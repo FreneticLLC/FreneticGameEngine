@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameEngineWelcomer"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameCore", "FreneticGameCore\FreneticGameCore.csproj", "{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameGraphics", "FreneticGameGraphics\FreneticGameGraphics.csproj", "{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
