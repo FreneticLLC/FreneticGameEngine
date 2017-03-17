@@ -21,7 +21,8 @@ namespace FreneticGameEngineWelcomer
         public enum MouseOver
         {
             NONE = 0,
-            EXIT = 1
+            EXIT = 1,
+            TOPBAR = 2
         }
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace FreneticGameEngineWelcomer
             get
             {
                 CreateParams handleParam = base.CreateParams;
-                handleParam.ExStyle |= 0x02000000;   // WS_EX_COMPOSITED       
+                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED       
                 return handleParam;
             }
         }
@@ -47,20 +48,59 @@ namespace FreneticGameEngineWelcomer
         /// </summary>
         public MouseOver Clicked = MouseOver.NONE;
 
+        /// <summary>
+        /// The main icon for the Welcomer form.
+        /// </summary>
         public Icon WelcomerIcon;
 
+        /// <summary>
+        /// The "Exit" button icon.
+        /// </summary>
         public Icon WelcomerExitIcon;
 
+        /// <summary>
+        /// The background color for <see cref="WelcomerIcon"/>.
+        /// </summary>
         public Color WelcomerIconBackColor = Color.FromArgb(170, 190, 190);
 
+        /// <summary>
+        /// The outline color for <see cref="WelcomerIcon"/>.
+        /// </summary>
         public Color WelcomerIconOutlineColor = Color.FromArgb(100, 230, 230);
 
-        public Color WelcomerBackColor = Color.FromArgb(235, 235, 235);
+        /// <summary>
+        /// The main form background color.
+        /// </summary>
+        public Color WelcomerBackColor = Color.FromArgb(245, 255, 255);
 
+        /// <summary>
+        /// The color the <see cref="WelcomerExitIcon"/> shines behind when it is hovered over.
+        /// </summary>
         public Color WelcomerExitButtonOver = Color.FromArgb(255, 20, 20);
 
+        /// <summary>
+        /// The picture box for rendering.
+        /// </summary>
         public PictureBox PicBox;
 
+        /// <summary>
+        /// Whether the form is currently being dragged.
+        /// </summary>
+        public bool Dragging = false;
+
+        /// <summary>
+        /// The last position of the cursor when dragging.
+        /// </summary>
+        public Point DragLast;
+
+        /// <summary>
+        /// Timer for general ticking.
+        /// </summary>
+        public Timer TickTimer;
+
+        /// <summary>
+        /// Initialize the form.
+        /// </summary>
         public WelcomerForm()
         {
             SuspendLayout();
@@ -74,35 +114,87 @@ namespace FreneticGameEngineWelcomer
             };
             PicBox.Paint += Form1_Paint;
             PicBox.MouseMove += Form1_MouseMove;
-            PicBox.MouseClick += Form1_MouseClick;
+            PicBox.MouseDown += Form1_MouseClick;
             PicBox.MouseUp += Form1_MouseUp;
             Resize += Form1_Resize;
             Controls.Add(PicBox);
             ResumeLayout();
             InitializeComponent();
             PicBox.Size = new Size(Width, Height);
+            TickTimer = new Timer()
+            {
+                Interval = 50
+            };
+            TickTimer.Tick += TickTimer_Tick;
+            TickTimer.Start();
         }
 
+        /// <summary>
+        /// Handles general ticking needs.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void TickTimer_Tick(object sender, EventArgs e)
+        {
+            if (Dragging)
+            {
+                Point pos = Cursor.Position;
+                Point rel = new Point(pos.X - DragLast.X, pos.Y - DragLast.Y);
+                DragLast = pos;
+                Location = new Point(Location.X + rel.X, Location.Y + rel.Y);
+            }
+        }
+
+        /// <summary>
+        /// Handles form resizing.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void Form1_Resize(object sender, EventArgs e)
         {
             PicBox.Size = new Size(Width, Height);
         }
 
+        /// <summary>
+        /// Handles a mouse button being released.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left)
+            {
+                return;
+            }
             if (Clicked == MouseOver.EXIT && Hovered == MouseOver.EXIT)
             {
                 Close();
             }
             Clicked = MouseOver.NONE;
+            Dragging = false;
             PicBox.Invalidate();
         }
 
+        /// <summary>
+        /// Handles a mouse button being pressed.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left)
+            {
+                return;
+            }
             if (Hovered == MouseOver.EXIT)
             {
                 Clicked = MouseOver.EXIT;
+            }
+            else if (Hovered == MouseOver.TOPBAR)
+            {
+                Clicked = MouseOver.TOPBAR;
+                Dragging = true;
+                DragLast = Cursor.Position;
             }
             else
             {
@@ -111,11 +203,20 @@ namespace FreneticGameEngineWelcomer
             PicBox.Invalidate();
         }
 
+        /// <summary>
+        /// Handles mouse movements over the form.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.X > Width - 34 && e.X < Width && e.Y > 0 && e.Y < 34)
             {
                 Hovered = MouseOver.EXIT;
+            }
+            else if (e.Y < 34)
+            {
+                Hovered = MouseOver.TOPBAR;
             }
             else
             {
@@ -124,23 +225,29 @@ namespace FreneticGameEngineWelcomer
             PicBox.Invalidate();
         }
 
+        /// <summary>
+        /// Handles redrawing the form.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
+            // Clear the screen
             e.Graphics.Clear(WelcomerBackColor);
+            // Fill it to the correct color
             e.Graphics.FillRectangle(new SolidBrush(WelcomerIconBackColor), new Rectangle(1, 1, 32, 32));
+            // Draw the outer edge of the screen
+            e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, Width - 1, Height - 1));
+            // Draw the welcomer icon, the icon's backdrop, and topbar underline
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, 33, 33));
             e.Graphics.DrawLine(new Pen(WelcomerIconOutlineColor), new Point(0, 33), new Point(e.ClipRectangle.Width, 33));
             e.Graphics.DrawIcon(WelcomerIcon, new Rectangle(1, 1, 32, 32));
+            // Drop the exit icon and backdrop
             if (Hovered == MouseOver.EXIT)
             {
                 e.Graphics.FillRectangle(new SolidBrush(WelcomerExitButtonOver), new Rectangle(e.ClipRectangle.Width - 33, 1, 32, 32));
             }
             e.Graphics.DrawIcon(WelcomerExitIcon, new Rectangle(e.ClipRectangle.Width - 33, 1, 32, 32));
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
