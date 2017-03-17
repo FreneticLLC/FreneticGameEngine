@@ -99,14 +99,20 @@ namespace FreneticGameEngineWelcomer
         public Timer TickTimer;
 
         /// <summary>
+        /// The font for the title bar;
+        /// </summary>
+        public Font TitleBarFont;
+
+        /// <summary>
         /// Initialize the form.
         /// </summary>
         public WelcomerForm()
         {
             SuspendLayout();
             ComponentResourceManager resources = new ComponentResourceManager(typeof(Common));
-            WelcomerIcon = resources.GetObject("FGE_Icon") as Icon;
-            WelcomerExitIcon = resources.GetObject("Exit_Icon") as Icon;
+            WelcomerIcon = Common.FGE_Icon;
+            WelcomerExitIcon = Common.Exit_Icon;
+            TitleBarFont = new Font(FontFamily.GenericSansSerif, 16f); // TODO: Screen scaling oddities may occur here?
             PicBox = new PictureBox()
             {
                 Location = new Point(0, 0),
@@ -238,6 +244,8 @@ namespace FreneticGameEngineWelcomer
             e.Graphics.FillRectangle(new SolidBrush(WelcomerIconBackColor), new Rectangle(1, 1, 32, 32));
             // Draw the outer edge of the screen
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, Width - 1, Height - 1));
+            // Drop the topbar text
+            e.Graphics.DrawString("Welcome | Frenetic Game Engine", TitleBarFont, Brushes.Black, new PointF(40, 0));
             // Draw the welcomer icon, the icon's backdrop, and topbar underline
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, 33, 33));
             e.Graphics.DrawLine(new Pen(WelcomerIconOutlineColor), new Point(0, 33), new Point(e.ClipRectangle.Width, 33));

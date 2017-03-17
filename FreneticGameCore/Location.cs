@@ -15,8 +15,6 @@ namespace FreneticGameCore
     [StructLayout(LayoutKind.Explicit)]
     public struct Location : IEquatable<Location>
     {
-        // TODO: Use doubles to simplify and accelerate this class?
-
         /// <summary>
         /// A Location of (0, 0, 0).
         /// </summary>
@@ -325,7 +323,7 @@ namespace FreneticGameCore
             double len = Length();
             if (len == 0)
             {
-                return Location.Zero;
+                return Zero;
             }
             return new Location(X / len, Y / len, Z / len);
         }
@@ -347,7 +345,7 @@ namespace FreneticGameCore
         /// <returns>The reflected vector.</returns>
         public Location Reflect(Location normal)
         {
-            return this - (2 * this.Dot(normal) * normal);
+            return this - (2 * Dot(normal) * normal);
         }
 
         /// <summary>
@@ -471,7 +469,7 @@ namespace FreneticGameCore
             string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
             if (data.Length != 3)
             {
-                return Location.NaN;
+                return NaN;
             }
             return new Location(Utilities.StringToDouble(data[0]), Utilities.StringToDouble(data[1]), Utilities.StringToDouble(data[2]));
         }

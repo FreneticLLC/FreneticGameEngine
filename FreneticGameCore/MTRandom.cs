@@ -63,7 +63,7 @@ namespace FreneticGameCore
 
         public ulong NextUL()
         {
-            ulong n = (ulong)mt.Length;
+            ulong n = (ulong)mt.LongLength;
             if (index >= n)
             {
                 for (ulong i = 0; i < n; i++)
