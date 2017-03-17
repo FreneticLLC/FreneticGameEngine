@@ -12,24 +12,48 @@ namespace FreneticGameCore
     /// </summary>
     public class MTRandom
     {
+        /// <summary>
+        /// A lower integer bit mask.
+        /// </summary>
         private const ulong lower_mask = 0x7FFFFFFF;
 
+        /// <summary>
+        /// A higher integer bit mask.
+        /// </summary>
         private const ulong upper_mask = ~lower_mask;
 
+        /// <summary>
+        /// The current buffer.
+        /// </summary>
         private ulong[] mt;
 
+        /// <summary>
+        /// The current index in the buffer.
+        /// </summary>
         private ulong index;
 
+        /// <summary>
+        /// Constructs the MT Random with a current-time-based seed.
+        /// </summary>
         public MTRandom()
             : this(624, (ulong)DateTime.UtcNow.ToBinary())
         {
         }
 
+        /// <summary>
+        /// Constructs the MT Random with a specific seed.
+        /// </summary>
+        /// <param name="seed">The seed.</param>
         public MTRandom(ulong seed)
             : this(624, seed)
         {
         }
 
+        /// <summary>
+        /// Constructs the MT Random with a specific seed and specific buffer size.
+        /// </summary>
+        /// <param name="n">The buffer size.</param>
+        /// <param name="seed">The seed.</param>
         public MTRandom(ulong n, ulong seed)
         {
             mt = new ulong[n];
@@ -41,26 +65,41 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Gets a random integer.
+        /// </summary>
         public int Next()
         {
             return (int)(NextUL() & lower_mask);
         }
 
+        /// <summary>
+        /// Gets a random integer up to a cap.
+        /// </summary>
         public int Next(int cap)
         {
             return (int)(Next() / (int.MaxValue / (double)cap)); // TODO: Sanity!
         }
 
+        /// <summary>
+        /// Gets a random integer between two bounds.
+        /// </summary>
         public int Next(int min, int max)
         {
             return Next(max - min) + min;
         }
 
+        /// <summary>
+        /// Gets a random double.
+        /// </summary>
         public double NextDouble()
         {
             return NextUL() / ((double)ulong.MaxValue);
         }
 
+        /// <summary>
+        /// Gets a random unsigned long.
+        /// </summary>
         public ulong NextUL()
         {
             ulong n = (ulong)mt.LongLength;

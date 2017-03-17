@@ -7,14 +7,29 @@ using System.IO;
 
 namespace FreneticGameCore
 {
+    /// <summary>
+    /// A helper wrapper for the System Console.
+    /// </summary>
     public class SysConsole
     {
+        /// <summary>
+        /// All currently waiting messages.
+        /// </summary>
         static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
 
+        /// <summary>
+        /// Locker for the console.
+        /// </summary>
         static Object ConsoleLock;
 
+        /// <summary>
+        /// Locker for writing.
+        /// </summary>
         static Object WriteLock;
 
+        /// <summary>
+        /// The thread being used for console output.
+        /// </summary>
         static Thread ConsoleOutputThread;
 
         /// <summary>
@@ -38,6 +53,10 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Whether to allow the cursor on this console.
+        /// IE, should the console show a ">" at the end.
+        /// </summary>
         public static bool AllowCursor = true;
 
         /// <summary>
@@ -147,6 +166,9 @@ namespace FreneticGameCore
             Write(text + "\n", bcolor);
         }
 
+        /// <summary>
+        /// Event fired when the console is written to.
+        /// </summary>
         public static EventHandler<ConsoleWrittenEventArgs> Written;
 
         /// <summary>
@@ -257,21 +279,39 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Outputs an exception with a message explaining the source of the exception.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="ex">The exception.</param>
         public static void Output(string message, Exception ex)
         {
             Output(OutputType.ERROR, message + ": " + ex.ToString() + "\n\n" + Environment.StackTrace);
         }
 
+        /// <summary>
+        /// Outputs an exception.
+        /// </summary>
+        /// <param name="ex">The exception.</param>
         public static void Output(Exception ex)
         {
             Output(OutputType.ERROR, ex.ToString() + "\n\n" + Environment.StackTrace);
         }
 
+        /// <summary>
+        /// Outputs custom debug information.
+        /// </summary>
+        /// <param name="type">The custom type.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="bcolor">The custom base color.</param>
         public static void OutputCustom(string type, string message, string bcolor = "^r^7")
         {
             WriteLine("^r^7" + Utilities.DateTimeToString(DateTime.Now) + " [" + bcolor + type + "^r^7] " + bcolor + message, bcolor);
         }
 
+        /// <summary>
+        /// Can be replaced to control whether the SysConsole should output debug data.
+        /// </summary>
         public static Func<bool> ShouldOutputDebug = () => true;
 
         /// <summary>
@@ -290,7 +330,10 @@ namespace FreneticGameCore
                 OutputNames[(int)ot] + "^r^7] " + OutputColors[(int)ot] + text, bcolor ?? OutputColors[(int)ot]);
         }
 
-        static string[] OutputColors = new string[]
+        /// <summary>
+        /// Contains the default set of output colors.
+        /// </summary>
+        public static readonly string[] OutputColors = new string[]
         {
             "^r^7ERROR:OUTPUTTYPE=NONE?",
             "^r^7",
@@ -302,7 +345,10 @@ namespace FreneticGameCore
             "^r^@"
         };
 
-        static string[] OutputNames = new string[]
+        /// <summary>
+        /// Contains the default set of output type names.
+        /// </summary>
+        public static readonly string[] OutputNames = new string[]
         {
             "NONE",
             "INFO/CLIENT",
@@ -315,10 +361,19 @@ namespace FreneticGameCore
         };
     }
 
+    /// <summary>
+    /// An event arguments for when the <see cref="SysConsole"/> is written to.
+    /// </summary>
     public class ConsoleWrittenEventArgs : EventArgs
     {
+        /// <summary>
+        /// The written text.
+        /// </summary>
         public string Text;
 
+        /// <summary>
+        /// The base color written with.
+        /// </summary>
         public string BColor;
     }
 

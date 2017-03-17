@@ -75,6 +75,12 @@ namespace FreneticGameCore
             return res;
         }
 
+        /// <summary>
+        /// Get the angle around an axis for a specific quaternion.
+        /// </summary>
+        /// <param name="rotation">The quaternion.</param>
+        /// <param name="axis">The relative axis.</param>
+        /// <returns>The angle.</returns>
         public static double AxisAngleFor(this Quaternion rotation, Vector3 axis)
         {
             Vector3 ra = new Vector3(rotation.X, rotation.Y, rotation.Z);
@@ -85,6 +91,12 @@ namespace FreneticGameCore
             return Utilities.VectorToAngles(new Location(new_forward)).Yaw * Math.PI / 180.0;
         }
 
+        /// <summary>
+        /// Converts a <see cref="TextElementEnumerator"/> to an Enumerable.
+        /// </summary>
+        /// <typeparam name="T">The expected Enumerable type.</typeparam>
+        /// <param name="enumerator">The original Enumerator.</param>
+        /// <returns>The enumerable.</returns>
         public static IEnumerable<T> AsEnumerable<T>(this TextElementEnumerator enumerator)
         {
             while (enumerator.MoveNext())

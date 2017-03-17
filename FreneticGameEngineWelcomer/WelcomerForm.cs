@@ -20,8 +20,17 @@ namespace FreneticGameEngineWelcomer
         /// </summary>
         public enum MouseOver
         {
+            /// <summary>
+            /// No item is under the mouse.
+            /// </summary>
             NONE = 0,
+            /// <summary>
+            /// The "Exit" button is under the mouse.
+            /// </summary>
             EXIT = 1,
+            /// <summary>
+            /// The general top bar is under the mouse.
+            /// </summary>
             TOPBAR = 2
         }
 

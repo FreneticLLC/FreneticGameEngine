@@ -292,7 +292,10 @@ namespace FreneticGameCore
             return "(" + X + ", " + Y + ", " + Z + ")";
         }
 
-        const string basicformat = "#.00";
+        /// <summary>
+        /// The number format for <see cref="ToBasicString"/>.
+        /// </summary>
+        public const string BasicFormat = "#.00";
 
         /// <summary>
         /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
@@ -301,7 +304,7 @@ namespace FreneticGameCore
         /// <returns>The basic location string.</returns>
         public string ToBasicString()
         {
-            return "(" + X.ToString(basicformat) + ", " + Y.ToString(basicformat) + ", " + Z.ToString(basicformat) + ")";
+            return "(" + X.ToString(BasicFormat) + ", " + Y.ToString(BasicFormat) + ", " + Z.ToString(BasicFormat) + ")";
         }
 
         /// <summary>
@@ -321,7 +324,7 @@ namespace FreneticGameCore
         public Location Normalize()
         {
             double len = Length();
-            if (len == 0)
+            if (len == 0.0)
             {
                 return Zero;
             }
@@ -371,6 +374,11 @@ namespace FreneticGameCore
             return new Location(X, Y, Z);
         }
 
+        /// <summary>
+        /// Returns whether this location matches any given generic object.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns>Whether they are equal.</returns>
         public override bool Equals(object obj)
         {
             if (!(obj is Location))
@@ -381,77 +389,150 @@ namespace FreneticGameCore
             return tobj.X == X && tobj.Y == Y && tobj.Z == Z;
         }
 
+        /// <summary>
+        /// Returns wether this location equals another location.
+        /// </summary>
+        /// <param name="v">The second location.</param>
+        /// <returns>Whether they are equal.</returns>
         public bool Equals(Location v)
         {
             return v.X == X && v.Y == Y && v.Z == Z;
         }
 
+        /// <summary>
+        /// Returns whether two locations are equal.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static bool operator ==(Location v1, Location v2)
         {
             return v1.X == v2.X && v1.Y == v2.Y && v1.Z == v2.Z;
         }
 
+        /// <summary>
+        /// Returns whether two locations are not equal.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static bool operator !=(Location v1, Location v2)
         {
             return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
         }
 
+        /// <summary>
+        /// Gets a quick generic hash code for the location data.
+        /// </summary>
+        /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
             return (int)(X + Y + Z);
         }
 
+        /// <summary>
+        /// Adds two locations.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static Location operator +(Location v1, Location v2)
         {
             return new Location(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
         }
 
+        /// <summary>
+        /// Negates a location.
+        /// </summary>
+        /// <param name="v">The first location.</param>
         public static Location operator -(Location v)
         {
             return new Location(-v.X, -v.Y, -v.Z);
         }
 
+        /// <summary>
+        /// Subtracts two locations.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static Location operator -(Location v1, Location v2)
         {
             return new Location(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
         }
 
+        /// <summary>
+        /// Multiplies two locations.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static Location operator *(Location v1, Location v2)
         {
             return new Location(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
         }
 
+        /// <summary>
+        /// Divides two locations.
+        /// </summary>
+        /// <param name="v1">The first location.</param>
+        /// <param name="v2">The second location.</param>
         public static Location operator /(Location v1, Location v2)
         {
             return new Location(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
         }
 
+        /// <summary>
+        /// Multiplies a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator *(Location v, double scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
+        /// <summary>
+        /// Multiplies a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator *(double scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
+        /// <summary>
+        /// Multiplies a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator *(Location v, float scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
+        /// <summary>
+        /// Multiplies a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator *(float scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
+        /// <summary>
+        /// Divides a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator /(Location v, double scale)
         {
             double sc = 1 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
         }
 
+        /// <summary>
+        /// Divides a location by a scalar.
+        /// </summary>
+        /// <param name="v">The location.</param>
+        /// <param name="scale">The scalar.</param>
         public static Location operator /(Location v, float scale)
         {
             double sc = 1 / scale;
