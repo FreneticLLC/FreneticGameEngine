@@ -10,16 +10,41 @@ using System.Windows.Forms;
 
 namespace FreneticGameEngineWelcomer
 {
+    /// <summary>
+    /// The main Welcomer form.
+    /// </summary>
     public partial class WelcomerForm : Form
     {
+        /// <summary>
+        /// possible things for the mouse to be over on this form.
+        /// </summary>
         public enum MouseOver
         {
             NONE = 0,
             EXIT = 1
         }
 
+        /// <summary>
+        /// Enable double buffering.
+        /// </summary>
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000;   // WS_EX_COMPOSITED       
+                return handleParam;
+            }
+        }
+
+        /// <summary>
+        /// What the mouse is currently over.
+        /// </summary>
         public MouseOver Hovered = MouseOver.NONE;
 
+        /// <summary>
+        /// What the mouse has clicked (NONE if mouse button is not pressed down).
+        /// </summary>
         public MouseOver Clicked = MouseOver.NONE;
 
         public Icon WelcomerIcon;
