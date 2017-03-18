@@ -41,6 +41,9 @@
     <Reference Include="BEPUutilities">
       <HintPath>.\BEPUutilities.dll</HintPath>
     </Reference>
+    <Reference Include="LZ4">
+      <HintPath>.\LZ4.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -52,6 +55,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Files\DataReader.cs" />
+    <Compile Include="Files\DataStream.cs" />
+    <Compile Include="Files\DataWriter.cs" />
+    <Compile Include="Files\FileHandler.cs" />
+    <Compile Include="Files\UnknownFileException.cs" />
+    <Compile Include="Files\ZipStorer.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="MTRandom.cs" />
     <Compile Include="Program.cs" />
