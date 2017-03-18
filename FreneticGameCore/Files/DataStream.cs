@@ -29,6 +29,10 @@ namespace FreneticGameCore.Files
         {
         }
 
+        /// <summary>
+        /// Constructs a datastream with a specific capacity.
+        /// </summary>
+        /// <param name="capacity">The capacity.</param>
         public DataStream(int capacity)
             : base(capacity)
         {
