@@ -57,9 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GLFontEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShaderEngine.cs" />
     <Compile Include="TextureEngine.cs" />
+    <Compile Include="TextVBO.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
