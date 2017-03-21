@@ -7,15 +7,34 @@ using System.Threading.Tasks;
 
 namespace FreneticGameCore
 {
+    /// <summary>
+    /// Helper to schedule sync or async tasks.
+    /// </summary>
     public class Scheduler
     {
+        /// <summary>
+        /// Current set of tasks.
+        /// TODO: Could be a ConcurrentQueue? Probably should be, for that matter!
+        /// </summary>
         public LockedLinkedList<SyncScheduleItem> Tasks = new LockedLinkedList<SyncScheduleItem>();
 
+        /// <summary>
+        /// Gets a sync task object, not yet scheduled.
+        /// </summary>
+        /// <param name="act">The action to call.</param>
+        /// <param name="delay">The delay value.</param>
+        /// <returns>A schedule item.</returns>
         public SyncScheduleItem GetSyncTask(Action act, double delay = 0)
         {
             return new SyncScheduleItem() { MyAction = act, Time = delay, OwningEngine = this };
         }
 
+        /// <summary>
+        /// Creates and schedules a sync task.
+        /// </summary>
+        /// <param name="act">The action to run.</param>
+        /// <param name="delay">How long before the task is called.</param>
+        /// <returns>The scheduled item.</returns>
         public SyncScheduleItem ScheduleSyncTask(Action act, double delay = 0)
         {
             SyncScheduleItem item = new SyncScheduleItem() { MyAction = act, Time = delay, OwningEngine = this };
@@ -23,6 +42,10 @@ namespace FreneticGameCore
             return item;
         }
 
+        /// <summary>
+        /// Ran every frame to cause all sync tasks to be processed.
+        /// </summary>
+        /// <param name="time">The delta time.</param>
         public void RunAllSyncTasks(double time)
         {
             LockedLinkedList<SyncScheduleItem>.Node node = Tasks.First;
@@ -52,6 +75,11 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Starts an async task.
+        /// </summary>
+        /// <param name="a">The action to launch async.</param>
+        /// <returns>The scheduled item.</returns>
         public ASyncScheduleItem StartAsyncTask(Action a)
         {
             ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = a };
@@ -59,6 +87,12 @@ namespace FreneticGameCore
             return asyncer;
         }
 
+        /// <summary>
+        /// Creates but does not start an async task.
+        /// </summary>
+        /// <param name="a">The action to launch async.</param>
+        /// <param name="followUp">Optional followup task.</param>
+        /// <returns>The created schedule item.</returns>
         public ASyncScheduleItem AddAsyncTask(Action a, ASyncScheduleItem followUp = null)
         {
             ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = a, FollowUp = followUp };
@@ -66,37 +100,79 @@ namespace FreneticGameCore
         }
     }
 
+    /// <summary>
+    /// Represents a schedulable item.
+    /// </summary>
     public abstract class ScheduleItem
     {
+        /// <summary>
+        /// Runs the schedulable item.
+        /// </summary>
         public abstract void RunMe();
 
+        /// <summary>
+        /// The relevant scheduler.
+        /// </summary>
         public Scheduler OwningEngine;
     }
 
+    /// <summary>
+    /// Represents a synchronous scheduled item.
+    /// </summary>
     public class SyncScheduleItem : ScheduleItem
     {
+        /// <summary>
+        /// The action to run.
+        /// </summary>
         public Action MyAction;
 
+        /// <summary>
+        /// The time left before running.
+        /// </summary>
         public double Time = 0;
 
+        /// <summary>
+        /// Causes the action to be run at the next frame.
+        /// </summary>
         public override void RunMe()
         {
             OwningEngine.ScheduleSyncTask(MyAction);
         }
     }
 
+    /// <summary>
+    /// Represents an asynchronous running item.
+    /// </summary>
     public class ASyncScheduleItem : ScheduleItem
     {
+        /// <summary>
+        /// The action to run.
+        /// </summary>
         public Action MyAction;
 
+        /// <summary>
+        /// The next thing to run in this sequence.
+        /// </summary>
         public ASyncScheduleItem FollowUp = null;
 
+        /// <summary>
+        /// Locker to prevent thread issues.
+        /// </summary>
         Object Locker = new Object();
 
+        /// <summary>
+        /// Whether the item has been started.
+        /// </summary>
         public bool Started = false;
 
+        /// <summary>
+        /// Whether the item is complete.
+        /// </summary>
         bool Done = false;
 
+        /// <summary>
+        /// Gets whether the item has started.
+        /// </summary>
         public bool HasStarted()
         {
             lock (Locker)
@@ -105,6 +181,9 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Gets whether the item is complete.
+        /// </summary>
         public bool IsDone()
         {
             lock (Locker)
@@ -113,6 +192,11 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Replaces the schedule item if its not yet started, otherwises follows it with a new item.
+        /// </summary>
+        /// <param name="item">The replacement item.</param>
+        /// <returns>The final item.</returns>
         public ASyncScheduleItem ReplaceOrFollowWith(ASyncScheduleItem item)
         {
             lock (Locker)
@@ -143,6 +227,10 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Tells the item to follow the current item with a new one.
+        /// </summary>
+        /// <param name="item">The follower item.</param>
         public void FollowWith(ASyncScheduleItem item)
         {
             lock (Locker)
@@ -158,6 +246,9 @@ namespace FreneticGameCore
             }
         }
 
+        /// <summary>
+        /// Runs the item asynchronously immediately.
+        /// </summary>
         public override void RunMe()
         {
             lock (Locker)
@@ -172,6 +263,9 @@ namespace FreneticGameCore
             Task.Factory.StartNew(RunInternal);
         }
 
+        /// <summary>
+        /// Internal runner for the item.
+        /// </summary>
         private void RunInternal()
         {
             MyAction.Invoke();
