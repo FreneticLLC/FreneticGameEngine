@@ -62,9 +62,11 @@
     <Compile Include="Files\UnknownFileException.cs" />
     <Compile Include="Files\ZipStorer.cs" />
     <Compile Include="Location.cs" />
+    <Compile Include="LockedLinkedList.cs" />
     <Compile Include="MTRandom.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scheduler.cs" />
     <Compile Include="SimplexNoise.cs" />
     <Compile Include="SysConsole.cs" />
     <Compile Include="SystemExtensions.cs" />
