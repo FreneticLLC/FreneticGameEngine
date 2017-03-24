@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticGameCore;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
 
 namespace FreneticGameGraphics
 {
@@ -11,6 +15,16 @@ namespace FreneticGameGraphics
     /// </summary>
     public static class GraphicsUtil
     {
+        /// <summary>
+        /// Converts a Location to a Vector3.
+        /// </summary>
+        /// <param name="inp">The location.</param>
+        /// <returns>The Vector3.</returns>
+        public static Vector3 Convert(Location inp)
+        {
+            return new Vector3((float)inp.X, (float)inp.Y, (float)inp.Z);
+        }
+
         /// <summary>
         /// Checks errors when debug is enabled.
         /// </summary>
