@@ -31,25 +31,85 @@ namespace FreneticGameGraphics
         /// </summary>
         public int _VAO = -1;
 
-
+        /// <summary>
+        /// The primary texture.
+        /// </summary>
         public Texture Tex;
+        
+        /// <summary>
+        /// The specular texture.
+        /// </summary>
         public Texture Tex_Specular;
+        
+        /// <summary>
+        /// The reflectivity texture.
+        /// </summary>
         public Texture Tex_Reflectivity;
+
+        /// <summary>
+        /// The normal texture.
+        /// </summary>
         public Texture Tex_Normal;
 
+        /// <summary>
+        /// The position vertices.
+        /// </summary>
         public List<Vector3> Vertices;
+
+        /// <summary>
+        /// The indices.
+        /// </summary>
         public List<uint> Indices;
+
+        /// <summary>
+        /// The normals.
+        /// </summary>
         public List<Vector3> Normals;
+        
+        /// <summary>
+        /// The normal tangents.
+        /// </summary>
         public List<Vector3> Tangents;
+
+        /// <summary>
+        /// The texture coordinates.
+        /// </summary>
         public List<Vector3> TexCoords;
+
+        /// <summary>
+        /// The colors.
+        /// </summary>
         public List<Vector4> Colors;
+
+        /// <summary>
+        /// The bone weight IDs.
+        /// </summary>
         public List<Vector4> BoneIDs;
+
+        /// <summary>
+        /// The bone weight levels.
+        /// </summary>
         public List<Vector4> BoneWeights;
+
+        /// <summary>
+        /// The second bone weight IDs.
+        /// </summary>
         public List<Vector4> BoneIDs2;
+
+        /// <summary>
+        /// The second bone weight levels.
+        /// </summary>
         public List<Vector4> BoneWeights2;
 
+        /// <summary>
+        /// How much VRAM this VBO would consume at last generation.
+        /// </summary>
         public long LastVRAM = 0;
 
+        /// <summary>
+        /// Gets a somewhat accurate amount of VRAM used, if any.
+        /// </summary>
+        /// <returns>The vRAM usage.</returns>
         public long GetVRAMUsage()
         {
             if (generated)
@@ -59,6 +119,9 @@ namespace FreneticGameGraphics
             return 0;
         }
 
+        /// <summary>
+        /// Cleans away CPU-side data.
+        /// </summary>
         public void CleanLists()
         {
             Vertices = null;
@@ -79,8 +142,18 @@ namespace FreneticGameGraphics
             v4_colors = null;
         }
 
+        /// <summary>
+        /// The vertex count.
+        /// </summary>
         public int vC;
 
+        /// <summary>
+        /// Helper to add an axis-aligned side to this VBO.
+        /// </summary>
+        /// <param name="normal">The normal.</param>
+        /// <param name="tc">The texture coordinates.</param>
+        /// <param name="offs">Whether to offset.</param>
+        /// <param name="texf">The texture ID.</param>
         public void AddSide(Location normal, TextureCoordinates tc, bool offs = false, float texf = 0)
         {
             // TODO: IMPROVE! Or discard?!
@@ -212,6 +285,9 @@ namespace FreneticGameGraphics
             }
         }
 
+        /// <summary>
+        /// Prepare the VBO's lists to be added to.
+        /// </summary>
         public void Prepare()
         {
             Vertices = new List<Vector3>();
@@ -225,8 +301,14 @@ namespace FreneticGameGraphics
             BoneWeights2 = new List<Vector4>();
         }
 
+        /// <summary>
+        /// Whether the VBO has been generated on the GPU.
+        /// </summary>
         public bool generated = false;
 
+        /// <summary>
+        /// Destroys GPU-side data.
+        /// </summary>
         public void Destroy()
         {
             if (generated)
@@ -257,15 +339,33 @@ namespace FreneticGameGraphics
         bool colors;
         bool bones;
 
+        /// <summary>
+        /// Ther vertices.
+        /// </summary>
         public Vector3[] verts = null;
+
+        /// <summary>
+        /// The indices.
+        /// </summary>
         public uint[] indices = null;
+
         Vector3[] normals = null;
         Vector3[] texts = null;
         Vector3[] tangents = null;
         Vector4[] v4_colors = null;
 
+        /// <summary>
+        /// What buffer mode to use.
+        /// </summary>
         public BufferUsageHint BufferMode = BufferUsageHint.StaticDraw;
 
+        /// <summary>
+        /// Gets the normal tangents for a VBO setup.
+        /// </summary>
+        /// <param name="vecs">The vertices.</param>
+        /// <param name="norms">The normals.</param>
+        /// <param name="texs">The texture coordinates.</param>
+        /// <returns>The tangent set.</returns>
         public static Vector3[] TangentsFor(Vector3[] vecs, Vector3[] norms, Vector3[] texs)
         {
             Vector3[] tangs = new Vector3[vecs.Length];
@@ -295,6 +395,13 @@ namespace FreneticGameGraphics
             return tangs;
         }
 
+        /// <summary>
+        /// Gets the normal tangents for a VBO setup.
+        /// </summary>
+        /// <param name="vecs">The vertices.</param>
+        /// <param name="norms">The normals.</param>
+        /// <param name="texs">The texture coordinates.</param>
+        /// <returns>The tangent set.</returns>
         public static Vector3[] TangentsFor(Vector3[] vecs, Vector3[] norms, Vector2[] texs)
         {
             Vector3[] tangs = new Vector3[vecs.Length];
@@ -324,6 +431,9 @@ namespace FreneticGameGraphics
             return tangs;
         }
 
+        /// <summary>
+        /// Generate the VBO to the GPU.
+        /// </summary>
         public void GenerateVBO()
         {
             if (generated)
@@ -503,6 +613,11 @@ namespace FreneticGameGraphics
 
         }
 
+        /// <summary>
+        /// Render the VBO fully.
+        /// </summary>
+        /// <param name="texture">Whether to use the textures.</param>
+        /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
         public void Render(bool texture, bool fixafter = true)
         {
             if (!generated)
@@ -558,8 +673,14 @@ namespace FreneticGameGraphics
         }
     }
 
+    /// <summary>
+    /// Represents a set of texture coordinates.
+    /// </summary>
     public class TextureCoordinates
     {
+        /// <summary>
+        /// Construct a basic set of texture coordinates.
+        /// </summary>
         public TextureCoordinates()
         {
             xscale = 1;
@@ -570,18 +691,50 @@ namespace FreneticGameGraphics
             yflip = false;
         }
 
+        /// <summary>
+        /// The X-Scale.
+        /// </summary>
         public float xscale;
+
+        /// <summary>
+        /// The Y-Scale.
+        /// </summary>
         public float yscale;
+
+        /// <summary>
+        /// The X-Shift.
+        /// </summary>
         public float xshift;
+
+        /// <summary>
+        /// The Y-Shift.
+        /// </summary>
         public float yshift;
+
+        /// <summary>
+        /// The X-flip option.
+        /// </summary>
         public bool xflip;
+
+        /// <summary>
+        /// The Y-flip option.
+        /// </summary>
         public bool yflip;
 
+        /// <summary>
+        /// Gets a quick string form of the Texture Coordinates.
+        /// </summary>
+        /// <returns>The string form.</returns>
         public override string ToString()
         {
             return xscale + "/" + yscale + "/" + xshift + "/" + yshift + "/" + (xflip ? "t" : "f") + "/" + (yflip ? "t" : "f");
         }
 
+        /// <summary>
+        /// Converts a quick string of a Texture Coordinate set to an actual TextureCoordinates.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <returns>The texture coordinates.</returns>
         public static TextureCoordinates FromString(string str)
         {
             TextureCoordinates tc = new TextureCoordinates();

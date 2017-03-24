@@ -64,6 +64,7 @@
     <Compile Include="ShaderEngine.cs" />
     <Compile Include="TextureEngine.cs" />
     <Compile Include="TextVBO.cs" />
+    <Compile Include="VBO.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
