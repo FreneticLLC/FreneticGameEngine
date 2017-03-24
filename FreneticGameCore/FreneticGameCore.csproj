@@ -55,6 +55,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Frustum.cs" />
+    <Compile Include="Plane.cs" />
     <Compile Include="Files\DataReader.cs" />
     <Compile Include="Files\DataStream.cs" />
     <Compile Include="Files\DataWriter.cs" />
