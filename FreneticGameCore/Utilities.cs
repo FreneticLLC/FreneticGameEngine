@@ -563,10 +563,10 @@ namespace FreneticGameCore
         public static byte[] QuaternionToBytes(Quaternion quat)
         {
             byte[] dat = new byte[4 + 4 + 4 + 4];
-            Utilities.FloatToBytes((float)quat.X).CopyTo(dat, 0);
-            Utilities.FloatToBytes((float)quat.Y).CopyTo(dat, 4);
-            Utilities.FloatToBytes((float)quat.Z).CopyTo(dat, 4 + 4);
-            Utilities.FloatToBytes((float)quat.W).CopyTo(dat, 4 + 4 + 4);
+            FloatToBytes((float)quat.X).CopyTo(dat, 0);
+            FloatToBytes((float)quat.Y).CopyTo(dat, 4);
+            FloatToBytes((float)quat.Z).CopyTo(dat, 4 + 4);
+            FloatToBytes((float)quat.W).CopyTo(dat, 4 + 4 + 4);
             return dat;
         }
 
@@ -595,9 +595,9 @@ namespace FreneticGameCore
             Location zAxis = (end - start).Normalize();
             Location xAxis = up.CrossProduct(zAxis).Normalize();
             Location yAxis = zAxis.CrossProduct(xAxis);
-            return new Matrix((double)xAxis.X, (double)yAxis.X, (double)zAxis.X, 0, (double)xAxis.Y,
-                (double)yAxis.Y, (double)zAxis.Y, 0, (double)xAxis.Z, (double)yAxis.Z, (double)zAxis.Z, 0,
-                (double)-xAxis.Dot(start), (double)-yAxis.Dot(start), (double)-zAxis.Dot(start), 1);
+            return new Matrix(xAxis.X, yAxis.X, zAxis.X, 0, xAxis.Y,
+                yAxis.Y, zAxis.Y, 0, xAxis.Z, yAxis.Z, zAxis.Z, 0,
+                -xAxis.Dot(start), -yAxis.Dot(start), -zAxis.Dot(start), 1);
         }
 
         /// <summary>
@@ -622,9 +622,9 @@ namespace FreneticGameCore
         public static Matrix AnglesToMatrix(Location rot)
         {
             // TODO: better method?
-            return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (double)(rot.X * Utilities.PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 1, 0), (double)(rot.Y * Utilities.PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), (double)(rot.Z * Utilities.PI180));
+            return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (rot.X * PI180))
+                    * Matrix.CreateFromAxisAngle(new Vector3(0, 1, 0), (rot.Y * PI180))
+                    * Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), (rot.Z * PI180));
         }
 
         /// <summary>
