@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collision\AABB.cs" />
     <Compile Include="Frustum.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Files\DataReader.cs" />
