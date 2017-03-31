@@ -328,7 +328,8 @@ namespace FreneticGameCore
             {
                 return Zero;
             }
-            return new Location(X / len, Y / len, Z / len);
+            len = 1.0 / len;
+            return new Location(X * len, Y * len, Z * len);
         }
 
         /// <summary>
@@ -524,7 +525,7 @@ namespace FreneticGameCore
         /// <param name="scale">The scalar.</param>
         public static Location operator /(Location v, double scale)
         {
-            double sc = 1 / scale;
+            double sc = 1.0 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
         }
 
@@ -535,7 +536,7 @@ namespace FreneticGameCore
         /// <param name="scale">The scalar.</param>
         public static Location operator /(Location v, float scale)
         {
-            double sc = 1 / scale;
+            double sc = 1.0 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
         }
 
