@@ -97,6 +97,34 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets the property by type, or returns false.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <param name="p">The property result.</param>
+        /// <returns>The property.</returns>
+        public bool TryGetProperty(Type t, out Property p)
+        {
+            return HeldProperties.TryGetValue(t, out p);
+        }
+
+        /// <summary>
+        /// Gets the property (with a typeparam-specified type), or returns false.
+        /// </summary>
+        /// <typeparam name="T">The property type.</typeparam>
+        /// <param name="p">The property result.</param>
+        /// <returns>The property.</returns>
+        public bool TryGetProperty<T>(out T p) where T : Property
+        {
+            if (HeldProperties.TryGetValue(typeof(T), out Property prop))
+            {
+                p = prop as T;
+                return true;
+            }
+            p = null;
+            return false;
+        }
+
+        /// <summary>
         /// Gets the property by type, or gives an exception.
         /// </summary>
         /// <param name="t">The type.</param>
