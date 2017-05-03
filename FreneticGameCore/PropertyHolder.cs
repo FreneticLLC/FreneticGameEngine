@@ -73,6 +73,7 @@ namespace FreneticGameCore
             {
                 p.Holder = null;
                 HeldProperties.Remove(t);
+                p.OnRemoved();
                 return true;
             }
             return false;
@@ -89,6 +90,7 @@ namespace FreneticGameCore
             {
                 p.Holder = null;
                 HeldProperties.Remove(typeof(T));
+                p.OnRemoved();
                 return true;
             }
             return false;
@@ -127,6 +129,7 @@ namespace FreneticGameCore
             }
             prop.Holder = this;
             HeldProperties.Add(prop.GetType(), prop);
+            prop.OnAdded();
         }
 
         /// <summary>
@@ -143,6 +146,7 @@ namespace FreneticGameCore
             }
             prop.Holder = this;
             HeldProperties.Add(typeof(T), prop);
+            prop.OnAdded();
         }
 
         /// <summary>
@@ -165,6 +169,7 @@ namespace FreneticGameCore
             }
             res.Holder = this;
             HeldProperties[t] = res;
+            res.OnAdded();
             return res;
         }
 
@@ -187,6 +192,7 @@ namespace FreneticGameCore
             }
             res.Holder = this;
             HeldProperties[typeof(T)] = res;
+            res.OnAdded();
             return res;
         }
     }
@@ -238,6 +244,22 @@ namespace FreneticGameCore
             Property p = MemberwiseClone() as Property;
             p.Holder = null;
             return p;
+        }
+
+        /// <summary>
+        /// This is fired when the property is added to a system.
+        /// </summary>
+        public virtual void OnAdded()
+        {
+            // Do nothing by default.
+        }
+
+        /// <summary>
+        /// This is fired when the property is removed from a system.
+        /// </summary>
+        public virtual void OnRemoved()
+        {
+            // Do nothing by default.
         }
     }
 }
