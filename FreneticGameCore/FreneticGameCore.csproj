@@ -69,6 +69,7 @@
     <Compile Include="MTRandom.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyHolder.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="SimplexNoise.cs" />
     <Compile Include="SysConsole.cs" />
