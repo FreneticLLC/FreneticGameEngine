@@ -43,14 +43,14 @@ namespace FreneticGameCore
         {
             get
             {
-                return SpawnedBody == null ? Mass : SpawnedBody.Mass;
+                return SpawnedBody == null ? InternalMass : SpawnedBody.Mass;
             }
             set
             {
-                Mass = value;
+                InternalMass = value;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.Mass = Mass;
+                    SpawnedBody.Mass = InternalMass;
                 }
             }
         }
