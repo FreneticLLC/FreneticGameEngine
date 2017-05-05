@@ -164,24 +164,10 @@ namespace FreneticGameCore
             HeldProperties.Add(t, prop);
             prop.OnAdded();
         }
-
-        /// <summary>
-        /// Adds the property, or gives an exception if a property of matching type already exists.
-        /// </summary>
-        /// <typeparam name="T">The property type.</typeparam>
-        /// <param name="prop">The property itself.</param>
-        /// <returns>The property.</returns>
-        public void AddProperty<T>(T prop) where T : Property
-        {
-            if (prop.Holder != null)
-            {
-                throw new InvalidOperationException("That property is already held by something!");
-            }
-            prop.Holder = this;
-            prop.Helper = PropertyHelper.EnsureHandled(typeof(T));
-            HeldProperties.Add(typeof(T), prop);
-            prop.OnAdded();
-        }
+        
+        // Note: Intentionally discard this signature:
+        // --> public void AddProperty<T>(T prop) where T : Property
+        // Because it can cause wrong type to be used!
 
         /// <summary>
         /// Gets the property (with a generic type), or adds the property with the specified property constructor.
@@ -210,7 +196,8 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Gets the property (with a generic type), or adds the property with the specified property constructor.
-        /// May still throw an exception, if the property is held elsewhere!
+        /// <para>May still throw an exception, if the property is held elsewhere!</para>
+        /// <para>Be careful with this, as it can lead to incorrect typing if the Func input has an incorrect type!</para>
         /// </summary>
         /// <typeparam name="T">The property type.</typeparam>
         /// <returns>The property.</returns>
@@ -236,11 +223,11 @@ namespace FreneticGameCore
     /// <summary>
     /// Used to indicate that a property field is debuggable (if not marked, the property field is not debuggable).
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class PropertyDebuggable : Attribute
     {
     }
-
+    
     /// <summary>
     /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
     /// </summary>
@@ -277,6 +264,7 @@ namespace FreneticGameCore
                 throw new Exception("Trying to handle a type that isn't a property!");
             }
             CPropID++;
+            // TODO: Handle C# properties!
             List<FieldInfo> fdbg = new List<FieldInfo>();
             List<FieldInfo> fautosave = new List<FieldInfo>();
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -485,6 +473,15 @@ namespace FreneticGameCore
         public virtual void OnRemoved()
         {
             // Do nothing by default.
+        }
+
+        /// <summary>
+        /// Gets a string-ified version of this property.
+        /// </summary>
+        /// <returns>The property string.</returns>
+        public override string ToString()
+        {
+            return "Property<" + GetPropertyName() + ">";
         }
     }
 }

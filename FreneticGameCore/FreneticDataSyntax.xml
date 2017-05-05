@@ -1,0 +1,372 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FreneticDataSyntax</name>
+    </assembly>
+    <members>
+        <member name="T:FreneticDataSyntax.FDSData">
+            <summary>
+            Represents a piece of data within an FDS Section.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSData.PrecedingComments">
+            <summary>
+            The list of comments preceding this data piece.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSData.Internal">
+            <summary>
+            The internal represented data.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSData.Outputable">
+            <summary>
+            Returns the output-able string representation of this data.
+            </summary>
+            <returns>The resultant data.</returns>
+        </member>
+        <member name="T:FreneticDataSyntax.FDSInputException">
+            <summary>
+            Represents an exception throw while inputting data to an FDS section.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSInputException.#ctor(System.String)">
+            <summary>
+            Construct the FDS exception.
+            </summary>
+            <param name="message">The message explaining the error.</param>
+        </member>
+        <member name="T:FreneticDataSyntax.FDSParseException">
+            <summary>
+            Represents an exception throw while parsing FDS contents.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSParseException.#ctor(System.String)">
+            <summary>
+            Construct the FDS exception.
+            </summary>
+            <param name="message">The message explaining the error.</param>
+        </member>
+        <member name="T:FreneticDataSyntax.FDSSection">
+            <summary>
+            Represents a FreneticDataSyntax section or file.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.#ctor(System.String)">
+            <summary>
+            Constructs the FDS Section from textual data.
+            </summary>
+            <param name="contents">The contents of the data file.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.#ctor">
+            <summary>
+            Constructs the FDS section from no data, preparing it for usage as a new section.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSSection.StartingLine">
+            <summary>
+            The line number this section starts on.
+            Note that files start at 1.
+            Only accurate at file-load time.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSSection.Data">
+            <summary>
+            All data contained by this section.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSSection.DataLowered">
+            <summary>
+            Lowercase-stored data for this section.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetStringList(System.String)">
+            <summary>
+            Gets a string from the section. Can stringify non-string values.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetDataList(System.String)">
+            <summary>
+            Gets a string from the section. Can stringify non-string values.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetString(System.String,System.String)">
+            <summary>
+            Gets a string from the section. Can stringify non-string values.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetFloat(System.String,System.Nullable{System.Single})">
+            <summary>
+            Gets an optional float from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetDouble(System.String,System.Nullable{System.Double})">
+            <summary>
+            Gets an optional double from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetInt(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Gets an optional int from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetLong(System.String,System.Nullable{System.Int64})">
+            <summary>
+            Gets an optional long from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetObject(System.String,System.Object)">
+            <summary>
+            Gets an object from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <param name="def">The default object.</param>
+            <returns>The data found, or the default.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.Set(System.String,System.Object)">
+            <summary>
+            Sets data to the section.
+            May throw an FDSInputException if Set failed!
+            </summary>
+            <param name="key">The key to set data from.</param>
+            <param name="input">The key to set data to.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.SetData(System.String,FreneticDataSyntax.FDSData)">
+            <summary>
+            Sets data to the section.
+            May throw an FDSInputException if SetData failed!
+            </summary>
+            <param name="key">The key to set data from.</param>
+            <param name="data">The key to set data to.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.Default(System.String,System.Object)">
+            <summary>
+            Defaults data to the section (IE, sets it if not present!)
+            </summary>
+            <param name="key">The key to set data from.</param>
+            <param name="input">The key to set data to.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.DefaultData(System.String,FreneticDataSyntax.FDSData)">
+            <summary>
+            Defaults data to the section (IE, sets it if not present!)
+            </summary>
+            <param name="key">The key to set data from.</param>
+            <param name="data">The key to set data to.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.HasKey(System.String)">
+            <summary>
+            Checks if a key exists in the FDS section.
+            </summary>
+            <param name="key">The key to check for.</param>
+            <returns>Whether the key is present.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetData(System.String)">
+            <summary>
+            Gets data from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or null.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetDataLowered(System.String)">
+            <summary>
+            Gets data from the section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or null.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetSection(System.String)">
+            <summary>
+            Gets a sub-section of this FDS section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key of the section.</param>
+            <returns>The subsection.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetSectionLowered(System.String)">
+            <summary>
+            Gets a sub-section of this FDS section.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key of the section.</param>
+            <returns>The subsection.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetSectionInternal(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Gets a sub-section of this FDS section.
+            </summary>
+            <param name="key">The key of the section.</param>
+            <param name="allowNull">Whether to allow null returns, otherwise enforce the section's existence. If true, can throw an FDSInputException!</param>
+            <param name="lowered">Whether to read lowercase section names. If set, expects lowercased input key!</param>
+            <returns>The subsection.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.SetRootData(System.String,FreneticDataSyntax.FDSData)">
+            <summary>
+            Sets data direct on the root level.
+            </summary>
+            <param name="key">The key to set data to.</param>
+            <param name="data">The data to read.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetRootData(System.String)">
+            <summary>
+            Gets data direct from the root level.
+            Returns null if not found.
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or null.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.GetRootDataLowered(System.String)">
+            <summary>
+            Gets data direct from the root level.
+            Returns null if not found.
+            Assumes input is already lowercase!
+            </summary>
+            <param name="key">The key to get data from.</param>
+            <returns>The data found, or null.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSSection.SaveToString(System.Int32,System.String)">
+            <summary>
+            Converts this FDSSection to a textual representation of itself.
+            </summary>
+            <param name="tabulation">How many tabs to start with. Generally do not set this.</param>
+            <param name="newline">What string to use as a new line. Generally do not set this.</param>
+            <returns>The string.</returns>
+        </member>
+        <member name="T:FreneticDataSyntax.FDSUtility">
+            <summary>
+            Utilities for the FreneticDataSyntax engine.
+            </summary>
+        </member>
+        <member name="F:FreneticDataSyntax.FDSUtility.UTF8">
+            <summary>
+            The UTF-8 encoding used by FDS.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.ReadFile(System.String)">
+            <summary>
+            Reads a file into an FDS Section. Throws normal exceptions on any issue.
+            </summary>
+            <param name="fname">The name of the file to read.</param>
+            <returns>An FDS Section containing the same data as the file.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.SaveToFile(FreneticDataSyntax.FDSSection,System.String)">
+            <summary>
+            Saves an FDS Section into a file. Throws normal exceptions on any issue.
+            </summary>
+            <param name="section">The data to save.</param>
+            <param name="fname">The name of the file to read.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.CleanFileData(System.String)">
+            <summary>
+            Cleans file line endings, tabs, and any other data that may cause issues.
+            </summary>
+            <param name="contents">The original file data.</param>
+            <returns>The cleaned file data.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.ToLowerFast(System.String)">
+            <summary>
+            Rapidly lowercases an ASCII string.
+            </summary>
+            <param name="str">The original string.</param>
+            <returns>The lowercased variant.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.Escape(System.String)">
+            <summary>
+            Escapes a string for output.
+            </summary>
+            <param name="str">The string to escape.</param>
+            <returns>The escaped string.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.EscapeKey(System.String)">
+            <summary>
+            Escapes a string for usage as a section key.
+            </summary>
+            <param name="str">The string to escape.</param>
+            <returns>The escaped string.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.UnEscape(System.String)">
+            <summary>
+            UnEscapes a string for output.
+            </summary>
+            <param name="str">The string to unescape.</param>
+            <returns>The unescaped string.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.UnEscapeKey(System.String)">
+            <summary>
+            UnEscapes a string for usage as a section key.
+            </summary>
+            <param name="str">The string to unescape.</param>
+            <returns>The unescaped string.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.InterpretType(System.String)">
+            <summary>
+            Interprets the type of the input text.
+            </summary>
+            <param name="input">The input text.</param>
+            <returns>The correctly typed result.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.AppendSpaces(System.Text.StringBuilder,System.Int32)">
+            <summary>
+            Appends a number of spaces to a string builder.
+            </summary>
+            <param name="sb">The string builder.</param>
+            <param name="spaces">The number of spaces.</param>
+        </member>
+        <member name="M:FreneticDataSyntax.FDSUtility.AppendTabs(System.Text.StringBuilder,System.Int32)">
+            <summary>
+            Appends a number of tabs to a string builder.
+            </summary>
+            <param name="sb">The string builder.</param>
+            <param name="spaces">The number of tabs.</param>
+        </member>
+        <member name="T:FreneticDataSyntax.Helpers">
+            <summary>
+            Helpers for the FreneticDataSyntax engine.
+            </summary>
+        </member>
+        <member name="M:FreneticDataSyntax.Helpers.ToLowerFast(System.String)">
+            <summary>
+            Rapidly converts an ASCII string to a lowercase representation.
+            </summary>
+            <param name="input">The original string.</param>
+            <returns>A lowercase version.</returns>
+        </member>
+        <member name="M:FreneticDataSyntax.Helpers.SplitFast(System.String,System.Char,System.Int32)">
+            <summary>
+            Quickly split a string.
+            </summary>
+            <param name="input">The original string.</param>
+            <param name="splitter">What to split it by.</param>
+            <param name="count">The maximum number of times to split it.</param>
+            <returns>The split string pieces.</returns>
+        </member>
+    </members>
+</doc>
