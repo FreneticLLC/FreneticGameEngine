@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace FreneticGameCore
 {
@@ -84,7 +87,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <typeparam name="T">The type.</typeparam>
         /// <returns>Whether it was removed.</returns>
-        public bool RemoveProperty<T>() where T: Property
+        public bool RemoveProperty<T>() where T : Property
         {
             if (HeldProperties.TryGetValue(typeof(T), out Property p))
             {
@@ -139,7 +142,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <typeparam name="T">The property type.</typeparam>
         /// <returns>The property.</returns>
-        public T GetProperty<T>() where T: Property
+        public T GetProperty<T>() where T : Property
         {
             return HeldProperties[typeof(T)] as T;
         }
@@ -155,8 +158,10 @@ namespace FreneticGameCore
             {
                 throw new InvalidOperationException("That property is already held by something!");
             }
+            Type t = prop.GetType();
             prop.Holder = this;
-            HeldProperties.Add(prop.GetType(), prop);
+            prop.Helper = PropertyHelper.EnsureHandled(t);
+            HeldProperties.Add(t, prop);
             prop.OnAdded();
         }
 
@@ -173,6 +178,7 @@ namespace FreneticGameCore
                 throw new InvalidOperationException("That property is already held by something!");
             }
             prop.Holder = this;
+            prop.Helper = PropertyHelper.EnsureHandled(typeof(T));
             HeldProperties.Add(typeof(T), prop);
             prop.OnAdded();
         }
@@ -196,6 +202,7 @@ namespace FreneticGameCore
                 throw new InvalidOperationException("That property is already held by something!");
             }
             res.Holder = this;
+            res.Helper = PropertyHelper.EnsureHandled(t);
             HeldProperties[t] = res;
             res.OnAdded();
             return res;
@@ -219,10 +226,184 @@ namespace FreneticGameCore
                 throw new InvalidOperationException("That property is already held by something!");
             }
             res.Holder = this;
+            res.Helper = PropertyHelper.EnsureHandled(typeof(T));
             HeldProperties[typeof(T)] = res;
             res.OnAdded();
             return res;
         }
+    }
+
+    /// <summary>
+    /// Used to indicate that a property field is debuggable (if not marked, the property field is not debuggable).
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class PropertyDebuggable : Attribute
+    {
+    }
+
+    /// <summary>
+    /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class PropertyAutoSaveable : Attribute
+    {
+    }
+
+    /// <summary>
+    /// Helper for the systems on a property.
+    /// </summary>
+    public abstract class PropertyHelper
+    {
+        /// <summary>
+        /// A mapping of types to their property maps. Do note: if a type object is lost (Assembly is collected and dropped), the properties on that type are also lost.
+        /// </summary>
+        public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = new ConditionalWeakTable<Type, PropertyHelper>();
+
+        private static long CPropID = 1;
+
+        /// <summary>
+        /// Ensures a type is handled by the system, and returns the helper for the type.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <returns>The helper for the type.</returns>
+        public static PropertyHelper EnsureHandled(Type t)
+        {
+            if (PropertiesHelper.TryGetValue(t, out PropertyHelper helper))
+            {
+                return helper;
+            }
+            if (!typeof(Property).IsAssignableFrom(t))
+            {
+                throw new Exception("Trying to handle a type that isn't a property!");
+            }
+            CPropID++;
+            List<FieldInfo> fdbg = new List<FieldInfo>();
+            List<FieldInfo> fautosave = new List<FieldInfo>();
+            FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            for (int i = 0; i < fields.Length; i++)
+            {
+                // Just in case!
+                if (fields[i].IsStatic || !fields[i].IsPublic)
+                {
+                    continue;
+                }
+                PropertyDebuggable dbgable = fields[i].GetCustomAttribute<PropertyDebuggable>();
+                if (dbgable != null)
+                {
+                    fdbg.Add(fields[i]);
+                }
+                PropertyAutoSaveable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSaveable>();
+                if (autosaveable != null)
+                {
+                    fautosave.Add(fields[i]);
+                }
+            }
+            string tid = "__FGE_Property_" + CPropID + "__" + t.Name + "__";
+            AssemblyName asmn = new AssemblyName(tid);
+            AssemblyBuilder asmb = AppDomain.CurrentDomain.DefineDynamicAssembly(asmn, AssemblyBuilderAccess.RunAndCollect);
+            ModuleBuilder modb = asmb.DefineDynamicModule(tid);
+            TypeBuilder typeb_c = modb.DefineType(tid + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
+            MethodBuilder methodb_c = typeb_c.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Property), typeof(Dictionary<string, string>) });
+            ILGenerator ilgen = methodb_c.GetILGenerator();
+            for (int i = 0; i < fdbg.Count; i++)
+            {
+                bool isClass = fdbg[i].FieldType.IsClass;
+                ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
+                ilgen.Emit(OpCodes.Ldstr, fdbg[i].FieldType.Name + "(" + fdbg[i].Name + ")"); // Load the field name as a string.
+                ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
+                ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
+                ilgen.Emit(OpCodes.Ldfld, fdbg[i]); // Load the field's value.
+                if (isClass) // If a class
+                {
+                    // CODE: vals.Add("FType(fname)", Stringify(p.fname));
+                    ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                }
+                else // if a struct
+                {
+                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
+                    MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbg[i].FieldType);
+                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                }
+                ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
+            }
+            ilgen.Emit(OpCodes.Ret);
+            typeb_c.DefineMethodOverride(methodb_c, Method_PropertyHelper_GetDebuggableInfoOutput);
+            Type res = typeb_c.CreateType();
+            PropertyHelper ph = Activator.CreateInstance(res) as PropertyHelper;
+            PropertiesHelper.Add(t, ph);
+            return ph;
+        }
+
+        /// <summary>
+        /// The <see cref="Object.ToString"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_Object_ToString = typeof(Object).GetMethod("ToString", new Type[0]);
+
+        /// <summary>
+        /// The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod("Add", new Type[] { typeof(string), typeof(string) });
+
+        /// <summary>
+        /// The <see cref="GetDebuggableInfoOutput"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod("GetDebuggableInfoOutput");
+
+        /// <summary>
+        /// The <see cref="Stringify"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_PropertyHelper_Stringify = typeof(PropertyHelper).GetMethod("Stringify");
+
+        /// <summary>
+        /// The <see cref="StringifyStruct"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_PropertyHelper_StringifyStruct = typeof(PropertyHelper).GetMethod("StringifyStruct");
+
+        /// <summary>
+        /// Safely converts a struct to a string.
+        /// </summary>
+        /// <param name="a">The struct.</param>
+        /// <returns>The string.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string StringifyStruct<T>(T a) where T : struct
+        {
+            return a.ToString();
+        }
+
+        /// <summary>
+        /// Safely converts an object to a string.
+        /// </summary>
+        /// <param name="a">The object.</param>
+        /// <returns>The string, or "null".</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string Stringify(Object a)
+        {
+            return a?.ToString() ?? "null";
+        }
+
+        // TODO: Auto read-to and assign-from a MapTag in FS wherever possible!
+
+        /// <summary>
+        /// Call this method to get debuggable information output added to a string dictionary.
+        /// </summary>
+        /// <param name="p">The property.</param>
+        /// <param name="vals">The string dictionary.</param>
+        public abstract void GetDebuggableInfoOutput(Property p, Dictionary<string, string> vals);
+
+        /// <summary>
+        /// The type of the property to monitor.
+        /// </summary>
+        public Type PropertyType;
+
+        /// <summary>
+        /// A list of all fields that are debuggable.
+        /// </summary>
+        public readonly List<FieldInfo> FieldsDebuggable = new List<FieldInfo>();
+
+        /// <summary>
+        /// A list of all fields that are auto-saveable.
+        /// </summary>
+        public readonly List<FieldInfo> FieldsAutoSaveable = new List<FieldInfo>();
     }
 
     /// <summary>
@@ -234,6 +415,22 @@ namespace FreneticGameCore
         /// The holder of this property. Modifying this value could lead to errors!
         /// </summary>
         public PropertyHolder Holder = null;
+
+        /// <summary>
+        /// The system that helps this property's field information.
+        /// </summary>
+        public PropertyHelper Helper = null;
+
+        /// <summary>
+        /// Gets the debug output for this property.
+        /// </summary>
+        /// <returns>The debuggable data.</returns>
+        public Dictionary<string, string> GetDebuggable()
+        {
+            Dictionary<string, string> strs = new Dictionary<string, string>();
+            Helper.GetDebuggableInfoOutput(this, strs);
+            return strs;
+        }
 
         /// <summary>
         /// Returns whether this property is currently held by something.
