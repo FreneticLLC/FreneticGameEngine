@@ -16,5 +16,20 @@ namespace FreneticGameCore
         /// The actual internal physics space.
         /// </summary>
         public Space Internal;
+
+        /// <summary>
+        /// Gets or sets the internal gravity value.
+        /// </summary>
+        public Location Gravity
+        {
+            get
+            {
+                return new Location(Internal.ForceUpdater.Gravity);
+            }
+            set
+            {
+                Internal.ForceUpdater.Gravity = value.ToBVector();
+            }
+        }
     }
 }
