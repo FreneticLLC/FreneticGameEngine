@@ -38,6 +38,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Gets or sets the entity's mass.
         /// </summary>
+        [PropertyDebuggable]
         public double Mass
         {
             get

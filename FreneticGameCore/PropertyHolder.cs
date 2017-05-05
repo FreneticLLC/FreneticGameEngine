@@ -264,7 +264,6 @@ namespace FreneticGameCore
                 throw new Exception("Trying to handle a type that isn't a property!");
             }
             CPropID++;
-            // TODO: Handle C# properties!
             List<FieldInfo> fdbg = new List<FieldInfo>();
             List<FieldInfo> fautosave = new List<FieldInfo>();
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -284,6 +283,20 @@ namespace FreneticGameCore
                 if (autosaveable != null)
                 {
                     fautosave.Add(fields[i]);
+                }
+            }
+            List<MethodInfo> fdbgm = new List<MethodInfo>();
+            PropertyInfo[] props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            for (int i = 0; i < props.Length; i++)
+            {
+                if (!props[i].CanRead)
+                {
+                    continue;
+                }
+                PropertyDebuggable dbgable = props[i].GetCustomAttribute<PropertyDebuggable>();
+                if (dbgable != null)
+                {
+                    fdbgm.Add(props[i].GetMethod);
                 }
             }
             string tid = "__FGE_Property_" + CPropID + "__" + t.Name + "__";
@@ -314,10 +327,35 @@ namespace FreneticGameCore
                 }
                 ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
+            for (int i = 0; i < fdbgm.Count; i++)
+            {
+                bool isClass = fdbgm[i].ReturnType.IsClass;
+                ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
+                ilgen.Emit(OpCodes.Ldstr, fdbgm[i].ReturnType.Name + "(" + fdbgm[i].Name + ")"); // Load the method name as a string.
+                ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
+                ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?)
+                ilgen.Emit(OpCodes.Call, fdbgm[i]); // Call the method and load the method's return value.
+                if (isClass) // If a class
+                {
+                    // CODE: vals.Add("FType(fname)", Stringify(p.mname()));
+                    ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                }
+                else // if a struct
+                {
+                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.mname()));
+                    MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbg[i].FieldType);
+                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                }
+                ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
+            }
             ilgen.Emit(OpCodes.Ret);
             typeb_c.DefineMethodOverride(methodb_c, Method_PropertyHelper_GetDebuggableInfoOutput);
             Type res = typeb_c.CreateType();
             PropertyHelper ph = Activator.CreateInstance(res) as PropertyHelper;
+            ph.PropertyType = t;
+            ph.FieldsDebuggable.AddRange(fdbg);
+            ph.FieldsAutoSaveable.AddRange(fautosave);
+            ph.GetterMethodsDebuggable.AddRange(fdbgm);
             PropertiesHelper.Add(t, ph);
             return ph;
         }
@@ -382,6 +420,11 @@ namespace FreneticGameCore
         /// The type of the property to monitor.
         /// </summary>
         public Type PropertyType;
+
+        /// <summary>
+        /// A list of all getter methods that are debuggable.
+        /// </summary>
+        public readonly List<MethodInfo> GetterMethodsDebuggable = new List<MethodInfo>();
 
         /// <summary>
         /// A list of all fields that are debuggable.

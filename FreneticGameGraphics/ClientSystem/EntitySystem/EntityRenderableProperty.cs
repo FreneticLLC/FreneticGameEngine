@@ -16,17 +16,14 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// Whether this Renderable entity should cast shadows.
         /// </summary>
         [PropertyDebuggable]
-        public readonly bool CastShadows;
+        public readonly bool CastShadows = true;
 
         /// <summary>
-        /// Constructs the entity renderable property.
+        /// Whether this Renderable entity is currently visible.
         /// </summary>
-        /// <param name="_castShadows">Whether the entity should cast shadows.</param>
-        public EntityRenderableProperty(bool _castShadows)
-        {
-            CastShadows = _castShadows;
-        }
-
+        [PropertyDebuggable]
+        public bool IsVisible = true;
+        
         /// <summary>
         /// Render the entity as seen by a top-down map.
         /// </summary>
