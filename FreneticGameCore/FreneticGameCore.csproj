@@ -41,12 +41,6 @@
     <Reference Include="BEPUutilities">
       <HintPath>.\BEPUutilities.dll</HintPath>
     </Reference>
-    <Reference Include="FreneticDataSyntax">
-      <HintPath>.\FreneticDataSyntax.dll</HintPath>
-    </Reference>
-    <Reference Include="FreneticScript">
-      <HintPath>.\FreneticScript.dll</HintPath>
-    </Reference>
     <Reference Include="LZ4">
       <HintPath>.\LZ4.dll</HintPath>
     </Reference>
@@ -89,6 +83,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
+      <Project>{1db47d6a-4225-4f25-8559-2c6292496953}</Project>
+      <Name>FreneticDataSyntax</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FreneticScript\FreneticScript\FreneticScript.csproj">
+      <Project>{0672dd5f-6f33-4853-bd6e-8716d3abc7ad}</Project>
+      <Name>FreneticScript</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
