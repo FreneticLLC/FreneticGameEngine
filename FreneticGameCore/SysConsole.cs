@@ -77,9 +77,9 @@ namespace FreneticGameCore
             ConsoleLock = new Object();
             WriteLock = new Object();
             ConsoleOutputCanceller = new CancellationTokenSource();
-            ConsoleOutputThread = new Thread(new ThreadStart(ConsoleLoop));
+            ConsoleOutputThread = new Thread(new ParameterizedThreadStart(ConsoleLoop));
             //Program.ThreadsToClose.Add(ConsoleOutputThread);
-            ConsoleOutputThread.Start();
+            ConsoleOutputThread.Start(ConsoleOutputCanceller);
             try
             {
                 DateTime DT = DateTime.Now;
@@ -103,15 +103,15 @@ namespace FreneticGameCore
 
         static FileStream FSOUT = null;
 
-        static void ConsoleLoop()
+        static void ConsoleLoop(Object obj)
         {
-            CancellationToken tok = ConsoleOutputCanceller.Token;
+            CancellationTokenSource cts = obj as CancellationTokenSource;
             while (true)
             {
                 List<KeyValuePair<string, string>> twaiting;
                 lock (ConsoleLock)
                 {
-                    if (tok.IsCancellationRequested)
+                    if (cts.IsCancellationRequested)
                     {
                         return;
                     }
