@@ -115,7 +115,7 @@ namespace FreneticGameCore
                     {
                         return;
                     }
-                    twaiting = Waiting;
+                    twaiting = new List<KeyValuePair<string, string>>(Waiting);
                     Waiting.Clear();
                 }
                 if (twaiting.Count > 0)
