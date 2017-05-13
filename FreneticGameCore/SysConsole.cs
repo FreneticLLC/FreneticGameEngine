@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -33,6 +34,11 @@ namespace FreneticGameCore
         static Thread ConsoleOutputThread;
 
         /// <summary>
+        /// Helper to cancel the console output thread.
+        /// </summary>
+        public static CancellationTokenSource ConsoleOutputCanceller;
+
+        /// <summary>
         /// Closes the SysConsole.
         /// </summary>
         public static void ShutDown()
@@ -41,13 +47,14 @@ namespace FreneticGameCore
             {
                 lock (WriteLock)
                 {
-                    ConsoleOutputThread.Abort();
+                    ConsoleOutputCanceller.Cancel();
                     if (Waiting.Count > 0)
                     {
                         foreach (KeyValuePair<string, string> message in Waiting)
                         {
                             WriteInternal(message.Value, message.Key);
                         }
+                        Waiting.Clear();
                     }
                 }
             }
@@ -69,6 +76,7 @@ namespace FreneticGameCore
             Console.WriteLine("Preparing console...");
             ConsoleLock = new Object();
             WriteLock = new Object();
+            ConsoleOutputCanceller = new CancellationTokenSource();
             ConsoleOutputThread = new Thread(new ThreadStart(ConsoleLoop));
             //Program.ThreadsToClose.Add(ConsoleOutputThread);
             ConsoleOutputThread.Start();
@@ -97,13 +105,18 @@ namespace FreneticGameCore
 
         static void ConsoleLoop()
         {
+            CancellationToken tok = ConsoleOutputCanceller.Token;
             while (true)
             {
                 List<KeyValuePair<string, string>> twaiting;
                 lock (ConsoleLock)
                 {
+                    if (tok.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     twaiting = Waiting;
-                    Waiting = new List<KeyValuePair<string, string>>();
+                    Waiting.Clear();
                 }
                 if (twaiting.Count > 0)
                 {
