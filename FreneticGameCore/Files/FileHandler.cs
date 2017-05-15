@@ -311,9 +311,9 @@ namespace FreneticGameCore.Files
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
         /// <returns>The file's data, as a stream.</returns>
-        public DataStream ReadToStream(string filename)
+        public Stream ReadToStream(string filename)
         {
-            return new DataStream(ReadBytes(filename));
+            return new MemoryStream(ReadBytes(filename));
         }
 
         /// <summary>
