@@ -62,8 +62,10 @@
     <Compile Include="FontSetEngine.cs" />
     <Compile Include="GLFontEngine.cs" />
     <Compile Include="GraphicsUtil.cs" />
+    <Compile Include="LightingSystem\PointLight2D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RenderContext.cs" />
+    <Compile Include="RenderContext2D.cs" />
     <Compile Include="ShaderEngine.cs" />
     <Compile Include="SystemExtensions.cs" />
     <Compile Include="TextureEngine.cs" />
