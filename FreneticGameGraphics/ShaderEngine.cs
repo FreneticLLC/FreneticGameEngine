@@ -26,6 +26,11 @@ namespace FreneticGameGraphics
         public Shader ColorMultShader;
 
         /// <summary>
+        /// A common shader that multiplies colors, explicitly for 2D usage.
+        /// </summary>
+        public Shader ColorMult2DShader;
+
+        /// <summary>
         /// A common shader that removes black color.
         /// </summary>
         public Shader TextCleanerShader;
@@ -46,6 +51,10 @@ namespace FreneticGameGraphics
             LoadedShaders = new List<Shader>();
             // Pregenerate a few needed shader
             ColorMultShader = GetShader("color_mult");
+            if (Files.Exists("shaders/color_mult2d.vs"))
+            {
+                ColorMult2DShader = GetShader("color_mult2d");
+            }
             TextCleanerShader = GetShader("text_cleaner?text");
         }
 
