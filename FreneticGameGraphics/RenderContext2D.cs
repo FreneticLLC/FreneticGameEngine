@@ -36,5 +36,15 @@ namespace FreneticGameGraphics
         /// The center of the 2D view.
         /// </summary>
         public Vector2 ViewCenter;
+
+        /// <summary>
+        /// The present Adder value.
+        /// </summary>
+        public Vector2 Adder;
+
+        /// <summary>
+        /// The present Scaler value.
+        /// </summary>
+        public Vector2 Scaler;
     }
 }
