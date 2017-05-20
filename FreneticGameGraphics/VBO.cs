@@ -159,7 +159,7 @@ namespace FreneticGameGraphics
             // TODO: IMPROVE! Or discard?!
             for (int i = 0; i < 6; i++)
             {
-                Normals.Add(GraphicsUtil.Convert(normal));
+                Normals.Add(normal.ToOpenTK());
                 Colors.Add(new Vector4(1f, 1f, 1f, 1f));
                 Indices.Add((uint)Indices.Count);
                 BoneIDs.Add(new Vector4(0, 0, 0, 0));

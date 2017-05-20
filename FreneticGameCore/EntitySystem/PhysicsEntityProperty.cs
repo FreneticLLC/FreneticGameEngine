@@ -268,7 +268,8 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Handles the physics entity being spawned into a world.
         /// </summary>
-        public void SpawnHandle(int prio, EntitySpawnEventArgs context)
+        /// <param name="context">The event context.</param>
+        public void SpawnHandle(EntitySpawnEventArgs context)
         {
             SpawnedBody = new Entity(Shape, InternalMass)
             {
@@ -304,7 +305,8 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Handles the physics entity being de-spawned from a world.
         /// </summary>
-        public void DeSpawnHandle(int prio, EntityDeSpawnEventArgs context)
+        /// <param name="context">The event context.</param>
+        public void DeSpawnHandle(EntityDeSpawnEventArgs context)
         {
             UpdateFields();
             PhysicsWorld.Internal.Remove(SpawnedBody);

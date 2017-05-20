@@ -72,14 +72,14 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Represents the arguments to an entity spawn event.
     /// </summary>
-    public class EntitySpawnEventArgs : EventArgs
+    public class EntitySpawnEventArgs : FreneticEventArgs
     {
     }
 
     /// <summary>
     /// Represents the arguments to an entity de-spawn event.
     /// </summary>
-    public class EntityDeSpawnEventArgs : EventArgs
+    public class EntityDeSpawnEventArgs : FreneticEventArgs
     {
     }
 }
