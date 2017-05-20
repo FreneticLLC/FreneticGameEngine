@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticScript;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.EntitySystem
 {
     /// <summary>
     /// The base most class of an entity in the FreneticGameEngine.

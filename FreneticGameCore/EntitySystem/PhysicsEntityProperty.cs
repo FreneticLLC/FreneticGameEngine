@@ -7,8 +7,9 @@ using BEPUphysics;
 using BEPUutilities;
 using BEPUphysics.Entities;
 using BEPUphysics.CollisionShapes;
+using FreneticGameCore.EntitySystem;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.EntitySystem
 {
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.

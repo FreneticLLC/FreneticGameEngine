@@ -55,10 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicEntity.cs" />
+    <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="Frustum.cs" />
-    <Compile Include="PhysicsEntityProperty.cs" />
+    <Compile Include="EntitySystem\PhysicsEntityProperty.cs" />
     <Compile Include="PhysicsSpace.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Files\DataReader.cs" />

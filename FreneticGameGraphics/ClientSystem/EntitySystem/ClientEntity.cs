@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore;
+using FreneticGameCore.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
