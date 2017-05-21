@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collision\CollisionUtil.cs" />
+    <Compile Include="Collision\Vector2i.cs" />
+    <Compile Include="Collision\Vector3i.cs" />
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="Frustum.cs" />
