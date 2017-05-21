@@ -17,28 +17,28 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// How far the box extends up and left.
         /// </summary>
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         [PropertyDebuggable]
         public Vector2 BoxUpLeft;
 
         /// <summary>
         /// How far the box extends down and right.
         /// </summary>
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         [PropertyDebuggable]
         public Vector2 BoxDownRight;
 
         /// <summary>
         /// The texture for this rendered box.
         /// </summary>
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         [PropertyDebuggable]
         public Texture BoxTexture;
 
         /// <summary>
         /// What color to render the box as.
         /// </summary>
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         [PropertyDebuggable]
         public Vector4 BoxColor = Vector4.One;
 

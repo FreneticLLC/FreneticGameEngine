@@ -60,8 +60,9 @@ namespace FreneticGameCore
             TypeReaders.Add(typeof(Location), (b) => Location.FromDoubleBytes(b, 0));
             // BEPU Savers
             TypeSavers.Add(typeof(Vector3), (o) => (new Location((Vector3)o)).ToDoubleBytes());
+            TypeSavers.Add(typeof(Quaternion), (o) => Utilities.QuaternionToBytes((Quaternion)o));
             // BEPU Readers
-            TypeReaders.Add(typeof(Vector3), (b) => Location.FromDoubleBytes(b, 0).ToBVector());
+            TypeReaders.Add(typeof(Quaternion), (b) => Utilities.BytesToQuaternion(b, 0));
         }
 
         /// <summary>
@@ -306,7 +307,7 @@ namespace FreneticGameCore
     /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class PropertyAutoSaveable : Attribute
+    public class PropertyAutoSavable : Attribute
     {
     }
 
@@ -353,7 +354,7 @@ namespace FreneticGameCore
                 {
                     fdbg.Add(fields[i]);
                 }
-                PropertyAutoSaveable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSaveable>();
+                PropertyAutoSavable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSavable>();
                 if (autosaveable != null)
                 {
                     fautosave.Add(fields[i]);

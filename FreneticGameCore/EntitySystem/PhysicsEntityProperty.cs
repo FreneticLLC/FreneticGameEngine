@@ -79,7 +79,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's mass.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public double Mass
         {
             get
@@ -100,7 +100,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's gravity.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Location Gravity
         {
             get
@@ -121,7 +121,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's friction.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public double Friction
         {
             get
@@ -144,7 +144,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's bounciness (Restitution coefficient).
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public double Bounciness
         {
             get
@@ -165,7 +165,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's linear velocity.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Location LinearVelocity
         {
             get
@@ -186,7 +186,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's angular velocity.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Location AngularVelocity
         {
             get
@@ -207,7 +207,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's position.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Location Position
         {
             get
@@ -229,7 +229,7 @@ namespace FreneticGameCore.EntitySystem
         /// TODO: Custom FGE quaternion type?
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Quaternion Orientation
         {
             get

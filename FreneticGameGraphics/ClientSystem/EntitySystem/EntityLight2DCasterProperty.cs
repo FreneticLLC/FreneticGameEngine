@@ -51,7 +51,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// The current position of the light.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public Vector2 LightPosition;
 
 
@@ -59,7 +59,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// The current strength of the light.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSaveable]
+        [PropertyAutoSavable]
         public float LightStrength = 256;
 
         /// <summary>
