@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using FreneticGameCore;
 using FreneticGameCore.Files;
@@ -34,24 +35,17 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// A common shader that removes black color.
         /// </summary>
         public Shader TextCleanerShader;
-
-        /// <summary>
-        /// The backing file system.
-        /// </summary>
-        public FileHandler Files;
-
+        
         /// <summary>
         /// Starts or restarts the shader system.
         /// </summary>
-        /// <param name="files">The backing file system.</param>
-        public void InitShaderSystem(FileHandler files)
+        public void InitShaderSystem()
         {
-            Files = files;
             // Reset shader list
             LoadedShaders = new List<Shader>();
             // Pregenerate a few needed shader
             ColorMultShader = GetShader("color_mult");
-            if (Files.Exists("shaders/color_mult2d.vs"))
+            if (File.Exists("shaders/color_mult2d.vs"))
             {
                 ColorMult2DShader = GetShader("color_mult2d");
             }
@@ -140,26 +134,34 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     vars = dat1[1].SplitFast(',');
                 }
                 filename = FileHandler.CleanFileName(dat1[0]);
-                if (!Files.Exists("shaders/" + filename + ".vs"))
+                if (!File.Exists("shaders/" + filename + ".vs"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load shader, file '" +
+                    SysConsole.Output(OutputType.ERROR, "Cannot load vertex shader, file '" +
                         TextStyle.Color_Standout + "shaders/" + filename + ".vs" + TextStyle.Color_Error +
                         "' does not exist.");
                     return null;
                 }
-                if (!Files.Exists("shaders/" + filename + ".fs"))
+                if (!File.Exists("shaders/" + filename + ".fs"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load shader, file '" +
+                    SysConsole.Output(OutputType.ERROR, "Cannot load fragment shader, file '" +
                         TextStyle.Color_Standout + "shaders/" + filename + ".fs" + TextStyle.Color_Error +
                         "' does not exist.");
                     return null;
                 }
-                string VS = Files.ReadText("shaders/" + filename + ".vs");
-                string FS = Files.ReadText("shaders/" + filename + ".fs");
+                string VS = File.ReadAllText("shaders/" + filename + ".vs");
+                string FS = File.ReadAllText("shaders/" + filename + ".fs");
                 string GS = null;
                 if (geom != null)
                 {
-                    GS = Files.ReadText("shaders/" + geom + ".geom");
+                    geom = FileHandler.CleanFileName(geom);
+                    if (!File.Exists("shaders/" + geom + ".geom"))
+                    {
+                        SysConsole.Output(OutputType.ERROR, "Cannot load geomry shader, file '" +
+                            TextStyle.Color_Standout + "shaders/" + geom + ".geom" + TextStyle.Color_Error +
+                            "' does not exist.");
+                        return null;
+                    }
+                    GS = File.ReadAllText("shaders/" + geom + ".geom");
                 }
                 return CreateShader(VS, FS, oname, vars, GS);
             }
@@ -212,11 +214,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (dat[i].StartsWith("#include "))
                 {
                     string name = "shaders/" + dat[i].Substring("#include ".Length);
-                    if (!Files.Exists(name))
+                    name = FileHandler.CleanFileName(name);
+                    if (!File.Exists(name))
                     {
                         throw new Exception("File " + name + " does not exist, but was included by a shader!");
                     }
-                    string included = Files.ReadText(name);
+                    string included = File.ReadAllText(name);
                     fsb.Append(included);
                 }
                 else

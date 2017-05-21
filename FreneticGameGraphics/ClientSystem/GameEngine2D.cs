@@ -248,7 +248,7 @@ namespace FreneticGameGraphics.ClientSystem
             Files.Init();
             SysConsole.Output(OutputType.INIT, "GameEngine2D loading shader helpers...");
             Shaders = new ShaderEngine();
-            Shaders.InitShaderSystem(Files);
+            Shaders.InitShaderSystem();
             GetShaders();
             SysConsole.Output(OutputType.INIT, "GameEngine2D loading texture helpers...");
             Textures = new TextureEngine();
