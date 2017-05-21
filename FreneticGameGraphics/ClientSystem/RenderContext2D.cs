@@ -13,6 +13,11 @@ namespace FreneticGameGraphics.ClientSystem
     public class RenderContext2D
     {
         /// <summary>
+        /// The backing engine.
+        /// </summary>
+        public GameEngine2D Engine;
+
+        /// <summary>
         /// Width of the view.
         /// </summary>
         public int Width;

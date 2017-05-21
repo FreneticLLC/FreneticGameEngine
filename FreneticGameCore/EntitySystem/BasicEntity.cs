@@ -14,8 +14,9 @@ namespace FreneticGameCore.EntitySystem
     {
         /// <summary>
         /// Whether the entity should tick normally.
+        /// <para>Note: Setting this after it's spawned is not required to validly modify its value.</para>
         /// </summary>
-        public readonly bool Ticks;
+        public bool Ticks;
 
         /// <summary>
         /// The internal Entity ID (Identifier) number for this entity.
@@ -31,6 +32,11 @@ namespace FreneticGameCore.EntitySystem
         /// The entity is removed from the owning world, or will be momentarily.
         /// </summary>
         public bool Removed = false;
+
+        /// <summary>
+        /// Fired when the entity is being ticked.
+        /// </summary>
+        public Action OnTick;
 
         /// <summary>
         /// Fired when this entity is spawned into a world.
@@ -52,11 +58,11 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
-        /// Tick the entity. Default implementation throws an exception!
+        /// Tick the entity. Just fires the tick event!
         /// </summary>
-        public virtual void Tick()
+        public void Tick()
         {
-            throw new NotImplementedException();
+            OnTick?.Invoke();
         }
 
         /// <summary>

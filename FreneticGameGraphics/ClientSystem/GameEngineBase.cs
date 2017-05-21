@@ -111,6 +111,13 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         private void Tick()
         {
+            for (int i = 0; i < Entities.Count; i++)
+            {
+                if (Entities[i].Ticks)
+                {
+                    Entities[i].Tick();
+                }
+            }
             OnTick?.Invoke();
         }
 

@@ -78,7 +78,7 @@ namespace FreneticGameCore
         /// </summary>
         public int Next(int cap)
         {
-            return (int)(Next() / (int.MaxValue / (double)cap)); // TODO: Sanity!
+            return (int)(Next() * ((double)cap / int.MaxValue)); // TODO: Sanity!
         }
 
         /// <summary>
@@ -90,11 +90,30 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Gets a random double.
+        /// Gets a random double, between 0 and 1.
         /// </summary>
         public double NextDouble()
         {
             return NextUL() / ((double)ulong.MaxValue);
+        }
+
+        /// <summary>
+        /// Gets a random double, between 0 and cap.
+        /// </summary>
+        /// <param name="cap">The upper limit.</param>
+        public double NextDouble(double cap)
+        {
+            return NextUL() * (cap / ulong.MaxValue);
+        }
+
+        /// <summary>
+        /// Gets a random double, between two bounds.
+        /// </summary>
+        /// <param name="min">The lower limit.</param>
+        /// <param name="cap">The upper limit.</param>
+        public double NextDouble(double min, double cap)
+        {
+            return (NextUL() * ((cap - min) / ulong.MaxValue)) + min;
         }
 
         /// <summary>

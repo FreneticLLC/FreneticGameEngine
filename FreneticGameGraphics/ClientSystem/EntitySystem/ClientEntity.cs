@@ -60,7 +60,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
                 Renderer = null;
             }
         }
-
+        
         /// <summary>
         /// Gets a string debug helper for this entity.
         /// </summary>

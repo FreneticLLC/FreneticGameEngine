@@ -37,9 +37,15 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Renders all objects. The boolean indicates whether to render objects that don't affect lighting (Meaning, things that don't cast shadows).
         /// Used when entity rendering is insufficient.
+        /// Fires BEFORE rendering path.
         /// </summary>
-        public event Action<bool> RenderAllObjects;
+        public Action<bool> RenderAllObjectsPre;
 
+        /// <summary>
+        /// Fires AFTER standard render path. See <see cref="RenderAllObjectsPre"/>.
+        /// </summary>
+        public Action<bool> RenderAllObjectsPost;
+        
         /// <summary>
         /// First shader stage: computes a 'light map' for each light source.
         /// </summary>
@@ -201,6 +207,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Zoom = Zoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenter;
+            MainRenderContext.Engine = this;
             GlobalTickTime += Delta;
             // Second step: Prepare positioning and blank out shaders
             if (Zoom > MaximumZoom)
@@ -261,15 +268,12 @@ namespace FreneticGameGraphics.ClientSystem
         {
             Textures.White.Bind();
             RenderHelper.SetColor(Vector4.One);
-            RenderAllObjects?.Invoke(lights);
-            foreach (ClientEntity ent in Entities)
+            RenderAllObjectsPre?.Invoke(lights);
+            foreach (ClientEntity ent in Entities.Where((e) => e.Renderer != null && (lights || e.Renderer.CastShadows)).OrderBy((e) => e.Renderer.RenderingPriorityOrder))
             {
-                EntityRenderableProperty prop = ent.Renderer;
-                if (prop != null && (!lights || prop.CastShadows))
-                {
-                    prop.RenderStandard2D(MainRenderContext);
-                }
+                ent.Renderer.RenderStandard2D(MainRenderContext);
             }
+            RenderAllObjectsPost?.Invoke(lights);
             GraphicsUtil.CheckError("Render - all Entities rendered");
         }
 
@@ -326,6 +330,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
+            MainRenderContext.Engine = this;
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
             GraphicsUtil.CheckError("Render - Setup Lights combine");
             for (int i = 0; i < Lights.Count; i++)
