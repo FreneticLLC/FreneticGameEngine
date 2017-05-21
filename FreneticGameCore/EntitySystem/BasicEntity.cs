@@ -60,7 +60,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Tick the entity. Just fires the tick event!
         /// </summary>
-        public void Tick()
+        public void TickThis()
         {
             OnTick?.Invoke();
         }

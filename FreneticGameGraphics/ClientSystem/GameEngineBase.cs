@@ -115,7 +115,7 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Entities[i].Ticks)
                 {
-                    Entities[i].Tick();
+                    Entities[i].TickThis();
                 }
             }
             OnTick?.Invoke();
