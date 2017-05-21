@@ -59,6 +59,7 @@
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="Frustum.cs" />
     <Compile Include="EntitySystem\PhysicsEntityProperty.cs" />
+    <Compile Include="LanguageEngine.cs" />
     <Compile Include="PhysicsSpace.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Files\DataReader.cs" />
@@ -93,6 +94,12 @@
       <Project>{0672dd5f-6f33-4853-bd6e-8716d3abc7ad}</Project>
       <Name>FreneticScript</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="data\info\text\core_en_us.fds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

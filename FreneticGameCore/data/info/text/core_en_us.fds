@@ -1,0 +1,23 @@
+﻿# Texts for FGE's core.
+# These can be accessed by any in-game text writer via ^[LANG=core|example.path.here]
+# Arguments can be given as such: ^[LANG=core|example.path.here|alpha|beta] where {{1}} will become alpha, {{2}} becomes beta, etc.
+# You can use color codes here, but use them sparingly (IE, only use as needed). Try not to use language calls ("^[LANG=...]")... instead, use arguments!
+# Note to editors: Please only edit the strings (text after the ":" symbol), not the comments (text after "#" symbol) nor the ID's (text before a ":" symbol)
+
+# General information for this language file.
+language:
+    # The internal ID of this language (Should match the file name!)
+    id: en_us
+    # The clean name of the language (human readable)
+    cleanname: English (United States)
+    # What texture to use for the flag
+    flagtexture: flags/usa
+
+# Common text.
+common:
+    # Things related to the language system itself
+    languages:
+        badinput: (Unknown or empty language data request, failed to read!)
+        badkey: (Unknown or bad language key value, failed to read!)
+    true: true
+    false: false
