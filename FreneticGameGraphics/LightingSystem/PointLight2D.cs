@@ -46,6 +46,15 @@ namespace FreneticGameGraphics.LightingSystem
             SubDivider = Math.Max((float)Math.Sqrt(Strength) * 0.1f, 1f);
             GraphicsUtil.CheckError("PointLight2D init");
         }
+        
+        /// <summary>
+        /// Destroys the light object.
+        /// </summary>
+        public void Destroy()
+        {
+            GL.DeleteTexture(FBO_Tex);
+            GL.DeleteFramebuffer(FBO);
+        }
 
         /// <summary>
         /// The position of the point light 2D, in 2D world space.

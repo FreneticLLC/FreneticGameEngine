@@ -13,6 +13,7 @@ using FreneticGameGraphics.LightingSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Threading;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
+using FreneticGameCore.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -43,6 +44,15 @@ namespace FreneticGameGraphics.ClientSystem
         public List<ClientEntity> Entities = new List<ClientEntity>();
 
         /// <summary>
+        /// Returns a duplicate of the entity list, for when you expect the master list to change.
+        /// </summary>
+        /// <returns>The duplicate.</returns>
+        public IReadOnlyList<ClientEntity> EntityListDuplicate()
+        {
+            return new List<ClientEntity>(Entities);
+        }
+
+        /// <summary>
         /// The current highest EID value.
         /// </summary>
         public long CurrentEID = 1;
@@ -66,7 +76,27 @@ namespace FreneticGameGraphics.ClientSystem
                 ce.AddProperty(props[i]);
             }
             Entities.Add(ce);
+            // TODO: it may be useful here to sort the entity list by rendering order? Would increase spawn lag but decrease frame time!
+            ce.IsSpawned = true;
+            ce.OnSpawn?.Fire(new EntitySpawnEventArgs());
             return ce;
+        }
+
+        /// <summary>
+        /// Removes an entity from the world.
+        /// </summary>
+        /// <param name="ent">The entity to remove.</param>
+        public void DeSpawnEntity(ClientEntity ent)
+        {
+            int ind = Entities.IndexOf(ent);
+            if (ind < 0 || !ent.IsSpawned)
+            {
+                SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
+                return;
+            }
+            ent.OnDeSpawn?.Fire(new EntityDeSpawnEventArgs());
+            Entities.RemoveAt(ind);
+            ent.IsSpawned = false;
         }
 
         /// <summary>
@@ -77,16 +107,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <returns>The spawned entity.</returns>
         public ClientEntity SpawnEntity(bool ticks, params Property[] props)
         {
-            ClientEntity ce = new ClientEntity(this, ticks)
-            {
-                EID = CurrentEID++
-            };
-            for (int i = 0; i < props.Length; i++)
-            {
-                ce.AddProperty(props[i]);
-            }
-            Entities.Add(ce);
-            return ce;
+            return SpawnEntity(ticks, null, props);
         }
 
         /// <summary>
@@ -158,11 +179,13 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         private void Tick()
         {
-            for (int i = 0; i < Entities.Count; i++)
+            // Dup list, to ensure ents can despawn themselves in the tick method!
+            IReadOnlyList<ClientEntity> ents = EntityListDuplicate();
+            for (int i = 0; i < ents.Count; i++)
             {
-                if (Entities[i].Ticks)
+                if (ents[i].Ticks)
                 {
-                    Entities[i].TickThis();
+                    ents[i].TickThis();
                 }
             }
             OnTick?.Invoke();

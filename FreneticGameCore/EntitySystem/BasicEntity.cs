@@ -39,6 +39,11 @@ namespace FreneticGameCore.EntitySystem
         public Action OnTick;
 
         /// <summary>
+        /// Fired when the entity is moved.
+        /// </summary>
+        public Action<Location> OnPositionChanged;
+
+        /// <summary>
         /// Fired when this entity is spawned into a world.
         /// </summary>
         public FreneticScriptEventHandler<EntitySpawnEventArgs> OnSpawn = new FreneticScriptEventHandler<EntitySpawnEventArgs>();
