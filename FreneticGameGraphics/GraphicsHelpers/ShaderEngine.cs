@@ -208,13 +208,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 return str;
             }
             StringBuilder fsb = new StringBuilder();
-            string[] dat = str.Split('\n');
+            string[] dat = str.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
                 if (dat[i].StartsWith("#include "))
                 {
                     string name = "shaders/" + dat[i].Substring("#include ".Length);
-                    name = FileHandler.CleanFileName(name);
+                    name = FileHandler.CleanFileName(name.Trim());
                     if (!File.Exists(name))
                     {
                         throw new Exception("File " + name + " does not exist, but was included by a shader!");
