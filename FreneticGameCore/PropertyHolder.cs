@@ -77,6 +77,7 @@ namespace FreneticGameCore
                 p.Holder = null;
                 HeldProperties.Remove(t);
                 p.OnRemoved();
+                OnRemoved(p);
                 return true;
             }
             return false;
@@ -94,6 +95,7 @@ namespace FreneticGameCore
                 p.Holder = null;
                 HeldProperties.Remove(typeof(T));
                 p.OnRemoved();
+                OnRemoved(p);
                 return true;
             }
             return false;
@@ -163,6 +165,7 @@ namespace FreneticGameCore
             prop.Helper = PropertyHelper.EnsureHandled(t);
             HeldProperties.Add(t, prop);
             prop.OnAdded();
+            OnAdded(prop);
         }
 
         // Note: Intentionally discard this signature:
@@ -191,6 +194,7 @@ namespace FreneticGameCore
             res.Helper = PropertyHelper.EnsureHandled(t);
             HeldProperties[t] = res;
             res.OnAdded();
+            OnAdded(res);
             return res;
         }
 
@@ -216,7 +220,24 @@ namespace FreneticGameCore
             res.Helper = PropertyHelper.EnsureHandled(typeof(T));
             HeldProperties[typeof(T)] = res;
             res.OnAdded();
+            OnAdded(res);
             return res;
+        }
+
+        /// <summary>
+        /// Called when a property is added.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public virtual void OnAdded(Property prop)
+        {
+        }
+
+        /// <summary>
+        /// Called when a property is removed.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public virtual void OnRemoved(Property prop)
+        {
         }
     }
 

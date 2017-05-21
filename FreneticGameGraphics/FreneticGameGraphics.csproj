@@ -59,13 +59,14 @@
   <ItemGroup>
     <Compile Include="ClientSystem\EntitySystem\ClientEntity.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
+    <Compile Include="ClientSystem\GameEngineBase.cs" />
     <Compile Include="GraphicsHelpers\FontSetEngine.cs" />
     <Compile Include="ClientSystem\GameEngine2D.cs" />
     <Compile Include="GraphicsHelpers\GLFontEngine.cs" />
     <Compile Include="GraphicsHelpers\GraphicsUtil.cs" />
     <Compile Include="LightingSystem\PointLight2D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RenderContext.cs" />
+    <Compile Include="ClientSystem\RenderContext.cs" />
     <Compile Include="ClientSystem\RenderContext2D.cs" />
     <Compile Include="GraphicsHelpers\Renderer2D.cs" />
     <Compile Include="GraphicsHelpers\ShaderEngine.cs" />

@@ -14,33 +14,11 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     public class ClientEntity : BasicEntity
     {
         /// <summary>
-        /// The property that renders this entity.
+        /// Get or set the renderer for this entity.
+        /// Adding or removing a renderable will set this value.
         /// </summary>
-        private EntityRenderableProperty Renderable = null;
-
-        /// <summary>
-        /// Get or set the renderer for this entity. Setting will automatically add renderer as a property (if non-null).
-        /// </summary>
-        public EntityRenderableProperty Renderer
-        {
-            get
-            {
-                return Renderable;
-            }
-            set
-            {
-                if (Renderable != null)
-                {
-                    RemoveProperty(Renderable.GetType());
-                }
-                Renderable = value;
-                if (Renderable != null)
-                {
-                    AddProperty(Renderable);
-                }
-            }
-        }
-
+        public EntityRenderableProperty Renderer = null;
+        
         // TODO: ClientWindow Client;
 
         /// <summary>
@@ -50,6 +28,32 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public ClientEntity(bool _ticks)
             : base(_ticks)
         {
+        }
+
+        /// <summary>
+        /// Called when a property is added.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public override void OnAdded(Property prop)
+        {
+            base.OnAdded(prop);
+            if (Renderer == null && prop is EntityRenderableProperty rnd)
+            {
+                Renderer = rnd;
+            }
+        }
+
+        /// <summary>
+        /// Called when a property is removed.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public override void OnRemoved(Property prop)
+        {
+            base.OnRemoved(prop);
+            if (prop == Renderer)
+            {
+                Renderer = null;
+            }
         }
 
         /// <summary>

@@ -20,13 +20,8 @@ namespace FreneticGameGraphics.ClientSystem
     /// Handles things like window management.
     /// TODO: Split the rendering system into a View2D, separate from the main game engine?
     /// </summary>
-    public class GameEngine2D
+    public class GameEngine2D : GameEngineBase
     {
-        /// <summary>
-        /// The primary window for the game.
-        /// </summary>
-        public GameWindow Window;
-        
         /// <summary>
         /// The window can never render coordinates past this point.
         /// This constant set for precision-safety reasons.
@@ -34,70 +29,9 @@ namespace FreneticGameGraphics.ClientSystem
         public const float MAX_COORD = 1000000.0f;
 
         /// <summary>
-        /// Current frame delta (seconds).
-        /// </summary>
-        public double Delta;
-
-        /// <summary>
-        /// How long the game has run (seconds).
-        /// </summary>
-        public double GlobalTickTime;
-
-        /// <summary>
-        /// The title of the window.
-        /// </summary>
-        public readonly string StartingWindowTitle;
-
-        /// <summary>
-        /// The shader system.
-        /// </summary>
-        public ShaderEngine Shaders;
-
-        /// <summary>
-        /// Helper for files.
-        /// </summary>
-        public FileHandler Files;
-
-        /// <summary>
-        /// Helper for internal GL font data in the system.
-        /// </summary>
-        public GLFontEngine GLFonts;
-
-        /// <summary>
-        /// Helper for all font sets in the system.
-        /// </summary>
-        public FontSetEngine FontSets;
-
-        /// <summary>
-        /// Helper for all textures in the system.
-        /// </summary>
-        public TextureEngine Textures;
-
-        /// <summary>
         /// Helps with rendering.
         /// </summary>
         public Renderer2D RenderHelper;
-
-        /// <summary>
-        /// Fired when the window is set up.
-        /// </summary>
-        public event Action OnWindowSetUp;
-
-        /// <summary>
-        /// Fired when the window is loading. Use this to load any data you need.
-        /// </summary>
-        public event Action OnWindowLoad;
-
-        /// <summary>
-        /// Fired every frame for logic update steps.
-        /// Note that the first tick fires AFTER the first render.
-        /// </summary>
-        public event Action OnTick;
-
-        /// <summary>
-        /// Fired when the window is closed.
-        /// </summary>
-        public event Action OnClosed;
 
         /// <summary>
         /// Renders all objects. The boolean indicates whether to render objects that don't affect lighting (Meaning, things that don't cast shadows).
@@ -150,79 +84,22 @@ namespace FreneticGameGraphics.ClientSystem
         public Vector2 ViewCenter = Vector2.Zero;
 
         /// <summary>
-        /// Whether the program should shut down when the window is closed.
-        /// </summary>
-        public bool ExitOnClose = true;
-
-        /// <summary>
         /// Sets up the game engine 2D.
-        /// Considering also attaching to available events such as <see cref="OnWindowSetUp"/>.
-        /// Then call <see cref="Start"/>.
+        /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowSetUp"/>.
+        /// Then call <see cref="GameEngineBase.Start"/>.
         /// </summary>
         /// <param name="render">The method that renders all visible objects from the game.</param>
         /// <param name="_windowTitle">The title, if different from game program descriptor.</param>
         public GameEngine2D(Action<bool> render, string _windowTitle = null)
+            : base(_windowTitle)
         {
             RenderAllObjects = render;
-            StartingWindowTitle = _windowTitle ?? Program.GameName + " v" + Program.GameVersion + " " + Program.GameVersionDescription;
         }
-
-        /// <summary>
-        /// Starts the game engine, and begins the primary loop.
-        /// </summary>
-        public void Start()
-        {
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading...");
-            Window = new GameWindow(800, 600, GraphicsMode.Default, StartingWindowTitle, GameWindowFlags.FixedWindow, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
-            Window.Load += Window_Load;
-            Window.RenderFrame += Window_RenderFrame;
-            Window.Mouse.Move += Mouse_Move;
-            Window.Closed += Window_Closed;
-            SysConsole.Output(OutputType.INIT, "GameEngine2D calling SetUp event...");
-            OnWindowSetUp?.Invoke();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D running...");
-            Window.Run();
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            OnClosed?.Invoke();
-            if (ExitOnClose)
-            {
-                Environment.Exit(0);
-            }
-        }
-
-        /// <summary>
-        /// The X-coordinate of the mouse in screen coordinates.
-        /// </summary>
-        public int MouseX;
-
-        /// <summary>
-        /// The Y-coordinate of the mouse in screen coordinates.
-        /// </summary>
-        public int MouseY;
-
-        /// <summary>
-        /// Monitors on-window mouse movement.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The event data.</param>
-        private void Mouse_Move(object sender, MouseMoveEventArgs e)
-        {
-            MouseX = e.X;
-            MouseY = e.Y;
-        }
-
-        /// <summary>
-        /// The Ortho matrix, for Font rendering simplicity.
-        /// </summary>
-        public Matrix4 Ortho;
 
         /// <summary>
         /// Loads all shaders for the standard Game Engine 2D.
         /// </summary>
-        public void GetShaders()
+        public override void GetShaders()
         {
             Shader_Lightmap = Shaders.GetShader("lightmap2d");
             Shader_Addlighttoscene = Shaders.GetShader("addlighttoscene2d");
@@ -230,43 +107,15 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
-        /// Loads all content for the game, and starts the systems.
+        /// Loads light helpers.
         /// </summary>
-        /// <param name="sender">Irrelevant.</param>
-        /// <param name="e">Irrelevant.</param>
-        private void Window_Load(object sender, EventArgs e)
+        public override void PostLoad()
         {
-            SysConsole.Output(OutputType.INIT, "GameEngine2D starting load sequence...");
-            GL.Viewport(0, 0, Window.Width, Window.Height);
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.Disable(EnableCap.CullFace);
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading file helpers...");
-            Files = new FileHandler();
-            Files.Init();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading shader helpers...");
-            Shaders = new ShaderEngine();
-            Shaders.InitShaderSystem();
-            GetShaders();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading texture helpers...");
-            Textures = new TextureEngine();
-            Textures.InitTextureSystem(Files);
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading render helpers...");
+            SysConsole.Output(OutputType.INIT, "GameEngine loading render helpers...");
             RenderHelper = new Renderer2D(Textures, Shaders);
             RenderHelper.Init();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading font helpers...");
-            GLFonts = new GLFontEngine(Shaders);
-            GLFonts.Init(Files);
-            FontSets = new FontSetEngine(GLFonts);
-            // TODO: Languages engine!
-            FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
-            SysConsole.Output(OutputType.INIT, "GameEngine2D loading light helpers...");
+            SysConsole.Output(OutputType.INIT, "GameEngine loading 2D light helpers...");
             LoadLightHelpers();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D calling load event...");
-            OnWindowLoad?.Invoke();
-            SysConsole.Output(OutputType.INIT, "GameEngine2D is ready and loaded! Starting main game loop...");
         }
 
         /// <summary>
@@ -317,12 +166,6 @@ namespace FreneticGameGraphics.ClientSystem
         public RenderContext2D MainRenderContext = new RenderContext2D();
 
         /// <summary>
-        /// The color to blank the screen to every frame.
-        /// Defaults to cyan (0:1:1:1).
-        /// </summary>
-        public float[] ScreenClearColor = new float[] { 0, 1, 1, 1 };
-
-        /// <summary>
         /// The current view scaler.
         /// </summary>
         public Vector2 Scaler = Vector2.One;
@@ -346,29 +189,20 @@ namespace FreneticGameGraphics.ClientSystem
         /// The current world-space mouse coordinates.
         /// </summary>
         public Vector2 MouseCoords;
-
+        
         /// <summary>
-        /// Renders a single frame of the game, and also ticks.
+        /// Renders a single frame of the 2D game engine.
         /// </summary>
-        /// <param name="sender">Irrelevant.</param>
-        /// <param name="e">Holds the frame time (delta).</param>
-        private void Window_RenderFrame(object sender, FrameEventArgs e)
+        public override void RenderSingleFrame()
         {
-            // First step: check delta
-            Delta = e.Time;
-            if (e.Time <= 0.0)
-            {
-                return;
-            }
+            // First step: setup
             MainRenderContext.Width = Window.Width;
             MainRenderContext.Height = Window.Height;
             MainRenderContext.Zoom = Zoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenter;
             GlobalTickTime += Delta;
-            // Second step: clear the screen
-            GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
-            // Third step: Prepare positioning and blank out shaders
+            // Second step: Prepare positioning and blank out shaders
             if (Zoom > MaximumZoom)
             {
                 Zoom = MaximumZoom;
@@ -403,7 +237,7 @@ namespace FreneticGameGraphics.ClientSystem
             Shaders.ColorMult2DShader.Bind();
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
-            // Fourth step: Pass to the primary rendering system
+            // Third step: Pass to the primary rendering system
             try
             {
                 Render();
@@ -417,14 +251,6 @@ namespace FreneticGameGraphics.ClientSystem
                 }
                 Console.WriteLine("Rendering exception: " + ex);
             }
-            // FIfth-final step: clean up!
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.BindVertexArray(0);
-            GL.UseProgram(0);
-            // Semi-final step: Tick logic!
-            Tick();
-            // Final step: Swap the render buffer onto the screen!
-            Window.SwapBuffers();
         }
 
         /// <summary>
@@ -515,14 +341,6 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ActiveTexture(TextureUnit.Texture0);
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("Render - Complete");
-        }
-
-        /// <summary>
-        /// The internal GameEngine2D tick sequence.
-        /// </summary>
-        private void Tick()
-        {
-            OnTick?.Invoke();
         }
     }
 }
