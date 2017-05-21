@@ -16,7 +16,5 @@ namespace FreneticGameGraphics.ClientSystem
         /// The relevant owning game window.
         /// </summary>
         public GameWindow Window;
-
-        // public View3D View;
     }
 }

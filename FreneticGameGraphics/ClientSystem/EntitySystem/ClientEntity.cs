@@ -18,16 +18,21 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// Adding or removing a renderable will set this value.
         /// </summary>
         public EntityRenderableProperty Renderer = null;
-        
-        // TODO: ClientWindow Client;
+
+        /// <summary>
+        /// The owning game engine.
+        /// </summary>
+        public GameEngineBase Engine;
 
         /// <summary>
         /// Constructs a client-side entity.
         /// </summary>
+        /// <param name="_engine">The owning game engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
-        public ClientEntity(bool _ticks)
+        public ClientEntity(GameEngineBase _engine, bool _ticks)
             : base(_ticks)
         {
+            Engine = _engine;
         }
 
         /// <summary>

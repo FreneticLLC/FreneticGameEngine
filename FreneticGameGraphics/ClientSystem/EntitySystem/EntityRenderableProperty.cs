@@ -33,5 +33,10 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// Render the entity as seen normally.
         /// </summary>
         public abstract void RenderStandard(RenderContext context);
+
+        /// <summary>
+        /// Render the entity as seen normally, in 2D.
+        /// </summary>
+        public abstract void RenderStandard2D(RenderContext2D context);
     }
 }

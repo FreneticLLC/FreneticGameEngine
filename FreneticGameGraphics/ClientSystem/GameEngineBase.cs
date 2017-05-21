@@ -12,6 +12,7 @@ using FreneticGameCore.Files;
 using FreneticGameGraphics.LightingSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Threading;
+using FreneticGameGraphics.ClientSystem.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -34,6 +35,12 @@ namespace FreneticGameGraphics.ClientSystem
         /// How long the game has run (seconds).
         /// </summary>
         public double GlobalTickTime;
+
+        /// <summary>
+        /// All entities on the server, in a list.
+        /// A list was chosen over a lookup table, as quick-resorting and running through is more important to be fast than EID lookups.
+        /// </summary>
+        public List<ClientEntity> Entities = new List<ClientEntity>();
 
         /// <summary>
         /// The title of the window.
@@ -112,6 +119,11 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public abstract void RenderSingleFrame();
 
+        /// <summary>
+        /// Called when the window is closed.
+        /// </summary>
+        /// <param name="sender">Irrelevant sender.</param>
+        /// <param name="e">Empty event args.</param>
         private void Window_Closed(object sender, EventArgs e)
         {
             OnClosed?.Invoke();

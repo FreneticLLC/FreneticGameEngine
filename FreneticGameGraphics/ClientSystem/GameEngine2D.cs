@@ -12,6 +12,7 @@ using FreneticGameCore.Files;
 using FreneticGameGraphics.LightingSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Threading;
+using FreneticGameGraphics.ClientSystem.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -35,6 +36,7 @@ namespace FreneticGameGraphics.ClientSystem
 
         /// <summary>
         /// Renders all objects. The boolean indicates whether to render objects that don't affect lighting (Meaning, things that don't cast shadows).
+        /// Used when entity rendering is insufficient.
         /// </summary>
         public event Action<bool> RenderAllObjects;
 
@@ -88,12 +90,10 @@ namespace FreneticGameGraphics.ClientSystem
         /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowSetUp"/>.
         /// Then call <see cref="GameEngineBase.Start"/>.
         /// </summary>
-        /// <param name="render">The method that renders all visible objects from the game.</param>
         /// <param name="_windowTitle">The title, if different from game program descriptor.</param>
-        public GameEngine2D(Action<bool> render, string _windowTitle = null)
+        public GameEngine2D(string _windowTitle = null)
             : base(_windowTitle)
         {
-            RenderAllObjects = render;
         }
 
         /// <summary>
@@ -254,6 +254,26 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Renders all entities and render helpers.
+        /// </summary>
+        /// <param name="lights">Whether to include things that don't cast shadows.</param>
+        private void RenderAll(bool lights)
+        {
+            Textures.White.Bind();
+            RenderHelper.SetColor(Vector4.One);
+            RenderAllObjects?.Invoke(lights);
+            foreach (ClientEntity ent in Entities)
+            {
+                EntityRenderableProperty prop = ent.Renderer;
+                if (prop != null && (!lights || prop.CastShadows))
+                {
+                    prop.RenderStandard2D(MainRenderContext);
+                }
+            }
+            GraphicsUtil.CheckError("Render - all Entities rendered");
+        }
+
+        /// <summary>
         /// Renders the entire GameEngine2D.
         /// </summary>
         private void Render()
@@ -261,7 +281,7 @@ namespace FreneticGameGraphics.ClientSystem
             if (!UseLightEngine)
             {
                 Shaders.ColorMult2DShader.Bind();
-                RenderAllObjects(true);
+                RenderAll(true);
                 return;
             }
             GraphicsUtil.CheckError("Render - Begin");
@@ -282,7 +302,7 @@ namespace FreneticGameGraphics.ClientSystem
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
                 GraphicsUtil.CheckError("Render - Light Precalcer");
-                RenderAllObjects(false);
+                RenderAll(false);
             }
             GraphicsUtil.CheckError("Render - Lights precalced");
             GL.Viewport(0, 0, Window.Width, Window.Height);
@@ -296,7 +316,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
             GraphicsUtil.CheckError("Render - Lights prepped");
-            RenderAllObjects(true);
+            RenderAll(true);
             Shader_Combine.Bind();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
