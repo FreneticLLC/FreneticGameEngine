@@ -309,8 +309,6 @@ namespace FreneticGameGraphics.ClientSystem
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, l_FBO_Tex, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            Lights.Add(new PointLight2D(new Vector2(400, 400), 800));
-            Lights.Add(new PointLight2D(new Vector2(0, 2500), 3200));
         }
 
         /// <summary>
