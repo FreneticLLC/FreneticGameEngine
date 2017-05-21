@@ -43,6 +43,23 @@ namespace FreneticGameGraphics.ClientSystem
         public List<ClientEntity> Entities = new List<ClientEntity>();
 
         /// <summary>
+        /// Spawns an entity into the world.
+        /// </summary>
+        /// <param name="ticks">Whether it should tick.</param>
+        /// <param name="props">Any properties to apply.</param>
+        /// <returns>The spawned entity.</returns>
+        public ClientEntity SpawnEntity(bool ticks, params Property[] props)
+        {
+            ClientEntity ce = new ClientEntity(this, ticks);
+            for (int i = 0; i < props.Length; i++)
+            {
+                ce.AddProperty(props[i]);
+            }
+            Entities.Add(ce);
+            return ce;
+        }
+
+        /// <summary>
         /// The title of the window.
         /// </summary>
         public readonly string StartingWindowTitle;
