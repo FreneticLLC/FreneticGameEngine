@@ -72,10 +72,14 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         private Quaternion InternalOrientation = Quaternion.Identity;
 
+        // TODO: Shape save/debug
+        // TODO: Maybe point to the correct physics space somehow in save files? Needs a space ID.
+
         /// <summary>
         /// Gets or sets the entity's mass.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public double Mass
         {
             get
@@ -96,6 +100,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's gravity.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Location Gravity
         {
             get
@@ -116,6 +121,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's friction.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public double Friction
         {
             get
@@ -138,6 +144,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's bounciness (Restitution coefficient).
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public double Bounciness
         {
             get
@@ -158,6 +165,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's linear velocity.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Location LinearVelocity
         {
             get
@@ -178,6 +186,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's angular velocity.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Location AngularVelocity
         {
             get
@@ -198,6 +207,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets or sets the entity's position.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Location Position
         {
             get
@@ -219,6 +229,7 @@ namespace FreneticGameCore.EntitySystem
         /// TODO: Custom FGE quaternion type?
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Quaternion Orientation
         {
             get

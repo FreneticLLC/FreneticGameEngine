@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
+using BEPUutilities;
 
 namespace FreneticGameCore
 {
@@ -14,6 +15,58 @@ namespace FreneticGameCore
     /// </summary>
     public class PropertyHolder
     {
+        /// <summary>
+        /// All type saver methods.
+        /// </summary>
+        public static Dictionary<Type, Func<Object,byte[]>> TypeSavers = new Dictionary<Type, Func<Object, byte[]>>();
+
+        /// <summary>
+        /// All type reader methods.
+        /// </summary>
+        public static Dictionary<Type, Func<byte[], Object>> TypeReaders = new Dictionary<Type, Func<byte[], object>>();
+
+        /// <summary>
+        /// Configures the default set of savers and readers for the FGE core.
+        /// </summary>
+        static PropertyHolder()
+        {
+            // Core Savers
+            TypeSavers.Add(typeof(byte), (o) => new byte[] { (byte)o });
+            TypeSavers.Add(typeof(sbyte), (o) => new byte[] { unchecked((byte)((sbyte)o)) });
+            TypeSavers.Add(typeof(ushort), (o) => BitConverter.GetBytes((ushort)o));
+            TypeSavers.Add(typeof(short), (o) => BitConverter.GetBytes((short)o));
+            TypeSavers.Add(typeof(uint), (o) => BitConverter.GetBytes((uint)o));
+            TypeSavers.Add(typeof(int), (o) => BitConverter.GetBytes((int)o));
+            TypeSavers.Add(typeof(long), (o) => BitConverter.GetBytes((long)o));
+            TypeSavers.Add(typeof(ulong), (o) => BitConverter.GetBytes((ulong)o));
+            TypeSavers.Add(typeof(float), (o) => BitConverter.GetBytes((float)o));
+            TypeSavers.Add(typeof(double), (o) => BitConverter.GetBytes((double)o));
+            TypeSavers.Add(typeof(string), (o) => Utilities.DefaultEncoding.GetBytes((string)o));
+            // Core Readers
+            TypeReaders.Add(typeof(byte), (b) => b[0]);
+            TypeReaders.Add(typeof(sbyte), (b) => unchecked((sbyte)(b[0])));
+            TypeReaders.Add(typeof(ushort), (b) => BitConverter.ToUInt16(b, 0));
+            TypeReaders.Add(typeof(short), (b) => BitConverter.ToInt16(b, 0));
+            TypeReaders.Add(typeof(uint), (b) => BitConverter.ToUInt32(b, 0));
+            TypeReaders.Add(typeof(int), (b) => BitConverter.ToInt32(b, 0));
+            TypeReaders.Add(typeof(ulong), (b) => BitConverter.ToUInt64(b, 0));
+            TypeReaders.Add(typeof(long), (b) => BitConverter.ToInt64(b, 0));
+            TypeReaders.Add(typeof(float), (b) => BitConverter.ToSingle(b, 0));
+            TypeReaders.Add(typeof(double), (b) => BitConverter.ToDouble(b, 0));
+            TypeReaders.Add(typeof(string), (b) => Utilities.DefaultEncoding.GetString(b));
+            // FGE/Core Savers
+            TypeSavers.Add(typeof(Location), (o) => ((Location)o).ToDoubleBytes());
+            // FGE/Core Readers
+            TypeReaders.Add(typeof(Location), (b) => Location.FromDoubleBytes(b, 0));
+            // BEPU Savers
+            TypeSavers.Add(typeof(Vector3), (o) => (new Location((Vector3)o)).ToDoubleBytes());
+            // BEPU Readers
+            TypeReaders.Add(typeof(Vector3), (b) => Location.FromDoubleBytes(b, 0).ToBVector());
+        }
+
+        /// <summary>
+        /// All currently held properties on this object.
+        /// </summary>
         private Dictionary<Type, Property> HeldProperties = new Dictionary<Type, Property>();
 
         /// <summary>
@@ -252,7 +305,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class PropertyAutoSaveable : Attribute
     {
     }

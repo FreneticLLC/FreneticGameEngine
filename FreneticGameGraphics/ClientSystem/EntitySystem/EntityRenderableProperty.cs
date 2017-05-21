@@ -18,22 +18,28 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <para>Note: Setting this after it's added is not required to validly modify its value.</para>
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public bool CastShadows = true;
 
         /// <summary>
         /// Whether this Renderable entity is currently visible.
         /// </summary>
         [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public bool IsVisible = true;
 
         /// <summary>
         /// priority order of rendering: lower means sooner in the rendering order.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public int RenderingPriorityOrder = 0;
 
         /// <summary>
         /// Where the entity should render at.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Vector3 RenderAt;
         
         /// <summary>

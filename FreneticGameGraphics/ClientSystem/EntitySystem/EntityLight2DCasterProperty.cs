@@ -44,18 +44,22 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="pos">The new position.</param>
         public void FixPosition(Location pos)
         {
-            LightPosition = new Vector2((float)pos.X, (float)pos.Y);
+            LightPosition = new Vector2(pos.XF, pos.YF);
         }
 
         /// <summary>
         /// The current position of the light.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public Vector2 LightPosition;
 
 
         /// <summary>
         /// The current strength of the light.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSaveable]
         public float LightStrength = 256;
 
         /// <summary>

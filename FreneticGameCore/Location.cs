@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace FreneticGameCore
 {
     /// <summary>
-    /// Represents a 3D location, using 3 double-precision doubleing-point coordinates.
+    /// Represents a 3D location, using 3 double-precision floating-point coordinates.
     /// Occupies 24 bytes, calculated as 8 * 3, as it has 3 fields (X, Y, Z) each occupying 8 bytes (a double).
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
@@ -62,6 +62,39 @@ namespace FreneticGameCore
         /// </summary>
         [FieldOffset(16)]
         public double Z;
+
+        /// <summary>
+        /// Returns X as a float.
+        /// </summary>
+        public float XF
+        {
+            get
+            {
+                return (float)X;
+            }
+        }
+
+        /// <summary>
+        /// Returns Y as a float.
+        /// </summary>
+        public float YF
+        {
+            get
+            {
+                return (float)Y;
+            }
+        }
+
+        /// <summary>
+        /// Returns Z as a float.
+        /// </summary>
+        public float ZF
+        {
+            get
+            {
+                return (float)Z;
+            }
+        }
 
         /// <summary>
         /// If this location is an angle set, returns the Yaw value of this angle set.
@@ -355,7 +388,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Converts the Location to a simple byte[] representation.
         /// Contains 24 bytes.
-        /// Inverts .FromDoubleBytes()
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
         public byte[] ToDoubleBytes()
         {
@@ -559,7 +592,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Reads the byte array to a Location object.
         /// Expects 24 bytes.
-        /// Inverts .ToDoubleBytes()
+        /// Inverts <see cref="ToDoubleBytes"/>.
         /// </summary>
         /// <param name="bytes">The bytes to read.</param>
         /// <param name="index">The index to start at.</param>

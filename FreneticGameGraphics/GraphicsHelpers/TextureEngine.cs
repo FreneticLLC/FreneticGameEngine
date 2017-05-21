@@ -466,5 +466,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             CheckValid();
             GL.BindTexture(TextureTarget.Texture2D, Internal_Texture);
         }
+        
+        /// <summary>
+        /// Gets the name of the texture.
+        /// </summary>
+        /// <returns>The name.</returns>
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
