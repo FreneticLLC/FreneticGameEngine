@@ -43,6 +43,33 @@ namespace FreneticGameGraphics.ClientSystem
         public List<ClientEntity> Entities = new List<ClientEntity>();
 
         /// <summary>
+        /// The current highest EID value.
+        /// </summary>
+        public long CurrentEID = 1;
+
+        /// <summary>
+        /// Spawns an entity into the world.
+        /// </summary>
+        /// <param name="ticks">Whether it should tick.</param>
+        /// <param name="configure">A method to configure the entity prior to spawn, if one applies.</param>
+        /// <param name="props">Any properties to apply.</param>
+        /// <returns>The spawned entity.</returns>
+        public ClientEntity SpawnEntity(bool ticks, Action<ClientEntity> configure, params Property[] props)
+        {
+            ClientEntity ce = new ClientEntity(this, ticks)
+            {
+                EID = CurrentEID++
+            };
+            configure?.Invoke(ce);
+            for (int i = 0; i < props.Length; i++)
+            {
+                ce.AddProperty(props[i]);
+            }
+            Entities.Add(ce);
+            return ce;
+        }
+
+        /// <summary>
         /// Spawns an entity into the world.
         /// </summary>
         /// <param name="ticks">Whether it should tick.</param>
@@ -50,7 +77,10 @@ namespace FreneticGameGraphics.ClientSystem
         /// <returns>The spawned entity.</returns>
         public ClientEntity SpawnEntity(bool ticks, params Property[] props)
         {
-            ClientEntity ce = new ClientEntity(this, ticks);
+            ClientEntity ce = new ClientEntity(this, ticks)
+            {
+                EID = CurrentEID++
+            };
             for (int i = 0; i < props.Length; i++)
             {
                 ce.AddProperty(props[i]);
