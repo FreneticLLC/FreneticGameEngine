@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using FreneticGameGraphics.ClientSystem;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// 2D render helper.

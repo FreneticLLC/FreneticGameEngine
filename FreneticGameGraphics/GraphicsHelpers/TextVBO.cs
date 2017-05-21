@@ -7,7 +7,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Handles Text rendering.

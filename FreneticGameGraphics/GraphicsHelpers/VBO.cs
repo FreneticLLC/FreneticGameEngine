@@ -8,7 +8,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Represents a Vertex Buffer/Array Object set.

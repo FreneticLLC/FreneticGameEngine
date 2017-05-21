@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.ClientSystem
 {
     /// <summary>
     /// Represents a 2D rendering context.

@@ -11,7 +11,7 @@ using FreneticGameCore.Files;
 using System.Drawing;
 using System.Globalization;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Handles pretty-rendered fonts.

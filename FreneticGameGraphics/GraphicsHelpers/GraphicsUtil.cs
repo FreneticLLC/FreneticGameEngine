@@ -8,7 +8,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Helper class for graphical systems.

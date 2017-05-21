@@ -13,7 +13,7 @@ using System.Drawing.Text;
 using System.Drawing.Imaging;
 using System.Globalization;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Handles rendering of fonts.

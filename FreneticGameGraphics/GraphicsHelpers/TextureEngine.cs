@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.Files;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// The primary engine for textures.

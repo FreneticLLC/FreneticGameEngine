@@ -7,7 +7,7 @@ using FreneticGameCore;
 using FreneticGameCore.Files;
 using OpenTK.Graphics.OpenGL4;
 
-namespace FreneticGameGraphics
+namespace FreneticGameGraphics.GraphicsHelpers
 {
     /// <summary>
     /// The primary engine for shaders.
