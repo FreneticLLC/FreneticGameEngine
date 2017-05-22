@@ -62,6 +62,7 @@ namespace FreneticGameCore
             TypeSavers.Add(typeof(Vector3), (o) => (new Location((Vector3)o)).ToDoubleBytes());
             TypeSavers.Add(typeof(Quaternion), (o) => Utilities.QuaternionToBytes((Quaternion)o));
             // BEPU Readers
+            TypeReaders.Add(typeof(Vector3), (b) => Location.FromDoubleBytes(b, 0).ToBVector());
             TypeReaders.Add(typeof(Quaternion), (b) => Utilities.BytesToQuaternion(b, 0));
         }
 

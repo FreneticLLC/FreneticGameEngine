@@ -20,19 +20,24 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public EntityRenderableProperty Renderer = null;
 
         /// <summary>
-        /// The owning game engine.
+        /// Gets the client-side engine.
         /// </summary>
-        public GameEngineBase Engine;
-
+        public GameEngineBase ClientEngine
+        {
+            get
+            {
+                return Engine as GameEngineBase;
+            }
+        }
+        
         /// <summary>
         /// Constructs a client-side entity.
         /// </summary>
         /// <param name="_engine">The owning game engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
         public ClientEntity(GameEngineBase _engine, bool _ticks)
-            : base(_ticks)
+            : base(_engine, _ticks)
         {
-            Engine = _engine;
         }
 
         /// <summary>
@@ -67,7 +72,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "ClientEntity of type: " + GetType().Name;
+            return "ClientEntity of type: " + GetType().Name + ", ID: " + EID;
         }
     }
 }

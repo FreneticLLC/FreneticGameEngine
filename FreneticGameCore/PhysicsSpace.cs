@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics;
+using FreneticGameCore.EntitySystem;
+using BEPUutilities;
+using BEPUphysics.Entities;
+using BEPUutilities.Threading;
 
 namespace FreneticGameCore
 {
     /// <summary>
-    /// Represents a physical space.
+    /// Represents a physical world (space).
     /// </summary>
     public class PhysicsSpace
     {
@@ -18,7 +22,20 @@ namespace FreneticGameCore
         public Space Internal;
 
         /// <summary>
-        /// Gets or sets the internal gravity value.
+        /// Construct the physics space.
+        /// </summary>
+        public PhysicsSpace()
+        {
+            ParallelLooper pl = new ParallelLooper();
+            for (int i = 0; i < Environment.ProcessorCount * 2; i++)
+            {
+                pl.AddThread();
+            }
+            Internal = new Space(pl);
+        }
+
+        /// <summary>
+        /// Gets or sets the internal default gravity value.
         /// </summary>
         public Location Gravity
         {
@@ -30,6 +47,35 @@ namespace FreneticGameCore
             {
                 Internal.ForceUpdater.Gravity = value.ToBVector();
             }
+        }
+
+        /// <summary>
+        /// All current entities in this physics world.
+        /// </summary>
+        public List<BasicEntity> SpawnedEntities = new List<BasicEntity>();
+
+        /// <summary>
+        /// Spawns a physical object into the physics world.
+        /// One entity per physics object only!
+        /// </summary>
+        /// <param name="ent">The controlling entity.</param>
+        /// <param name="bepuent">The BEPU object.</param>
+        public void Spawn(BasicEntity ent, Entity bepuent)
+        {
+            Internal.Add(bepuent);
+            SpawnedEntities.Add(ent);
+        }
+
+        /// <summary>
+        /// De-Spawns a physical object from the physics world.
+        /// One entity per physics object only!
+        /// </summary>
+        /// <param name="ent">The controlling entity.</param>
+        /// <param name="bepuent">The BEPU object.</param>
+        public void DeSpawn(BasicEntity ent, Entity bepuent)
+        {
+            Internal.Remove(bepuent);
+            SpawnedEntities.Remove(ent);
         }
     }
 }

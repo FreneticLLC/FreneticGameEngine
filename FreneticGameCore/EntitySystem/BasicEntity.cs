@@ -13,6 +13,11 @@ namespace FreneticGameCore.EntitySystem
     public abstract class BasicEntity : PropertyHolder
     {
         /// <summary>
+        /// The owning engine.
+        /// </summary>
+        public BasicEngine Engine;
+
+        /// <summary>
         /// Whether the entity should tick normally.
         /// <para>Note: Setting this after it's spawned is not required to validly modify its value.</para>
         /// </summary>
@@ -56,9 +61,11 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Construct the basic Entity.
         /// </summary>
+        /// <param name="eng">The owning engine.</param>
         /// <param name="_ticks">Whether the entity ticks.</param>
-        public BasicEntity(bool _ticks)
+        public BasicEntity(BasicEngine eng, bool _ticks)
         {
+            Engine = eng;
             Ticks = _ticks;
         }
 
@@ -76,7 +83,7 @@ namespace FreneticGameCore.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "BasicEntity of type: " + GetType().Name;
+            return "BasicEntity of type: " + GetType().Name + ", ID: " + EID;
         }
     }
 

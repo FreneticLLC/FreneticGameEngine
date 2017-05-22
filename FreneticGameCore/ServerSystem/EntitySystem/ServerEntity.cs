@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore.EntitySystem;
+using FreneticGameCore;
 
 namespace FreneticGameCore.ServerSystem.EntitySystem
 {
@@ -22,10 +23,11 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
         /// <summary>
         /// Constructs a server-side entity.
         /// </summary>
+        /// <param name="engine">The owning engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
         /// <param name="_shouldNetwork">Whether it should network.</param>
-        public ServerEntity(bool _ticks, bool _shouldNetwork = false) 
-            : base(_ticks)
+        public ServerEntity(BasicEngine engine, bool _ticks, bool _shouldNetwork = false) 
+            : base(engine, _ticks)
         {
             ShouldNetwork = _shouldNetwork;
         }
@@ -36,7 +38,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "ClientEntity of type: " + GetType().Name;
+            return "ServerEntity of type: " + GetType().Name + ", ID: " + EID;
         }
     }
 }

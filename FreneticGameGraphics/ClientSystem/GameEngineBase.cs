@@ -9,106 +9,21 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.Files;
-using FreneticGameGraphics.LightingSystem;
 using FreneticGameGraphics.GraphicsHelpers;
-using System.Threading;
-using FreneticGameGraphics.ClientSystem.EntitySystem;
 using FreneticGameCore.EntitySystem;
+using FreneticGameGraphics.ClientSystem.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
     /// <summary>
-    /// Represents the common functionality of a Game Engine.
+    /// Represents the common functionality of a client Game Engine.
     /// </summary>
-    public abstract class GameEngineBase
+    public abstract class GameEngineBase : BasicEngine
     {
         /// <summary>
         /// The primary window for the game.
         /// </summary>
         public GameWindow Window;
-
-        /// <summary>
-        /// Current frame delta (seconds).
-        /// </summary>
-        public double Delta;
-
-        /// <summary>
-        /// How long the game has run (seconds).
-        /// </summary>
-        public double GlobalTickTime;
-
-        /// <summary>
-        /// All entities on the server, in a list.
-        /// A list was chosen over a lookup table, as quick-resorting and running through is more important to be fast than EID lookups.
-        /// </summary>
-        public List<ClientEntity> Entities = new List<ClientEntity>();
-
-        /// <summary>
-        /// Returns a duplicate of the entity list, for when you expect the master list to change.
-        /// </summary>
-        /// <returns>The duplicate.</returns>
-        public IReadOnlyList<ClientEntity> EntityListDuplicate()
-        {
-            return new List<ClientEntity>(Entities);
-        }
-
-        /// <summary>
-        /// The current highest EID value.
-        /// </summary>
-        public long CurrentEID = 1;
-
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
-        /// <param name="ticks">Whether it should tick.</param>
-        /// <param name="configure">A method to configure the entity prior to spawn, if one applies.</param>
-        /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
-        public ClientEntity SpawnEntity(bool ticks, Action<ClientEntity> configure, params Property[] props)
-        {
-            ClientEntity ce = new ClientEntity(this, ticks)
-            {
-                EID = CurrentEID++
-            };
-            configure?.Invoke(ce);
-            for (int i = 0; i < props.Length; i++)
-            {
-                ce.AddProperty(props[i]);
-            }
-            Entities.Add(ce);
-            // TODO: it may be useful here to sort the entity list by rendering order? Would increase spawn lag but decrease frame time!
-            ce.IsSpawned = true;
-            ce.OnSpawn?.Fire(new EntitySpawnEventArgs());
-            return ce;
-        }
-
-        /// <summary>
-        /// Removes an entity from the world.
-        /// </summary>
-        /// <param name="ent">The entity to remove.</param>
-        public void DeSpawnEntity(ClientEntity ent)
-        {
-            int ind = Entities.IndexOf(ent);
-            if (ind < 0 || !ent.IsSpawned)
-            {
-                SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
-                return;
-            }
-            ent.OnDeSpawn?.Fire(new EntityDeSpawnEventArgs());
-            Entities.RemoveAt(ind);
-            ent.IsSpawned = false;
-        }
-
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
-        /// <param name="ticks">Whether it should tick.</param>
-        /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
-        public ClientEntity SpawnEntity(bool ticks, params Property[] props)
-        {
-            return SpawnEntity(ticks, null, props);
-        }
 
         /// <summary>
         /// The title of the window.
@@ -122,6 +37,16 @@ namespace FreneticGameGraphics.ClientSystem
         public GameEngineBase(string _sWindowTitle)
         {
             StartingWindowTitle = _sWindowTitle ?? Program.GameName + " v" + Program.GameVersion + " " + Program.GameVersionDescription;
+        }
+
+        /// <summary>
+        /// Creates an entity.
+        /// </summary>
+        /// <param name="ticks">Whether it should tick.</param>
+        /// <returns>The entity.</returns>
+        public override BasicEntity CreateEntity(bool ticks)
+        {
+            return new ClientEntity(this, ticks);
         }
 
         /// <summary>
@@ -175,23 +100,6 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
-        /// The internal GameEngine tick sequence.
-        /// </summary>
-        private void Tick()
-        {
-            // Dup list, to ensure ents can despawn themselves in the tick method!
-            IReadOnlyList<ClientEntity> ents = EntityListDuplicate();
-            for (int i = 0; i < ents.Count; i++)
-            {
-                if (ents[i].Ticks)
-                {
-                    ents[i].TickThis();
-                }
-            }
-            OnTick?.Invoke();
-        }
-
-        /// <summary>
         /// Run through a full single-frame render sequence.
         /// </summary>
         public abstract void RenderSingleFrame();
@@ -203,7 +111,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="e">Empty event args.</param>
         private void Window_Closed(object sender, EventArgs e)
         {
-            OnClosed?.Invoke();
+            OnWindowClosed?.Invoke();
             if (ExitOnClose)
             {
                 Environment.Exit(0);
@@ -261,6 +169,8 @@ namespace FreneticGameGraphics.ClientSystem
             FontSets = new FontSetEngine(GLFonts);
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
+            SysConsole.Output(OutputType.INIT, "GameEngine prepping physics helper...");
+            PhysicsWorld = new PhysicsSpace();
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
             PostLoad();
             SysConsole.Output(OutputType.INIT, "GameEngine calling external load event...");
@@ -319,15 +229,9 @@ namespace FreneticGameGraphics.ClientSystem
         public Action OnWindowLoad;
 
         /// <summary>
-        /// Fired every frame for logic update steps.
-        /// Note that the first tick fires AFTER the first render.
-        /// </summary>
-        public Action OnTick;
-
-        /// <summary>
         /// Fired when the window is closed.
         /// </summary>
-        public Action OnClosed;
+        public Action OnWindowClosed;
 
         /// <summary>
         /// Whether the program should shut down when the window is closed.

@@ -55,11 +55,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicEngine.cs" />
     <Compile Include="Collision\CollisionUtil.cs" />
     <Compile Include="Collision\Vector2i.cs" />
     <Compile Include="Collision\Vector3i.cs" />
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
+    <Compile Include="EntitySystem\BasicEntityProperty.cs" />
     <Compile Include="Frustum.cs" />
     <Compile Include="EntitySystem\PhysicsEntityProperty.cs" />
     <Compile Include="LanguageEngine.cs" />

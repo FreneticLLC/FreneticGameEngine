@@ -13,9 +13,8 @@ namespace FreneticGameCore.EntitySystem
 {
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
-    /// Add this BEFORE you spawn an entity!
     /// </summary>
-    public class PhysicsEntityProperty : Property
+    public class PhysicsEntityProperty : BasicEntityProperty
     {
         /// <summary>
         /// The owning physics world.
@@ -36,6 +35,13 @@ namespace FreneticGameCore.EntitySystem
         /// The starting mass of the physics body.
         /// </summary>
         private double InternalMass = 1;
+
+        /// <summary>
+        /// Whether gravity value is already set for this entity. If not set, <see cref="Gravity"/> is invalid or irrelevant.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool GravityIsSet = false;
 
         /// <summary>
         /// The starting gravity of the physics body.
@@ -73,7 +79,7 @@ namespace FreneticGameCore.EntitySystem
         private Quaternion InternalOrientation = Quaternion.Identity;
 
         // TODO: Shape save/debug
-        // TODO: Maybe point to the correct physics space somehow in save files? Needs a space ID.
+        // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
 
         /// <summary>
         /// Gets or sets the entity's mass.
@@ -261,9 +267,21 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnAdded()
         {
-            BasicEntity be = Holder as BasicEntity;
-            be.OnSpawn += SpawnHandle;
-            be.OnDeSpawn += DeSpawnHandle;
+            BEntity.OnSpawn += SpawnHandle;
+            BEntity.OnDeSpawn += DeSpawnHandle;
+            BEntity.OnPositionChanged += PosCheck;
+        }
+
+        /// <summary>
+        /// Checks and handles a position update.
+        /// </summary>
+        /// <param name="p">The new position.</param>
+        public void PosCheck(Location p)
+        {
+            if (p != InternalPosition)
+            {
+                Position = p;
+            }
         }
 
         /// <summary>
@@ -271,9 +289,9 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnRemoved()
         {
-            BasicEntity be = Holder as BasicEntity;
-            be.OnSpawn -= SpawnHandle;
-            be.OnDeSpawn -= DeSpawnHandle;
+            BEntity.OnSpawn -= SpawnHandle;
+            BEntity.OnDeSpawn -= DeSpawnHandle;
+            BEntity.OnPositionChanged -= PosCheck;
         }
 
         /// <summary>
@@ -282,6 +300,11 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="context">The event context.</param>
         public void SpawnHandle(EntitySpawnEventArgs context)
         {
+            if (!GravityIsSet)
+            {
+                InternalGravity = PhysicsWorld.Gravity;
+                GravityIsSet = true;
+            }
             SpawnedBody = new Entity(Shape, InternalMass)
             {
                 Gravity = InternalGravity.ToBVector(),
@@ -295,7 +318,21 @@ namespace FreneticGameCore.EntitySystem
             SpawnedBody.Position = InternalPosition.ToBVector();
             SpawnedBody.Orientation = InternalOrientation;
             // TODO: Other settings
-            PhysicsWorld.Internal.Add(SpawnedBody);
+            PhysicsWorld.Spawn(BEntity, SpawnedBody);
+            BEntity.OnTick += Tick;
+        }
+
+        /// <summary>
+        /// Ticks the physics entity.
+        /// </summary>
+        public void Tick()
+        {
+            Location bpos = new Location(SpawnedBody.Position);
+            if (InternalPosition != bpos)
+            {
+                InternalPosition = bpos;
+                BEntity.OnPositionChanged?.Invoke(bpos);
+            }
         }
 
         /// <summary>
@@ -320,7 +357,8 @@ namespace FreneticGameCore.EntitySystem
         public void DeSpawnHandle(EntityDeSpawnEventArgs context)
         {
             UpdateFields();
-            PhysicsWorld.Internal.Remove(SpawnedBody);
+            BEntity.OnTick -= Tick;
+            PhysicsWorld.DeSpawn(BEntity, SpawnedBody);
             SpawnedBody = null;
         }
 

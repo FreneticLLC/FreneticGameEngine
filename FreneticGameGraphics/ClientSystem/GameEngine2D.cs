@@ -270,7 +270,7 @@ namespace FreneticGameGraphics.ClientSystem
             RenderHelper.SetColor(Vector4.One);
             RenderAllObjectsPre?.Invoke(lights);
             // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
-            foreach (ClientEntity ent in Entities.Where((e) => e.Renderer != null && (lights || e.Renderer.CastShadows)).OrderBy((e) => e.Renderer.RenderingPriorityOrder))
+            foreach (ClientEntity ent in Entities.Cast<ClientEntity>().Where((e) => e.Renderer != null && (lights || e.Renderer.CastShadows)).OrderBy((e) => e.Renderer.RenderingPriorityOrder))
             {
                 ent.Renderer.RenderStandard2D(MainRenderContext);
             }
