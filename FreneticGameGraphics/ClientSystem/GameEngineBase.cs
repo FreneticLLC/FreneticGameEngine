@@ -31,6 +31,21 @@ namespace FreneticGameGraphics.ClientSystem
         public readonly string StartingWindowTitle;
 
         /// <summary>
+        /// All entities on the client engine, in a list.
+        /// A list was chosen over a lookup table, as quick-resorting and running through is more important to be fast than EID lookups.
+        /// </summary>
+        public List<BasicEntity> Entities = new List<BasicEntity>();
+
+        /// <summary>
+        /// Returns a duplicate of the entity list, for when you expect the master list to change.
+        /// </summary>
+        /// <returns>The duplicate.</returns>
+        public override IReadOnlyList<BasicEntity> EntityListDuplicate()
+        {
+            return new List<BasicEntity>(Entities);
+        }
+
+        /// <summary>
         /// Constructs the base game engine.
         /// </summary>
         /// <param name="_sWindowTitle">The starting window title.</param>
@@ -39,6 +54,24 @@ namespace FreneticGameGraphics.ClientSystem
             StartingWindowTitle = _sWindowTitle ?? Program.GameName + " v" + Program.GameVersion + " " + Program.GameVersionDescription;
         }
 
+        /// <summary>
+        /// Add an entity to the entity list.
+        /// </summary>
+        /// <param name="be">The entity.</param>
+        public override void AddEntity(BasicEntity be)
+        {
+            Entities.Add(be);
+        }
+
+        /// <summary>
+        /// Remove an entity from the entity list.
+        /// </summary>
+        /// <param name="be">The entity.</param>
+        public override void RemoveEntity(BasicEntity be)
+        {
+            Entities.Remove(be);
+        }
+        
         /// <summary>
         /// Creates an entity.
         /// </summary>

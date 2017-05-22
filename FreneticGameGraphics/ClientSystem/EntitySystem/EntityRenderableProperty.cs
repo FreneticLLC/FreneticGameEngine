@@ -41,7 +41,34 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Vector3 RenderAt;
-        
+
+        /// <summary>
+        /// Fired when the entity is spawned.
+        /// </summary>
+        public override void OnSpawn()
+        {
+            base.OnSpawn();
+            Entity.OnPositionChanged += FixLocation;
+        }
+
+        /// <summary>
+        /// Fired when the entity is de-spawned.
+        /// </summary>
+        public override void OnDeSpawn()
+        {
+            base.OnDeSpawn();
+            Entity.OnPositionChanged -= FixLocation;
+        }
+
+        /// <summary>
+        /// Fixes the location of the renderable.
+        /// </summary>
+        /// <param name="loc">The new location.</param>
+        public void FixLocation(Location loc)
+        {
+            RenderAt = loc.ToOpenTK();
+        }
+
         /// <summary>
         /// Render the entity as seen by a top-down map.
         /// </summary>

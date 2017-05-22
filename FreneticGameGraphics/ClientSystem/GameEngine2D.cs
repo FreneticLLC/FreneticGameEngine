@@ -69,6 +69,11 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
         /// </summary>
+        public float OriginalZoom = 1f;
+
+        /// <summary>
+        /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
+        /// </summary>
         public float Zoom = 1f;
 
         /// <summary>
@@ -204,7 +209,7 @@ namespace FreneticGameGraphics.ClientSystem
             // First step: setup
             MainRenderContext.Width = Window.Width;
             MainRenderContext.Height = Window.Height;
-            MainRenderContext.Zoom = Zoom;
+            MainRenderContext.Zoom = OriginalZoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenter;
             MainRenderContext.Engine = this;
@@ -218,8 +223,9 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 Zoom = MinimumZoom;
             }
+            OriginalZoom = Zoom;
             float aspect = Window.Width / (float)Window.Height;
-            float sc = 1.0f / (Zoom * ZoomMultiplier);
+            float sc = 1.0f / (OriginalZoom * ZoomMultiplier);
             OriginalScaler = new Vector2(sc, sc * aspect);
             OriginalAdder = new Vector2(ViewCenter.X * Scaler.X, ViewCenter.Y * Scaler.Y);
             Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
@@ -264,13 +270,16 @@ namespace FreneticGameGraphics.ClientSystem
         /// Renders all entities and render helpers.
         /// </summary>
         /// <param name="lights">Whether to include things that don't cast shadows.</param>
-        private void RenderAll(bool lights)
+        /// <param name="shouldShadow">The method to determine if an object should cast a shadow.</param>
+        private void RenderAll(bool lights, Func<ClientEntity, bool> shouldShadow)
         {
             Textures.White.Bind();
             RenderHelper.SetColor(Vector4.One);
             RenderAllObjectsPre?.Invoke(lights);
             // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
-            foreach (ClientEntity ent in Entities.Cast<ClientEntity>().Where((e) => e.Renderer != null && (lights || e.Renderer.CastShadows)).OrderBy((e) => e.Renderer.RenderingPriorityOrder))
+            foreach (ClientEntity ent in Entities.Cast<ClientEntity>()
+                .Where((e) => e.Renderer != null && (lights || e.Renderer.CastShadows) && (shouldShadow == null || shouldShadow(e)))
+                .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
             {
                 ent.Renderer.RenderStandard2D(MainRenderContext);
             }
@@ -286,7 +295,7 @@ namespace FreneticGameGraphics.ClientSystem
             if (!UseLightEngine)
             {
                 Shaders.ColorMult2DShader.Bind();
-                RenderAll(true);
+                RenderAll(true, null);
                 return;
             }
             GraphicsUtil.CheckError("Render - Begin");
@@ -307,7 +316,7 @@ namespace FreneticGameGraphics.ClientSystem
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
                 GraphicsUtil.CheckError("Render - Light Precalcer");
-                RenderAll(false);
+                RenderAll(false, Lights[i].ShouldShadow);
             }
             GraphicsUtil.CheckError("Render - Lights precalced");
             GL.Viewport(0, 0, Window.Width, Window.Height);
@@ -321,7 +330,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
             GraphicsUtil.CheckError("Render - Lights prepped");
-            RenderAll(true);
+            RenderAll(true, null);
             Shader_Combine.Bind();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });

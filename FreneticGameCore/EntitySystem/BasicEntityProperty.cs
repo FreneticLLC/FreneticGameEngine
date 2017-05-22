@@ -12,6 +12,20 @@ namespace FreneticGameCore.EntitySystem
     public class BasicEntityProperty : Property
     {
         /// <summary>
+        /// Run when the entity is spawned.
+        /// </summary>
+        public virtual void OnSpawn()
+        {
+        }
+
+        /// <summary>
+        /// Run when the entity is de-spawned.
+        /// </summary>
+        public virtual void OnDeSpawn()
+        {
+        }
+        
+        /// <summary>
         /// Gets the basic entity associated with a property.
         /// </summary>
         public BasicEntity BEntity

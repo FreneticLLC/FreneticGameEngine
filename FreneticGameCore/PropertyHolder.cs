@@ -7,9 +7,31 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
 using BEPUutilities;
+using FreneticGameCore.EntitySystem.PhysicsHelpers;
 
 namespace FreneticGameCore
 {
+    /// <summary>
+    /// Represents a helper to save or load an object.
+    /// </summary>
+    public class PropertySaverLoader
+    {
+        /// <summary>
+        /// The save name.
+        /// </summary>
+        public string SaveString;
+        
+        /// <summary>
+        /// The save method.
+        /// </summary>
+        public Func<Object, byte[]> Saver;
+
+        /// <summary>
+        /// The load method.
+        /// </summary>
+        public Func<byte[], Object> Loader;
+    }
+
     /// <summary>
     /// Holds an uncapped set of properties.
     /// </summary>
@@ -18,52 +40,125 @@ namespace FreneticGameCore
         /// <summary>
         /// All type saver methods.
         /// </summary>
-        public static Dictionary<Type, Func<Object,byte[]>> TypeSavers = new Dictionary<Type, Func<Object, byte[]>>();
+        public static Dictionary<Type, PropertySaverLoader> TypeSavers = new Dictionary<Type, PropertySaverLoader>(1024);
 
         /// <summary>
-        /// All type reader methods.
+        /// Ensures initialization.
         /// </summary>
-        public static Dictionary<Type, Func<byte[], Object>> TypeReaders = new Dictionary<Type, Func<byte[], object>>();
+        static PropertyHolder()
+        {
+            EnsureInit();
+        }
+
+        /// <summary>
+        /// Whether the system is already inited.
+        /// </summary>
+        private static bool Initted = false;
 
         /// <summary>
         /// Configures the default set of savers and readers for the FGE core.
         /// </summary>
-        static PropertyHolder()
+        public static void EnsureInit()
         {
-            // Core Savers
-            TypeSavers.Add(typeof(byte), (o) => new byte[] { (byte)o });
-            TypeSavers.Add(typeof(sbyte), (o) => new byte[] { unchecked((byte)((sbyte)o)) });
-            TypeSavers.Add(typeof(ushort), (o) => BitConverter.GetBytes((ushort)o));
-            TypeSavers.Add(typeof(short), (o) => BitConverter.GetBytes((short)o));
-            TypeSavers.Add(typeof(uint), (o) => BitConverter.GetBytes((uint)o));
-            TypeSavers.Add(typeof(int), (o) => BitConverter.GetBytes((int)o));
-            TypeSavers.Add(typeof(long), (o) => BitConverter.GetBytes((long)o));
-            TypeSavers.Add(typeof(ulong), (o) => BitConverter.GetBytes((ulong)o));
-            TypeSavers.Add(typeof(float), (o) => BitConverter.GetBytes((float)o));
-            TypeSavers.Add(typeof(double), (o) => BitConverter.GetBytes((double)o));
-            TypeSavers.Add(typeof(string), (o) => Utilities.DefaultEncoding.GetBytes((string)o));
-            // Core Readers
-            TypeReaders.Add(typeof(byte), (b) => b[0]);
-            TypeReaders.Add(typeof(sbyte), (b) => unchecked((sbyte)(b[0])));
-            TypeReaders.Add(typeof(ushort), (b) => BitConverter.ToUInt16(b, 0));
-            TypeReaders.Add(typeof(short), (b) => BitConverter.ToInt16(b, 0));
-            TypeReaders.Add(typeof(uint), (b) => BitConverter.ToUInt32(b, 0));
-            TypeReaders.Add(typeof(int), (b) => BitConverter.ToInt32(b, 0));
-            TypeReaders.Add(typeof(ulong), (b) => BitConverter.ToUInt64(b, 0));
-            TypeReaders.Add(typeof(long), (b) => BitConverter.ToInt64(b, 0));
-            TypeReaders.Add(typeof(float), (b) => BitConverter.ToSingle(b, 0));
-            TypeReaders.Add(typeof(double), (b) => BitConverter.ToDouble(b, 0));
-            TypeReaders.Add(typeof(string), (b) => Utilities.DefaultEncoding.GetString(b));
-            // FGE/Core Savers
-            TypeSavers.Add(typeof(Location), (o) => ((Location)o).ToDoubleBytes());
-            // FGE/Core Readers
-            TypeReaders.Add(typeof(Location), (b) => Location.FromDoubleBytes(b, 0));
-            // BEPU Savers
-            TypeSavers.Add(typeof(Vector3), (o) => (new Location((Vector3)o)).ToDoubleBytes());
-            TypeSavers.Add(typeof(Quaternion), (o) => Utilities.QuaternionToBytes((Quaternion)o));
-            // BEPU Readers
-            TypeReaders.Add(typeof(Vector3), (b) => Location.FromDoubleBytes(b, 0).ToBVector());
-            TypeReaders.Add(typeof(Quaternion), (b) => Utilities.BytesToQuaternion(b, 0));
+            if (Initted)
+            {
+                return;
+            }
+            Initted = true;
+            // Core Helpers
+            TypeSavers.Add(typeof(byte), new PropertySaverLoader()
+            {
+                Saver = (o) => new byte[] { (byte)o },
+                Loader = (b) => b[0],
+                SaveString = "C/byte"
+            });
+            TypeSavers.Add(typeof(sbyte), new PropertySaverLoader()
+            {
+                Saver = (o) => new byte[] { unchecked((byte)((sbyte)o)) },
+                Loader = (b) => unchecked((sbyte)(b[0])),
+                SaveString = "C/sbyte"
+            });
+            TypeSavers.Add(typeof(ushort), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((ushort)o),
+                Loader = (b) => BitConverter.ToUInt16(b, 0),
+                SaveString = "C/ushort"
+            });
+            TypeSavers.Add(typeof(short), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((short)o),
+                Loader = (b) => BitConverter.ToInt16(b, 0),
+                SaveString = "C/short"
+            });
+            TypeSavers.Add(typeof(uint), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((uint)o),
+                Loader = (b) => BitConverter.ToUInt32(b, 0),
+                SaveString = "C/uint"
+            });
+            TypeSavers.Add(typeof(int), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((int)o),
+                Loader = (b) => BitConverter.ToInt32(b, 0),
+                SaveString = "C/int"
+            });
+            TypeSavers.Add(typeof(ulong), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((ulong)o),
+                Loader = (b) => BitConverter.ToUInt64(b, 0),
+                SaveString = "C/ulong"
+            });
+            TypeSavers.Add(typeof(long), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((long)o),
+                Loader = (b) => BitConverter.ToInt64(b, 0),
+                SaveString = "C/long"
+            });
+            TypeSavers.Add(typeof(float), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((float)o),
+                Loader = (b) => BitConverter.ToSingle(b, 0),
+                SaveString = "C/float"
+            });
+            TypeSavers.Add(typeof(double), new PropertySaverLoader()
+            {
+                Saver = (o) => BitConverter.GetBytes((double)o),
+                Loader = (b) => BitConverter.ToDouble(b, 0),
+                SaveString = "C/double"
+            });
+            TypeSavers.Add(typeof(string), new PropertySaverLoader()
+            {
+                Saver = (o) => Utilities.DefaultEncoding.GetBytes((string)o),
+                Loader = (b) => Utilities.DefaultEncoding.GetString(b),
+                SaveString = "C/string"
+            });
+            // FGE/Core Helpers
+            TypeSavers.Add(typeof(Location), new PropertySaverLoader()
+            {
+                Saver = (o) => ((Location)o).ToDoubleBytes(),
+                Loader = (b) => Location.FromDoubleBytes(b, 0),
+                SaveString = "C/location"
+            });
+            // FGE/Core/Entity/Physics
+            TypeSavers.Add(typeof(EntityBoxShape), new PropertySaverLoader()
+            {
+                Saver = (o) => ((EntityBoxShape)o).ToBytes(),
+                Loader = (b) => EntityBoxShape.FromBytes(b),
+                SaveString = "C/P/S/boxshape"
+            });
+            // BEPU Helpers
+            TypeSavers.Add(typeof(Vector3), new PropertySaverLoader()
+            {
+                Saver = (o) => (new Location((Vector3)o)).ToDoubleBytes(),
+                Loader = (b) => Location.FromDoubleBytes(b, 0).ToBVector(),
+                SaveString = "C/B/vector3"
+            });
+            TypeSavers.Add(typeof(Quaternion), new PropertySaverLoader()
+            {
+                Saver = (o) => Utilities.QuaternionToBytes((Quaternion)o),
+                Loader = (b) => Utilities.BytesToQuaternion(b, 0),
+                SaveString = "C/B/quaternion"
+            });
         }
 
         /// <summary>
@@ -191,7 +286,11 @@ namespace FreneticGameCore
         /// <returns>The property.</returns>
         public Property GetProperty(Type t)
         {
-            return HeldProperties[t];
+            if (HeldProperties.TryGetValue(t, out Property prop))
+            {
+                return prop;
+            }
+            throw new ArgumentOutOfRangeException("Cannot find property of type: " + t.Name + ", but was required for object " + this);
         }
 
         /// <summary>
@@ -201,7 +300,11 @@ namespace FreneticGameCore
         /// <returns>The property.</returns>
         public T GetProperty<T>() where T : Property
         {
-            return HeldProperties[typeof(T)] as T;
+            if (HeldProperties.TryGetValue(typeof(T), out Property prop))
+            {
+                return prop as T;
+            }
+            throw new ArgumentOutOfRangeException("Cannot find property of type: " + typeof(T).Name + ", but was required for object " + this);
         }
 
         /// <summary>
@@ -299,7 +402,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Used to indicate that a property field is debuggable (if not marked, the property field is not debuggable).
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class PropertyDebuggable : Attribute
     {
     }
@@ -307,11 +410,11 @@ namespace FreneticGameCore
     /// <summary>
     /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class PropertyAutoSavable : Attribute
     {
     }
-
+    
     /// <summary>
     /// Helper for the systems on a property.
     /// </summary>

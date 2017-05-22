@@ -7,6 +7,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameGraphics.ClientSystem;
+using FreneticGameCore;
+using FreneticGameGraphics.ClientSystem.EntitySystem;
 using FreneticGameGraphics.GraphicsHelpers;
 
 namespace FreneticGameGraphics.LightingSystem
@@ -33,6 +35,7 @@ namespace FreneticGameGraphics.LightingSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
             FBO_Tex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, FBO_Tex);
+            // TODO: Utilities.NextPowerOfTwo? Should probably only be added if it's confirmed as need (POT-only hardware on OpenGL 4.3 is unlikely... NPOTs are common!)
             Width = (int)(Strength * 2f);
             // TODO: Alpha texture!
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
@@ -54,6 +57,7 @@ namespace FreneticGameGraphics.LightingSystem
         {
             GL.DeleteTexture(FBO_Tex);
             GL.DeleteFramebuffer(FBO);
+            GraphicsUtil.CheckError("PointLight2D destroy");
         }
 
         /// <summary>
@@ -85,6 +89,11 @@ namespace FreneticGameGraphics.LightingSystem
         /// The subdivider to affect the render detail of this point light 2D.
         /// </summary>
         public float SubDivider = 4;
+
+        /// <summary>
+        /// Set to configure whether an entity should cast a shadow from this light.
+        /// </summary>
+        public Func<ClientEntity, bool> ShouldShadow;
 
         /// <summary>
         /// The color of this point light 2D.

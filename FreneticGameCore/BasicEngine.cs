@@ -12,7 +12,6 @@ namespace FreneticGameCore
     /// </summary>
     public abstract class BasicEngine
     {
-
         /// <summary>
         /// The general-purpose physics world.
         /// </summary>
@@ -29,19 +28,22 @@ namespace FreneticGameCore
         public double GlobalTickTime = 1.0;
 
         /// <summary>
-        /// All entities on the server, in a list.
-        /// A list was chosen over a lookup table, as quick-resorting and running through is more important to be fast than EID lookups.
-        /// </summary>
-        public List<BasicEntity> Entities = new List<BasicEntity>();
-
-        /// <summary>
         /// Returns a duplicate of the entity list, for when you expect the master list to change.
         /// </summary>
         /// <returns>The duplicate.</returns>
-        public IReadOnlyList<BasicEntity> EntityListDuplicate()
-        {
-            return new List<BasicEntity>(Entities);
-        }
+        public abstract IReadOnlyList<BasicEntity> EntityListDuplicate();
+
+        /// <summary>
+        /// Add an entity to the entity list.
+        /// </summary>
+        /// <param name="be">The entity.</param>
+        public abstract void AddEntity(BasicEntity be);
+
+        /// <summary>
+        /// Remove an entity from the entity list.
+        /// </summary>
+        /// <param name="be">The entity.</param>
+        public abstract void RemoveEntity(BasicEntity be);
 
         /// <summary>
         /// The current highest EID value.
@@ -71,10 +73,16 @@ namespace FreneticGameCore
             {
                 ce.AddProperty(props[i]);
             }
-            Entities.Add(ce);
-            // TODO: it may be useful here to sort the entity list by rendering order? Would increase spawn lag but decrease frame time!
+            AddEntity(ce);
             ce.IsSpawned = true;
-            ce.OnSpawn?.Fire(new EntitySpawnEventArgs());
+            foreach (Property prop in ce.GetAllProperties())
+            {
+                if (prop is BasicEntityProperty bep)
+                {
+                    bep.OnSpawn();
+                }
+            }
+            ce.OnSpawnEvent?.Fire(new EntitySpawnEventArgs());
             return ce;
         }
 
@@ -116,14 +124,20 @@ namespace FreneticGameCore
         /// <param name="ent">The entity to remove.</param>
         public void DeSpawnEntity(BasicEntity ent)
         {
-            int ind = Entities.IndexOf(ent);
-            if (ind < 0 || !ent.IsSpawned)
+            if (!ent.IsSpawned)
             {
                 SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
                 return;
             }
-            ent.OnDeSpawn?.Fire(new EntityDeSpawnEventArgs());
-            Entities.RemoveAt(ind);
+            foreach (Property prop in ent.GetAllProperties())
+            {
+                if (prop is BasicEntityProperty bep)
+                {
+                    bep.OnDeSpawn();
+                }
+            }
+            ent.OnDeSpawnEvent?.Fire(new EntityDeSpawnEventArgs());
+            RemoveEntity(ent);
             ent.IsSpawned = false;
         }
 
@@ -132,6 +146,7 @@ namespace FreneticGameCore
         /// </summary>
         public void Tick()
         {
+            PhysicsWorld.Internal.Update(Delta);
             // Dup list, to ensure ents can despawn themselves in the tick method!
             IReadOnlyList<BasicEntity> ents = EntityListDuplicate();
             for (int i = 0; i < ents.Count; i++)

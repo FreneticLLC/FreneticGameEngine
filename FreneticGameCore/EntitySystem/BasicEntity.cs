@@ -51,12 +51,12 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fired when this entity is spawned into a world.
         /// </summary>
-        public FreneticScriptEventHandler<EntitySpawnEventArgs> OnSpawn = new FreneticScriptEventHandler<EntitySpawnEventArgs>();
+        public FreneticScriptEventHandler<EntitySpawnEventArgs> OnSpawnEvent = new FreneticScriptEventHandler<EntitySpawnEventArgs>();
 
         /// <summary>
         /// Fired when this entity is de-spawned out of a world.
         /// </summary>
-        public FreneticScriptEventHandler<EntityDeSpawnEventArgs> OnDeSpawn = new FreneticScriptEventHandler<EntityDeSpawnEventArgs>();
+        public FreneticScriptEventHandler<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticScriptEventHandler<EntityDeSpawnEventArgs>();
 
         /// <summary>
         /// Construct the basic Entity.
@@ -83,7 +83,21 @@ namespace FreneticGameCore.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "BasicEntity of type: " + GetType().Name + ", ID: " + EID;
+            return "BasicEntity of type: " + GetType().Name + ", ID: " + EID + ", with properties: " + PropertyList();
+        }
+
+        /// <summary>
+        /// Gets a string list of all properties.
+        /// </summary>
+        /// <returns>The string list.</returns>
+        public string PropertyList()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (Type t in GetAllPropertyTypes())
+            {
+                sb.Append(t.Name).Append(" | ");
+            }
+            return sb.Length > 0 ? sb.ToString().Substring(0, sb.Length - 3) : "";
         }
     }
 

@@ -32,6 +32,7 @@ namespace FreneticGameCore
                 pl.AddThread();
             }
             Internal = new Space(pl);
+            Internal.ForceUpdater.Gravity = new Vector3(0, 0, -9.8);
         }
 
         /// <summary>

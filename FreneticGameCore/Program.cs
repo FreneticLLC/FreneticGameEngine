@@ -17,6 +17,11 @@ namespace FreneticGameCore
         /// The current program instance.
         /// </summary>
         public static Program Instance;
+        
+        /// <summary>
+        /// The original system culture.
+        /// </summary>
+        public static CultureInfo SystemCulture;
 
         /// <summary>
         /// This method should be called FIRST!
@@ -25,6 +30,7 @@ namespace FreneticGameCore
         public static void PreInit(Program p)
         {
             Instance = p;
+            SystemCulture = CultureInfo.DefaultThreadCurrentCulture;
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;

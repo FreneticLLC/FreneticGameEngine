@@ -38,7 +38,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "ServerEntity of type: " + GetType().Name + ", ID: " + EID;
+            return "ServerEntity of type: " + GetType().Name + ", ID: " + EID + ", with properties: " + PropertyList();
         }
     }
 }

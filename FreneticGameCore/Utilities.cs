@@ -20,6 +20,27 @@ namespace FreneticGameCore
         public static readonly Encoding DefaultEncoding = new UTF8Encoding(false);
 
         /// <summary>
+        /// Returns the next power of two.
+        /// Meaning, the next number in the sequence:
+        /// 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, ...
+        /// Result is >= input.
+        /// </summary>
+        /// <param name="x">The value, less than or equal to the result.</param>
+        /// <returns>The result, greater than or equal to the value.</returns>
+        public static int NextPowerOfTwo(int x)
+        {
+            int mod = 1;
+            for (int i = 1; i < 31; i++)
+            {
+                if (1 << mod <= x)
+                {
+                    return 1 << mod;
+                }
+            }
+            // Number too massive!
+            return x;
+        }
+        /// <summary>
         /// A thread-static random object for all non-deterministic objects to use.
         /// </summary>
         public static MTRandom UtilRandom

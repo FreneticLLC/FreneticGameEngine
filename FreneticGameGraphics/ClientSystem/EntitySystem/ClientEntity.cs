@@ -72,7 +72,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "ClientEntity of type: " + GetType().Name + ", ID: " + EID;
+            return "ClientEntity of type: " + GetType().Name + ", ID: " + EID + ", with properties: " + PropertyList();
         }
     }
 }

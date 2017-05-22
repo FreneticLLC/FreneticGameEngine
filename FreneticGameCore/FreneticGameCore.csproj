@@ -62,8 +62,10 @@
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
+    <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
+    <Compile Include="EntitySystem\PhysicsHelpers\EntityShapeHelper.cs" />
     <Compile Include="Frustum.cs" />
-    <Compile Include="EntitySystem\PhysicsEntityProperty.cs" />
+    <Compile Include="EntitySystem\EntityPhysicsProperty.cs" />
     <Compile Include="LanguageEngine.cs" />
     <Compile Include="Model3D.cs" />
     <Compile Include="ModelHandler.cs" />

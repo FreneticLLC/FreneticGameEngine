@@ -7,14 +7,14 @@ using BEPUphysics;
 using BEPUutilities;
 using BEPUphysics.Entities;
 using BEPUphysics.CollisionShapes;
-using FreneticGameCore.EntitySystem;
+using FreneticGameCore.EntitySystem.PhysicsHelpers;
 
 namespace FreneticGameCore.EntitySystem
 {
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
     /// </summary>
-    public class PhysicsEntityProperty : BasicEntityProperty
+    public class EntityPhysicsProperty : BasicEntityProperty
     {
         /// <summary>
         /// The owning physics world.
@@ -29,7 +29,9 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// The shape of the physics body.
         /// </summary>
-        public EntityShape Shape; // Set by client.
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public EntityShapeHelper Shape; // Set by client.
 
         /// <summary>
         /// The starting mass of the physics body.
@@ -256,19 +258,18 @@ namespace FreneticGameCore.EntitySystem
         /// Construct the physics entity property.
         /// </summary>
         /// <param name="space">The space it will be spawned into.</param>
-        public PhysicsEntityProperty(PhysicsSpace space)
+        public EntityPhysicsProperty(PhysicsSpace space)
         {
             PhysicsWorld = space;
             InternalGravity = PhysicsWorld.Gravity;
         }
 
         /// <summary>
-        /// Fired when the property is added to an entity.
+        /// Fired when the entity is added to the world.
         /// </summary>
-        public override void OnAdded()
+        public override void OnSpawn()
         {
-            BEntity.OnSpawn += SpawnHandle;
-            BEntity.OnDeSpawn += DeSpawnHandle;
+            SpawnHandle();
             BEntity.OnPositionChanged += PosCheck;
         }
 
@@ -285,32 +286,32 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
-        /// Fired when the property is removed from an entity.
+        /// Fired when the entity is removed from the world.
         /// </summary>
-        public override void OnRemoved()
+        public override void OnDeSpawn()
         {
-            BEntity.OnSpawn -= SpawnHandle;
-            BEntity.OnDeSpawn -= DeSpawnHandle;
+            DeSpawnHandle();
             BEntity.OnPositionChanged -= PosCheck;
         }
 
+        // TODO: Damping values!
+        
         /// <summary>
         /// Handles the physics entity being spawned into a world.
         /// </summary>
-        /// <param name="context">The event context.</param>
-        public void SpawnHandle(EntitySpawnEventArgs context)
+        public void SpawnHandle()
         {
             if (!GravityIsSet)
             {
                 InternalGravity = PhysicsWorld.Gravity;
                 GravityIsSet = true;
             }
-            SpawnedBody = new Entity(Shape, InternalMass)
+            SpawnedBody = new Entity(Shape.GetBEPUShape(), InternalMass)
             {
                 Gravity = InternalGravity.ToBVector(),
-                LinearVelocity = SpawnedBody.LinearVelocity,
-                AngularVelocity = SpawnedBody.AngularVelocity,
-                Tag = this
+                LinearVelocity = InternalLinearVelocity.ToBVector(),
+                AngularVelocity = InternalAngularVelocity.ToBVector(),
+                Tag = BEntity
             };
             SpawnedBody.Material.KineticFriction = InternalFriction;
             SpawnedBody.Material.StaticFriction = InternalFriction;
@@ -328,7 +329,7 @@ namespace FreneticGameCore.EntitySystem
         public void Tick()
         {
             Location bpos = new Location(SpawnedBody.Position);
-            if (InternalPosition != bpos)
+            if (InternalPosition.DistanceSquared(bpos) > 0.01)
             {
                 InternalPosition = bpos;
                 BEntity.OnPositionChanged?.Invoke(bpos);
@@ -353,8 +354,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Handles the physics entity being de-spawned from a world.
         /// </summary>
-        /// <param name="context">The event context.</param>
-        public void DeSpawnHandle(EntityDeSpawnEventArgs context)
+        public void DeSpawnHandle()
         {
             UpdateFields();
             BEntity.OnTick -= Tick;
