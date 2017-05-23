@@ -77,6 +77,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Get the angle around an axis for a specific quaternion.
+        /// TODO: Possibly preduces reversed (Angle+PI) results?
         /// </summary>
         /// <param name="rotation">The quaternion.</param>
         /// <param name="axis">The relative axis.</param>

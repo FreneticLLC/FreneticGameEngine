@@ -43,12 +43,18 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public Vector3 RenderAt;
 
         /// <summary>
+        /// What orientation to render the entity at.
+        /// </summary>
+        public Quaternion RenderOrientation = Quaternion.Identity;
+
+        /// <summary>
         /// Fired when the entity is spawned.
         /// </summary>
         public override void OnSpawn()
         {
             base.OnSpawn();
             Entity.OnPositionChanged += FixLocation;
+            Entity.OnOrientationChanged += FixOrientation;
         }
 
         /// <summary>
@@ -58,6 +64,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             base.OnDeSpawn();
             Entity.OnPositionChanged -= FixLocation;
+            Entity.OnOrientationChanged -= FixOrientation;
         }
 
         /// <summary>
@@ -67,6 +74,15 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public void FixLocation(Location loc)
         {
             RenderAt = loc.ToOpenTK();
+        }
+
+        /// <summary>
+        /// Fixes the orientation of the renderable.
+        /// </summary>
+        /// <param name="q">The new orientation.</param>
+        public void FixOrientation(BEPUutilities.Quaternion q)
+        {
+            RenderOrientation = q.ToOpenTK();
         }
 
         /// <summary>

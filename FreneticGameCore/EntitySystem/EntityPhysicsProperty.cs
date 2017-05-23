@@ -271,18 +271,7 @@ namespace FreneticGameCore.EntitySystem
         {
             SpawnHandle();
             BEntity.OnPositionChanged += PosCheck;
-        }
-
-        /// <summary>
-        /// Checks and handles a position update.
-        /// </summary>
-        /// <param name="p">The new position.</param>
-        public void PosCheck(Location p)
-        {
-            if (p != InternalPosition)
-            {
-                Position = p;
-            }
+            BEntity.OnOrientationChanged += OriCheck;
         }
 
         /// <summary>
@@ -292,10 +281,36 @@ namespace FreneticGameCore.EntitySystem
         {
             DeSpawnHandle();
             BEntity.OnPositionChanged -= PosCheck;
+            BEntity.OnOrientationChanged -= OriCheck;
+        }
+
+        /// <summary>
+        /// Checks and handles a position update.
+        /// </summary>
+        /// <param name="p">The new position.</param>
+        public void PosCheck(Location p)
+        {
+            if (p.DistanceSquared(InternalPosition) > 0.01)
+            {
+                Position = p;
+            }
+        }
+
+        /// <summary>
+        /// Checks and handles an orientation update.
+        /// </summary>
+        /// <param name="q">The new orientation.</param>
+        public void OriCheck(Quaternion q)
+        {
+            Quaternion.GetRelativeRotation(ref q, ref InternalOrientation, out Quaternion rel);
+            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
+            {
+                Orientation = q;
+            }
         }
 
         // TODO: Damping values!
-        
+
         /// <summary>
         /// Handles the physics entity being spawned into a world.
         /// </summary>
@@ -333,6 +348,13 @@ namespace FreneticGameCore.EntitySystem
             {
                 InternalPosition = bpos;
                 BEntity.OnPositionChanged?.Invoke(bpos);
+            }
+            Quaternion cur = SpawnedBody.Orientation;
+            Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
+            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
+            {
+                InternalOrientation = cur;
+                BEntity.OnOrientationChanged?.Invoke(cur);
             }
         }
 

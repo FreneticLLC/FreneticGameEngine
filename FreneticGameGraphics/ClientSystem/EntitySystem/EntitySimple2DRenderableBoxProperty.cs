@@ -29,6 +29,22 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public Vector2 BoxDownRight;
 
         /// <summary>
+        /// Get or set the size of the box. Setting will align the box to its own center.
+        /// </summary>
+        public Vector2 BoxSize
+        {
+            get
+            {
+                return new Vector2(BoxDownRight.X - BoxUpLeft.X, BoxUpLeft.Y - BoxDownRight.Y);
+            }
+            set
+            {
+                BoxUpLeft = new Vector2(-value.X * 0.5f, value.Y * 0.5f);
+                BoxDownRight = new Vector2(value.X * 0.5f, -value.Y * 0.5f);
+            }
+        }
+
+        /// <summary>
         /// The texture for this rendered box.
         /// </summary>
         [PropertyAutoSavable]
@@ -50,7 +66,9 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             BoxTexture.Bind();
             context.Engine.RenderHelper.SetColor(BoxColor);
-            context.Engine.RenderHelper.RenderRectangle(context, RenderAt.X + BoxUpLeft.X, RenderAt.Y + BoxDownRight.Y, RenderAt.X + BoxDownRight.X, RenderAt.Y + BoxUpLeft.Y);
+            Vector2 sz = BoxSize;
+            context.Engine.RenderHelper.RenderRectangle(context, RenderAt.X + BoxUpLeft.X, RenderAt.Y + BoxDownRight.Y,
+                RenderAt.X + BoxDownRight.X, RenderAt.Y + BoxUpLeft.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
         }
     }
 }

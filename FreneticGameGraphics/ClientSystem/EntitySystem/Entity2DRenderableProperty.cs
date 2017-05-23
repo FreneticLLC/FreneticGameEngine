@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTK;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
@@ -11,6 +12,23 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     /// </summary>
     public abstract class Entity2DRenderableProperty : EntityRenderableProperty
     {
+        /// <summary>
+        /// Gets the 2D angle to render around.
+        /// Assumes the renderable is rotated only around the Z axis.
+        /// </summary>
+        public float RenderAngle
+        {
+            get
+            {
+                RenderOrientation.ToAxisAngle(out Vector3 axis, out float ang);
+                if (axis.Z < 0)
+                {
+                    return -ang;
+                }
+                return ang;
+            }
+        }
+
         /// <summary>
         /// Render the entity as seen by a top-down map.
         /// </summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticScript;
+using BEPUutilities;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -47,6 +48,11 @@ namespace FreneticGameCore.EntitySystem
         /// Fired when the entity is moved.
         /// </summary>
         public Action<Location> OnPositionChanged;
+
+        /// <summary>
+        /// Fired when the entity's orientation is changed.
+        /// </summary>
+        public Action<Quaternion> OnOrientationChanged;
 
         /// <summary>
         /// Fired when this entity is spawned into a world.

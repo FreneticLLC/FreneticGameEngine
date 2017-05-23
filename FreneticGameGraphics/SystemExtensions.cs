@@ -14,6 +14,26 @@ namespace FreneticGameGraphics
     public static class SystemExtensions
     {
         /// <summary>
+        /// Converts a BEPU quaternion to an OpenTK quaternion.
+        /// </summary>
+        /// <param name="q">The BEPU quaternion.</param>
+        /// <returns>The OpenTK quaternion.</returns>
+        public static Quaternion ToOpenTK(this BEPUutilities.Quaternion q)
+        {
+            return new Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+        }
+
+        /// <summary>
+        /// Converts a BEPU quaternion to an OpenTK quaternion.
+        /// </summary>
+        /// <param name="q">The OpenTK quaternion.</param>
+        /// <returns>The BEPU quaternion.</returns>
+        public static BEPUutilities.Quaternion ToBEPU(this Quaternion q)
+        {
+            return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
         /// Converts a location to an OpenTK Vector3D.
         /// </summary>
         /// <param name="l">The location.</param>

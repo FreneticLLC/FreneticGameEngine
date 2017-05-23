@@ -179,15 +179,24 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
         /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
         /// <param name="ymax">The upper bounds of the the rectangle: Y coordinate.</param>
-        public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax)
+        /// <param name="rot">The rotation, if any applies.</param>
+        public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null)
         {
             Vector2 scaler = new Vector2(xmax - xmin, ymax - ymin);
             Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
             Vector2 adder = new Vector2(xmin, ymin);
             GL.Uniform2(1, rc.Scaler * scaler);
             GL.Uniform2(2, rc.Adder * rc.Scaler + adder * rc.Scaler);
+            if (rot != null)
+            {
+                GL.Uniform3(4, rot.Value);
+            }
             GL.BindVertexArray(Square._VAO);
             GL.DrawElements(PrimitiveType.Quads, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            if (rot != null)
+            {
+                GL.Uniform3(4, Vector3.Zero);
+            }
         }
     }
 }
