@@ -62,6 +62,7 @@
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
+    <Compile Include="EntitySystem\EntityPhysics2DLimitProperty.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityShapeHelper.cs" />
     <Compile Include="Frustum.cs" />
