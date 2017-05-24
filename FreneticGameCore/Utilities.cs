@@ -659,11 +659,11 @@ namespace FreneticGameCore
             {
                 if (input.Z > 0)
                 {
-                    return new Location(0, 90, 0);
+                    return new Location(0, 0, 0);
                 }
                 else
                 {
-                    return new Location(0, 270, 0);
+                    return new Location(0, 180, 0);
                 }
             }
             else
@@ -672,15 +672,15 @@ namespace FreneticGameCore
                 double pitch;
                 if (input.X != 0)
                 {
-                    yaw = (Math.Atan2(input.Y, input.X) * (180.0 / Math.PI)) + 180.0;
+                    yaw = (Math.Atan2(input.Y, input.X) * (180.0 / Math.PI));
                 }
                 else if (input.Y > 0)
                 {
-                    yaw = 90;
+                    yaw = 0;
                 }
                 else
                 {
-                    yaw = 270;
+                    yaw = 180;
                 }
                 pitch = (Math.Atan2(input.Z, Math.Sqrt(input.X * input.X + input.Y * input.Y)) * (180.0 / Math.PI));
                 while (pitch < -180)

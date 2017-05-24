@@ -19,6 +19,13 @@ namespace FreneticGameCore.EntitySystem
     public class EntityPhysics2DLimitProperty : BasicEntityProperty
     {
         /// <summary>
+        /// Whether to force the position (in addition to rotation).
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool ForcePosition = true;
+
+        /// <summary>
         /// Handles the spawn event.
         /// </summary>
         public override void OnSpawn()
@@ -39,9 +46,12 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="e">The event.</param>
         public void SpawnHandle(EntitySpawnEventArgs e)
         {
-            POPJ = new PointOnPlaneJoint(null, PhysEnt.SpawnedBody, Vector3.Zero, Vector3.UnitZ, Vector3.Zero);
+            if (ForcePosition)
+            {
+                POPJ = new PointOnPlaneJoint(null, PhysEnt.SpawnedBody, Vector3.Zero, Vector3.UnitZ, Vector3.Zero);
+                PhysEnt.PhysicsWorld.Internal.Add(POPJ);
+            }
             RAJ = new RevoluteAngularJoint(null, PhysEnt.SpawnedBody, Vector3.UnitZ);
-            PhysEnt.PhysicsWorld.Internal.Add(POPJ);
             PhysEnt.PhysicsWorld.Internal.Add(RAJ);
         }
 
@@ -50,7 +60,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public void TickHandle()
         {
-            if (Math.Abs(PhysEnt.SpawnedBody.Position.Z) > 0.1)
+            if (ForcePosition && Math.Abs(PhysEnt.SpawnedBody.Position.Z) > 0.1)
             {
                 PhysEnt.SpawnedBody.Position = new Vector3(PhysEnt.SpawnedBody.Position.X, PhysEnt.SpawnedBody.Position.Y, 0.0);
             }
@@ -61,8 +71,11 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public void RemoveJoints()
         {
-            PhysEnt.PhysicsWorld.Internal.Remove(POPJ);
-            POPJ = null;
+            if (ForcePosition)
+            {
+                PhysEnt.PhysicsWorld.Internal.Remove(POPJ);
+                POPJ = null;
+            }
             PhysEnt.PhysicsWorld.Internal.Remove(RAJ);
             RAJ = null;
         }

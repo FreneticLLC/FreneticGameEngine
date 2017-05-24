@@ -22,6 +22,11 @@ namespace FreneticGameCore
         public Space Internal;
 
         /// <summary>
+        /// The scale of all physics vs. rendered objects. Phys * Scale = Render.
+        /// </summary>
+        public double RelativeScale = 1f;
+
+        /// <summary>
         /// Construct the physics space.
         /// </summary>
         public PhysicsSpace()
@@ -61,7 +66,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="ent">The controlling entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Spawn(BasicEntity ent, Entity bepuent)
+        public void Spawn(BasicEntity ent, ISpaceObject bepuent)
         {
             Internal.Add(bepuent);
             SpawnedEntities.Add(ent);
@@ -73,7 +78,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="ent">The controlling entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void DeSpawn(BasicEntity ent, Entity bepuent)
+        public void DeSpawn(BasicEntity ent, ISpaceObject bepuent)
         {
             Internal.Remove(bepuent);
             SpawnedEntities.Remove(ent);

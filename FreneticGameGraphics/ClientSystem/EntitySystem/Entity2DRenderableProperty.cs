@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using FreneticGameCore;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
@@ -20,12 +21,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             get
             {
-                RenderOrientation.ToAxisAngle(out Vector3 axis, out float ang);
-                if (axis.Z < 0)
-                {
-                    return -ang;
-                }
-                return ang;
+                return (float)RenderOrientation.ToBEPU().AxisAngleFor(BEPUutilities.Vector3.UnitZ);
             }
         }
 

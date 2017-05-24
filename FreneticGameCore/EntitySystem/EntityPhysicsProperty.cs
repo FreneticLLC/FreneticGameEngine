@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics;
 using BEPUutilities;
+using BEPUphysics.Character;
 using BEPUphysics.Entities;
 using BEPUphysics.CollisionShapes;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
@@ -25,6 +26,11 @@ namespace FreneticGameCore.EntitySystem
         /// The spawned physics body.
         /// </summary>
         public Entity SpawnedBody = null; // Set by spawner.
+
+        /// <summary>
+        /// The original spawned object.
+        /// </summary>
+        public ISpaceObject OriginalObject = null; // Set by spawner.
 
         /// <summary>
         /// The shape of the physics body.
@@ -295,9 +301,10 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="p">The new position.</param>
         public void PosCheck(Location p)
         {
-            if (p.DistanceSquared(InternalPosition) > 0.01)
+            Location p2 = p / PhysicsWorld.RelativeScale;
+            if (p2.DistanceSquared(InternalPosition) > 0.01)
             {
-                Position = p;
+                Position = p2;
             }
         }
 
@@ -326,20 +333,29 @@ namespace FreneticGameCore.EntitySystem
                 InternalGravity = PhysicsWorld.Gravity;
                 GravityIsSet = true;
             }
-            SpawnedBody = new Entity(Shape.GetBEPUShape(), InternalMass)
+            if (Shape is EntityCharacterShape chr)
             {
-                Gravity = InternalGravity.ToBVector(),
-                LinearVelocity = InternalLinearVelocity.ToBVector(),
-                AngularVelocity = InternalAngularVelocity.ToBVector(),
-                Tag = BEntity
-            };
-            SpawnedBody.Material.KineticFriction = InternalFriction;
-            SpawnedBody.Material.StaticFriction = InternalFriction;
-            SpawnedBody.Material.Bounciness = InternalBounciness;
-            SpawnedBody.Position = InternalPosition.ToBVector();
-            SpawnedBody.Orientation = InternalOrientation;
+                CharacterController cc = chr.GetBEPUCharacter();
+                cc.Tag = BEntity;
+                OriginalObject = cc;
+                SpawnedBody = cc.Body;
+            }
+            else
+            {
+                SpawnedBody = new Entity(Shape.GetBEPUShape(), InternalMass);
+                OriginalObject = SpawnedBody;
+                SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
+                SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
+                SpawnedBody.Material.KineticFriction = InternalFriction;
+                SpawnedBody.Material.StaticFriction = InternalFriction;
+                SpawnedBody.Material.Bounciness = InternalBounciness;
+                SpawnedBody.Position = InternalPosition.ToBVector();
+                SpawnedBody.Orientation = InternalOrientation;
+            }
+            SpawnedBody.Gravity = InternalGravity.ToBVector();
+            SpawnedBody.Tag = BEntity;
             // TODO: Other settings
-            PhysicsWorld.Spawn(BEntity, SpawnedBody);
+            PhysicsWorld.Spawn(BEntity, OriginalObject);
             BEntity.OnTick += Tick;
         }
 
@@ -349,10 +365,10 @@ namespace FreneticGameCore.EntitySystem
         public void Tick()
         {
             Location bpos = new Location(SpawnedBody.Position);
-            if (InternalPosition.DistanceSquared(bpos) > 0.01)
+            if (InternalPosition.DistanceSquared(bpos) > 0.0001)
             {
                 InternalPosition = bpos;
-                BEntity.OnPositionChanged?.Invoke(bpos);
+                BEntity.OnPositionChanged?.Invoke(bpos * PhysicsWorld.RelativeScale);
             }
             Quaternion cur = SpawnedBody.Orientation;
             Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
@@ -391,8 +407,9 @@ namespace FreneticGameCore.EntitySystem
             UpdateFields();
             BEntity.OnTick -= Tick;
             DeSpawnEvent?.Invoke();
-            PhysicsWorld.DeSpawn(BEntity, SpawnedBody);
+            PhysicsWorld.DeSpawn(BEntity, OriginalObject);
             SpawnedBody = null;
+            OriginalObject = null;
         }
 
         private bool HandledRemove = false;
