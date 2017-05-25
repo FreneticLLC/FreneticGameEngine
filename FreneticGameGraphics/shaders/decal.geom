@@ -62,8 +62,11 @@ void main()
 	float tid = f[0].texcoord.y;
 	fi.color = f[0].color;
 	fi.size = 1.0 / scale;
-	vec3 xp = vec3(norm.z, norm.x, norm.y) * scale;
-	vec3 yp = vec3(norm.y, norm.z, norm.x) * scale;
+	vec3 UPPER = norm.z > 0.8 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+	vec3 tangent = normalize(UPPER - (dot(UPPER, norm)) * norm);
+	vec3 bitangent = cross(tangent, norm);
+	vec3 xp = tangent * scale;
+	vec3 yp = bitangent * scale;
 	// First Vertex
 	vec3 p = qfix(pos + (-xp - yp));
 	gl_Position = proj_matrix * vec4(p, 1.0);

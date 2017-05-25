@@ -64,6 +64,7 @@
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
     <Compile Include="ClientSystem\GameEngineBase.cs" />
+    <Compile Include="GraphicsHelpers\DecalInfo.cs" />
     <Compile Include="GraphicsHelpers\FontSetEngine.cs" />
     <Compile Include="ClientSystem\GameEngine2D.cs" />
     <Compile Include="GraphicsHelpers\GLFontEngine.cs" />
