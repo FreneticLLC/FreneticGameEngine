@@ -476,7 +476,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator +(Location v1, Location v2)
         {
             return new Location(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
@@ -486,7 +485,6 @@ namespace FreneticGameCore
         /// Negates a location.
         /// </summary>
         /// <param name="v">The first location.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator -(Location v)
         {
             return new Location(-v.X, -v.Y, -v.Z);
@@ -497,7 +495,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator -(Location v1, Location v2)
         {
             return new Location(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
@@ -508,7 +505,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v1, Location v2)
         {
             return new Location(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
@@ -519,7 +515,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v1, Location v2)
         {
             return new Location(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
@@ -530,7 +525,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v, double scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -541,7 +535,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(double scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -552,7 +545,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v, float scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -563,7 +555,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(float scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -574,7 +565,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v, double scale)
         {
             double sc = 1.0 / scale;
@@ -586,7 +576,6 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v, float scale)
         {
             double sc = 1.0 / scale;
