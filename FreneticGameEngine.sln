@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticDataSyntax", "Frene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticScript", "FreneticScript\FreneticScript\FreneticScript.csproj", "{0672DD5F-6F33-4853-BD6E-8716D3ABC7AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGETests", "FGETests\FGETests.csproj", "{BC791A53-E852-4E99-90F9-4E9CF3138C14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
