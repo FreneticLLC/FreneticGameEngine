@@ -238,6 +238,7 @@ namespace FreneticGameCore
         /// Returns the flat (X/Y) linear distance of the vector location to another vector location, squared for efficiency.
         /// </summary>
         /// <returns>The squared distance.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double DistanceSquared_Flat(Location two)
         {
             double x1 = X - two.X;
@@ -249,6 +250,7 @@ namespace FreneticGameCore
         /// Returns the full linear distance of the vector location to another vector location, squared for efficiency.
         /// </summary>
         /// <returns>The squared distance.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double DistanceSquared(Location two)
         {
             double x1 = X - two.X;
@@ -273,6 +275,7 @@ namespace FreneticGameCore
         /// Returns the full linear length of the vector location, squared for efficiency.
         /// </summary>
         /// <returns>The squared length.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double LengthSquared()
         {
             return X * X + Y * Y + Z * Z;
@@ -291,6 +294,7 @@ namespace FreneticGameCore
         /// Returns whether the location is NaN.
         /// </summary>
         /// <returns>whether the location is NaN.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNaN()
         {
             return double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
@@ -300,6 +304,7 @@ namespace FreneticGameCore
         /// Returns whether the location is infinite.
         /// </summary>
         /// <returns>whether the location is infinite.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInfinite()
         {
             return double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
@@ -310,6 +315,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="two">The second location.</param>
         /// <returns>The dot product.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Dot(Location two)
         {
             return X * two.X + Y * two.Y + Z * two.Z;
@@ -370,6 +376,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="two">The second location vector.</param>
         /// <returns>The cross product of the two.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location CrossProduct(Location two)
         {
             return new Location(Y * two.Z - two.Y * Z, two.X * Z - X * two.Z, X * two.Y - Y * two.X);
@@ -380,6 +387,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="normal">The normal vector.</param>
         /// <returns>The reflected vector.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location Reflect(Location normal)
         {
             return this - (2 * Dot(normal) * normal);
@@ -403,6 +411,7 @@ namespace FreneticGameCore
         /// Returns a copy of this location.
         /// </summary>
         /// <returns>A copy of the location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location Duplicate()
         {
             return new Location(X, Y, Z);
@@ -413,12 +422,9 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="obj">The object.</param>
         /// <returns>Whether they are equal.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (!(obj is Location))
-            {
-                return false;
-            }
             Location tobj = (Location)obj;
             return tobj.X == X && tobj.Y == Y && tobj.Z == Z;
         }
@@ -428,6 +434,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The second location.</param>
         /// <returns>Whether they are equal.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Location v)
         {
             return v.X == X && v.Y == Y && v.Z == Z;
@@ -438,6 +445,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Location v1, Location v2)
         {
             return v1.X == v2.X && v1.Y == v2.Y && v1.Z == v2.Z;
@@ -448,6 +456,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Location v1, Location v2)
         {
             return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
@@ -467,6 +476,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator +(Location v1, Location v2)
         {
             return new Location(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
@@ -476,6 +486,7 @@ namespace FreneticGameCore
         /// Negates a location.
         /// </summary>
         /// <param name="v">The first location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator -(Location v)
         {
             return new Location(-v.X, -v.Y, -v.Z);
@@ -486,6 +497,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator -(Location v1, Location v2)
         {
             return new Location(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
@@ -496,6 +508,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v1, Location v2)
         {
             return new Location(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
@@ -506,6 +519,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v1, Location v2)
         {
             return new Location(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
@@ -516,6 +530,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v, double scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -526,6 +541,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(double scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -536,6 +552,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(Location v, float scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -546,6 +563,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator *(float scale, Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
@@ -556,6 +574,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v, double scale)
         {
             double sc = 1.0 / scale;
@@ -567,6 +586,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Location operator /(Location v, float scale)
         {
             double sc = 1.0 / scale;
@@ -613,6 +633,7 @@ namespace FreneticGameCore
         /// Converts the Location to a BEPUPhysics Vector3.
         /// </summary>
         /// <returns>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BEPUutilities.Vector3 ToBVector()
         {
             return new BEPUutilities.Vector3(X, Y, Z);
@@ -622,6 +643,7 @@ namespace FreneticGameCore
         /// Gets the location of the block this location is within. (Round-down all values).
         /// </summary>
         /// <returns>The block location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location GetBlockLocation()
         {
             return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
@@ -631,6 +653,7 @@ namespace FreneticGameCore
         /// Gets the location of the next block corner up from this location. (Round-up all values).
         /// </summary>
         /// <returns>The block location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location GetUpperBlockBorder()
         {
             return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
