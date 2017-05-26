@@ -1,4 +1,3 @@
-
 #version 430 core
 
 #define MCM_PRETTY 0
@@ -92,16 +91,13 @@ vec4 qfix(in vec4 pos, in vec3 right, in vec3 pos_norm)
 void main()
 {
 	vec3 pos = gl_in[0].gl_Position.xyz;
-	vec3 up = vec3(0.0, 0.0, 1.0);
 #if MCM_IS_A_SHADOW
 	vec3 pos_norm = normalize(pos.xyz - camPos);
 #else
 	vec3 pos_norm = normalize(pos.xyz);
 #endif
-	if (abs(pos_norm.x) < 0.01 && abs(pos_norm.y) < 0.01)
-	{
-		up = vec3(0.0, 1.0, 0.0);
-	}
+	vec3 UPPER = pos_norm.z > 0.8 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+	vec3 up = normalize(UPPER - (dot(UPPER, pos_norm)) * pos_norm);
 	float scale = f[0].texcoord.x * 0.5;
 	float tid = f[0].texcoord.y;
 	vec3 right = cross(up, pos_norm);
