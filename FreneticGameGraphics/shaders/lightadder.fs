@@ -192,7 +192,7 @@ float ssao_color(in vec3 position, in vec3 normal, vec3 difcol)
 		float rangeCheck = abs(pos_zm - sampleDepth) < ssao_radius ? 1.0 : 0.0;
 		occlusion += (sampleDepth <= linearizeDepth(offset.z) ? 1.0 : 0.0) * rangeCheck;
 	}
-	return 1.0 - (occlusion / 64.0);
+	return 1.0 - (occlusion * (0.5 / 64.0));
 }
 
 void main() // Let's put all code in main, why not...
