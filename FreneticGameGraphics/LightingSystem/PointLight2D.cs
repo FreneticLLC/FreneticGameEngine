@@ -23,7 +23,8 @@ namespace FreneticGameGraphics.LightingSystem
         /// </summary>
         /// <param name="pos">Its starting position.</param>
         /// <param name="str">Its strength.</param>
-        public PointLight2D(Vector2 pos, float str)
+        /// <param name="sdscale">The subdivision scale.</param>
+        public PointLight2D(Vector2 pos, float str, float sdscale)
         {
             if (str < 1)
             {
@@ -46,7 +47,7 @@ namespace FreneticGameGraphics.LightingSystem
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            SubDivider = Math.Max((float)Math.Sqrt(Strength) * 0.1f, 1f);
+            SubDivider = Math.Max((float)Math.Sqrt(Strength) * sdscale, 1f);
             GraphicsUtil.CheckError("PointLight2D init");
         }
         

@@ -53,6 +53,13 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public Color4 LightColor = Color4.White;
 
         /// <summary>
+        /// The current subdivider-scale of the light.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float LightSDScale = 0.5f;
+
+        /// <summary>
         /// The actual light object.
         /// </summary>
         public PointLight2D ActualLight;
@@ -74,7 +81,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine2D eng)
             {
-                ActualLight = new PointLight2D(LightPosition, LightStrength) { Color = LightColor, ShouldShadow = CastShadow };
+                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale) { Color = LightColor, ShouldShadow = CastShadow };
                 eng.Lights.Add(ActualLight);
                 Entity.OnPositionChanged += FixPosition;
             }
