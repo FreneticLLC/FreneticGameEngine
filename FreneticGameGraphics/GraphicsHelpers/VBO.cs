@@ -340,7 +340,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         bool bones;
 
         /// <summary>
-        /// Ther vertices.
+        /// The vertices.
         /// </summary>
         public Vector3[] verts = null;
 

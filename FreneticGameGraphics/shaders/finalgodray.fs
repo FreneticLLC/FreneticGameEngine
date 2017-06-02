@@ -1,4 +1,3 @@
-
 #version 430 core
 
 #define MCM_GOOD_GRAPHICS 0
@@ -25,8 +24,8 @@ layout (location = 9) uniform float cameraTargetDepth = 0.01; // How far away th
 layout (location = 10) uniform float hdrOldExp = 1.0; // The previous frame's HDR exposure.
 layout (location = 11) uniform float frameDelta = 0.05; // The current frame's delta. // TODO: ???
 // ...
-layout (location = 16) uniform float znear = 0.1; // The Z-Near value of the 3D projection.
-layout (location = 17) uniform float zfar = 1000.0; // The Z-Far value of the 3D projection.
+layout (location = 16) uniform float fogDist = 1.0 / 100000.0; // The distance fog should be around.
+layout (location = 17) uniform vec2 zdist = vec2(0.1, 1000.0); // The Z-Near and Z-Far value of the 3D projection.
 layout (location = 18) uniform vec4 fogCol = vec4(0.0); // What color any fog to apply is. For no fog, the alpha value will be zero.
 layout (location = 19) uniform float desaturationAmount = 0.0; // How much to desaturation the view by. 1.0 = fully desaturated.
 layout (location = 20) uniform vec3 eye_position = vec3(0.0); // What position the eye of the 3D camera view is at in the world.
@@ -47,7 +46,7 @@ layout (location = 1) out vec4 bloom; // The color of any bloom our pixel may pr
 
 float linearizeDepth(in float rinput) // Convert standard depth (stretched) to a linear distance (still from 0.0 to 1.0).
 {
-	return (2.0 * znear) / (zfar + znear - rinput * (zfar - znear));
+	return (2.0 * zdist.x) / (zdist.y + zdist.x - rinput * (zdist.y - zdist.x));
 }
 
 vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray across the screen, for reflection purposes.
@@ -186,10 +185,12 @@ void main() // The central entry point of the shader. Handles everything!
 #if MCM_GOOD_GRAPHICS
 	vec3 renderhint = texture(renderhinttex, f_texcoord).xyz;
 	vec3 renderhint2 = texture(renderhint2tex, f_texcoord).xyz;
+	vec3 pos = texture(positiontex, f_texcoord).xyz;
 	float dist = linearizeDepth(texture(depthtex, f_texcoord).r); // This is useful for both fog and reflection, so grab it here.
 	if (renderhint.z < 1.0 || fogCol.w > 1.0)
 	{
-		float fogMod = dist * exp(fogCol.w) * fogCol.w;
+		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);
+		float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
 		float fmz = min(fogMod, 1.0);
 		light_color.xyz = light_color.xyz * (1.0 - fmz) + fogCol.xyz * fmz + vec3(fogMod - fmz);
 	}
@@ -206,7 +207,6 @@ void main() // The central entry point of the shader. Handles everything!
 		vec4 norm = texture(normaltex, f_texcoord);
 		vec3 normal = normalize(norm.xyz);
 		float currDepth = dist;
-		vec3 pos = texture(positiontex, f_texcoord).xyz;
 		vec3 eyePosition = normalize(eye_position - pos);
 		vec4 reflectionVector = proj_mat * reflect(vec4(eyePosition, 0.0), vec4(normal, 0.0));
 		vec4 SSR = raytrace(reflectionVector.xyz / reflectionVector.w, currDepth);
