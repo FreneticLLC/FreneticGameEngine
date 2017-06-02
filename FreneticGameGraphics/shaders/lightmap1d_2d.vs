@@ -26,5 +26,4 @@ void main()
 	vec4 resPos = vec4(prerot_pos - vec3(rotation.xy, 0.0), 1.0) * vec4(scaler, 1.0, 1.0) + vec4(adder, 0.0, 0.0);
 	float heightZ = dot(resPos, resPos) / light_size;
 	gl_Position = vec4(atan(resPos.y, resPos.x) * 100.0 * 320.0, 0.0, heightZ, 1.0);
-	gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
 }
