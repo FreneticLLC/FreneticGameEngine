@@ -81,7 +81,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine2D eng)
             {
-                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale) { Color = LightColor, ShouldShadow = CastShadow };
+                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng) { Color = LightColor, ShouldShadow = CastShadow };
                 eng.Lights.Add(ActualLight);
                 Entity.OnPositionChanged += FixPosition;
             }

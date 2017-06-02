@@ -19,27 +19,43 @@ namespace FreneticGameGraphics.LightingSystem
     public class PointLight2D
     {
         /// <summary>
+        /// The powering 2D game engine.
+        /// </summary>
+        public GameEngine2D Engine;
+
+        /// <summary>
         /// Constructs the point light 2D.
         /// </summary>
         /// <param name="pos">Its starting position.</param>
         /// <param name="str">Its strength.</param>
         /// <param name="sdscale">The subdivision scale.</param>
-        public PointLight2D(Vector2 pos, float str, float sdscale)
+        /// <param name="_engine">The powering game engine.</param>
+        public PointLight2D(Vector2 pos, float str, float sdscale, GameEngine2D _engine)
         {
             if (str < 1)
             {
                 throw new Exception("Invalid strength!");
             }
+            Engine = _engine;
             Position = pos;
             Strength = str;
             FBO = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
             FBO_Tex = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, FBO_Tex);
-            // TODO: Utilities.NextPowerOfTwo? Should probably only be added if it's confirmed as need (POT-only hardware on OpenGL 4.3 is unlikely... NPOTs are common!)
-            Width = (int)(Strength * 2f);
-            // TODO: Alpha texture!
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            if (Engine.OneDLights)
+            {
+                Width = 314 * 2 + 320 * 2;
+                GL.BindTexture(TextureTarget.Texture1D, FBO_Tex);
+                GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.R32f, Width, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
+            }
+            else
+            {
+                GL.BindTexture(TextureTarget.Texture2D, FBO_Tex);
+                // TODO: Utilities.NextPowerOfTwo? Should probably only be added if it's confirmed as need (POT-only hardware on OpenGL 4.3 is unlikely... NPOTs are common!)
+                Width = (int)(Strength * 2f);
+                // TODO: Alpha texture!?
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            }
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
@@ -107,8 +123,8 @@ namespace FreneticGameGraphics.LightingSystem
         public void PrepareLightmap()
         {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 0 });
-            GL.Viewport(0, 0, Width, Width);
+            GL.ClearBuffer(ClearBuffer.Color, 0, Engine.OneDLights ? new float[] { 999999f } : new float[] { 0, 0, 0, 0 });
+            GL.Viewport(0, 0, Width, Engine.OneDLights ? 1 : Width);
         }
 
         /// <summary>

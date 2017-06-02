@@ -62,9 +62,24 @@ namespace FreneticGameGraphics.ClientSystem
         public Shader Shader_Addlighttoscene;
 
         /// <summary>
+        /// First shader stage: computes a 'light map' for each light source.
+        /// </summary>
+        public Shader Shader_Lightmap1D;
+
+        /// <summary>
+        /// Final shader stage: applies a 2D/1D light to the scene.
+        /// </summary>
+        public Shader Shader_ApplyLights1D;
+
+        /// <summary>
         /// Whether to use the 2D lighting engine.
         /// </summary>
         public bool UseLightEngine = false;
+
+        /// <summary>
+        /// Whether to use the 1D lighting trick when lighting is enabled.
+        /// </summary>
+        public bool OneDLights = true;
 
         /// <summary>
         /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
@@ -113,8 +128,10 @@ namespace FreneticGameGraphics.ClientSystem
         public override void GetShaders()
         {
             Shader_Lightmap = Shaders.GetShader("lightmap2d");
+            Shader_Lightmap1D = Shaders.GetShader("lightmap1d_2d");
             Shader_Addlighttoscene = Shaders.GetShader("addlighttoscene2d");
             Shader_Combine = Shaders.GetShader("combine2d");
+            Shader_ApplyLights1D = Shaders.GetShader("applylights1d_2d");
             GraphicsUtil.CheckError("GetShaders");
         }
 
@@ -246,18 +263,19 @@ namespace FreneticGameGraphics.ClientSystem
             wx /= OriginalScaler.X;
             wy /= OriginalScaler.Y;
             MouseCoords = new Vector2(wx, wy);
-            Shader_Combine.Bind();
+            if (OneDLights)
+            {
+                Shader_ApplyLights1D.Bind();
+            }
+            else
+            {
+                Shader_Combine.Bind();
+            }
             GraphicsUtil.CheckError("RenderSingleFrame - 2");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
             GL.Uniform1(7, (float)Window.Width / (float)Window.Height);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
-            Shader_Lightmap.Bind();
-            GraphicsUtil.CheckError("RenderSingleFrame - 2.6");
-            GL.Uniform2(1, ref Scaler);
-            GraphicsUtil.CheckError("RenderSingleFrame - 2.65");
-            GL.Uniform2(2, ref Adder);
-            GraphicsUtil.CheckError("RenderSingleFrame - 2.7");
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
@@ -314,7 +332,14 @@ namespace FreneticGameGraphics.ClientSystem
             }
             GraphicsUtil.CheckError("Render - Begin");
             // TODO: Discard fully out-of-view lights!
-            Shader_Lightmap.Bind();
+            if (OneDLights)
+            {
+                Shader_Lightmap1D.Bind();
+            }
+            else
+            {
+                Shader_Lightmap.Bind();
+            }
             if (Lights.Count > 0)
             {
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, Lights[0].FBO);
@@ -345,7 +370,14 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Adder = Adder;
             GraphicsUtil.CheckError("Render - Lights prepped");
             RenderAll(true, null);
-            Shader_Combine.Bind();
+            if (OneDLights)
+            {
+                Shader_ApplyLights1D.Bind();
+            }
+            else
+            {
+                Shader_Combine.Bind();
+            }
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
             Scaler = Vector2.One;
@@ -363,8 +395,11 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform2(4, Lights[i].GetSecondAdder(MainRenderContext));
                 GL.Uniform1(5, (float)Lights[i].Width);
                 GL.Uniform4(6, new Vector4(Lights[i].Color.R, Lights[i].Color.G, Lights[i].Color.B, Lights[i].Color.A));
+                if (!OneDLights)
+                {
+                    GL.Uniform1(8, Lights[i].SubDivider);
+                }
                 GL.BindTexture(TextureTarget.Texture2D, Lights[i].FBO_Tex);
-                GL.Uniform1(8, Lights[i].SubDivider);
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             }
             GraphicsUtil.CheckError("Render - Lights combined");

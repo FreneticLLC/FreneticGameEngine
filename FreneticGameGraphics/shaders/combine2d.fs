@@ -15,7 +15,7 @@ out vec4 color;
 
 void main()
 {
-	vec2 lmat = (vec2(f_texcoord.x, f_texcoord.y) * vec2(2.0) + vec2(-1.0)) * l_scaler + l_adder;
+	vec2 lmat = (f_texcoord * vec2(2.0) + vec2(-1.0)) * l_scaler + l_adder;
 	lmat.y /= aspect;
 	vec2 mmat = lmat;
 	float modif = max(0.95 - dot(mmat, mmat), 0.0);
@@ -28,11 +28,12 @@ void main()
 	float lmat_len = length(lmat);
 	vec2 move = ((-lmat) / lmat_len) * (1.0 / light_width) * sub_divider;
 	int reps = int(lmat_len * light_width / sub_divider);
+	float sdx = (sub_divider / 4.0);
 	for (int i = 0; i < reps; i++)
 	{
 		lmat += move;
 		vec4 col_read = texture(light_tex, lmat * vec2(0.5) + vec2(0.5));
-		modif *= 1.0 - (col_read.w * 0.15 * (sub_divider / 4.0));
+		modif *= 1.0 - (col_read.w * 0.15 * sdx);
 	}
 	vec4 c = light_color * modif;
 	color = vec4(c.xyz * c.xyz, c.w);
