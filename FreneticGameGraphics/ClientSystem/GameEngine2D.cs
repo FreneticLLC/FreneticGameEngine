@@ -115,6 +115,7 @@ namespace FreneticGameGraphics.ClientSystem
             Shader_Lightmap = Shaders.GetShader("lightmap2d");
             Shader_Addlighttoscene = Shaders.GetShader("addlighttoscene2d");
             Shader_Combine = Shaders.GetShader("combine2d");
+            GraphicsUtil.CheckError("GetShaders");
         }
 
         /// <summary>
@@ -122,11 +123,14 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void PostLoad()
         {
+            GraphicsUtil.CheckError("PostLoad - Pre");
             SysConsole.Output(OutputType.INIT, "GameEngine loading render helpers...");
             RenderHelper = new Renderer2D(Textures, Shaders);
             RenderHelper.Init();
+            GraphicsUtil.CheckError("PostLoad - RenderHelper Done");
             SysConsole.Output(OutputType.INIT, "GameEngine loading 2D light helpers...");
             LoadLightHelpers();
+            GraphicsUtil.CheckError("PostLoad - Post");
         }
 
         /// <summary>
@@ -169,6 +173,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, l_FBO_Tex, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
+            GraphicsUtil.CheckError("LoadLightHelpers");
         }
 
         /// <summary>
@@ -206,6 +211,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void RenderSingleFrame()
         {
+            GraphicsUtil.CheckError("RenderSingleFrame");
             // First step: setup
             MainRenderContext.Width = Window.Width;
             MainRenderContext.Height = Window.Height;
@@ -241,18 +247,25 @@ namespace FreneticGameGraphics.ClientSystem
             wy /= OriginalScaler.Y;
             MouseCoords = new Vector2(wx, wy);
             Shader_Combine.Bind();
+            GraphicsUtil.CheckError("RenderSingleFrame - 2");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
             GL.Uniform1(7, (float)Window.Width / (float)Window.Height);
+            GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
             Shader_Lightmap.Bind();
+            GraphicsUtil.CheckError("RenderSingleFrame - 2.6");
             GL.Uniform2(1, ref Scaler);
+            GraphicsUtil.CheckError("RenderSingleFrame - 2.65");
             GL.Uniform2(2, ref Adder);
+            GraphicsUtil.CheckError("RenderSingleFrame - 2.7");
             Shaders.ColorMult2DShader.Bind();
+            GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
             // Third step: Pass to the primary rendering system
             try
             {
+                GraphicsUtil.CheckError("Pre-Render");
                 Render();
                 GraphicsUtil.CheckError("Post-Render");
             }
@@ -292,6 +305,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         private void Render()
         {
+            GraphicsUtil.CheckError("Render - Pre");
             if (!UseLightEngine)
             {
                 Shaders.ColorMult2DShader.Bind();

@@ -120,6 +120,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             // Second step: clear the screen
             GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
+            GraphicsUtil.CheckError("GEB - Pre");
             // Third step: general rendering
             RenderSingleFrame();
             // Fourth step: clean up!
@@ -127,9 +128,12 @@ namespace FreneticGameGraphics.ClientSystem
             GL.BindVertexArray(0);
             GL.UseProgram(0);
             // Semi-final step: Tick logic!
+            GraphicsUtil.CheckError("GEB - PreTick");
             Tick();
+            GraphicsUtil.CheckError("GEB - PostTick");
             // Final step: Swap the render buffer onto the screen!
             Window.SwapBuffers();
+            GraphicsUtil.CheckError("GEB - Post");
         }
 
         /// <summary>
@@ -186,6 +190,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
+            GraphicsUtil.CheckError("GEB - Initial");
             SysConsole.Output(OutputType.INIT, "GameEngine loading file helpers...");
             Files = new FileHandler();
             Files.Init();
@@ -196,12 +201,14 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine loading texture helpers...");
             Textures = new TextureEngine();
             Textures.InitTextureSystem(Files);
+            GraphicsUtil.CheckError("GEB - Textures");
             SysConsole.Output(OutputType.INIT, "GameEngine loading font helpers...");
             GLFonts = new GLFontEngine(Shaders);
             GLFonts.Init(Files);
             FontSets = new FontSetEngine(GLFonts);
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
+            GraphicsUtil.CheckError("GEB - Fonts");
             SysConsole.Output(OutputType.INIT, "GameEngine prepping physics helper...");
             PhysicsWorld = new PhysicsSpace();
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
@@ -209,6 +216,7 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine calling external load event...");
             OnWindowLoad?.Invoke();
             SysConsole.Output(OutputType.INIT, "GameEngine is ready and loaded! Starting main game loop...");
+            GraphicsUtil.CheckError("GEB - Loaded");
         }
 
         /// <summary>
