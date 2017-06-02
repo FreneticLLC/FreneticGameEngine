@@ -12,7 +12,7 @@ layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 // ...
 #if MCM_IS_A_SHADOW
 layout (location = 5) uniform float should_sqrt = 0.0;
-// ..
+// ...
 layout (location = 7) uniform vec3 camPos = vec3(0.0);
 #endif
 

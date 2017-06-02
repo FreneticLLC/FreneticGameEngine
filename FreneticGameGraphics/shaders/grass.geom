@@ -1,15 +1,15 @@
-
 #version 430 core
 
 #define MCM_PRETTY 0
 #define MCM_SHADOWS 0
+#define MCM_IS_A_SHADOW 0
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 6) out;
 
 layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 // ...
-#if MCM_SHADOWS
+#if MCM_IS_A_SHADOW
 layout (location = 5) uniform float should_sqrt = 0.0;
 #endif
 layout (location = 6) uniform float time = 0.0;
@@ -66,7 +66,7 @@ float fix_sqr(in float inTemp)
 
 vec4 final_fix(in vec4 pos)
 {
-#if MCM_SHADOWS
+#if MCM_IS_A_SHADOW
 	if (should_sqrt >= 0.5)
 	{
 		pos /= pos.w;

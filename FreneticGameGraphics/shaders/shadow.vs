@@ -1,4 +1,3 @@
-
 #version 430 core
 
 #define MCM_GEOM_ACTIVE 0
@@ -9,10 +8,13 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texcoords;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec4 color;
+#if MCM_GEOM_ACTIVE
+#else
 layout (location = 5) in vec4 Weights;
 layout (location = 6) in vec4 BoneID;
 layout (location = 7) in vec4 Weights2;
 layout (location = 8) in vec4 BoneID2;
+#endif
 
 const int MAX_BONES = 200;
 
@@ -22,10 +24,10 @@ layout (location = 1) uniform mat4 projection = mat4(1.0);
 #endif
 layout (location = 2) uniform mat4 model_matrix = mat4(1.0);
 // ...
-layout (location = 5) uniform float should_sqrt = 0.0;
-// ...
 #if MCM_GEOM_ACTIVE
 #else
+layout (location = 5) uniform float should_sqrt = 0.0;
+// ...
 layout (location = 100) uniform mat4 simplebone_matrix = mat4(1.0);
 layout (location = 101) uniform mat4 boneTrans[MAX_BONES];
 #endif
@@ -46,24 +48,25 @@ out struct vox_fout
 } fi;
 
 #define f fi
-#endif
 
 float fix_sqr(in float inTemp)
 {
 	return 1.0 - (inTemp * inTemp);
 }
+#endif
+
 
 void main()
 {
-	vec4 pos1;
 #if MCM_GEOM_ACTIVE
-	pos1 = vec4(position, 1.0);
+	f.position = model_matrix * vec4(position, 1.0);
 #else
 #if MCM_NO_BONES
 	const float rem = 1.0;
 #else
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
 #endif
+	vec4 pos1;
 	mat4 BT = mat4(1.0);
 	if (rem < 0.99)
 	{
@@ -83,11 +86,6 @@ void main()
 		pos1 = vec4(position, 1.0);
 	}
 	pos1 *= simplebone_matrix;
-#endif
-	f.texcoord = texcoords;
-#if MCM_GEOM_ACTIVE
-	f.position = model_matrix * vec4(pos1.xyz, 1.0);
-#else
 	f.position = projection * model_matrix * vec4(pos1.xyz, 1.0);
 	if (should_sqrt >= 0.5)
 	{
@@ -96,6 +94,7 @@ void main()
 		f.position.y = sign(f.position.y) * fix_sqr(1.0 - abs(f.position.y));
 	}
 #endif
+	f.texcoord = texcoords;
 	f.color = color;
 	gl_Position = f.position;
 }
