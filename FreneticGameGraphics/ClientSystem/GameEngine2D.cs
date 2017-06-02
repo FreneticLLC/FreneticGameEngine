@@ -250,7 +250,7 @@ namespace FreneticGameGraphics.ClientSystem
             float aspect = Window.Width / (float)Window.Height;
             float sc = 1.0f / (OriginalZoom * ZoomMultiplier);
             OriginalScaler = new Vector2(sc, sc * aspect);
-            OriginalAdder = new Vector2(ViewCenter.X * Scaler.X, ViewCenter.Y * Scaler.Y);
+            OriginalAdder = ViewCenter;
             Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
@@ -331,21 +331,25 @@ namespace FreneticGameGraphics.ClientSystem
                 return;
             }
             GraphicsUtil.CheckError("Render - Begin");
-            // TODO: Discard fully out-of-view lights!
-            if (OneDLights)
-            {
-                Shader_Lightmap1D.Bind();
-            }
-            else
-            {
-                Shader_Lightmap.Bind();
-            }
             if (Lights.Count > 0)
             {
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, Lights[0].FBO);
                 GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
             }
+            // TODO: Discard fully out-of-view lights!
+            if (OneDLights)
+            {
+                Shader_Lightmap1D.Bind();
+                GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                GL.Enable(EnableCap.DepthTest);
+                GL.DepthMask(true);
+            }
+            else
+            {
+                Shader_Lightmap.Bind();
+            }
             GraphicsUtil.CheckError("Render - Before Light Precalcer");
+            MainRenderContext.CalcShadows = true;
             for (int i = 0; i < Lights.Count; i++)
             {
                 Lights[i].PrepareLightmap();
@@ -354,13 +358,22 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform2(2, Adder = Lights[i].GetAdder());
                 if (OneDLights)
                 {
+                    GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
                     GL.Uniform2(6, Lights[i].Position);
+                    GL.Uniform1(7, Lights[i].Strength * Lights[i].Strength);
                 }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
                 GraphicsUtil.CheckError("Render - Light Precalcer");
                 RenderAll(false, Lights[i].ShouldShadow);
             }
+            if (OneDLights)
+            {
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.Disable(EnableCap.DepthTest);
+                GL.DepthMask(false);
+            }
+            MainRenderContext.CalcShadows = false;
             GraphicsUtil.CheckError("Render - Lights precalced");
             GL.Viewport(0, 0, Window.Width, Window.Height);
             Shaders.ColorMult2DShader.Bind();
@@ -401,7 +414,10 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform4(6, new Vector4(Lights[i].Color.R, Lights[i].Color.G, Lights[i].Color.B, Lights[i].Color.A));
                 if (OneDLights)
                 {
-                    GL.Uniform2(2, Lights[i].Position);
+                    GL.Uniform2(8, Lights[i].Position);
+                    GL.Uniform2(9, OriginalScaler);
+                    GL.Uniform2(10, OriginalAdder);
+                    GL.Uniform1(11, Lights[i].Strength * Lights[i].Strength);
                 }
                 else
                 {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using FreneticGameCore;
 using FreneticGameGraphics.ClientSystem;
 
 namespace FreneticGameGraphics.GraphicsHelpers
@@ -36,16 +37,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
 
         void GenerateSquareVBO()
         {
-            Vector3[] vecs = new Vector3[4];
-            uint[] inds = new uint[4];
-            Vector3[] texs = new Vector3[4];
-            Vector4[] cols = new Vector4[4];
-            Vector3[] nrms = new Vector3[4];
-            for (uint u = 0; u < 4; u++)
+            Vector3[] vecs = new Vector3[5];
+            uint[] inds = new uint[5];
+            Vector3[] texs = new Vector3[5];
+            Vector4[] cols = new Vector4[5];
+            Vector3[] nrms = new Vector3[5];
+            for (uint u = 0; u < 5; u++)
             {
                 inds[u] = u;
             }
-            for (int c = 0; c < 4; c++)
+            for (int c = 0; c < 5; c++)
             {
                 cols[c] = new Vector4(1, 1, 1, 1);
                 nrms[c] = new Vector3(0, 0, 1);
@@ -58,6 +59,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
             texs[2] = new Vector3(0, 1, 0);
             vecs[3] = new Vector3(0, 0, 0);
             texs[3] = new Vector3(0, 0, 0);
+            vecs[4] = new Vector3(1, 0, 0);
+            texs[4] = new Vector3(1, 0, 0);
             Square = new VBO()
             {
                 Vertices = vecs.ToList(),
@@ -185,14 +188,23 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Vector2 scaler = new Vector2(xmax - xmin, ymax - ymin);
             Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
             Vector2 adder = new Vector2(xmin, ymin);
-            GL.Uniform2(1, rc.Scaler * scaler);
-            GL.Uniform2(2, rc.Adder * rc.Scaler + adder * rc.Scaler);
+            Vector2 tscaler = rc.Scaler * scaler;
+            GL.Uniform2(1, tscaler);
+            Vector2 tadder = rc.Adder * rc.Scaler + adder * rc.Scaler;
+            GL.Uniform2(2, tadder);
             if (rot != null)
             {
                 GL.Uniform3(4, rot.Value);
             }
             GL.BindVertexArray(Square._VAO);
-            GL.DrawElements(PrimitiveType.Quads, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            if (rc.CalcShadows)
+            {
+                GL.DrawElements(PrimitiveType.LineStrip, 5, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            }
+            else
+            {
+                GL.DrawElements(PrimitiveType.Quads, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            }
             if (rot != null)
             {
                 GL.Uniform3(4, Vector3.Zero);

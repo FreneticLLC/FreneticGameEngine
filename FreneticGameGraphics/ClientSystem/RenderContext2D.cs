@@ -33,6 +33,11 @@ namespace FreneticGameGraphics.ClientSystem
         public float Zoom;
 
         /// <summary>
+        /// Whether the system is currently calculating shadows.
+        /// </summary>
+        public bool CalcShadows = false;
+
+        /// <summary>
         /// The multiplier for zoom effects.
         /// </summary>
         public float ZoomMultiplier;

@@ -52,6 +52,18 @@ namespace FreneticGameGraphics.LightingSystem
                 GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
                 GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
                 GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture1D, FBO_Tex, 0);
+                GraphicsUtil.CheckError("PointLight2D init - 1D Tex");
+                FBO_DTex = GL.GenTexture();
+                GL.BindTexture(TextureTarget.Texture1D, FBO_DTex);
+                GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.DepthComponent, Width, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+                GraphicsUtil.CheckError("PointLight2D init - 1D DTex - Tex");
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
+                GraphicsUtil.CheckError("PointLight2D init - 1D DTex");
+                GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture1D, FBO_DTex, 0);
+                GraphicsUtil.CheckError("PointLight2D init - 1D DTex Attach");
             }
             else
             {
@@ -78,6 +90,10 @@ namespace FreneticGameGraphics.LightingSystem
         public void Destroy()
         {
             GL.DeleteTexture(FBO_Tex);
+            if (FBO_DTex > 0)
+            {
+                GL.DeleteTexture(FBO_DTex);
+            }
             GL.DeleteFramebuffer(FBO);
             GraphicsUtil.CheckError("PointLight2D destroy");
         }
@@ -101,6 +117,11 @@ namespace FreneticGameGraphics.LightingSystem
         /// The FrameBufferObject texture used by this Point Light 2D.
         /// </summary>
         public int FBO_Tex;
+
+        /// <summary>
+        /// The FrameBufferObject depth-texture used by this point light 1d_2d.
+        /// </summary>
+        public int FBO_DTex;
 
         /// <summary>
         /// The maximum width of this point light 2D's effects.
@@ -128,7 +149,7 @@ namespace FreneticGameGraphics.LightingSystem
         public void PrepareLightmap()
         {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-            GL.ClearBuffer(ClearBuffer.Color, 0, Engine.OneDLights ? new float[] { 999999f } : new float[] { 0, 0, 0, 0 });
+            GL.ClearBuffer(ClearBuffer.Color, 0, Engine.OneDLights ? new float[] { 1.0f } : new float[] { 0, 0, 0, 0 });
             GL.Viewport(0, 0, Width, Engine.OneDLights ? 1 : Width);
         }
 
