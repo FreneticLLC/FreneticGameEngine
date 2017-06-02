@@ -21,7 +21,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="loc">The source calling location.</param>
         public static void CheckError(string loc)
         {
-#if DEBUG
+#if !DEBUG
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {

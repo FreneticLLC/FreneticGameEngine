@@ -47,6 +47,11 @@ namespace FreneticGameGraphics.LightingSystem
                 Width = 314 * 2 + 320 * 2;
                 GL.BindTexture(TextureTarget.Texture1D, FBO_Tex);
                 GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.R32f, Width, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
+                GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture1D, FBO_Tex, 0);
             }
             else
             {
@@ -55,12 +60,12 @@ namespace FreneticGameGraphics.LightingSystem
                 Width = (int)(Strength * 2f);
                 // TODO: Alpha texture!?
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
+                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
             }
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             SubDivider = Math.Max((float)Math.Sqrt(Strength) * sdscale, 1f);
@@ -143,7 +148,6 @@ namespace FreneticGameGraphics.LightingSystem
         /// <returns>The adder.</returns>
         public Vector2 GetAdder()
         {
-            float sc = 1.0f / (Strength);
             return new Vector2(-Position.X, -Position.Y);
         }
 

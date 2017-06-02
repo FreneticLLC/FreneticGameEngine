@@ -352,6 +352,10 @@ namespace FreneticGameGraphics.ClientSystem
                 GraphicsUtil.CheckError("Render - Light Precalcer (Prep)");
                 GL.Uniform2(1, Scaler = Lights[i].GetScaler());
                 GL.Uniform2(2, Adder = Lights[i].GetAdder());
+                if (OneDLights)
+                {
+                    GL.Uniform2(6, Lights[i].Position);
+                }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
                 GraphicsUtil.CheckError("Render - Light Precalcer");
@@ -395,11 +399,15 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform2(4, Lights[i].GetSecondAdder(MainRenderContext));
                 GL.Uniform1(5, (float)Lights[i].Width);
                 GL.Uniform4(6, new Vector4(Lights[i].Color.R, Lights[i].Color.G, Lights[i].Color.B, Lights[i].Color.A));
-                if (!OneDLights)
+                if (OneDLights)
+                {
+                    GL.Uniform2(2, Lights[i].Position);
+                }
+                else
                 {
                     GL.Uniform1(8, Lights[i].SubDivider);
                 }
-                GL.BindTexture(TextureTarget.Texture2D, Lights[i].FBO_Tex);
+                GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             }
             GraphicsUtil.CheckError("Render - Lights combined");
