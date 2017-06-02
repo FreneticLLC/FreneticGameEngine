@@ -79,7 +79,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Whether to use the 1D lighting trick when lighting is enabled.
         /// </summary>
-        public bool OneDLights = true;
+        public bool OneDLights = false;
 
         /// <summary>
         /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
@@ -274,8 +274,10 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("RenderSingleFrame - 2");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
-            GL.Uniform1(7, (float)Window.Width / (float)Window.Height);
+            GL.Uniform1(7, Window.Width / (float)Window.Height);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
+            Shader_Lightmap1D.Bind();
+            GL.Uniform1(10, Window.Width / (float)Window.Height);
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
@@ -361,6 +363,8 @@ namespace FreneticGameGraphics.ClientSystem
                     GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
                     GL.Uniform2(6, Lights[i].Position);
                     GL.Uniform1(7, Lights[i].Strength * Lights[i].Strength);
+                    GL.Uniform2(8, Lights[i].GetSecondScaler(MainRenderContext));
+                    GL.Uniform2(9, Lights[i].GetSecondAdder(MainRenderContext));
                 }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;

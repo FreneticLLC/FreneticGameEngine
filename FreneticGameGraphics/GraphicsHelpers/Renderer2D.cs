@@ -197,7 +197,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 GL.Uniform3(4, rot.Value);
             }
             GL.BindVertexArray(Square._VAO);
-            if (rc.CalcShadows)
+            if (rc.CalcShadows && rc.Engine.OneDLights)
             {
                 GL.DrawElements(PrimitiveType.LineStrip, 5, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
