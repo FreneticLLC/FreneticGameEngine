@@ -44,7 +44,7 @@ namespace FreneticGameGraphics.LightingSystem
             FBO_Tex = GL.GenTexture();
             if (Engine.OneDLights)
             {
-                Width = 314 * 2 + 320 * 2;
+                Width = 4096;
                 GL.BindTexture(TextureTarget.Texture1D, FBO_Tex);
                 GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.R32f, Width, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
                 GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);

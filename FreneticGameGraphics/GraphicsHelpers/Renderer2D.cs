@@ -22,6 +22,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void Init()
         {
             GenerateSquareVBO();
+            GenerateSquareOfLinesVBO();
             GenerateLineVBO();
         }
 
@@ -31,11 +32,51 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public VBO Square;
 
         /// <summary>
+        /// Square-of-lines mesh.
+        /// </summary>
+        public VBO SquareOfLines;
+
+        /// <summary>
         /// Line mesh.
         /// </summary>
         public VBO Line;
 
         void GenerateSquareVBO()
+        {
+            Vector3[] vecs = new Vector3[4];
+            uint[] inds = new uint[4];
+            Vector3[] texs = new Vector3[4];
+            Vector4[] cols = new Vector4[4];
+            Vector3[] nrms = new Vector3[4];
+            for (uint u = 0; u < 4; u++)
+            {
+                inds[u] = u;
+            }
+            for (int c = 0; c < 4; c++)
+            {
+                cols[c] = new Vector4(1, 1, 1, 1);
+                nrms[c] = new Vector3(0, 0, 1);
+            }
+            vecs[0] = new Vector3(1, 0, 0);
+            texs[0] = new Vector3(1, 0, 0);
+            vecs[1] = new Vector3(1, 1, 0);
+            texs[1] = new Vector3(1, 1, 0);
+            vecs[2] = new Vector3(0, 0, 0);
+            texs[2] = new Vector3(0, 0, 0);
+            vecs[3] = new Vector3(0, 1, 0);
+            texs[3] = new Vector3(0, 1, 0);
+            Square = new VBO()
+            {
+                Vertices = vecs.ToList(),
+                Indices = inds.ToList(),
+                TexCoords = texs.ToList(),
+                Colors = cols.ToList(),
+                Normals = nrms.ToList()
+            };
+            Square.GenerateVBO();
+        }
+
+        void GenerateSquareOfLinesVBO()
         {
             Vector3[] vecs = new Vector3[5];
             uint[] inds = new uint[5];
@@ -61,7 +102,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             texs[3] = new Vector3(0, 0, 0);
             vecs[4] = new Vector3(1, 0, 0);
             texs[4] = new Vector3(1, 0, 0);
-            Square = new VBO()
+            SquareOfLines = new VBO()
             {
                 Vertices = vecs.ToList(),
                 Indices = inds.ToList(),
@@ -69,7 +110,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Colors = cols.ToList(),
                 Normals = nrms.ToList()
             };
-            Square.GenerateVBO();
+            SquareOfLines.GenerateVBO();
         }
 
         void GenerateLineVBO()
@@ -190,20 +231,21 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Vector2 adder = new Vector2(xmin, ymin);
             Vector2 tscaler = rc.Scaler * scaler;
             GL.Uniform2(1, tscaler);
-            Vector2 tadder = rc.Adder * rc.Scaler + adder * rc.Scaler;
+            Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
             GL.Uniform2(2, tadder);
             if (rot != null)
             {
                 GL.Uniform3(4, rot.Value);
             }
-            GL.BindVertexArray(Square._VAO);
             if (rc.CalcShadows && rc.Engine.OneDLights)
             {
+                GL.BindVertexArray(SquareOfLines._VAO);
                 GL.DrawElements(PrimitiveType.LineStrip, 5, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
             else
             {
-                GL.DrawElements(PrimitiveType.Quads, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
+                GL.BindVertexArray(Square._VAO);
+                GL.DrawElements(PrimitiveType.TriangleStrip, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
             if (rot != null)
             {

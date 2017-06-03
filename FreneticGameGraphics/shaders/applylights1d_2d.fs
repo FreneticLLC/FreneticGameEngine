@@ -30,8 +30,12 @@ void main()
 	//vec2 fmat = (f_texcoord * vec2(2.0) + vec2(-1.0));
 	vec2 rel_pos = mmat;//fmat - ((light_pos + m_adder) * m_scaler);
 	float ownDist = dot(rel_pos, rel_pos);
-	float xDist = texture(tex, atan(rel_pos.y, rel_pos.x) * 100.0 + 320.0).x;
-	modif *= ownDist >= xDist ? 0.2 : 1.0;
+	float xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318) * 0.5) + 0.0).x;
+	modif *= ownDist >= xDist ? 0.0 : 1.0;
+	xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318)) * 0.5 + 0.5).x;
+	modif *= ownDist >= xDist ? 0.0 : 1.0;
+	xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318)) * 0.5 + 1.0).x;
+	modif *= ownDist >= xDist ? 0.0 : 1.0;
 	vec4 c = light_color * modif;
 	color = vec4(c.xyz * c.xyz, c.w);
 }

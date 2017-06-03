@@ -79,7 +79,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Whether to use the 1D lighting trick when lighting is enabled.
         /// </summary>
-        public bool OneDLights = false;
+        public bool OneDLights = true;
 
         /// <summary>
         /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
@@ -128,7 +128,7 @@ namespace FreneticGameGraphics.ClientSystem
         public override void GetShaders()
         {
             Shader_Lightmap = Shaders.GetShader("lightmap2d");
-            Shader_Lightmap1D = Shaders.GetShader("lightmap1d_2d");
+            Shader_Lightmap1D = Shaders.GetShader("lightmap1d_2d?line_densen");
             Shader_Addlighttoscene = Shaders.GetShader("addlighttoscene2d");
             Shader_Combine = Shaders.GetShader("combine2d");
             Shader_ApplyLights1D = Shaders.GetShader("applylights1d_2d");
