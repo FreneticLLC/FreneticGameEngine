@@ -277,7 +277,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(7, Window.Width / (float)Window.Height);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
             Shader_Lightmap1D.Bind();
-            GL.Uniform1(10, Window.Width / (float)Window.Height);
+            //GL.Uniform1(10, Window.Width / (float)Window.Height);
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
@@ -361,10 +361,6 @@ namespace FreneticGameGraphics.ClientSystem
                 if (OneDLights)
                 {
                     GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                    GL.Uniform2(6, Lights[i].Position);
-                    GL.Uniform1(7, Lights[i].Strength * Lights[i].Strength);
-                    GL.Uniform2(8, Lights[i].GetSecondScaler(MainRenderContext));
-                    GL.Uniform2(9, Lights[i].GetSecondAdder(MainRenderContext));
                 }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
@@ -414,17 +410,10 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 GL.Uniform2(3, Lights[i].GetSecondScaler(MainRenderContext));
                 GL.Uniform2(4, Lights[i].GetSecondAdder(MainRenderContext));
-                GL.Uniform1(5, (float)Lights[i].Width);
                 GL.Uniform4(6, new Vector4(Lights[i].Color.R, Lights[i].Color.G, Lights[i].Color.B, Lights[i].Color.A));
-                if (OneDLights)
+                if (!OneDLights)
                 {
-                    GL.Uniform2(8, Lights[i].Position);
-                    GL.Uniform2(9, OriginalScaler);
-                    GL.Uniform2(10, OriginalAdder);
-                    GL.Uniform1(11, Lights[i].Strength * Lights[i].Strength);
-                }
-                else
-                {
+                    GL.Uniform1(5, (float)Lights[i].Width);
                     GL.Uniform1(8, Lights[i].SubDivider);
                 }
                 GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);

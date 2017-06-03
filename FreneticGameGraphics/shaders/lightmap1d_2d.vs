@@ -8,11 +8,6 @@ layout (location = 1) uniform vec2 scaler = vec2(1.0);
 layout (location = 2) uniform vec2 adder = vec2(0.0);
 layout (location = 3) uniform vec4 v_color = vec4(1.0);
 layout (location = 4) uniform vec3 rotation = vec3(0.0);
-// ...
-layout (location = 6) uniform vec2 light_pos = vec2(0.0);
-layout (location = 7) uniform float light_size = 100.0;
-layout (location = 8) uniform vec2 l_scaler = vec2(1.0);
-layout (location = 9) uniform vec2 l_adder = vec2(0.0);
 
 layout (location = 0) out struct fge_out {
 	vec4 f_color;
