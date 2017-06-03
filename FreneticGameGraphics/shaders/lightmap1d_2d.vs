@@ -31,5 +31,6 @@ void main()
 	vec2 tresPos = resPos.xy * l_scaler + l_adder;
 	tresPos.y /= aspect;
 	float heightZ = dot(tresPos, tresPos);
-	gl_Position = vec4(atan(tresPos.y, tresPos.x) * 100.0 + 320.0, 0.0, heightZ * 0.5 + 0.5, 1.0);
+	gl_Position = vec4(atan(tresPos.y, tresPos.x) * 100.0 + 320.0, 0.0, heightZ * 2.0 - 1.0, 1.0);
+	gl_Position.x = gl_VertexID % 2 == 0 ? 0.0 : 1200.0;
 }

@@ -74,7 +74,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Whether to use the 2D lighting engine.
         /// </summary>
-        public bool UseLightEngine = false;
+        public bool UseLightEngine = true;
 
         /// <summary>
         /// Whether to use the 1D lighting trick when lighting is enabled.

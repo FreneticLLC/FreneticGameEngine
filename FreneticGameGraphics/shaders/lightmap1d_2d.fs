@@ -14,5 +14,5 @@ void main()
 	{
 		discard;
 	}
-	color = (gl_FragCoord.z - 0.5) * 2.0;
+	color = gl_FragCoord.z;
 }
