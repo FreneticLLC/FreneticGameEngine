@@ -235,11 +235,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Compiles a compute shader by name to a shader.
         /// </summary>
         /// <param name="fname">The file name.</param>
+        /// <param name="specialadder">Special additions (EG defines)</param>
         /// <returns>The shader program.</returns>
-        public int CompileCompute(string fname)
+        public int CompileCompute(string fname, string specialadder = "")
         {
             fname = FileHandler.CleanFileName(fname.Trim());
-            string ftxt = Includes(File.ReadAllText("shaders/" + fname + ".comp"));
+            string ftxt = Includes(File.ReadAllText("shaders/" + fname + ".comp").Replace("\r\n", "\n").Replace("\r", ""));
+            string bf = ftxt.BeforeAndAfter("#version 430 core\n", out string af);
+            ftxt = bf + "#version 430 core\n" + specialadder + af;
             int shd = GL.CreateShader(ShaderType.ComputeShader);
             GL.ShaderSource(shd, ftxt);
             GL.CompileShader(shd);
