@@ -232,6 +232,37 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Compiles a compute shader by name to a shader.
+        /// </summary>
+        /// <param name="fname">The file name.</param>
+        /// <returns>The shader program.</returns>
+        public int CompileCompute(string fname)
+        {
+            fname = FileHandler.CleanFileName(fname.Trim());
+            string ftxt = Includes(File.ReadAllText("shaders/" + fname + ".comp"));
+            int shd = GL.CreateShader(ShaderType.ComputeShader);
+            GL.ShaderSource(shd, ftxt);
+            GL.CompileShader(shd);
+            string SHD_Info = GL.GetShaderInfoLog(shd);
+            GL.GetShader(shd, ShaderParameter.CompileStatus, out int SHD_Status);
+            if (SHD_Status != 1)
+            {
+                throw new Exception("Error creating ComputeShader. Error status: " + SHD_Status + ", info: " + SHD_Info);
+            }
+            int program = GL.CreateProgram();
+            GL.AttachShader(program, shd);
+            GL.LinkProgram(program);
+            string str = GL.GetProgramInfoLog(program);
+            if (str.Length != 0)
+            {
+                SysConsole.Output(OutputType.INFO, "Linked shader with message: '" + str + "'" + " -- FOR -- " + ftxt);
+            }
+            GL.DeleteShader(shd);
+            GraphicsUtil.CheckError("Shader - Compute - Compile");
+            return program;
+        }
+
+        /// <summary>
         /// Compiles a VertexShader and FragmentShader to a usable shader program.
         /// </summary>
         /// <param name="VS">The input VertexShader code.</param>
@@ -306,6 +337,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 GL.DeleteShader(gObj);
             }
+            GraphicsUtil.CheckError("Shader - Compile");
             return Program;
         }
     }
