@@ -154,7 +154,7 @@ namespace FreneticGameCore.Files
                 pak.FileListIndex = Files.Count;
                 foreach (ZipStorer.ZipFileEntry zent in zents)
                 {
-                    string name = zent.FilenameInZip.Replace('\\', '/').Replace("..", ".").Replace(":", "").ToLowerFast();
+                    string name = CleanFileName(zent.FilenameInZip);
                     if (name.Length == 0 || name[name.Length - 1] == '/')
                     {
                         continue;
