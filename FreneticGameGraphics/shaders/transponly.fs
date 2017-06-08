@@ -44,8 +44,7 @@ layout (location = 9) uniform mat4 lights_used_helper;
 layout (location = 16) uniform float minimum_light;
 // ...
 layout (location = 20) uniform mat4 shadow_matrix_array[LIGHTS_MAX];
-layout (location = 40) uniform mat4 light_details_array[LIGHTS_MAX];
-layout (location = 60) uniform mat4 light_details2_array[LIGHTS_MAX];
+layout (location = 58) uniform mat4 light_details_array[LIGHTS_MAX];
 
 #if MCM_GEOM_ACTIVE
 in struct vox_fout
@@ -120,28 +119,26 @@ void main()
 	for (int i = 0; i < count; i++)
 	{
 	mat4 light_details = light_details_array[i];
-	mat4 light_details2 = light_details2_array[i];
 	mat4 shadow_matrix = shadow_matrix_array[i];
 	// Loop body
 	float light_radius = light_details[0][0];
-	vec3 diffuse_albedo = vec3(light_details[0][1], light_details[0][2], light_details[0][3]);
-	vec3 specular_albedo = vec3(light_details[1][1], light_details[1][2], light_details[1][3]);
+	vec3 diffuse_albedo = vec3(0.7);
+	vec3 specular_albedo = vec3(0.7);
 	float light_type = light_details[1][3];
 	float should_sqrt = light_details[2][0];
 	float tex_size = light_details[2][1];
-	float depth_jump = light_details[2][2];
+	float depth_jump = 0.5;
 	float lightc = light_details[2][3];
 	if (minimum_light > 0.99)
 	{
 		fcolor += vec4(color.xyz / lightc, color.w);
 		continue;
 	}
-	vec4 bambient = (vec4(light_details[3][0], light_details[3][1], light_details[3][2], 1.0)
-		+ vec4(minimum_light, minimum_light, minimum_light, 0.0)) / lightc;
-	vec3 eye_pos = vec3(light_details2[0][0], light_details2[0][1], light_details2[0][2]);
-	vec3 light_pos = vec3(light_details2[1][0], light_details2[1][1], light_details2[1][2]);
-	float exposure = light_details2[2][0];
-	vec3 light_color = vec3(light_details2[0][3], light_details2[2][1], light_details2[2][2]);
+	vec4 bambient = vec4(minimum_light, minimum_light, minimum_light, 0.0) / lightc;
+	vec3 eye_pos = vec3(0.0);
+	vec3 light_pos = vec3(light_details[0][1], light_details[0][2], light_details[0][3]);
+	float exposure = light_details[2][2];
+	vec3 light_color = vec3(light_details[1][0], light_details[1][1], light_details[1][2]);
 	vec4 x_spos = shadow_matrix * vec4(f.position.xyz, 1.0);
 	vec3 N = -normalize(f.tbn * norms);
 	vec3 light_path = light_pos - f.position.xyz;
