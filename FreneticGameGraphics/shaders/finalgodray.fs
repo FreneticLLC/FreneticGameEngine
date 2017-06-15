@@ -186,7 +186,7 @@ void main() // The central entry point of the shader. Handles everything!
 	vec3 renderhint = texture(renderhinttex, f_texcoord).xyz;
 	vec3 renderhint2 = texture(renderhint2tex, f_texcoord).xyz;
 	vec3 pos = texture(positiontex, f_texcoord).xyz;
-	float dist = linearizeDepth(texture(depthtex, f_texcoord).r); // This is useful for both fog and reflection, so grab it here.
+	float dist = linearizeDepth(texture(depthtex, f_texcoord).x); // This is useful for both fog and reflection, so grab it here.
 	if (renderhint.z < 1.0 || fogCol.w > 1.0)
 	{
 		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);

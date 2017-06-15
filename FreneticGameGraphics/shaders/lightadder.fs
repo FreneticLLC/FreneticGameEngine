@@ -1,4 +1,3 @@
-
 #version 430 core
 
 #define MCM_GOOD_GRAPHICS 0
