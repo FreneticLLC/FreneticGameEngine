@@ -20,12 +20,12 @@ in struct vox_out
 {
 #if MCM_PRETTY
 	vec4 position;
-	vec2 texcoord;
+	vec3 texcoord;
 	vec4 color;
 	mat3 tbn;
 #else
 	mat3 tbn;
-	vec2 texcoord;
+	vec3 texcoord;
 	vec4 color;
 #endif
 } f[1];
@@ -85,8 +85,9 @@ void main()
 		return;
 	}
 	float snz = snoise((pos + vec3(time, time, 0.0)) * 0.2);
-	vec3 wnd = wind * snz;
-	vec3 up = vec3(0.0, 0.0, 1.0);
+	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
+	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
+	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
 	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.3;
 	vec3 nr = right * (1.0 / 0.3);
 	vec3 pos_norm = normalize(pos.xyz + wnd);

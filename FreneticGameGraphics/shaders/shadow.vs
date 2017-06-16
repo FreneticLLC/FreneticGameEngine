@@ -2,10 +2,11 @@
 
 #define MCM_GEOM_ACTIVE 0
 #define MCM_NO_BONES 0
+#define MCM_GEOM_THREED_TEXTURE 0
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texcoords;
+layout (location = 2) in vec3 texcoords;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec4 color;
 #if MCM_GEOM_ACTIVE
@@ -39,7 +40,11 @@ out struct vox_fout
 #endif
 {
 	vec4 position;
+#if MCM_GEOM_THREED_TEXTURE
+	vec3 texcoord;
+#else
 	vec2 texcoord;
+#endif
 	vec4 color;
 	mat3 tbn;
 #if MCM_GEOM_ACTIVE
@@ -94,7 +99,11 @@ void main()
 		f.position.y = sign(f.position.y) * fix_sqr(1.0 - abs(f.position.y));
 	}
 #endif
+#if MCM_GEOM_THREED_TEXTURE
 	f.texcoord = texcoords;
+#else
+	f.texcoord = texcoords.xy;
+#endif
 	f.color = color;
 	gl_Position = f.position;
 }

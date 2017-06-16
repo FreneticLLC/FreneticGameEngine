@@ -1,0 +1,32 @@
+#version 430 core
+
+layout(std430, binding = 1) buffer b_pos
+{
+	vec4 f_pos[];
+};
+layout(std430, binding = 2) buffer b_texcoord
+{
+	vec4 f_tcs[];
+};
+
+layout (location = 11) uniform uint size_of_buf;
+layout (location = 12) uniform vec4 squishy;
+layout (location = 13) uniform float time;
+layout (location = 14) uniform float deltat;
+
+layout(local_size_x = 90, local_size_y = 1, local_size_z = 1) in; // TODO: tweak the 90 value
+
+void main()
+{
+	uint bcoord = gl_GlobalInvocationID.x;
+	if (bcoord < size_of_buf)
+	{
+		vec3 rel = (f_pos[bcoord].xyz + vec3(0.0, 0.0, 1.0)) - squishy.xyz;
+		float dotted = dot(rel, rel);
+		if (dotted < squishy.w * squishy.w)
+		{
+			float pushback = time + ((1.0 - (sqrt(dotted) / squishy.w)) * 60.0);
+			f_tcs[bcoord].z = max(min(pushback, f_tcs[bcoord].z + deltat * 60.0), f_tcs[bcoord].z);
+		}
+	}
+}
