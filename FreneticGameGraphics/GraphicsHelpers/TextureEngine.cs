@@ -173,6 +173,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public event EventHandler<TextureLoadedEventArgs> OnTextureLoaded;
 
         /// <summary>
+        /// Whether textures should use linear mode usually.
+        /// </summary>
+        public bool DefaultLinear = true;
+
+        /// <summary>
         /// Loads a texture from file.
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
@@ -209,7 +214,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 GL.GenTextures(1, out texture.Original_InternalID);
                 texture.Internal_Texture = texture.Original_InternalID;
                 texture.Bind();
-                LockBitmapToTexture(bmp2, true);
+                LockBitmapToTexture(bmp2, DefaultLinear);
                 if (bmp2 != bmp)
                 {
                     bmp2.Dispose();

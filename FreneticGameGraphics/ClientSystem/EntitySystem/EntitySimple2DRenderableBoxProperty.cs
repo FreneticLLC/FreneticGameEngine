@@ -64,11 +64,18 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="context">The render context.</param>
         public override void RenderStandard2D(RenderContext2D context)
         {
-            BoxTexture.Bind();
+            if (context.CalcShadows && context.Engine.OneDLights)
+            {
+                context.Engine.Textures.White.Bind();
+            }
+            else
+            {
+                BoxTexture.Bind();
+            }
             context.Engine.RenderHelper.SetColor(BoxColor);
             Vector2 sz = BoxSize;
-            context.Engine.RenderHelper.RenderRectangle(context, RenderAt.X + BoxUpLeft.X, RenderAt.Y + BoxDownRight.Y,
-                RenderAt.X + BoxDownRight.X, RenderAt.Y + BoxUpLeft.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
+            context.Engine.RenderHelper.RenderRectangle(context, RenderAt.X + BoxUpLeft.X, RenderAt.Y + BoxUpLeft.Y,
+                RenderAt.X + BoxDownRight.X, RenderAt.Y + BoxDownRight.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
         }
     }
 }
