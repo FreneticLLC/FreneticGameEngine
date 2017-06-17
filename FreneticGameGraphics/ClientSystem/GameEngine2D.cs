@@ -112,6 +112,11 @@ namespace FreneticGameGraphics.ClientSystem
         public Vector2 ViewCenter = Vector2.Zero;
 
         /// <summary>
+        /// How much to pixelate the view. 1 = no pixelation.
+        /// </summary>
+        public int Pixelation = 1;
+
+        /// <summary>
         /// Sets up the game engine 2D.
         /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowSetUp"/>.
         /// Then call <see cref="GameEngineBase.Start"/>.
@@ -172,9 +177,9 @@ namespace FreneticGameGraphics.ClientSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
             c_FBO_Tex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, c_FBO_Tex);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.Width, Window.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.Width / Pixelation, Window.Height / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, c_FBO_Tex, 0);
@@ -182,9 +187,9 @@ namespace FreneticGameGraphics.ClientSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
             l_FBO_Tex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, l_FBO_Tex);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.Width, Window.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.Width / Pixelation, Window.Height / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, l_FBO_Tex, 0);
@@ -230,8 +235,8 @@ namespace FreneticGameGraphics.ClientSystem
         {
             GraphicsUtil.CheckError("RenderSingleFrame");
             // First step: setup
-            MainRenderContext.Width = Window.Width;
-            MainRenderContext.Height = Window.Height;
+            MainRenderContext.Width = Window.Width / Pixelation;
+            MainRenderContext.Height = Window.Height / Pixelation;
             MainRenderContext.Zoom = OriginalZoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenter;
@@ -274,7 +279,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("RenderSingleFrame - 2");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
-            GL.Uniform1(7, Window.Width / (float)Window.Height);
+            GL.Uniform1(7, aspect);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
             Shader_Lightmap1D.Bind();
             Shaders.ColorMult2DShader.Bind();
@@ -375,7 +380,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             MainRenderContext.CalcShadows = false;
             GraphicsUtil.CheckError("Render - Lights precalced");
-            GL.Viewport(0, 0, Window.Width, Window.Height);
+            GL.Viewport(0, 0, Window.Width / Pixelation, Window.Height / Pixelation);
             Shaders.ColorMult2DShader.Bind();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
@@ -439,6 +444,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
+            GL.Viewport(0, 0, Window.Width, Window.Height);
             RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             GraphicsUtil.CheckError("Render - Added");
             GL.BindTexture(TextureTarget.Texture2D, 0);
