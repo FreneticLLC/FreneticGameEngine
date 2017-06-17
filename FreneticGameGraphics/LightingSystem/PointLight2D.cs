@@ -169,6 +169,10 @@ namespace FreneticGameGraphics.LightingSystem
         /// <returns>The scaler.</returns>
         public Vector2 GetScaler()
         {
+            if (IsSkyLight)
+            {
+                Strength = 1.0f / (Math.Min(Engine.OriginalScaler.X, Engine.OriginalScaler.Y) * 0.05f);
+            }
             float sc = 1.0f / (Strength);
             return new Vector2(sc, sc);
         }
@@ -179,6 +183,10 @@ namespace FreneticGameGraphics.LightingSystem
         /// <returns>The adder.</returns>
         public Vector2 GetAdder()
         {
+            if (IsSkyLight)
+            {
+                Position = -Engine.OriginalAdder + (new Vector2(1.0f / (Engine.OriginalScaler.X), 1.0f / (Engine.OriginalScaler.Y * 0.25f)));
+            }
             return new Vector2(-Position.X, -Position.Y);
         }
 
