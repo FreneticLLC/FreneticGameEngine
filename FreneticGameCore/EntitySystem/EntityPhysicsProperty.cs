@@ -19,7 +19,7 @@ namespace FreneticGameCore.EntitySystem
     {
         /// <summary>
         /// The owning physics world.
-        /// </summary>
+        /// </summary> // TODO: Save the correct physics world ref?
         public PhysicsSpace PhysicsWorld; // Set by constructor.
 
         /// <summary>
@@ -263,11 +263,8 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Construct the physics entity property.
         /// </summary>
-        /// <param name="space">The space it will be spawned into.</param>
-        public EntityPhysicsProperty(PhysicsSpace space)
+        public EntityPhysicsProperty()
         {
-            PhysicsWorld = space;
-            InternalGravity = PhysicsWorld.Gravity;
         }
 
         /// <summary>
@@ -275,6 +272,10 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
+            if (PhysicsWorld == null)
+            {
+                PhysicsWorld = BEntity.Engine.PhysicsWorld;
+            }
             SpawnHandle();
             BEntity.OnPositionChanged += PosCheck;
             BEntity.OnOrientationChanged += OriCheck;
