@@ -416,6 +416,10 @@ namespace FreneticGameGraphics.ClientSystem
                     GL.Uniform1(5, (float)Lights[i].Width);
                     GL.Uniform1(8, Lights[i].SubDivider);
                 }
+                else
+                {
+                    GL.Uniform1(8, Lights[i].ExtraLightDist);
+                }
                 GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             }

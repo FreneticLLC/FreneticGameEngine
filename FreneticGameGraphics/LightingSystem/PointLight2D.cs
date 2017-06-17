@@ -132,6 +132,11 @@ namespace FreneticGameGraphics.LightingSystem
         /// The subdivider to affect the render detail of this point light 2D.
         /// </summary>
         public float SubDivider = 4;
+        
+        /// <summary>
+        /// Extra light distance (affects how deep into an object a light will still show at).
+        /// </summary>
+        public float ExtraLightDist = 50.0f;
 
         /// <summary>
         /// Set to configure whether an entity should cast a shadow from this light.

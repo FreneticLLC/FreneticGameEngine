@@ -60,6 +60,13 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public float LightSDScale = 0.5f;
 
         /// <summary>
+        /// How deep into an object the light should go.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float LightExtraDist = 50.0f;
+        
+        /// <summary>
         /// The actual light object.
         /// </summary>
         public PointLight2D ActualLight;
@@ -81,7 +88,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine2D eng)
             {
-                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng) { Color = LightColor, ShouldShadow = CastShadow };
+                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng) { Color = LightColor, ShouldShadow = CastShadow, ExtraLightDist = LightExtraDist };
                 eng.Lights.Add(ActualLight);
                 Entity.OnPositionChanged += FixPosition;
             }
