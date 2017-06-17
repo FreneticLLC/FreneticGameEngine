@@ -277,7 +277,6 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(7, Window.Width / (float)Window.Height);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
             Shader_Lightmap1D.Bind();
-            //GL.Uniform1(10, Window.Width / (float)Window.Height);
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
@@ -361,6 +360,7 @@ namespace FreneticGameGraphics.ClientSystem
                 if (OneDLights)
                 {
                     GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                    GL.Uniform4(21, new Vector4(ViewCenter.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenter.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
                 }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
@@ -419,6 +419,7 @@ namespace FreneticGameGraphics.ClientSystem
                 else
                 {
                     GL.Uniform1(8, Lights[i].ExtraLightDist);
+                    GL.Uniform4(21, new Vector4(ViewCenter.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenter.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
                 }
                 GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);

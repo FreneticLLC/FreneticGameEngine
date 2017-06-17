@@ -139,6 +139,11 @@ namespace FreneticGameGraphics.LightingSystem
         public float ExtraLightDist = 50.0f;
 
         /// <summary>
+        /// Whether this is a 'sky' light.
+        /// </summary>
+        public bool IsSkyLight = false;
+
+        /// <summary>
         /// Set to configure whether an entity should cast a shadow from this light.
         /// </summary>
         public Func<ClientEntity, bool> ShouldShadow;

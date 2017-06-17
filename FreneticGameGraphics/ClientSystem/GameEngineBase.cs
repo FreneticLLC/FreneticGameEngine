@@ -118,6 +118,12 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 return;
             }
+            ErrorCode ec = GL.GetError();
+            while (ec != ErrorCode.NoError)
+            {
+                SysConsole.Output(OutputType.WARNING, "GL Error: " + ec);
+                ec = GL.GetError();
+            }
             // Second step: clear the screen
             GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
             GraphicsUtil.CheckError("GEB - Pre");

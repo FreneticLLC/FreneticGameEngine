@@ -65,7 +65,14 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LightExtraDist = 50.0f;
-        
+
+        /// <summary>
+        /// Whether the light source is a 'sky' light.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool IsSkyLight = false;
+
         /// <summary>
         /// The actual light object.
         /// </summary>
@@ -88,7 +95,13 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine2D eng)
             {
-                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng) { Color = LightColor, ShouldShadow = CastShadow, ExtraLightDist = LightExtraDist };
+                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng)
+                {
+                    Color = LightColor,
+                    ShouldShadow = CastShadow,
+                    ExtraLightDist = LightExtraDist,
+                    IsSkyLight = IsSkyLight
+                };
                 eng.Lights.Add(ActualLight);
                 Entity.OnPositionChanged += FixPosition;
             }

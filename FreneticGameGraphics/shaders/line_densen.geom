@@ -5,7 +5,7 @@
 layout (lines) in;
 layout (line_strip, max_vertices = 16) out;
 
-layout (location = 10) uniform float aspect;
+layout (location = 21) uniform vec4 sky = vec4(0.0);
 
 layout (location = 0) in struct fge_out {
 	vec4 f_color;
@@ -19,6 +19,21 @@ layout (location = 0) out struct fge_in {
 
 void main()
 {
+	if (sky.w > 0.5)
+	{
+		fin.f_color = fout[0].f_color;
+		fin.f_texcoord = fout[0].f_texcoord;
+		float zer = gl_in[0].gl_Position.y;
+		gl_Position = vec4(gl_in[0].gl_Position.x * 2.0, 0.0, dot(zer, zer) * 2.0 - 1.0, 1.0);
+		EmitVertex();
+		fin.f_color = fout[1].f_color;
+		fin.f_texcoord = fout[1].f_texcoord;
+		zer = gl_in[1].gl_Position.y;
+		gl_Position = vec4(gl_in[1].gl_Position.x * 2.0, 0.0, dot(zer, zer) * 2.0 - 1.0, 1.0);
+		EmitVertex();
+		EndPrimitive();
+		return;
+	}
 	vec4 colA = fout[0].f_color;
 	vec4 colAdd = (fout[1].f_color - colA) * (1.0 / 15.0);
 	vec2 tcA = fout[0].f_texcoord;
