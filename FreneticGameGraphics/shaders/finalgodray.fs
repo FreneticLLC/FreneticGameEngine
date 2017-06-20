@@ -192,6 +192,7 @@ void main() // The central entry point of the shader. Handles everything!
 		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);
 		float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
 		float fmz = min(fogMod, 1.0);
+		fmz *= fmz * fmz * fmz;
 		light_color.xyz = light_color.xyz * (1.0 - fmz) + fogCol.xyz * fmz + vec3(fogMod - fmz);
 	}
 	if (dot(renderhint2, renderhint2) > 0.99) // Apply refraction if set. This is set by having a strong renderhint2 value that has a length-squared of at least 1.0!
