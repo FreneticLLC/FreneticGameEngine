@@ -34,6 +34,15 @@ namespace FreneticGameCore.Collision
         }
 
         /// <summary>
+        /// Converts the AABB to a string.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString()
+        {
+            return Min + "/" + Max;
+        }
+
+        /// <summary>
         /// Includes a Location into the box's space, expanding as needed (but not shrinking).
         /// </summary>
         /// <param name="pos">The position to include.</param>

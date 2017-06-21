@@ -678,9 +678,9 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Returns the samallest coordinate in this location (samallest of X, Y, or Z).
+        /// Returns the smallest coordinate in this location (samallest of X, Y, or Z).
         /// </summary>
-        /// <returns>The samallest coordinate.</returns>
+        /// <returns>The smallest coordinate.</returns>
         public double SmallestValue()
         {
             return Math.Min(Math.Min(X, Y), Z);
