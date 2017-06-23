@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using FreneticGameCore.Collision;
 
 namespace FreneticGameCore
 {
@@ -636,6 +637,15 @@ namespace FreneticGameCore
         public Location GetBlockLocation()
         {
             return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
+        }
+
+        /// <summary>
+        /// Converts the Location to an integer vector.
+        /// </summary>
+        /// <returns>The integer vector.</returns>
+        public Vector3i ToVec3i()
+        {
+            return new Vector3i((int)X, (int)Y, (int)Z);
         }
 
         /// <summary>
