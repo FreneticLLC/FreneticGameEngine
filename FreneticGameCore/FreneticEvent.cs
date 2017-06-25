@@ -134,6 +134,11 @@ namespace FreneticGameCore
         public ManualResetEvent MRECompletion = new ManualResetEvent(false);
 
         /// <summary>
+        /// Locked until the first pass of the wait run is complete.
+        /// </summary>
+        public ManualResetEvent MREFirst = new ManualResetEvent(false);
+
+        /// <summary>
         /// Waits for a delay in seconds.
         /// Be sure to use <see cref="Complete"/> when done.
         /// </summary>
@@ -141,6 +146,7 @@ namespace FreneticGameCore
         public void Wait(double delay)
         {
             Used = true;
+            MREFirst.Set();
             ManualResetEvent mre = new ManualResetEvent(false);
             Schedule.ScheduleSyncTask(() =>
             {
@@ -154,12 +160,14 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Waits for an MRE to be set - the runs at the next frame tick.
+        /// Waits minimum one frame.
         /// Be sure to use <see cref="Complete"/> when done.
         /// </summary>
         /// <param name="mre"></param>
         public void WaitFor(ManualResetEvent mre)
         {
             Used = true;
+            MREFirst.Set();
             MRECompletion.Set();
             mre.WaitOne();
             Wait(0);
@@ -170,6 +178,7 @@ namespace FreneticGameCore
         /// </summary>
         public void Complete()
         {
+            MREFirst.Set();
             MRECompletion.Set();
         }
     }
@@ -243,13 +252,12 @@ namespace FreneticGameCore
         public FreneticEventWaiter FireWait(FreneticEventArgs<T> fea)
         {
             FreneticEventWaiter few = new FreneticEventWaiter() { Schedule = fea.ScheduleHelper };
-            ManualResetEvent completed = new ManualResetEvent(false);
             fea.ScheduleHelper.StartAsyncTask(() =>
             {
                 FireWaiter(fea, few);
-                completed.Set();
+                few.MREFirst.Set();
             });
-            completed.WaitOne();
+            few.MREFirst.WaitOne();
             if (few.Used)
             {
                 return few;
