@@ -578,6 +578,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Converts a quaternion to a byte array.
+        /// 16 bytes.
         /// </summary>
         /// <param name="quat">The quaternion.</param>
         /// <returns>The byte array.</returns>
