@@ -135,6 +135,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Waits for a delay in seconds.
+        /// Be sure to use <see cref="Complete"/> when done.
         /// </summary>
         /// <param name="delay">The delay, in seconds.</param>
         public void Wait(double delay)
@@ -149,6 +150,19 @@ namespace FreneticGameCore
             }, delay);
             MRECompletion.Set();
             mre.WaitOne();
+        }
+
+        /// <summary>
+        /// Waits for an MRE to be set - the runs at the next frame tick.
+        /// Be sure to use <see cref="Complete"/> when done.
+        /// </summary>
+        /// <param name="mre"></param>
+        public void WaitFor(ManualResetEvent mre)
+        {
+            Used = true;
+            MRECompletion.Set();
+            mre.WaitOne();
+            Wait(0);
         }
 
         /// <summary>
