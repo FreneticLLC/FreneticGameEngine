@@ -129,17 +129,34 @@ namespace FreneticGameCore
         public bool Used = false;
 
         /// <summary>
+        /// The marker for completetion of the waiter.
+        /// </summary>
+        public ManualResetEvent MRECompletion = new ManualResetEvent(false);
+
+        /// <summary>
         /// Waits for a delay in seconds.
         /// </summary>
         /// <param name="delay">The delay, in seconds.</param>
         public void Wait(double delay)
         {
+            Used = true;
             ManualResetEvent mre = new ManualResetEvent(false);
             Schedule.ScheduleSyncTask(() =>
             {
+                MRECompletion.Reset();
                 mre.Set();
+                MRECompletion.WaitOne();
             }, delay);
+            MRECompletion.Set();
             mre.WaitOne();
+        }
+
+        /// <summary>
+        /// Marks the Waiter complete. MUST be run if waiting is ever used!
+        /// </summary>
+        public void Complete()
+        {
+            MRECompletion.Set();
         }
     }
 
