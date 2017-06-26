@@ -621,7 +621,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             else
             {
                 float Y = (float)Position.Y;
-                List<Task> tasks = new List<Task>(lines.Length);
+                List<Task> tasks = AsyncText ? new List<Task>(lines.Length) : null;
                 List<TextVBO> vbos = new List<TextVBO>(lines.Length);
                 string tcol = "";
                 for (int i = 0; i < lines.Length; i++)
@@ -633,15 +633,25 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         vbos.Add(tvbo);
                         float ty = Y;
                         string tcc = tcol;
-                        tasks.Add(Task.Factory.StartNew(() => render(tcc + line, ty, tvbo)));
+                        if (AsyncText)
+                        {
+                            tasks.Add(TFactory.StartNew(() => render(tcc + line, ty, tvbo)));
+                        }
+                        else
+                        {
+                            render(tcc + line, ty, tvbo);
+                        }
                         tcol += GrabAllColors(line);
                     }
                     Y += font_default.Height;
                 }
                 int len = 0;
-                for (int i = 0; i < tasks.Count; i++)
+                for (int i = 0; i < vbos.Count; i++)
                 {
-                    tasks[i].Wait();
+                    if (AsyncText)
+                    {
+                        tasks[i].Wait();
+                    }
                     len += vbos[i].Vecs.Count;
                 }
                 cVBO.Positions = new Vector4[len];
@@ -663,6 +673,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
             cVBO.Destroy();
             GraphicsUtil.CheckError("Render FontSet");
         }
+
+        /// <summary>
+        /// Whether text should be async-accelerated.
+        /// </summary>
+        public bool AsyncText = false;
+
+        /// <summary>
+        /// The Font Engine's Task Factory.
+        /// </summary>
+        public TaskFactory TFactory = new TaskFactory();
 
         /// <summary>
         /// Grabs a string containing only colors from the string containing text.
