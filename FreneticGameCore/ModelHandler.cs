@@ -223,13 +223,14 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="input">The model.</param>
         /// <param name="verts">The vertice count if needed.</param>
+        /// <param name="center">The center output.</param>
         /// <returns>The BEPU mesh.</returns>
-        public ConvexHullShape MeshToBepuConvex(Model3D input, out int verts)
+        public ConvexHullShape MeshToBepuConvex(Model3D input, out int verts, out Vector3 center)
         {
             List<Vector3> vertices = GetCollisionVertices(input);
             ConvexHullHelper.RemoveRedundantPoints(vertices);
             verts = vertices.Count;
-            return new ConvexHullShape(vertices);
+            return new ConvexHullShape(vertices, out center);
         }
     }
 }
