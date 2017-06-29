@@ -34,6 +34,7 @@ namespace FreneticGameCore
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
         }
 
         /// <summary>

@@ -171,6 +171,11 @@ namespace FreneticGameCore
         bool Done = false;
 
         /// <summary>
+        /// Whether this event is unimportant, and thus can be treated as lower priority.
+        /// </summary>
+        public bool UnImportant = true;
+
+        /// <summary>
         /// Gets whether the item has started.
         /// </summary>
         public bool HasStarted()
@@ -268,7 +273,18 @@ namespace FreneticGameCore
         /// </summary>
         private void RunInternal()
         {
-            MyAction.Invoke();
+            try
+            {
+                if (UnImportant)
+                {
+                    Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+                }
+                MyAction.Invoke();
+            }
+            finally
+            {
+                Thread.CurrentThread.Priority = ThreadPriority.Normal;
+            }
             lock (Locker)
             {
                 Done = true;
