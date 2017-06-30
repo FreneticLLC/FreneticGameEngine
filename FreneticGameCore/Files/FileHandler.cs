@@ -264,32 +264,51 @@ namespace FreneticGameCore.Files
             return false;
         }
 
+        private byte[] ReadFromFS(string fname)
+        {
+            if (File.Exists(BaseDirectory + fname))
+            {
+                return File.ReadAllBytes(BaseDirectory + fname);
+            }
+            else
+            {
+                for (int i = 0; i < SubDirectories.Count; i++)
+                {
+                    if (File.Exists(SubDirectories[i] + fname))
+                    {
+                        return File.ReadAllBytes(SubDirectories[i] + fname);
+                    }
+                }
+                return null;
+            }
+        }
+
         /// <summary>
         /// Returns all the byte data in a file.
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
+        /// <param name="journal">Whether to use a journalling read for file system files.</param>
         /// <returns>The file's data, as a byte array.</returns>
-        public byte[] ReadBytes(string filename)
+        public byte[] ReadBytes(string filename, bool journal = true)
         {
             string fname = CleanFileName(filename);
             int ind = FileIndex(fname);
             if (ind == -1)
             {
-                if (File.Exists(BaseDirectory + fname))
+                byte[] b = ReadFromFS(fname);
+                if (b != null)
                 {
-                    return File.ReadAllBytes(BaseDirectory + fname);
+                    return b;
                 }
-                else
+                if (journal)
                 {
-                    for (int i = 0; i < SubDirectories.Count; i++)
+                    b = ReadFromFS(fname + "~1") ?? ReadFromFS(fname + "~2");
+                    if (b != null)
                     {
-                        if (File.Exists(SubDirectories[i] + fname))
-                        {
-                            return File.ReadAllBytes(SubDirectories[i] + fname);
-                        }
+                        return b;
                     }
-                    throw new UnknownFileException(fname);
                 }
+                throw new UnknownFileException(fname);
             }
             PakkedFile file = Files[ind];
             if (file.IsPakked)
@@ -300,7 +319,7 @@ namespace FreneticGameCore.Files
                 ms.Close();
                 return toret;
             }
-            else
+            else // TODO: Should non-pakked "pakked file"s ever be a thing?
             {
                 return File.ReadAllBytes(file.Handle);
             }
@@ -320,10 +339,11 @@ namespace FreneticGameCore.Files
         /// Returns all the text data in a file.
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
+        /// <param name="journal">Whether to use a journalling read for file system files.</param>
         /// <returns>The file's data, as a string.</returns>
-        public string ReadText(string filename)
+        public string ReadText(string filename, bool journal = true)
         {
-            return encoding.GetString(ReadBytes(filename)).Replace("\r", "");
+            return encoding.GetString(ReadBytes(filename, journal)).Replace("\r", "");
         }
 
         /// <summary>
@@ -421,19 +441,43 @@ namespace FreneticGameCore.Files
                 Directory.CreateDirectory(dir);
             }
             File.WriteAllBytes(finname, bytes);
-            for (int i = 0; i < Files.Count; i++)
+        }
+
+        /// <summary>
+        /// Save bytes to a file, journalling mode.
+        /// </summary>
+        /// <param name="filename">The file to save to.</param>
+        /// <param name="bytes">The bytes to write.</param>
+        public void JournalSaveBytes(string filename, byte[] bytes)
+        {
+            string fname = CleanFileName(filename);
+            string finname;
+            finname = SaveDir + fname;
+            string dir = Path.GetDirectoryName(finname);
+            if (!Directory.Exists(dir))
             {
-                if (Files[i] == null)
-                {
-                    // TODO: Find out why this can happen
-                    continue;
-                }
-                if (Files[i].Handle == finname)
-                {
-                    return;
-                }
+                Directory.CreateDirectory(dir);
             }
-            // TODO: Files.Insert(0, new PakkedFile(fname, finname));
+            File.WriteAllBytes(finname + "~1", bytes);
+            if (File.Exists(finname))
+            {
+                File.Move(finname, finname + "~2");
+            }
+            File.Move(finname + "~1", finname);
+            if (File.Exists(finname + "~2"))
+            {
+                File.Delete(finname + "~2");
+            }
+        }
+
+        /// <summary>
+        /// Writes text to a file.
+        /// </summary>
+        /// <param name="filename">The name of the file to write to.</param>
+        /// <param name="text">The text data to write.</param>
+        public void JournalWriteText(string filename, string text)
+        {
+            JournalSaveBytes(filename, encoding.GetBytes(text.Replace('\r', ' ')));
         }
 
         /// <summary>
