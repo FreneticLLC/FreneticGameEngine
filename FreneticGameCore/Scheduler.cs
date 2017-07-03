@@ -79,10 +79,11 @@ namespace FreneticGameCore
         /// Starts an async task.
         /// </summary>
         /// <param name="a">The action to launch async.</param>
+        /// <param name="prio">Whether this action is considered important.</param>
         /// <returns>The scheduled item.</returns>
-        public ASyncScheduleItem StartAsyncTask(Action a)
+        public ASyncScheduleItem StartAsyncTask(Action a, bool prio = false)
         {
-            ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = a };
+            ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = a, UnImportant = !prio };
             asyncer.RunMe();
             return asyncer;
         }
