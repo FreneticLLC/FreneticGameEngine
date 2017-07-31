@@ -41,7 +41,7 @@ namespace FGETests
         {
             if (!BitConverter.IsLittleEndian)
             {
-                Assert.Fail("BitConverter identifies this system as little endian, which is not yet supported by the game!");
+                Assert.Fail("BitConverter identifies this system as big endian, which is not currently supported by the game!");
             }
             else
             {
