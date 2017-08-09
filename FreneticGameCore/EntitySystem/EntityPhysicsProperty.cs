@@ -345,14 +345,14 @@ namespace FreneticGameCore.EntitySystem
             {
                 SpawnedBody = new Entity(Shape.GetBEPUShape(), InternalMass);
                 OriginalObject = SpawnedBody;
-                SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
-                SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
-                SpawnedBody.Material.KineticFriction = InternalFriction;
-                SpawnedBody.Material.StaticFriction = InternalFriction;
-                SpawnedBody.Material.Bounciness = InternalBounciness;
-                SpawnedBody.Position = InternalPosition.ToBVector();
                 SpawnedBody.Orientation = InternalOrientation;
             }
+            SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
+            SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
+            SpawnedBody.Material.KineticFriction = InternalFriction;
+            SpawnedBody.Material.StaticFriction = InternalFriction;
+            SpawnedBody.Material.Bounciness = InternalBounciness;
+            SpawnedBody.Position = InternalPosition.ToBVector();
             SpawnedBody.Gravity = InternalGravity.ToBVector();
             SpawnedBody.Tag = BEntity;
             // TODO: Other settings
