@@ -70,10 +70,66 @@ namespace FreneticGameGraphics.ClientSystem
         public ModelEngine Models;
 
         /// <summary>
+        /// Whether forward mode should calculate reflection helpers.
+        /// </summary>
+        public bool ForwardReflections = false;
+
+        /// <summary>
+        /// Whether to display decal effects.
+        /// </summary>
+        public bool DisplayDecals = true;
+
+        /// <summary>
+        /// Whether to render the view as a 3D side-by-side view.
+        /// </summary>
+        public bool Render3DView = false;
+
+        /// <summary>
+        /// The current Field Of View, in degrees (Defaults to 70).
+        /// </summary>
+        public float FOV = 70;
+
+        /// <summary>
+        /// The current Z-Near value, defaults to '0.1'.
+        /// </summary>
+        public float ZNear = 0.1f;
+
+        /// <summary>
+        /// Get the Z-Far value (defaults to 1000 autoget).
+        /// </summary>
+        public Func<float> ZFar = () => 1000;
+        
+        /// <summary>
+        /// Get the maximum distance of fog. Defaults to match ZFar.
+        /// </summary>
+        public Func<float> FogMaxDist = null;
+
+        /// <summary>
+        /// Get the Z-Far (OUT-View) value (defaults to 1000 autoget).
+        /// </summary>
+        public Func<float> ZFarOut = () => 1000;
+
+        /// <summary>
+        /// The "Sun adjustment" backup light color and value.
+        /// </summary>
+        public Vector4 SunAdjustBackupLight = Vector4.One;
+
+        /// <summary>
+        /// The direction of the sun for backup light.
+        /// </summary>
+        public Location SunAdjustDirection = -Location.UnitZ;
+
+        /// <summary>
+        /// Whether dynamic shadows should be handled at all.
+        /// </summary>
+        public bool EnableDynamicShadows = true;
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
         {
+            FogMaxDist = () => ZFar();
             GraphicsUtil.CheckError("PostLoad - Pre");
             SysConsole.Output(OutputType.INIT, "GameEngine configuring graphics...");
             GL.Enable(EnableCap.CullFace);

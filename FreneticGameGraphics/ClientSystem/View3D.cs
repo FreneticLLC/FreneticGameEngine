@@ -65,6 +65,11 @@ namespace FreneticGameGraphics.ClientSystem
         public bool TranspShadows = true;
 
         /// <summary>
+        /// Current lights count.
+        /// </summary>
+        public int LightsC = 0;
+
+        /// <summary>
         /// Set this to whatever method call is needed after the solid rendering and we're switching to transparent rendering.
         /// </summary>
         public Action PostFirstRender = null;
@@ -962,22 +967,24 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1.0f });
             cameraBasePos = CameraPos;
             cameraAdjust = -camforward.CrossProduct(camup) * 0.25;
-            if (Engine.VR != null)
+            // TODO: VR Patch
+            /*if (Engine.VR != null)
             {
                 //cameraAdjust = -cameraAdjust;
                 cameraAdjust = Location.Zero;
-            }
+            }*/
             RenderRelative = CameraPos;
             OSetViewport();
             CameraTarget = CameraPos + camforward;
             OffsetWorld = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D());
             Matrix4d outviewD;
-            if (Engine.VR != null)
+            // TODO: VR Patch
+            /*if (Engine.VR != null)
             {
-                Matrix4 proj = Engine.VR.GetProjection(true, Engine.CVars.r_znear.ValueF, Engine.ZFar());
+                Matrix4 proj = Engine.VR.GetProjection(true, Engine.ZNear, Engine.ZFar());
                 Matrix4 view = Engine.VR.Eye(true);
                 PrimaryMatrix = view * proj;
-                Matrix4 proj2 = Engine.VR.GetProjection(false, Engine.CVars.r_znear.ValueF, Engine.ZFar());
+                Matrix4 proj2 = Engine.VR.GetProjection(false, Engine.ZNear, Engine.ZFar());
                 Matrix4 view2 = Engine.VR.Eye(false);
                 PrimaryMatrix_OffsetFor3D = view2 * proj2;
                 PrimaryMatrixd = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view.ConvertToD() * proj.ConvertToD();
@@ -987,28 +994,28 @@ namespace FreneticGameGraphics.ClientSystem
                 outviewD = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view.ConvertToD() * projo.ConvertToD();
                 // TODO: Transform VR by cammod?
             }
-            else
+            else*/
             {
-                Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.CVars.r_fov.ValueF), (float)Width / (float)Height, Engine.CVars.r_znear.ValueF, Engine.ZFar()); // TODO: View3D-level vars?
-                Location bx = Engine.CVars.r_3d_enable.ValueB ? (cameraAdjust) : Location.Zero;
+                Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Width / (float)Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
+                Location bx = Engine.Render3DView ? (cameraAdjust) : Location.Zero;
                 Matrix4 view = Matrix4.LookAt(bx.ToOpenTK(), (bx + camforward).ToOpenTK(), camup.ToOpenTK());
                 PrimaryMatrix = view * proj;
-                if (Engine.CVars.r_3d_enable.ValueB)
+                if (Engine.Render3DView)
                 {
                     Matrix4 view2 = Matrix4.LookAt((-cameraAdjust).ToOpenTK(), (-cameraAdjust + camforward).ToOpenTK(), camup.ToOpenTK());
                     PrimaryMatrix_OffsetFor3D = view2 * proj;
                 }
-                Matrix4 proj_out = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.CVars.r_fov.ValueF), (float)Width / (float)Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
+                Matrix4 proj_out = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Width / (float)Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
                 OutViewMatrix = view * proj_out;
-                Matrix4d projd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.CVars.r_fov.ValueF),
-                    (float)Width / (float)Height, Engine.CVars.r_znear.ValueF, Engine.ZFar()); // TODO: View3D-level vars?
-                Location bxd = Engine.CVars.r_3d_enable.ValueB ? (CameraPos + cameraAdjust) : CameraPos;
+                Matrix4d projd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV),
+                    (float)Width / (float)Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
+                Location bxd = Engine.Render3DView ? (CameraPos + cameraAdjust) : CameraPos;
                 Matrix4d viewd = Matrix4d.LookAt(bxd.ToOpenTK3D(), (bxd + camforward).ToOpenTK3D(), camup.ToOpenTK3D());
                 PrimaryMatrixd = viewd * projd;
-                Matrix4d proj_outd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.CVars.r_fov.ValueF), (float)Width / (float)Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
+                Matrix4d proj_outd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Width / (float)Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
                 outviewD = viewd * proj_outd;
                 PrimaryMatrix_OffsetFor3Dd = Matrix4d.Identity;
-                if (Engine.CVars.r_3d_enable.ValueB)
+                if (Engine.Render3DView)
                 {
                     Matrix4d view2d = Matrix4d.LookAt((CameraPos - cameraAdjust).ToOpenTK3D(), (CameraPos - cameraAdjust + camforward).ToOpenTK3D(), camup.ToOpenTK3D());
                     PrimaryMatrix_OffsetFor3Dd = view2d * projd;
@@ -1022,12 +1029,17 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// The maximum distance of lights.
+        /// </summary>
+        public double LightsMaxDistance = 1000;
+
+        /// <summary>
         /// Render everything as quickly as possible: a simple forward renderer.
         /// </summary>
         public void RenderPass_FAST()
         {
             GraphicsUtil.CheckError("Render/Fast - Prep");
-            if (Engine.CVars.r_decals.ValueB || Engine.CVars.r_forwardreflections.ValueB)
+            if (Engine.DisplayDecals || Engine.ForwardReflections)
             {
                 RS4P.Bind(this);
                 RS4P.Clear();
@@ -1035,7 +1047,7 @@ namespace FreneticGameGraphics.ClientSystem
             float[] light_dat = new float[LIGHTS_MAX * 16];
             float[] shadowmat_dat = new float[LIGHTS_MAX * 16];
             int c = 0;
-            if (Engine.CVars.r_forward_lights.ValueB)
+            if (Engine.Forward_Lights)
             {
                 // TODO: An ambient light source?
                 for (int i = 0; i < Lights.Count; i++)
@@ -1043,7 +1055,7 @@ namespace FreneticGameGraphics.ClientSystem
                     if (Lights[i] is SkyLight || camFrust == null || camFrust.ContainsSphere(Lights[i].EyePos, Lights[i].MaxDistance))
                     {
                         double d1 = (Lights[i].EyePos - CameraPos).LengthSquared();
-                        double d2 = Engine.CVars.r_lightmaxdistance.ValueD * Engine.CVars.r_lightmaxdistance.ValueD + Lights[i].MaxDistance * Lights[i].MaxDistance;
+                        double d2 = LightsMaxDistance * LightsMaxDistance + Lights[i].MaxDistance * Lights[i].MaxDistance;
                         double maxrangemult = 0;
                         if (d1 < d2 * 4 || Lights[i] is SkyLight)
                         {
@@ -1147,16 +1159,16 @@ namespace FreneticGameGraphics.ClientSystem
             RenderLights = Engine.Forward_Lights;
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_SOLID;
-            Vector3 maxLit = Engine.TheRegion.GetSunAdjust().Xyz;
+            Vector3 maxLit = Engine.SunAdjustBackupLight.Xyz;
             Engine.Shaders3D.s_forw_particles.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.3");
-            GL.Uniform4(4, new Vector4(Width, Height, Engine.CVars.r_znear.ValueF, Engine.ZFar()));
+            GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.4");
             //GL.Uniform1(6, (float)Engine.GlobalTickTimeLocal);
             //CheckError("Render/Fast - Uniforms 1.43");
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.46");
-            GL.Uniform2(14, new Vector2(Engine.CVars.r_znear.ValueF, Engine.ZFar()));
+            GL.Uniform2(14, new Vector2(Engine.ZNear, Engine.ZFar()));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.5");
             /*if (Engine.CVars.r_forward_lights.ValueB)
             {
@@ -1169,7 +1181,7 @@ namespace FreneticGameGraphics.ClientSystem
             }*/
             Engine.Shaders3D.s_forw_grass.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.2");
-            if (Engine.CVars.r_forward_lights.ValueB)
+            if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
                 GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
@@ -1178,7 +1190,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.5");
             Engine.Shaders3D.s_forwdecal.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.6");
-            if (Engine.CVars.r_forward_lights.ValueB)
+            if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
                 GraphicsUtil.CheckError("Render/Fast - Uniforms 2.7");
@@ -1191,14 +1203,14 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.2");
-            GL.Uniform4(4, new Vector4(Width, Height, Engine.CVars.r_znear.ValueF, Engine.ZFar()));
+            GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
             //GL.Uniform1(6, (float)Engine.GlobalTickTimeLocal);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.3");
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.5");
             float fogDist = 1.0f / Engine.FogMaxDist();
             fogDist *= fogDist;
-            Vector2 zfar_rel = new Vector2(Engine.CVars.r_znear.ValueF, Engine.ZFar());
+            Vector2 zfar_rel = new Vector2(Engine.ZNear, Engine.ZFar());
             GL.Uniform1(13, fogDist);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.9");
             GL.Uniform2(14, zfar_rel);
@@ -1230,6 +1242,8 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
+            // TODO: Vox patch
+            /*
             Engine.Shaders3D.s_forw_vox.Bind();
             if (Engine.CVars.r_forward_lights.ValueB)
             {
@@ -1259,8 +1273,9 @@ namespace FreneticGameGraphics.ClientSystem
             Engine.Rendering.SetColor(Color4.White, this);
             GL.Uniform3(10, -GraphicsUtil.Convert(Engine.TheSun.Direction));
             GL.Uniform3(11, maxLit);
+            */
             Engine.Shaders3D.s_forw_nobones.Bind();
-            if (Engine.CVars.r_forward_lights.ValueB)
+            if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
                 GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
@@ -1274,10 +1289,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -GraphicsUtil.Convert(Engine.TheSun.Direction));
+            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
             GL.Uniform3(11, maxLit);
             Engine.Shaders3D.s_forw.Bind();
-            if (Engine.CVars.r_forward_lights.ValueB)
+            if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
                 GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
@@ -1291,10 +1306,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -GraphicsUtil.Convert(Engine.TheSun.Direction));
+            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
             GL.Uniform3(11, maxLit);
             GraphicsUtil.CheckError("Render/Fast - Uniforms");
-            if (Engine.CVars.r_3d_enable.ValueB || Engine.VR != null)
+            if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR patch
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
@@ -1302,8 +1317,10 @@ namespace FreneticGameGraphics.ClientSystem
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
+                // TOOD: Vox patch!
+                /*
                 Engine.Shaders3D.s_forw_vox = Engine.Shaders3D.s_forw_vox.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);*/
                 Engine.Shaders3D.s_forw = Engine.Shaders3D.s_forw.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
@@ -1320,7 +1337,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Render3D(this);
                 GraphicsUtil.CheckError("Render/Fast - Solid");
             }
-            if (Engine.CVars.r_decals.ValueB || Engine.CVars.r_forwardreflections.ValueB)
+            if (Engine.DisplayDecals || Engine.ForwardReflections)
             {
                 RS4P.Unbind(this);
                 BindFramebuffer(FramebufferTarget.Framebuffer, CurrentFBO);
@@ -1328,7 +1345,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, RS4P.fbo);
                 GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
-                if (Engine.CVars.r_forwardreflections.ValueB)
+                if (Engine.ForwardReflections)
                 {
                     Engine.Shaders3D.s_post_fast = Engine.Shaders3D.s_post_fast.Bind();
                     GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
@@ -1362,7 +1379,7 @@ namespace FreneticGameGraphics.ClientSystem
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
             }
-            if (Engine.CVars.r_decals.ValueB)
+            if (Engine.DisplayDecals)
             {
                 Engine.Shaders3D.s_forwdecal = Engine.Shaders3D.s_forwdecal.Bind();
                 GL.ActiveTexture(TextureUnit.Texture4);
@@ -1371,7 +1388,7 @@ namespace FreneticGameGraphics.ClientSystem
                 FBOid = FBOID.FORWARD_EXTRAS;
                 GL.DepthMask(false);
                 GraphicsUtil.CheckError("Render/Fast - Decal Prep");
-                if (Engine.CVars.r_3d_enable.ValueB || Engine.VR != null)
+                if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR Patch!
                 {
                     Viewport(Width / 2, 0, Width / 2, Height);
                     DecalRender?.Invoke(this);
@@ -1395,6 +1412,8 @@ namespace FreneticGameGraphics.ClientSystem
             }
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_TRANSP;
+            // TODO: Vox patch
+            /*
             Engine.Shaders3D.s_forw_vox_trans.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1404,6 +1423,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
+            */
             Engine.Shaders3D.s_forw_trans_nobones.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1422,15 +1442,17 @@ namespace FreneticGameGraphics.ClientSystem
             Engine.Rendering.SetColor(Color4.White, this);
             PostFirstRender?.Invoke();
             GraphicsUtil.CheckError("Render/Fast - Transp Unifs");
-            if (Engine.CVars.r_3d_enable.ValueB || Engine.VR != null)
+            if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR Patch!
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
+                // TODO: Vox patch!
+                /*
                 Engine.Shaders3D.s_forw_vox_trans = Engine.Shaders3D.s_forw_vox_trans.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);*/
                 Engine.Shaders3D.s_forw_trans = Engine.Shaders3D.s_forw_trans.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
@@ -1447,7 +1469,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Render3D(this);
                 GraphicsUtil.CheckError("Render/Fast - Transp");
             }
-            if (Engine.CVars.r_forward_shadows.ValueB)
+            if (Engine.Forward_Shadows)
             {
                 GL.ActiveTexture(TextureUnit.Texture5);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -1484,7 +1506,8 @@ namespace FreneticGameGraphics.ClientSystem
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
                 Engine.Shaders3D.s_shadow = Engine.Shaders3D.s_shadow.Bind();
-                Engine.FixPersp = Matrix4.Identity;
+                // TODO: Vox patch!
+                //Engine.FixPersp = Matrix4.Identity;
                 RenderingShadows = true;
                 ShadowsOnly = true;
                 LightsC = 0;
@@ -1498,7 +1521,7 @@ namespace FreneticGameGraphics.ClientSystem
                     if (Lights[i] is SkyLight || camFrust == null || camFrust.ContainsSphere(Lights[i].EyePos, Lights[i].MaxDistance))
                     {
                         if (Lights[i] is SkyLight || Lights[i].EyePos.DistanceSquared(campos) <
-                            Engine.CVars.r_lightmaxdistance.ValueD * Engine.CVars.r_lightmaxdistance.ValueD + Lights[i].MaxDistance * Lights[i].MaxDistance * 6)
+                            LightsMaxDistance * LightsMaxDistance + Lights[i].MaxDistance * Lights[i].MaxDistance * 6)
                         {
                             LightsC++;
                             if (Lights[i] is PointLight pl && !pl.CastShadows)
@@ -1548,11 +1571,12 @@ namespace FreneticGameGraphics.ClientSystem
                                     }
                                     GraphicsUtil.CheckError("Pre-Prerender - Shadows - " + i);
                                     CameraPos = Lights[i].InternalLights[x].eye.ToLocation() - campos;
-                                    Engine.Shaders3D.s_shadowvox = Engine.Shaders3D.s_shadowvox.Bind();
+                                    // TODO: Vox patch
+                                    /*Engine.Shaders3D.s_shadowvox = Engine.Shaders3D.s_shadowvox.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     Lights[i].InternalLights[x].SetProj(this);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
-                                    GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);
+                                    GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);*/
                                     Engine.Shaders3D.s_shadow_grass = Engine.Shaders3D.s_shadow_grass.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
@@ -1563,7 +1587,7 @@ namespace FreneticGameGraphics.ClientSystem
                                     SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
                                     GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);
-                                    GL.Uniform3(7, ClientUtilities.Convert(CameraPos));
+                                    GL.Uniform3(7, CameraPos.ToOpenTK());
                                     Lights[i].InternalLights[x].SetProj(this);
                                     Engine.Shaders3D.s_shadow_nobones = Engine.Shaders3D.s_shadow_nobones.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
@@ -1600,7 +1624,7 @@ namespace FreneticGameGraphics.ClientSystem
                                         GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, sky.FBO);
                                         GL.BlitFramebuffer(0, 0, sky.TexWidth, sky.TexWidth, ltX, ltY, widX, widY, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
                                         GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
-                                        if (Engine.CVars.r_dynamicshadows.ValueB)
+                                        if (Engine.EnableDynamicShadows)
                                         {
                                             //GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f });
                                             FBOid = FBOID.DYNAMIC_SHADOWS;
