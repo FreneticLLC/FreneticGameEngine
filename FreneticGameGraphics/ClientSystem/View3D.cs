@@ -10,12 +10,13 @@ using System.Runtime.CompilerServices;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Diagnostics;
 using FreneticGameCore;
+using FreneticGameGraphics.LightingSystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
     /// <summary>
     /// Represents a 3D view port.
-    /// <para>Call <see cref="Generate(Client, int, int)"/></para>
+    /// <para>Call <see cref="Generate(GameEngine3D, int, int)"/></para>
     /// <para>Set <see cref="Render3D"/>, <see cref="PostFirstRender"/>, ...</para>
     /// <para>Call <see cref="Render"/> every frame.</para>
     /// </summary>
@@ -64,13 +65,73 @@ namespace FreneticGameGraphics.ClientSystem
         public int Height;
 
         /// <summary>
+        /// Whether the system is rendering lightinge ffects.
+        /// </summary>
+        public bool RenderLights = false;
+
+        /// <summary>
         /// Current fog color.
         /// </summary>
         public Location FogCol = new Location(0.7);
-        
+
+        /// <summary>
+        /// All lights known to this view.
+        /// </summary>
+        public List<LightObject> Lights = new List<LightObject>();
+
         int transp_fbo_main = 0;
         int transp_fbo_texture = 0;
         int transp_fbo_depthtex = 0;
+
+        /// <summary>
+        /// Time statistic: Shadows.
+        /// </summary>
+        public double ShadowTime;
+
+        /// <summary>
+        /// Whether to not touch the buffer mode.
+        /// </summary>
+        public bool BufferDontTouch = false;
+
+        /// <summary>
+        /// Time statistic: FBO.
+        /// </summary>
+        public double FBOTime;
+
+        /// <summary>
+        /// Time statistic: Lights.
+        /// </summary>
+        public double LightsTime;
+
+        /// <summary>
+        /// Time statistic: Total.
+        /// </summary>
+        public double TotalTime;
+
+        /// <summary>
+        /// Time statistic (spike): Shadows.
+        /// </summary>
+        public double ShadowSpikeTime;
+
+        /// <summary>
+        /// Time statistic (spike): FBO.
+        /// </summary>
+        public double FBOSpikeTime;
+
+        /// <summary>
+        /// Time statistic (spike): Lights.
+        /// </summary>
+        public double LightsSpikeTime;
+
+        /// <summary>
+        /// Time statistic (spike): Total.
+        /// </summary>
+        public double TotalSpikeTime;
+
+        /// <summary>
+        /// The current FBO ID.
+        /// </summary>
+        public FBOID FBOid;
 
         /// <summary>
         /// (Re-)Generate transparent helpers, internal call.
@@ -224,7 +285,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 4");
             }
             GraphicsUtil.CheckError("Load - View3D - Light - Deletes");
-            RS4P = new RenderSurface4Part(Width, Height, Engine.Rendering);
+            RS4P = new RenderSurface4Part(Width, Height, Engine.Rendering, this);
             // FBO
             fbo_texture = GL.GenTexture();
             fbo_main = GL.GenFramebuffer();
@@ -590,7 +651,7 @@ namespace FreneticGameGraphics.ClientSystem
                     GL.ActiveTexture(TextureUnit.Texture0);
                     GL.BindTexture(TextureTarget.Texture2D, FB_Tex);
                     float power = FB_DurLeft > 2.0 ? 1f : ((float)FB_DurLeft * 0.5f);
-                    Engine.Rendering.SetColor(new Vector4(1f, 1f, 1f, power));
+                    Engine.Rendering.SetColor(new Vector4(1f, 1f, 1f, power), this);
                     GL.Disable(EnableCap.DepthTest);
                     GL.Disable(EnableCap.CullFace);
                     GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
@@ -599,7 +660,7 @@ namespace FreneticGameGraphics.ClientSystem
                     Engine.Textures.White.Bind();
                     if (power < 1f)
                     {
-                        Engine.Rendering.SetColor(new Vector4(1f, 1f, 1f, (1f - power) * power));
+                        Engine.Rendering.SetColor(new Vector4(1f, 1f, 1f, (1f - power) * power), this);
                         Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
                     }
                 }
@@ -977,7 +1038,7 @@ namespace FreneticGameGraphics.ClientSystem
                             if (Lights[i] is PointLight pl && !pl.CastShadows)
                             {
                                 Matrix4 smat = Matrix4.Identity;
-                                Vector3d eyep = Lights[i].InternalLights[0].eye - GraphicsUtil.ConvertD(CameraPos);
+                                Vector3d eyep = Lights[i].InternalLights[0].eye - CameraPos.ToOpenTK3D();
                                 Vector3 col = Lights[i].InternalLights[0].color * (float)maxrangemult;
                                 Matrix4 light_data = new Matrix4(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
@@ -1018,8 +1079,8 @@ namespace FreneticGameGraphics.ClientSystem
                                     {
                                         sp /= 2;
                                     }
-                                    Matrix4 smat = Lights[i].InternalLights[x].GetMatrix();
-                                    Vector3d eyep = Lights[i].InternalLights[x].eye - GraphicsUtil.ConvertD(CameraPos);
+                                    Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
+                                    Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
                                     Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
                                     Matrix4 light_data = new Matrix4(
                                         (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
@@ -1433,7 +1494,7 @@ namespace FreneticGameGraphics.ClientSystem
                                     }
                                     else
                                     {
-                                        CFrust = new Frustum(ClientUtilities.ConvertToD(Lights[i].InternalLights[x].GetMatrix()).ConvertD()); // TODO: One-step conversion!
+                                        CFrust = new Frustum(ClientUtilities.ConvertToD(Lights[i].InternalLights[x].GetMatrix(this)).ConvertD()); // TODO: One-step conversion!
                                     }
                                     int lTID = n;
                                     int widX = sp;
@@ -1560,6 +1621,123 @@ namespace FreneticGameGraphics.ClientSystem
                 StandardBlend();
                 GraphicsUtil.CheckError("AfterShadows");
             }
+        }
+    }
+    
+    /// <summary>
+    /// Helper for current rendering mode ID.
+    /// </summary>
+    public enum FBOID : byte
+    {
+        /// <summary>
+        /// No relevant mode.
+        /// </summary>
+        NONE = 0,
+        /// <summary>
+        /// Main mode (FBO).
+        /// </summary>
+        MAIN = 1,
+        /// <summary>
+        /// Main mode (Extras: decals).
+        /// </summary>
+        MAIN_EXTRAS = 2,
+        /// <summary>
+        /// Transparency, no lights.
+        /// </summary>
+        TRANSP_UNLIT = 3,
+        /// <summary>
+        /// Shadows.
+        /// </summary>
+        SHADOWS = 4,
+        /// <summary>
+        /// Static shadows.
+        /// </summary>
+        STATIC_SHADOWS = 5,
+        /// <summary>
+        /// Dynamic shadows.
+        /// </summary>
+        DYNAMIC_SHADOWS = 6,
+        /// <summary>
+        /// Transparency (lights).
+        /// </summary>
+        TRANSP_LIT = 7,
+        /// <summary>
+        /// Transparency (lights and shadows).
+        /// </summary>
+        TRANSP_SHADOWS = 8,
+        /// <summary>
+        /// Transparency (LL).
+        /// </summary>
+        TRANSP_LL = 12,
+        /// <summary>
+        /// Transparency (lights and LL).
+        /// </summary>
+        TRANSP_LIT_LL = 13,
+        /// <summary>
+        /// Transparency (lights and shadows and LL).
+        /// </summary>
+        TRANSP_SHADOWS_LL = 14,
+        /// <summary>
+        /// Refraction helper.
+        /// </summary>
+        REFRACT = 21,
+        /// <summary>
+        /// Forward extras (decals).
+        /// </summary>
+        FORWARD_EXTRAS = 97,
+        /// <summary>
+        /// Forward transparency.
+        /// </summary>
+        FORWARD_TRANSP = 98,
+        /// <summary>
+        /// Forward opaque.
+        /// </summary>
+        FORWARD_SOLID = 99,
+    }
+
+    /// <summary>
+    /// Helpers for <see cref="FBOID"/>.
+    /// </summary>
+    public static class FBOIDExtensions
+    {
+        /// <summary>
+        /// Checks if the ID is the 'main + transparent' modes.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        /// <returns>Whether it is.</returns>
+        public static bool IsMainTransp(this FBOID id)
+        {
+            return id == FBOID.TRANSP_LIT || id == FBOID.TRANSP_LIT_LL || id == FBOID.TRANSP_LL || id == FBOID.TRANSP_SHADOWS || id == FBOID.TRANSP_SHADOWS_LL || id == FBOID.TRANSP_UNLIT;
+        }
+
+        /// <summary>
+        /// Checks if the ID is the 'main + opaque' modes.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        /// <returns>Whether it is.</returns>
+        public static bool IsMainSolid(this FBOID id)
+        {
+            return id == FBOID.FORWARD_SOLID || id == FBOID.MAIN;
+        }
+
+        /// <summary>
+        /// Checks if the ID is the 'solid (opaque)' modes.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        /// <returns>Whether it is.</returns>
+        public static bool IsSolid(this FBOID id)
+        {
+            return id == FBOID.SHADOWS || id == FBOID.STATIC_SHADOWS || id == FBOID.DYNAMIC_SHADOWS || id == FBOID.FORWARD_SOLID || id == FBOID.REFRACT || id == FBOID.MAIN;
+        }
+
+        /// <summary>
+        /// Checks if the ID is the 'forward' modes.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        /// <returns>Whether it is.</returns>
+        public static bool IsForward(this FBOID id)
+        {
+            return id == FBOID.FORWARD_SOLID || id == FBOID.FORWARD_TRANSP || id == FBOID.FORWARD_EXTRAS;
         }
     }
 }

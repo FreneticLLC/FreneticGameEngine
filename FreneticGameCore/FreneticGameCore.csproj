@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimationEngine.cs" />
     <Compile Include="BasicEngine.cs" />
     <Compile Include="Collision\CollisionUtil.cs" />
     <Compile Include="Collision\Vector2i.cs" />

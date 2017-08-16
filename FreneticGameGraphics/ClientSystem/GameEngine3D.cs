@@ -60,6 +60,16 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// The render helper system.
+        /// </summary>
+        public Renderer Rendering;
+
+        /// <summary>
+        /// System to help with models.
+        /// </summary>
+        public ModelEngine Models;
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
@@ -68,6 +78,12 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine configuring graphics...");
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
+            SysConsole.Output(OutputType.INIT, "GameEngine loading model engine...");
+            Models = new ModelEngine();
+            Models.Init(null, this);
+            SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
+            Rendering = new Renderer(Textures, Shaders, Models);
+            Rendering.Init();
             GraphicsUtil.CheckError("PostLoad - Post");
         }
 
@@ -76,6 +92,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void RenderSingleFrame()
         {
+            Models.Update(GlobalTickTime);
         }
     }
 }
