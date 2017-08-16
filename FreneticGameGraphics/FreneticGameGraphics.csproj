@@ -216,6 +216,12 @@
     <None Include="shaders\lightmap1d_2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="shaders\forward.fs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="shaders\forward.vs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="shaders\applylights1d_2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
