@@ -18,11 +18,11 @@ namespace FreneticGameGraphics.ClientSystem
     {
         /// <summary>
         /// Sets up the game engine 3D.
-        /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowSetUp"/>.
+        /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowLoad"/>.
         /// Then call <see cref="GameEngineBase.Start"/>.
         /// </summary>
         /// <param name="_windowTitle">The title, if different from game program descriptor.</param>
-        public GameEngine3D(string _sWindowTitle) : base(_sWindowTitle)
+        public GameEngine3D(string _sWindowTitle = null) : base(_sWindowTitle)
         {
         }
 
