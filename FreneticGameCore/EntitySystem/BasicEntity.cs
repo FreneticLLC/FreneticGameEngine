@@ -45,6 +45,11 @@ namespace FreneticGameCore.EntitySystem
         public Action OnTick;
 
         /// <summary>
+        /// Last position known that this entity was or is exactly upon.
+        /// </summary>
+        public Location LastKnownPosition;
+
+        /// <summary>
         /// Fired when the entity is moved.
         /// </summary>
         public Action<Location> OnPositionChanged;
@@ -65,6 +70,15 @@ namespace FreneticGameCore.EntitySystem
         public FreneticScriptEventHandler<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticScriptEventHandler<EntityDeSpawnEventArgs>();
 
         /// <summary>
+        /// Sets the last known position to the input value.
+        /// </summary>
+        /// <param name="p">The last known position.</param>
+        private void SetLKP(Location p)
+        {
+            LastKnownPosition = p;
+        }
+
+        /// <summary>
         /// Construct the basic Entity.
         /// </summary>
         /// <param name="eng">The owning engine.</param>
@@ -73,6 +87,7 @@ namespace FreneticGameCore.EntitySystem
         {
             Engine = eng;
             Ticks = _ticks;
+            OnPositionChanged += SetLKP;
         }
 
         /// <summary>

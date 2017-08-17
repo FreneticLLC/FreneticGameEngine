@@ -125,6 +125,11 @@ namespace FreneticGameGraphics.ClientSystem
         public bool EnableDynamicShadows = true;
 
         /// <summary>
+        /// The main 3D view.
+        /// </summary>
+        public View3D MainView = null;
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
@@ -140,7 +145,38 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
             Rendering = new Renderer(Textures, Shaders, Models);
             Rendering.Init();
+            SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
+            MainView = new View3D();
+            MainView.Generate(this, Window.Width, Window.Height);
+            MainView.Render3D = Render3D;
+            MainView.PostFirstRender = ReverseEntities;
             GraphicsUtil.CheckError("PostLoad - Post");
+        }
+
+        /// <summary>
+        /// Sorts the entities according to distance from camera view.
+        /// </summary>
+        public void SortEntities()
+        {
+            Location pos = MainView.CameraPos;
+            Entities = Entities.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
+        }
+
+        /// <summary>
+        /// Reverses the entity order for transparent rendering.
+        /// </summary>
+        public void ReverseEntities()
+        {
+            Entities.Reverse();
+        }
+
+        /// <summary>
+        /// Renders the standard view's 3D data.
+        /// </summary>
+        /// <param name="view">The view object.</param>
+        public void Render3D(View3D view)
+        {
+
         }
 
         /// <summary>
@@ -149,6 +185,9 @@ namespace FreneticGameGraphics.ClientSystem
         public override void RenderSingleFrame()
         {
             Models.Update(GlobalTickTime);
+            SortEntities();
+            MainView.Render();
+            ReverseEntities();
         }
     }
 }
