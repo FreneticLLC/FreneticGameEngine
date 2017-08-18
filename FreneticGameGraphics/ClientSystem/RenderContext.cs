@@ -8,13 +8,13 @@ using OpenTK;
 namespace FreneticGameGraphics.ClientSystem
 {
     /// <summary>
-    /// Represents the context in which something is being rendered.
+    /// Represents the context in which something is being rendered (in 3D).
     /// </summary>
     public class RenderContext
     {
         /// <summary>
-        /// The relevant owning game window.
+        /// The relevant owning game engine (3D).
         /// </summary>
-        public GameWindow Window;
+        public GameEngine3D Engine;
     }
 }

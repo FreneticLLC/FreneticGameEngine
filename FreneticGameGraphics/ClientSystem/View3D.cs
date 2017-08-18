@@ -599,7 +599,7 @@ namespace FreneticGameGraphics.ClientSystem
         public Location CameraTarget;
 
         /// <summary>
-        /// Maximum strength of a light.
+        /// Maximum strength of a light. Used for ortho light radius.
         /// </summary>
         public const float LightMaximum = 1E10f;
 

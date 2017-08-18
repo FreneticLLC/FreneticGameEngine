@@ -8,6 +8,7 @@ using FreneticGameCore;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using FreneticGameGraphics.ClientSystem.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -105,9 +106,9 @@ namespace FreneticGameGraphics.ClientSystem
         public Func<float> FogMaxDist = null;
 
         /// <summary>
-        /// Get the Z-Far (OUT-View) value (defaults to 1000 autoget).
+        /// Get the Z-Far (OUT-View) value (defaults to 10000 autoget).
         /// </summary>
-        public Func<float> ZFarOut = () => 1000;
+        public Func<float> ZFarOut = () => 10000;
 
         /// <summary>
         /// The "Sun adjustment" backup light color and value.
@@ -130,18 +131,30 @@ namespace FreneticGameGraphics.ClientSystem
         public View3D MainView = null;
 
         /// <summary>
+        /// The main rendering context.
+        /// </summary>
+        public RenderContext MainContext = new RenderContext();
+
+        /// <summary>
+        /// The 3D animation helper.
+        /// </summary>
+        public AnimationEngine Animations;
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
         {
+            MainContext.Engine = this;
             FogMaxDist = () => ZFar();
             GraphicsUtil.CheckError("PostLoad - Pre");
             SysConsole.Output(OutputType.INIT, "GameEngine configuring graphics...");
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
             SysConsole.Output(OutputType.INIT, "GameEngine loading model engine...");
+            Animations = new AnimationEngine();
             Models = new ModelEngine();
-            Models.Init(null, this);
+            Models.Init(Animations, this);
             SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
             Rendering = new Renderer(Textures, Shaders, Models);
             Rendering.Init();
@@ -150,6 +163,8 @@ namespace FreneticGameGraphics.ClientSystem
             MainView.Generate(this, Window.Width, Window.Height);
             MainView.Render3D = Render3D;
             MainView.PostFirstRender = ReverseEntities;
+            MainView.CameraUp = () => MainCamera.Up;
+            ZFar = () => MainCamera.ZFar;
             GraphicsUtil.CheckError("PostLoad - Post");
         }
 
@@ -158,7 +173,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void SortEntities()
         {
-            Location pos = MainView.CameraPos;
+            Location pos = MainView.RenderRelative;
             Entities = Entities.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
         }
 
@@ -176,17 +191,39 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="view">The view object.</param>
         public void Render3D(View3D view)
         {
-
+            GL.ActiveTexture(TextureUnit.Texture1);
+            Textures.NormalDef.Bind();
+            GL.ActiveTexture(TextureUnit.Texture0);
+            foreach (ClientEntity ce in Entities)
+            {
+                if (ce.Renderer != null && ce.Renderer.IsVisible && (ce.Renderer.CastShadows || !view.RenderingShadows))
+                {
+                    ce.Renderer?.RenderStandard(MainContext);
+                }
+            }
         }
+
+        /// <summary>
+        /// The main default camera for the main view.
+        /// </summary>
+        public Camera3D MainCamera = new Camera3D();
 
         /// <summary>
         /// Renders a single frame of the 3D game engine.
         /// </summary>
         public override void RenderSingleFrame()
         {
+            // Tick helpers
             Models.Update(GlobalTickTime);
+            // Set camera to view
+            MainView.CameraPos = MainCamera.Position;
+            MainView.ForwardVec = MainCamera.Direction;
+            ZNear = MainCamera.ZNear;
+            // Sort entities to prep render
             SortEntities();
+            // Render
             MainView.Render();
+            // Fix entities back to sorted value (They will be flipped by the render process)
             ReverseEntities();
         }
     }

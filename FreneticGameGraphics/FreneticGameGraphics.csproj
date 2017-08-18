@@ -57,12 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientSystem\Camera3D.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntity.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntityProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\Entity2DRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityLight2DCasterProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
+    <Compile Include="ClientSystem\EntitySystem\EntitySimple3DRenderableModelProperty.cs" />
     <Compile Include="ClientSystem\GameEngine3D.cs" />
     <Compile Include="ClientSystem\GameEngineBase.cs" />
     <Compile Include="ClientSystem\GE3DShaders.cs" />

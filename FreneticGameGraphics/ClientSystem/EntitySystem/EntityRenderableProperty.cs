@@ -107,7 +107,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public abstract void RenderForTopMap(RenderContext context);
 
         /// <summary>
-        /// Render the entity as seen normally.
+        /// Render the entity as seen normally, in 3D.
         /// </summary>
         /// <param name="context">The render context.</param>
         public abstract void RenderStandard(RenderContext context);
