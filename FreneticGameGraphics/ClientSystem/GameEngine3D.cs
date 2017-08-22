@@ -128,7 +128,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// The main 3D view.
         /// </summary>
-        public View3D MainView = null;
+        public View3D MainView = new View3D();
 
         /// <summary>
         /// The main rendering context.
@@ -159,7 +159,6 @@ namespace FreneticGameGraphics.ClientSystem
             Rendering = new Renderer(Textures, Shaders, Models);
             Rendering.Init();
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
-            MainView = new View3D();
             MainView.Generate(this, Window.Width, Window.Height);
             MainView.Render3D = Render3D;
             MainView.PostFirstRender = ReverseEntities;

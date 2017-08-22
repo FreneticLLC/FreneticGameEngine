@@ -249,7 +249,7 @@ void main()
 					{
 						offz = -0.000001; // Force it to the threshold value to reduce errors.
 					}
-					offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
+					//offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
 					float rd = texture(shadowtex, vec3((fs.x + x * jump) * mdX + rdX, (fs.y + y * jump) * mdY + rdY, shadowID)).r; // Calculate the depth of the pixel.
 					depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
 					depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.

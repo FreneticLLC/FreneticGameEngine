@@ -62,6 +62,7 @@
     <Compile Include="ClientSystem\EntitySystem\ClientEntityProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\Entity2DRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityLight2DCasterProperty.cs" />
+    <Compile Include="ClientSystem\EntitySystem\EntityPointLight3DProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple3DRenderableModelProperty.cs" />
