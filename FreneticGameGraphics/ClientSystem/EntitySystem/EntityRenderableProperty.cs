@@ -55,6 +55,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             base.OnSpawn();
             Entity.OnPositionChanged += FixLocation;
             Entity.OnOrientationChanged += FixOrientation;
+            HandledRemove = false;
         }
 
         /// <summary>
@@ -72,6 +73,9 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             Entity.OnOrientationChanged -= FixOrientation;
         }
 
+        /// <summary>
+        /// Whether the removal was already handled.
+        /// </summary>
         private bool HandledRemove = false;
 
         /// <summary>

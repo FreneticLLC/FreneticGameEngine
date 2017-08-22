@@ -196,7 +196,7 @@ void main()
 		}
 #if MCM_SIMPLE_LIGHT
 		const float depth = 1.0;
-#else
+#else // MCM_SIMPLE_LIGHT
 		vec3 fs = vec3(0.0);
 		if (is_point == 0)
 		{
@@ -238,7 +238,6 @@ void main()
 			dz_duv /= tlen;
 			float oneoverdj = 1.0 / depth_jump;
 			float jump = tex_size * depth_jump;
-			float depth = 0;
 			float depth_count = 0;
 			// Loop over an area quite near the pixel on the shadow map, but still covering multiple pixels of the shadow map.
 			for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
@@ -251,13 +250,13 @@ void main()
 						offz = -0.000001; // Force it to the threshold value to reduce errors.
 					}
 					offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
-					float rd = texture(shadowtex, vec3(fs.x + x * jump, fs.y + y * jump, float(i))).r; // Calculate the depth of the pixel.
+					float rd = texture(shadowtex, vec3((fs.x + x * jump) * mdX + rdX, (fs.y + y * jump) * mdY + rdY, shadowID)).r; // Calculate the depth of the pixel.
 					depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
 					depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.
 				}
 			}
 			depth = depth / depth_count; // Average up the 0 and 1 light values to produce gray near the edges of shadows. Soft shadows, hooray!
-#else
+#else // MCM_GOOD_GRAPHICS
 			int loops = 0;
 			for (float x = -1.0; x <= 1.0; x += 0.5)
 			{
@@ -269,24 +268,24 @@ void main()
 				}
 			}
 			depth /= loops;
-#endif
+#endif // else - MCM_GOOD_GRAPHICS
 		}
-#else
+#else // shadow blur (1)
 		float depth = 1.0;
 		if (is_point == 0)
 		{
 			float rd = texture(shadowtex, vec3(fs.x * mdX + rdX, fs.y * mdY + rdY, shadowID)).r; // Calculate the depth of the pixel.
 			depth = (rd >= (fs.z - 0.001) ? 1.0 : 0.0); // If we have a bad graphics card, just quickly get a 0 or 1 depth value. This will be pixelated (hard) shadows!
 		}
-#endif
+#endif // else - shadow blur (1)
 		if (depth <= 0.0)
 		{
 			continue;
 		}
-#else
+#else // MCM_SHADOWS
 		const float depth = 1.0;
-#endif
-#endif
+#endif // else - MCM_SHADOWS
+#endif // else - MCM_SIMPLE_LIGHT
 		vec3 L = light_path / light_length; // Get the light's movement direction as a vector
 		vec3 diffuse = max(dot(tf_normal, L), 0.0) * vec3(diffuse_albedo); // Find out how much diffuse light to apply
 		vec3 reller = normalize(fi.pos - eye_pos);
