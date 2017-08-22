@@ -28,6 +28,17 @@ namespace FreneticGameGraphics.ClientSystem
         public Location Up = Location.UnitZ;
 
         /// <summary>
+        /// Gets the sideways direction for this camera.
+        /// </summary>
+        public Location Side
+        {
+            get
+            {
+                return Direction.CrossProduct(Up);
+            }
+        }
+
+        /// <summary>
         /// The Z-Near value of the camera.
         /// </summary>
         public float ZNear = 0.1f;

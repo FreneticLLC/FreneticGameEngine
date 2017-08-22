@@ -59,8 +59,8 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
                 DiffuseTexture.Bind();
             }
             context.Engine.Rendering.SetColor(Color, context.Engine.MainView);
-            Matrix4 mat = Matrix4.CreateScale(Scale.ToOpenTK()) * Matrix4.CreateFromQuaternion(RenderOrientation) * Matrix4.CreateTranslation(RenderAt);
-            GL.UniformMatrix4(2, false, ref mat);
+            Matrix4d mat = Matrix4d.Scale(Scale.ToOpenTK3D()) * Matrix4d.CreateFromQuaternion(RenderOrientation.ToDoubles()) * Matrix4d.CreateTranslation(RenderAt.ToOpenTK3D());
+            context.Engine.MainView.SetMatrix(ShaderLocations.Common.WORLD, mat);
             EntityModel.Draw();
         }
 

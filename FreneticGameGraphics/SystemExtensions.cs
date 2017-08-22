@@ -32,6 +32,16 @@ namespace FreneticGameGraphics
         {
             return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
         }
+
+        /// <summary>
+        /// Converts a float quaternion to doubles.
+        /// </summary>
+        /// <param name="q">Float quaternion.</param>
+        /// <returns>Double quaternion.</returns>
+        public static Quaterniond ToDoubles(this Quaternion q)
+        {
+            return new Quaterniond(q.X, q.Y, q.Z, q.W);
+        }
         
         /// <summary>
         /// Converts an OpenTK Vector3 to an OpenTK Vector3D.

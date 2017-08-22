@@ -74,8 +74,8 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             }
             context.Engine.RenderHelper.SetColor(BoxColor);
             Vector2 sz = BoxSize;
-            context.Engine.RenderHelper.RenderRectangle(context, RenderAt.X + BoxUpLeft.X, RenderAt.Y + BoxUpLeft.Y,
-                RenderAt.X + BoxDownRight.X, RenderAt.Y + BoxDownRight.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
+            context.Engine.RenderHelper.RenderRectangle(context, (float)RenderAt.X + BoxUpLeft.X, (float)RenderAt.Y + BoxUpLeft.Y,
+                (float)RenderAt.X + BoxDownRight.X, (float)RenderAt.Y + BoxDownRight.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
         }
     }
 }

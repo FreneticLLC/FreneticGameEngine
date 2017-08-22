@@ -40,7 +40,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Vector3 RenderAt;
+        public Location RenderAt;
 
         /// <summary>
         /// What orientation to render the entity at.
@@ -88,7 +88,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="loc">The new location.</param>
         public void FixLocation(Location loc)
         {
-            RenderAt = loc.ToOpenTK();
+            RenderAt = loc;
         }
 
         /// <summary>
