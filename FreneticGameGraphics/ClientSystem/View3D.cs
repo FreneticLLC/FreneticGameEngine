@@ -1168,7 +1168,7 @@ namespace FreneticGameGraphics.ClientSystem
             //CheckError("Render/Fast - Uniforms 1.43");
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.46");
-            GL.Uniform2(14, new Vector2(Engine.ZNear, Engine.ZFar()));
+            //GL.Uniform2(14, new Vector2(Engine.ZNear, Engine.ZFar()));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.5");
             /*if (Engine.CVars.r_forward_lights.ValueB)
             {
@@ -1213,25 +1213,32 @@ namespace FreneticGameGraphics.ClientSystem
             Vector2 zfar_rel = new Vector2(Engine.ZNear, Engine.ZFar());
             GL.Uniform1(13, fogDist);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.9");
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             Engine.Shaders3D.s_forwt.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.1");
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.2");
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.3");
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.4");
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.5");
+            //GL.Uniform2(14, zfar_rel);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.6");
             Engine.Rendering.SetColor(Color4.White, this);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.7");
             Engine.Shaders3D.s_forwt_nofog.Bind();
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 4.8");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             Engine.Shaders3D.s_forwt_obj.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
@@ -1240,7 +1247,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             // TODO: Vox patch
             /*
@@ -1283,15 +1290,27 @@ namespace FreneticGameGraphics.ClientSystem
             }
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.5");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.51");
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.52");
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.53");
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.54");
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.55");
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
-            GL.Uniform3(11, maxLit);
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.56");
+            if (!Engine.Forward_Lights)
+            {
+                GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
+                GraphicsUtil.CheckError("Render/Fast - Uniforms 5.57");
+                GL.Uniform3(11, maxLit);
+            }
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.58");
             Engine.Shaders3D.s_forw.Bind();
+            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.59");
             if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
@@ -1304,10 +1323,13 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
-            GL.Uniform3(11, maxLit);
+            if (!Engine.Forward_Lights)
+            {
+                GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
+                GL.Uniform3(11, maxLit);
+            }
             GraphicsUtil.CheckError("Render/Fast - Uniforms");
             if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR patch
             {
@@ -1430,7 +1452,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             Engine.Shaders3D.s_forw_trans.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
@@ -1438,7 +1460,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
+            //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             PostFirstRender?.Invoke();
             GraphicsUtil.CheckError("Render/Fast - Transp Unifs");

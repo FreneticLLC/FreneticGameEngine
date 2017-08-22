@@ -60,7 +60,7 @@ layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 layout (location = 11) uniform vec3 maximum_light = vec3(0.9, 0.9, 0.9);
 layout (location = 12) uniform vec4 fogCol = vec4(0.0);
 layout (location = 13) uniform float fogDist = 1.0 / 100000.0;
-layout (location = 14) uniform vec2 zdist = vec2(1.0, 1000.0);
+// ...
 layout (location = 15) uniform float lights_used = 0.0;
 layout (location = 16) uniform float minimum_light = 0.2;
 #if MCM_LIGHTS
@@ -78,12 +78,12 @@ float snoise2(in vec3 v);
 
 vec4 unused_nonsense() // Prevent shader compiler from claiming variables are unused (Even if they /are/ unused!)
 {
-	return screen_size + fogCol + vec4(zdist, zdist);
+	return screen_size + fogCol;
 }
 
 float linearizeDepth(in float rinput) // Convert standard depth (stretched) to a linear distance (still from 0.0 to 1.0).
 {
-	return (2.0 * zdist.x) / (zdist.y + zdist.x - rinput * (zdist.y - zdist.x));
+	return (2.0 * screen_size.z) / (screen_size.w + screen_size.z - rinput * (screen_size.w - screen_size.z));
 }
 
 void applyFog()
