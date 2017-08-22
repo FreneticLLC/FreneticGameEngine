@@ -55,9 +55,9 @@ namespace FreneticGameGraphics.ClientSystem
         public bool ShadowsOnly = false;
 
         /// <summary>
-        /// Whether shadows are currently being rendered.
+        /// Whether shadows are allowed to be rendered.
         /// </summary>
-        public bool ShadowingAllowed = false;
+        public bool ShadowingAllowed = true;
 
         /// <summary>
         /// Whether transparent objects can cast shadows ever (defaults true).

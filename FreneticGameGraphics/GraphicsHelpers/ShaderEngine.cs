@@ -53,7 +53,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// whether "good graphics" are enabled for all shaders.
+        /// whether "good graphics" should be enabled for all shaders.
         /// </summary>
         public bool MCM_GOOD_GRAPHICS = true;
 
