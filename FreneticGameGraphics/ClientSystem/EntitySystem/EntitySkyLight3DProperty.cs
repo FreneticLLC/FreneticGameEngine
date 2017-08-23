@@ -12,9 +12,9 @@ using OpenTK.Graphics;
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
     /// <summary>
-    /// Represents the fact that the entity casts 2D light.
+    /// Represents a 3D sky light.
     /// </summary>
-    public class EntityLight2DCasterProperty : ClientEntityProperty
+    public class EntitySkytLight3DProperty : ClientEntityProperty
     {
         /// <summary>
         /// Fixes the position of the light to match a new location.
@@ -23,70 +23,71 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="pos">The new position.</param>
         public void FixPosition(Location pos)
         {
-            LightPosition = new Vector2(pos.XF, pos.YF);
-            if (ActualLight != null)
+            LightPosition = pos;
+            if (InternalLight != null)
             {
-                ActualLight.Position = LightPosition;
+                InternalLight.Reposition(pos);
             }
         }
+
+        /// <summary>
+        /// Whether to automatically place the sky light where the camera's at every tick.
+        /// Disable if you have a better method of keeping it positioned.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool AutoCorrectPlacement = true;
 
         /// <summary>
         /// The current position of the light.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Vector2 LightPosition;
-
+        public Location LightPosition = Location.Zero;
 
         /// <summary>
-        /// The current strength of the light.
+        /// The direction of the light.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public float LightStrength = 256;
+        public Location Direction = -Location.UnitZ;
 
         /// <summary>
-        /// The current color of the light.
+        /// The horizontal radius of the sky light. How wide of an area it reaches.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Color4 LightColor = Color4.White;
+        public float Radius = 512f;
 
         /// <summary>
-        /// The current subdivider-scale of the light.
+        /// The vertical size of the sky light. How far it reaches.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public float LightSDScale = 0.5f;
-
+        public float Size = 1000f;
+        
         /// <summary>
-        /// How deep into an object the light should go.
+        /// The current color of the light as (X,Y,Z) => (R,G,B).
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public float LightExtraDist = 50.0f;
+        public Location LightColor = Location.One * 0.75;
 
         /// <summary>
-        /// Whether the light source is a 'sky' light.
+        /// The represented 3D sky light.
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public bool IsSkyLight = false;
+        public SkyLight InternalLight;
 
         /// <summary>
-        /// The actual light object.
+        /// Ticks the sky light, correcting its position.
         /// </summary>
-        [PropertyDebuggable]
-        public PointLight2D ActualLight;
-
-        /// <summary>
-        /// Whether an entity will cast shadows from this light.
-        /// </summary>
-        /// <param name="ent">The entity in question.</param>
-        /// <returns>Whether to cast shadows.</returns>
-        public bool CastShadow(ClientEntity ent)
+        public void Tick()
         {
-            return ent.Renderer != null && ent.Renderer.CastShadows && ent.EID != BEntity.EID;
+            if (AutoCorrectPlacement)
+            {
+                Entity.SetPosition(Engine3D.MainCamera.Position - Direction * (Size * 0.5));
+            }
         }
 
         /// <summary>
@@ -94,21 +95,16 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
-            if (Entity.Engine is GameEngine2D eng)
+            if (Entity.Engine is GameEngine3D eng)
             {
-                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng)
-                {
-                    Color = LightColor,
-                    ShouldShadow = CastShadow,
-                    ExtraLightDist = LightExtraDist,
-                    IsSkyLight = IsSkyLight
-                };
-                eng.Lights.Add(ActualLight);
+                InternalLight = new SkyLight(LightPosition, Radius, LightColor, Direction, Size, false, Engine3D.MainView.ShadowTexSize());
+                eng.MainView.Lights.Add(InternalLight);
                 Entity.OnPositionChanged += FixPosition;
+                Entity.OnTick += Tick;
             }
             else
             {
-                SysConsole.Output(OutputType.WARNING, "2D light spawned into a non-2D-engine-based game!");
+                SysConsole.Output(OutputType.WARNING, "3D light spawned into a non-3D-engine-based game!");
             }
         }
 
@@ -117,16 +113,17 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         public override void OnDeSpawn()
         {
-            if (Entity.Engine is GameEngine2D eng)
+            if (Entity.Engine is GameEngine3D eng)
             {
-                eng.Lights.Remove(ActualLight);
-                ActualLight.Destroy();
-                ActualLight = null;
+                eng.MainView.Lights.Remove(InternalLight);
+                InternalLight.Destroy();
+                InternalLight = null;
                 Entity.OnPositionChanged -= FixPosition;
+                Entity.OnTick -= Tick;
             }
             else
             {
-                SysConsole.Output(OutputType.WARNING, "2D light despawned from a non-2D-engine-based game!");
+                SysConsole.Output(OutputType.WARNING, "3D light despawned from a non-3D-engine-based game!");
             }
         }
     }

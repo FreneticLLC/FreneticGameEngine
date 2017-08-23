@@ -68,6 +68,15 @@ namespace FreneticGameCore.EntitySystem
         /// Fired when this entity is de-spawned out of a world.
         /// </summary>
         public FreneticScriptEventHandler<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticScriptEventHandler<EntityDeSpawnEventArgs>();
+        
+        /// <summary>
+        /// Sets the position of the entity.
+        /// </summary>
+        /// <param name="p">New position.</param>
+        public void SetPosition(Location p)
+        {
+            OnPositionChanged(p);
+        }
 
         /// <summary>
         /// Sets the last known position to the input value.
