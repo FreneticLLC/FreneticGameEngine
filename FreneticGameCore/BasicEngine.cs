@@ -18,6 +18,11 @@ namespace FreneticGameCore
         public PhysicsSpace PhysicsWorld;
 
         /// <summary>
+        /// The source object for this engine. Set to any tag style constant reference you find most helpful to keep!
+        /// </summary>
+        public Object Source;
+
+        /// <summary>
         /// Current frame delta (seconds).
         /// </summary>
         public double Delta;
