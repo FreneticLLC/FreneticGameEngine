@@ -45,6 +45,11 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Whether the system is rendering things where specular value is relevant.
+        /// </summary>
+        public bool RenderSpecular = false;
+
+        /// <summary>
         /// Set this to whatever method call renders all 3D objects in this view.
         /// </summary>
         public Action<View3D> Render3D = null;
@@ -157,6 +162,51 @@ namespace FreneticGameGraphics.ClientSystem
         /// The current FBO ID.
         /// </summary>
         public FBOID FBOid;
+
+        /// <summary>
+        /// Minimum sun light value.
+        /// </summary>
+        public float SunLight_Minimum = 0;
+
+        /// <summary>
+        /// Maximum sun light value.
+        /// </summary>
+        public float SunLight_Maximum = 1;
+
+        /// <summary>
+        /// Current HDR exposure value.
+        /// </summary>
+        public float MainEXP = 1.0f;
+
+        /// <summary>
+        /// The alpha value to clear to.
+        /// </summary>
+        public float RenderClearAlpha = 1f;
+
+        /// <summary>
+        /// The shadow blur factor for deferred mode.
+        /// </summary>
+        public float ShadowBlur = 0.25f;
+
+        /// <summary>
+        /// The strength factor for depth-of-field if enabled.
+        /// </summary>
+        public float DOF_Factor = 4;
+
+        /// <summary>
+        /// The target location, if DOF is used.
+        /// </summary>
+        public Location DOF_Target = Location.Zero;
+
+        /// <summary>
+        /// The location of the sun when available.
+        /// </summary>
+        public Location SunLocation = Location.NaN;
+
+        /// <summary>
+        /// Maximum view distance of small lights.
+        /// </summary>
+        public double LightMaxDistance = 200f;
 
         /// <summary>
         /// (Re-)Generate transparent helpers, internal call.
@@ -604,6 +654,11 @@ namespace FreneticGameGraphics.ClientSystem
         public const float LightMaximum = 1E10f;
 
         /// <summary>
+        /// Whether to enable godrays.
+        /// </summary>
+        public bool GodRays = true;
+
+        /// <summary>
         /// Converts the next frame to a texture.
         /// </summary>
         /// <returns>The texture.</returns>
@@ -742,20 +797,19 @@ namespace FreneticGameGraphics.ClientSystem
                     EndNF(pfbo);
                     return;
                 }
-                /// TODO: Restore!
-                /*Stopwatch timer = new Stopwatch();
+                Stopwatch timer = new Stopwatch();
                 timer.Start();
-                if (Engine.CVars.r_shadows.ValueB)
+                if (Engine.Deferred_Shadows)
                 {
                     RenderPass_Shadows();
-                    CheckError("Render - Shadow");
+                    GraphicsUtil.CheckError("Render - Shadow");
                 }
                 RenderPass_GBuffer();
-                CheckError("Render - Buffer");
+                GraphicsUtil.CheckError("Render - Buffer");
                 RenderPass_Lights();
-                CheckError("Render - Lights");
+                GraphicsUtil.CheckError("Render - Lights");
                 FinalHDRGrab();
-                CheckError("Render - HDR");
+                GraphicsUtil.CheckError("Render - HDR");
                 PForward = CameraForward + CameraPos;
                 timer.Stop();
                 TotalTime = (double)timer.ElapsedMilliseconds / 1000f;
@@ -763,7 +817,7 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     TotalSpikeTime = TotalTime;
                 }
-                EndNF(pfbo);*/
+                EndNF(pfbo);
             }
             catch (Exception ex)
             {
@@ -1696,6 +1750,1105 @@ namespace FreneticGameGraphics.ClientSystem
                 StandardBlend();
                 GraphicsUtil.CheckError("AfterShadows");
             }
+        }
+        /// <summary>
+        /// Generate the G-Buffer ("FBO") for lighting and final passes.
+        /// </summary>
+        public void RenderPass_GBuffer()
+        {
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            OSetViewport();
+            Engine.Shaders3D.s_fbodecal = Engine.Shaders3D.s_fbodecal.Bind();
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
+            //GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
+            // TODO: Vox patch!
+            /*
+            Engine.Shaders3D.s_fbov = Engine.Shaders3D.s_fbov.Bind();
+            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 0");
+            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform1(7, AudioLevel);
+            GL.Uniform2(8, new Vector2(TheClient.sl_min, TheClient.sl_max));
+            Engine.Shaders3D.s_fbovslod = Engine.Shaders3D.s_fbovslod.Bind();
+            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 0.5");
+            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform2(8, new Vector2(TheClient.sl_min, TheClient.sl_max));
+            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 1");
+            */
+            Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
+            Engine.Shaders3D.s_fbo = Engine.Shaders3D.s_fbo.Bind();
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GraphicsUtil.CheckError("Render - GBuffer - 0");
+            FBOid = FBOID.MAIN;
+            RenderingShadows = false;
+            CFrust = camFrust;
+            GL.ActiveTexture(TextureUnit.Texture0);
+            RS4P.Bind(this);
+            RS4P.Clear();
+            RenderLights = true;
+            RenderSpecular = true;
+            Engine.Rendering.SetColor(Color4.White, this);
+            StandardBlend();
+            GraphicsUtil.CheckError("Render - GBuffer - 1");
+            // TODO: VR Patch!
+            /*if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            {
+                Viewport(Width / 2, 0, Width / 2, Height);
+                Render3D(this);
+                CFrust = cf2;
+                Viewport(0, 0, Width / 2, Height);
+                CameraPos = cameraBasePos - cameraAdjust;
+                Engine.Shaders3D.s_fbov = Engine.Shaders3D.s_fbov.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_fbo = Engine.Shaders3D.s_fbo.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Matrix4 orig = PrimaryMatrix;
+                PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Render3D(this);
+                PrimaryMatrix = orig;
+                Viewport(0, 0, Width, Height);
+                CameraPos = cameraBasePos + cameraAdjust;
+                CFrust = camFrust;
+            }
+            else*/
+            {
+                Render3D(this);
+            }
+            GraphicsUtil.CheckError("AfterFBO");
+            RenderPass_Decals();
+            RenderPass_RefractionBuffer();
+            timer.Stop();
+            FBOTime = (double)timer.ElapsedMilliseconds / 1000f;
+            if (FBOTime > FBOSpikeTime)
+            {
+                FBOSpikeTime = FBOTime;
+            }
+            GraphicsUtil.CheckError("Render - GBuffer - Final");
+        }
+
+        /// <summary>
+        /// Adds decal data to the G-Buffer ("FBO").
+        /// </summary>
+        public void RenderPass_Decals()
+        {
+            Engine.Shaders3D.s_fbodecal = Engine.Shaders3D.s_fbodecal.Bind();
+            RS4P.Unbind(this);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_decal);
+            GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, RS4P.fbo);
+            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+            RS4P.Bind(this);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, fbo_decal_depth);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.DepthMask(false);
+            GraphicsUtil.CheckError("Render - Decals - 0");
+            // TODO: VR patch!
+            /*
+            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            {
+                Viewport(Width / 2, 0, Width / 2, Height);
+                DecalRender?.Invoke(this);
+                CFrust = cf2;
+                Viewport(0, 0, Width / 2, Height);
+                CameraPos = cameraBasePos - cameraAdjust;
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Matrix4 orig = PrimaryMatrix;
+                PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                DecalRender?.Invoke(this);
+                PrimaryMatrix = orig;
+                Viewport(0, 0, Width, Height);
+                CameraPos = cameraBasePos + cameraAdjust;
+                CFrust = camFrust;
+            }
+            else*/
+            {
+                DecalRender?.Invoke(this);
+            }
+            GraphicsUtil.CheckError("Render - Decals - Final");
+            GL.DepthMask(true);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture0);
+        }
+
+        /// <summary>
+        /// Adds refraction data to the G-Buffer ("FBO").
+        /// </summary>
+        public void RenderPass_RefractionBuffer()
+        {
+            FBOid = FBOID.REFRACT;
+            // TODO: Vox patch!
+            /*
+            Engine.Shaders3D.s_fbov_refract = Engine.Shaders3D.s_fbov_refract.Bind();
+            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform2(8, new Vector2(SunLight_Minimum, SunLight_Maximum));
+            */
+            Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
+            GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.DepthMask(false);
+            GraphicsUtil.CheckError("Render - Refract - 0");
+            // TODO: VR Patch!
+            /*
+            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            {
+                Viewport(Width / 2, 0, Width / 2, Height);
+                Render3D(this);
+                CFrust = cf2;
+                Viewport(0, 0, Width / 2, Height);
+                CameraPos = cameraBasePos - cameraAdjust;
+                Engine.Shaders3D.s_fbov_refract = Engine.Shaders3D.s_fbov_refract.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Matrix4 orig = PrimaryMatrix;
+                PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Render3D(this);
+                PrimaryMatrix = orig;
+                Viewport(0, 0, Width, Height);
+                CameraPos = cameraBasePos + cameraAdjust;
+                CFrust = camFrust;
+            }
+            else*/
+            {
+                Render3D(this);
+            }
+            GraphicsUtil.CheckError("AfterRefract");
+            GL.DepthMask(true);
+            RenderLights = false;
+            RenderSpecular = false;
+            RS4P.Unbind(this);
+            FBOid = FBOID.NONE;
+        }
+
+        /// <summary>
+        /// Light source addition render passes.
+        /// </summary>
+        public void RenderPass_Lights()
+        {
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            BindFramebuffer(FramebufferTarget.Framebuffer, fbo_main);
+            DrawBuffer(DrawBufferMode.ColorAttachment0);
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.0f, 0.0f, 0.0f, RenderClearAlpha });
+            if (Engine.Deferred_Shadows)
+            {
+                if (Engine.Deferred_SSAO)
+                {
+                    Engine.Shaders3D.s_shadowadder_ssao = Engine.Shaders3D.s_shadowadder_ssao.Bind();
+                }
+                else
+                {
+                    Engine.Shaders3D.s_shadowadder = Engine.Shaders3D.s_shadowadder.Bind();
+                }
+                GL.Uniform1(3, ShadowBlur);
+            }
+            else
+            {
+                if (Engine.Deferred_SSAO)
+                {
+                    Engine.Shaders3D.s_lightadder_ssao = Engine.Shaders3D.s_lightadder_ssao.Bind();
+                }
+                else
+                {
+                    Engine.Shaders3D.s_lightadder = Engine.Shaders3D.s_lightadder.Bind();
+                }
+            }
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.PositionTexture);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.NormalsTexture);
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.BindTexture(TextureTarget.Texture2DArray, fbo_shadow_tex);
+            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.RenderhintTexture);
+            GL.ActiveTexture(TextureUnit.Texture6);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.DiffuseTexture);
+            GL.Uniform3(4, ambient.ToOpenTK());
+            GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.DepthTest);
+            TranspBlend();
+            if (Engine.Deferred_Lights)
+            {
+                float[] light_dat = new float[LIGHTS_MAX * 16];
+                float[] shadowmat_dat = new float[LIGHTS_MAX * 16];
+                int c = 0;
+                // TODO: An ambient light source?
+                for (int i = 0; i < Lights.Count; i++)
+                {
+                    if (Lights[i] is SkyLight || camFrust == null || camFrust.ContainsSphere(Lights[i].EyePos, Lights[i].MaxDistance))
+                    {
+                        double d1 = (Lights[i].EyePos - CameraPos).LengthSquared();
+                        double d2 = LightMaxDistance * LightMaxDistance + Lights[i].MaxDistance * Lights[i].MaxDistance;
+                        double maxrangemult = 0;
+                        if (d1 < d2 * 4 || Lights[i] is SkyLight)
+                        {
+                            maxrangemult = 1;
+                        }
+                        else if (d1 < d2 * 6)
+                        {
+                            maxrangemult = 1 - ((d1 - (d2 * 4)) / ((d2 * 6) - (d2 * 4)));
+                        }
+                        if (maxrangemult > 0)
+                        {
+                            for (int x = 0; x < Lights[i].InternalLights.Count; x++)
+                            {
+                                if (Lights[i].InternalLights[x].color.LengthSquared <= 0.01)
+                                {
+                                    continue;
+                                }
+                                Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
+                                Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
+                                Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
+                                Matrix4 light_data = new Matrix4(
+                                    (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
+                                    0.7f, // diffuse_albedo
+                                    0.7f, // specular_albedo
+                                    Lights[i].InternalLights[x] is LightOrtho ? 1.0f : 0.0f, // should_sqrt
+                                    col.X, col.Y, col.Z, // light_color
+                                    Lights[i].InternalLights[x] is LightOrtho ? LightMaximum : (Lights[i].InternalLights[0].maxrange <= 0 ? LightMaximum : Lights[i].InternalLights[0].maxrange), // light_radius
+                                    0f, 0f, 0f, // eye_pos
+                                    Lights[i] is SpotLight ? 1.0f : 0.0f, // light_type
+                                    1f / ShadowTexSize(), // tex_size
+                                    0.0f // Unused.
+                                    );
+                                for (int mx = 0; mx < 4; mx++)
+                                {
+                                    for (int my = 0; my < 4; my++)
+                                    {
+                                        shadowmat_dat[c * 16 + mx * 4 + my] = smat[mx, my];
+                                        light_dat[c * 16 + mx * 4 + my] = light_data[mx, my];
+                                    }
+                                }
+                                c++;
+                                if (c >= LIGHTS_MAX)
+                                {
+                                    goto lights_apply;
+                                }
+                            }
+                        }
+                    }
+                }
+                lights_apply:
+                GL.ActiveTexture(TextureUnit.Texture4);
+                GL.BindTexture(TextureTarget.Texture2DArray, fbo_shadow_tex);
+                GL.Uniform2(7, new Vector2(Engine.ZNear, Engine.ZFar()));
+                GL.UniformMatrix4(8, false, ref PrimaryMatrix); // TODO: Render both eyes separately here for SSAO accuracy?
+                GL.Uniform1(9, (float)c);
+                GL.UniformMatrix4(10, LIGHTS_MAX, false, shadowmat_dat);
+                GL.UniformMatrix4(10 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                StandardBlend();
+                GraphicsUtil.CheckError("AfterLighting");
+                RenderPass_HDR();
+            }
+            else
+            {
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, hdrtex);
+                float[] data = new float[HDR_SPREAD * HDR_SPREAD];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    data[i] = 1f;
+                }
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, HDR_SPREAD, HDR_SPREAD, 0, PixelFormat.Red, PixelType.Float, data);
+            }
+            GraphicsUtil.CheckError("AfterAllLightCode");
+            RenderPass_LightsToBase();
+            int lightc = RenderPass_Transparents();
+            RenderPass_Bloom(lightc);
+            timer.Stop();
+            LightsTime = (double)timer.ElapsedMilliseconds / 1000f;
+            if (LightsTime > LightsSpikeTime)
+            {
+                LightsSpikeTime = LightsTime;
+            }
+            timer.Reset();
+            GraphicsUtil.CheckError("AtEnd");
+        }
+
+        /// <summary>
+        /// Calculates the brightness value for High Dynamic Range rendering.
+        /// </summary>
+        public void RenderPass_HDR()
+        {
+            if (Engine.Deferred_Lights && Engine.Deferred_HDR)
+            {
+                Engine.Shaders3D.s_hdrpass.Bind();
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.Disable(EnableCap.CullFace);
+                GL.Disable(EnableCap.DepthTest);
+                GL.BindTexture(TextureTarget.Texture2D, fbo_texture);
+                GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                BindFramebuffer(FramebufferTarget.Framebuffer, hdrfbo);
+                DrawBuffer(DrawBufferMode.ColorAttachment0);
+                GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform2(4, new Vector2(Width, Height));
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+                StandardBlend();
+                GraphicsUtil.CheckError("AfterHDRRead");
+            }
+            else
+            {
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, hdrtex);
+                float[] data = new float[HDR_SPREAD * HDR_SPREAD];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    data[i] = 1f;
+                }
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, HDR_SPREAD, HDR_SPREAD, 0, PixelFormat.Red, PixelType.Float, data);
+            }
+        }
+
+        /// <summary>
+        /// Applies lights to the base buffer.
+        /// </summary>
+        public void RenderPass_LightsToBase()
+        {
+            BindFramebuffer(FramebufferTarget.Framebuffer, fbo_godray_main);
+            if (Engine.Deferred_Lights)
+            {
+                if (Engine.Deferred_Toonify)
+                {
+                    Engine.Shaders3D.s_finalgodray_lights_toonify = Engine.Shaders3D.s_finalgodray_lights_toonify.Bind();
+                }
+                else
+                {
+                    if (Engine.Deferred_MotionBlur)
+                    {
+                        Engine.Shaders3D.s_finalgodray_lights_motblur = Engine.Shaders3D.s_finalgodray_lights_motblur.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_finalgodray_lights = Engine.Shaders3D.s_finalgodray_lights.Bind();
+                    }
+                }
+            }
+            else
+            {
+                if (Engine.Deferred_Toonify)
+                {
+                    Engine.Shaders3D.s_finalgodray_toonify = Engine.Shaders3D.s_finalgodray_toonify.Bind();
+                }
+                else
+                {
+                    Engine.Shaders3D.s_finalgodray = Engine.Shaders3D.s_finalgodray.Bind();
+                }
+            }
+            BufferDontTouch = true;
+            GL.DrawBuffers(2, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1 });
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
+            GL.ClearBuffer(ClearBuffer.Color, 1, new float[] { 0f, 0f, 0f, 0f });
+            GL.BlendFuncSeparate(1, BlendingFactorSrc.SrcColor, BlendingFactorDest.Zero, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.Zero);
+            GL.Uniform3(8, DOF_Target.ToOpenTK());
+            GL.Uniform1(9, DOF_Factor);
+            GL.Uniform1(10, MainEXP * Engine.Exposure);
+            float fogDist = 1.0f / Engine.FogMaxDist();
+            fogDist *= fogDist;
+            Vector2 zfar_rel = new Vector2(Engine.ZNear, Engine.ZFar());
+            GL.Uniform1(16, fogDist);
+            GL.Uniform2(17, ref zfar_rel);
+            GL.Uniform4(18, new Vector4(FogCol.ToOpenTK(), FogAlpha));
+            // TODO: If thick fog, blur the environment? Or some similar head-in-a-block effect!
+            GL.Uniform1(19, DesaturationAmount);
+            GL.Uniform3(20, new Vector3(0, 0, 0));
+            GL.Uniform3(21, DesaturationColor);
+            GL.UniformMatrix4(22, false, ref PrimaryMatrix);
+            GL.Uniform1(24, (float)Width);
+            GL.Uniform1(25, (float)Height);
+            GL.Uniform1(26, (float)Engine.GlobalTickTime);
+            Vector4 v = Vector4.Transform(new Vector4(PForward.ToOpenTK(), 1f), PrimaryMatrix);
+            Vector2 v2 = (v.Xy / v.W);
+            Vector2 rel = (pfRes - v2) * 0.01f;
+            if (float.IsNaN(rel.X) || float.IsInfinity(rel.X) || float.IsNaN(rel.Y) || float.IsInfinity(rel.Y))
+            {
+                rel = new Vector2(0f, 0f);
+            }
+            GL.Uniform2(27, ref rel);
+            pfRes = v2;
+            GL.Uniform1(28, Engine.Deferred_Grayscale ? 1f : 0f);
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, fbo_texture);
+            GL.ActiveTexture(TextureUnit.Texture7);
+            GL.BindTexture(TextureTarget.Texture2D, hdrtex);
+            GL.ActiveTexture(TextureUnit.Texture6);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.Rh2Texture);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, RS4P.DiffuseTexture);
+            GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GraphicsUtil.CheckError("FirstRenderToBasePassPre");
+            Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+            GraphicsUtil.CheckError("FirstRenderToBasePassComplete");
+            GL.ActiveTexture(TextureUnit.Texture6);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GraphicsUtil.CheckError("AmidTextures");
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Enable(EnableCap.DepthTest);
+            GraphicsUtil.CheckError("PreBlendFunc");
+            //GL.BlendFunc(1, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GraphicsUtil.CheckError("PreAFRFBO");
+            BindFramebuffer(FramebufferTarget.Framebuffer, CurrentFBO);
+            DrawBuffer(CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
+            BufferDontTouch = false;
+            GraphicsUtil.CheckError("AFRFBO_1");
+            BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)RS4P.fbo); // TODO: is this line and line below needed?
+            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+            GraphicsUtil.CheckError("AFRFBO_2");
+            BindFramebuffer(FramebufferTarget.ReadFramebuffer, fbo_godray_main);
+            GraphicsUtil.CheckError("AFRFBO_3");
+            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+            GraphicsUtil.CheckError("AFRFBO_4");
+            BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+            GL.Enable(EnableCap.CullFace);
+            GraphicsUtil.CheckError("AfterFirstRender");
+            PostFirstRender?.Invoke();
+            GraphicsUtil.CheckError("AfterPostFirstRender");
+        }
+
+        /// <summary>
+        /// Used for motion blurring.
+        /// </summary>
+        Vector2 pfRes = Vector2.Zero;
+
+        /// <summary>
+        /// Render transparent data.
+        /// </summary>
+        public int RenderPass_Transparents()
+        {
+            // TODO: Vox patch!
+            /*
+            if (TheClient.CVars.r_transplighting.ValueB)
+            {
+                if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
+                    }
+                }
+            }
+            else
+            {
+                if (Engine.AllowLL)
+                {
+                    Engine.Shaders3D.s_transponlyvox_ll = Engine.Shaders3D.s_transponlyvox_ll.Bind();
+                }
+                else
+                {
+                    Engine.Shaders3D.s_transponlyvox = Engine.Shaders3D.s_transponlyvox.Bind();
+                }
+            }
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform1(4, DesaturationAmount);*/
+            if (Engine.Deferred_TransparentLights)
+            {
+                if (Engine.Deferred_Shadows)
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                        FBOid = FBOID.TRANSP_SHADOWS_LL;
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                        FBOid = FBOID.TRANSP_SHADOWS;
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                        FBOid = FBOID.TRANSP_LIT_LL;
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                        FBOid = FBOID.TRANSP_LIT;
+                    }
+                }
+            }
+            else
+            {
+                if (Engine.AllowLL)
+                {
+                    Engine.Shaders3D.s_transponly_ll = Engine.Shaders3D.s_transponly_ll.Bind();
+                    FBOid = FBOID.TRANSP_LL;
+                }
+                else
+                {
+                    Engine.Shaders3D.s_transponly = Engine.Shaders3D.s_transponly.Bind();
+                    FBOid = FBOID.TRANSP_UNLIT;
+                }
+            }
+            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref IdentityMatrix);
+            GL.Uniform1(4, DesaturationAmount);
+            GL.DepthMask(false);
+            if (Engine.AllowLL || !Engine.Deferred_BrightTransp)
+            {
+                StandardBlend();
+            }
+            else
+            {
+                TranspBlend();
+            }
+            BindFramebuffer(FramebufferTarget.Framebuffer, transp_fbo_main);
+            DrawBuffer(DrawBufferMode.ColorAttachment0);
+            BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)RS4P.fbo);
+            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+            BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
+            int lightc = 0;
+            GraphicsUtil.CheckError("PreTransp");
+            // TODO: VR Patch!
+            /*
+            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            {
+                Viewport(Width / 2, 0, Width / 2, Height);
+                CameraPos = cameraBasePos + cameraAdjust;
+                RenderTransp(ref lightc);
+                CFrust = cf2;
+                Viewport(0, 0, Width / 2, Height);
+                CFrust = cf2;
+                if (TheClient.CVars.r_transplighting.ValueB)
+                {
+                    if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
+                    {
+                        if (Engine.AllowLL)
+                        {
+                            Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
+                        }
+                        else
+                        {
+                            Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
+                        }
+                    }
+                    else
+                    {
+                        if (Engine.AllowLL)
+                        {
+                            Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
+                        }
+                        else
+                        {
+                            Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
+                        }
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlyvox_ll = Engine.Shaders3D.s_transponlyvox_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlyvox = Engine.Shaders3D.s_transponlyvox.Bind();
+                    }
+                }
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                if (TheClient.CVars.r_transplighting.ValueB)
+                {
+                    if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
+                    {
+                        if (Engine.AllowLL)
+                        {
+                            Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                            FBOid = FBOID.TRANSP_SHADOWS_LL;
+                        }
+                        else
+                        {
+                            Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                            FBOid = FBOID.TRANSP_SHADOWS;
+                        }
+                    }
+                    else
+                    {
+                        if (Engine.AllowLL)
+                        {
+                            Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                            FBOid = FBOID.TRANSP_LIT_LL;
+                        }
+                        else
+                        {
+                            Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                            FBOid = FBOID.TRANSP_LIT;
+                        }
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponly_ll = Engine.Shaders3D.s_transponly_ll.Bind();
+                        FBOid = FBOID.TRANSP_LL;
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponly = Engine.Shaders3D.s_transponly.Bind();
+                        FBOid = FBOID.TRANSP_UNLIT;
+                    }
+                }
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                CameraPos = cameraBasePos - cameraAdjust;
+                Matrix4 orig = PrimaryMatrix;
+                PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                RenderTransp(ref lightc, cf2);
+                PrimaryMatrix = orig;
+                Viewport(0, 0, Width, Height);
+                CameraPos = cameraBasePos + cameraAdjust;
+                CFrust = camFrust;
+            }
+            else*/
+            {
+                RenderTransp(ref lightc);
+            }
+            if (lightc == 0)
+            {
+                lightc = 1;
+            }
+            GraphicsUtil.CheckError("AfterTransp");
+            return lightc;
+        }
+
+        /// <summary>
+        /// Apply godrays, bloom, and transparent data to screen.
+        /// </summary>
+        public void RenderPass_Bloom(int lightc)
+        {
+            BindFramebuffer(FramebufferTarget.Framebuffer, CurrentFBO);
+            DrawBuffer(CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
+            StandardBlend();
+            FBOid = FBOID.NONE;
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.Disable(EnableCap.CullFace);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+            GL.Disable(EnableCap.DepthTest);
+            GraphicsUtil.CheckError("PreGR");
+            if (GodRays)
+            {
+                // TODO: 3d stuff for GodRays.
+                GL.ActiveTexture(TextureUnit.Texture1);
+                GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, fbo_godray_texture2);
+                Engine.Shaders3D.s_godray = Engine.Shaders3D.s_godray.Bind();
+                GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform1(6, MainEXP * Engine.Exposure);
+                GL.Uniform1(7, Width / (float)Height);
+                if (SunLocation.IsNaN())
+                {
+                    GL.Uniform2(8, new Vector2(-10f, -10f));
+                }
+                else
+                {
+                    Vector4d v = Vector4d.Transform(new Vector4d(SunLocation.ToOpenTK3D(), 1.0), PrimaryMatrixd);
+                    if (v.Z / v.W > 1.0f || v.Z / v.W < 0.0f)
+                    {
+                        GL.Uniform2(8, new Vector2(-10f, -10f));
+                    }
+                    else
+                    {
+                        Vector2d lp1 = (v.Xy / v.W) * 0.5f + new Vector2d(0.5f);
+                        GL.Uniform2(8, new Vector2((float)lp1.X, (float)lp1.Y));
+                        float lplenadj = (float)((1.0 - Math.Min(lp1.Length, 1.0)) * (0.99 - 0.6) + 0.6);
+                        GL.Uniform1(12, 0.84f * lplenadj);
+                    }
+                }
+                GL.Uniform1(14, Engine.ZNear);
+                GL.Uniform1(15, Engine.ZFar());
+                GL.Uniform1(16, Engine.ZFarOut() * 0.5f);
+                TranspBlend();
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+                StandardBlend();
+            }
+            GraphicsUtil.CheckError("PostGR");
+            {
+                // TODO: Merge transp-to-screen and GR pass?
+                //GL.Enable(EnableCap.DepthTest);
+                GL.BindTexture(TextureTarget.Texture2D, transp_fbo_texture);
+                Engine.Shaders3D.s_transpadder = Engine.Shaders3D.s_transpadder.Bind();
+                GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform1(3, (float)lightc);
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+            }
+            GL.UseProgram(0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.DepthMask(true);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.CullFace);
+            GraphicsUtil.CheckError("WrapUp");
+            BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            DrawBuffer(DrawBufferMode.Back);
+        }
+
+        /// <summary>
+        /// Render transparent objects into a temporary buffer.
+        /// </summary>
+        void RenderTransp(ref int lightc, Frustum frustumToUse = null)
+        {
+            if (Engine.AllowLL)
+            {
+                GL.ActiveTexture(TextureUnit.Texture4);
+                GL.BindTexture(TextureTarget.Texture2DArray, TransTexs[0]);
+                GL.BindImageTexture(4, TransTexs[0], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+                GL.ActiveTexture(TextureUnit.Texture5);
+                GL.BindTexture(TextureTarget.TextureBuffer, TransTexs[1]);
+                GL.BindImageTexture(5, TransTexs[1], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.Rgba32f);
+                GL.ActiveTexture(TextureUnit.Texture6);
+                GL.BindTexture(TextureTarget.TextureBuffer, TransTexs[2]);
+                GL.BindImageTexture(6, TransTexs[2], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+                GL.ActiveTexture(TextureUnit.Texture7);
+                GL.BindTexture(TextureTarget.TextureBuffer, TransTexs[3]);
+                GL.BindImageTexture(7, TransTexs[3], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                Engine.Shaders3D.s_ll_clearer.Bind();
+                GL.Uniform2(4, new Vector2(Width, Height));
+                Matrix4 flatProj = Matrix4.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
+                GL.UniformMatrix4(1, false, ref flatProj);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform2(4, new Vector2(Width, Height));
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+                GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+                //s_whatever.Bind();
+                //GL.Uniform2(4, new Vector2(Window.Width, Window.Height));
+                //GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 1f });
+                //GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                //Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(FOV, Window.Width / (float)Window.Height, ZNear, ZFar);
+                //Matrix4 view = Matrix4.LookAt(CamPos, CamGoal, Vector3.UnitZ);
+                //Matrix4 combined = view * proj;
+                //GL.UniformMatrix4(1, false, ref combined);
+                RenderTranspInt(ref lightc, frustumToUse);
+                GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+                Engine.Shaders3D.s_ll_fpass.Bind();
+                GL.Uniform2(4, new Vector2(Width, Height));
+                GL.UniformMatrix4(1, false, ref flatProj);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform2(4, new Vector2(Width, Height));
+                Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+            }
+            else
+            {
+                RenderTranspInt(ref lightc, frustumToUse);
+            }
+        }
+        
+        void RenderTranspInt(ref int lightc, Frustum frustumToUse)
+        {
+            if (frustumToUse == null)
+            {
+                frustumToUse = camFrust;
+            }
+            if (Engine.Deferred_TransparentLights)
+            {
+                RenderLights = true;
+                for (int i = 0; i < Lights.Count; i++)
+                {
+                    if (Lights[i] is SkyLight || frustumToUse == null || frustumToUse.ContainsSphere(Lights[i].EyePos, Lights[i].MaxDistance))
+                    {
+                        for (int x = 0; x < Lights[i].InternalLights.Count; x++)
+                        {
+                            lightc++;
+                        }
+                    }
+                }
+                int c = 0;
+                float[] l_dats1 = new float[LIGHTS_MAX * 16];
+                float[] s_mats = new float[LIGHTS_MAX * 16];
+                for (int i = 0; i < Lights.Count; i++)
+                {
+                    if (Lights[i] is SkyLight || frustumToUse == null || frustumToUse.ContainsSphere(Lights[i].EyePos, Lights[i].MaxDistance))
+                    {
+                        for (int x = 0; x < Lights[i].InternalLights.Count; x++)
+                        {
+                            Matrix4 lmat = Lights[i].InternalLights[x].GetMatrix(this);
+                            float maxrange = (Lights[i].InternalLights[x] is LightOrtho) ? LightMaximum : Lights[i].InternalLights[x].maxrange;
+                            Matrix4 matxyz = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+                            matxyz[0, 0] = maxrange <= 0 ? LightMaximum : maxrange;
+                            matxyz[0, 1] = (float)(Lights[i].EyePos.X - RenderRelative.X);
+                            matxyz[0, 2] = (float)(Lights[i].EyePos.Y - RenderRelative.Y);
+                            matxyz[0, 3] = (float)(Lights[i].EyePos.Z - RenderRelative.Z);
+                            matxyz[1, 0] = Lights[i].InternalLights[x].color.X;
+                            matxyz[1, 1] = Lights[i].InternalLights[x].color.Y;
+                            matxyz[1, 2] = Lights[i].InternalLights[x].color.Z;
+                            matxyz[1, 3] = (Lights[i] is SpotLight) ? 1f : 0f;
+                            matxyz[2, 0] = (Lights[i].InternalLights[x] is LightOrtho) ? 1f : 0f;
+                            matxyz[2, 1] = 1f / ShadowTexSize();
+                            matxyz[2, 2] = MainEXP * Engine.Exposure;
+                            matxyz[2, 3] = (float)lightc; // TODO: Move this to a generic
+                            matxyz[3, 0] = (float)ambient.X; // TODO: Remove ambient
+                            matxyz[3, 1] = (float)ambient.Y;
+                            matxyz[3, 2] = (float)ambient.Z;
+                            for (int mx = 0; mx < 4; mx++)
+                            {
+                                for (int my = 0; my < 4; my++)
+                                {
+                                    s_mats[c * 16 + mx * 4 + my] = lmat[mx, my];
+                                    l_dats1[c * 16 + mx * 4 + my] = matxyz[mx, my];
+                                }
+                            }
+                            c++;
+                            if (c >= LIGHTS_MAX)
+                            {
+                                goto lights_apply;
+                            }
+                        }
+                    }
+                }
+                lights_apply:
+                GraphicsUtil.CheckError("PreRenderTranspLights");
+                if (Engine.Deferred_Shadows)
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylitsh_ll_particles = Engine.Shaders3D.s_transponlylitsh_ll_particles.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylitsh_particles = Engine.Shaders3D.s_transponlylitsh_particles.Bind();
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylit_ll_particles = Engine.Shaders3D.s_transponlylit_ll_particles.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylit_particles = Engine.Shaders3D.s_transponlylit_particles.Bind();
+                    }
+                }
+                GraphicsUtil.CheckError("PreRenderTranspLights - 1.5");
+                Matrix4 mat_lhelp = new Matrix4(c, Engine.ZNear, Engine.ZFar(), Width, Height, 0, 0, 0, 0, 0, 0, 0, (float)FogCol.X, (float)FogCol.Y, (float)FogCol.Z, FogAlpha);
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform1(4, DesaturationAmount);
+                //GL.Uniform1(7, (float)TheClient.GlobalTickTimeLocal);
+                GL.Uniform2(8, new Vector2(Width, Height));
+                GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
+                GL.UniformMatrix4(9, false, ref mat_lhelp);
+                GL.UniformMatrix4(20, LIGHTS_MAX, false, s_mats);
+                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, l_dats1);
+                GraphicsUtil.CheckError("PreRenderTranspLights - 2");
+                // TODO: Vox patch!
+                /*
+                if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
+                {
+                    if (Engine.Shaders3D.CVars.r_transpll.ValueB)
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
+                    }
+                }
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
+                GL.Uniform1(7, AudioLevel);
+                GL.Uniform2(8, new Vector2(Width, Height));
+                GL.UniformMatrix4(9, false, ref mat_lhelp);
+                GL.UniformMatrix4(20, LIGHTS_MAX, false, s_mats);
+                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, l_dats1);*/
+                GraphicsUtil.CheckError("PreRenderTranspLights - 3");
+                if (Engine.Deferred_Shadows)
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                    }
+                }
+                else
+                {
+                    if (Engine.AllowLL)
+                    {
+                        Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                    }
+                    else
+                    {
+                        Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                    }
+                }
+                GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                GL.Uniform2(8, new Vector2(Width, Height));
+                GL.UniformMatrix4(9, false, ref mat_lhelp);
+                GL.UniformMatrix4(20, LIGHTS_MAX, false, s_mats);
+                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, l_dats1);
+                GL.ActiveTexture(TextureUnit.Texture4);
+                GL.BindTexture(TextureTarget.Texture2DArray, fbo_shadow_tex);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GraphicsUtil.CheckError("PreparedRenderTranspLights");
+                Render3D(this);
+                GraphicsUtil.CheckError("PostRenderTranspLights");
+                GL.ActiveTexture(TextureUnit.Texture2);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                RenderLights = false;
+            }
+            else
+            {
+                if (Engine.AllowLL)
+                {
+                    Matrix4 matabc = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+                    matabc[0, 3] = (float)Width;
+                    matabc[1, 3] = (float)Height;
+                    // TODO: Vox patch!
+                    /*
+                    Engine.Shaders3D.s_transponlyvox_ll.Bind();
+                    // GL.UniformMatrix4(1, false, ref combined);
+                    GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                    GL.UniformMatrix4(9, false, ref matabc);*/
+                    Engine.Shaders3D.s_transponly_ll.Bind();
+                    //GL.UniformMatrix4(1, false, ref combined);
+                    GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                    GL.UniformMatrix4(9, false, ref matabc);
+                }
+                else
+                {
+                    // TODO: Vox Patch!
+                    /*Engine.Shaders3D.s_transponlyvox.Bind();
+                    //GL.UniformMatrix4(1, false, ref combined);
+                    GL.UniformMatrix4(2, false, ref IdentityMatrix);*/
+                    Engine.Shaders3D.s_transponly.Bind();
+                    //GL.UniformMatrix4(1, false, ref combined);
+                    GL.UniformMatrix4(2, false, ref IdentityMatrix);
+                }
+                Render3D(this);
+            }
+        }
+        
+        /// <summary>
+        /// Reads HDR result from the GPU.
+        /// </summary>
+        public void FinalHDRGrab()
+        {
+            if (Engine.Deferred_HDR)
+            {
+                float[] rd = new float[HDR_SPREAD * HDR_SPREAD];
+                BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                BindFramebuffer(FramebufferTarget.ReadFramebuffer, hdrfbo);
+                GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+                GL.ReadPixels(0, 0, HDR_SPREAD, HDR_SPREAD, PixelFormat.Red, PixelType.Float, rd);
+                BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+                GL.ReadBuffer(ReadBufferMode.None);
+                float exp = FindExp(rd);
+                exp = Math.Max(Math.Min(exp, 5.0f), 0.4f);
+                exp = 1.0f / exp;
+                float stepUp = (float)Engine.Delta * 0.05f;
+                float stepDown = stepUp * 5.0f;
+                float relative = Math.Abs(MainEXP - exp);
+                float modder = 3f * relative;
+                stepUp *= modder;
+                stepDown *= modder;
+                if (exp > MainEXP + stepUp)
+                {
+                    MainEXP += stepUp;
+                }
+                else if (exp < MainEXP - stepDown)
+                {
+                    MainEXP -= stepDown;
+                }
+                else
+                {
+                    MainEXP = exp;
+                }
+            }
+            else
+            {
+                MainEXP = 0.75f;
+            }
+        }
+
+
+        /// <summary>
+        /// Helper to find exposure.
+        /// </summary>
+        /// <param name="inp">Exposure array input.</param>
+        public float FindExp(float[] inp)
+        {
+            float total = 0f;
+            for (int i = 0; i < inp.Length; i++)
+            {
+                total += inp[i];
+            }
+            return total / (float)inp.Length;
         }
     }
     

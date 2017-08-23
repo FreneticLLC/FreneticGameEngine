@@ -53,6 +53,57 @@ namespace FreneticGameGraphics.ClientSystem
         public bool Forward_Shadows = false;
 
         /// <summary>
+        /// Whether to enable deferred mode lights.
+        /// </summary>
+        public bool Deferred_Lights = true;
+
+        /// <summary>
+        /// Whether to enable deferred mode transparent-object-affecting lights.
+        /// </summary>
+        public bool Deferred_TransparentLights = true;
+
+        /// <summary>
+        /// Whether to enable deferred mode shadows.
+        /// </summary>
+        public bool Deferred_Shadows = true;
+
+        /// <summary>
+        /// Whether to enable deferred mode HDR.
+        /// </summary>
+        public bool Deferred_HDR = true;
+
+        /// <summary>
+        /// Whether deferred mode should use SSAO effects.
+        /// </summary>
+        public bool Deferred_SSAO = true;
+
+        /// <summary>
+        /// Whether deferred mode should have a motion blur effect.
+        /// TODO: This can probably be simplified to just a buffer cheat instead of a complex shader with dumb logic.
+        /// </summary>
+        public bool Deferred_MotionBlur = false;
+
+        /// <summary>
+        /// Whether deferred mode should use toonify effects.
+        /// </summary>
+        public bool Deferred_Toonify = false;
+
+        /// <summary>
+        /// Whether deferred mode should use grayscaling effects.
+        /// </summary>
+        public bool Deferred_Grayscale = false;
+
+        /// <summary>
+        /// Whether to have 'bright' transparent objects in deferred mode.
+        /// </summary>
+        public bool Deferred_BrightTransp = true;
+
+        /// <summary>
+        /// The (deferred mode) exposure value.
+        /// </summary>
+        public float Exposure = 1;
+
+        /// <summary>
         /// Loads all shaders for the standard Game Engine 3D.
         /// </summary>
         public override void GetShaders()
