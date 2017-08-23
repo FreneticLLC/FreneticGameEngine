@@ -14,7 +14,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     /// <summary>
     /// Represents a 3D sky light.
     /// </summary>
-    public class EntitySkytLight3DProperty : ClientEntityProperty
+    public class EntitySkyLight3DProperty : ClientEntityProperty
     {
         /// <summary>
         /// Fixes the position of the light to match a new location.
