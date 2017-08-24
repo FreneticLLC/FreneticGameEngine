@@ -245,8 +245,19 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Models = modelsdet;
         }
 
+        /// <summary>
+        /// Texture engine.
+        /// </summary>
         public TextureEngine TEngine;
+
+        /// <summary>
+        /// Shader engine.
+        /// </summary>
         public ShaderEngine Shaders;
+        
+        /// <summary>
+        /// Model engine.
+        /// </summary>
         public ModelEngine Models;
 
         /// <summary>
@@ -380,7 +391,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Set the color of rendered objects.
         /// </summary>
-        /// <param name="c">The color.</param>
+        /// <param name="col">The color.</param>
         /// <param name="view">The relevant view.</param>
         public void SetColor(Vector4 col, View3D view)
         {

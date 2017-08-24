@@ -950,6 +950,10 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public Func<BEPUutilities.Quaternion> CameraModifier = () => BEPUutilities.Quaternion.Identity;
 
+        /// <summary>
+        /// Calculates the tranformation of the forward vector.
+        /// </summary>
+        /// <returns>Transformed forward vector.</returns>
         public Location CalcForward()
         {
             BEPUutilities.Quaternion cammod = CameraModifier();

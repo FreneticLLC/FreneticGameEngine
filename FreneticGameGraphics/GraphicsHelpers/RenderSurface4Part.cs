@@ -26,17 +26,53 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public int Height;
 
+        /// <summary>
+        /// OpenGL FBo.
+        /// </summary>
         public uint fbo;
 
+        /// <summary>
+        /// OpenGL diffuse texture.
+        /// </summary>
         public uint DiffuseTexture;
+
+        /// <summary>
+        /// OpenGL position texture.
+        /// </summary>
         public uint PositionTexture;
+
+        /// <summary>
+        /// OpenGL normals texture.
+        /// </summary>
         public uint NormalsTexture;
+
+        /// <summary>
+        /// OpenGL depth texture.
+        /// </summary>
         public uint DepthTexture;
+
+        /// <summary>
+        /// OpenGL Render hint texture.
+        /// </summary>
         public uint RenderhintTexture;
+
+        /// <summary>
+        /// OpenGL render hint (2) texture.
+        /// </summary>
         public uint Rh2Texture;
 
+        /// <summary>
+        /// Render helper.
+        /// </summary>
         public Renderer Rendering;
 
+        /// <summary>
+        /// Constructs the RS4P.
+        /// </summary>
+        /// <param name="_width">Texture width.</param>
+        /// <param name="_height">Texture height.</param>
+        /// <param name="rendering">Render helper.</param>
+        /// <param name="view">View system.</param>
         public RenderSurface4Part(int _width, int _height, Renderer rendering, View3D view)
         {
             Rendering = rendering;
@@ -95,6 +131,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
             view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
+        /// <summary>
+        /// Destroys the RS4P.
+        /// </summary>
         public void Destroy()
         {
             GL.DeleteFramebuffer(fbo);
@@ -113,6 +152,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("RS4P - Destroy");
         }
 
+        /// <summary>
+        /// Binds the RS4P to OpenGL and a view.
+        /// </summary>
+        /// <param name="view">The view.</param>
         public void Bind(View3D view)
         {
             view.BufferDontTouch = true;
@@ -125,6 +168,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GL.Enable(EnableCap.Texture2D);
         }
 
+        /// <summary>
+        /// Clears the RS4P Buffers.
+        /// </summary>
         public void Clear()
         {
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
@@ -136,6 +182,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GL.ClearBuffer(ClearBuffer.Color, 5, new float[] { 0f, 0f, 0f, 0f });
         }
 
+        /// <summary>
+        /// Unbinds the RS4P from OpenGL and a view.
+        /// </summary>
+        /// <param name="view">The view.</param>
         public void Unbind(View3D view)
         {
             view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
