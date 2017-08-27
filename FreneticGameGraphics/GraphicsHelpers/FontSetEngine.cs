@@ -56,7 +56,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Helper function to get the current orthographic matrix.
         /// </summary>
         public Func<Matrix4> GetOrtho;
-        
+
         /// <summary>
         /// Helper function to get the current global tick time.
         /// </summary>
@@ -468,9 +468,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
                                         else
                                         {
                                             float widt = MeasureFancyText(ttext);
-                                            /* TODO: DrawColoredText(ttext, new Location(X, Y, 0), MaxY, transmod, extrashadow, bcolor,
+                                            DrawColoredText(ttext, new Location(X, Y, 0), MaxY, transmod, extrashadow, bcolor,
                                                 color, bold, italic, underline, strike, overline, highlight, emphasis, ucolor, scolor, ocolor, hcolor, ecolor, super,
-                                                sub, flip, pseudo, jello, obfu, random, shadow, font);*/
+                                                sub, flip, pseudo, jello, obfu, random, shadow, font);
                                             X += widt;
                                         }
                                         start = x + 1;
@@ -607,13 +607,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 }
             };
             TextVBO cVBO = new TextVBO(Engine.GLFonts);
-            Engine.GLFonts.Shaders.TextCleanerShader.Bind();
-            Matrix4 ortho = Engine.GetOrtho();
-            GL.UniformMatrix4(1, false, ref ortho);
-            //Matrix4 ident = Matrix4.Identity;
-            //GL.UniformMatrix4(2, false, ref ident);
-            Vector3 col = new Vector3(1, 1, 1);
-            GL.Uniform3(3, ref col);
+            Action configme = () =>
+            {
+                Engine.GLFonts.Shaders.TextCleanerShader.Bind();
+                Matrix4 ortho = Engine.GetOrtho();
+                GL.UniformMatrix4(1, false, ref ortho);
+                //Matrix4 ident = Matrix4.Identity;
+                //GL.UniformMatrix4(2, false, ref ident);
+                Vector3 col = new Vector3(1, 1, 1);
+                GL.Uniform3(3, ref col);
+            };
             if (lines.Length <= 1)
             {
                 render(lines[0], (float)Position.Y, cVBO);
@@ -666,6 +669,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     pos += vbos[i].Vecs.Count;
                 }
             }
+            configme();
             cVBO.Build();
             cVBO.Render();
             Engine.GLFonts.Shaders.ColorMultShader.Bind();
@@ -1124,7 +1128,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// The width.
         /// </summary>
         public float Width;
-        
+
         /// <summary>
         /// The height.
         /// </summary>
