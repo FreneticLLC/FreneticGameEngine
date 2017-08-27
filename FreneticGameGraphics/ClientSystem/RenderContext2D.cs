@@ -20,17 +20,17 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Width of the view.
         /// </summary>
-        public int Width;
+        public int Width = 1024;
 
         /// <summary>
         /// Height of the view.
         /// </summary>
-        public int Height;
+        public int Height = 768;
 
         /// <summary>
         /// The zoom of the view.
         /// </summary>
-        public float Zoom;
+        public float Zoom = 1f;
 
         /// <summary>
         /// Whether the system is currently calculating shadows.
@@ -40,12 +40,12 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// The multiplier for zoom effects.
         /// </summary>
-        public float ZoomMultiplier;
+        public float ZoomMultiplier = 1f;
 
         /// <summary>
         /// The center of the 2D view.
         /// </summary>
-        public Vector2 ViewCenter;
+        public Vector2 ViewCenter = Vector2.Zero;
 
         /// <summary>
         /// The present Adder value.

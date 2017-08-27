@@ -73,6 +73,7 @@
     <Compile Include="ClientSystem\GE3DShaders.cs" />
     <Compile Include="ClientSystem\ShaderLocations.cs" />
     <Compile Include="ClientSystem\View3D.cs" />
+    <Compile Include="ClientSystem\ViewUI2D.cs" />
     <Compile Include="GraphicsHelpers\DecalInfo.cs" />
     <Compile Include="GraphicsHelpers\FontSetEngine.cs" />
     <Compile Include="ClientSystem\GameEngine2D.cs" />
@@ -98,6 +99,8 @@
     <Compile Include="GraphicsHelpers\TextureEngine.cs" />
     <Compile Include="GraphicsHelpers\TextVBO.cs" />
     <Compile Include="GraphicsHelpers\VBO.cs" />
+    <Compile Include="UISystem\UIElement.cs" />
+    <Compile Include="UISystem\UIRectangle.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">

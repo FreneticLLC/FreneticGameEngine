@@ -127,8 +127,10 @@ namespace FreneticGameGraphics.ClientSystem
             // Second step: clear the screen
             GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
             GraphicsUtil.CheckError("GEB - Pre");
-            // Third step: general rendering
+            // Third step: general game rendering
             RenderSingleFrame();
+            // Add the UI Layer too
+            MainUI.Draw();
             // Fourth step: clean up!
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.BindVertexArray(0);
@@ -215,6 +217,8 @@ namespace FreneticGameGraphics.ClientSystem
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
             GraphicsUtil.CheckError("GEB - Fonts");
+            SysConsole.Output(OutputType.INIT, "GameEngine loading 2D/UI render helper...");
+            MainUI = new ViewUI2D(this);
             SysConsole.Output(OutputType.INIT, "GameEngine prepping physics helper...");
             PhysicsWorld = new PhysicsSpace();
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
@@ -284,5 +288,10 @@ namespace FreneticGameGraphics.ClientSystem
         /// Whether the program should shut down when the window is closed.
         /// </summary>
         public bool ExitOnClose = true;
+
+        /// <summary>
+        /// The currently rendering UI for this engine.
+        /// </summary>
+        public ViewUI2D MainUI;
     }
 }

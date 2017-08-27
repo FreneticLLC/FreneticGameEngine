@@ -192,6 +192,11 @@ namespace FreneticGameGraphics.ClientSystem
         public AnimationEngine Animations;
 
         /// <summary>
+        /// The 2D rendering helper, for any UI logic.
+        /// </summary>
+        public Renderer2D RenderingUI;
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
@@ -209,6 +214,8 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
             Rendering = new Renderer(Textures, Shaders, Models);
             Rendering.Init();
+            RenderingUI = new Renderer2D(Textures, Shaders);
+            RenderingUI.Init();
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
             MainView.Generate(this, Window.Width, Window.Height);
             MainView.Render3D = Render3D;
@@ -263,6 +270,9 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void RenderSingleFrame()
         {
+            // Setup requirements
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.CullFace);
             // Tick helpers
             Models.Update(GlobalTickTime);
             // Set camera to view
