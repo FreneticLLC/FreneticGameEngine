@@ -15,13 +15,13 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// The internal stream.
         /// </summary>
-        public Stream Internal;
+        public DataStream Internal;
 
         /// <summary>
         /// Constructs the data writer.
         /// </summary>
         /// <param name="stream">The base stream.</param>
-        public DataWriter(Stream stream)
+        public DataWriter(DataStream stream)
         {
             Internal = stream;
         }
