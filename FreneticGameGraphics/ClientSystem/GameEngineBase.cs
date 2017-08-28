@@ -13,6 +13,7 @@ using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore.EntitySystem;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
 using FreneticGameGraphics.UISystem;
+using FreneticGameGraphics.AudioSystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -25,6 +26,21 @@ namespace FreneticGameGraphics.ClientSystem
         /// The primary window for the game.
         /// </summary>
         public GameWindow Window;
+
+        /// <summary>
+        /// Whether to use audio 'enforce' mode.
+        /// </summary>
+        public bool EnforceAudio = true;
+
+        /// <summary>
+        /// Whether to shut up when the game is deselected.
+        /// </summary>
+        public bool QuietOnDeselect = true;
+
+        /// <summary>
+        /// The sound system.
+        /// </summary>
+        public SoundEngine Sounds;
 
         /// <summary>
         /// The title of the window.
@@ -138,9 +154,8 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UseProgram(0);
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GEB - PreTick");
-            // Mouse handling
-            PreviousMouse = CurrentMouse;
-            CurrentMouse = Window.Mouse.GetState();
+            // Pre-tick.
+            ClientEngineTick();
             // Primary entity tick
             Tick();
             // Primary UI tick
@@ -150,6 +165,23 @@ namespace FreneticGameGraphics.ClientSystem
             Window.SwapBuffers();
             GraphicsUtil.CheckError("GEB - Post");
         }
+
+        /// <summary>
+        /// Ticks the client engine.
+        /// </summary>
+        public void ClientEngineTick()
+        {
+            // Mouse handling
+            PreviousMouse = CurrentMouse;
+            CurrentMouse = Window.Mouse.GetState();
+            // Audio handling
+            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
+        }
+
+        /// <summary>
+        /// The audio camera view.
+        /// </summary>
+        public Camera3D AudioCamera;
 
         /// <summary>
         /// Run through a full single-frame render sequence.
@@ -238,6 +270,9 @@ namespace FreneticGameGraphics.ClientSystem
             MainUI = new ViewUI2D(this);
             SysConsole.Output(OutputType.INIT, "GameEngine prepping physics helper...");
             PhysicsWorld = new PhysicsSpace();
+            SysConsole.Output(OutputType.INIT, "GameEngine prepping audio systems...");
+            Sounds = new SoundEngine();
+            Sounds.Init(this);
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
             PostLoad();
             SysConsole.Output(OutputType.INIT, "GameEngine calling external load event...");

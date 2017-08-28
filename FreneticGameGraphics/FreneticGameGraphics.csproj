@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\FreneticGameGraphics.xml</DocumentationFile>
@@ -43,6 +43,12 @@
     <Reference Include="BEPUutilities">
       <HintPath>..\FreneticGameCore\BEPUutilities.dll</HintPath>
     </Reference>
+    <Reference Include="csogg">
+      <HintPath>.\csogg.dll</HintPath>
+    </Reference>
+    <Reference Include="csvorbis">
+      <HintPath>.\csvorbis.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\OpenTK.dll</HintPath>
@@ -50,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,6 +65,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioSystem\ActiveSound.cs" />
+    <Compile Include="AudioSystem\EnforcerSystem\AudioEnforcer.cs" />
+    <Compile Include="AudioSystem\EnforcerSystem\AudioState.cs" />
+    <Compile Include="AudioSystem\EnforcerSystem\LiveAudioClip.cs" />
+    <Compile Include="AudioSystem\EnforcerSystem\LiveAudioInstance.cs" />
+    <Compile Include="AudioSystem\OggDecodeStream.cs" />
+    <Compile Include="AudioSystem\SoundEffect.cs" />
+    <Compile Include="AudioSystem\SoundEngine.cs" />
+    <Compile Include="AudioSystem\TextToSpeech.cs" />
     <Compile Include="ClientSystem\Camera3D.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntity.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntityProperty.cs" />

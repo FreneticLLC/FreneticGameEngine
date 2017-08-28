@@ -33,6 +33,11 @@ namespace FreneticGameCore
         public double GlobalTickTime = 1.0;
 
         /// <summary>
+        /// The general purpose scheduler.
+        /// </summary>
+        public Scheduler Schedule = new Scheduler();
+
+        /// <summary>
         /// Returns a duplicate of the entity list, for when you expect the master list to change.
         /// </summary>
         /// <returns>The duplicate.</returns>
@@ -151,6 +156,7 @@ namespace FreneticGameCore
         /// </summary>
         public void Tick()
         {
+            Schedule.RunAllSyncTasks(Delta);
             PhysicsWorld.Internal.Update(Delta);
             // Dup list, to ensure ents can despawn themselves in the tick method!
             IReadOnlyList<BasicEntity> ents = EntityListDuplicate();

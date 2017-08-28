@@ -221,6 +221,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainView.Render3D = Render3D;
             MainView.PostFirstRender = ReverseEntities;
             MainView.CameraUp = () => MainCamera.Up;
+            AudioCamera = MainCamera;
             ZFar = () => MainCamera.ZFar;
             GraphicsUtil.CheckError("PostLoad - Post");
         }
