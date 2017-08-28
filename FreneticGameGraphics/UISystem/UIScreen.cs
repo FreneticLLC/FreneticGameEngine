@@ -1,0 +1,95 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FreneticGameGraphics.ClientSystem;
+using FreneticGameGraphics.GraphicsHelpers;
+using OpenTK.Graphics.OpenGL4;
+
+namespace FreneticGameGraphics.UISystem
+{
+    /// <summary>
+    /// Represents an entire screen with any kind of graphics.
+    /// </summary>
+    public class UIScreen : UIElement
+    {
+        private GameEngineBase _Engine;
+
+        /// <summary>
+        /// Gets the client game engine this screen is associated with.
+        /// </summary>
+        public override GameEngineBase Engine => _Engine;
+
+        /// <summary>
+        /// Whether to erase the screen at the beginning of each render call.
+        /// </summary>
+        protected bool ResetOnRender = false;
+
+        /// <summary>
+        /// Constructs a screen that covers the entire game window.
+        /// </summary>
+        /// <param name="engine">The client game engine.</param>
+        public UIScreen(GameEngineBase engine) : this(engine, UIAnchor.TOP_LEFT, () => 0, () => 0, () => 0, () => 0)
+        {
+            Width = () => Parent == null ? Engine.Window.Width : Parent.GetWidth();
+            Height = () => Parent == null ? Engine.Window.Height : Parent.GetHeight();
+        }
+
+        /// <summary>
+        /// Constructs a screen that covers a specific portion of the game window.
+        /// </summary>
+        /// <param name="engine">The client game engine.</param>
+        /// <param name="anchor">The anchor the element will be positioned relative to.</param>
+        /// <param name="width">The function that controls the width of the element.</param>
+        /// <param name="height">The function that controls the height of the element.</param>
+        /// <param name="xOff">The function that controls the X offset of the element.</param>
+        /// <param name="yOff">The function that controls the Y offset of the element.</param>
+        public UIScreen(GameEngineBase engine, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff) : base(anchor, width, height, xOff, yOff)
+        {
+            _Engine = engine;
+        }
+
+        /// <summary>
+        /// Performs a tick on all children of this screen.
+        /// </summary>
+        /// <param name="delta">The time since the last tick.</param>
+        protected override void TickChildren(double delta)
+        {
+            base.TickChildren(delta);
+        }
+
+        /// <summary>
+        /// Performs a render on all children of this screen.
+        /// </summary>
+        /// <param name="view">The UI view.</param>
+        /// <param name="delta">The time since the last render.</param>
+        /// <param name="xoff">The X offset of this element's parent.</param>
+        /// <param name="yoff">The Y offset of this element's parent.</param>
+        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff)
+        {
+            if (ResetOnRender)
+            {
+                GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
+                GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                GraphicsUtil.CheckError("RenderScreen - Reset");
+            }
+            base.RenderChildren(view, delta, xoff, yoff);
+            GraphicsUtil.CheckError("RenderScreen - Children");
+        }
+
+        /// <summary>
+        /// Preps the switch to this screen.
+        /// </summary>
+        public virtual void SwitchTo()
+        {
+        }
+
+        /// <summary>
+        /// Preps the switch from this screen.
+        /// </summary>
+        public virtual void SwitchFrom()
+        {
+        }
+    }
+}
