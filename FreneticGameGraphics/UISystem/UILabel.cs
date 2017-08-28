@@ -27,11 +27,13 @@ namespace FreneticGameGraphics.UISystem
 
         /// <summary>
         /// The maximum width of this label.
+        /// <para>Will cause text to wrap.</para>
         /// </summary>
         public Func<int> MaxX = null;
 
         /// <summary>
         /// The background color for this label.
+        /// <para>Set to Vector4.Zero (or any values with W=0) to disable the background color.</para>
         /// </summary>
         public Vector4 BackColor = Vector4.Zero;
 
@@ -78,7 +80,7 @@ namespace FreneticGameGraphics.UISystem
                 view.Renderer.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y);
                 view.Renderer.SetColor(Vector4.One);
             }
-            TextFont.DrawColoredText(tex, new Location(bx, by, 0), int.MaxValue, 1, false, BColor);
+            TextFont.DrawColoredText(tex, new Location(bx, by, 0), bcolor: BColor);
         }
     }
 }

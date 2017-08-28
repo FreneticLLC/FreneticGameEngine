@@ -158,7 +158,7 @@ namespace FreneticGameGraphics.UISystem
             }
             else
             {
-                TextFont.DrawColoredText(tt, new Location(GetX() + xoff, GetY() + yoff, 0), int.MaxValue, 1, false, BColor);
+                TextFont.DrawColoredText(tt, new Location(GetX() + xoff, GetY() + yoff, 0), bcolor: BColor);
             }
         }
     }

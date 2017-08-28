@@ -14,15 +14,26 @@ namespace FreneticGameGraphics.UISystem
     /// </summary>
     public class UIScreen : UIElement
     {
+        /// <summary>
+        /// A reference to the relevant engine backing this screen.
+        /// Get this using <see cref="Engine"/>.
+        /// </summary>
         private GameEngineBase _Engine;
 
         /// <summary>
         /// Gets the client game engine this screen is associated with.
         /// </summary>
-        public override GameEngineBase Engine => _Engine;
+        public override GameEngineBase Engine
+        {
+            get
+            {
+                return _Engine;
+            }
+        }
 
         /// <summary>
         /// Whether to erase the screen at the beginning of each render call.
+        /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
         /// </summary>
         protected bool ResetOnRender = false;
 

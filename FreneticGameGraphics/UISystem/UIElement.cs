@@ -27,7 +27,13 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Gets the client game engine used to render this element.
         /// </summary>
-        public virtual GameEngineBase Engine => Parent?.Engine;
+        public virtual GameEngineBase Engine
+        {
+            get
+            {
+                return Parent.Engine;
+            }
+        }
 
         /// <summary>
         /// The anchor this element's position is relative to.
@@ -273,6 +279,9 @@ namespace FreneticGameGraphics.UISystem
         {
         }
 
+        /// <summary>
+        /// Whether the mouse left button was previously down.
+        /// </summary>
         private bool pDown;
 
         /// <summary>

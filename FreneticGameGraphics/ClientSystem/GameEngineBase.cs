@@ -138,9 +138,12 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UseProgram(0);
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GEB - PreTick");
+            // Mouse handling
             PreviousMouse = CurrentMouse;
             CurrentMouse = Window.Mouse.GetState();
+            // Primary entity tick
             Tick();
+            // Primary UI tick
             MainUI.Tick();
             GraphicsUtil.CheckError("GEB - PostTick");
             // Final step: Swap the render buffer onto the screen!

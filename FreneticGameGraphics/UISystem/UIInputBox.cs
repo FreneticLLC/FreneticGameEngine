@@ -150,6 +150,10 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         public bool TriedToEscape = false;
 
+        /// <summary>
+        /// Performs a tick on this element.
+        /// </summary>
+        /// <param name="delta">The time since the last tick.</param>
         protected override void Tick(double delta)
         {
             if (MDown)

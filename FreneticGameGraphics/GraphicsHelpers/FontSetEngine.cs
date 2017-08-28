@@ -263,7 +263,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
 
         /// <summary>
         /// Fully renders colorful/fancy text (unless the text is not marked as fancy, or fancy rendering is disabled).
-        /// Specify: The text render, where to render it, etc.
+        /// Specify: The text to render, where to render it, etc.
         /// </summary>
         public void DrawColoredText(string Text, Location Position, int MaxY = int.MaxValue, float transmod = 1, bool extrashadow = false, string bcolor = "^r^7",
             int _color = DefaultColor, bool _bold = false, bool _italic = false, bool _underline = false, bool _strike = false, bool _overline = false, bool _highlight = false, bool _emphasis = false,
