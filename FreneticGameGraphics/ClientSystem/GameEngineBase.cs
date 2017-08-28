@@ -12,6 +12,7 @@ using FreneticGameCore.Files;
 using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore.EntitySystem;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
+using FreneticGameGraphics.UISystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -137,7 +138,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UseProgram(0);
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GEB - PreTick");
+            PreviousMouse = CurrentMouse;
+            CurrentMouse = Window.Mouse.GetState();
             Tick();
+            MainUI.Tick();
             GraphicsUtil.CheckError("GEB - PostTick");
             // Final step: Swap the render buffer onto the screen!
             Window.SwapBuffers();
@@ -172,6 +176,16 @@ namespace FreneticGameGraphics.ClientSystem
         /// The Y-coordinate of the mouse in screen coordinates.
         /// </summary>
         public int MouseY;
+
+        /// <summary>
+        /// The current mouse state for this tick.
+        /// </summary>
+        public MouseState CurrentMouse;
+
+        /// <summary>
+        /// The mouse state during the previous tick.
+        /// </summary>
+        public MouseState PreviousMouse;
 
         /// <summary>
         /// Monitors on-window mouse movement.

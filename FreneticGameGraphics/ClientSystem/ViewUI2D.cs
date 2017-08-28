@@ -33,6 +33,11 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// The default basic UI screen.
+        /// </summary>
+        public UIScreen DefaultScreen;
+
+        /// <summary>
         /// Constructs the view.
         /// </summary>
         /// <param name="gameEngine">Backing engine.</param>
@@ -40,12 +45,14 @@ namespace FreneticGameGraphics.ClientSystem
         {
             Engine = gameEngine;
             UIContext = new RenderContext2D();
+            DefaultScreen = new UIScreen(Engine);
+            CurrentScreen = DefaultScreen;
         }
 
         /// <summary>
-        /// Top-level UI elements.
+        /// The current main screen.
         /// </summary>
-        public List<UIElement> Elements = new List<UIElement>();
+        public UIScreen CurrentScreen;
 
         /// <summary>
         /// The render context (2D) for the UI.
@@ -78,10 +85,15 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
-            foreach (UIElement elem in Elements)
-            {
-                elem.Render(this);
-            }
+            CurrentScreen.FullRender(this, Engine.Delta, 0, 0);
+        }
+
+        /// <summary>
+        /// Ticks all elements attached to this view.
+        /// </summary>
+        public void Tick()
+        {
+            CurrentScreen.FullTick(Engine.Delta);
         }
     }
 }

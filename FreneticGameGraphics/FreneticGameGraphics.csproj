@@ -99,8 +99,17 @@
     <Compile Include="GraphicsHelpers\TextureEngine.cs" />
     <Compile Include="GraphicsHelpers\TextVBO.cs" />
     <Compile Include="GraphicsHelpers\VBO.cs" />
+    <Compile Include="UISystem\UIAnchor.cs" />
+    <Compile Include="UISystem\UIButton.cs" />
+    <Compile Include="UISystem\UIColoredBox.cs" />
     <Compile Include="UISystem\UIElement.cs" />
-    <Compile Include="UISystem\UIRectangle.cs" />
+    <Compile Include="UISystem\UIGroup.cs" />
+    <Compile Include="UISystem\UIImage.cs" />
+    <Compile Include="UISystem\UIInputBox.cs" />
+    <Compile Include="UISystem\UILabel.cs" />
+    <Compile Include="UISystem\UIScreen.cs" />
+    <Compile Include="UISystem\UIScrollBox.cs" />
+    <Compile Include="UISystem\UITextLink.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
@@ -287,5 +296,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
