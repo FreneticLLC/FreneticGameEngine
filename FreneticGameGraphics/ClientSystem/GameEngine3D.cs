@@ -146,28 +146,32 @@ namespace FreneticGameGraphics.ClientSystem
 
         /// <summary>
         /// The current Field Of View, in degrees (Defaults to 70).
+        /// TODO: Camera attachment?
         /// </summary>
         public float FOV = 70;
 
         /// <summary>
         /// The current Z-Near value, defaults to '0.1'.
+        /// TODO: Camera attachment?
         /// </summary>
         public float ZNear = 0.1f;
 
         /// <summary>
         /// Get the Z-Far value (defaults to 1000 autoget).
+        /// TODO: Camera attachment?
         /// </summary>
         public Func<float> ZFar = () => 1000;
         
         /// <summary>
+        /// Get the Z-Far (OUT-View) value (defaults to 10000 autoget).
+        /// TODO: Camera attachment?
+        /// </summary>
+        public Func<float> ZFarOut = () => 10000;
+
+        /// <summary>
         /// Get the maximum distance of fog. Defaults to match ZFar.
         /// </summary>
         public Func<float> FogMaxDist = null;
-
-        /// <summary>
-        /// Get the Z-Far (OUT-View) value (defaults to 10000 autoget).
-        /// </summary>
-        public Func<float> ZFarOut = () => 10000;
 
         /// <summary>
         /// The "Sun adjustment" backup light color and value.

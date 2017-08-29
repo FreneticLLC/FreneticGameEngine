@@ -21,7 +21,7 @@ namespace FreneticGameGraphics.LightingSystem
     /// <summary>
     /// Represents an orthographic light.
     /// </summary>
-    class LightOrtho : Light
+    public class LightOrtho : Light
     {
         /// <summary>
         /// Gets the matrix of the light.

@@ -471,6 +471,42 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Helper to generate an FBO backend for the view, if not a main-screen view.
+        /// </summary>
+        public void GenerateFBO()
+        {
+            if (CurrentFBO != 0)
+            {
+                GL.DeleteFramebuffer(CurrentFBO);
+                GL.DeleteTexture(CurrentFBOTexture);
+                GL.DeleteTexture(CurrentFBODepth);
+            }
+            GraphicsUtil.CheckError("Load - View3D - GenFBO - Deletes");
+            GL.ActiveTexture(TextureUnit.Texture0);
+            CurrentFBOTexture = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, CurrentFBOTexture);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            CurrentFBODepth = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, CurrentFBODepth);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            CurrentFBO = GL.GenFramebuffer();
+            BindFramebuffer(FramebufferTarget.Framebuffer, CurrentFBO);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, CurrentFBOTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, CurrentFBODepth, 0);
+            BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GraphicsUtil.CheckError("Load - View3D - GenFBO");
+        }
+
+        /// <summary>
         /// An RS4P used in some locations.
         /// </summary>
         public RenderSurface4Part RS4P;
@@ -483,12 +519,12 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Maximum shadow textures at once (Some may be reused as sub-texture based shadows).
         /// </summary>
-        const int SHADOW_BITS_MAX = 17;
+        public const int SHADOW_BITS_MAX = 17;
 
         /// <summary>
         /// Maximum lights at once.
         /// </summary>
-        const int LIGHTS_MAX = 38;
+        public const int LIGHTS_MAX = 38;
 
         /// <summary>
         /// The shadow texture size. Defaults to 64.
@@ -936,22 +972,22 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// The camera's base position.
         /// </summary>
-        Location cameraBasePos;
+        public Location cameraBasePos;
 
         /// <summary>
         /// The camera's adjustment value for 3D.
         /// </summary>
-        Location cameraAdjust;
+        public Location cameraAdjust;
 
         /// <summary>
         /// The primary matrix, as offset for 3D logic.
         /// </summary>
-        Matrix4 PrimaryMatrix_OffsetFor3D;
+        public Matrix4 PrimaryMatrix_OffsetFor3D;
 
         /// <summary>
         /// The previous forward vector.
         /// </summary>
-        Location PForward = Location.Zero;
+        public Location PForward = Location.Zero;
 
         /// <summary>
         /// Gets any camera rotation effects needed. Defaults to Identity.
@@ -1098,6 +1134,81 @@ namespace FreneticGameGraphics.ClientSystem
         /// The maximum distance of lights.
         /// </summary>
         public double LightsMaxDistance = 1000;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action<float[], float[], float, Vector3, int> ViewPatchOne;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchTwo;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action<float> ViewPatchThree;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchFour;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchFive;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action<int, int> ViewPatchSix;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchSeven;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchEight;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchNine;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchTen;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchEleven;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchTwelve;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action<Matrix4, float[], float[]> ViewPatchThirteen;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action<Matrix4> ViewPatchFourteen;
+
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchFifteen;
 
         /// <summary>
         /// Render everything as quickly as possible: a simple forward renderer.
@@ -1315,38 +1426,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            // TODO: Vox patch
-            /*
-            Engine.Shaders3D.s_forw_vox.Bind();
-            if (Engine.CVars.r_forward_lights.ValueB)
-            {
-                GL.Uniform1(15, (float)c);
-                GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
-                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
-            }
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 5");
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform1(6, (float)Engine.GlobalTickTime);
-            GL.Uniform1(7, AudioLevel);
-            GL.Uniform4(12, new Vector4(GraphicsUtil.Convert(FogCol), FogAlpha));
-            GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
-            Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -GraphicsUtil.Convert(Engine.TheSun.Direction));
-            GL.Uniform3(11, maxLit);
-            Engine.Shaders3D.s_forw_vox_slod.Bind();
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.25");
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform1(6, (float)Engine.GlobalTickTime);
-            GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
-            GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
-            Engine.Rendering.SetColor(Color4.White, this);
-            GL.Uniform3(10, -GraphicsUtil.Convert(Engine.TheSun.Direction));
-            GL.Uniform3(11, maxLit);
-            */
+            ViewPatchOne?.Invoke(shadowmat_dat, light_dat, fogDist, maxLit, c);
             Engine.Shaders3D.s_forw_nobones.Bind();
             if (Engine.Forward_Lights)
             {
@@ -1405,10 +1485,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
-                // TOOD: Vox patch!
-                /*
-                Engine.Shaders3D.s_forw_vox = Engine.Shaders3D.s_forw_vox.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);*/
+                ViewPatchTwo?.Invoke();
                 Engine.Shaders3D.s_forw = Engine.Shaders3D.s_forw.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
@@ -1500,18 +1577,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_TRANSP;
-            // TODO: Vox patch
-            /*
-            Engine.Shaders3D.s_forw_vox_trans.Bind();
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform1(6, (float)Engine.GlobalTickTime);
-            GL.Uniform1(7, AudioLevel);
-            GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
-            GL.Uniform1(13, fogDist);
-            GL.Uniform2(14, zfar_rel);
-            Engine.Rendering.SetColor(Color4.White, this);
-            */
+            ViewPatchThree?.Invoke(fogDist);
             Engine.Shaders3D.s_forw_trans_nobones.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1537,10 +1603,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
-                // TODO: Vox patch!
-                /*
-                Engine.Shaders3D.s_forw_vox_trans = Engine.Shaders3D.s_forw_vox_trans.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);*/
+                ViewPatchFour?.Invoke();
                 Engine.Shaders3D.s_forw_trans = Engine.Shaders3D.s_forw_trans.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
@@ -1594,8 +1657,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
                 Engine.Shaders3D.s_shadow = Engine.Shaders3D.s_shadow.Bind();
-                // TODO: Vox patch!
-                //Engine.FixPersp = Matrix4.Identity;
+                ViewPatchFive?.Invoke();
                 RenderingShadows = true;
                 ShadowsOnly = true;
                 LightsC = 0;
@@ -1659,12 +1721,7 @@ namespace FreneticGameGraphics.ClientSystem
                                     }
                                     GraphicsUtil.CheckError("Pre-Prerender - Shadows - " + i);
                                     CameraPos = Lights[i].InternalLights[x].eye.ToLocation() - campos;
-                                    // TODO: Vox patch
-                                    /*Engine.Shaders3D.s_shadowvox = Engine.Shaders3D.s_shadowvox.Bind();
-                                    SetMatrix(2, Matrix4d.Identity);
-                                    Lights[i].InternalLights[x].SetProj(this);
-                                    GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
-                                    GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);*/
+                                    ViewPatchSix?.Invoke(i, x);
                                     Engine.Shaders3D.s_shadow_grass = Engine.Shaders3D.s_shadow_grass.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
@@ -1775,24 +1832,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
-            //GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
-            // TODO: Vox patch!
-            /*
-            Engine.Shaders3D.s_fbov = Engine.Shaders3D.s_fbov.Bind();
-            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 0");
-            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform1(7, AudioLevel);
-            GL.Uniform2(8, new Vector2(TheClient.sl_min, TheClient.sl_max));
-            Engine.Shaders3D.s_fbovslod = Engine.Shaders3D.s_fbovslod.Bind();
-            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 0.5");
-            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform2(8, new Vector2(TheClient.sl_min, TheClient.sl_max));
-            GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 1");
-            */
+            ViewPatchSeven?.Invoke();
             Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1815,15 +1855,14 @@ namespace FreneticGameGraphics.ClientSystem
             StandardBlend();
             GraphicsUtil.CheckError("Render - GBuffer - 1");
             // TODO: VR Patch!
-            /*if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            if (Engine.Render3DView/* || TheClient.VR != null*/)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
-                Engine.Shaders3D.s_fbov = Engine.Shaders3D.s_fbov.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                ViewPatchEight?.Invoke();
                 Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Engine.Shaders3D.s_fbo = Engine.Shaders3D.s_fbo.Bind();
@@ -1836,7 +1875,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = cameraBasePos + cameraAdjust;
                 CFrust = camFrust;
             }
-            else*/
+            else
             {
                 Render3D(this);
             }
@@ -1871,8 +1910,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.DepthMask(false);
             GraphicsUtil.CheckError("Render - Decals - 0");
             // TODO: VR patch!
-            /*
-            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            if (Engine.Render3DView /* || TheClient.VR != null*/)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 DecalRender?.Invoke(this);
@@ -1888,7 +1926,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = cameraBasePos + cameraAdjust;
                 CFrust = camFrust;
             }
-            else*/
+            else
             {
                 DecalRender?.Invoke(this);
             }
@@ -1905,14 +1943,7 @@ namespace FreneticGameGraphics.ClientSystem
         public void RenderPass_RefractionBuffer()
         {
             FBOid = FBOID.REFRACT;
-            // TODO: Vox patch!
-            /*
-            Engine.Shaders3D.s_fbov_refract = Engine.Shaders3D.s_fbov_refract.Bind();
-            GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform2(8, new Vector2(SunLight_Minimum, SunLight_Maximum));
-            */
+            ViewPatchNine?.Invoke();
             Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
@@ -1920,16 +1951,14 @@ namespace FreneticGameGraphics.ClientSystem
             GL.DepthMask(false);
             GraphicsUtil.CheckError("Render - Refract - 0");
             // TODO: VR Patch!
-            /*
-            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            if (Engine.Render3DView/* || TheClient.VR != null*/)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
-                Engine.Shaders3D.s_fbov_refract = Engine.Shaders3D.s_fbov_refract.Bind();
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                ViewPatchTen?.Invoke();
                 Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
@@ -1940,7 +1969,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = cameraBasePos + cameraAdjust;
                 CFrust = camFrust;
             }
-            else*/
+            else
             {
                 Render3D(this);
             }
@@ -2269,47 +2298,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public int RenderPass_Transparents()
         {
-            // TODO: Vox patch!
-            /*
-            if (TheClient.CVars.r_transplighting.ValueB)
-            {
-                if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
-                {
-                    if (Engine.AllowLL)
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
-                    }
-                    else
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
-                    }
-                }
-                else
-                {
-                    if (Engine.AllowLL)
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
-                    }
-                    else
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
-                    }
-                }
-            }
-            else
-            {
-                if (Engine.AllowLL)
-                {
-                    Engine.Shaders3D.s_transponlyvox_ll = Engine.Shaders3D.s_transponlyvox_ll.Bind();
-                }
-                else
-                {
-                    Engine.Shaders3D.s_transponlyvox = Engine.Shaders3D.s_transponlyvox.Bind();
-                }
-            }
-            GL.UniformMatrix4(1, false, ref PrimaryMatrix);
-            GL.UniformMatrix4(2, false, ref IdentityMatrix);
-            GL.Uniform1(4, DesaturationAmount);*/
+            ViewPatchEleven?.Invoke();
             if (Engine.Deferred_TransparentLights)
             {
                 if (Engine.Deferred_Shadows)
@@ -2373,8 +2362,7 @@ namespace FreneticGameGraphics.ClientSystem
             int lightc = 0;
             GraphicsUtil.CheckError("PreTransp");
             // TODO: VR Patch!
-            /*
-            if (TheClient.CVars.r_3d_enable.ValueB || TheClient.VR != null)
+            if (Engine.Render3DView/* || TheClient.VR != null*/)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -2382,46 +2370,10 @@ namespace FreneticGameGraphics.ClientSystem
                 CFrust = cf2;
                 Viewport(0, 0, Width / 2, Height);
                 CFrust = cf2;
-                if (TheClient.CVars.r_transplighting.ValueB)
+                ViewPatchTwelve?.Invoke();
+                if (Engine.Deferred_TransparentLights)
                 {
-                    if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
-                    {
-                        if (Engine.AllowLL)
-                        {
-                            Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
-                        }
-                        else
-                        {
-                            Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
-                        }
-                    }
-                    else
-                    {
-                        if (Engine.AllowLL)
-                        {
-                            Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
-                        }
-                        else
-                        {
-                            Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
-                        }
-                    }
-                }
-                else
-                {
-                    if (Engine.AllowLL)
-                    {
-                        Engine.Shaders3D.s_transponlyvox_ll = Engine.Shaders3D.s_transponlyvox_ll.Bind();
-                    }
-                    else
-                    {
-                        Engine.Shaders3D.s_transponlyvox = Engine.Shaders3D.s_transponlyvox.Bind();
-                    }
-                }
-                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                if (TheClient.CVars.r_transplighting.ValueB)
-                {
-                    if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
+                    if (Engine.Deferred_Shadows)
                     {
                         if (Engine.AllowLL)
                         {
@@ -2471,7 +2423,7 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = cameraBasePos + cameraAdjust;
                 CFrust = camFrust;
             }
-            else*/
+            else
             {
                 RenderTransp(ref lightc);
             }
@@ -2704,37 +2656,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(20, LIGHTS_MAX, false, s_mats);
                 GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, l_dats1);
                 GraphicsUtil.CheckError("PreRenderTranspLights - 2");
-                // TODO: Vox patch!
-                /*
-                if (TheClient.CVars.r_transpshadows.ValueB && TheClient.CVars.r_shadows.ValueB)
-                {
-                    if (Engine.Shaders3D.CVars.r_transpll.ValueB)
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlitsh_ll = Engine.Shaders3D.s_transponlyvoxlitsh_ll.Bind();
-                    }
-                    else
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlitsh = Engine.Shaders3D.s_transponlyvoxlitsh.Bind();
-                    }
-                }
-                else
-                {
-                    if (Engine.AllowLL)
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlit_ll = Engine.Shaders3D.s_transponlyvoxlit_ll.Bind();
-                    }
-                    else
-                    {
-                        Engine.Shaders3D.s_transponlyvoxlit = Engine.Shaders3D.s_transponlyvoxlit.Bind();
-                    }
-                }
-                GL.UniformMatrix4(2, false, ref IdentityMatrix);
-                GL.Uniform1(6, (float)TheClient.GlobalTickTimeLocal);
-                GL.Uniform1(7, AudioLevel);
-                GL.Uniform2(8, new Vector2(Width, Height));
-                GL.UniformMatrix4(9, false, ref mat_lhelp);
-                GL.UniformMatrix4(20, LIGHTS_MAX, false, s_mats);
-                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, l_dats1);*/
+                ViewPatchThirteen?.Invoke(mat_lhelp, s_mats, l_dats1);
                 GraphicsUtil.CheckError("PreRenderTranspLights - 3");
                 if (Engine.Deferred_Shadows)
                 {
@@ -2781,12 +2703,7 @@ namespace FreneticGameGraphics.ClientSystem
                     Matrix4 matabc = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
                     matabc[0, 3] = (float)Width;
                     matabc[1, 3] = (float)Height;
-                    // TODO: Vox patch!
-                    /*
-                    Engine.Shaders3D.s_transponlyvox_ll.Bind();
-                    // GL.UniformMatrix4(1, false, ref combined);
-                    GL.UniformMatrix4(2, false, ref IdentityMatrix);
-                    GL.UniformMatrix4(9, false, ref matabc);*/
+                    ViewPatchFourteen?.Invoke(matabc);
                     Engine.Shaders3D.s_transponly_ll.Bind();
                     //GL.UniformMatrix4(1, false, ref combined);
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -2794,10 +2711,7 @@ namespace FreneticGameGraphics.ClientSystem
                 }
                 else
                 {
-                    // TODO: Vox Patch!
-                    /*Engine.Shaders3D.s_transponlyvox.Bind();
-                    //GL.UniformMatrix4(1, false, ref combined);
-                    GL.UniformMatrix4(2, false, ref IdentityMatrix);*/
+                    ViewPatchFifteen?.Invoke();
                     Engine.Shaders3D.s_transponly.Bind();
                     //GL.UniformMatrix4(1, false, ref combined);
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
