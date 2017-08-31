@@ -650,7 +650,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// What color to clear the viewport to.
         /// </summary>
-        public float[] ClearColor = new float[] { 0f, 1f, 1f, 1f };
+        public float[] ClearColor = new float[] { 0.2f, 1f, 1f, 1f };
 
         /// <summary>
         /// Ambient light.
@@ -1220,6 +1220,7 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 RS4P.Bind(this);
                 RS4P.Clear();
+                GL.ClearBuffer(ClearBuffer.Color, 0, ClearColor);
             }
             float[] light_dat = new float[LIGHTS_MAX * 16];
             float[] shadowmat_dat = new float[LIGHTS_MAX * 16];
@@ -2761,8 +2762,7 @@ namespace FreneticGameGraphics.ClientSystem
                 MainEXP = 0.75f;
             }
         }
-
-
+        
         /// <summary>
         /// Helper to find exposure.
         /// </summary>
@@ -2775,6 +2775,50 @@ namespace FreneticGameGraphics.ClientSystem
                 total += inp[i];
             }
             return total / (float)inp.Length;
+        }
+
+        /// <summary>
+        /// Destroys the view.
+        /// // TODO: Ensure that this fully destroys all data!
+        /// </summary>
+        public void Destroy()
+        {
+            if (CurrentFBO != 0)
+            {
+                GL.DeleteFramebuffer(CurrentFBO);
+                GL.DeleteTexture(CurrentFBOTexture);
+                GL.DeleteTexture(CurrentFBODepth);
+            }
+            if (transp_fbo_main != 0)
+            {
+                GL.DeleteFramebuffer(transp_fbo_main);
+                GL.DeleteTexture(transp_fbo_texture);
+                GL.DeleteTexture(transp_fbo_depthtex);
+            }
+            if (RS4P != null)
+            {
+                RS4P.Destroy();
+                GL.DeleteFramebuffer(fbo_main);
+                GL.DeleteTexture(fbo_texture);
+                RS4P = null;
+                fbo_main = 0;
+                fbo_texture = 0;
+                GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 1");
+                GL.DeleteFramebuffer(fbo_godray_main);
+                GL.DeleteTexture(fbo_godray_texture);
+                GL.DeleteTexture(fbo_godray_texture2);
+                GL.DeleteFramebuffer(hdrfbo);
+                GL.DeleteTexture(hdrtex);
+                GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 2");
+                GL.DeleteFramebuffers(SHADOW_BITS_MAX + 1, fbo_shadow);
+                GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 3");
+                GL.DeleteTexture(fbo_shadow_color);
+                GL.DeleteTexture(fbo_shadow_tex);
+                GL.DeleteFramebuffer(fbo_decal);
+                GL.DeleteTexture(fbo_decal_tex);
+                GL.DeleteTexture(fbo_decal_depth);
+                GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 4");
+            }
         }
     }
     

@@ -231,6 +231,8 @@ namespace FreneticGameGraphics.ClientSystem
         public override void RenderSingleFrame()
         {
             GraphicsUtil.CheckError("RenderSingleFrame");
+            // Audio handling
+            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
             // First step: setup
             MainRenderContext.Width = Window.Width / Pixelation;
             MainRenderContext.Height = Window.Height / Pixelation;

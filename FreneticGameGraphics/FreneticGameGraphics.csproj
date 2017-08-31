@@ -116,6 +116,7 @@
     <Compile Include="GraphicsHelpers\TextureEngine.cs" />
     <Compile Include="GraphicsHelpers\TextVBO.cs" />
     <Compile Include="GraphicsHelpers\VBO.cs" />
+    <Compile Include="UISystem\UI3DSubEngine.cs" />
     <Compile Include="UISystem\UIAnchor.cs" />
     <Compile Include="UISystem\UIButton.cs" />
     <Compile Include="UISystem\UIColoredBox.cs" />

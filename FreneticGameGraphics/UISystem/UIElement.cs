@@ -268,6 +268,7 @@ namespace FreneticGameGraphics.UISystem
             {
                 if (Children.Remove(element))
                 {
+                    element.Destroy();
                     element.Parent = null;
                 }
                 else
@@ -534,6 +535,13 @@ namespace FreneticGameGraphics.UISystem
         /// Preps the element.
         /// </summary>
         protected virtual void Init()
+        {
+        }
+
+        /// <summary>
+        /// Destroys any data tracked by the element.
+        /// </summary>
+        protected virtual void Destroy()
         {
         }
     }

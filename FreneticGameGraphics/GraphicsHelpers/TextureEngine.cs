@@ -190,7 +190,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         /// <param name="input">Input.</param>
         /// <returns>Output.</returns>
-        public int GetNextPOTValue(int input)
+        public static int GetNextPOTValue(int input)
         {
             int x = 1;
             while (input > x)

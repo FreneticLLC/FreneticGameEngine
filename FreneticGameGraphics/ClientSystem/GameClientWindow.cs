@@ -203,9 +203,6 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("GEB - Fonts");
             SysConsole.Output(OutputType.INIT, "GameClient loading 2D/UI render helper...");
             MainUI = new ViewUI2D(this);
-            SysConsole.Output(OutputType.INIT, "GameClient prepping audio systems...");
-            Sounds = new SoundEngine();
-            Sounds.Init(this);
             SysConsole.Output(OutputType.INIT, "GameEngine loading model engine...");
             Animations = new AnimationEngine();
             Models = new ModelEngine();
@@ -222,26 +219,6 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameClient is ready and loaded! Starting main game loop...");
             GraphicsUtil.CheckError("GEB - Loaded");
         }
-
-        /// <summary>
-        /// Whether to use audio 'enforce' mode.
-        /// </summary>
-        public bool EnforceAudio = true;
-
-        /// <summary>
-        /// Whether to shut up when the game is deselected.
-        /// </summary>
-        public bool QuietOnDeselect = true;
-
-        /// <summary>
-        /// The sound system.
-        /// </summary>
-        public SoundEngine Sounds;
-
-        /// <summary>
-        /// The audio camera view.
-        /// </summary>
-        public Camera3D AudioCamera;
 
         /// <summary>
         /// The Ortho matrix, for Font rendering simplicity.
@@ -326,8 +303,6 @@ namespace FreneticGameGraphics.ClientSystem
             // Mouse handling
             PreviousMouse = CurrentMouse;
             CurrentMouse = Window.Mouse.GetState();
-            // Audio handling
-            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
         }
 
         /// <summary>

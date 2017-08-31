@@ -74,6 +74,7 @@ namespace FreneticGameGraphics.UISystem
                 view.Rendering.SetColor(Color);
                 engine.Textures.White.Bind();
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.SetColor(Vector4.One);
             }
             if (GetTexture != null)
             {

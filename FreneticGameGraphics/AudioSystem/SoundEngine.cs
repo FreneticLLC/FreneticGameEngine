@@ -47,7 +47,7 @@ namespace FreneticGameGraphics.AudioSystem
         /// <summary>
         /// The backing game client.
         /// </summary>
-        public GameClientWindow Client;
+        public GameEngineBase Client;
 
         /// <summary>
         /// Current global volume.
@@ -63,7 +63,7 @@ namespace FreneticGameGraphics.AudioSystem
         /// Initialize the sound engine.
         /// </summary>
         /// <param name="tclient">The backing client.</param>
-        public void Init(GameClientWindow tclient)
+        public void Init(GameEngineBase tclient)
         {
             if (AudioInternal != null)
             {
@@ -602,7 +602,7 @@ namespace FreneticGameGraphics.AudioSystem
             try
             {
                 string newname = "sounds/" + name + ".ogg";
-                if (!Client.Files.Exists(newname))
+                if (!Client.Client.Files.Exists(newname))
                 {
                     //SysConsole.Output(OutputType.DEBUG, "Audio / nullsource");
                     return null;
@@ -617,7 +617,7 @@ namespace FreneticGameGraphics.AudioSystem
                 {
                     try
                     {
-                        SoundEffect ts = LoadVorbisSound(Client.Files.ReadToStream(newname), name);
+                        SoundEffect ts = LoadVorbisSound(Client.Client.Files.ReadToStream(newname), name);
                         lock (tsfx)
                         {
                             tsfx.Internal = ts.Internal;

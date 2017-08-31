@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore;
+using FreneticGameCore.Collision;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -179,6 +180,16 @@ namespace FreneticGameGraphics.ClientSystem
         public RenderContext MainContext = new RenderContext();
 
         /// <summary>
+        /// Whether this engine is a 'sub engine' (otherwise, it's the main engine).
+        /// </summary>
+        public bool IsSubEngine = false;
+
+        /// <summary>
+        /// The sub-view size, if a sub engine.
+        /// </summary>
+        public Vector2i SubSize = new Vector2i(1024, 768);
+
+        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
@@ -190,11 +201,18 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
-            MainView.Generate(this, Window.Width, Window.Height);
+            SubSize = new Vector2i(Window.Width, Window.Height);
+            MainView.Width = SubSize.X;
+            MainView.Height = SubSize.Y;
+            if (IsSubEngine)
+            {
+                MainView.GenerateFBO();
+            }
+            MainView.Generate(this, SubSize.X, SubSize.Y);
             MainView.Render3D = Render3D;
             MainView.PostFirstRender = ReverseEntities;
             MainView.CameraUp = () => MainCamera.Up;
-            Client.AudioCamera = MainCamera;
+            AudioCamera = MainCamera;
             ZFar = () => MainCamera.ZFar;
             GraphicsUtil.CheckError("PostLoad - Post");
         }
@@ -255,6 +273,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void RenderSingleFrame()
         {
+            // Audio handling
+            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
             // Setup requirements
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);

@@ -36,6 +36,26 @@ namespace FreneticGameGraphics.ClientSystem
         public GameClientWindow Client;
 
         /// <summary>
+        /// Whether to use audio 'enforce' mode.
+        /// </summary>
+        public bool EnforceAudio = true;
+
+        /// <summary>
+        /// Whether to shut up when the game is deselected.
+        /// </summary>
+        public bool QuietOnDeselect = true;
+
+        /// <summary>
+        /// The sound system.
+        /// </summary>
+        public SoundEngine Sounds;
+
+        /// <summary>
+        /// The audio camera view.
+        /// </summary>
+        public Camera3D AudioCamera;
+
+        /// <summary>
         /// Gets the client window.
         /// </summary>
         public GameWindow Window
@@ -78,18 +98,7 @@ namespace FreneticGameGraphics.ClientSystem
                 return Client.Models;
             }
         }
-
-        /// <summary>
-        /// Gets the client sound system.
-        /// </summary>
-        public SoundEngine Sounds
-        {
-            get
-            {
-                return Client.Sounds;
-            }
-        }
-
+        
         /// <summary>
         /// The title of the window.
         /// </summary>
@@ -160,6 +169,10 @@ namespace FreneticGameGraphics.ClientSystem
             GetShaders();
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
             PostLoad();
+            SysConsole.Output(OutputType.INIT, "GameEngine prepping audio systems...");
+            Sounds = new SoundEngine();
+            Sounds.Init(this);
+            SysConsole.Output(OutputType.INIT, "GameEngine load sequence complete.");
         }
 
         /// <summary>
