@@ -25,9 +25,18 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
         /// Whether this entity should be sent over the network.
         /// </summary>
         public bool ShouldNetwork;
-
-        // TODO: ServerEngine Server;
-
+        
+        /// <summary>
+        /// Gets the backing server engine.
+        /// </summary>
+        public ServerEngine Server
+        {
+            get
+            {
+                return Engine as ServerEngine;
+            }
+        }
+        
         /// <summary>
         /// Constructs a server-side entity.
         /// </summary>

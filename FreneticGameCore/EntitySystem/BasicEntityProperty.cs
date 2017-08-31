@@ -43,5 +43,16 @@ namespace FreneticGameCore.EntitySystem
                 return Holder as BasicEntity;
             }
         }
+
+        /// <summary>
+        /// Gets the basic engine associated with a property.
+        /// </summary>
+        public BasicEngine BEngine
+        {
+            get
+            {
+                return BEntity.Engine;
+            }
+        }
     }
 }

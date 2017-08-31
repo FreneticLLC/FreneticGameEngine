@@ -92,6 +92,7 @@
     <Compile Include="PropertyHolder.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntity.cs" />
+    <Compile Include="ServerSystem\ServerEngine.cs" />
     <Compile Include="SimplexNoise.cs" />
     <Compile Include="SysConsole.cs" />
     <Compile Include="SystemExtensions.cs" />

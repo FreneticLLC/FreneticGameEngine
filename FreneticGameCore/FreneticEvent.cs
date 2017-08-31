@@ -99,6 +99,17 @@ namespace FreneticGameCore
             Handlers = Handlers.OrderBy((fef) => fef.Priority).ToList();
         }
     }
+
+    /// <summary>
+    /// Represents a cancellable event.
+    /// </summary>
+    public interface ICancellableEvent
+    {
+        /// <summary>
+        /// Gets or sets whether the event is cancelled.
+        /// </summary>
+        bool Cancelled { get; set; }
+    }
     
     /// <summary>
     /// Represents the arguments to an event.
