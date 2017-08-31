@@ -27,7 +27,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// What texture widths/heights are allowed.
         /// </summary>
-        public static int[] AcceptableWidths = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
+        public static int[] AcceptableWidths = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
 
         /// <summary>
         /// A full list of currently loaded textures.
@@ -186,6 +186,21 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public bool DefaultLinear = true;
 
         /// <summary>
+        /// Gets the next Power Of Two value.
+        /// </summary>
+        /// <param name="input">Input.</param>
+        /// <returns>Output.</returns>
+        public int GetNextPOTValue(int input)
+        {
+            int x = 1;
+            while (input > x)
+            {
+                x *= 2;
+            }
+            return x;
+        }
+
+        /// <summary>
         /// Loads a texture from file.
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
@@ -204,12 +219,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     return null;
                 }
                 Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png"));
-                if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
+                if (twidth <= 0 && !AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load texture, file '" +
-                        TextStyle.Color_Standout + "textures/" + filename + ".png" + TextStyle.Color_Error +
-                        "' is invalid: unreasonable width or height.");
-                    return null;
+                    int wid = GetNextPOTValue(bmp.Width);
+                    int hei = GetNextPOTValue(bmp.Height);
+                    Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
+                    bmp.Dispose();
+                    bmp = bmp_fixed;
                 }
                 Bitmap bmp2 = twidth <= 0 ? bmp : new Bitmap(bmp, new Size(twidth, twidth));
                 Texture texture = new Texture()
