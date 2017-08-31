@@ -87,7 +87,9 @@ namespace FreneticGameGraphics.ClientSystem
                 UIContext.Scaler = new Vector2(sc, -sc * aspect);
                 UIContext.ViewCenter = new Vector2(-Engine.Window.Width * 0.5f, -Engine.Window.Height * 0.5f);
                 UIContext.Adder = UIContext.ViewCenter;
+                Engine.Ortho = Matrix4.CreateOrthographicOffCenter(0, Engine.Window.Width, Engine.Window.Height, 0, -1, 1);
             }
+            // TODO: alternate Ortho setting from scaler/adder def!
             Engine.Shaders.ColorMult2DShader.Bind();
             GL.Uniform2(1, ref UIContext.Scaler);
             GL.Uniform2(2, ref UIContext.Adder);

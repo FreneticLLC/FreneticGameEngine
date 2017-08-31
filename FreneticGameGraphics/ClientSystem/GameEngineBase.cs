@@ -270,7 +270,10 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine loading font helpers...");
             GLFonts = new GLFontEngine(Shaders);
             GLFonts.Init(Files);
-            FontSets = new FontSetEngine(GLFonts);
+            FontSets = new FontSetEngine(GLFonts)
+            {
+                FixTo = Shaders.ColorMult2DShader
+            };
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
             GraphicsUtil.CheckError("GEB - Fonts");

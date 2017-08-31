@@ -36,6 +36,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Shader to revert to after rendering some text.
+        /// </summary>
+        public Shader FixTo;
+
+        /// <summary>
         /// The lower font system.
         /// </summary>
         public GLFontEngine GLFonts;
@@ -680,7 +685,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             configme();
             cVBO.Build();
             cVBO.Render();
-            Engine.GLFonts.Shaders.ColorMultShader.Bind();
+            if (Engine.FixTo == null)
+            {
+                Engine.GLFonts.Shaders.ColorMultShader.Bind();
+            }
+            else
+            {
+                Engine.FixTo.Bind();
+            }
             r_depth--;
             cVBO.Destroy();
             GraphicsUtil.CheckError("Render FontSet");
