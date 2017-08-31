@@ -140,16 +140,28 @@ namespace FreneticGameEngineWelcomer
             PicBox.MouseDown += Form1_MouseClick;
             PicBox.MouseUp += Form1_MouseUp;
             Resize += Form1_Resize;
+            MouseLeave += WelcomerForm_MouseLeave;
             Controls.Add(PicBox);
             ResumeLayout();
             InitializeComponent();
             PicBox.Size = new Size(Width, Height);
             TickTimer = new Timer()
             {
-                Interval = 50
+                Interval = 25
             };
             TickTimer.Tick += TickTimer_Tick;
             TickTimer.Start();
+        }
+
+        /// <summary>
+        /// Handles mouse leaving the form.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">Event data</param>
+        private void WelcomerForm_MouseLeave(object sender, EventArgs e)
+        {
+            Hovered = MouseOver.NONE;
+            PicBox.Invalidate();
         }
 
         /// <summary>
@@ -165,6 +177,15 @@ namespace FreneticGameEngineWelcomer
                 Point rel = new Point(pos.X - DragLast.X, pos.Y - DragLast.Y);
                 DragLast = pos;
                 Location = new Point(Location.X + rel.X, Location.Y + rel.Y);
+            }
+            else if (Hovered != MouseOver.NONE)
+            {
+                Point pos = Cursor.Position;
+                if (pos.X < Location.X || pos.Y < Location.Y || pos.X > Location.X + Size.Width || pos.Y > Location.Y + Size.Height)
+                {
+                    Hovered = MouseOver.NONE;
+                    PicBox.Invalidate();
+                }
             }
         }
 
