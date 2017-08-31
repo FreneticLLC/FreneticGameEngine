@@ -59,23 +59,19 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Constructs a screen that covers the entire game window.
         /// </summary>
-        /// <param name="client">The client game window.</param>
-        public UIScreen(GameClientWindow client) : this(client, UIAnchor.TOP_LEFT, () => 0, () => 0, () => 0, () => 0)
+        /// <param name="view">The client UI View.</param>
+        public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
         {
-            Width = () => Parent == null ? Engine.Window.Width : Parent.GetWidth();
-            Height = () => Parent == null ? Engine.Window.Height : Parent.GetHeight();
+            Position.GetterWidth(() => Parent == null ? Engine.Window.Width : Parent.GetWidth());
+            Position.GetterHeight(() => Parent == null ? Engine.Window.Height : Parent.GetHeight());
         }
 
         /// <summary>
         /// Constructs a screen that covers a specific portion of the game window.
         /// </summary>
         /// <param name="client">The client game window.</param>
-        /// <param name="anchor">The anchor the element will be positioned relative to.</param>
-        /// <param name="width">The function that controls the width of the element.</param>
-        /// <param name="height">The function that controls the height of the element.</param>
-        /// <param name="xOff">The function that controls the X offset of the element.</param>
-        /// <param name="yOff">The function that controls the Y offset of the element.</param>
-        public UIScreen(GameClientWindow client, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff) : base(anchor, width, height, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
         {
             _Client = client;
         }

@@ -55,29 +55,9 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
-        /// The anchor this element's position is relative to.
+        /// The position and size of this element.
         /// </summary>
-        public UIAnchor Anchor;
-
-        /// <summary>
-        /// Returns the current width of this element.
-        /// </summary>
-        public Func<float> Width;
-
-        /// <summary>
-        /// Returns the current height of this element.
-        /// </summary>
-        public Func<float> Height;
-
-        /// <summary>
-        /// Returns the current X offset of this element.
-        /// </summary>
-        public Func<int> OffsetX;
-
-        /// <summary>
-        /// Returns the current Y offset of this element.
-        /// </summary>
-        public Func<int> OffsetY;
+        public UIPositionHelper Position;
 
         /// <summary>
         /// Internal use only.
@@ -87,19 +67,12 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Constructs a new element to be placed on a <see cref="UIScreen"/>.
         /// </summary>
-        /// <param name="anchor">The anchor the element will be positioned relative to.</param>
-        /// <param name="width">The function that controls the width of the element.</param>
-        /// <param name="height">The function that controls the height of the element.</param>
-        /// <param name="xOff">The function that controls the X offset of the element.</param>
-        /// <param name="yOff">The function that controls the Y offset of the element.</param>
-        public UIElement(UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UIElement(UIPositionHelper pos)
         {
             Children = new List<UIElement>();
-            Anchor = anchor ?? UIAnchor.TOP_LEFT;
-            Width = width ?? (() => 0);
-            Height = height ?? (() => 0);
-            OffsetX = xOff ?? (() => 0);
-            OffsetY = yOff ?? (() => 0);
+            Position = pos;
+            Position.For = this;
         }
 
         /// <summary>
@@ -172,7 +145,7 @@ namespace FreneticGameGraphics.UISystem
         /// <returns>The current X value.</returns>
         public int GetX()
         {
-            return (Parent != null ? (int)Anchor.GetX(this) : 0) + OffsetX();
+            return Position.X;
         }
 
         /// <summary>
@@ -181,25 +154,25 @@ namespace FreneticGameGraphics.UISystem
         /// <returns>The current Y value.</returns>
         public int GetY()
         {
-            return (Parent != null ? (int)Anchor.GetY(this) : 0) + OffsetY();
+            return Position.Y;
         }
 
         /// <summary>
         /// Gets the current width of this element.
         /// </summary>
         /// <returns>The current width.</returns>
-        public float GetWidth()
+        public int GetWidth()
         {
-            return Width();
+            return Position.Width;
         }
 
         /// <summary>
         /// Gets the current height of this element.
         /// </summary>
         /// <returns>The current height.</returns>
-        public float GetHeight()
+        public int GetHeight()
         {
-            return Height();
+            return Position.Height;
         }
 
         /// <summary>

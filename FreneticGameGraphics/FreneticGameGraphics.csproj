@@ -125,6 +125,7 @@
     <Compile Include="UISystem\UIImage.cs" />
     <Compile Include="UISystem\UIInputBox.cs" />
     <Compile Include="UISystem\UILabel.cs" />
+    <Compile Include="UISystem\UIPositionHelper.cs" />
     <Compile Include="UISystem\UIScreen.cs" />
     <Compile Include="UISystem\UIScrollBox.cs" />
     <Compile Include="UISystem\UITextLink.cs" />

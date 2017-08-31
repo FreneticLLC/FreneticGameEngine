@@ -81,11 +81,9 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="btextclick">The text to display while clicking.</param>
         /// <param name="font">The font to use.</param>
         /// <param name="clicked">The action to run when clicked.</param>
-        /// <param name="anchor">The anchor the link will be positioned relative to.</param>
-        /// <param name="xOff">The function that controls the X offset of the link.</param>
-        /// <param name="yOff">The function that controls the Y offset of the link.</param>
-        public UITextLink(Texture ico, string btext, string btexthover, string btextclick, FontSet font, Action clicked, UIAnchor anchor, Func<int> xOff, Func<int> yOff)
-            : base(anchor, () => 0, () => 0, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UITextLink(Texture ico, string btext, string btexthover, string btextclick, FontSet font, Action clicked, UIPositionHelper pos)
+            : base(pos)
         {
             Icon = ico;
             ClickedTask = clicked;
@@ -94,8 +92,8 @@ namespace FreneticGameGraphics.UISystem
             TextHover = btexthover;
             TextClick = btextclick;
             TextFont = font;
-            Width = () => font.MeasureFancyText(Text, BColor) + (Icon == null ? 0 : font.font_default.Height);
-            Height = () => TextFont.font_default.Height;
+            Position.ConstantWidth((int)(font.MeasureFancyText(Text, BColor) + (Icon == null ? 0 : font.font_default.Height)));
+            Position.ConstantHeight((int)TextFont.font_default.Height);
         }
 
         /// <summary>

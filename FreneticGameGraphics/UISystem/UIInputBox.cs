@@ -66,12 +66,9 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="text">The default text in the box.</param>
         /// <param name="info">Information about the box.</param>
         /// <param name="fonts">The font to use.</param>
-        /// <param name="anchor">The anchor the input box will be relative to.</param>
-        /// <param name="width">The function to get the width.</param>
-        /// <param name="xOff">The function to get the X offset.</param>
-        /// <param name="yOff">The function to get the Y offset.</param>
-        public UIInputBox(string text, string info, FontSet fonts, UIAnchor anchor, Func<float> width, Func<int> xOff, Func<int> yOff)
-            : base(anchor, width, () => fonts.font_default.Height, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos)
+            : base(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.font_default.Height) : pos)
         {
             Text = text;
             Info = info;

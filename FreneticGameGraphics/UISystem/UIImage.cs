@@ -30,13 +30,9 @@ namespace FreneticGameGraphics.UISystem
         /// Constructs an image.
         /// </summary>
         /// <param name="image">The image to display.</param>
-        /// <param name="anchor">The anchor the image will be relative to.</param>
-        /// <param name="width">The function to get the width.</param>
-        /// <param name="height">The function to get the height.</param>
-        /// <param name="xOff">The function to get the X offset.</param>
-        /// <param name="yOff">The function to get the Y offset.</param>
-        public UIImage(Texture image, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff)
-            : base(anchor, width, height, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UIImage(Texture image, UIPositionHelper pos)
+            : base(pos)
         {
             Image = image;
         }

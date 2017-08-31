@@ -32,13 +32,7 @@ namespace FreneticGameGraphics.UISystem
         /// The font to use.
         /// </summary>
         public FontSet TextFont;
-
-        /// <summary>
-        /// The maximum width of this label.
-        /// <para>Will cause text to wrap.</para>
-        /// </summary>
-        public Func<int> MaxX = null;
-
+        
         /// <summary>
         /// The background color for this label.
         /// <para>Set to Vector4.Zero (or any values with W=0) to disable the background color.</para>
@@ -55,19 +49,22 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="btext">The text to display on the label.</param>
         /// <param name="font">The font to use.</param>
-        /// <param name="anchor">The anchor the label will be relative to.</param>
-        /// <param name="xOff">The function to get the X offset.</param>
-        /// <param name="yOff">The function to get the Y offset.</param>
-        /// <param name="maxx">The function to get the maximum width.</param>
-        public UILabel(string btext, FontSet font, UIAnchor anchor, Func<int> xOff, Func<int> yOff, Func<int> maxx = null)
-            : base(anchor, () => 0, () => 0, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UILabel(string btext, FontSet font, UIPositionHelper pos)
+            : base(pos)
         {
             Text = btext;
             TextFont = font;
-            Width = () => (float)TextFont.MeasureFancyLinesOfText(MaxX != null ? TextFont.SplitAppropriately(Text, MaxX()) : Text, BColor).X;
-            Height = () => (float)TextFont.MeasureFancyLinesOfText(MaxX != null ? TextFont.SplitAppropriately(Text, MaxX()) : Text, BColor).Y;
-            MaxX = maxx;
+            int pwidth = GetWidth();
+            CustomWidth = pwidth > 0;
+            Location scale = TextFont.MeasureFancyLinesOfText(CustomWidth ? TextFont.SplitAppropriately(Text, pwidth) : Text, BColor);
+            pos.ConstantWidthHeight((int)scale.X, (int)scale.Y);
         }
+
+        /// <summary>
+        /// Whether to custom-limit the width.
+        /// </summary>
+        public bool CustomWidth;
 
         /// <summary>
         /// Renders this label on the screen.
@@ -78,7 +75,7 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="yoff">The Y offset of this label's parent.</param>
         protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
         {
-            string tex = MaxX != null ? TextFont.SplitAppropriately(Text, MaxX()) : Text;
+            string tex = CustomWidth ? TextFont.SplitAppropriately(Text, GetWidth()) : Text;
             float bx = GetX() + xoff;
             float by = GetY() + yoff;
             if (BackColor.W > 0)

@@ -42,14 +42,10 @@ namespace FreneticGameGraphics.UISystem
         /// Constructs a simple colored box.
         /// </summary>
         /// <param name="color">The color to use.</param>
-        /// <param name="anchor">The anchor the box will be relative to.</param>
-        /// <param name="width">The function to get the width.</param>
-        /// <param name="height">The function to get the height.</param>
-        /// <param name="xOff">The function to get the X offset.</param>
-        /// <param name="yOff">The function to get the Y offset.</param>
+        /// <param name="pos">The position of the element.</param>
         /// <param name="texture">The function to use to get the texture ID, if any.</param>
-        public UIColoredBox(Vector4 color, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff, Func<int> texture = null)
-            : base(anchor, width, height, xOff, yOff)
+        public UIColoredBox(Vector4 color, UIPositionHelper pos, Func<int> texture = null)
+            : base(pos)
         {
             Color = color;
             GetTexture = texture;

@@ -74,13 +74,9 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="buttontext">The text to display.</param>
         /// <param name="font">The font to use.</param>
         /// <param name="clicked">The action to run when clicked.</param>
-        /// <param name="anchor">The anchor the button will be relative to.</param>
-        /// <param name="width">The function to get the width.</param>
-        /// <param name="height">The function to get the height.</param>
-        /// <param name="xOff">The function to get the X offset.</param>
-        /// <param name="yOff">The function to get the Y offset.</param>
-        public UIButton(string buttontexname, string buttontext, FontSet font, Action clicked, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff)
-            : base(anchor, width, height, xOff, yOff)
+        /// <param name="pos">The position of the element.</param>
+        public UIButton(string buttontexname, string buttontext, FontSet font, Action clicked, UIPositionHelper pos)
+            : base(pos)
         {
             tName = buttontexname;
             Text = buttontext;

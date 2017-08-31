@@ -64,7 +64,7 @@ namespace FreneticGameGraphics.ClientSystem
         {
             Client = gameClient;
             UIContext = new RenderContext2D();
-            DefaultScreen = new UIScreen(gameClient);
+            DefaultScreen = new UIScreen(this);
             CurrentScreen = DefaultScreen;
         }
 
