@@ -184,6 +184,7 @@ namespace FreneticGameEngineWelcomer
                 if (pos.X < Location.X || pos.Y < Location.Y || pos.X > Location.X + Size.Width || pos.Y > Location.Y + Size.Height)
                 {
                     Hovered = MouseOver.NONE;
+                    Clicked = MouseOver.NONE;
                     PicBox.Invalidate();
                 }
             }
@@ -270,6 +271,11 @@ namespace FreneticGameEngineWelcomer
         }
 
         /// <summary>
+        /// The 'welcome' message topbar text.
+        /// </summary>
+        public const string TOPBAR_TEXT = "Welcome | Frenetic Game Engine";
+
+        /// <summary>
         /// Handles redrawing the form.
         /// </summary>
         /// <param name="sender">The event sender.</param>
@@ -283,7 +289,7 @@ namespace FreneticGameEngineWelcomer
             // Draw the outer edge of the screen
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, Width - 1, Height - 1));
             // Drop the topbar text
-            e.Graphics.DrawString("Welcome | Frenetic Game Engine", TitleBarFont, Brushes.Black, new PointF(40, 0));
+            e.Graphics.DrawString(TOPBAR_TEXT, TitleBarFont, Brushes.Black, new PointF(40, 0));
             // Draw the welcomer icon, the icon's backdrop, and topbar underline
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, 33, 33));
             e.Graphics.DrawLine(new Pen(WelcomerIconOutlineColor), new Point(0, 33), new Point(e.ClipRectangle.Width, 33));
