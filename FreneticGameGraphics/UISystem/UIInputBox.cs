@@ -94,7 +94,7 @@ namespace FreneticGameGraphics.UISystem
             int xs = GetX();
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Engine.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
                 {
                     MinCursor = i;
                     MaxCursor = i;
@@ -143,7 +143,7 @@ namespace FreneticGameGraphics.UISystem
             int xs = GetX();
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Engine.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
                 {
                     MinCursor = Math.Min(i, MStart);
                     MaxCursor = Math.Max(i, MStart);
@@ -282,18 +282,18 @@ namespace FreneticGameGraphics.UISystem
             int y = GetY() + yoff;
             int w = (int)GetWidth();
             engine.Textures.White.Bind();
-            view.Renderer.SetColor(Color);
-            view.Renderer.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.font_default.Height + 1);
+            view.Rendering.SetColor(Color);
+            view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.font_default.Height + 1);
             GL.Enable(EnableCap.ScissorTest);
             GL.Scissor(x, engine.Window.Height - (y + (int)Fonts.font_default.Height), w, (int)Fonts.font_default.Height);
             if (Selected)
             {
                 float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
                 float textw2 = Fonts.MeasureFancyText(typed.Substring(0, MaxCursor + cmax));
-                view.Renderer.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-                view.Renderer.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.font_default.Height);
+                view.Rendering.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
+                view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.font_default.Height);
             }
-            view.Renderer.SetColor(Color4.White);
+            view.Rendering.SetColor(Color4.White);
             Fonts.DrawColoredText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));
             GL.Scissor(0, 0, engine.Window.Width, engine.Window.Height); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);

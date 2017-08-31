@@ -26,16 +26,6 @@ namespace FreneticGameGraphics.ClientSystem
     public class GameEngine3D : GameEngineBase
     {
         /// <summary>
-        /// Sets up the game engine 3D.
-        /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowLoad"/>.
-        /// Then call <see cref="GameEngineBase.Start"/>.
-        /// </summary>
-        /// <param name="_sWindowTitle">The title, if different from game program descriptor.</param>
-        public GameEngine3D(string _sWindowTitle = null) : base(_sWindowTitle)
-        {
-        }
-
-        /// <summary>
         /// The list of common shaders for this engine.
         /// </summary>
         public GE3DShaders Shaders3D = new GE3DShaders();
@@ -120,16 +110,6 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
-        /// The render helper system.
-        /// </summary>
-        public Renderer Rendering;
-
-        /// <summary>
-        /// System to help with models.
-        /// </summary>
-        public ModelEngine Models;
-
-        /// <summary>
         /// Whether forward mode should calculate reflection helpers.
         /// </summary>
         public bool ForwardReflections = false;
@@ -199,16 +179,6 @@ namespace FreneticGameGraphics.ClientSystem
         public RenderContext MainContext = new RenderContext();
 
         /// <summary>
-        /// The 3D animation helper.
-        /// </summary>
-        public AnimationEngine Animations;
-
-        /// <summary>
-        /// The 2D rendering helper, for any UI logic.
-        /// </summary>
-        public Renderer2D RenderingUI;
-
-        /// <summary>
         /// Loads any additional final data.
         /// </summary>
         public override void PostLoad()
@@ -219,21 +189,12 @@ namespace FreneticGameGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine configuring graphics...");
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
-            SysConsole.Output(OutputType.INIT, "GameEngine loading model engine...");
-            Animations = new AnimationEngine();
-            Models = new ModelEngine();
-            Models.Init(Animations, this);
-            SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
-            Rendering = new Renderer(Textures, Shaders, Models);
-            Rendering.Init();
-            RenderingUI = new Renderer2D(Textures, Shaders);
-            RenderingUI.Init();
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
             MainView.Generate(this, Window.Width, Window.Height);
             MainView.Render3D = Render3D;
             MainView.PostFirstRender = ReverseEntities;
             MainView.CameraUp = () => MainCamera.Up;
-            AudioCamera = MainCamera;
+            Client.AudioCamera = MainCamera;
             ZFar = () => MainCamera.ZFar;
             GraphicsUtil.CheckError("PostLoad - Post");
         }
@@ -278,6 +239,17 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public Camera3D MainCamera = new Camera3D();
 
+
+        /// <summary>
+        /// Gets the 3D renderer.
+        /// </summary>
+        public Renderer Rendering
+        {
+            get
+            {
+                return Client.Rendering3D;
+            }
+        }
         /// <summary>
         /// Renders a single frame of the 3D game engine.
         /// </summary>
@@ -286,8 +258,6 @@ namespace FreneticGameGraphics.ClientSystem
             // Setup requirements
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
-            // Tick helpers
-            Models.Update(GlobalTickTime);
             // Set camera to view
             MainView.CameraPos = MainCamera.Position;
             MainView.ForwardVec = MainCamera.Direction;

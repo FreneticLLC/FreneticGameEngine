@@ -37,6 +37,17 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
                 return Engine as GameEngineBase;
             }
         }
+
+        /// <summary>
+        /// Gets the client associated with this entity.
+        /// </summary>
+        public GameClientWindow Client
+        {
+            get
+            {
+                return ClientEngine.Client;
+            }
+        }
         
         /// <summary>
         /// Constructs a client-side entity.

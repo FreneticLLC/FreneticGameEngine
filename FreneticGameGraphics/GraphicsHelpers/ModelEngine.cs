@@ -54,12 +54,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The client engine.
         /// </summary>
-        public GameEngine3D TheClient;
+        public GameClientWindow TheClient;
 
         /// <summary>
         /// Prepares the model system.
         /// </summary>
-        public void Init(AnimationEngine engine, GameEngine3D tclient)
+        /// <param name="engine">Animation engine.</param>
+        /// <param name="tclient">Backing client.</param>
+        public void Init(AnimationEngine engine, GameClientWindow tclient)
         {
             TheClient = tclient;
             AnimEngine = engine;
@@ -633,32 +635,32 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Value);
-            Engine.TheClient.Rendering.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateRotationX((float)Math.PI) * Matrix4.CreateTranslation(vpos));
+            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateRotationX((float)Math.PI) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);

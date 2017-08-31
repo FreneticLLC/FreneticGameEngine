@@ -53,7 +53,7 @@ namespace FreneticGameGraphics.UISystem
             Image.Bind();
             int x = GetX() + xoff;
             int y = GetY() + yoff;
-            view.Renderer.RenderRectangle(view.UIContext, x, y, x + GetWidth(), y + GetHeight());
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + GetWidth(), y + GetHeight());
         }
     }
 }

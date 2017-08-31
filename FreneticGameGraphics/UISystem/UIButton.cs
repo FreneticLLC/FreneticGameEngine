@@ -162,7 +162,7 @@ namespace FreneticGameGraphics.UISystem
             int y = GetY() + yoff;
             float width = GetWidth();
             float height = GetHeight();
-            view.Renderer.RenderRectangle(view.UIContext, x, y, x + width, y + height);
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height);
             float len = TextFont.MeasureFancyText(Text);
             float hei = TextFont.font_default.Height;
             TextFont.DrawColoredText(Text, new Location(x + width / 2 - len / 2, y + height / 2 - hei / 2, 0));

@@ -25,18 +25,29 @@ namespace FreneticGameGraphics.ClientSystem
     public class ViewUI2D
     {
         /// <summary>
-        /// The backing engine.
+        /// The backing client window.
         /// </summary>
-        public GameEngineBase Engine;
+        public GameClientWindow Client;
 
         /// <summary>
-        /// Gets the renderer for the engine.
+        /// Gets the primary engine.
         /// </summary>
-        public Renderer2D Renderer
+        public GameEngineBase Engine
         {
             get
             {
-                return (Engine is GameEngine2D ge2d) ? ge2d.RenderHelper : (Engine as GameEngine3D).RenderingUI;
+                return Client.CurrentEngine;
+            }
+        }
+
+        /// <summary>
+        /// Gets the rendering helper for the engine.
+        /// </summary>
+        public Renderer2D Rendering
+        {
+            get
+            {
+                return Client.Rendering2D;
             }
         }
 
@@ -48,12 +59,12 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Constructs the view.
         /// </summary>
-        /// <param name="gameEngine">Backing engine.</param>
-        public ViewUI2D(GameEngineBase gameEngine)
+        /// <param name="gameClient">Backing client window.</param>
+        public ViewUI2D(GameClientWindow gameClient)
         {
-            Engine = gameEngine;
+            Client = gameClient;
             UIContext = new RenderContext2D();
-            DefaultScreen = new UIScreen(Engine);
+            DefaultScreen = new UIScreen(gameClient);
             CurrentScreen = DefaultScreen;
         }
 
@@ -79,23 +90,23 @@ namespace FreneticGameGraphics.ClientSystem
         {
             if (DirectToScreen)
             {
-                UIContext.ZoomMultiplier = Engine.Window.Width * 0.5f;
-                UIContext.Width = Engine.Window.Width;
-                UIContext.Height = Engine.Window.Height;
+                UIContext.ZoomMultiplier = Client.Window.Width * 0.5f;
+                UIContext.Width = Client.Window.Width;
+                UIContext.Height = Client.Window.Height;
                 float aspect = UIContext.Width / (float)UIContext.Height;
                 float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
                 UIContext.Scaler = new Vector2(sc, -sc * aspect);
-                UIContext.ViewCenter = new Vector2(-Engine.Window.Width * 0.5f, -Engine.Window.Height * 0.5f);
+                UIContext.ViewCenter = new Vector2(-Client.Window.Width * 0.5f, -Client.Window.Height * 0.5f);
                 UIContext.Adder = UIContext.ViewCenter;
-                Engine.Ortho = Matrix4.CreateOrthographicOffCenter(0, Engine.Window.Width, Engine.Window.Height, 0, -1, 1);
+                Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Width, Client.Window.Height, 0, -1, 1);
             }
             // TODO: alternate Ortho setting from scaler/adder def!
-            Engine.Shaders.ColorMult2DShader.Bind();
+            Client.Shaders.ColorMult2DShader.Bind();
             GL.Uniform2(1, ref UIContext.Scaler);
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
-            CurrentScreen.FullRender(this, Engine.Delta, 0, 0);
+            CurrentScreen.FullRender(this, Client.Delta, 0, 0);
         }
 
         /// <summary>
@@ -103,7 +114,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void Tick()
         {
-            CurrentScreen.FullTick(Engine.Delta);
+            CurrentScreen.FullTick(Client.Delta);
         }
     }
 }

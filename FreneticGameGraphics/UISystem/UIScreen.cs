@@ -23,10 +23,10 @@ namespace FreneticGameGraphics.UISystem
     public class UIScreen : UIElement
     {
         /// <summary>
-        /// A reference to the relevant engine backing this screen.
-        /// Get this using <see cref="Engine"/>.
+        /// A reference to the relevant client backing this screen.
+        /// Get this using <see cref="Client"/>.
         /// </summary>
-        private GameEngineBase _Engine;
+        private GameClientWindow _Client;
 
         /// <summary>
         /// Gets the client game engine this screen is associated with.
@@ -35,7 +35,18 @@ namespace FreneticGameGraphics.UISystem
         {
             get
             {
-                return _Engine;
+                return _Client.CurrentEngine;
+            }
+        }
+
+        /// <summary>
+        /// Gets the client game window this screen is associated with.
+        /// </summary>
+        public override GameClientWindow Client
+        {
+            get
+            {
+                return _Client;
             }
         }
 
@@ -48,8 +59,8 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Constructs a screen that covers the entire game window.
         /// </summary>
-        /// <param name="engine">The client game engine.</param>
-        public UIScreen(GameEngineBase engine) : this(engine, UIAnchor.TOP_LEFT, () => 0, () => 0, () => 0, () => 0)
+        /// <param name="client">The client game window.</param>
+        public UIScreen(GameClientWindow client) : this(client, UIAnchor.TOP_LEFT, () => 0, () => 0, () => 0, () => 0)
         {
             Width = () => Parent == null ? Engine.Window.Width : Parent.GetWidth();
             Height = () => Parent == null ? Engine.Window.Height : Parent.GetHeight();
@@ -58,15 +69,15 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Constructs a screen that covers a specific portion of the game window.
         /// </summary>
-        /// <param name="engine">The client game engine.</param>
+        /// <param name="client">The client game window.</param>
         /// <param name="anchor">The anchor the element will be positioned relative to.</param>
         /// <param name="width">The function that controls the width of the element.</param>
         /// <param name="height">The function that controls the height of the element.</param>
         /// <param name="xOff">The function that controls the X offset of the element.</param>
         /// <param name="yOff">The function that controls the Y offset of the element.</param>
-        public UIScreen(GameEngineBase engine, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff) : base(anchor, width, height, xOff, yOff)
+        public UIScreen(GameClientWindow client, UIAnchor anchor, Func<float> width, Func<float> height, Func<int> xOff, Func<int> yOff) : base(anchor, width, height, xOff, yOff)
         {
-            _Engine = engine;
+            _Client = client;
         }
 
         /// <summary>

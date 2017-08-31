@@ -45,9 +45,9 @@ namespace FreneticGameGraphics.AudioSystem
         //public MicrophoneHandler Microphone = null;
 
         /// <summary>
-        /// The backing game engine.
+        /// The backing game client.
         /// </summary>
-        public GameEngineBase Engine;
+        public GameClientWindow Client;
 
         /// <summary>
         /// Current global volume.
@@ -62,8 +62,8 @@ namespace FreneticGameGraphics.AudioSystem
         /// <summary>
         /// Initialize the sound engine.
         /// </summary>
-        /// <param name="tengine">The backing engine.</param>
-        public void Init(GameEngineBase tengine)
+        /// <param name="tclient">The backing client.</param>
+        public void Init(GameClientWindow tclient)
         {
             if (AudioInternal != null)
             {
@@ -73,9 +73,9 @@ namespace FreneticGameGraphics.AudioSystem
             {
                 Context.Dispose();
             }
-            Engine = tengine;
+            Client = tclient;
             Context = new AudioContext(AudioContext.DefaultDevice, 0, 0, false, true);
-            if (Engine.EnforceAudio)
+            if (Client.EnforceAudio)
             {
                 AudioInternal = new AudioEnforcer();
                 AudioInternal.Init(Context);
@@ -194,7 +194,7 @@ namespace FreneticGameGraphics.AudioSystem
                     return;
                 }
             }
-            bool sel = Engine.QuietOnDeselect ? selected : true;
+            bool sel = Client.QuietOnDeselect ? selected : true;
             Selected = sel;
             /*if (DeafenTime > 0.0)
             {
@@ -246,7 +246,7 @@ namespace FreneticGameGraphics.AudioSystem
                     i--;
                     continue;
                 }
-                PlayingNow[i].Effect.LastUse = Engine.GlobalTickTime;
+                PlayingNow[i].Effect.LastUse = Client.GlobalTickTime;
                 /*if ((TimeDeaf > 0.0) && sel && !PlayingNow[i].IsBackground)
                 {
                     PlayingNow[i].IsDeafened = true;
@@ -343,7 +343,7 @@ namespace FreneticGameGraphics.AudioSystem
                 AudioInternal.UpDirection = up;
                 AudioInternal.Volume = globvol;
             }
-            TimeTowardsNextClean += Engine.Delta;
+            TimeTowardsNextClean += Client.Delta;
             if (TimeTowardsNextClean > 10.0)
             {
                 CleanTick();
@@ -363,7 +363,7 @@ namespace FreneticGameGraphics.AudioSystem
         {
             foreach (KeyValuePair<string, SoundEffect> effect in Effects)
             {
-                if (effect.Value.LastUse + 30.0 < Engine.GlobalTickTime)
+                if (effect.Value.LastUse + 30.0 < Client.GlobalTickTime)
                 {
                     if (effect.Value.Internal > -1)
                     {
@@ -569,7 +569,7 @@ namespace FreneticGameGraphics.AudioSystem
             {
                 Name = namelow,
                 Internal = -1,
-                LastUse = Engine.GlobalTickTime
+                LastUse = Client.GlobalTickTime
             };
             Effects.Add(namelow, sfx);
             return sfx;
@@ -602,7 +602,7 @@ namespace FreneticGameGraphics.AudioSystem
             try
             {
                 string newname = "sounds/" + name + ".ogg";
-                if (!Engine.Files.Exists(newname))
+                if (!Client.Files.Exists(newname))
                 {
                     //SysConsole.Output(OutputType.DEBUG, "Audio / nullsource");
                     return null;
@@ -611,13 +611,13 @@ namespace FreneticGameGraphics.AudioSystem
                 {
                     Name = name,
                     Internal = -1,
-                    LastUse = Engine.GlobalTickTime
+                    LastUse = Client.GlobalTickTime
                 };
-                Engine.Schedule.StartAsyncTask(() =>
+                Client.Schedule.StartAsyncTask(() =>
                 {
                     try
                     {
-                        SoundEffect ts = LoadVorbisSound(Engine.Files.ReadToStream(newname), name);
+                        SoundEffect ts = LoadVorbisSound(Client.Files.ReadToStream(newname), name);
                         lock (tsfx)
                         {
                             tsfx.Internal = ts.Internal;
@@ -626,7 +626,7 @@ namespace FreneticGameGraphics.AudioSystem
                         //SysConsole.Output(OutputType.DEBUG, "Audio / valid1: " + tsfx.Internal + ", " + tsfx.Clip);
                         if (tsfx.Loaded != null)
                         {
-                            Engine.Schedule.ScheduleSyncTask(() =>
+                            Client.Schedule.ScheduleSyncTask(() =>
                             {
                                 if (tsfx.Loaded != null)
                                 {
@@ -688,7 +688,7 @@ namespace FreneticGameGraphics.AudioSystem
             SoundEffect sfx = new SoundEffect()
             {
                 Name = name,
-                LastUse = Engine.GlobalTickTime
+                LastUse = Client.GlobalTickTime
             };
             byte[] data = LoadWAVE(stream, out int channels, out int bits, out int rate);
             if (AudioInternal != null)

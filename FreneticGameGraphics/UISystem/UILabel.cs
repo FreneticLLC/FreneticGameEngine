@@ -84,9 +84,9 @@ namespace FreneticGameGraphics.UISystem
             if (BackColor.W > 0)
             {
                 Location meas = TextFont.MeasureFancyLinesOfText(tex);
-                view.Renderer.SetColor(BackColor);
-                view.Renderer.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y);
-                view.Renderer.SetColor(Vector4.One);
+                view.Rendering.SetColor(BackColor);
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y);
+                view.Rendering.SetColor(Vector4.One);
             }
             TextFont.DrawColoredText(tex, new Location(bx, by, 0), bcolor: BColor);
         }

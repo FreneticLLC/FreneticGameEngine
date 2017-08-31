@@ -71,22 +71,22 @@ namespace FreneticGameGraphics.UISystem
             GameEngineBase engine = view.Engine;
             if (Color.W > 0.0f)
             {
-                view.Renderer.SetColor(Color);
+                view.Rendering.SetColor(Color);
                 engine.Textures.White.Bind();
-                view.Renderer.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
             }
             if (GetTexture != null)
             {
-                view.Renderer.SetColor(Vector4.One);
+                view.Rendering.SetColor(Vector4.One);
                 GL.BindTexture(TextureTarget.Texture2D, GetTexture());
             }
             if (Flip)
             {
-                view.Renderer.RenderRectangle(view.UIContext, x, y + h, x + w, y);
+                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y);
             }
             else
             {
-                view.Renderer.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
             }
             engine.Textures.White.Bind();
         }

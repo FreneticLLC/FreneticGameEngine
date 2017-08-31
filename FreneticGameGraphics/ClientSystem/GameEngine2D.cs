@@ -123,18 +123,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// How much to pixelate the view. 1 = no pixelation.
         /// </summary>
         public int Pixelation = 1;
-
-        /// <summary>
-        /// Sets up the game engine 2D.
-        /// Considering also attaching to available events such as <see cref="GameEngineBase.OnWindowLoad"/>.
-        /// Then call <see cref="GameEngineBase.Start"/>.
-        /// </summary>
-        /// <param name="_windowTitle">The title, if different from game program descriptor.</param>
-        public GameEngine2D(string _windowTitle = null)
-            : base(_windowTitle)
-        {
-        }
-
+        
         /// <summary>
         /// Loads all shaders for the standard Game Engine 2D.
         /// </summary>
@@ -264,11 +253,11 @@ namespace FreneticGameGraphics.ClientSystem
             float sc = 1.0f / (OriginalZoom * ZoomMultiplier);
             OriginalScaler = new Vector2(sc, sc * aspect);
             OriginalAdder = ViewCenter;
-            Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
+            Client.Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
-            float wx = MouseX / (float)Window.Width;
-            float wy = MouseY / (float)Window.Height;
+            float wx = Client.MouseX / (float)Window.Width;
+            float wy = Client.MouseY / (float)Window.Height;
             wx -= 0.5f;
             wy -= 0.5f;
             wx *= 2f;
@@ -308,6 +297,17 @@ namespace FreneticGameGraphics.ClientSystem
                     throw;
                 }
                 Console.WriteLine("Rendering exception: " + ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the 2D renderer.
+        /// </summary>
+        public Renderer2D Rendering
+        {
+            get
+            {
+                return Client.Rendering2D;
             }
         }
 

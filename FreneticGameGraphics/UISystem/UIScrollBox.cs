@@ -93,7 +93,7 @@ namespace FreneticGameGraphics.UISystem
         {
             if (WatchMouse)
             {
-                Scroll -= Engine.CurrentMouse.ScrollWheelValue * 10;
+                Scroll -= Client.CurrentMouse.ScrollWheelValue * 10;
                 if (Scroll < 0)
                 {
                     Scroll = 0;
@@ -114,9 +114,9 @@ namespace FreneticGameGraphics.UISystem
             int y = GetY() + yoff;
             int h = (int)GetHeight();
             int w = (int)GetWidth();
-            view.Renderer.SetColor(new Vector4(0f, 0.5f, 0.5f, 0.3f));
-            view.Renderer.RenderRectangle(view.UIContext, x, y, x + w, y + h);
-            view.Renderer.SetColor(new Vector4(1f));
+            view.Rendering.SetColor(new Vector4(0f, 0.5f, 0.5f, 0.3f));
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+            view.Rendering.SetColor(new Vector4(1f));
         }
 
         /// <summary>

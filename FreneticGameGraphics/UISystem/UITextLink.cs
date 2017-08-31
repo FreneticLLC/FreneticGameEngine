@@ -159,10 +159,10 @@ namespace FreneticGameGraphics.UISystem
                 float x = GetX() + xoff;
                 float y = GetY() + yoff;
                 Icon.Bind();
-                view.Renderer.SetColor(IconColor);
-                view.Renderer.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height);
+                view.Rendering.SetColor(IconColor);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height);
                 TextFont.DrawColoredText(tt, new Location(x + TextFont.font_default.Height, y, 0), int.MaxValue, 1, false, BColor);
-                view.Renderer.SetColor(OpenTK.Vector4.One);
+                view.Rendering.SetColor(OpenTK.Vector4.One);
             }
             else
             {

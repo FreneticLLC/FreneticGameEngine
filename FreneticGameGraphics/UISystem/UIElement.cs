@@ -26,11 +26,22 @@ namespace FreneticGameGraphics.UISystem
         /// Do not access directly, except for debugging.
         /// </summary>
         public List<UIElement> Children;
-
+        
         /// <summary>
         /// The parent of this element.
         /// </summary>
         public UIElement Parent;
+
+        /// <summary>
+        /// Gets the client game window used to render this element.
+        /// </summary>
+        public virtual GameClientWindow Client
+        {
+            get
+            {
+                return Parent.Client;
+            }
+        }
 
         /// <summary>
         /// Gets the client game engine used to render this element.
@@ -298,9 +309,9 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last tick.</param>
         protected virtual void TickChildren(double delta)
         {
-            int mX = Engine.MouseX;
-            int mY = Engine.MouseY;
-            bool mDown = Engine.CurrentMouse.IsButtonDown(MouseButton.Left);
+            int mX = Client.MouseX;
+            int mY = Client.MouseY;
+            bool mDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
             foreach (UIElement element in Children)
             {
                 if (element.Contains(mX, mY))

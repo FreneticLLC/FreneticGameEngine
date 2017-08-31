@@ -84,6 +84,7 @@
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple3DRenderableModelProperty.cs" />
+    <Compile Include="ClientSystem\GameClientWindow.cs" />
     <Compile Include="ClientSystem\GameEngine3D.cs" />
     <Compile Include="ClientSystem\GameEngineBase.cs" />
     <Compile Include="ClientSystem\GE3DShaders.cs" />
