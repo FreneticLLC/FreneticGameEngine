@@ -89,6 +89,11 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Whether to process the default engine.
+        /// </summary>
+        public bool ProcessMainEngine = true;
+
+        /// <summary>
         /// The X-coordinate of the mouse in screen coordinates.
         /// </summary>
         public int MouseX;
@@ -272,7 +277,10 @@ namespace FreneticGameGraphics.ClientSystem
             // Tick helpers
             Models.Update(GlobalTickTime);
             // Third step: general game rendering
-            CurrentEngine.RenderSingleFrame();
+            if (ProcessMainEngine)
+            {
+                CurrentEngine.RenderSingleFrame();
+            }
             // Add the UI Layer too
             MainUI.Draw();
             // Fourth step: clean up!
@@ -282,7 +290,10 @@ namespace FreneticGameGraphics.ClientSystem
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GEB - PreTick");
             // Pre-tick.
-            ClientEngineTick();
+            if (ProcessMainEngine)
+            {
+                ClientEngineTick();
+            }
             // Primary entity tick
             CurrentEngine.Tick();
             // Primary UI tick
