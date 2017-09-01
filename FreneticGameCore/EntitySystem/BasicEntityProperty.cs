@@ -51,7 +51,7 @@ namespace FreneticGameCore.EntitySystem
         {
             get
             {
-                return Entity.Engine as T2;
+                return Entity.Engine;
             }
         }
     }
