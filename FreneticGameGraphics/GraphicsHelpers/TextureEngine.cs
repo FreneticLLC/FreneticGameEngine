@@ -16,6 +16,7 @@ using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.Files;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -228,7 +229,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="twidth">The texture width, if any.</param>
         /// <returns>The loaded texture, or null if it does not exist.</returns>
         // Shut up the CodeAnalysis (It doesn't like the BMP variable handling below).
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public Texture LoadTexture(string filename, int twidth = 0)
         {
             try
