@@ -100,7 +100,7 @@ namespace FreneticGameCore
                     bep.OnSpawn();
                 }
             }
-            ce.OnSpawnEvent?.Fire(new EntitySpawnEventArgs());
+            ce.OnSpawnEvent?.Fire(Schedule, new EntitySpawnEventArgs());
             return ce;
         }
 
@@ -154,7 +154,7 @@ namespace FreneticGameCore
                     bep.OnDeSpawn();
                 }
             }
-            ent.OnDeSpawnEvent?.Fire(new EntityDeSpawnEventArgs());
+            ent.OnDeSpawnEvent?.Fire(Schedule, new EntityDeSpawnEventArgs());
             RemoveEntity(ent);
             ent.IsSpawned = false;
         }

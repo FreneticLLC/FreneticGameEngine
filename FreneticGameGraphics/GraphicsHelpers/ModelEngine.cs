@@ -99,7 +99,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!TheClient.Files.Exists("models/" + filename + ".vmd"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
-                        FreneticScript.TextStyle.Color_Standout + "models/" + filename + ".vmd" + FreneticScript.TextStyle.Color_Warning +
+                        TextStyle.Color_Standout + "models/" + filename + ".vmd" + TextStyle.Color_Warning +
                         "' does not exist.");
                     return null;
                 }
@@ -108,7 +108,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load model from filename '" +
-                    FreneticScript.TextStyle.Color_Standout + "models/" + filename + ".vmd" + FreneticScript.TextStyle.Color_Error + "': " + ex.ToString());
+                    TextStyle.Color_Standout + "models/" + filename + ".vmd" + TextStyle.Color_Error + "': " + ex.ToString());
                 return null;
             }
         }

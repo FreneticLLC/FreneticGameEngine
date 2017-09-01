@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FreneticScript;
 using BEPUutilities;
 
 namespace FreneticGameCore.EntitySystem
@@ -70,13 +69,13 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fired when this entity is spawned into a world.
         /// </summary>
-        public FreneticScriptEventHandler<EntitySpawnEventArgs> OnSpawnEvent = new FreneticScriptEventHandler<EntitySpawnEventArgs>();
+        public FreneticEvent<EntitySpawnEventArgs> OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>();
 
         /// <summary>
         /// Fired when this entity is de-spawned out of a world.
         /// </summary>
-        public FreneticScriptEventHandler<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticScriptEventHandler<EntityDeSpawnEventArgs>();
-        
+        public FreneticEvent<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticEvent<EntityDeSpawnEventArgs>();
+
         /// <summary>
         /// Sets the position of the entity.
         /// </summary>
@@ -142,14 +141,14 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Represents the arguments to an entity spawn event.
     /// </summary>
-    public class EntitySpawnEventArgs : FreneticEventArgs
+    public class EntitySpawnEventArgs : EventArgs
     {
     }
 
     /// <summary>
     /// Represents the arguments to an entity de-spawn event.
     /// </summary>
-    public class EntityDeSpawnEventArgs : FreneticEventArgs
+    public class EntityDeSpawnEventArgs : EventArgs
     {
     }
 }

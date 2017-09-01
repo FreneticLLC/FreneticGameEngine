@@ -39,7 +39,7 @@ namespace FreneticGameCore.EntitySystem
         public override void OnSpawn()
         {
             PhysEnt = BEntity.GetProperty<EntityPhysicsProperty>();
-            BEntity.OnSpawnEvent += SpawnHandle;
+            BEntity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
             BEntity.OnTick += TickHandle;
             PhysEnt.DeSpawnEvent += RemoveJoints;
         }
@@ -52,7 +52,7 @@ namespace FreneticGameCore.EntitySystem
         /// Post-spawn handling.
         /// </summary>
         /// <param name="e">The event.</param>
-        public void SpawnHandle(EntitySpawnEventArgs e)
+        public void SpawnHandle(FreneticEventArgs<EntitySpawnEventArgs> e)
         {
             if (ForcePosition)
             {
@@ -98,7 +98,7 @@ namespace FreneticGameCore.EntitySystem
                 return;
             }
             HandledRemove = true;
-            BEntity.OnSpawnEvent -= SpawnHandle;
+            BEntity.OnSpawnEvent.RemoveBySource(this);
             BEntity.OnTick -= TickHandle;
         }
 
