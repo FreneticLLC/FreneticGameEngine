@@ -517,12 +517,12 @@ namespace FreneticGameCore.Files
         public static byte[] Compress(byte[] input)
         {
             MemoryStream memstream = new MemoryStream();
-            LZ4Stream lzstream = new LZ4Stream(memstream, LZ4StreamMode.Compress);
-            lzstream.Write(input, 0, input.Length);
-            lzstream.Close();
-            byte[] finaldata = memstream.ToArray();
-            memstream.Close();
-            return finaldata;
+            using (LZ4Stream lzstream = new LZ4Stream(memstream, LZ4StreamMode.Compress))
+            {
+                lzstream.Write(input, 0, input.Length);
+                lzstream.Flush();
+                return memstream.ToArray();
+            }
         }
 
         /// <summary>
@@ -535,11 +535,12 @@ namespace FreneticGameCore.Files
             using (MemoryStream output = new MemoryStream())
             {
                 MemoryStream memstream = new MemoryStream(input);
-                LZ4Stream LZStream = new LZ4Stream(memstream, LZ4StreamMode.Decompress);
-                LZStream.CopyTo(output);
-                LZStream.Close();
-                memstream.Close();
-                return output.ToArray();
+                using (LZ4Stream LZStream = new LZ4Stream(memstream, LZ4StreamMode.Decompress))
+                {
+                    LZStream.CopyTo(output);
+                    LZStream.Flush();
+                    return output.ToArray();
+                }
             }
         }
 
@@ -551,12 +552,12 @@ namespace FreneticGameCore.Files
         public static byte[] GZip(byte[] input)
         {
             MemoryStream memstream = new MemoryStream();
-            GZipStream GZStream = new GZipStream(memstream, CompressionMode.Compress);
-            GZStream.Write(input, 0, input.Length);
-            GZStream.Close();
-            byte[] finaldata = memstream.ToArray();
-            memstream.Close();
-            return finaldata;
+            using (GZipStream GZStream = new GZipStream(memstream, CompressionMode.Compress))
+            {
+                GZStream.Write(input, 0, input.Length);
+                GZStream.Flush();
+                return memstream.ToArray();
+            }
         }
 
         /// <summary>
@@ -569,11 +570,12 @@ namespace FreneticGameCore.Files
             using (MemoryStream output = new MemoryStream())
             {
                 MemoryStream memstream = new MemoryStream(input);
-                GZipStream GZStream = new GZipStream(memstream, CompressionMode.Decompress);
-                GZStream.CopyTo(output);
-                GZStream.Close();
-                memstream.Close();
-                return output.ToArray();
+                using (GZipStream GZStream = new GZipStream(memstream, CompressionMode.Decompress))
+                {
+                    GZStream.CopyTo(output);
+                    GZStream.Flush();
+                    return output.ToArray();
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ namespace FreneticGameCore.Files
     /// <summary>
     /// Wraps a System.IO.FileNotFoundException.
     /// </summary>
+    [Serializable]
     public class UnknownFileException : FileNotFoundException
     {
         /// <summary>

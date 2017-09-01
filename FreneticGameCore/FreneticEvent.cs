@@ -135,7 +135,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Helper to wait inside events.
     /// </summary>
-    public class FreneticEventWaiter
+    public class FreneticEventWaiter : IDisposable
     {
         /// <summary>
         /// The scheduler for this waiter.
@@ -199,6 +199,32 @@ namespace FreneticGameCore
         {
             MREFirst.Set();
             MRECompletion.Set();
+        }
+
+        /// <summary>
+        /// Screw microsoft.
+        /// </summary>
+        /// <param name="disposing">If you input false, screw you.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            // Useless if check
+            if (!disposing)
+            {
+                return;
+            }
+            // Actual dispose
+            MREFirst.Dispose();
+            MRECompletion.Dispose();
+            // Microsoft logic...
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose and destroy the event.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
         }
     }
 

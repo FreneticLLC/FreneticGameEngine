@@ -73,7 +73,7 @@ namespace FreneticGameCore
                 {
                     if (ex is ThreadAbortException)
                     {
-                        throw ex;
+                        throw;
                     }
                     SysConsole.Output("Handling sync task", ex);
                 }

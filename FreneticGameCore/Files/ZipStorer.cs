@@ -764,12 +764,30 @@ namespace System.IO.Compression
         #endregion
 
         #region IDisposable Members
+        
+        /// <summary>
+        /// Screw microsoft.
+        /// </summary>
+        /// <param name="disposing">If you input false, screw you.</param>
+        protected virtual void Dispose(bool disposing) // mcmonkey - this method
+        {
+            // Useless if check
+            if (!disposing)
+            {
+                return;
+            }
+            // Actual dispose
+            Close();
+            // Microsoft logic...
+            GC.SuppressFinalize(this);
+        }
         /// <summary>
         /// Closes the Zip file stream
         /// </summary>
         public void Dispose()
         {
-            this.Close();
+            // mcmonkey - move out: this.Close();
+            Dispose(true); // mcmonkey - happy now, MS?
         }
         #endregion
     }
