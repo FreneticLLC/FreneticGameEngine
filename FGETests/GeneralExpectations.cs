@@ -37,8 +37,8 @@ namespace FGETests
         [Test]
         public static void TestFloatStrings()
         {
-            Assert.That((3.2).ToString().Equals("3.2"), "Numbers 3.2 != " + (3.2).ToString() + ", possibly a locale issue?");
-            Assert.That((1.9f).ToString().Equals("1.9"), "Numbers 1.9 != " + (1.9f).ToString() + ", possibly a locale issue?");
+            Assert.That((3.2).ToString().Equals("3.2"), "Numbers (double) 3.2 != " + (3.2).ToString() + ", possibly a locale issue?");
+            Assert.That((1.9f).ToString().Equals("1.9"), "Numbers (float) 1.9 != " + (1.9f).ToString() + ", possibly a locale issue?");
         }
 
         /// <summary>
@@ -59,13 +59,12 @@ namespace FGETests
                 Assert.That(bI[1] == 2, "Bit contents (int->bytes)[1]");
                 Assert.That(bI[2] == 0, "Bit contents (int->bytes)[2]");
                 Assert.That(bI[3] == 0, "Bit contents (int->bytes)[3]");
-                byte[] bF = Utilities.FloatToBytes(0);
+                byte[] bF = Utilities.FloatToBytes(127.125f);
                 Assert.That(bF.Length == 4, "Bit length (float->bytes)");
                 Assert.That(bF[0] == 0, "Bit contents (float->bytes)[0]");
-                Assert.That(bF[1] == 0, "Bit contents (float->bytes)[1]");
-                Assert.That(bF[2] == 0, "Bit contents (float->bytes)[2]");
-                Assert.That(bF[3] == 0, "Bit contents (float->bytes)[3]");
-                // TODO: better byte-by-byte float test? (Non-zero!)
+                Assert.That(bF[1] == 64, "Bit contents (float->bytes)[1]");
+                Assert.That(bF[2] == 254, "Bit contents (float->bytes)[2]");
+                Assert.That(bF[3] == 66, "Bit contents (float->bytes)[3]");
                 Assert.That(Utilities.BytesToDouble(Utilities.DoubleToBytes(1.73e5)) == 1.73e5, "Double parseback validity");
             }
         }
