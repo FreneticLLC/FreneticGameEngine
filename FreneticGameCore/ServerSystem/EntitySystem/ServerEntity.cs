@@ -19,7 +19,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
     /// <summary>
     /// Represents an entity on the server side.
     /// </summary>
-    public class ServerEntity : BasicEntity
+    public class ServerEntity : BasicEntity<ServerEngine>
     {
         /// <summary>
         /// Whether this entity should be sent over the network.
@@ -43,7 +43,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
         /// <param name="engine">The owning engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
         /// <param name="_shouldNetwork">Whether it should network.</param>
-        public ServerEntity(BasicEngine engine, bool _ticks, bool _shouldNetwork = false) 
+        public ServerEntity(ServerEngine engine, bool _ticks, bool _shouldNetwork = false) 
             : base(engine, _ticks)
         {
             ShouldNetwork = _shouldNetwork;

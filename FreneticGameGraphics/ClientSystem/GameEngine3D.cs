@@ -223,7 +223,7 @@ namespace FreneticGameGraphics.ClientSystem
         public void SortEntities()
         {
             Location pos = MainView.RenderRelative;
-            Entities = Entities.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
+            EntityList = EntityList.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void ReverseEntities()
         {
-            Entities.Reverse();
+            EntityList.Reverse();
         }
 
         /// <summary>
@@ -243,8 +243,9 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ActiveTexture(TextureUnit.Texture1);
             Textures.NormalDef.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
-            foreach (ClientEntity ce in Entities)
+            foreach (ClientEntity ce in EntityList)
             {
+                // TODO: layering logic of some form instead of this overly basic stuff.
                 if (ce.Renderer != null && ce.Renderer.IsVisible && (ce.Renderer.CastShadows || !view.RenderingShadows))
                 {
                     ce.Renderer?.RenderStandard(MainContext);

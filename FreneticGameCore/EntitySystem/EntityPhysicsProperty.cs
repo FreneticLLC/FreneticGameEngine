@@ -23,12 +23,12 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
     /// </summary>
-    public class EntityPhysicsProperty : BasicEntityProperty
+    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// The owning physics world.
         /// </summary> // TODO: Save the correct physics world ref?
-        public PhysicsSpace PhysicsWorld; // Set by constructor.
+        public PhysicsSpace<T, T2> PhysicsWorld; // Set by constructor.
 
         /// <summary>
         /// The spawned physics body.
@@ -282,11 +282,11 @@ namespace FreneticGameCore.EntitySystem
         {
             if (PhysicsWorld == null)
             {
-                PhysicsWorld = BEntity.Engine.PhysicsWorld;
+                PhysicsWorld = Entity.Engine.PhysicsWorld;
             }
             SpawnHandle();
-            BEntity.OnPositionChanged += PosCheck;
-            BEntity.OnOrientationChanged += OriCheck;
+            Entity.OnPositionChanged += PosCheck;
+            Entity.OnOrientationChanged += OriCheck;
         }
 
         /// <summary>
@@ -300,8 +300,8 @@ namespace FreneticGameCore.EntitySystem
             }
             HandledRemove = true;
             DeSpawnHandle();
-            BEntity.OnPositionChanged -= PosCheck;
-            BEntity.OnOrientationChanged -= OriCheck;
+            Entity.OnPositionChanged -= PosCheck;
+            Entity.OnOrientationChanged -= OriCheck;
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace FreneticGameCore.EntitySystem
             if (Shape is EntityCharacterShape chr)
             {
                 CharacterController cc = chr.GetBEPUCharacter();
-                cc.Tag = BEntity;
+                cc.Tag = Entity;
                 OriginalObject = cc;
                 SpawnedBody = cc.Body;
             }
@@ -362,10 +362,10 @@ namespace FreneticGameCore.EntitySystem
             SpawnedBody.Material.Bounciness = InternalBounciness;
             SpawnedBody.Position = InternalPosition.ToBVector();
             SpawnedBody.Gravity = InternalGravity.ToBVector();
-            SpawnedBody.Tag = BEntity;
+            SpawnedBody.Tag = Entity;
             // TODO: Other settings
-            PhysicsWorld.Spawn(BEntity, OriginalObject);
-            BEntity.OnTick += Tick;
+            PhysicsWorld.Spawn(Entity, OriginalObject);
+            Entity.OnTick += Tick;
         }
 
         /// <summary>
@@ -377,14 +377,14 @@ namespace FreneticGameCore.EntitySystem
             if (InternalPosition.DistanceSquared(bpos) > 0.0001)
             {
                 InternalPosition = bpos;
-                BEntity.OnPositionChanged?.Invoke(bpos * PhysicsWorld.RelativeScale);
+                Entity.OnPositionChanged?.Invoke(bpos * PhysicsWorld.RelativeScale);
             }
             Quaternion cur = SpawnedBody.Orientation;
             Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
             if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
             {
                 InternalOrientation = cur;
-                BEntity.OnOrientationChanged?.Invoke(cur);
+                Entity.OnOrientationChanged?.Invoke(cur);
             }
         }
 
@@ -414,9 +414,9 @@ namespace FreneticGameCore.EntitySystem
         public void DeSpawnHandle()
         {
             UpdateFields();
-            BEntity.OnTick -= Tick;
+            Entity.OnTick -= Tick;
             DeSpawnEvent?.Invoke();
-            PhysicsWorld.DeSpawn(BEntity, OriginalObject);
+            PhysicsWorld.DeSpawn(Entity, OriginalObject);
             SpawnedBody = null;
             OriginalObject = null;
         }

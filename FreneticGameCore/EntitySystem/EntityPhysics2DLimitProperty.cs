@@ -24,7 +24,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Restricts a physics entity to 2D only.
     /// </summary>
-    public class EntityPhysics2DLimitProperty : BasicEntityProperty
+    public class EntityPhysics2DLimitProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// Whether to force the position (in addition to rotation).
@@ -38,9 +38,9 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
-            PhysEnt = BEntity.GetProperty<EntityPhysicsProperty>();
-            BEntity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
-            BEntity.OnTick += TickHandle;
+            PhysEnt = Entity.GetProperty<EntityPhysicsProperty<T, T2>>();
+            Entity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
+            Entity.OnTick += TickHandle;
             PhysEnt.DeSpawnEvent += RemoveJoints;
         }
 
@@ -98,8 +98,8 @@ namespace FreneticGameCore.EntitySystem
                 return;
             }
             HandledRemove = true;
-            BEntity.OnSpawnEvent.RemoveBySource(this);
-            BEntity.OnTick -= TickHandle;
+            Entity.OnSpawnEvent.RemoveBySource(this);
+            Entity.OnTick -= TickHandle;
         }
 
         private bool HandledRemove = false;
@@ -115,6 +115,6 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// The relevant physics entity.
         /// </summary>
-        public EntityPhysicsProperty PhysEnt;
+        public EntityPhysicsProperty<T, T2> PhysEnt;
     }
 }

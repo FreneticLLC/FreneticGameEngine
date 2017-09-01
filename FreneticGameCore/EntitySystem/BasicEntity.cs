@@ -18,12 +18,12 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// The base most class of an entity in the FreneticGameEngine.
     /// </summary>
-    public abstract class BasicEntity : PropertyHolder
+    public abstract class BasicEntity<T> : PropertyHolder
     {
         /// <summary>
         /// The owning engine.
         /// </summary>
-        public BasicEngine Engine;
+        public T Engine;
 
         /// <summary>
         /// Whether the entity should tick normally.
@@ -48,6 +48,7 @@ namespace FreneticGameCore.EntitySystem
 
         /// <summary>
         /// Fired when the entity is being ticked.
+        /// TODO: Actual event?
         /// </summary>
         public Action OnTick;
 
@@ -58,11 +59,13 @@ namespace FreneticGameCore.EntitySystem
 
         /// <summary>
         /// Fired when the entity is moved.
+        /// TODO: Actual event?
         /// </summary>
         public Action<Location> OnPositionChanged;
 
         /// <summary>
         /// Fired when the entity's orientation is changed.
+        /// TODO: Actual event?
         /// </summary>
         public Action<Quaternion> OnOrientationChanged;
 
@@ -99,7 +102,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         /// <param name="eng">The owning engine.</param>
         /// <param name="_ticks">Whether the entity ticks.</param>
-        public BasicEntity(BasicEngine eng, bool _ticks)
+        public BasicEntity(T eng, bool _ticks)
         {
             Engine = eng;
             Ticks = _ticks;

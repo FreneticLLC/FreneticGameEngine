@@ -93,7 +93,11 @@
     <Compile Include="PropertyHolder.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntity.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysics2DLimitProperty.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysicsProperty.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntityProperty.cs" />
     <Compile Include="ServerSystem\ServerEngine.cs" />
+    <Compile Include="ServerSystem\ServerGameInstance.cs" />
     <Compile Include="SimplexNoise.cs" />
     <Compile Include="SysConsole.cs" />
     <Compile Include="SystemExtensions.cs" />

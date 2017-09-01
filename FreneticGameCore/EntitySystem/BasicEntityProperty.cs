@@ -17,7 +17,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Represents a property on a basic entity.
     /// </summary>
-    public class BasicEntityProperty : Property
+    public class BasicEntityProperty<T, T2> : Property where T: BasicEntity<T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>
         /// Run when the entity is spawned.
@@ -34,24 +34,24 @@ namespace FreneticGameCore.EntitySystem
         }
         
         /// <summary>
-        /// Gets the basic entity associated with a property.
+        /// Gets the entity associated with a property.
         /// </summary>
-        public BasicEntity BEntity
+        public T Entity
         {
             get
             {
-                return Holder as BasicEntity;
+                return Holder as T;
             }
         }
 
         /// <summary>
-        /// Gets the basic engine associated with a property.
+        /// Gets the engine associated with a property.
         /// </summary>
-        public BasicEngine BEngine
+        public T2 Engine
         {
             get
             {
-                return BEntity.Engine;
+                return Entity.Engine as T2;
             }
         }
     }

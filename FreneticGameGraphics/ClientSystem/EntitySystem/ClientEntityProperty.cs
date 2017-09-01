@@ -19,30 +19,8 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     /// <summary>
     /// Represents a property on a client-side entity.
     /// </summary>
-    public class ClientEntityProperty : BasicEntityProperty
+    public class ClientEntityProperty : BasicEntityProperty<ClientEntity, GameEngineBase>
     {
-        /// <summary>
-        /// Gets the entity associated with this property.
-        /// </summary>
-        public ClientEntity Entity
-        {
-            get
-            {
-                return Holder as ClientEntity;
-            }
-        }
-
-        /// <summary>
-        /// Gets the associated client game engine.
-        /// </summary>
-        public GameEngineBase Engine
-        {
-            get
-            {
-                return Entity.ClientEngine;
-            }
-        }
-
         /// <summary>
         /// Gets the associated client game engine in 2D form.
         /// </summary>

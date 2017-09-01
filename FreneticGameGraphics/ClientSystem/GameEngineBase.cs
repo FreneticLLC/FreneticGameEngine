@@ -28,7 +28,7 @@ namespace FreneticGameGraphics.ClientSystem
     /// <summary>
     /// Represents the common functionality of a client Game Engine.
     /// </summary>
-    public abstract class GameEngineBase : BasicEngine, IDisposable
+    public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>, IDisposable
     {
         /// <summary>
         /// Dumb MS logic dispoe method.
@@ -40,6 +40,16 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 Sounds.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Creates an entity.
+        /// </summary>
+        /// <param name="ticks">Whether it ticks.</param>
+        /// <returns>The entity.</returns>
+        public override ClientEntity CreateEntity(bool ticks)
+        {
+            return new ClientEntity(this, ticks);
         }
 
         /// <summary>
@@ -123,50 +133,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// The title of the window.
         /// </summary>
         public readonly string StartingWindowTitle;
-
-        /// <summary>
-        /// All entities on the client engine, in a list.
-        /// A list was chosen over a lookup table, as quick-resorting and running through is more important to be fast than EID lookups.
-        /// </summary>
-        public List<BasicEntity> Entities = new List<BasicEntity>();
-
-        /// <summary>
-        /// Returns a duplicate of the entity list, for when you expect the master list to change.
-        /// </summary>
-        /// <returns>The duplicate.</returns>
-        public override IReadOnlyList<BasicEntity> EntityListDuplicate()
-        {
-            return new List<BasicEntity>(Entities);
-        }
         
-        /// <summary>
-        /// Add an entity to the entity list.
-        /// </summary>
-        /// <param name="be">The entity.</param>
-        public override void AddEntity(BasicEntity be)
-        {
-            Entities.Add(be);
-        }
-
-        /// <summary>
-        /// Remove an entity from the entity list.
-        /// </summary>
-        /// <param name="be">The entity.</param>
-        public override void RemoveEntity(BasicEntity be)
-        {
-            Entities.Remove(be);
-        }
-        
-        /// <summary>
-        /// Creates an entity.
-        /// </summary>
-        /// <param name="ticks">Whether it should tick.</param>
-        /// <returns>The entity.</returns>
-        public override BasicEntity CreateEntity(bool ticks)
-        {
-            return new ClientEntity(this, ticks);
-        }
-
         /// <summary>
         /// Run through a full single-frame render sequence.
         /// </summary>
@@ -182,9 +149,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void Load()
         {
-            SysConsole.Output(OutputType.INIT, "GameEngine starting load sequence...");
-            SysConsole.Output(OutputType.INIT, "GameEngine prepping physics helper...");
-            PhysicsWorld = new PhysicsSpace();
+            SysConsole.Output(OutputType.INIT, "GameEngine starting load sequence, start with basic...");
+            LoadBasic();
             SysConsole.Output(OutputType.INIT, "GameEngine loading shaders...");
             GetShaders();
             SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");

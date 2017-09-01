@@ -19,7 +19,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     /// <summary>
     /// Represents an entity on the client side.
     /// </summary>
-    public class ClientEntity : BasicEntity
+    public class ClientEntity : BasicEntity<GameEngineBase>
     {
         /// <summary>
         /// Get or set the renderer for this entity.

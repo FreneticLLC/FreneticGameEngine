@@ -22,7 +22,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Represents a physical world (space).
     /// </summary>
-    public class PhysicsSpace
+    public class PhysicsSpace<T, T2> where T: BasicEntity<T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>
         /// The actual internal physics space.
@@ -66,7 +66,7 @@ namespace FreneticGameCore
         /// <summary>
         /// All current entities in this physics world.
         /// </summary>
-        public List<BasicEntity> SpawnedEntities = new List<BasicEntity>();
+        public List<T> SpawnedEntities = new List<T>();
 
         /// <summary>
         /// Spawns a physical object into the physics world.
@@ -74,7 +74,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="ent">The controlling entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Spawn(BasicEntity ent, ISpaceObject bepuent)
+        public void Spawn(T ent, ISpaceObject bepuent)
         {
             Internal.Add(bepuent);
             SpawnedEntities.Add(ent);
@@ -86,7 +86,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="ent">The controlling entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void DeSpawn(BasicEntity ent, ISpaceObject bepuent)
+        public void DeSpawn(T ent, ISpaceObject bepuent)
         {
             Internal.Remove(bepuent);
             SpawnedEntities.Remove(ent);
