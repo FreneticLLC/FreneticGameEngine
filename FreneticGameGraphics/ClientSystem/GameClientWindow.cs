@@ -268,12 +268,12 @@ namespace FreneticGameGraphics.ClientSystem
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
-                SysConsole.Output(OutputType.WARNING, "GL Error: " + ec);
+                SysConsole.Output(OutputType.WARNING, "Uncaught GL Error: " + ec);
                 ec = GL.GetError();
             }
             // Second step: clear the screen
             GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
-            GraphicsUtil.CheckError("GEB - Pre");
+            GraphicsUtil.CheckError("GameClient - Pre");
             // Tick helpers
             Models.Update(GlobalTickTime);
             // Third step: general game rendering
@@ -288,7 +288,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.BindVertexArray(0);
             GL.UseProgram(0);
             // Semi-final step: Tick logic!
-            GraphicsUtil.CheckError("GEB - PreTick");
+            GraphicsUtil.CheckError("GameClient - PreTick");
             // Pre-tick.
             ClientEngineTick();
             // Primary entity tick
@@ -298,10 +298,10 @@ namespace FreneticGameGraphics.ClientSystem
             }
             // Primary UI tick
             MainUI.Tick();
-            GraphicsUtil.CheckError("GEB - PostTick");
+            GraphicsUtil.CheckError("GameClient - PostTick");
             // Final step: Swap the render buffer onto the screen!
             Window.SwapBuffers();
-            GraphicsUtil.CheckError("GEB - Post");
+            GraphicsUtil.CheckError("GameClient - Post");
         }
 
         /// <summary>

@@ -32,7 +32,7 @@ namespace FreneticGameGraphics.UISystem
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new FreneticGameCore.Collision.Vector2i(TextureEngine.GetNextPOTValue((int)GetWidth()), TextureEngine.GetNextPOTValue((int)GetHeight()))
+                SubSize = new FreneticGameCore.Collision.Vector2i(TextureEngine.GetNextPOTValue(GetWidth()), TextureEngine.GetNextPOTValue(GetHeight()))
             };
         }
 
