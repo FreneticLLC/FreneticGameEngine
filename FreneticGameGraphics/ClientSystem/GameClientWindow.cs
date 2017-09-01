@@ -290,12 +290,12 @@ namespace FreneticGameGraphics.ClientSystem
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GEB - PreTick");
             // Pre-tick.
+            ClientEngineTick();
+            // Primary entity tick
             if (ProcessMainEngine)
             {
-                ClientEngineTick();
+                CurrentEngine.Tick();
             }
-            // Primary entity tick
-            CurrentEngine.Tick();
             // Primary UI tick
             MainUI.Tick();
             GraphicsUtil.CheckError("GEB - PostTick");
