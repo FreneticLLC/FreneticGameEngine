@@ -20,7 +20,7 @@ namespace FGETests
     /// Tests expectations of the FGE Core program class.
     /// </summary>
     [TestFixture]
-    public class FGECoreProgram : FGETest
+    public class FGECoreProgramExpectations : FGETest
     {
         /// <summary>
         /// Prepares the basics.
