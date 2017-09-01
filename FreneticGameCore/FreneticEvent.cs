@@ -215,8 +215,6 @@ namespace FreneticGameCore
             // Actual dispose
             MREFirst.Dispose();
             MRECompletion.Dispose();
-            // Microsoft logic...
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>

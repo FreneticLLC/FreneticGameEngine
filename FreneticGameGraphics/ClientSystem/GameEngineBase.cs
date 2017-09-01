@@ -28,8 +28,28 @@ namespace FreneticGameGraphics.ClientSystem
     /// <summary>
     /// Represents the common functionality of a client Game Engine.
     /// </summary>
-    public abstract class GameEngineBase : BasicEngine
+    public abstract class GameEngineBase : BasicEngine, IDisposable
     {
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Sounds.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
         /// <summary>
         /// The backing game client.
         /// </summary>

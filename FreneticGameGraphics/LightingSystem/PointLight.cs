@@ -86,7 +86,7 @@ namespace FreneticGameGraphics.LightingSystem
         /// Repositions the light.
         /// </summary>
         /// <param name="pos">The new position.</param>
-        public override void Reposition(Location pos)
+        public sealed override void Reposition(Location pos)
         {
             EyePos = pos;
             for (int i = 0; i < 6; i++)

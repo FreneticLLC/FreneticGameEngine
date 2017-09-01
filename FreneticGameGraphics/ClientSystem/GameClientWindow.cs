@@ -20,7 +20,7 @@ namespace FreneticGameGraphics.ClientSystem
     /// <summary>
     /// Represents a game client window for a game.
     /// </summary>
-    public class GameClientWindow
+    public class GameClientWindow : IDisposable
     {
         /// <summary>
         /// A scheduler for the general game client.
@@ -365,5 +365,28 @@ namespace FreneticGameGraphics.ClientSystem
         /// The currently rendering UI for this engine.
         /// </summary>
         public ViewUI2D MainUI;
+
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                CurrentEngine.Dispose();
+                Textures.Dispose();
+                GLFonts.Dispose();
+                Window.Dispose();
+            }
+        }
+        
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
     }
 }

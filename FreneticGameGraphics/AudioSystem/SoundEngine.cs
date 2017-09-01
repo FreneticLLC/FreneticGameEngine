@@ -25,8 +25,28 @@ namespace FreneticGameGraphics.AudioSystem
     /// <summary>
     /// An audio sound system and engine for playing audio.
     /// </summary>
-    public class SoundEngine
+    public class SoundEngine : IDisposable
     {
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Context.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
         /// <summary>
         /// A "noise" sound effect.
         /// </summary>

@@ -22,8 +22,29 @@ namespace FreneticGameGraphics.GraphicsHelpers
     /// <summary>
     /// The primary engine for textures.
     /// </summary>
-    public class TextureEngine
+    public class TextureEngine : IDisposable
     {
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                GenericGraphicsObject.Dispose();
+                EmptyBitmap.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
         /// <summary>
         /// What texture widths/heights are allowed.
         /// </summary>
@@ -206,6 +227,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="filename">The name of the file to use.</param>
         /// <param name="twidth">The texture width, if any.</param>
         /// <returns>The loaded texture, or null if it does not exist.</returns>
+        // Shut up the CodeAnalysis (It doesn't like the BMP variable handling below).
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public Texture LoadTexture(string filename, int twidth = 0)
         {
             try

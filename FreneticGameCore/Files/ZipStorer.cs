@@ -778,8 +778,6 @@ namespace System.IO.Compression
             }
             // Actual dispose
             Close();
-            // Microsoft logic...
-            GC.SuppressFinalize(this);
         }
         /// <summary>
         /// Closes the Zip file stream

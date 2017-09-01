@@ -24,6 +24,7 @@ namespace FreneticGameEngineWelcomer
             if (disposing && (components != null))
             {
                 components.Dispose();
+                TitleBarFont.Dispose();
             }
             base.Dispose(disposing);
         }

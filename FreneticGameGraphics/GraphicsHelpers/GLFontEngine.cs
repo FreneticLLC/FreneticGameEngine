@@ -26,7 +26,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
     /// <summary>
     /// Handles rendering of fonts.
     /// </summary>
-    public class GLFontEngine
+    public class GLFontEngine : IDisposable
     {
         /// <summary>
         /// Constructs a GLFontEngine. Does not initialize.
@@ -308,12 +308,34 @@ namespace FreneticGameGraphics.GraphicsHelpers
             UpdateTexture();
             return f;
         }
+
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Standard.Dispose();
+                CurrentBMP.Dispose();
+                pfc.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
     }
 
     /// <summary>
     /// A class for rendering text within OpenGL.
     /// </summary>
-    public class GLFont
+    public class GLFont : IDisposable
     {
         /// <summary>
         /// The base Font engine.
@@ -601,6 +623,28 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 X += RectForSymbol(stx).Width;
             }
             return X;
+        }
+
+        /// <summary>
+        /// Dumb MS logic dispoe method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                sf.Dispose();
+                BackupFont.Dispose();
+                Internal_Font.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
         }
     }
 }
