@@ -24,9 +24,9 @@ namespace FreneticGameGraphics.LightingSystem
     public class SkyLight : LightObject
     {
         /// <summary>
-        /// The radius of the light.
+        /// The radius of the effect of the light (vertical).
         /// </summary>
-        float Radius;
+        public float Radius;
 
         /// <summary>
         /// The color of the light.
@@ -39,7 +39,7 @@ namespace FreneticGameGraphics.LightingSystem
         public Location Direction;
 
         /// <summary>
-        /// The width of effect of the light (vertical).
+        /// The width of effect of the light (horizontal).
         /// </summary>
         public float Width;
 
@@ -67,10 +67,10 @@ namespace FreneticGameGraphics.LightingSystem
         /// Constructs the sky light.
         /// </summary>
         /// <param name="pos">The position.</param>
-        /// <param name="radius">The radius.</param>
+        /// <param name="radius">The radius (vertical).</param>
         /// <param name="col">The color.</param>
         /// <param name="dir">The direction.</param>
-        /// <param name="size">Effective size (vertical).</param>
+        /// <param name="size">Effective size (horizontal).</param>
         /// <param name="transp">Whether to include transparents for shadow effects.</param>
         /// <param name="twidth">The shadow texture width.</param>
         public SkyLight(Location pos, float radius, Location col, Location dir, float size, bool transp, int twidth)

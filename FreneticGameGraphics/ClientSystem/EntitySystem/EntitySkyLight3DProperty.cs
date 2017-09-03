@@ -61,18 +61,18 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public Location Direction = -Location.UnitZ;
 
         /// <summary>
-        /// The horizontal radius of the sky light. How wide of an area it reaches.
+        /// The vertical size of the sky light. How far it reaches.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float Radius = 512f;
 
         /// <summary>
-        /// The vertical size of the sky light. How far it reaches.
+        /// The horizontal radius of the sky light. How wide of an area it reaches.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public float Size = 1000f;
+        public float Size = 128f;
         
         /// <summary>
         /// The current color of the light as (X,Y,Z) => (R,G,B).
@@ -94,7 +94,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             if (AutoCorrectPlacement)
             {
-                Entity.SetPosition(Engine3D.MainCamera.Position - Direction * (Size * 0.5));
+                Entity.SetPosition(Engine3D.MainCamera.Position - Direction * (Radius * 0.5));
             }
         }
 
