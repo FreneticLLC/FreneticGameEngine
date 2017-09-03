@@ -237,6 +237,7 @@ void main() // Let's put all code in main, why not...
 	float light_radius = light_data[2][1]; // The maximum radius of the light.
 	vec3 eye_pos = vec3(light_data[2][2], light_data[2][3], light_data[3][0]); // The position of the camera eye.
 	float light_type = light_data[3][1]; // What type of light this is: 0 is standard (point, sky, etc.), 1 is conical (spot light).
+	int is_point = light_type >= 1.5 ? 1 : 0;
 	float tex_size = light_data[3][2]; // If shadows are enabled, this is the inverse of the texture size of the shadow map.
 	// float unused = light_data[3][3];
 	vec4 f_spos = shadow_matrix * vec4(position, 1.0); // Calculate the position of the light relative to the view.
@@ -245,7 +246,7 @@ void main() // Let's put all code in main, why not...
 	float light_length = length(light_path); // How far the light is from this pixel.
 	float d = light_length / light_radius; // How far the pixel is from the end of the light.
 	float atten = clamp(1.0 - (d * d), 0.0, 1.0); // How weak the light is here, based purely on distance so far.
-	if (light_type >= 0.5) // If this is a conical (spot light)...
+	if (is_point == 0 && light_type >= 0.5) // If this is a conical (spot light)...
 	{
 		atten *= 1.0 - (f_spos.x * f_spos.x + f_spos.y * f_spos.y); // Weaken the light based on how far towards the edge of the cone/circle it is. Bright in the center, dark in the corners.
 	}
@@ -258,16 +259,28 @@ void main() // Let's put all code in main, why not...
 		f_spos.x = sign(f_spos.x) * fix_sqr(1.0 - abs(f_spos.x)); // Inverse square the relative position while preserving the sign. Shadow creation buffer also did this.
 		f_spos.y = sign(f_spos.y) * fix_sqr(1.0 - abs(f_spos.y)); // This section means that coordinates near the center of the light view will have more pixels per area available than coordinates far from the center.
 	}
-	// Create a variable representing the proper screen/texture coordinate of the shadow view (ranging from 0 to 1 instead of -1 to 1).
-	vec3 fs = f_spos.xyz * 0.5 + vec3(0.5, 0.5, 0.5); 
-	if (fs.x < 0.0 || fs.x > 1.0
-		|| fs.y < 0.0 || fs.y > 1.0
-		|| fs.z < 0.0 || fs.z > 1.0) // If any coordinate is outside view range...
+	vec3 fs;
+	if (is_point == 0)
 	{
-		continue; // We can't light it! Discard straight away!
+		// Create a variable representing the proper screen/texture coordinate of the shadow view (ranging from 0 to 1 instead of -1 to 1).
+		fs = f_spos.xyz * 0.5 + vec3(0.5, 0.5, 0.5); 
+		if (fs.x < 0.0 || fs.x > 1.0
+			|| fs.y < 0.0 || fs.y > 1.0
+			|| fs.z < 0.0 || fs.z > 1.0) // If any coordinate is outside view range...
+		{
+			continue; // We can't light it! Discard straight away!
+		}
+	}
+	else
+	{
+		fs = f_spos.xyz;
 	}
 	// This block only runs if shadows are enabled.
 #if MCM_SHADOWS
+	float depth = 1.0;
+	if (is_point == 0)
+	{
+	depth = 0;
 	// Pretty quality (soft) shadows require a quality graphics card.
 #if MCM_GOOD_GRAPHICS
 	// This area is some calculus-ish stuff based upon NVidia sample code (naturally, it seems to run poorly on AMD cards. Good area to recode/optimize!)
@@ -279,7 +292,6 @@ void main() // Let's put all code in main, why not...
 	dz_duv /= tlen;
 	float oneoverdj = 1.0 / depth_jump;
 	float jump = tex_size * depth_jump;
-	float depth = 0;
 	float depth_count = 0;
 	// Loop over an area quite near the pixel on the shadow map, but still covering multiple pixels of the shadow map.
 	for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
@@ -305,6 +317,7 @@ void main() // Let's put all code in main, why not...
 	if (depth <= 0.0)
 	{
 		continue; // If we're a fully shadowed pixel, don't add any light!
+	}
 	}
 #else // Shadows
 	const float depth = 1.0; // If shadows are off, depth is a constant 1.0!

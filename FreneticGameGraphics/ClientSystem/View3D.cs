@@ -2057,24 +2057,20 @@ namespace FreneticGameGraphics.ClientSystem
                         }
                         if (maxrangemult > 0)
                         {
-                            for (int x = 0; x < Lights[i].InternalLights.Count; x++)
+                            if (Lights[i] is PointLight pl && !pl.CastShadows)
                             {
-                                if (Lights[i].InternalLights[x].color.LengthSquared <= 0.01)
-                                {
-                                    continue;
-                                }
-                                Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
-                                Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
-                                Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
+                                Matrix4 smat = Matrix4.Identity;
+                                Vector3d eyep = pl.EyePos.ToOpenTK3D() - CameraPos.ToOpenTK3D();
+                                Vector3 col = Lights[i].InternalLights[0].color * (float)maxrangemult;
                                 Matrix4 light_data = new Matrix4(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                     0.7f, // diffuse_albedo
                                     0.7f, // specular_albedo
-                                    Lights[i].InternalLights[x] is LightOrtho ? 1.0f : 0.0f, // should_sqrt
+                                   0.0f, // should_sqrt
                                     col.X, col.Y, col.Z, // light_color
-                                    Lights[i].InternalLights[x] is LightOrtho ? LightMaximum : (Lights[i].InternalLights[0].maxrange <= 0 ? LightMaximum : Lights[i].InternalLights[0].maxrange), // light_radius
+                                    (Lights[i].InternalLights[0].maxrange <= 0 ? LightMaximum : Lights[i].InternalLights[0].maxrange), // light_radius
                                     0f, 0f, 0f, // eye_pos
-                                    Lights[i] is SpotLight ? 1.0f : 0.0f, // light_type
+                                    2.0f, // light_type
                                     1f / ShadowTexSize(), // tex_size
                                     0.0f // Unused.
                                     );
@@ -2092,6 +2088,44 @@ namespace FreneticGameGraphics.ClientSystem
                                     goto lights_apply;
                                 }
                             }
+                            else
+                            {
+                                for (int x = 0; x < Lights[i].InternalLights.Count; x++)
+                                {
+                                    if (Lights[i].InternalLights[x].color.LengthSquared <= 0.01)
+                                    {
+                                        continue;
+                                    }
+                                    Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
+                                    Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
+                                    Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
+                                    Matrix4 light_data = new Matrix4(
+                                        (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
+                                        0.7f, // diffuse_albedo
+                                        0.7f, // specular_albedo
+                                        Lights[i].InternalLights[x] is LightOrtho ? 1.0f : 0.0f, // should_sqrt
+                                        col.X, col.Y, col.Z, // light_color
+                                        Lights[i].InternalLights[x] is LightOrtho ? LightMaximum : (Lights[i].InternalLights[0].maxrange <= 0 ? LightMaximum : Lights[i].InternalLights[0].maxrange), // light_radius
+                                        0f, 0f, 0f, // eye_pos
+                                        Lights[i] is SpotLight ? 1.0f : 0.0f, // light_type
+                                        1f / ShadowTexSize(), // tex_size
+                                        0.0f // Unused.
+                                        );
+                                    for (int mx = 0; mx < 4; mx++)
+                                    {
+                                        for (int my = 0; my < 4; my++)
+                                        {
+                                            shadowmat_dat[c * 16 + mx * 4 + my] = smat[mx, my];
+                                            light_dat[c * 16 + mx * 4 + my] = light_data[mx, my];
+                                        }
+                                    }
+                                    c++;
+                                    if (c >= LIGHTS_MAX)
+                                    {
+                                        goto lights_apply;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -2099,7 +2133,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.ActiveTexture(TextureUnit.Texture4);
                 GL.BindTexture(TextureTarget.Texture2DArray, fbo_shadow_tex);
                 GL.Uniform2(7, new Vector2(Engine.ZNear, Engine.ZFar()));
-                GL.UniformMatrix4(8, false, ref PrimaryMatrix); // TODO: Render both eyes separately here for SSAO accuracy?
+                GL.UniformMatrix4(8, false, ref PrimaryMatrix); // TODO: In 3D/VR, render both eyes separately here for SSAO accuracy?
                 GL.Uniform1(9, (float)c);
                 GL.UniformMatrix4(10, LIGHTS_MAX, false, shadowmat_dat);
                 GL.UniformMatrix4(10 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);

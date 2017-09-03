@@ -1,0 +1,18 @@
+// This is all the characters that will be prerendered for the font handling code.
+// Newlines are ignored, lines beginning with // are ignored
+// File must be a text file encoded as UTF-8 without BOM.
+// --
+// Letters
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+// Numbers
+0123456789
+// Common symbols
+// NOTE: The spaces are a tab, non-breaking-space, and standard space
+!@#$%^	& * ()
+-_=+,./<>?[]{}\|;:'"`~
+// Special symbols
+⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöò
+ûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡
+«»░▒▓│§¶‼↕◄►☼♫♪▬↨↑↓→←∟↔╥▼
+█

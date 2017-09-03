@@ -234,6 +234,7 @@ void main()
 		float depth = 1.0;
 		if (is_point == 0)
 		{
+			depth = 0.0;
 			// Pretty quality (soft) shadows require a quality graphics card.
 #if MCM_GOOD_GRAPHICS
 			const float depth_jump = 0.5; // Placeholder default value
