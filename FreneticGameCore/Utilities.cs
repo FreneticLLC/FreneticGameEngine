@@ -134,11 +134,31 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Converts a character to a byte array.
+        /// </summary>
+        /// <param name="ch">The actual value of it.</param>
+        /// <returns>The byte array.</returns>
+        public static byte[] CharToBytes(char ch)
+        {
+            return BitConverter.GetBytes(ch);
+        }
+
+        /// <summary>
+        /// Converts a short to a byte array.
+        /// </summary>
+        /// <param name="sh">The actual value of it.</param>
+        /// <returns>The byte array.</returns>
+        public static byte[] ShortToBytes(short sh)
+        {
+            return BitConverter.GetBytes(sh);
+        }
+
+        /// <summary>
         /// Converts a ushort to a byte array.
         /// </summary>
         /// <param name="ush">The actual value of it.</param>
         /// <returns>The byte array.</returns>
-        public static byte[] UshortToBytes(ushort ush)
+        public static byte[] UShortToBytes(ushort ush)
         {
             return BitConverter.GetBytes(ush);
         }
@@ -164,7 +184,17 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Converts a byte array to an int.
+        /// Converts a byte array to a character.
+        /// </summary>
+        /// <param name="bytes">The byte array.</param>
+        /// <returns>The actual value of it.</returns>
+        public static char BytesToChar(byte[] bytes)
+        {
+            return BitConverter.ToChar(bytes, 0);
+        }
+
+        /// <summary>
+        /// Converts a byte array to a short.
         /// </summary>
         /// <param name="bytes">The byte array.</param>
         /// <returns>The actual value of it.</returns>
@@ -184,6 +214,16 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Converts a byte array to an unsigned int.
+        /// </summary>
+        /// <param name="bytes">The byte array.</param>
+        /// <returns>The actual value of it.</returns>
+        public static uint BytesToUInt(byte[] bytes)
+        {
+            return BitConverter.ToUInt32(bytes, 0);
+        }
+
+        /// <summary>
         /// Converts a byte array to a long.
         /// </summary>
         /// <param name="bytes">The byte array.</param>
@@ -191,6 +231,16 @@ namespace FreneticGameCore
         public static long BytesToLong(byte[] bytes)
         {
             return BitConverter.ToInt64(bytes, 0);
+        }
+
+        /// <summary>
+        /// Converts a byte array to an unsigned long.
+        /// </summary>
+        /// <param name="bytes">The byte array.</param>
+        /// <returns>The actual value of it.</returns>
+        public static ulong BytesToULong(byte[] bytes)
+        {
+            return BitConverter.ToUInt64(bytes, 0);
         }
 
         /// <summary>
@@ -204,11 +254,31 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Converts an unsigned int to a byte array.
+        /// </summary>
+        /// <param name="intty">The actual value of it.</param>
+        /// <returns>The byte array.</returns>
+        public static byte[] UIntToBytes(uint intty)
+        {
+            return BitConverter.GetBytes(intty);
+        }
+
+        /// <summary>
         /// Converts a long to a byte array.
         /// </summary>
         /// <param name="intty">The actual value of it.</param>
         /// <returns>The byte array.</returns>
         public static byte[] LongToBytes(long intty)
+        {
+            return BitConverter.GetBytes(intty);
+        }
+
+        /// <summary>
+        /// Converts an unsigned long to a byte array.
+        /// </summary>
+        /// <param name="intty">The actual value of it.</param>
+        /// <returns>The byte array.</returns>
+        public static byte[] ULongToBytes(ulong intty)
         {
             return BitConverter.GetBytes(intty);
         }

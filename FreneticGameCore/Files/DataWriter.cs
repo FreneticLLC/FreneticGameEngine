@@ -53,12 +53,48 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a signed byte.
+        /// </summary>
+        /// <param name="x">The data.</param>
+        public void WriteSByte(sbyte x)
+        {
+            Internal.WriteByte((byte)x);
+        }
+
+        /// <summary>
+        /// Write a bool.
+        /// </summary>
+        /// <param name="x">The data.</param>
+        public void WriteBool(bool x)
+        {
+            WriteByte((byte)(x ? 1 : 0));
+        }
+
+        /// <summary>
+        /// Write a character (2 bytes).
+        /// </summary>
+        /// <param name="x"></param>
+        public void WriteChar(char x)
+        {
+            Internal.Write(Utilities.CharToBytes(x), 0, 2);
+        }
+
+        /// <summary>
+        /// Write a short integer (2 bytes).
+        /// </summary>
+        /// <param name="x">The data.</param>
+        public void WriteShort(short x)
+        {
+            Internal.Write(Utilities.ShortToBytes(x), 0, 2);
+        }
+
+        /// <summary>
         /// Write an unsigned short integer (2 bytes).
         /// </summary>
         /// <param name="x">The data.</param>
         public void WriteUShort(ushort x)
         {
-            Internal.Write(Utilities.UshortToBytes(x), 0, 2);
+            Internal.Write(Utilities.UShortToBytes(x), 0, 2);
         }
 
         /// <summary>
@@ -68,6 +104,15 @@ namespace FreneticGameCore.Files
         public void WriteInt(int x)
         {
             Internal.Write(Utilities.IntToBytes(x), 0, 4);
+        }
+
+        /// <summary>
+        /// Write an unsigned integer (4 bytes).
+        /// </summary>
+        /// <param name="x">The data.</param>
+        public void WriteUInt(uint x)
+        {
+            Internal.Write(Utilities.UIntToBytes(x), 0, 4);
         }
 
         /// <summary>
@@ -95,6 +140,15 @@ namespace FreneticGameCore.Files
         public void WriteLong(long x)
         {
             Internal.Write(Utilities.LongToBytes(x), 0, 8);
+        }
+
+        /// <summary>
+        /// Write an unsigned long integer (8 bytes).
+        /// </summary>
+        /// <param name="x">The data.</param>
+        public void WriteULong(ulong x)
+        {
+            Internal.Write(Utilities.ULongToBytes(x), 0, 8);
         }
 
         /// <summary>

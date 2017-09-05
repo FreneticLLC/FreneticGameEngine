@@ -73,11 +73,43 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read a signed byte.
+        /// </summary>
+        /// <returns></returns>
+        public sbyte ReadSByte()
+        {
+            int r = Internal.ReadByte();
+            if (r < 0)
+            {
+                throw new EndOfStreamException("Failed to read from stream, " + Internal.Length + " bytes were available (now none)...");
+            }
+            return (sbyte)r;
+        }
+
+        /// <summary>
+        /// Read a boolean (1 byte).
+        /// </summary>
+        /// <returns></returns>
+        public bool ReadBool()
+        {
+            return ReadByte() == 1;
+        }
+
+        /// <summary>
         /// Read a location object (24 bytes).
         /// </summary>
         public Location ReadLocation()
         {
             return Location.FromDoubleBytes(ReadBytes(24), 0);
+        }
+
+        /// <summary>
+        /// Read a character (2 bytes).
+        /// </summary>
+        /// <returns></returns>
+        public char ReadChar()
+        {
+            return Utilities.BytesToChar(ReadBytes(2));
         }
 
         /// <summary>
@@ -105,11 +137,27 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read an unsigned integer (4 bytes).
+        /// </summary>
+        public uint ReadUInt()
+        {
+            return Utilities.BytesToUInt(ReadBytes(4));
+        }
+
+        /// <summary>
         /// Read a long integer (8 bytes).
         /// </summary>
         public long ReadLong()
         {
             return Utilities.BytesToLong(ReadBytes(8));
+        }
+
+        /// <summary>
+        /// Read an unsigned long integer (8 bytes).
+        /// </summary>
+        public ulong ReadULong()
+        {
+            return Utilities.BytesToULong(ReadBytes(8));
         }
 
         /// <summary>
