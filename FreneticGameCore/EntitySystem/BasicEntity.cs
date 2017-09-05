@@ -75,9 +75,9 @@ namespace FreneticGameCore.EntitySystem
         public FreneticEvent<EntitySpawnEventArgs> OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>();
 
         /// <summary>
-        /// Fired when this entity is de-spawned out of a world.
+        /// Fired when this entity is despawned out of a world.
         /// </summary>
-        public FreneticEvent<EntityDeSpawnEventArgs> OnDeSpawnEvent = new FreneticEvent<EntityDeSpawnEventArgs>();
+        public FreneticEvent<EntityDeSpawnEventArgs> OnDespawnEvent = new FreneticEvent<EntityDeSpawnEventArgs>();
 
         /// <summary>
         /// Sets the position of the entity.

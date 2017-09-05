@@ -209,7 +209,7 @@ namespace FreneticGameCore
         /// Removes an entity from the world.
         /// </summary>
         /// <param name="ent">The entity to remove.</param>
-        public void DeSpawnEntity(T ent)
+        public void DespawnEntity(T ent)
         {
             if (!ent.IsSpawned)
             {
@@ -223,7 +223,7 @@ namespace FreneticGameCore
                     bep.OnDeSpawn();
                 }
             }
-            ent.OnDeSpawnEvent?.Fire(Schedule, new EntityDeSpawnEventArgs());
+            ent.OnDespawnEvent?.Fire(Schedule, new EntityDeSpawnEventArgs());
             RemoveEntity(ent);
             ent.IsSpawned = false;
         }

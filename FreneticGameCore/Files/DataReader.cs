@@ -125,7 +125,7 @@ namespace FreneticGameCore.Files
         /// </summary>
         public ushort ReadUShort()
         {
-            return Utilities.BytesToUshort(ReadBytes(2));
+            return Utilities.BytesToUShort(ReadBytes(2));
         }
 
         /// <summary>

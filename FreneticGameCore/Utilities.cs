@@ -108,7 +108,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="bytes">The byte array.</param>
         /// <returns>The actual value of it.</returns>
-        public static ushort BytesToUshort(byte[] bytes)
+        public static ushort BytesToUShort(byte[] bytes)
         {
             return BitConverter.ToUInt16(bytes, 0);
         }
