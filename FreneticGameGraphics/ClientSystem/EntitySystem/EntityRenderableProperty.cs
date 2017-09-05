@@ -69,14 +69,14 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Fired when the entity is de-spawned.
         /// </summary>
-        public override void OnDeSpawn()
+        public override void OnDespawn()
         {
             if (HandledRemove)
             {
                 return;
             }
             HandledRemove = true;
-            base.OnDeSpawn();
+            base.OnDespawn();
             Entity.OnPositionChanged -= FixLocation;
             Entity.OnOrientationChanged -= FixOrientation;
         }
@@ -91,7 +91,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         public override void OnRemoved()
         {
-            OnDeSpawn();
+            OnDespawn();
         }
 
         /// <summary>

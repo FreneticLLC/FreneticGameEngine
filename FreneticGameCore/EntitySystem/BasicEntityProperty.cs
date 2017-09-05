@@ -29,7 +29,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Run when the entity is de-spawned.
         /// </summary>
-        public virtual void OnDeSpawn()
+        public virtual void OnDespawn()
         {
         }
         

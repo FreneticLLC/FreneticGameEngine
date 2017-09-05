@@ -41,7 +41,7 @@ namespace FreneticGameCore.EntitySystem
             PhysEnt = Entity.GetProperty<EntityPhysicsProperty<T, T2>>();
             Entity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
             Entity.OnTick += TickHandle;
-            PhysEnt.DeSpawnEvent += RemoveJoints;
+            PhysEnt.DespawnEvent += RemoveJoints;
         }
 
         private PointOnPlaneJoint POPJ;
@@ -91,7 +91,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Handles the despawn event.
         /// </summary>
-        public override void OnDeSpawn()
+        public override void OnDespawn()
         {
             if (HandledRemove)
             {
@@ -109,7 +109,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnRemoved()
         {
-            OnDeSpawn();
+            OnDespawn();
         }
 
         /// <summary>

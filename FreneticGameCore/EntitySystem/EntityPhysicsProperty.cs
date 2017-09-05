@@ -292,14 +292,14 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fired when the entity is removed from the world.
         /// </summary>
-        public override void OnDeSpawn()
+        public override void OnDespawn()
         {
             if (HandledRemove)
             {
                 return;
             }
             HandledRemove = true;
-            DeSpawnHandle();
+            DespawnHandle();
             Entity.OnPositionChanged -= PosCheck;
             Entity.OnOrientationChanged -= OriCheck;
         }
@@ -406,17 +406,17 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fired before the physics entity is despawned from the world.
         /// </summary>
-        public Action DeSpawnEvent;
+        public Action DespawnEvent;
         
         /// <summary>
         /// Handles the physics entity being de-spawned from a world.
         /// </summary>
-        public void DeSpawnHandle()
+        public void DespawnHandle()
         {
             UpdateFields();
             Entity.OnTick -= Tick;
-            DeSpawnEvent?.Invoke();
-            PhysicsWorld.DeSpawn(Entity, OriginalObject);
+            DespawnEvent?.Invoke();
+            PhysicsWorld.Despawn(Entity, OriginalObject);
             SpawnedBody = null;
             OriginalObject = null;
         }
@@ -428,7 +428,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnRemoved()
         {
-            OnDeSpawn();
+            OnDespawn();
         }
 
         /// <summary>

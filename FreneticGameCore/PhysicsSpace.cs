@@ -86,7 +86,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="ent">The controlling entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void DeSpawn(T ent, ISpaceObject bepuent)
+        public void Despawn(T ent, ISpaceObject bepuent)
         {
             Internal.Remove(bepuent);
             SpawnedEntities.Remove(ent);

@@ -123,7 +123,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Fired when the entity is despawned.
         /// </summary>
-        public override void OnDeSpawn()
+        public override void OnDespawn()
         {
             if (Entity.Engine is GameEngine2D eng)
             {

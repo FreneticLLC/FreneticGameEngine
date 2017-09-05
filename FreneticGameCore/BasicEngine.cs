@@ -220,10 +220,10 @@ namespace FreneticGameCore
             {
                 if (prop is BasicEntityProperty<T, T2> bep)
                 {
-                    bep.OnDeSpawn();
+                    bep.OnDespawn();
                 }
             }
-            ent.OnDespawnEvent?.Fire(Schedule, new EntityDeSpawnEventArgs());
+            ent.OnDespawnEvent?.Fire(Schedule, new EntityDespawnEventArgs());
             RemoveEntity(ent);
             ent.IsSpawned = false;
         }
