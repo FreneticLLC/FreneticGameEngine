@@ -66,6 +66,7 @@
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
     <Compile Include="EntitySystem\EntityPhysics2DLimitProperty.cs" />
+    <Compile Include="EntitySystem\PhysicsHelpers\EntityConvexHullShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntitySphereShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityCharacterShape.cs" />
