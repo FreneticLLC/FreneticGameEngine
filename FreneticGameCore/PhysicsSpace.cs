@@ -16,6 +16,7 @@ using FreneticGameCore.EntitySystem;
 using BEPUutilities;
 using BEPUphysics.Entities;
 using BEPUutilities.Threading;
+using BEPUphysics.BroadPhaseEntries;
 
 namespace FreneticGameCore
 {
@@ -90,6 +91,38 @@ namespace FreneticGameCore
         {
             Internal.Remove(bepuent);
             SpawnedEntities.Remove(ent);
+        }
+
+        /// <summary>
+        /// Sends a world ray trace, giving back the single found object, or null if none.
+        /// </summary>
+        /// <param name="start">The start position.</param>
+        /// <param name="dir">The direction.</param>
+        /// <param name="dist">The distance.</param>
+        /// <param name="filter">The filter, if any.</param>
+        public T RayTraceSingle(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null)
+        {
+            RayCastResult rcr;
+            if (filter != null)
+            {
+                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, filter, out rcr))
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, out rcr))
+                {
+                    return null;
+                }
+            }
+            if (rcr.HitObject != null && rcr.HitObject.Tag != null)
+            {
+                return rcr.HitObject.Tag as T;
+            }
+            SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " +rcr.HitObject + " ? " + rcr.HitObject?.Tag);
+            return null;
         }
     }
 }

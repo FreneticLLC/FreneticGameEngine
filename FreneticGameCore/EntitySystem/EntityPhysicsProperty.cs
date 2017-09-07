@@ -363,6 +363,7 @@ namespace FreneticGameCore.EntitySystem
             SpawnedBody.Position = InternalPosition.ToBVector();
             SpawnedBody.Gravity = InternalGravity.ToBVector();
             SpawnedBody.Tag = Entity;
+            SpawnedBody.CollisionInformation.Tag = Entity;
             // TODO: Other settings
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
