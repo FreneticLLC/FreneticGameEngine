@@ -139,7 +139,7 @@ namespace FreneticGameCore.Collision
         }
 
         /// <summary>
-        /// Mathematical comparison.
+        /// Mathematical operation.
         /// </summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
@@ -151,7 +151,19 @@ namespace FreneticGameCore.Collision
         }
 
         /// <summary>
-        /// Mathematical comparison.
+        /// Mathematical operation.
+        /// </summary>
+        /// <param name="one">First vec.</param>
+        /// <param name="two">Second vec.</param>
+        /// <returns>Result.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3i operator -(Vector3i one, Vector3i two)
+        {
+            return new Vector3i(one.X - two.X, one.Y - two.Y, one.Z - two.Z);
+        }
+
+        /// <summary>
+        /// Mathematical operation.
         /// </summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Int scalar.</param>
