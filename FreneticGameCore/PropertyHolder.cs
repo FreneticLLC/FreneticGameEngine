@@ -175,6 +175,65 @@ namespace FreneticGameCore
         private Dictionary<Type, Property> HeldProperties = new Dictionary<Type, Property>();
 
         /// <summary>
+        /// All currently held interfaces on this object.
+        /// </summary>
+        private Dictionary<Type, List<Object>> HeldInterfaces = new Dictionary<Type, List<Object>>();
+
+        /// <summary>
+        /// Special helper: Default empty list for some returns.
+        /// </summary>
+        private static readonly List<Object> DefaultReturn = new List<Object>();
+
+        /// <summary>
+        /// Gets all properties with a specific interface.
+        /// Note that this is faster but less clean than <see cref="GetAllInterfacedProperties{T}"/>.
+        /// Good for foreach loops. Bad for when you need a typed list.
+        /// </summary>
+        /// <param name="t">The type of the interface.</param>
+        /// <returns>All the objects.</returns>
+        public IReadOnlyList<Object> GetAllInterfacedProperties(Type t)
+        {
+            if (HeldInterfaces.TryGetValue(t, out List<Object> objs))
+            {
+                return objs;
+            }
+            return DefaultReturn;
+        }
+
+        /// <summary>
+        /// Gets all properties with a specific interface.
+        /// Note that this is slower but cleaner than <see cref="GetAllInterfacedProperties(Type)"/>.
+        /// Good for when you need a typed list. Bad for foreach loops.
+        /// </summary>
+        /// <typeparam name="T">The type of the interface.</typeparam>
+        /// <returns>All the objects.</returns>
+        public IReadOnlyList<T> GetAllInterfacedProperties<T>()
+        {
+            if (HeldInterfaces.TryGetValue(typeof(T), out List<Object> objs))
+            {
+                return objs.Cast<T>().ToList();
+            }
+            return new List<T>();
+        }
+
+        /// <summary>
+        /// Sends a signal to all properties with a specific interface.
+        /// </summary>
+        /// <typeparam name="T">The type of the interface.</typeparam>
+        /// <param name="signal">The signal to send.</param>
+        public void SignalAllInterfacedProperties<T>(Action<T> signal)
+        {
+            if (!HeldInterfaces.TryGetValue(typeof(T), out List<Object> objs))
+            {
+                return;
+            }
+            foreach (T obj in objs)
+            {
+                signal(obj);
+            }
+        }
+
+        /// <summary>
         /// Gets all currently held property types in a safe copied container.
         /// </summary>
         /// <returns>The set of property types.</returns>
@@ -224,6 +283,26 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Internal: forget a property from this property holder.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <param name="p">The property of relevance.</param>
+        private void ForgetProperty(Type t, Property p)
+        {
+            p.Holder = null;
+            HeldProperties.Remove(t);
+            foreach (Type iface in t.GetInterfaces())
+            {
+                if (HeldInterfaces.TryGetValue(iface, out List<Object> objs))
+                {
+                    objs.Remove(p);
+                }
+            }
+            p.OnRemoved();
+            OnRemoved(p);
+        }
+
+        /// <summary>
         /// Removes the property by type, returning whether it was removed.
         /// </summary>
         /// <param name="t">The type.</param>
@@ -232,10 +311,7 @@ namespace FreneticGameCore
         {
             if (HeldProperties.TryGetValue(t, out Property p))
             {
-                p.Holder = null;
-                HeldProperties.Remove(t);
-                p.OnRemoved();
-                OnRemoved(p);
+                ForgetProperty(t, p);
                 return true;
             }
             return false;
@@ -250,10 +326,7 @@ namespace FreneticGameCore
         {
             if (HeldProperties.TryGetValue(typeof(T), out Property p))
             {
-                p.Holder = null;
-                HeldProperties.Remove(typeof(T));
-                p.OnRemoved();
-                OnRemoved(p);
+                ForgetProperty(typeof(T), p);
                 return true;
             }
             return false;
@@ -316,6 +389,30 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Internal: Notice a property.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <param name="p">The property.</param>
+        private void NoticeProperty(Type t, Property p)
+        {
+            p.Holder = this;
+            p.Helper = PropertyHelper.EnsureHandled(t);
+            foreach (Type iface in t.GetInterfaces())
+            {
+                if (HeldInterfaces.TryGetValue(iface, out List<Object> objs))
+                {
+                    objs.Add(p);
+                }
+                else
+                {
+                    HeldInterfaces[iface] = new List<Object>() { p };
+                }
+            }
+            p.OnAdded();
+            OnAdded(p);
+        }
+
+        /// <summary>
         /// Adds the property, or gives an exception if a property of matching type already exists.
         /// </summary>
         /// <param name="prop">The property itself.</param>
@@ -327,11 +424,8 @@ namespace FreneticGameCore
                 throw new InvalidOperationException("That property is already held by something!");
             }
             Type t = prop.GetType();
-            prop.Holder = this;
-            prop.Helper = PropertyHelper.EnsureHandled(t);
             HeldProperties.Add(t, prop);
-            prop.OnAdded();
-            OnAdded(prop);
+            NoticeProperty(t, prop);
         }
 
         // Note: Intentionally discard this signature:
@@ -356,11 +450,8 @@ namespace FreneticGameCore
             {
                 throw new InvalidOperationException("That property is already held by something!");
             }
-            res.Holder = this;
-            res.Helper = PropertyHelper.EnsureHandled(t);
             HeldProperties[t] = res;
-            res.OnAdded();
-            OnAdded(res);
+            NoticeProperty(t, res);
             return res;
         }
 
@@ -382,11 +473,8 @@ namespace FreneticGameCore
             {
                 throw new InvalidOperationException("That property is already held by something!");
             }
-            res.Holder = this;
-            res.Helper = PropertyHelper.EnsureHandled(typeof(T));
             HeldProperties[typeof(T)] = res;
-            res.OnAdded();
-            OnAdded(res);
+            NoticeProperty(typeof(T), res);
             return res;
         }
 
