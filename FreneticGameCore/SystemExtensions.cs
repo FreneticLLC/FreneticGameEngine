@@ -204,5 +204,33 @@ namespace FreneticGameCore
                 MinimumRadius = shape.MinimumRadius * scaleFactor
             });
         }
+
+        /// <summary>
+        /// Rescales a convex hull shape.
+        /// </summary>
+        /// <param name="shape">The shape.</param>
+        /// <param name="scaleFactor">The scaling factor.</param>
+        /// <returns>The new hull.</returns>
+        public static ConvexHullShape Rescale(this ConvexHullShape shape, Vector3 scaleFactor)
+        {
+            BEPUutilities.DataStructures.ReadOnlyList<Vector3> verts = shape.Vertices;
+            List<Vector3> newlist = new List<Vector3>(verts.Count);
+            foreach (Vector3 vert in verts)
+            {
+                newlist.Add(vert * scaleFactor);
+            }
+            double len = scaleFactor.Length();
+            return new ConvexHullShape(newlist, new ConvexShapeDescription()
+            {
+                CollisionMargin = shape.CollisionMargin,
+                EntityShapeVolume = new BEPUphysics.CollisionShapes.EntityShapeVolumeDescription()
+                {
+                    Volume = shape.Volume * (scaleFactor.X * scaleFactor.Y * scaleFactor.Z),
+                    VolumeDistribution = shape.VolumeDistribution // TODO: Confirm accuracy
+                },
+                MaximumRadius = shape.MaximumRadius * len,
+                MinimumRadius = shape.MinimumRadius * len
+            });
+        }
     }
 }
