@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BEPUphysics.CollisionShapes.ConvexShapes;
 using BEPUutilities;
 using System.Globalization;
 
@@ -175,6 +176,33 @@ namespace FreneticGameCore
             double u1 = input.NextDouble();
             double u2 = input.NextDouble();
             return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+        }
+
+        /// <summary>
+        /// Rescales a convex hull shape.
+        /// </summary>
+        /// <param name="shape">The shape.</param>
+        /// <param name="scaleFactor">The scaling factor.</param>
+        /// <returns>The new hull.</returns>
+        public static ConvexHullShape Rescale(this ConvexHullShape shape, double scaleFactor)
+        {
+            BEPUutilities.DataStructures.ReadOnlyList<Vector3> verts = shape.Vertices;
+            List<Vector3> newlist = new List<Vector3>(verts.Count);
+            foreach (Vector3 vert in verts)
+            {
+                newlist.Add(vert * scaleFactor);
+            }
+            return new ConvexHullShape(newlist, new ConvexShapeDescription()
+            {
+                CollisionMargin = shape.CollisionMargin,
+                EntityShapeVolume = new BEPUphysics.CollisionShapes.EntityShapeVolumeDescription()
+                {
+                    Volume = shape.Volume * (scaleFactor * scaleFactor * scaleFactor),
+                    VolumeDistribution = shape.VolumeDistribution // TODO: Confirm accuracy
+                },
+                MaximumRadius = shape.MaximumRadius * scaleFactor,
+                MinimumRadius = shape.MinimumRadius * scaleFactor
+            });
         }
     }
 }
