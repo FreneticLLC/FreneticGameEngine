@@ -395,7 +395,7 @@ namespace FreneticGameCore.EntitySystem
             }
             Quaternion cur = SpawnedBody.Orientation;
             Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
-            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01) // TODO: || Active?
+            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001) // TODO: || Active?
             {
                 InternalOrientation = cur;
                 Entity.OnOrientationChanged?.Invoke(cur);

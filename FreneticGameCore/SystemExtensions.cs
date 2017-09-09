@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes.ConvexShapes;
 using BEPUutilities;
 using System.Globalization;
+using BEPUutilities.ResourceManagement;
+using BEPUutilities.DataStructures;
+using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 
 namespace FreneticGameCore
 {
@@ -213,24 +216,29 @@ namespace FreneticGameCore
         /// <returns>The new hull.</returns>
         public static ConvexHullShape Rescale(this ConvexHullShape shape, Vector3 scaleFactor)
         {
-            BEPUutilities.DataStructures.ReadOnlyList<Vector3> verts = shape.Vertices;
+            ReadOnlyList<Vector3> verts = shape.Vertices;
             List<Vector3> newlist = new List<Vector3>(verts.Count);
             foreach (Vector3 vert in verts)
             {
                 newlist.Add(vert * scaleFactor);
             }
             double len = scaleFactor.Length();
-            return new ConvexHullShape(newlist, new ConvexShapeDescription()
+            RawList<int> triangles = CommonResources.GetIntList();
+            ConvexHullHelper.GetConvexHull(newlist, triangles);
+            InertiaHelper.ComputeShapeDistribution(newlist, triangles, out double volume, out Matrix3x3 volumeDistribution);
+            ConvexShapeDescription csd = new ConvexShapeDescription()
             {
                 CollisionMargin = shape.CollisionMargin,
                 EntityShapeVolume = new BEPUphysics.CollisionShapes.EntityShapeVolumeDescription()
                 {
-                    Volume = shape.Volume * (scaleFactor.X * scaleFactor.Y * scaleFactor.Z),
-                    VolumeDistribution = shape.VolumeDistribution // TODO: Confirm accuracy
+                    Volume = volume,
+                    VolumeDistribution = volumeDistribution
                 },
                 MaximumRadius = shape.MaximumRadius * len,
                 MinimumRadius = shape.MinimumRadius * len
-            });
+            };
+            CommonResources.GiveBack(triangles);
+            return new ConvexHullShape(newlist, csd);
         }
     }
 }
