@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes;
 using BEPUphysics.CollisionShapes.ConvexShapes;
+using BEPUutilities;
 
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {
@@ -17,6 +18,20 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// The internal convex hull shape.
         /// </summary>
         public ConvexHullShape Internal;
+
+        /// <summary>
+        /// The center offset for this shape.
+        /// </summary>
+        public Vector3 Center;
+
+        /// <summary>
+        /// Gets the center offset.
+        /// </summary>
+        /// <returns>The center offset.</returns>
+        public override Vector3 GetCenterOffset()
+        {
+            return Center;
+        }
 
         /// <summary>
         /// Gets the BEPU shape object.

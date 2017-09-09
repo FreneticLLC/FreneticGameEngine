@@ -310,7 +310,8 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="p">The new position.</param>
         public void PosCheck(Location p)
         {
-            Location p2 = p / PhysicsWorld.RelativeScale;
+            Location coff = new Location(Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+            Location p2 = (p / PhysicsWorld.RelativeScale) + coff;
             if (p2.DistanceSquared(InternalPosition) > 0.01)
             {
                 Position = p2;
@@ -368,21 +369,22 @@ namespace FreneticGameCore.EntitySystem
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
         }
-
+        
         /// <summary>
         /// Ticks the physics entity.
         /// </summary>
         public void Tick()
         {
             Location bpos = new Location(SpawnedBody.Position);
-            if (InternalPosition.DistanceSquared(bpos) > 0.0001)
+            if (InternalPosition.DistanceSquared(bpos) > 0.0001) // TODO: || Active?
             {
                 InternalPosition = bpos;
-                Entity.OnPositionChanged?.Invoke(bpos * PhysicsWorld.RelativeScale);
+                Location coff = new Location(Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+                Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScale);
             }
             Quaternion cur = SpawnedBody.Orientation;
             Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
-            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
+            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01) // TODO: || Active?
             {
                 InternalOrientation = cur;
                 Entity.OnOrientationChanged?.Invoke(cur);

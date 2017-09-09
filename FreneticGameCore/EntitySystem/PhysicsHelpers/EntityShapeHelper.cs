@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes;
+using BEPUutilities;
 
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {
@@ -25,6 +26,15 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// </summary>
         /// <returns>The BEPU shape.</returns>
         public abstract EntityShape GetBEPUShape();
+
+        /// <summary>
+        /// Gets the BEPU Shape offset, if any.
+        /// </summary>
+        /// <returns>The shape offset, or Zero if none.</returns>
+        public virtual Vector3 GetCenterOffset()
+        {
+            return Vector3.Zero;
+        }
 
         /// <summary>
         /// The string form of this shape helper.
