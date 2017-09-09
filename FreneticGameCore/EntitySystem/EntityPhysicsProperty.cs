@@ -368,12 +368,23 @@ namespace FreneticGameCore.EntitySystem
             // TODO: Other settings
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
+            InternalPosition = Location.Zero;
+            InternalOrientation = Quaternion.Identity;
+            TickUpdates();
         }
         
         /// <summary>
         /// Ticks the physics entity.
         /// </summary>
         public void Tick()
+        {
+            TickUpdates();
+        }
+
+        /// <summary>
+        /// Ticks external positioning updates.
+        /// </summary>
+        public void TickUpdates()
         {
             Location bpos = new Location(SpawnedBody.Position);
             if (InternalPosition.DistanceSquared(bpos) > 0.0001) // TODO: || Active?
