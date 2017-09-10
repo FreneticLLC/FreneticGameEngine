@@ -340,7 +340,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             string str = GL.GetProgramInfoLog(Program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, "Linked shader with message: '" + str + "'" + " -- FOR -- " + VS + " -- -- " + (geom ?? "(no geom)") + " -- -- " + FS);
+                SysConsole.Output(OutputType.INFO, "Linked shader with message: '" + str + "'" + " -- FOR: variables: " + string.Join(",", vars));
             }
             GL.DeleteShader(FragmentObject);
             GL.DeleteShader(VertexObject);
