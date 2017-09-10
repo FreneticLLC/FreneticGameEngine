@@ -289,7 +289,6 @@ namespace FreneticGameCore
         /// <param name="p">The property of relevance.</param>
         private void ForgetProperty(Type t, Property p)
         {
-            p.Holder = null;
             HeldProperties.Remove(t);
             foreach (Type iface in t.GetInterfaces())
             {
@@ -300,6 +299,7 @@ namespace FreneticGameCore
             }
             p.OnRemoved();
             OnRemoved(p);
+            p.Holder = null;
         }
 
         /// <summary>
