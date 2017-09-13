@@ -83,7 +83,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// The audio camera view.
         /// </summary>
-        public Camera3D AudioCamera;
+        public Camera3D AudioCamera = new Camera3D();
 
         /// <summary>
         /// Gets the client window.

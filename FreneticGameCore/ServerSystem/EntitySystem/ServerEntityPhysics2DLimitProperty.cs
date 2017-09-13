@@ -18,7 +18,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
     /// <summary>
     /// Represents an entity physics-2D-limit property on the server.
     /// </summary>
-    public class ServerEntityPhysics2DLimitProperty : EntityPhysics2DLimitProperty<ServerEntity, ServerEngine>
+    public class ServerEntityPhysics2DLimitProperty : EntityPhysics2DLimitProperty<ServerEntity, ServerEngine, ServerEntityPhysicsProperty>
     {
     }
 }

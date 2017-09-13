@@ -18,7 +18,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     /// <summary>
     /// Represents an entity physics-2D-limit property on the client.
     /// </summary>
-    public class ClientEntityPhysics2DLimitProperty : EntityPhysics2DLimitProperty<ClientEntity, GameEngineBase>
+    public class ClientEntityPhysics2DLimitProperty : EntityPhysics2DLimitProperty<ClientEntity, GameEngineBase, ClientEntityPhysicsProperty>
     {
     }
 }
