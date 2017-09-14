@@ -290,6 +290,14 @@ namespace FreneticGameCore
                 }
                 MyAction.Invoke();
             }
+            catch (Exception ex)
+            {
+                if (ex is ThreadAbortException)
+                {
+                    throw;
+                }
+                SysConsole.Output("Running Asynchronous task", ex);
+            }
             finally
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Normal;

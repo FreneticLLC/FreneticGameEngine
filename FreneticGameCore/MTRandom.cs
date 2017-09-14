@@ -86,6 +86,7 @@ namespace FreneticGameCore
         /// </summary>
         public int Next(int cap)
         {
+            // TODO: Maybe just a modulo?
             return (int)(Next() * ((double)cap / int.MaxValue)); // TODO: Sanity!
         }
 
