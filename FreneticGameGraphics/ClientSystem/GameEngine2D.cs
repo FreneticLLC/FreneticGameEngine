@@ -285,6 +285,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform2(1, ref Scaler);
             GL.Uniform2(2, ref Adder);
+            Rendering.SetColor(Vector4.One);
             // Third step: Pass to the primary rendering system
             try
             {
@@ -342,7 +343,18 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Render - Pre");
             if (!UseLightEngine)
             {
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.Disable(EnableCap.DepthTest);
+                GL.DepthMask(false);
+                GL.Viewport(0, 0, Window.Width / Pixelation, Window.Height / Pixelation);
                 Shaders.ColorMult2DShader.Bind();
+                MainRenderContext.CalcShadows = false;
+                Scaler = OriginalScaler;
+                Adder = OriginalAdder;
+                GL.Uniform2(1, ref Scaler);
+                GL.Uniform2(2, ref Adder);
+                MainRenderContext.Scaler = Scaler;
+                MainRenderContext.Adder = Adder;
                 RenderAll(true, null);
                 return;
             }

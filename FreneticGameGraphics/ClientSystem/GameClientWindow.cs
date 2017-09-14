@@ -258,6 +258,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public float[] ScreenClearColor = new float[] { 0, 1, 1, 1 };
 
+        private float[] DepthClear = new float[] { 1 };
+
         /// <summary>
         /// Renders a single frame of the game, and also ticks.
         /// </summary>
@@ -281,6 +283,9 @@ namespace FreneticGameGraphics.ClientSystem
             }
             // Second step: clear the screen
             GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, DepthClear);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.DrawBuffer(DrawBufferMode.Back);
             GraphicsUtil.CheckError("GameClient - Pre");
             // Tick helpers
             Models.Update(GlobalTickTime);
