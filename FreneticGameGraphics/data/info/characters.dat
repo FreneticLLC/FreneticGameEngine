@@ -1,6 +1,11 @@
 // This is all the characters that will be prerendered for the font handling code.
 // Newlines are ignored, lines beginning with // are ignored
 // File must be a text file encoded as UTF-8 without BOM.
+// Note that other symbols not listed here,
+// will be automatically loaded when first used,
+// as such there's no need to list them here realistically.
+// This is a legacy file, despite still being in use.
+// It might not be used in the future.
 // --
 // Letters
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
