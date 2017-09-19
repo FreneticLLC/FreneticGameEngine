@@ -10,7 +10,7 @@
 
 layout(binding = 0) uniform sampler2D lighttex;
 
-const float SPREAD = 4.0;
+const float SPREAD = 32.0; // TODO: Uniform?
 
 layout (location = 4) uniform vec2 u_screensize = vec2(1024, 1024);
 

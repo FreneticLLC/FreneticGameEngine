@@ -331,8 +331,9 @@ namespace FreneticGameGraphics.ClientSystem
 
         /// <summary>
         /// What range to spread HDR calculations by. Gets squared to estimate graphics cores involved in process.
+        /// Have to edit shader hdrpass.fs to adjust this.
         /// </summary>
-        const int HDR_SPREAD = 8;
+        const int HDR_SPREAD = 32;
 
         int hdrfbo;
         int hdrtex;
