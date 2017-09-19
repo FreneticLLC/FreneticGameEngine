@@ -208,6 +208,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             try
             {
                 pfc = new PrivateFontCollection();
+                // TODO: Move out of data directory, as we don't use the file handler at all anyway?
                 pfc.AddFontFile(Environment.CurrentDirectory + "/data/fonts/" + fname + ".ttf");
                 family = pfc.Families[0];
                 family_priority = 100;

@@ -242,7 +242,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         "' does not exist.");
                     return null;
                 }
-                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png"));
+                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png", out PakkedFile pf));
                 if (twidth <= 0 && !AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
                 {
                     int wid = GetNextPOTValue(bmp.Width);
@@ -257,7 +257,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     Engine = this,
                     Name = filename,
                     Width = bmp2.Width,
-                    Height = bmp2.Height
+                    Height = bmp2.Height,
+                    FileRef =  pf
                 };
                 GL.GenTextures(1, out texture.Original_InternalID);
                 texture.Internal_Texture = texture.Original_InternalID;
@@ -448,6 +449,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// The height of the texture.
         /// </summary>
         public int Height;
+
+        /// <summary>
+        /// The file that was used to load this texture. Can be null for manually-generated textures.
+        /// </summary>
+        public PakkedFile FileRef;
 
         /// <summary>
         /// Removes the texture from OpenGL.

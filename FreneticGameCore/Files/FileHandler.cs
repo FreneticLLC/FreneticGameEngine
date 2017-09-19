@@ -152,7 +152,7 @@ namespace FreneticGameCore.Files
                 }
                 else
                 {
-                    Files.Add(new PakkedFile(file.Replace(pth, "").ToLowerFast(), file));
+                    Files.Add(new PakkedFile(file.Replace(pth, "").ToLowerFast(), file) { MainDirectiory = pth });
                 }
             }
             int id = 0;
@@ -167,7 +167,7 @@ namespace FreneticGameCore.Files
                     {
                         continue;
                     }
-                    Files.Add(new PakkedFile(name, "", id, zent));
+                    Files.Add(new PakkedFile(name, "", id, zent) { MainDirectiory = pth });
                 }
                 id++;
             }
@@ -296,8 +296,9 @@ namespace FreneticGameCore.Files
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
         /// <param name="journal">Whether to use a journalling read for file system files.</param>
+        /// <param name="fref">Output file reference.</param>
         /// <returns>The file's data, as a byte array.</returns>
-        public byte[] ReadBytes(string filename, bool journal = true)
+        public byte[] ReadBytes(string filename, out PakkedFile fref, bool journal = true)
         {
             string fname = CleanFileName(filename);
             int ind = FileIndex(fname);
@@ -306,6 +307,7 @@ namespace FreneticGameCore.Files
                 byte[] b = ReadFromFS(fname);
                 if (b != null)
                 {
+                    fref = null;
                     return b;
                 }
                 if (journal)
@@ -313,12 +315,14 @@ namespace FreneticGameCore.Files
                     b = ReadFromFS(fname + "~1") ?? ReadFromFS(fname + "~2");
                     if (b != null)
                     {
+                        fref = null;
                         return b;
                     }
                 }
                 throw new UnknownFileException(fname);
             }
             PakkedFile file = Files[ind];
+            fref = file;
             if (file.IsPakked)
             {
                 MemoryStream ms = new MemoryStream();
@@ -337,10 +341,32 @@ namespace FreneticGameCore.Files
         /// Returns a stream of the byte data in a file.
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
+        /// <param name="fref">Output file reference.</param>
+        /// <returns>The file's data, as a stream.</returns>
+        public Stream ReadToStream(string filename, out PakkedFile fref)
+        {
+            return new MemoryStream(ReadBytes(filename, out fref));
+        }
+
+        /// <summary>
+        /// Returns all the byte data in a file.
+        /// </summary>
+        /// <param name="filename">The name of the file to read.</param>
+        /// <param name="journal">Whether to use a journalling read for file system files.</param>
+        /// <returns>The file's data, as a byte array.</returns>
+        public byte[] ReadBytes(string filename, bool journal = true)
+        {
+            return ReadBytes(filename, out PakkedFile _, journal);
+        }
+
+        /// <summary>
+        /// Returns a stream of the byte data in a file.
+        /// </summary>
+        /// <param name="filename">The name of the file to read.</param>
         /// <returns>The file's data, as a stream.</returns>
         public Stream ReadToStream(string filename)
         {
-            return new MemoryStream(ReadBytes(filename));
+            return ReadToStream(filename, out PakkedFile _);
         }
 
         /// <summary>
@@ -594,6 +620,11 @@ namespace FreneticGameCore.Files
         /// The full path of the file.
         /// </summary>
         public string Handle = null;
+
+        /// <summary>
+        /// The directory of the file. Generally the full path of the defaeult data directory or a sub directory.
+        /// </summary>
+        public string MainDirectiory = null;
 
         /// <summary>
         /// Whether the file is in a PAK file.

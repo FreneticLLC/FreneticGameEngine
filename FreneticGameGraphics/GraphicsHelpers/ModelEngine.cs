@@ -103,7 +103,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         "' does not exist.");
                     return null;
                 }
-                return FromBytes(filename, TheClient.Files.ReadBytes("models/" + filename + ".vmd"));
+                Model m = FromBytes(filename, TheClient.Files.ReadBytes("models/" + filename + ".vmd", out PakkedFile fref));
+                if (m != null)
+                {
+                    m.FileRef = fref;
+                }
+                return m;
             }
             catch (Exception ex)
             {
@@ -386,6 +391,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Name = _name;
             Meshes = new List<ModelMesh>();
         }
+
+        /// <summary>
+        /// The file that was used to load this texture. Can be null for manually-generated textures.
+        /// </summary>
+        public PakkedFile FileRef;
 
         /// <summary>
         /// The root transform.
