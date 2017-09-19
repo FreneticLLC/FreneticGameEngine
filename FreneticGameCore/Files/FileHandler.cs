@@ -30,7 +30,12 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// All data files known to the system.
         /// </summary>
-        public List<PakkedFile> Files = new List<PakkedFile>();
+        public List<PakkedFile> Files = new List<PakkedFile>(1024);
+
+        /// <summary>
+        /// A map of all files known to the system.
+        /// </summary>
+        public Dictionary<string, PakkedFile> FileMap = new Dictionary<string, PakkedFile>(1024);
 
         /// <summary>
         /// The default text encoding.
@@ -75,6 +80,7 @@ namespace FreneticGameCore.Files
             }
             Paks.Clear();
             Files.Clear();
+            FileMap.Clear();
         }
 
         /// <summary>
@@ -152,7 +158,9 @@ namespace FreneticGameCore.Files
                 }
                 else
                 {
-                    Files.Add(new PakkedFile(file.Replace(pth, "").ToLowerFast(), file) { MainDirectory = pth });
+                    PakkedFile pf = new PakkedFile(file.Replace(pth, "").ToLowerFast(), file) { MainDirectory = pth, FileListIndex = Files.Count };
+                    Files.Add(pf);
+                    FileMap[pf.Name] = pf;
                 }
             }
             int id = 0;
@@ -167,7 +175,9 @@ namespace FreneticGameCore.Files
                     {
                         continue;
                     }
-                    Files.Add(new PakkedFile(name, "", id, zent) { MainDirectory = pth });
+                    PakkedFile pf = new PakkedFile(name, "", id, zent) { MainDirectory = pth, MainPak = pak, FileListIndex = Files.Count };
+                    Files.Add(pf);
+                    FileMap[pf.Name] = pf;
                 }
                 id++;
             }
@@ -240,12 +250,9 @@ namespace FreneticGameCore.Files
         public int FileIndex(string filename)
         {
             string cleaned = CleanFileName(filename);
-            for (int i = 0; i < Files.Count; i++)
+            if (FileMap.TryGetValue(cleaned, out PakkedFile pf))
             {
-                if (Files[i].Name == cleaned)
-                {
-                    return i;
-                }
+                return pf.FileListIndex;
             }
             return -1;
         }
@@ -627,6 +634,11 @@ namespace FreneticGameCore.Files
         public string MainDirectory = null;
 
         /// <summary>
+        /// The pak that contains this file, if any.
+        /// </summary>
+        public PakFile MainPak = null;
+
+        /// <summary>
         /// Whether the file is in a PAK file.
         /// </summary>
         public bool IsPakked = false;
@@ -635,6 +647,11 @@ namespace FreneticGameCore.Files
         /// The index in a PAK file, or -1.
         /// </summary>
         public int PakIndex = -1;
+
+        /// <summary>
+        /// The index in the file list.
+        /// </summary>
+        public int FileListIndex = 0;
 
         /// <summary>
         /// The PAK file inner file object.
