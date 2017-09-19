@@ -21,6 +21,7 @@
 #define MCM_SKY_FOG 0
 #define MCM_ANTI_TRANSP 0
 #define MCM_SIMPLE_LIGHT 0
+#define MCM_SPECIAL_FOG 0
 
 #if MCM_GEOM_ACTIVE
 layout (binding = 0) uniform sampler2DArray s;
@@ -107,7 +108,9 @@ void applyFog()
 		float dist = pow(dot(fi.pos, fi.pos) * fogDist, 0.6);
 		float fogMod = dist * exp(fogCol.w) * fogCol.w;
 		float fmz = min(fogMod, 1.0);
+#if MCM_SPECIAL_FOG
 		fmz *= fmz * fmz * fmz;
+#endif
 		color.xyz = min(color.xyz * (1.0 - fmz) + fogCol.xyz * fmz, vec3(1.0));
 	}
 }
