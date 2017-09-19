@@ -393,7 +393,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// The file that was used to load this texture. Can be null for manually-generated textures.
+        /// The file that was used to load this model. Can be null for manually-generated textures.
         /// </summary>
         public PakkedFile FileRef;
 

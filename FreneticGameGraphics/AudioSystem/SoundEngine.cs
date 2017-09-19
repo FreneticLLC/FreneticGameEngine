@@ -637,7 +637,8 @@ namespace FreneticGameGraphics.AudioSystem
                 {
                     try
                     {
-                        SoundEffect ts = LoadVorbisSound(Client.Client.Files.ReadToStream(newname), name);
+                        SoundEffect ts = LoadVorbisSound(Client.Client.Files.ReadToStream(newname, out PakkedFile fref), name);
+                        ts.FileRef = fref;
                         lock (tsfx)
                         {
                             tsfx.Internal = ts.Internal;
