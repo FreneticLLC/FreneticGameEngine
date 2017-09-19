@@ -152,7 +152,7 @@ namespace FreneticGameCore.Files
                 }
                 else
                 {
-                    Files.Add(new PakkedFile(file.Replace(pth, "").ToLowerFast(), file) { MainDirectiory = pth });
+                    Files.Add(new PakkedFile(file.Replace(pth, "").ToLowerFast(), file) { MainDirectory = pth });
                 }
             }
             int id = 0;
@@ -167,7 +167,7 @@ namespace FreneticGameCore.Files
                     {
                         continue;
                     }
-                    Files.Add(new PakkedFile(name, "", id, zent) { MainDirectiory = pth });
+                    Files.Add(new PakkedFile(name, "", id, zent) { MainDirectory = pth });
                 }
                 id++;
             }
@@ -622,9 +622,9 @@ namespace FreneticGameCore.Files
         public string Handle = null;
 
         /// <summary>
-        /// The directory of the file. Generally the full path of the defaeult data directory or a sub directory.
+        /// The directory of the file. Generally the full file system path of the default data directory or a sub directory.
         /// </summary>
-        public string MainDirectiory = null;
+        public string MainDirectory = null;
 
         /// <summary>
         /// Whether the file is in a PAK file.
