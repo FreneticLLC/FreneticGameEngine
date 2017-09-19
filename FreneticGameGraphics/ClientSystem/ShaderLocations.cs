@@ -20,7 +20,7 @@ namespace FreneticGameGraphics.ClientSystem
     public static class ShaderLocations
     {
         /// <summary>
-        /// Locations shared by most shaders.
+        /// Locations shared by most shaders (3D mainly).
         /// </summary>
         public static class Common
         {
@@ -33,6 +33,32 @@ namespace FreneticGameGraphics.ClientSystem
             /// The general world offset.
             /// </summary>
             public const int WORLD = 2;
+        }
+
+        /// <summary>
+        /// Locations shared by most 2D shaders.
+        /// </summary>
+        public static class Common2D
+        {
+            /// <summary>
+            /// The scaler value.
+            /// </summary>
+            public const int SCALER = 1;
+
+            /// <summary>
+            /// The adder value.
+            /// </summary>
+            public const int ADDER = 2;
+
+            /// <summary>
+            /// The color multiplier to add.
+            /// </summary>
+            public const int COLOR = 3;
+
+            /// <summary>
+            /// The rotation effect to apply.
+            /// </summary>
+            public const int ROTATION = 4;
         }
     }
 }

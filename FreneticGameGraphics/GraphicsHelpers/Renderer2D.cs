@@ -211,7 +211,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="col">The color.</param>
         public void SetColor(Vector4 col)
         {
-            GL.Uniform4(3, ref col);
+            GL.Uniform4(ShaderLocations.Common2D.COLOR, ref col);
         }
 
         /// <summary>
@@ -238,12 +238,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
             Vector2 adder = new Vector2(xmin, ymin);
             Vector2 tscaler = rc.Scaler * scaler;
-            GL.Uniform2(1, tscaler);
+            GL.Uniform2(ShaderLocations.Common2D.SCALER, tscaler);
             Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
-            GL.Uniform2(2, tadder);
+            GL.Uniform2(ShaderLocations.Common2D.ADDER, tadder);
             if (rot != null)
             {
-                GL.Uniform3(4, rot.Value);
+                GL.Uniform3(ShaderLocations.Common2D.ROTATION, rot.Value);
             }
             if (rc.CalcShadows && rc.Engine.OneDLights)
             {
@@ -257,7 +257,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             }
             if (rot != null)
             {
-                GL.Uniform3(4, Vector3.Zero);
+                GL.Uniform3(ShaderLocations.Common2D.ROTATION, Vector3.Zero);
             }
         }
     }
