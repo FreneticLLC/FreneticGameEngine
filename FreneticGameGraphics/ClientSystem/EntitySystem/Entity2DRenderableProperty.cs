@@ -24,12 +24,17 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Gets the 2D angle to render around.
         /// Assumes the renderable is rotated only around the Z axis.
+        /// Setting this will broadcast an orientation update.
         /// </summary>
         public float RenderAngle
         {
             get
             {
                 return (float)RenderOrientation.ToBEPU().AxisAngleFor(BEPUutilities.Vector3.UnitZ);
+            }
+            set
+            {
+                Entity.OnOrientationChanged?.Invoke(BEPUutilities.Quaternion.CreateFromAxisAngle(BEPUutilities.Vector3.UnitZ, value));
             }
         }
 
