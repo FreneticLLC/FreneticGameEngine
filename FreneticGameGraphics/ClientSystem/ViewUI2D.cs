@@ -98,11 +98,12 @@ namespace FreneticGameGraphics.ClientSystem
                 UIContext.Scaler = new Vector2(sc, -sc * aspect);
                 UIContext.ViewCenter = new Vector2(-Client.Window.Width * 0.5f, -Client.Window.Height * 0.5f);
                 UIContext.Adder = UIContext.ViewCenter;
+                UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
                 Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Width, Client.Window.Height, 0, -1, 1);
             }
             // TODO: alternate Ortho setting from scaler/adder def!
             Client.Shaders.ColorMult2DShader.Bind();
-            GL.Uniform2(1, ref UIContext.Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);

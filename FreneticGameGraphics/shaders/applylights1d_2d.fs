@@ -28,28 +28,26 @@ void main()
 {
 	vec2 lmat = (f_texcoord * vec2(2.0) + vec2(-1.0)) * l_scaler + l_adder;
 	lmat.y /= aspect;
-	vec2 mmat = lmat;
 	float modif = 1.0;
-	vec2 rel_pos = mmat;
 	if (sky.w > 0.5)
 	{
-		float ownDist = dot(rel_pos.y, rel_pos.y);
-		float xDist = texture(tex, rel_pos.x + 0.5).x;
+		float ownDist = lmat.y * lmat.y;
+		float xDist = texture(tex, lmat.x + 0.5).x;
 		modif *= ownDist >= xDist ? 1.0 - min((ownDist - xDist) * extra_light_dist, 1.0) : 1.0;
 	}
 	else
 	{
-		modif *= max(0.95 - dot(mmat, mmat), 0.0);
+		modif *= max(0.95 - dot(lmat, lmat), 0.0);
 		if (modif < 0.01)
 		{
 			discard;
 		}
-		float ownDist = dot(rel_pos, rel_pos);
-		float xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318) * 0.5) + 0.0).x;
+		float ownDist = dot(lmat, lmat);
+		float xDist = texture(tex, (atan(lmat.y, lmat.x) * (1.0 / 6.28318) * 0.5) + 0.0).x;
 		modif *= ownDist >= xDist ? 1.0 - min((ownDist - xDist) * extra_light_dist, 1.0) : 1.0;
-		xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318)) * 0.5 + 0.5).x;
+		xDist = texture(tex, (atan(lmat.y, lmat.x) * (1.0 / 6.28318)) * 0.5 + 0.5).x;
 		modif *= ownDist >= xDist ? 1.0 - min((ownDist - xDist) * extra_light_dist, 1.0) : 1.0;
-		xDist = texture(tex, (atan(rel_pos.y, rel_pos.x) * (1.0 / 6.28318)) * 0.5 + 1.0).x;
+		xDist = texture(tex, (atan(lmat.y, lmat.x) * (1.0 / 6.28318)) * 0.5 + 1.0).x;
 		modif *= ownDist >= xDist ? 1.0 - min((ownDist - xDist) * extra_light_dist, 1.0) : 1.0;
 	}
 	if (modif < 0.01)

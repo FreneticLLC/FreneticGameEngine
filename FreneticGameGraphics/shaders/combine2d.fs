@@ -25,8 +25,7 @@ void main()
 {
 	vec2 lmat = (f_texcoord * vec2(2.0) + vec2(-1.0)) * l_scaler + l_adder;
 	lmat.y /= aspect;
-	vec2 mmat = lmat;
-	float modif = max(0.95 - dot(mmat, mmat), 0.0);
+	float modif = max(0.95 - dot(lmat, lmat), 0.0);
 	//color = vec4(modif, modif, modif, 1.0); return;
 	//color = texture(light_tex, f_texcoord); return;
 	if (modif < 0.01)

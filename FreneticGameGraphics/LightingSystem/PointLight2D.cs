@@ -215,10 +215,9 @@ namespace FreneticGameGraphics.LightingSystem
         /// <returns>The second adder.</returns>
         public Vector2 GetSecondAdder(RenderContext2D rc)
         {
-            float aspect = rc.Width / (float)rc.Height;
             float one_over_str = 1f / Strength;
             float adx = (-rc.ViewCenter.X - Position.X) * one_over_str;
-            float ady = (-rc.ViewCenter.Y - Position.Y) * one_over_str * aspect;
+            float ady = (-rc.ViewCenter.Y - Position.Y) * one_over_str * rc.AspectHelper;
             return new Vector2(adx, ady);
         }
     }

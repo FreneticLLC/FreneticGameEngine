@@ -240,6 +240,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenter;
             MainRenderContext.Engine = this;
+            MainRenderContext.AspectHelper = MainRenderContext.Width / (float)MainRenderContext.Height;
             GlobalTickTime += Delta;
             // Second step: Prepare positioning and blank out shaders
             if (Zoom > MaximumZoom)
@@ -276,14 +277,14 @@ namespace FreneticGameGraphics.ClientSystem
                 Shader_Combine.Bind();
             }
             GraphicsUtil.CheckError("RenderSingleFrame - 2");
-            GL.Uniform2(1, ref Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
             GL.Uniform1(7, aspect);
             GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
             Shader_Lightmap1D.Bind();
             Shaders.ColorMult2DShader.Bind();
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
-            GL.Uniform2(1, ref Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
             Rendering.SetColor(Vector4.One);
             // Third step: Pass to the primary rendering system
@@ -351,7 +352,7 @@ namespace FreneticGameGraphics.ClientSystem
                 MainRenderContext.CalcShadows = false;
                 Scaler = OriginalScaler;
                 Adder = OriginalAdder;
-                GL.Uniform2(1, ref Scaler);
+                GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
                 GL.Uniform2(2, ref Adder);
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
@@ -382,7 +383,8 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 Lights[i].PrepareLightmap();
                 GraphicsUtil.CheckError("Render - Light Precalcer (Prep)");
-                GL.Uniform2(1, Scaler = Lights[i].GetScaler());
+                Scaler = Lights[i].GetScaler();
+                GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
                 GL.Uniform2(2, Adder = Lights[i].GetAdder());
                 if (OneDLights)
                 {
@@ -408,7 +410,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
-            GL.Uniform2(1, ref Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
@@ -426,7 +428,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
             Scaler = Vector2.One;
             Adder = Vector2.Zero;
-            GL.Uniform2(1, ref Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
@@ -462,7 +464,7 @@ namespace FreneticGameGraphics.ClientSystem
             Shader_Addlighttoscene.Bind();
             Scaler = Vector2.One;
             Adder = Vector2.Zero;
-            GL.Uniform2(1, ref Scaler);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;

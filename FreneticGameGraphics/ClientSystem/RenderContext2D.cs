@@ -41,6 +41,11 @@ namespace FreneticGameGraphics.ClientSystem
         public float Zoom = 1f;
 
         /// <summary>
+        /// Width over height.
+        /// </summary>
+        public float AspectHelper = 1024f / 768f;
+
+        /// <summary>
         /// Whether the system is currently calculating shadows.
         /// </summary>
         public bool CalcShadows = false;
