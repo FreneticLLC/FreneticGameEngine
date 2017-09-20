@@ -28,9 +28,8 @@ void main()
 	fout.f_texcoord = texcoords;
 	vec3 rotter = vec3(rotation.xy, 0.0) * vec3(scaler.xy, 1.0);
 	vec3 prerot_pos = (position * vec3(scaler.xy, 1.0)) + rotter;
-	//prerot_pos.y /= scaler.z;
 	float cosrot = cos(rotation.z);
 	float sinrot = sin(rotation.z);
-	prerot_pos = vec3(prerot_pos.x * cosrot - prerot_pos.y * sinrot, (prerot_pos.y * cosrot + prerot_pos.x * sinrot) * scaler.z, prerot_pos.z);
+	prerot_pos = vec3(prerot_pos.x * cosrot - prerot_pos.y * sinrot, (prerot_pos.y * cosrot + prerot_pos.x * sinrot), prerot_pos.z);
 	gl_Position = vec4(prerot_pos - rotter, 1.0) + vec4(adder, 0.0, 0.0);
 }
