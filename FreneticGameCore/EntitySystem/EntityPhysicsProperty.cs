@@ -132,6 +132,7 @@ namespace FreneticGameCore.EntitySystem
             set
             {
                 InternalGravity = value;
+                GravityIsSet = true;
                 if (SpawnedBody != null)
                 {
                     SpawnedBody.Gravity = InternalGravity.ToBVector();
