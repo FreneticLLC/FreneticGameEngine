@@ -34,7 +34,9 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             }
             set
             {
-                Entity.OnOrientationChanged?.Invoke(BEPUutilities.Quaternion.CreateFromAxisAngle(BEPUutilities.Vector3.UnitZ, value));
+                BEPUutilities.Quaternion quat = BEPUutilities.Quaternion.CreateFromAxisAngle(BEPUutilities.Vector3.UnitZ, value);
+                RenderOrientation = quat.ToOpenTK();
+                Entity?.OnOrientationChanged?.Invoke(quat);
             }
         }
 
