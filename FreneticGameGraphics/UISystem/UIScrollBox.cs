@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticGameCore;
 using FreneticGameGraphics.ClientSystem;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
@@ -26,6 +27,12 @@ namespace FreneticGameGraphics.UISystem
         /// The current scroll position.
         /// </summary>
         public int Scroll = 0;
+
+        /// <summary>
+        /// An upper limit on how far the scroll box can be scrolled.
+        /// 0 for unlimited scrolling.
+        /// </summary>
+        public int MaxScroll = 0;
 
         /// <summary>
         /// Construcsts the UI scroll box.
@@ -94,8 +101,17 @@ namespace FreneticGameGraphics.UISystem
                 {
                     Scroll = 0;
                 }
+                if (MaxScroll != 0 && Scroll > MaxScroll)
+                {
+                    Scroll = MaxScroll;
+                }
             }
         }
+
+        /// <summary>
+        /// The color of the background of the scroll box (set to Alpha 0 to remove).
+        /// </summary>
+        public Color4F Color = new Color4F(0f, 0.5f, 0.6f, 0.3f);
 
         /// <summary>
         /// Renders this scroll box on the screen.
@@ -106,13 +122,16 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="yoff">The Y offset of this scroll box's parent.</param>
         protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
         {
-            int x = GetX() + xoff;
-            int y = GetY() + yoff;
-            int h = (int)GetHeight();
-            int w = (int)GetWidth();
-            view.Rendering.SetColor(new Vector4(0f, 0.5f, 0.5f, 0.3f));
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
-            view.Rendering.SetColor(new Vector4(1f));
+            if (Color.A > 0)
+            {
+                int x = GetX() + xoff;
+                int y = GetY() + yoff;
+                int h = (int)GetHeight();
+                int w = (int)GetWidth();
+                view.Rendering.SetColor(Color);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.SetColor(new Vector4(1f));
+            }
         }
 
         /// <summary>

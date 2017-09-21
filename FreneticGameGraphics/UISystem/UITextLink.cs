@@ -70,7 +70,7 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// The color of the icon.
         /// </summary>
-        public System.Drawing.Color IconColor = System.Drawing.Color.White;
+        public Color4F IconColor = Color4F.White;
 
         /// <summary>
         /// Constructs an interactable text link.

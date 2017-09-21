@@ -77,6 +77,11 @@ namespace FreneticGameGraphics.UISystem
                 view.Rendering.SetColor(Vector4.One);
                 GL.BindTexture(TextureTarget.Texture2D, GetTexture());
             }
+            else
+            {
+                view.Rendering.SetColor(Vector4.One);
+                engine.Textures.White.Bind();
+            }
             if (Flip)
             {
                 view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y);

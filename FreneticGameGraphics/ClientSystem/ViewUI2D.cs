@@ -107,7 +107,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
+            Shader s = Client.FontSets.FixTo;
+            Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
             CurrentScreen.FullRender(this, Client.Delta, 0, 0);
+            Client.FontSets.FixTo = s;
         }
 
         /// <summary>
