@@ -42,7 +42,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// The color of the model.
         /// </summary>
-        public Vector4 Color = Vector4.One;
+        public Color4F Color = Color4F.White;
 
         /// <summary>
         /// Render the entity as seen by a top-down map.

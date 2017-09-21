@@ -64,7 +64,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
-        public Vector4 BoxColor = Vector4.One;
+        public Color4F BoxColor = Color4F.White;
 
         /// <summary>
         /// Render the entity as seen normally, in 2D.

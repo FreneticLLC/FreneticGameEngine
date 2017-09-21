@@ -58,7 +58,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Color4 LightColor = Color4.White;
+        public Color4F LightColor = Color4F.White;
 
         /// <summary>
         /// The current subdivider-scale of the light.

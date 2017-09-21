@@ -53,11 +53,11 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public float LightStrength = 16;
 
         /// <summary>
-        /// The current color of the light as (X,Y,Z) => (R,G,B).
+        /// The current color of the light.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Location LightColor = Location.One;
+        public Color3F LightColor = Color3F.White;
 
         /// <summary>
         /// The represented 3D point light.

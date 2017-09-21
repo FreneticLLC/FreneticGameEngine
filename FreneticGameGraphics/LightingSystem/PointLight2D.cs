@@ -159,7 +159,7 @@ namespace FreneticGameGraphics.LightingSystem
         /// <summary>
         /// The color of this point light 2D.
         /// </summary>
-        public Color4 Color = Color4.White;
+        public Color4F Color = Color4F.White;
         
         /// <summary>
         /// Prepares the point light 2D for rendering.

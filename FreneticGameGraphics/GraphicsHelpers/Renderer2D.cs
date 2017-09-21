@@ -208,6 +208,15 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Sets the color of the next rendered objects.
         /// </summary>
+        /// <param name="c">The color.</param>
+        public void SetColor(Color4F c)
+        {
+            SetColor(new Vector4(c.R, c.G, c.B, c.A));
+        }
+
+        /// <summary>
+        /// Sets the color of the next rendered objects.
+        /// </summary>
         /// <param name="col">The color.</param>
         public void SetColor(Vector4 col)
         {

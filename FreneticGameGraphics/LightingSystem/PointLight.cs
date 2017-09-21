@@ -31,7 +31,7 @@ namespace FreneticGameGraphics.LightingSystem
         /// <summary>
         /// Color of the light.
         /// </summary>
-        Location Color;
+        Color3F Color;
 
         /// <summary>
         /// Gets whether it should cast shadows.
@@ -57,7 +57,7 @@ namespace FreneticGameGraphics.LightingSystem
         /// <param name="pos">The position.</param>
         /// <param name="radius">The radius.</param>
         /// <param name="col">The color.</param>
-        public PointLight(Location pos, float radius, Location col)
+        public PointLight(Location pos, float radius, Color3F col)
         {
             EyePos = pos;
             Radius = radius;

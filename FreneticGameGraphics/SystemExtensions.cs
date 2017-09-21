@@ -72,6 +72,16 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
+        /// Converts a Color3F to an OpenTK Vector3.
+        /// </summary>
+        /// <param name="l">The color.</param>
+        /// <returns>The OpenTK Vector3.</returns>
+        public static Vector3 ToOpenTK(this Color3F l)
+        {
+            return new Vector3(l.R, l.G, l.B);
+        }
+
+        /// <summary>
         /// Converts a location to an OpenTK Vector3.
         /// </summary>
         /// <param name="l">The location.</param>
