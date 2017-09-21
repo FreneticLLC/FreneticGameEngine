@@ -110,7 +110,7 @@ namespace FreneticGameGraphics.LightingSystem
         /// The position of the point light 2D, in 2D world space.
         /// </summary>
         public Vector2 Position;
-
+        
         /// <summary>
         /// The strength (how far it goes) of the point light 2D.
         /// </summary>

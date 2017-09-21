@@ -75,6 +75,20 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public float LightExtraDist = 50.0f;
 
         /// <summary>
+        /// The lowest layer that can present a shadow.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public double ShadowMinLayer = -10E10;
+
+        /// <summary>
+        /// The highest layer that can present a shadow.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public double ShadowMaxLayer = 10E10;
+
+        /// <summary>
         /// Whether the light source is a 'sky' light.
         /// </summary>
         [PropertyDebuggable]
@@ -94,7 +108,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <returns>Whether to cast shadows.</returns>
         public bool CastShadow(ClientEntity ent)
         {
-            return ent.Renderer != null && ent.Renderer.CastShadows && ent.EID != Entity.EID;
+            return ent.EID != Entity.EID && ent.Renderer != null && ent.Renderer.CastShadows && ent.Renderer.RenderingPriorityOrder >= ShadowMinLayer && ent.Renderer.RenderingPriorityOrder <= ShadowMaxLayer;
         }
 
         /// <summary>
