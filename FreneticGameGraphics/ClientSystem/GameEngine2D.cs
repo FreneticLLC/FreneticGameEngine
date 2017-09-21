@@ -117,7 +117,22 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Center location of the view, in world coordinates.
         /// </summary>
-        public Vector2 ViewCenter = Vector2.Zero;
+        public Vector2 ViewCenter
+        {
+            get
+            {
+                return -ViewCenterInverse;
+            }
+            set
+            {
+                ViewCenterInverse = -value;
+            }
+        }
+
+        /// <summary>
+        /// Center location of the view, in negative world coordinates. Primarily for internal usage.
+        /// </summary>
+        public Vector2 ViewCenterInverse = Vector2.Zero;
 
         /// <summary>
         /// How much to pixelate the view. 1 = no pixelation.
@@ -238,7 +253,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Height = Window.Height / Pixelation;
             MainRenderContext.Zoom = OriginalZoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
-            MainRenderContext.ViewCenter = ViewCenter;
+            MainRenderContext.ViewCenter = ViewCenterInverse;
             MainRenderContext.Engine = this;
             MainRenderContext.AspectHelper = MainRenderContext.Width / (float)MainRenderContext.Height;
             GlobalTickTime += Delta;
@@ -255,7 +270,7 @@ namespace FreneticGameGraphics.ClientSystem
             float aspect = Window.Width / (float)Window.Height;
             float sc = 1.0f / (OriginalZoom * ZoomMultiplier);
             OriginalScaler = new Vector2(sc, sc * aspect);
-            OriginalAdder = ViewCenter;
+            OriginalAdder = ViewCenterInverse;
             Client.Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
@@ -389,7 +404,7 @@ namespace FreneticGameGraphics.ClientSystem
                 if (OneDLights)
                 {
                     GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                    GL.Uniform4(21, new Vector4(ViewCenter.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenter.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
+                    GL.Uniform4(21, new Vector4(ViewCenterInverse.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenterInverse.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
                 }
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
@@ -448,7 +463,7 @@ namespace FreneticGameGraphics.ClientSystem
                 else
                 {
                     GL.Uniform1(8, Lights[i].ExtraLightDist);
-                    GL.Uniform4(21, new Vector4(ViewCenter.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenter.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
+                    GL.Uniform4(21, new Vector4(ViewCenterInverse.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenterInverse.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
                 }
                 GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
