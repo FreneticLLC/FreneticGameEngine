@@ -22,10 +22,29 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     public abstract class Entity2DRenderableProperty : EntityRenderableProperty
     {
         /// <summary>
+        /// Whether to automatically update the rendering priority based on Z position.
+        /// </summary>
+        [PropertyAutoSavable]
+        [PropertyDebuggable]
+        public bool AutoUpdatePriorityZ = true;
+
+        /// <summary>
+        /// Fired when the location is fixed.
+        /// </summary>
+        public override void OtherLocationPatch()
+        {
+            if (AutoUpdatePriorityZ)
+            {
+                RenderingPriorityOrder = RenderAt.Z;
+            }
+        }
+
+        /// <summary>
         /// Gets the 2D angle to render around.
         /// Assumes the renderable is rotated only around the Z axis.
         /// Setting this will broadcast an orientation update.
         /// </summary>
+        [PropertyDebuggable]
         public float RenderAngle
         {
             get

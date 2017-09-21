@@ -37,11 +37,11 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public bool IsVisible = true;
 
         /// <summary>
-        /// priority order of rendering: lower means sooner in the rendering order.
+        /// priority order of rendering: lower means sooner in the rendering order. This means higher numbers appear "on top" of lower numbers.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public int RenderingPriorityOrder = 0;
+        public double RenderingPriorityOrder = 0;
 
         /// <summary>
         /// Where the entity should render at.
@@ -101,6 +101,14 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public void FixLocation(Location loc)
         {
             RenderAt = loc;
+            OtherLocationPatch();
+        }
+
+        /// <summary>
+        /// Fired when the location is fixed.
+        /// </summary>
+        public virtual void OtherLocationPatch()
+        {
         }
 
         /// <summary>
