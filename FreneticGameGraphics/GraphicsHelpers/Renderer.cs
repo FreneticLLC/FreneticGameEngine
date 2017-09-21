@@ -354,45 +354,47 @@ namespace FreneticGameGraphics.GraphicsHelpers
 
         /// <summary>
         /// Adapt a color effect for rendering.
+        /// TODO: Does this logic belong in FreneticGameEngine?
         /// </summary>
         /// <param name="vt">The coordinate.</param>
         /// <param name="tcol">The base 't-color' value.</param>
         /// <returns>The resultant color.</returns>
-        public Vector4 AdaptColor(Vector3 vt, System.Drawing.Color tcol)
+        public Vector4 AdaptColor(Vector3 vt, Color4F tcol)
         {
             return AdaptColor(vt.ToOpenTK3D(), tcol);
         }
 
         /// <summary>
         /// Adapt a color effect for rendering.
+        /// TODO: Does this logic belong in FreneticGameEngine?
         /// </summary>
         /// <param name="vt">The coordinate.</param>
         /// <param name="tcol">The base 't-color' value.</param>
         /// <returns>The resultant color.</returns>
-        public Vector4 AdaptColor(Vector3d vt, System.Drawing.Color tcol)
+        public Vector4 AdaptColor(Vector3d vt, Color4F tcol)
         {
-            if (tcol.A == 0)
+            if (tcol.IA == 0)
             {
-                if (tcol.R == 127 && tcol.G == 0 && tcol.B == 127)
+                if (tcol.IR == 127 && tcol.IG == 0 && tcol.IB == 127)
                 {
                     float r = (float)SimplexNoise.Generate(vt.X / 10f, vt.Y / 10f, vt.Z / 10f);
                     float g = (float)SimplexNoise.Generate((vt.X + 50f) / 10f, (vt.Y + 127f) / 10f, (vt.Z + 10f) / 10f);
                     float b = (float)SimplexNoise.Generate((vt.X - 150f) / 10f, (vt.Y - 65f) / 10f, (vt.Z + 73f) / 10f);
                     return new Vector4(r, g, b, 1f);
                 }
-                else if (tcol.R == 127 && tcol.G == 0 && tcol.B == 0)
+                else if (tcol.IR == 127 && tcol.IG == 0 && tcol.IB == 0)
                 {
                     Random random = new Random((int)(vt.X + vt.Y + vt.Z));
                     return new Vector4((float)random.NextDouble(), (float)random.NextDouble(), (float)random.NextDouble(), 1f);
                 }
                 else
                 {
-                    return new Vector4(tcol.R / 255f, tcol.G / 255f, tcol.B / 255f, 0f);
+                    return new Vector4(tcol.R, tcol.G, tcol.G, tcol.A);
                 }
             }
             else
             {
-                return new Vector4(tcol.R / 255f, tcol.G / 255f, tcol.B / 255f, tcol.A / 255f);
+                return new Vector4(tcol.R, tcol.G, tcol.G, tcol.A);
             }
         }
 

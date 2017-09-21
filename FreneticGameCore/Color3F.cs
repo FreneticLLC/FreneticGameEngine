@@ -40,6 +40,51 @@ namespace FreneticGameCore
         public float B;
 
         /// <summary>
+        /// Integer R.
+        /// </summary>
+        public int IR
+        {
+            get
+            {
+                return (int)(R * 255);
+            }
+            set
+            {
+                R = value / 255f;
+            }
+        }
+        
+        /// <summary>
+        /// Integer G.
+        /// </summary>
+        public int IG
+        {
+            get
+            {
+                return (int)(G * 255);
+            }
+            set
+            {
+                G = value / 255f;
+            }
+        }
+        
+        /// <summary>
+        /// Integer B.
+        /// </summary>
+        public int IB
+        {
+            get
+            {
+                return (int)(B * 255);
+            }
+            set
+            {
+                B = value / 255f;
+            }
+        }
+
+        /// <summary>
         /// Multiplies a color by a scale.
         /// </summary>
         /// <param name="v">The color.</param>

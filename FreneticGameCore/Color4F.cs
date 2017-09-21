@@ -86,6 +86,66 @@ namespace FreneticGameCore
         public float A;
 
         /// <summary>
+        /// Integer R.
+        /// </summary>
+        public int IR
+        {
+            get
+            {
+                return (int)(R * 255);
+            }
+            set
+            {
+                R = value / 255f;
+            }
+        }
+
+        /// <summary>
+        /// Integer G.
+        /// </summary>
+        public int IG
+        {
+            get
+            {
+                return (int)(G * 255);
+            }
+            set
+            {
+                G = value / 255f;
+            }
+        }
+
+        /// <summary>
+        /// Integer B.
+        /// </summary>
+        public int IB
+        {
+            get
+            {
+                return (int)(B * 255);
+            }
+            set
+            {
+                B = value / 255f;
+            }
+        }
+
+        /// <summary>
+        /// Integer A.
+        /// </summary>
+        public int IA
+        {
+            get
+            {
+                return (int)(A * 255);
+            }
+            set
+            {
+                A = value / 255f;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the RGB color object for this color.
         /// </summary>
         public Color3F RGB
@@ -116,7 +176,7 @@ namespace FreneticGameCore
         /// <param name="b">Blue.</param>
         /// <param name="a">Alpha.</param>
         /// <returns>The color.</returns>
-        public static Color4F FromArgb(byte a, byte r, byte g, byte b)
+        public static Color4F FromArgb(int a, int r, int g, int b)
         {
             return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, a * BYTE_TO_FLOAT);
         }
@@ -129,7 +189,7 @@ namespace FreneticGameCore
         /// <param name="g">Green.</param>
         /// <param name="b">Blue.</param>
         /// <returns>The color.</returns>
-        public static Color4F FromArgb(byte r, byte g, byte b)
+        public static Color4F FromArgb(int r, int g, int b)
         {
             return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, 1);
         }
