@@ -159,13 +159,11 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Waits for a delay in seconds.
-        /// Be sure to use <see cref="Complete"/> when done.
         /// </summary>
         /// <param name="delay">The delay, in seconds.</param>
         public void Wait(double delay)
         {
             Used = true;
-            MREFirst.Set();
             ManualResetEvent mre = new ManualResetEvent(false);
             Schedule.ScheduleSyncTask(() =>
             {
@@ -173,6 +171,7 @@ namespace FreneticGameCore
                 mre.Set();
                 MRECompletion.WaitOne();
             }, delay);
+            MREFirst.Set();
             MRECompletion.Set();
             mre.WaitOne();
         }
@@ -180,7 +179,6 @@ namespace FreneticGameCore
         /// <summary>
         /// Waits for an MRE to be set - the runs at the next frame tick.
         /// Waits minimum one frame.
-        /// Be sure to use <see cref="Complete"/> when done.
         /// </summary>
         /// <param name="mre"></param>
         public void WaitFor(ManualResetEvent mre)
@@ -193,7 +191,13 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Marks the Waiter complete. MUST be run if waiting is ever used!
+        /// Whether to automatically complete this waiter at the end of the event system.
+        /// If turned to false, must call <see cref="Complete"/> to end the waiter when the event is done.
+        /// </summary>
+        public bool AutoComplete = true;
+
+        /// <summary>
+        /// Marks the Waiter complete. MUST be run if waiting is ever used! Called automatically by the event system.
         /// </summary>
         public void Complete()
         {
@@ -299,6 +303,10 @@ namespace FreneticGameCore
             {
                 FireWaiter(fea, few);
                 few.MREFirst.Set();
+                if (few.Used && few.AutoComplete)
+                {
+                    few.Complete();
+                }
             });
             few.MREFirst.WaitOne();
             if (few.Used)
