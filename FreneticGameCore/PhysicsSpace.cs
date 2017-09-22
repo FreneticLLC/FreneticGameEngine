@@ -17,6 +17,8 @@ using BEPUutilities;
 using BEPUphysics.Entities;
 using BEPUutilities.Threading;
 using BEPUphysics.BroadPhaseEntries;
+using BEPUphysics.BroadPhaseEntries.MobileCollidables;
+using FreneticGameCore.Collision;
 
 namespace FreneticGameCore
 {
@@ -94,13 +96,36 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets all (physics enabled) entities whose boundaries touch the specified bounding box. This includes entities fully within the box.
+        /// <para>Note that this method is designed for best acceleration with LINQ.</para>
+        /// </summary>
+        /// <param name="box">The bounding box.</param>
+        /// <returns>The list of entities found.</returns>
+        public IEnumerable<T> GetEntitiesInBox(AABB box)
+        {
+            List<BroadPhaseEntry> bpes = new List<BroadPhaseEntry>();
+            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToBVector(), box.Max.ToBVector()), bpes);
+            foreach (BroadPhaseEntry bpe in bpes)
+            {
+                if (bpe is EntityCollidable ec && ec.Entity.Tag is T res)
+                {
+                    yield return res;
+                }
+                else if (bpe.Tag is T bres)
+                {
+                    yield return bres;
+                }
+            }
+        }
+
+        /// <summary>
         /// Sends a world ray trace, giving back the single found object, or null if none.
         /// </summary>
         /// <param name="start">The start position.</param>
         /// <param name="dir">The direction.</param>
         /// <param name="dist">The distance.</param>
         /// <param name="filter">The filter, if any.</param>
-        public T RayTraceSingle(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null)
+        public T RayTraceSingle(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null) // TODO: Func<T, bool> filter!
         {
             RayCastResult rcr;
             if (filter != null)
