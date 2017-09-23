@@ -415,7 +415,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The LOD box.
         /// </summary>
-        public AABB LODBox = null;
+        public AABB LODBox = default(AABB);
 
         /// <summary>
         /// All the meshes this model has.
