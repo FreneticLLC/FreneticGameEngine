@@ -17,7 +17,7 @@ namespace FreneticGameCore.Collision
     /// <summary>
     /// Represents an Axis-Aligned Bounding Box.
     /// </summary>
-    public class AABB
+    public struct AABB
     {
         /// <summary>
         /// The minimum coordinates.
