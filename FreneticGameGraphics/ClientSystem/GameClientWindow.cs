@@ -289,13 +289,16 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("GameClient - Pre");
             // Tick helpers
             Models.Update(GlobalTickTime);
+            GraphicsUtil.CheckError("GameClient - PostModelUpdate");
             // Third step: general game rendering
             if (ProcessMainEngine)
             {
                 CurrentEngine.RenderSingleFrame();
+                GraphicsUtil.CheckError("GameClient - PostMainEngine");
             }
             // Add the UI Layer too
             MainUI.Draw();
+            GraphicsUtil.CheckError("GameClient - PostUI");
             // Fourth step: clean up!
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.BindVertexArray(0);

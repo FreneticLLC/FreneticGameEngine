@@ -38,8 +38,24 @@
     <ApplicationIcon>FGE_Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BEPUphysics">
+      <HintPath>..\FreneticGameCore\BEPUphysics.dll</HintPath>
+    </Reference>
+    <Reference Include="BEPUutilities">
+      <HintPath>..\FreneticGameCore\BEPUutilities.dll</HintPath>
+    </Reference>
+    <Reference Include="csogg">
+      <HintPath>..\FreneticGameGraphics\csogg.dll</HintPath>
+    </Reference>
+    <Reference Include="csvorbis">
+      <HintPath>..\FreneticGameGraphics\csvorbis.dll</HintPath>
+    </Reference>
     <Reference Include="LZ4">
       <HintPath>..\FreneticGameCore\LZ4.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\FreneticGameGraphics\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -92,7 +108,34 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    </Compile>	<None Include="generator\app_conf.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\asminf_cs.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\fge_legal.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\game_cs.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\game_cs_2d.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\gitignore.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\gprogram_cs.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\project_cs.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="generator\project_solution.txt">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -102,6 +145,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Exit_Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
+      <Project>{1db47d6a-4225-4f25-8559-2c6292496953}</Project>
+      <Name>FreneticDataSyntax</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
+      <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>
+      <Name>FreneticGameCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FreneticGameGraphics\FreneticGameGraphics.csproj">
+      <Project>{cf20c1b4-c199-4d11-8053-ecf7d18b4b7b}</Project>
+      <Name>FreneticGameGraphics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FreneticScript\FreneticScript\FreneticScript.csproj">
+      <Project>{0672dd5f-6f33-4853-bd6e-8716d3abc7ad}</Project>
+      <Name>FreneticScript</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

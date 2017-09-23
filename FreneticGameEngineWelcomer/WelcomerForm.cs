@@ -9,17 +9,20 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace FreneticGameEngineWelcomer
 {
     /// <summary>
     /// The main Welcomer form.
+    /// TODO: This system should have its own simple UI engine, as opposed to hardcoding everything.
     /// </summary>
     public partial class WelcomerForm : Form
     {
@@ -39,7 +42,15 @@ namespace FreneticGameEngineWelcomer
             /// <summary>
             /// The general top bar is under the mouse.
             /// </summary>
-            TOPBAR = 2
+            TOPBAR = 2,
+            /// <summary>
+            /// The 'new project' button is under the mouse.
+            /// </summary>
+            NEW_BUTTON = 3,
+            /// <summary>
+            /// The 'new project (2D)' button is under the mouse.
+            /// </summary>
+            NEW_BUTTON_2D = 4
         }
 
         /// <summary>
@@ -96,6 +107,21 @@ namespace FreneticGameEngineWelcomer
         public Color WelcomerExitButtonOver = Color.FromArgb(255, 20, 20);
 
         /// <summary>
+        /// The color new button shines normally.
+        /// </summary>
+        public Color WelcomerNewButton = Color.FromArgb(100, 200, 200);
+
+        /// <summary>
+        /// The color new button is outlined in.
+        /// </summary>
+        public Color WelcomerNewButtonOutline = Color.FromArgb(100, 230, 230);
+
+        /// <summary>
+        /// The color new button shines behind when it is hovered over.
+        /// </summary>
+        public Color WelcomerNewButtonOver = Color.FromArgb(20, 200, 100);
+
+        /// <summary>
         /// The picture box for rendering.
         /// </summary>
         public PictureBox PicBox;
@@ -121,6 +147,11 @@ namespace FreneticGameEngineWelcomer
         public Font TitleBarFont;
 
         /// <summary>
+        /// The font for the new button.
+        /// </summary>
+        public Font NewButtonFont;
+
+        /// <summary>
         /// Initialize the form.
         /// </summary>
         public WelcomerForm()
@@ -129,7 +160,9 @@ namespace FreneticGameEngineWelcomer
             ComponentResourceManager resources = new ComponentResourceManager(typeof(Common));
             WelcomerIcon = Common.FGE_Icon;
             WelcomerExitIcon = Common.Exit_Icon;
-            TitleBarFont = new Font(FontFamily.GenericSansSerif, 16f); // TODO: Screen scaling oddities may occur here?
+            // TODO: Screen scaling oddities may occur here? (Fonts)
+            TitleBarFont = new Font(FontFamily.GenericSansSerif, 16f);
+            NewButtonFont = new Font(FontFamily.GenericSansSerif, 12f);
             PicBox = new PictureBox()
             {
                 Location = new Point(0, 0),
@@ -201,6 +234,115 @@ namespace FreneticGameEngineWelcomer
         }
 
         /// <summary>
+        /// Copies over a text file to a new project.
+        /// </summary>
+        /// <param name="f_in">Input file name.</param>
+        /// <param name="f_out">Output file name.</param>
+        /// <param name="projectData">Any custom settings.</param>
+        public void CopyOverText(string f_in, string f_out, List<KeyValuePair<string, string>> projectData)
+        {
+            string inp = File.ReadAllText("./generator/" + f_in + ".txt");
+            for (int i = 0; i < projectData.Count; i++)
+            {
+                inp = inp.Replace("{{{" + projectData[i].Key + "}}}", projectData[i].Value);
+            }
+            Directory.GetParent(f_out).Create();
+            File.WriteAllText(f_out, inp);
+        }
+        
+        /// <summary>
+        /// Creates a game project.
+        /// </summary>
+        /// <param name="threed">Whether it should be 3D.</param>
+        public void CreateGame(bool threed)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog()
+            {
+                ShowNewFolderButton = true
+            };
+            DialogResult dr = fbd.ShowDialog(this);
+            if (dr != DialogResult.OK && dr != DialogResult.Yes)
+            {
+                return;
+            }
+            string folder = fbd.SelectedPath;
+            if (!Directory.Exists(folder))
+            {
+                MessageBox.Show(this, "Invalid directory (does not exist).", "Error");
+                return;
+            }
+            if (Directory.GetFiles(folder).Length > 0)
+            {
+                MessageBox.Show(this, "Invalid directory (not empty).", "Error");
+                return;
+            }
+            string pfname = folder.TrimEnd('/', '\\');
+            int ind = pfname.LastIndexOfAny(new char[] { '/', '\\' });
+            string proj_name = pfname.Substring(ind + 1);
+            string baseFolder = folder + "/" + proj_name + "/";
+            List<KeyValuePair<string, string>> strs = new List<KeyValuePair<string, string>>() { };
+            strs.Add(new KeyValuePair<string, string>("name", proj_name));
+            strs.Add(new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()));
+            strs.Add(new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()));
+            CopyOverText("project_solution", folder + "/" + proj_name + ".sln", strs);
+            CopyOverText("app_conf", baseFolder + "App.config", strs);
+            CopyOverText("project_cs", baseFolder + proj_name + ".csproj", strs);
+            CopyOverText("gprogram_cs", baseFolder + "GameProgram.cs", strs);
+            CopyOverText("gitignore", folder + "/.gitignore", strs);
+            CopyOverText("fge_legal", folder + "/FGE-LEGAL.md", strs);
+            CopyOverText("gprogram_cs", baseFolder + "GameProgram.cs", strs);
+            CopyOverText("asminf_cs", baseFolder + "Properties/AssemblyInfo.cs", strs);
+            if (threed)
+            {
+                CopyOverText("game_cs", baseFolder + "MainGame/Game.cs", strs);
+            }
+            else
+            {
+                CopyOverText("game_cs_2d", baseFolder + "MainGame/Game.cs", strs);
+            }
+            foreach (string f in FILES)
+            {
+                File.Copy("./" + f, baseFolder + f);
+            }
+            CopyDirectoryAndChildren("shaders", baseFolder + "bin/Debug/shaders/");
+            CopyDirectoryAndChildren("data", baseFolder + "bin/Debug/data/");
+            Process.Start(folder + "/" + proj_name + ".sln");
+            MessageBox.Show(this, "Created! Launching your editor... if it doesn't open, navigate to the folder and open the SLN file!", "Success");
+        }
+
+        /// <summary>
+        /// Copies a directory and all child directories and files to a new location.
+        /// </summary>
+        /// <param name="dir">The directory.</param>
+        /// <param name="newBase">The new base folder.</param>
+        public void CopyDirectoryAndChildren(string dir, string newBase)
+        {
+            Directory.CreateDirectory(newBase);
+            foreach (string f in Directory.GetFileSystemEntries("./" + dir + "/"))
+            {
+                int find = f.LastIndexOfAny(new char[] { '/', '\\' });
+                if (f.EndsWith("/") || File.GetAttributes(f).HasFlag(FileAttributes.Directory))
+                {
+                    string fn = f.TrimEnd('/', '\\').Substring(find + 1);
+                    CopyDirectoryAndChildren(dir + "/" + fn, newBase + fn + "/");
+                    continue;
+                }
+                File.Copy(f, newBase + f.Substring(find + 1));
+            }
+        }
+
+        string[] FILES = new string[] { "BEPUphysics.dll", "BEPUphysics.pdb", "BEPUphysics.xml",
+            "BEPUutilities.dll", "BEPUutilities.pdb", "BEPUutilities.xml",
+            "csogg.dll", "csvorbis.dll",
+            "FreneticDataSyntax.dll", "FreneticDataSyntax.pdb", "FreneticDataSyntax.xml",
+            "FreneticGameCore.dll", "FreneticGameCore.pdb", "FreneticGameCore.xml",
+            "FreneticGameGraphics.dll", "FreneticGameGraphics.pdb", "FreneticGameGraphics.xml",
+            "FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
+            "LZ4.dll",
+            "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml"
+        };
+
+        /// <summary>
         /// Handles a mouse button being released.
         /// </summary>
         /// <param name="sender">The event sender.</param>
@@ -214,6 +356,14 @@ namespace FreneticGameEngineWelcomer
             if (Clicked == MouseOver.EXIT && Hovered == MouseOver.EXIT)
             {
                 Close();
+            }
+            else if (Clicked == MouseOver.NEW_BUTTON && Hovered == MouseOver.NEW_BUTTON)
+            {
+                CreateGame(true);
+            }
+            else if (Clicked == MouseOver.NEW_BUTTON_2D && Hovered == MouseOver.NEW_BUTTON_2D)
+            {
+                CreateGame(false);
             }
             Clicked = MouseOver.NONE;
             Dragging = false;
@@ -234,6 +384,14 @@ namespace FreneticGameEngineWelcomer
             if (Hovered == MouseOver.EXIT)
             {
                 Clicked = MouseOver.EXIT;
+            }
+            else if (Hovered == MouseOver.NEW_BUTTON)
+            {
+                Clicked = MouseOver.NEW_BUTTON;
+            }
+            else if (Hovered == MouseOver.NEW_BUTTON_2D)
+            {
+                Clicked = MouseOver.NEW_BUTTON_2D;
             }
             else if (Hovered == MouseOver.TOPBAR)
             {
@@ -259,6 +417,14 @@ namespace FreneticGameEngineWelcomer
             {
                 Hovered = MouseOver.EXIT;
             }
+            else if (e.X >= 2 && e.X <= 234 + 2 && e.Y >= 38 && e.Y <= 38 + 25)
+            {
+                Hovered = MouseOver.NEW_BUTTON;
+            }
+            else if (e.X >= 2 + 234 + 5 && e.X <= 234 + 5 + 234 + 2 && e.Y >= 38 && e.Y <= 38 + 25)
+            {
+                Hovered = MouseOver.NEW_BUTTON_2D;
+            }
             else if (e.Y < 34)
             {
                 Hovered = MouseOver.TOPBAR;
@@ -274,6 +440,16 @@ namespace FreneticGameEngineWelcomer
         /// The 'welcome' message topbar text.
         /// </summary>
         public const string TOPBAR_TEXT = "Welcome | Frenetic Game Engine";
+
+        /// <summary>
+        /// The 'create new game project (3D)' message text.
+        /// </summary>
+        public const string NEWBUTTON_TEXT = "Create New Game Project (3D)";
+
+        /// <summary>
+        /// The 'create new game project (2D)' message text.
+        /// </summary>
+        public const string NEWBUTTON_TEXT_2D = "Create New Game Project (2D)";
 
         /// <summary>
         /// Handles redrawing the form.
@@ -294,6 +470,28 @@ namespace FreneticGameEngineWelcomer
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, 33, 33));
             e.Graphics.DrawLine(new Pen(WelcomerIconOutlineColor), new Point(0, 33), new Point(e.ClipRectangle.Width, 33));
             e.Graphics.DrawIcon(WelcomerIcon, new Rectangle(1, 1, 32, 32));
+            // Draw the new button
+            if (Hovered == MouseOver.NEW_BUTTON)
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), new RectangleF(2, 38, 234, 25));
+            }
+            else
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), new RectangleF(2, 38, 234, 25));
+            }
+            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), new Rectangle(2, 38, 234, 25));
+            e.Graphics.DrawString(NEWBUTTON_TEXT, NewButtonFont, Brushes.Black, new PointF(5, 40));
+            // Draw the new button 2D
+            if (Hovered == MouseOver.NEW_BUTTON_2D)
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), new RectangleF(2 + 234 + 5, 38, 234, 25));
+            }
+            else
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), new RectangleF(2 + 234 + 5, 38, 234, 25));
+            }
+            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), new Rectangle(2 + 234 + 5, 38, 234, 25));
+            e.Graphics.DrawString(NEWBUTTON_TEXT_2D, NewButtonFont, Brushes.Black, new PointF(5 + 5 + 234, 40));
             // Drop the exit icon and backdrop
             if (Hovered == MouseOver.EXIT)
             {

@@ -88,6 +88,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void Draw()
         {
+            GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
             if (DirectToScreen)
             {
                 UIContext.ZoomMultiplier = Client.Window.Width * 0.5f;
@@ -100,6 +101,7 @@ namespace FreneticGameGraphics.ClientSystem
                 UIContext.Adder = UIContext.ViewCenter;
                 UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
                 Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Width, Client.Window.Height, 0, -1, 1);
+                GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
             }
             // TODO: alternate Ortho setting from scaler/adder def!
             Client.Shaders.ColorMult2DShader.Bind();
@@ -109,8 +111,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Disable(EnableCap.CullFace);
             Shader s = Client.FontSets.FixTo;
             Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
             CurrentScreen.FullRender(this, Client.Delta, 0, 0);
             Client.FontSets.FixTo = s;
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         }
 
         /// <summary>

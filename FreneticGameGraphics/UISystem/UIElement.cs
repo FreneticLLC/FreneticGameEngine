@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
+using FreneticGameGraphics.GraphicsHelpers;
 using OpenTK.Input;
 
 namespace FreneticGameGraphics.UISystem
@@ -363,10 +364,12 @@ namespace FreneticGameGraphics.UISystem
         protected virtual void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff)
         {
             CheckChildren();
+            GraphicsUtil.CheckError("RenderElement - Children - Pre");
             foreach (UIElement element in Children)
             {
                 element.FullRender(view, delta, xoff, yoff);
             }
+            GraphicsUtil.CheckError("RenderElement - Children - Post");
         }
 
         /// <summary>
