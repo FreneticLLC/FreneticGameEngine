@@ -161,11 +161,17 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Whether this RS4P is bound.
+        /// </summary>
+        public bool IsBound = false;
+
+        /// <summary>
         /// Binds the RS4P to OpenGL and a view.
         /// </summary>
         /// <param name="view">The view.</param>
         public void Bind(View3D view)
         {
+            IsBound = true;
             view.BufferDontTouch = true;
             view.BindFramebuffer(FramebufferTarget.Framebuffer, (int)fbo);
             view.Viewport(0, 0, Width, Height);
@@ -176,18 +182,21 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GL.Enable(EnableCap.Texture2D);
         }
 
+        static float[] Zeroes = new float[] { 0f, 0f, 0f, 0f };
+        static float[] One = new float[] { 1f };
+
         /// <summary>
         /// Clears the RS4P Buffers.
         /// </summary>
         public void Clear()
         {
-            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
-            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-            GL.ClearBuffer(ClearBuffer.Color, 1, new float[] { 0f, 0f, 0f, 0f });
-            GL.ClearBuffer(ClearBuffer.Color, 2, new float[] { 0f, 0f, 0f, 0f });
-            GL.ClearBuffer(ClearBuffer.Color, 3, new float[] { 0f, 0f, 0f, 0f });
-            GL.ClearBuffer(ClearBuffer.Color, 4, new float[] { 0f, 0f, 0f, 0f });
-            GL.ClearBuffer(ClearBuffer.Color, 5, new float[] { 0f, 0f, 0f, 0f });
+            GL.ClearBuffer(ClearBuffer.Color, 0, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, One);
+            GL.ClearBuffer(ClearBuffer.Color, 1, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 2, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 3, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 4, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 5, Zeroes);
         }
 
         /// <summary>
@@ -196,6 +205,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="view">The view.</param>
         public void Unbind(View3D view)
         {
+            IsBound = false;
             view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             view.Viewport(0, 0, view.Width, view.Height);
             GL.DrawBuffer(DrawBufferMode.Back);

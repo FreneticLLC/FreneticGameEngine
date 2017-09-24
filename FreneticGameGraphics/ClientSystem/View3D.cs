@@ -50,6 +50,8 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Load - View3D - Light");
             GenerateTranspHelpers();
             GraphicsUtil.CheckError("Load - View3D - Transp");
+            GenerateOutDepthHelpers();
+            GraphicsUtil.CheckError("Load - View3D - OV");
         }
 
         /// <summary>
@@ -215,6 +217,41 @@ namespace FreneticGameGraphics.ClientSystem
         /// Maximum view distance of small lights.
         /// </summary>
         public double LightMaxDistance = 200f;
+
+        /// <summary>
+        /// Out-View FBO.
+        /// </summary>
+        public int OV_FBO;
+
+        /// <summary>
+        /// Out-View depth texture.
+        /// </summary>
+        public int OV_DT;
+
+        /// <summary>
+        /// Generate helpers to deal with out-view depth logic.
+        /// </summary>
+        public void GenerateOutDepthHelpers()
+        {
+            if (OV_FBO != 0)
+            {
+                GL.DeleteFramebuffer(OV_FBO);
+                GL.DeleteTexture(OV_DT);
+            }
+            OV_DT = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, OV_DT);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            OV_FBO = GL.GenFramebuffer();
+            BindFramebuffer(FramebufferTarget.Framebuffer, OV_FBO);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, OV_DT, 0);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+            BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
 
         /// <summary>
         /// (Re-)Generate transparent helpers, internal call.
@@ -1519,6 +1556,9 @@ namespace FreneticGameGraphics.ClientSystem
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
                     GL.UniformMatrix4(6, false, ref PrimaryMatrix);
                     GL.Uniform2(5, zfar_rel);
+                    GL.Uniform2(7, new Vector2(60f, Engine.ZFarOut())); // TODO: View3D-level Vars!
+                    GL.ActiveTexture(TextureUnit.Texture5);
+                    GL.BindTexture(TextureTarget.Texture2D, OV_DT);
                     GL.ActiveTexture(TextureUnit.Texture4);
                     GL.BindTexture(TextureTarget.Texture2D, RS4P.PositionTexture);
                     GL.ActiveTexture(TextureUnit.Texture3);
@@ -1534,6 +1574,8 @@ namespace FreneticGameGraphics.ClientSystem
                     Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
                     GL.Enable(EnableCap.DepthTest);
                     GL.Enable(EnableCap.CullFace);
+                    GL.ActiveTexture(TextureUnit.Texture5);
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
                     GL.ActiveTexture(TextureUnit.Texture4);
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                     GL.ActiveTexture(TextureUnit.Texture3);

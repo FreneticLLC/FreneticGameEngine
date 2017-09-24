@@ -240,6 +240,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="view">The view object.</param>
         public void Render3D(View3D view)
         {
+            // TODO: Out View Rendering!
             GL.ActiveTexture(TextureUnit.Texture1);
             Textures.NormalDef.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
