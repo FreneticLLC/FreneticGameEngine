@@ -1149,7 +1149,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Executable view patch.
         /// </summary>
-        public Action<float> ViewPatchThree;
+        public Action<float, float[], float[], int> ViewPatchThree;
 
         /// <summary>
         /// Executable view patch.
@@ -1579,13 +1579,19 @@ namespace FreneticGameGraphics.ClientSystem
             }
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_TRANSP;
-            ViewPatchThree?.Invoke(fogDist);
+            ViewPatchThree?.Invoke(fogDist, shadowmat_dat, light_dat, c);
             Engine.Shaders3D.s_forw_trans_nobones.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
+            if (Engine.Forward_Lights)
+            {
+                GL.Uniform1(15, (float)c);
+                GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
+                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
+            }
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             Engine.Shaders3D.s_forw_trans.Bind();
@@ -1594,6 +1600,12 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(FogCol.ToOpenTK(), FogAlpha));
             GL.Uniform1(13, fogDist);
+            if (Engine.Forward_Lights)
+            {
+                GL.Uniform1(15, (float)c);
+                GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
+                GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
+            }
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             PostFirstRender?.Invoke();

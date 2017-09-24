@@ -83,7 +83,7 @@ void main()
 	f.texcoord = texcoords.xy;
 #endif
 	vec4 normo = mv_mat_simple * vec4(normal.xyz, 1.0);
-	f.tbn = transpose(mat3(vec3(0.0), vec3(0.0), normo.xyz)); // TODO: Improve for decals?!
+	f.tbn = (mat3(vec3(0.0), vec3(0.0), normo.xyz)); // TODO: Improve for decals?!
 	f.color = color * v_color;
 	gl_Position = mv_matrix * vec4(position.xyz, 1.0);
 #else // MCM_GEOM_ACTIVE
@@ -125,7 +125,7 @@ void main()
 	vec3 tf_normal = (mv_mat_simple * vec4(norm1.xyz, 0.0)).xyz; // TODO: Should BT be here?
 	vec3 tf_tangent = (mv_mat_simple * vec4(tangent.xyz, 0.0)).xyz; // TODO: Should BT be here?
 	vec3 tf_bitangent = (mv_mat_simple * vec4(cross(tangent.xyz, norm1.xyz), 0.0)).xyz; // TODO: Should BT be here?
-	fi.tbn = transpose(mat3(tf_tangent, tf_bitangent, tf_normal)); // TODO: Neccessity of transpose()?
+	fi.tbn = (mat3(tf_tangent, tf_bitangent, tf_normal)); // TODO: Neccessity of transpose()?
 #endif // else - MCM_GEOM_ACTIVE
 }
 

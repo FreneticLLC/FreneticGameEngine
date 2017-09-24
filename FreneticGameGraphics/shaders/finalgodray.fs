@@ -73,7 +73,14 @@ vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray acro
 			float delta = currentDepth - sampledDepth;
 			if(delta < 0.03)
 			{
-				return texture(colortex, sampledPosition);
+				if (sampledDepth < startDepth)
+				{
+					return vec4(0.0);
+				}
+				else
+				{
+					return texture(colortex, sampledPosition);
+				}
 			}
 		}
 	}

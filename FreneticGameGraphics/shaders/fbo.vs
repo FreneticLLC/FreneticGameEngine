@@ -72,7 +72,7 @@ void main()
 #if MCM_GEOM_ACTIVE
 	pos1 = vec4(position, 1.0);
 	norm1 = vec4(normal, 1.0);
-	f.tbn = transpose(mat3(vec3(0.0), vec3(0.0), normal)); // TODO: Improve for decals?!
+	f.tbn = (mat3(vec3(0.0), vec3(0.0), normal)); // TODO: Improve for decals?!
 #if MCM_GEOM_THREED_TEXTURE
 	f.texcoord = texcoords;
 #else
@@ -116,7 +116,7 @@ void main()
 	vec3 tf_normal = (mv_mat_simple * vec4(norm1.xyz, 0.0)).xyz; // TODO: Should BT be here?
 	vec3 tf_tangent = (mv_mat_simple * vec4(tangent, 0.0)).xyz; // TODO: Should BT be here?
 	vec3 tf_bitangent = (mv_mat_simple * vec4(cross(tangent, norm1.xyz), 0.0)).xyz; // TODO: Should BT be here?
-	fi.tbn = transpose(mat3(tf_tangent, tf_bitangent, tf_normal)); // TODO: Neccessity of transpose()?
+	fi.tbn = (mat3(tf_tangent, tf_bitangent, tf_normal)); // TODO: Neccessity of transpose()?
 #endif
 }
 

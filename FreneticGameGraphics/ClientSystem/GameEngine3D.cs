@@ -114,7 +114,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// Whether forward mode should calculate reflection helpers.
         /// </summary>
         public bool ForwardReflections = false;
-
+        
         /// <summary>
         /// Whether to display decal effects.
         /// </summary>
