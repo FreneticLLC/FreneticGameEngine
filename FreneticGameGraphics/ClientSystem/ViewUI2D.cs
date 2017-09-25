@@ -69,7 +69,7 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
-        /// Generally do not read set this directly.
+        /// Generally do not set this directly.
         /// Instead use <see cref="CurrentScreen"/>.
         /// </summary>
         public UIScreen InternalCurrentScreen;
