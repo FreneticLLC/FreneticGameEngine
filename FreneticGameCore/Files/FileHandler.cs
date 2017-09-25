@@ -350,9 +350,9 @@ namespace FreneticGameCore.Files
         /// <param name="filename">The name of the file to read.</param>
         /// <param name="fref">Output file reference.</param>
         /// <returns>The file's data, as a stream.</returns>
-        public DataStream ReadToStream(string filename, out PakkedFile fref)
+        public Stream ReadToStream(string filename, out PakkedFile fref)
         {
-            return new DataStream(ReadBytes(filename, out fref));
+            return new MemoryStream(ReadBytes(filename, out fref));
         }
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace FreneticGameCore.Files
         /// </summary>
         /// <param name="filename">The name of the file to read.</param>
         /// <returns>The file's data, as a stream.</returns>
-        public DataStream ReadToStream(string filename)
+        public Stream ReadToStream(string filename)
         {
             return ReadToStream(filename, out PakkedFile _);
         }

@@ -151,7 +151,7 @@ namespace FreneticGameCore.Files
             }
             else if (origin == SeekOrigin.End)
             {
-                Ind = Len - offset;
+                Ind = Wrapped.Length - offset;
             }
             return Ind;
         }
