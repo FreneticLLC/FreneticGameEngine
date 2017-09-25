@@ -68,10 +68,27 @@ namespace FreneticGameGraphics.ClientSystem
             CurrentScreen = DefaultScreen;
         }
 
+        private UIScreen _CurrentScreen;
+
         /// <summary>
         /// The current main screen.
         /// </summary>
-        public UIScreen CurrentScreen;
+        public UIScreen CurrentScreen
+        {
+            get
+            {
+                return _CurrentScreen;
+            }
+            set
+            {
+                if (value != _CurrentScreen)
+                {
+                    _CurrentScreen?.SwitchFrom();
+                    _CurrentScreen = value;
+                    _CurrentScreen?.SwitchTo();
+                }
+            }
+        }
 
         /// <summary>
         /// The render context (2D) for the UI.
