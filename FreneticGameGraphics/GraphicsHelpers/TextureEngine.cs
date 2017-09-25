@@ -110,7 +110,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
             LoadedTextures.Add(Black);
             Clear = GenerateForColor(Color.Transparent, "clear");
             LoadedTextures.Add(Clear);
-            NormalDef = GetTexture("normal_def");
+            NormalDef = GenerateForColor(Color.FromArgb(255, 127, 127, 255), "normal_def");
+            LoadedTextures.Add(NormalDef);
         }
 
         /// <summary>
