@@ -52,6 +52,7 @@ vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray acro
 		{
 			sD = texture(depthtex2, sampledPosition).x;
 			sampledDepth = ((odist.x - zdist.x) / (zdist.y - zdist.x)) + linearizeDepthOut(sD) * ((zdist.y - zdist.x) / (odist.y - odist.x));
+			sampledDepth = 1.0 - sampledDepth;
 		}
 		else
 		{
