@@ -1328,7 +1328,7 @@ namespace FreneticGameGraphics.ClientSystem
                                         sp /= 2;
                                     }
                                     Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
-                                    Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
+                                    Vector3d eyep = Lights[i] is SkyLight se ? -se.Direction.ToOpenTK3D() : Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
                                     Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
                                     Matrix4 light_data = new Matrix4(
                                         (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
@@ -2152,7 +2152,7 @@ namespace FreneticGameGraphics.ClientSystem
                                         continue;
                                     }
                                     Matrix4 smat = Lights[i].InternalLights[x].GetMatrix(this);
-                                    Vector3d eyep = Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
+                                    Vector3d eyep = Lights[i] is SkyLight se ? -se.Direction.ToOpenTK3D() : Lights[i].InternalLights[x].eye - CameraPos.ToOpenTK3D();
                                     Vector3 col = Lights[i].InternalLights[x].color * (float)maxrangemult;
                                     Matrix4 light_data = new Matrix4(
                                         (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
