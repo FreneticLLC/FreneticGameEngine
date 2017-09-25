@@ -68,7 +68,11 @@ namespace FreneticGameGraphics.ClientSystem
             CurrentScreen = DefaultScreen;
         }
 
-        private UIScreen _CurrentScreen;
+        /// <summary>
+        /// Generally do not read set this directly.
+        /// Instead use <see cref="CurrentScreen"/>.
+        /// </summary>
+        public UIScreen InternalCurrentScreen;
 
         /// <summary>
         /// The current main screen.
@@ -77,15 +81,15 @@ namespace FreneticGameGraphics.ClientSystem
         {
             get
             {
-                return _CurrentScreen;
+                return InternalCurrentScreen;
             }
             set
             {
-                if (value != _CurrentScreen)
+                if (value != InternalCurrentScreen)
                 {
-                    _CurrentScreen?.SwitchFrom();
-                    _CurrentScreen = value;
-                    _CurrentScreen?.SwitchTo();
+                    InternalCurrentScreen?.SwitchFrom();
+                    InternalCurrentScreen = value;
+                    InternalCurrentScreen?.SwitchTo();
                 }
             }
         }
