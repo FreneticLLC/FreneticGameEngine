@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
+using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 
 namespace FreneticGameGraphics.UISystem
@@ -92,7 +93,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="lastRot">The last rotation made in the render chain.</param>
+        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             if (ResetOnRender)
             {
@@ -100,7 +102,7 @@ namespace FreneticGameGraphics.UISystem
                 GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
                 GraphicsUtil.CheckError("RenderScreen - Reset");
             }
-            base.RenderChildren(view, delta, xoff, yoff);
+            base.RenderChildren(view, delta, xoff, yoff, lastRot);
             GraphicsUtil.CheckError("RenderScreen - Children");
         }
 

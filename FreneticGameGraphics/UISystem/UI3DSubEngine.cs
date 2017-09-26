@@ -80,14 +80,15 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">Delta time.</param>
         /// <param name="xoff">X Offset.</param>
         /// <param name="yoff">Y Offset.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             int x = GetX() + xoff;
             int y = GetY() + yoff;
             int w = (int)GetWidth();
             int h = (int)GetHeight();
             GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.CurrentFBO);
-            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y);
+            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, rotation));
         }
     }
 }

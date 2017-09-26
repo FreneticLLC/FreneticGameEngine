@@ -73,7 +73,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this label's parent.</param>
         /// <param name="yoff">The Y offset of this label's parent.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             string tex = CustomWidth ? TextFont.SplitAppropriately(Text, GetWidth()) : Text;
             float bx = GetX() + xoff;
@@ -82,7 +83,7 @@ namespace FreneticGameGraphics.UISystem
             {
                 Location meas = TextFont.MeasureFancyLinesOfText(tex);
                 view.Rendering.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y);
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, rotation));
                 view.Rendering.SetColor(Vector4.One);
             }
             TextFont.DrawColoredText(tex, new Location(bx, by, 0), bcolor: BColor);

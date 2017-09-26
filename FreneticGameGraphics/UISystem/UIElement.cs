@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
+using OpenTK;
 using OpenTK.Input;
 
 namespace FreneticGameGraphics.UISystem
@@ -177,6 +178,15 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
+        /// Gets the current rotation of this element.
+        /// </summary>
+        /// <returns>The current rotation.</returns>
+        public float GetRotation()
+        {
+            return Position.Rotation;
+        }
+
+        /// <summary>
         /// Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.
         /// </summary>
         /// <param name="x">The X position to check for.</param>
@@ -334,15 +344,33 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        public virtual void FullRender(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="lastRot">The last rotation made in the render chain.</param>
+        public virtual void FullRender(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             if (Parent == null || !Parent.ToRemove.Contains(this))
             {
-                Render(view, delta, xoff, yoff);
-                RenderChildren(view, delta, GetX() + xoff, GetY() + yoff);
+                int x = GetX() + xoff;
+                int y = GetY() + yoff;
+                float rot = GetRotation() + lastRot.Z;
+                if (rot != 0f)
+                {
+                    int pivotX = (int)(x + GetWidth() / 2f);
+                    int pivotY = (int)(y + GetHeight() / 2f);
+                    float cos = (float)Math.Cos(rot);
+                    float sin = (float)Math.Sin(rot);
+                    x -= pivotX;
+                    y -= pivotY;
+                    int newX = (int)(x * cos - y * sin);
+                    int newY = (int)(x * sin + y * cos);
+                    x = newX + pivotX;
+                    y = newY + pivotY;
+                    lastRot = new Vector3(pivotX, pivotY, rot);
+                }
+                Render(view, delta, xoff, yoff, lastRot.Z);
+                RenderChildren(view, delta, x, y, lastRot);
             }
         }
-        
+
         /// <summary>
         /// Performs a render on this element.
         /// </summary>
@@ -350,7 +378,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        protected virtual void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected virtual void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
         }
 
@@ -361,13 +390,14 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        protected virtual void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="lastRot">The last rotation made in the render chain.</param>
+        protected virtual void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             CheckChildren();
             GraphicsUtil.CheckError("RenderElement - Children - Pre");
             foreach (UIElement element in Children)
             {
-                element.FullRender(view, delta, xoff, yoff);
+                element.FullRender(view, delta, xoff, yoff, lastRot);
             }
             GraphicsUtil.CheckError("RenderElement - Children - Post");
         }

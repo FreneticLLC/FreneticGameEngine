@@ -39,6 +39,15 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
+        /// Helper to return a zero.
+        /// </summary>
+        /// <returns>The zero.</returns>
+        public static float GetZeroF()
+        {
+            return 0f;
+        }
+
+        /// <summary>
         /// The view backing this element's positioning logic.
         /// </summary>
         public ViewUI2D View;
@@ -112,6 +121,21 @@ namespace FreneticGameGraphics.UISystem
         /// Getter value for Height, if value.
         /// </summary>
         public Func<int> Getter_Height = GetZero;
+
+        /// <summarHeight>
+        /// Position mode for Rotation.
+        /// </summarHeight>
+        public UIPosMode PM_Rot = UIPosMode.CONSTANT;
+
+        /// <summarHeight>
+        /// Constant value for Rotation, if valid.
+        /// </summarHeight>
+        public float Const_Rot = 0;
+
+        /// <summary>
+        /// Getter value for Rotation, if value.
+        /// </summary>
+        public Func<float> Getter_Rot = GetZeroF;
 
         /// <summary>
         /// Sets an anchor.
@@ -203,6 +227,18 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
+        /// Sets a constant Rotation value.
+        /// </summary>
+        /// <param name="rotation">The Rotation value.</param>
+        /// <returns>This object.</returns>
+        public UIPositionHelper ConstantRotation(float rotation)
+        {
+            PM_Rot = UIPosMode.CONSTANT;
+            Const_Rot = rotation;
+            return this;
+        }
+
+        /// <summary>
         /// Sets a getter X value.
         /// </summary>
         /// <param name="x">The X getter.</param>
@@ -281,6 +317,18 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
+        /// Sets a getter Rotation value.
+        /// </summary>
+        /// <param name="rotation">The Rotation getter.</param>
+        /// <returns>This object.</returns>
+        public UIPositionHelper GetterRotation(Func<float> rotation)
+        {
+            PM_Rot = UIPosMode.GETTER;
+            Getter_Rot = rotation;
+            return this;
+        }
+
+        /// <summary>
         /// Gets the X coordinate.
         /// </summary>
         public int X
@@ -355,6 +403,25 @@ namespace FreneticGameGraphics.UISystem
                     return Getter_Height();
                 }
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets the local Rotation value.
+        /// </summary>
+        public float Rotation
+        {
+            get
+            {
+                if (PM_Rot == UIPosMode.CONSTANT)
+                {
+                    return Const_Rot;
+                }
+                if (PM_Rot == UIPosMode.GETTER)
+                {
+                    return Getter_Rot();
+                }
+                return 0f;
             }
         }
     }

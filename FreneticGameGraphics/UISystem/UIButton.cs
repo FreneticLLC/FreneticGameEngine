@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FreneticGameCore;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
+using OpenTK;
 
 namespace FreneticGameGraphics.UISystem
 {
@@ -140,7 +141,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this button's parent.</param>
         /// <param name="yoff">The Y offset of this button's parent.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             if (Clicked)
             {
@@ -158,7 +160,7 @@ namespace FreneticGameGraphics.UISystem
             int y = GetY() + yoff;
             float width = GetWidth();
             float height = GetHeight();
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height);
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, rotation));
             float len = TextFont.MeasureFancyText(Text);
             float hei = TextFont.font_default.Height;
             TextFont.DrawColoredText(Text, new Location(x + width / 2 - len / 2, y + height / 2 - hei / 2, 0));

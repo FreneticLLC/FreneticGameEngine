@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
+using OpenTK;
 
 namespace FreneticGameGraphics.UISystem
 {
@@ -44,12 +45,13 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             Image.Bind();
             int x = GetX() + xoff;
             int y = GetY() + yoff;
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + GetWidth(), y + GetHeight());
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + GetWidth(), y + GetHeight(), new Vector3(-0.5f, -0.5f, rotation));
         }
     }
 }

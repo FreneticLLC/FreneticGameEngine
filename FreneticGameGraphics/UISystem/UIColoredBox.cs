@@ -58,7 +58,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this box's parent.</param>
         /// <param name="yoff">The Y offset of this box's parent.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             int x = GetX() + xoff;
             int y = GetY() + yoff;
@@ -69,7 +70,7 @@ namespace FreneticGameGraphics.UISystem
             {
                 view.Rendering.SetColor(Color);
                 engine.Textures.White.Bind();
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
                 view.Rendering.SetColor(Vector4.One);
             }
             if (GetTexture != null)
@@ -84,11 +85,11 @@ namespace FreneticGameGraphics.UISystem
             }
             if (Flip)
             {
-                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y);
+                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, rotation));
             }
             else
             {
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
             }
             engine.Textures.White.Bind();
         }

@@ -133,7 +133,7 @@ namespace FreneticGameGraphics.ClientSystem
             Shader s = Client.FontSets.FixTo;
             Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            CurrentScreen.FullRender(this, Client.Delta, 0, 0);
+            CurrentScreen.FullRender(this, Client.Delta, 0, 0, Vector3.Zero);
             Client.FontSets.FixTo = s;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         }

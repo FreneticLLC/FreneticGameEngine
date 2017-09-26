@@ -120,7 +120,8 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this scroll box's parent.</param>
         /// <param name="yoff">The Y offset of this scroll box's parent.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="rotation">The calculated rotation to make in this render call.</param>
+        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
         {
             if (Color.A > 0)
             {
@@ -129,7 +130,7 @@ namespace FreneticGameGraphics.UISystem
                 int h = (int)GetHeight();
                 int w = (int)GetWidth();
                 view.Rendering.SetColor(Color);
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
                 view.Rendering.SetColor(new Vector4(1f));
             }
         }
@@ -141,14 +142,15 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
-        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff)
+        /// <param name="lastRot">The last rotation made in the render chain.</param>
+        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             int h = (int)GetHeight();
             int w = (int)GetWidth();
             GameEngineBase engine = Engine;
             GL.Enable(EnableCap.ScissorTest);
             GL.Scissor(xoff, engine.Window.Height - (yoff + h), w, h);
-            base.RenderChildren(view, delta, xoff, yoff - Scroll);
+            base.RenderChildren(view, delta, xoff, yoff - Scroll, lastRot);
             GL.Scissor(0, 0, engine.Window.Width, engine.Window.Height); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);
         }
