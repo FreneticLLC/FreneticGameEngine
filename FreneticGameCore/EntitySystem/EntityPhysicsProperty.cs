@@ -350,6 +350,7 @@ namespace FreneticGameCore.EntitySystem
                 cc.Tag = Entity;
                 OriginalObject = cc;
                 SpawnedBody = cc.Body;
+                SpawnedBody.Mass = InternalMass;
             }
             else
             {

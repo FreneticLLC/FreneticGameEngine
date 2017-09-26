@@ -200,6 +200,7 @@ namespace FreneticGameCore.ServerSystem
             Schedule.RunAllSyncTasks(delta);
             foreach (ServerEngine engine in Engines)
             {
+                engine.Delta = delta;
                 engine.Tick();
             }
         }
