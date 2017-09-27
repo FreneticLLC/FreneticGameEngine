@@ -180,5 +180,39 @@ namespace FreneticGameCore.Files
             WriteInt(data.Length);
             WriteBytes(data);
         }
+
+        /// <summary>
+        /// Writes a variable integer to the stream.
+        /// This writes 1 byte at a time, where the final bit signifies whether another byte of data follows.
+        /// <para>For example, if we assume (DATA) to be any combination of 7 bits (zero or one, repeated seven times.
+        /// Then (DATA)0 is one full VarInt. Additionally, (DATA)1(DATA)0 is as well a single full VarInt. (DATA)1(DATA)1(DATA)1(DATA)0 is as well as singular complete VarInt.</para>
+        /// <para>This can theoretically continue on to infinity for massive integers, where every byte has its final bit as a 1, until the very last byte's last bit, which is always a 0.</para>
+        /// <para>The first bit is always 0 for positive numbers, and 1 for negative numbers. The remaining bits are as described above.</para>
+        /// </summary>
+        /// <param name="input">The input integer.</param>
+        public void WriteVarInt(long input)
+        {
+            if (input < 0)
+            {
+                input = -input;
+                input <<= 1;
+                input += 1;
+            }
+            else
+            {
+                input <<= 1;
+            }
+            int shifts = 0;
+            long lim = 127;
+            while (input > lim)
+            {
+                byte b = (byte)(((input & lim) >> shifts) | 128);
+                WriteByte(b);
+                shifts += 7;
+                lim <<= 7;
+            }
+            byte lastB = (byte)(((input & lim) >> shifts));
+            WriteByte(lastB);
+        }
     }
 }
