@@ -99,9 +99,12 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
         {
-            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
-            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-            GraphicsUtil.CheckError("RenderScreen - Reset");
+            if (ResetOnRender)
+            {
+                GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
+                GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                GraphicsUtil.CheckError("RenderScreen - Reset");
+            }
         }
 
         /// <summary>
