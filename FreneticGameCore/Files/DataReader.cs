@@ -209,7 +209,7 @@ namespace FreneticGameCore.Files
         /// </summary>
         public string ReadString(int length)
         {
-            return FileHandler.encoding.GetString(ReadBytes(length));
+            return FileHandler.DefaultEncoding.GetString(ReadBytes(length));
         }
 
         /// <summary>

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FreneticGameCore.Files;
 using System.IO;
 
 namespace FreneticGameCore
@@ -221,7 +222,14 @@ namespace FreneticGameCore
             }
             else
             {
-                Console.Write(bcolor + text.Replace("^B", bcolor));
+                string toOut = bcolor + text.Replace("^B", bcolor);
+                byte[] t = FileHandler.DefaultEncoding.GetBytes(toOut);
+                StringBuilder outp = new StringBuilder(t.Length);
+                for (int i = 0; i < t.Length; i++)
+                {
+                    outp.Append((char)t[i]);
+                }
+                Console.Write(outp.ToString());
                 return;
             }
             StringBuilder outme = new StringBuilder();
