@@ -349,22 +349,35 @@ namespace FreneticGameGraphics.UISystem
         {
             if (Parent == null || !Parent.ToRemove.Contains(this))
             {
-                int x = GetX() + xoff;
-                int y = GetY() + yoff;
-                float rot = GetRotation() + lastRot.Z;
-                if (rot != 0f)
+                int x;
+                int y;
+                if (Math.Abs(lastRot.Z) < 0.001f)
                 {
-                    int pivotX = (int)(x + GetWidth() / 2f);
-                    int pivotY = (int)(y + GetHeight() / 2f);
-                    float cos = (float)Math.Cos(rot);
-                    float sin = (float)Math.Sin(rot);
-                    x -= pivotX;
-                    y -= pivotY;
-                    int newX = (int)(x * cos - y * sin);
-                    int newY = (int)(x * sin + y * cos);
-                    x = newX + pivotX;
-                    y = newY + pivotY;
-                    lastRot = new Vector3(pivotX, pivotY, rot);
+                    x = GetX() + xoff;
+                    y = GetY() + yoff;
+                    lastRot = new Vector3(GetWidth() * -0.5f, GetHeight() * -0.5f, GetRotation());
+                }
+                else
+                {
+                    x = GetX();
+                    y = GetY();
+                    int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
+                    int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
+                    float half_wid = GetWidth() * 0.5f;
+                    float half_hei = GetHeight() * 0.5f;
+                    float tx = x + lastRot.X + cwx - half_wid;
+                    float ty = y + lastRot.Y + chy - half_hei;
+                    float cosRot = (float)Math.Cos(-lastRot.Z);
+                    float sinRot = (float)Math.Sin(-lastRot.Z);
+                    float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
+                    float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
+                    lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + GetRotation());
+                    int bx = (int)tx2 + xoff;
+                    int by = (int)ty2 + yoff;
+                    xoff = bx - x;
+                    yoff = by - y;
+                    x = bx;
+                    y = by;
                 }
                 Render(view, delta, xoff, yoff, lastRot.Z);
                 RenderChildren(view, delta, x, y, lastRot);
