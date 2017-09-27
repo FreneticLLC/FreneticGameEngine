@@ -82,6 +82,16 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
+        /// Converts a BEPU Vector3 to an OpenTK Vector3.
+        /// </summary>
+        /// <param name="l">The BEPU Vector.</param>
+        /// <returns>The OpenTK Vector3.</returns>
+        public static Vector3 ToOpenTK(this BEPUutilities.Vector3 l)
+        {
+            return new Vector3((float)l.X, (float)l.Y, (float)l.Z);
+        }
+
+        /// <summary>
         /// Converts a location to an OpenTK Vector3.
         /// </summary>
         /// <param name="l">The location.</param>

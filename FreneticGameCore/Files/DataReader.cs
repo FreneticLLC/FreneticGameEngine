@@ -104,6 +104,34 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read a location object (12 bytes).
+        /// </summary>
+        public Location ReadLocationFloat()
+        {
+            float x = ReadFloat();
+            float y = ReadFloat();
+            float z = ReadFloat();
+            return new Location(x, y, z);
+        }
+
+        /// <summary>
+        /// Read a view direction into a location object (4 bytes).
+        /// </summary>
+        /// <returns>The view direction location.</returns>
+        public Location ReadViewDirection()
+        {
+            ushort yawS = ReadUShort();
+            ushort pitchS = ReadUShort();
+            float yaw = yawS * (360f / ushort.MaxValue);
+            float pitch = pitchS * (180f / ushort.MaxValue);
+            pitch -= 90f;
+            Location loc = new Location();
+            loc.Yaw = yaw;
+            loc.Pitch = pitch;
+            return loc;
+        }
+
+        /// <summary>
         /// Read a character (2 bytes).
         /// </summary>
         /// <returns></returns>
@@ -181,7 +209,25 @@ namespace FreneticGameCore.Files
         /// </summary>
         public string ReadString(int length)
         {
-            return FileHandler.encoding.GetString(ReadBytes(length));
+            return FileHandler.DefaultEncoding.GetString(ReadBytes(length));
+        }
+
+        /// <summary>
+        /// Read a "full set" of bytes: specified by a 4-byte length at the start of data.
+        /// </summary>
+        public byte[] ReadFullBytesVar()
+        {
+            int len = (int)ReadVarInt();
+            return ReadBytes(len);
+        }
+
+        /// <summary>
+        /// Read a "full" string: specified by a 4-byte length at the start of data.
+        /// </summary>
+        public string ReadFullStringVar()
+        {
+            int len = (int)ReadVarInt();
+            return ReadString(len);
         }
 
         /// <summary>
@@ -200,6 +246,34 @@ namespace FreneticGameCore.Files
         {
             int len = ReadInt();
             return ReadString(len);
+        }
+
+        /// <summary>
+        /// Reads a variable integer from the stream.
+        /// See <see cref="DataWriter.WriteVarInt(long)"/> for an explanation.
+        /// </summary>
+        /// <returns>The var int's value.</returns>
+        public long ReadVarInt()
+        {
+            long res = 0;
+            byte b = ReadByte();
+            int shifts = 0;
+            while ((b & 128) == 128)
+            {
+                res += (long)(b & 127) << shifts;
+                shifts += 7;
+                b = ReadByte();
+            }
+            res += (long)(b & 127) << shifts;
+            if ((res & 1) == 1)
+            {
+                res = -((res & ~1L) >> 1);
+            }
+            else
+            {
+                res >>= 1;
+            }
+            return res;
         }
 
         /// <summary>

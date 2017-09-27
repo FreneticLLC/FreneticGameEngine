@@ -40,7 +40,7 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// The default text encoding.
         /// </summary>
-        public static Encoding encoding = new UTF8Encoding(false);
+        public static Encoding DefaultEncoding = new UTF8Encoding(false);
 
         /// <summary>
         /// The base directory in which all data is stored.
@@ -384,7 +384,7 @@ namespace FreneticGameCore.Files
         /// <returns>The file's data, as a string.</returns>
         public string ReadText(string filename, bool journal = true)
         {
-            return encoding.GetString(ReadBytes(filename, journal)).Replace("\r", "");
+            return DefaultEncoding.GetString(ReadBytes(filename, journal)).Replace("\r", "");
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace FreneticGameCore.Files
         /// <param name="text">The text data to write.</param>
         public void JournalWriteText(string filename, string text)
         {
-            JournalSaveBytes(filename, encoding.GetBytes(text.Replace('\r', ' ')));
+            JournalSaveBytes(filename, DefaultEncoding.GetBytes(text.Replace('\r', ' ')));
         }
 
         /// <summary>
@@ -528,7 +528,7 @@ namespace FreneticGameCore.Files
         /// <param name="text">The text data to write.</param>
         public void WriteText(string filename, string text)
         {
-            WriteBytes(filename, encoding.GetBytes(text.Replace('\r', ' ')));
+            WriteBytes(filename, DefaultEncoding.GetBytes(text.Replace('\r', ' ')));
         }
 
         /// <summary>

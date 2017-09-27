@@ -44,6 +44,46 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a location object (12 bytes).
+        /// </summary>
+        /// <param name="loc">The data.</param>
+        public void WriteLocationFloat(Location loc)
+        {
+            WriteFloat(loc.XF);
+            WriteFloat(loc.YF);
+            WriteFloat(loc.ZF);
+        }
+
+        /// <summary>
+        /// Write a view direction from a location object (4 bytes).
+        /// </summary>
+        /// <param name="loc">The data.</param>
+        public void WriteViewDirection(Location loc)
+        {
+            float yaw = (float)loc.Yaw;
+            while (yaw < 0f)
+            {
+                yaw += 360f;
+            }
+            while (yaw > 360f)
+            {
+                yaw -= 360f;
+            }
+            WriteUShort((ushort)((ushort.MaxValue / 360f) * yaw));
+            float pitch = (float)loc.Pitch;
+            if (pitch < -89.999f)
+            {
+                pitch = -89.999f;
+            }
+            if (pitch > 89.999f)
+            {
+                pitch = 89.999f;
+            }
+            pitch += 90;
+            WriteUShort((ushort)((ushort.MaxValue / 180f) * pitch));
+        }
+
+        /// <summary>
         /// Write a byte.
         /// </summary>
         /// <param name="x">The data.</param>
@@ -161,6 +201,27 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a "full set" of bytes to the stream: prefixing the bytes with a var int length indicator.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public void WriteFullBytesVar(byte[] data)
+        {
+            WriteVarInt(data.Length);
+            WriteBytes(data);
+        }
+
+        /// <summary>
+        /// Write a "full" string to the stream: prefixing the string with a var int length indicator.
+        /// </summary>
+        /// <param name="str">The data.</param>
+        public void WriteFullStringVar(string str)
+        {
+            byte[] data = FileHandler.DefaultEncoding.GetBytes(str);
+            WriteVarInt(data.Length);
+            WriteBytes(data);
+        }
+
+        /// <summary>
         /// Write a "full set" of bytes to the stream: prefixing the bytes with a 4-byte length indicator.
         /// </summary>
         /// <param name="data">The data.</param>
@@ -176,9 +237,43 @@ namespace FreneticGameCore.Files
         /// <param name="str">The data.</param>
         public void WriteFullString(string str)
         {
-            byte[] data = FileHandler.encoding.GetBytes(str);
+            byte[] data = FileHandler.DefaultEncoding.GetBytes(str);
             WriteInt(data.Length);
             WriteBytes(data);
+        }
+
+        /// <summary>
+        /// Writes a variable integer to the stream.
+        /// This writes 1 byte at a time, where the final bit signifies whether another byte of data follows.
+        /// <para>For example, if we assume (DATA) to be any combination of 7 bits (zero or one, repeated seven times.
+        /// Then (DATA)0 is one full VarInt. Additionally, (DATA)1(DATA)0 is as well a single full VarInt. (DATA)1(DATA)1(DATA)1(DATA)0 is as well as singular complete VarInt.</para>
+        /// <para>This can theoretically continue on to infinity for massive integers, where every byte has its final bit as a 1, until the very last byte's last bit, which is always a 0.</para>
+        /// <para>The first bit is always 0 for positive numbers, and 1 for negative numbers. The remaining bits are as described above.</para>
+        /// </summary>
+        /// <param name="input">The input integer.</param>
+        public void WriteVarInt(long input)
+        {
+            if (input < 0)
+            {
+                input = -input;
+                input <<= 1;
+                input += 1;
+            }
+            else
+            {
+                input <<= 1;
+            }
+            int shifts = 0;
+            long lim = 127;
+            while (input > lim)
+            {
+                byte b = (byte)(((input & lim) >> shifts) | 128);
+                WriteByte(b);
+                shifts += 7;
+                lim <<= 7;
+            }
+            byte lastB = (byte)(((input & lim) >> shifts));
+            WriteByte(lastB);
         }
     }
 }
