@@ -282,7 +282,7 @@ namespace FreneticGameGraphics.ClientSystem
             wy *= 2f;
             wx /= OriginalScaler.X;
             wy /= OriginalScaler.Y;
-            MouseCoords = new Vector2(wx, wy);
+            MouseCoords = new Vector2(wx, wy) + ViewCenter;
             if (OneDLights)
             {
                 Shader_ApplyLights1D.Bind();
