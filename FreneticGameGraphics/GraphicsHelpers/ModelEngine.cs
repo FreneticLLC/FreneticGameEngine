@@ -80,11 +80,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The cube model.</returns>
         public Model GenerateCube()
         {
-            Model m = new Model("cube");
-            m.Engine = this;
-            m.Skinned = true;
-            m.ModelMin = new BEPUutilities.Vector3(-1, -1, -1);
-            m.ModelMax = new BEPUutilities.Vector3(1, 1, 1);
+            Model m = new Model("cube")
+            {
+                Engine = this,
+                Skinned = true,
+                ModelMin = new BEPUutilities.Vector3(-1, -1, -1),
+                ModelMax = new BEPUutilities.Vector3(1, 1, 1)
+            };
             ModelMesh mm = new ModelMesh("cube");
             mm.vbo.Prepare();
             TextureCoordinates tc = new TextureCoordinates();
@@ -94,6 +96,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             mm.vbo.AddSide(-Location.UnitX, tc);
             mm.vbo.AddSide(-Location.UnitY, tc);
             mm.vbo.AddSide(-Location.UnitZ, tc);
+            m.Original = new Model3D();
+            Model3DMesh m3m = new Model3DMesh();
+            m3m.Name = "cube";
+            m3m.Indices = new List<int>(mm.vbo.Indices.ConvertAll((u) => (int)u));
+            m3m.Vertices = new List<BEPUutilities.Vector3>(mm.vbo.Vertices.ConvertAll((o) => o.ToLocation().ToBVector()));
+            m3m.TexCoords = new List<BEPUutilities.Vector2>(mm.vbo.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y)));
+            m3m.Normals = new List<BEPUutilities.Vector3>(mm.vbo.Normals.ConvertAll((o) => o.ToLocation().ToBVector()));
+            m.Original.Meshes = new List<Model3DMesh>() { m3m };
             mm.vbo.GenerateVBO();
             mm.VBOGenned = true;
             m.Meshes.Add(mm);
