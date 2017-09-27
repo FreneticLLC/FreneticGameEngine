@@ -44,6 +44,17 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a location object (12 bytes).
+        /// </summary>
+        /// <param name="loc">The data.</param>
+        public void WriteLocationFloat(Location loc)
+        {
+            WriteFloat(loc.XF);
+            WriteFloat(loc.YF);
+            WriteFloat(loc.ZF);
+        }
+
+        /// <summary>
         /// Write a byte.
         /// </summary>
         /// <param name="x">The data.</param>

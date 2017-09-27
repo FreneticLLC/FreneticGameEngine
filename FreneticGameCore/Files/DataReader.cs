@@ -104,6 +104,17 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read a location object (12 bytes).
+        /// </summary>
+        public Location ReadLocationFloat()
+        {
+            float x = ReadFloat();
+            float y = ReadFloat();
+            float z = ReadFloat();
+            return new Location(x, y, z);
+        }
+
+        /// <summary>
         /// Read a character (2 bytes).
         /// </summary>
         /// <returns></returns>
