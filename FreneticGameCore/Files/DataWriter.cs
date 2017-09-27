@@ -161,6 +161,27 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a "full set" of bytes to the stream: prefixing the bytes with a var int length indicator.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public void WriteFullBytesVar(byte[] data)
+        {
+            WriteVarInt(data.Length);
+            WriteBytes(data);
+        }
+
+        /// <summary>
+        /// Write a "full" string to the stream: prefixing the string with a var int length indicator.
+        /// </summary>
+        /// <param name="str">The data.</param>
+        public void WriteFullStringVar(string str)
+        {
+            byte[] data = FileHandler.encoding.GetBytes(str);
+            WriteVarInt(data.Length);
+            WriteBytes(data);
+        }
+
+        /// <summary>
         /// Write a "full set" of bytes to the stream: prefixing the bytes with a 4-byte length indicator.
         /// </summary>
         /// <param name="data">The data.</param>

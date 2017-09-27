@@ -187,6 +187,24 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// Read a "full set" of bytes: specified by a 4-byte length at the start of data.
         /// </summary>
+        public byte[] ReadFullBytesVar()
+        {
+            int len = (int)ReadVarInt();
+            return ReadBytes(len);
+        }
+
+        /// <summary>
+        /// Read a "full" string: specified by a 4-byte length at the start of data.
+        /// </summary>
+        public string ReadFullStringVar()
+        {
+            int len = (int)ReadVarInt();
+            return ReadString(len);
+        }
+
+        /// <summary>
+        /// Read a "full set" of bytes: specified by a 4-byte length at the start of data.
+        /// </summary>
         public byte[] ReadFullBytes()
         {
             int len = ReadInt();
