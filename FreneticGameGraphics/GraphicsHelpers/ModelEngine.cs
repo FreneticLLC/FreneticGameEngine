@@ -28,6 +28,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
     {
         /// <summary>
         /// All currently loaded models.
+        /// TODO: Dictionary!
         /// </summary>
         public List<Model> LoadedModels;
 
@@ -67,9 +68,36 @@ namespace FreneticGameGraphics.GraphicsHelpers
             AnimEngine = engine;
             Handler = new ModelHandler();
             LoadedModels = new List<Model>();
-            Cube = GetModel("cube");
+            Cube = GenerateCube();
+            LoadedModels.Add(Cube);
             Cylinder = GetModel("cylinder");
             Sphere = GetModel("sphere");
+        }
+
+        /// <summary>
+        /// Generates a cube model.
+        /// </summary>
+        /// <returns>The cube model.</returns>
+        public Model GenerateCube()
+        {
+            Model m = new Model("cube");
+            m.Engine = this;
+            m.Skinned = true;
+            m.ModelMin = new BEPUutilities.Vector3(-1, -1, -1);
+            m.ModelMax = new BEPUutilities.Vector3(1, 1, 1);
+            ModelMesh mm = new ModelMesh("cube");
+            mm.vbo.Prepare();
+            TextureCoordinates tc = new TextureCoordinates();
+            mm.vbo.AddSide(Location.UnitX, tc);
+            mm.vbo.AddSide(Location.UnitY, tc);
+            mm.vbo.AddSide(Location.UnitZ, tc);
+            mm.vbo.AddSide(-Location.UnitX, tc);
+            mm.vbo.AddSide(-Location.UnitY, tc);
+            mm.vbo.AddSide(-Location.UnitZ, tc);
+            mm.vbo.GenerateVBO();
+            mm.VBOGenned = true;
+            m.Meshes.Add(mm);
+            return m;
         }
 
         /// <summary>
