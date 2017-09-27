@@ -275,7 +275,7 @@ namespace FreneticGameGraphics.ClientSystem
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
             float wx = Client.MouseX / (float)Window.Width;
-            float wy = Client.MouseY / (float)Window.Height;
+            float wy = 1.0f - (Client.MouseY / (float)Window.Height);
             wx -= 0.5f;
             wy -= 0.5f;
             wx *= 2f;
