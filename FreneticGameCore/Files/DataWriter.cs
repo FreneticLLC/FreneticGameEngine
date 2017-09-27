@@ -55,6 +55,35 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a view direction from a location object (4 bytes).
+        /// </summary>
+        /// <param name="loc">The data.</param>
+        public void WriteViewDirection(Location loc)
+        {
+            float yaw = (float)loc.Yaw;
+            while (yaw < 0f)
+            {
+                yaw += 360f;
+            }
+            while (yaw > 360f)
+            {
+                yaw -= 360f;
+            }
+            WriteUShort((ushort)((ushort.MaxValue / 360f) * yaw));
+            float pitch = (float)loc.Pitch;
+            if (pitch < -89.999f)
+            {
+                pitch = -89.999f;
+            }
+            if (pitch > 89.999f)
+            {
+                pitch = 89.999f;
+            }
+            pitch += 90;
+            WriteUShort((ushort)((ushort.MaxValue / 180f) * pitch));
+        }
+
+        /// <summary>
         /// Write a byte.
         /// </summary>
         /// <param name="x">The data.</param>

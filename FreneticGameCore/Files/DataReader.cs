@@ -115,6 +115,23 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read a view direction into a location object (4 bytes).
+        /// </summary>
+        /// <returns>The view direction location.</returns>
+        public Location ReadViewDirection()
+        {
+            ushort yawS = ReadUShort();
+            ushort pitchS = ReadUShort();
+            float yaw = yawS * (360f / ushort.MaxValue);
+            float pitch = pitchS * (180f / ushort.MaxValue);
+            pitch -= 90f;
+            Location loc = new Location();
+            loc.Yaw = yaw;
+            loc.Pitch = pitch;
+            return loc;
+        }
+
+        /// <summary>
         /// Read a character (2 bytes).
         /// </summary>
         /// <returns></returns>
