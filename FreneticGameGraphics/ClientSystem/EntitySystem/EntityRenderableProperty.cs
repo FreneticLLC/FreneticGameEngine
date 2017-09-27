@@ -38,6 +38,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
 
         /// <summary>
         /// priority order of rendering: lower means sooner in the rendering order. This means higher numbers appear "on top" of lower numbers.
+        /// <para>For 2D entities, this is by default automatically set to match the Z coordinate if <see cref="Entity2DRenderableProperty.AutoUpdatePriorityZ"/> is set.</para>
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
