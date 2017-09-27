@@ -132,11 +132,22 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Disable(EnableCap.CullFace);
             Shader s = Client.FontSets.FixTo;
             Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
+            LastRenderedSet.Clear();
+            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            CurrentScreen.FullRender(this, Client.Delta, 0, 0, Vector3.Zero);
-            Client.FontSets.FixTo = s;
+            foreach (UIElement elem in LastRenderedSet.OrderBy((e) => e.RenderPriority))
+            {
+                elem.Render(this, Client.Delta);
+            }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
+            Client.FontSets.FixTo = s;
         }
+
+        /// <summary>
+        /// The last set of elements that were rendered (not sorted).
+        /// </summary>
+        public List<UIElement> LastRenderedSet = new List<UIElement>();
 
         /// <summary>
         /// Ticks all elements attached to this view.

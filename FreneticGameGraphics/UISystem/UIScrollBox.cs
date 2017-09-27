@@ -75,8 +75,6 @@ namespace FreneticGameGraphics.UISystem
             List<UIElement> found = new List<UIElement>();
             if (SelfContains(x, y))
             {
-                x -= GetX();
-                y += Scroll - GetY();
                 foreach (UIElement element in Children)
                 {
                     if (element.Contains(x, y))
@@ -118,35 +116,26 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this scroll box's parent.</param>
-        /// <param name="yoff">The Y offset of this scroll box's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
             if (Color.A > 0)
             {
-                int x = GetX() + xoff;
-                int y = GetY() + yoff;
-                int h = (int)GetHeight();
-                int w = (int)GetWidth();
+                float x = LastAbsolutePosition.X;
+                float y = LastAbsolutePosition.Y;
+                float w = LastAbsoluteSize.X;
+                float h = LastAbsoluteSize.Y;
                 view.Rendering.SetColor(Color);
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 view.Rendering.SetColor(new Vector4(1f));
             }
         }
 
-        /// <summary>
-        /// Performs a render on this scroll box's children.
-        /// </summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="lastRot">The last rotation made in the render chain.</param>
-        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
+        // TODO: Fix!
+        /*
+        private void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
         {
-            int h = (int)GetHeight();
-            int w = (int)GetWidth();
+            int h = LastAbsoluteSize.X;
+            int w = LastAbsoluteSize.Y;
             GameEngineBase engine = Engine;
             GL.Enable(EnableCap.ScissorTest);
             GL.Scissor(xoff, engine.Window.Height - (yoff + h), w, h);
@@ -154,5 +143,6 @@ namespace FreneticGameGraphics.UISystem
             GL.Scissor(0, 0, engine.Window.Width, engine.Window.Height); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);
         }
+        */
     }
 }

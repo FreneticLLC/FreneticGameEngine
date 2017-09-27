@@ -55,7 +55,8 @@ namespace FreneticGameGraphics.UISystem
         {
             Text = btext;
             TextFont = font;
-            int pwidth = GetWidth();
+            // TODO: Dynamic scaling support?
+            int pwidth = Position.Width;
             CustomWidth = pwidth > 0;
             Location scale = TextFont.MeasureFancyLinesOfText(CustomWidth ? TextFont.SplitAppropriately(Text, pwidth) : Text, BColor);
             pos.ConstantWidthHeight((int)scale.X, (int)scale.Y);
@@ -71,19 +72,16 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this label's parent.</param>
-        /// <param name="yoff">The Y offset of this label's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
-            string tex = CustomWidth ? TextFont.SplitAppropriately(Text, GetWidth()) : Text;
-            float bx = GetX() + xoff;
-            float by = GetY() + yoff;
+            string tex = CustomWidth ? TextFont.SplitAppropriately(Text, LastAbsoluteSize.X) : Text;
+            int bx = LastAbsolutePosition.X;
+            int by = LastAbsolutePosition.Y;
             if (BackColor.W > 0)
             {
                 Location meas = TextFont.MeasureFancyLinesOfText(tex);
                 view.Rendering.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 view.Rendering.SetColor(Vector4.One);
             }
             TextFont.DrawColoredText(tex, new Location(bx, by, 0), bcolor: BColor);

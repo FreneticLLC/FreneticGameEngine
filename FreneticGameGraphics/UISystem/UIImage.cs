@@ -43,17 +43,16 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
             if (Image != null)
             {
                 Image.Bind();
-                int x = GetX() + xoff;
-                int y = GetY() + yoff;
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + GetWidth(), y + GetHeight(), new Vector3(-0.5f, -0.5f, rotation));
+                int x = LastAbsolutePosition.X;
+                int y = LastAbsolutePosition.Y;
+                float width = LastAbsoluteSize.X;
+                float height = LastAbsoluteSize.Y;
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
         }
     }

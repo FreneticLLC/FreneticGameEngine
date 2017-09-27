@@ -56,21 +56,18 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this box's parent.</param>
-        /// <param name="yoff">The Y offset of this box's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
-            int x = GetX() + xoff;
-            int y = GetY() + yoff;
-            int w = (int)GetWidth();
-            int h = (int)GetHeight();
+            int x = LastAbsolutePosition.X;
+            int y = LastAbsolutePosition.Y;
+            float w = LastAbsoluteSize.X;
+            float h = LastAbsoluteSize.Y;
             GameEngineBase engine = view.Engine;
             if (Color.W > 0.0f)
             {
                 view.Rendering.SetColor(Color);
                 engine.Textures.White.Bind();
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 view.Rendering.SetColor(Vector4.One);
             }
             if (GetTexture != null)
@@ -85,11 +82,11 @@ namespace FreneticGameGraphics.UISystem
             }
             if (Flip)
             {
-                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
             else
             {
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
             engine.Textures.White.Bind();
         }

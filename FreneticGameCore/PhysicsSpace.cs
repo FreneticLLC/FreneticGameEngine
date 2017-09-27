@@ -98,6 +98,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Gets all (physics enabled) entities whose boundaries touch the specified bounding box. This includes entities fully within the box.
         /// <para>Note that this method is designed for best acceleration with LINQ.</para>
+        /// TODO: Filter options!
         /// </summary>
         /// <param name="box">The bounding box.</param>
         /// <returns>The list of entities found.</returns>

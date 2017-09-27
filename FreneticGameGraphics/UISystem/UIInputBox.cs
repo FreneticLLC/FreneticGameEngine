@@ -88,7 +88,7 @@ namespace FreneticGameGraphics.UISystem
             Selected = true;
             // TODO: implement
             // /* KeyHandlerState khs = */KeyHandler.GetKBState();
-            int xs = GetX();
+            int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
                 if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
@@ -137,7 +137,7 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         protected void AdjustMax()
         {
-            int xs = GetX();
+            int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
                 if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
@@ -249,16 +249,13 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this input box's parent.</param>
-        /// <param name="yoff">The Y offset of this input box's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
             string typed = Text;
             int c = 0;
             int cmax = 0;
             GameEngineBase engine = Engine;
-            if (!/*engine.CVars.u_colortyping.ValueB*/false)
+            if (!/*engine.CVars.u_colortyping.ValueB*/false) // TODO: Color Typing option!
             {
                 for (int i = 0; i < typed.Length && i < MinCursor; i++)
                 {
@@ -276,12 +273,12 @@ namespace FreneticGameGraphics.UISystem
                 }
                 typed = typed.Replace("^", "^^n");
             }
-            int x = GetX() + xoff;
-            int y = GetY() + yoff;
-            int w = (int)GetWidth();
+            int x = LastAbsolutePosition.X;
+            int y = LastAbsolutePosition.Y;
+            int w = LastAbsoluteSize.X;
             engine.Textures.White.Bind();
             view.Rendering.SetColor(Color);
-            view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.font_default.Height + 1, new Vector3(-0.5f, -0.5f, rotation));
+            view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.font_default.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             GL.Enable(EnableCap.ScissorTest);
             GL.Scissor(x, engine.Window.Height - (y + (int)Fonts.font_default.Height), w, (int)Fonts.font_default.Height);
             if (Selected)
@@ -289,7 +286,7 @@ namespace FreneticGameGraphics.UISystem
                 float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
                 float textw2 = Fonts.MeasureFancyText(typed.Substring(0, MaxCursor + cmax));
                 view.Rendering.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-                view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.font_default.Height, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.font_default.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
             view.Rendering.SetColor(Color4.White);
             Fonts.DrawColoredText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

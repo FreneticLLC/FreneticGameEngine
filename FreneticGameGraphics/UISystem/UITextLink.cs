@@ -140,10 +140,7 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this link's parent.</param>
-        /// <param name="yoff">The Y offset of this link's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
             string tt = Text;
             if (Clicked)
@@ -156,17 +153,17 @@ namespace FreneticGameGraphics.UISystem
             }
             if (Icon != null)
             {
-                float x = GetX() + xoff;
-                float y = GetY() + yoff;
+                float x = LastAbsolutePosition.X;
+                float y = LastAbsolutePosition.Y;
                 Icon.Bind();
                 view.Rendering.SetColor(IconColor);
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height, new Vector3(-0.5f, -0.5f, rotation));
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 TextFont.DrawColoredText(tt, new Location(x + TextFont.font_default.Height, y, 0), int.MaxValue, 1, false, BColor);
                 view.Rendering.SetColor(OpenTK.Vector4.One);
             }
             else
             {
-                TextFont.DrawColoredText(tt, new Location(GetX() + xoff, GetY() + yoff, 0), bcolor: BColor);
+                TextFont.DrawColoredText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0), bcolor: BColor);
             }
         }
     }

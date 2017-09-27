@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticGameCore.Collision;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using OpenTK;
@@ -27,7 +28,7 @@ namespace FreneticGameGraphics.UISystem
         /// <summary>
         /// Do not access directly, except for debugging.
         /// </summary>
-        public List<UIElement> Children;
+        public List<UIElement> Children = new List<UIElement>();
         
         /// <summary>
         /// The parent of this element.
@@ -57,6 +58,21 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
+        /// Last known absolute position.
+        /// </summary>
+        public Vector2i LastAbsolutePosition;
+
+        /// <summary>
+        /// Last known absolute size (Width / Height).
+        /// </summary>
+        public Vector2i LastAbsoluteSize;
+
+        /// <summary>
+        /// Last known aboslute rotation.
+        /// </summary>
+        public float LastAbsoluteRotation;
+
+        /// <summary>
         /// The position and size of this element.
         /// </summary>
         public UIPositionHelper Position;
@@ -67,14 +83,21 @@ namespace FreneticGameGraphics.UISystem
         public bool HoverInternal;
 
         /// <summary>
+        /// Priority for rendering logic.
+        /// </summary>
+        public double RenderPriority = 0;
+
+        /// <summary>
         /// Constructs a new element to be placed on a <see cref="UIScreen"/>.
         /// </summary>
         /// <param name="pos">The position of the element.</param>
         public UIElement(UIPositionHelper pos)
         {
-            Children = new List<UIElement>();
             Position = pos;
             Position.For = this;
+            LastAbsolutePosition = new Vector2i(Position.X, Position.Y);
+            LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
+            LastAbsoluteRotation = Position.Rotation;
         }
 
         /// <summary>
@@ -142,51 +165,6 @@ namespace FreneticGameGraphics.UISystem
         }
         
         /// <summary>
-        /// Gets the current X position of this element on the screen based on the anchor and X offset.
-        /// </summary>
-        /// <returns>The current X value.</returns>
-        public int GetX()
-        {
-            return Position.X;
-        }
-
-        /// <summary>
-        /// Gets the current Y position of this element on the screen based on the anchor and Y offset.
-        /// </summary>
-        /// <returns>The current Y value.</returns>
-        public int GetY()
-        {
-            return Position.Y;
-        }
-
-        /// <summary>
-        /// Gets the current width of this element.
-        /// </summary>
-        /// <returns>The current width.</returns>
-        public int GetWidth()
-        {
-            return Position.Width;
-        }
-
-        /// <summary>
-        /// Gets the current height of this element.
-        /// </summary>
-        /// <returns>The current height.</returns>
-        public int GetHeight()
-        {
-            return Position.Height;
-        }
-
-        /// <summary>
-        /// Gets the current rotation of this element.
-        /// </summary>
-        /// <returns>The current rotation.</returns>
-        public float GetRotation()
-        {
-            return Position.Rotation;
-        }
-
-        /// <summary>
         /// Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.
         /// </summary>
         /// <param name="x">The X position to check for.</param>
@@ -212,10 +190,10 @@ namespace FreneticGameGraphics.UISystem
         /// <returns>Whether the position is within any of the boundaries.</returns>
         protected bool SelfContains(int x, int y)
         {
-            int lowX = GetX();
-            int lowY = GetY();
-            int highX = lowX + (int)GetWidth();
-            int highY = lowY + (int)GetHeight();
+            int lowX = LastAbsolutePosition.X;
+            int lowY = LastAbsolutePosition.Y;
+            int highX = lowX + LastAbsoluteSize.X;
+            int highY = lowY + LastAbsoluteSize.Y;
             return x > lowX && x < highX
                 && y > lowY && y < highY;
         }
@@ -338,14 +316,14 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
-        /// Performs a render on this element and its children.
+        /// Updates positions of this element and its children.
         /// </summary>
-        /// <param name="view">The UI view.</param>
+        /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
         /// <param name="lastRot">The last rotation made in the render chain.</param>
-        public virtual void FullRender(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
+        public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             if (Parent == null || !Parent.ToRemove.Contains(this))
             {
@@ -353,34 +331,35 @@ namespace FreneticGameGraphics.UISystem
                 int y;
                 if (Math.Abs(lastRot.Z) < 0.001f)
                 {
-                    x = GetX() + xoff;
-                    y = GetY() + yoff;
-                    lastRot = new Vector3(GetWidth() * -0.5f, GetHeight() * -0.5f, GetRotation());
+                    x = Position.X + xoff;
+                    y = Position.Y + yoff;
+                    lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
                 }
                 else
                 {
-                    x = GetX();
-                    y = GetY();
+                    x = Position.X;
+                    y = Position.Y;
                     int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
                     int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
-                    float half_wid = GetWidth() * 0.5f;
-                    float half_hei = GetHeight() * 0.5f;
+                    float half_wid = Position.Width * 0.5f;
+                    float half_hei = Position.Height * 0.5f;
                     float tx = x + lastRot.X + cwx - half_wid;
                     float ty = y + lastRot.Y + chy - half_hei;
                     float cosRot = (float)Math.Cos(-lastRot.Z);
                     float sinRot = (float)Math.Sin(-lastRot.Z);
                     float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
                     float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
-                    lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + GetRotation());
+                    lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
                     int bx = (int)tx2 + xoff;
                     int by = (int)ty2 + yoff;
-                    xoff = bx - x;
-                    yoff = by - y;
                     x = bx;
                     y = by;
                 }
-                Render(view, delta, xoff, yoff, lastRot.Z);
-                RenderChildren(view, delta, x, y, lastRot);
+                LastAbsolutePosition = new Vector2i(x, y);
+                LastAbsoluteRotation = lastRot.Z;
+                LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
+                output.Add(this);
+                UpdateChildPositions(output, delta, x, y, lastRot);
             }
         }
 
@@ -389,30 +368,25 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected virtual void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public virtual void Render(ViewUI2D view, double delta)
         {
         }
 
         /// <summary>
-        /// Performs a render on this element's children.
+        /// Updates this element's child positions.
         /// </summary>
-        /// <param name="view">The UI view.</param>
+        /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
         /// <param name="lastRot">The last rotation made in the render chain.</param>
-        protected virtual void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
+        protected virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             CheckChildren();
-            GraphicsUtil.CheckError("RenderElement - Children - Pre");
             foreach (UIElement element in Children)
             {
-                element.FullRender(view, delta, xoff, yoff, lastRot);
+                element.UpdatePositions(output, delta, xoff, yoff, lastRot);
             }
-            GraphicsUtil.CheckError("RenderElement - Children - Post");
         }
 
         /// <summary>

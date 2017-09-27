@@ -40,7 +40,7 @@ namespace FreneticGameGraphics.UISystem
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new FreneticGameCore.Collision.Vector2i(TextureEngine.GetNextPOTValue(GetWidth()), TextureEngine.GetNextPOTValue(GetHeight()))
+                SubSize = new FreneticGameCore.Collision.Vector2i(TextureEngine.GetNextPOTValue(Position.Width), TextureEngine.GetNextPOTValue(Position.Height))
             };
         }
 
@@ -78,17 +78,14 @@ namespace FreneticGameGraphics.UISystem
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">Delta time.</param>
-        /// <param name="xoff">X Offset.</param>
-        /// <param name="yoff">Y Offset.</param>
-        /// <param name="rotation">The calculated rotation to make in this render call.</param>
-        protected override void Render(ViewUI2D view, double delta, int xoff, int yoff, float rotation)
+        public override void Render(ViewUI2D view, double delta)
         {
-            int x = GetX() + xoff;
-            int y = GetY() + yoff;
-            int w = (int)GetWidth();
-            int h = (int)GetHeight();
+            int x = LastAbsolutePosition.X;
+            int y = LastAbsolutePosition.Y;
+            int w = LastAbsoluteSize.X;
+            int h = LastAbsoluteSize.Y;
             GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.CurrentFBO);
-            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, rotation));
+            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         }
     }
 }

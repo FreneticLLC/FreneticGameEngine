@@ -24,6 +24,11 @@ namespace FreneticGameGraphics.UISystem
     public class UIScreen : UIElement
     {
         /// <summary>
+        /// The default priority of a UI Screen.
+        /// </summary>
+        public const double SCREEN_PRIORITY_DEFAULT = -10E10;
+
+        /// <summary>
         /// A reference to the relevant client backing this screen.
         /// Get this using <see cref="Client"/>.
         /// </summary>
@@ -63,8 +68,9 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="view">The client UI View.</param>
         public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
         {
-            Position.GetterWidth(() => Parent == null ? Engine.Window.Width : Parent.GetWidth());
-            Position.GetterHeight(() => Parent == null ? Engine.Window.Height : Parent.GetHeight());
+            Position.GetterWidth(() => Parent == null ? Engine.Window.Width : Parent.Position.Width);
+            Position.GetterHeight(() => Parent == null ? Engine.Window.Height : Parent.Position.Height);
+            RenderPriority = SCREEN_PRIORITY_DEFAULT;
         }
 
         /// <summary>
@@ -87,23 +93,15 @@ namespace FreneticGameGraphics.UISystem
         }
 
         /// <summary>
-        /// Performs a render on all children of this screen.
+        /// Performs a render on this element.
         /// </summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="lastRot">The last rotation made in the render chain.</param>
-        protected override void RenderChildren(ViewUI2D view, double delta, int xoff, int yoff, Vector3 lastRot)
+        public override void Render(ViewUI2D view, double delta)
         {
-            if (ResetOnRender)
-            {
-                GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
-                GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                GraphicsUtil.CheckError("RenderScreen - Reset");
-            }
-            base.RenderChildren(view, delta, xoff, yoff, lastRot);
-            GraphicsUtil.CheckError("RenderScreen - Children");
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
+            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+            GraphicsUtil.CheckError("RenderScreen - Reset");
         }
 
         /// <summary>
