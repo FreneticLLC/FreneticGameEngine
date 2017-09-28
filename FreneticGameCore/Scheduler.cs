@@ -274,8 +274,13 @@ namespace FreneticGameCore
                 Started = true;
                 Done = false;
             }
-            Task.Factory.StartNew(RunInternal);
+            Created = Task.Factory.StartNew(RunInternal);
         }
+
+        /// <summary>
+        /// The created task, if any.
+        /// </summary>
+        public Task Created;
 
         /// <summary>
         /// Internal runner for the item.
