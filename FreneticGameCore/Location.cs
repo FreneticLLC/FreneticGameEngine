@@ -477,7 +477,7 @@ namespace FreneticGameCore
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return (int)(X + Y + Z);
+            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
         }
 
         /// <summary>

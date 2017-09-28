@@ -93,13 +93,13 @@ namespace FreneticGameCore
         /// <param name="rotation">The quaternion.</param>
         /// <param name="axis">The relative axis.</param>
         /// <returns>The angle.</returns>
-        public static double AxisAngleFor(this Quaternion rotation, Vector3 axis)
+        public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, Vector3 axis)
         {
             Vector3 ra = new Vector3(rotation.X, rotation.Y, rotation.Z);
             Vector3 p = Utilities.Project(ra, axis);
-            Quaternion twist = new Quaternion(p.X, p.Y, p.Z, rotation.W);
+            BEPUutilities.Quaternion twist = new BEPUutilities.Quaternion(p.X, p.Y, p.Z, rotation.W);
             twist.Normalize();
-            Vector3 new_forward = Quaternion.Transform(Vector3.UnitX, twist);
+            Vector3 new_forward = BEPUutilities.Quaternion.Transform(Vector3.UnitX, twist);
             return Utilities.VectorToAngles(new Location(new_forward)).Yaw * Math.PI / 180.0;
         }
 

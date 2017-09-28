@@ -183,7 +183,7 @@ namespace FreneticGameCore
                                     {
                                         string[] posdata = rots[x].SplitFast('=');
                                         node.RotTimes.Add(Utilities.StringToDouble(posdata[0]));
-                                        node.Rotations.Add(new Quaternion(Utilities.StringToFloat(posdata[1]), Utilities.StringToFloat(posdata[2]),
+                                        node.Rotations.Add(new BEPUutilities.Quaternion(Utilities.StringToFloat(posdata[1]), Utilities.StringToFloat(posdata[2]),
                                             Utilities.StringToFloat(posdata[3]), Utilities.StringToFloat(posdata[4])));
                                     }
                                 }
@@ -320,7 +320,7 @@ namespace FreneticGameCore
         /// <summary>
         /// The rotations.
         /// </summary>
-        public List<Quaternion> Rotations = new List<Quaternion>();
+        public List<BEPUutilities.Quaternion> Rotations = new List<BEPUutilities.Quaternion>();
 
         /// <summary>
         /// Finds a position by time.
@@ -398,11 +398,11 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="aTime">The time.</param>
         /// <returns>The rotation.</returns>
-        public Quaternion LerpRotate(double aTime)
+        public BEPUutilities.Quaternion LerpRotate(double aTime)
         {
             if (Rotations.Count == 0)
             {
-                return Quaternion.Identity;
+                return BEPUutilities.Quaternion.Identity;
             }
             if (Rotations.Count == 1)
             {
@@ -420,9 +420,9 @@ namespace FreneticGameCore
             {
                 return Rotations[0];
             }
-            Quaternion start = Rotations[index];
-            Quaternion end = Rotations[nextIndex];
-            Quaternion res = Quaternion.Slerp(start, end, (double)factor);
+            BEPUutilities.Quaternion start = Rotations[index];
+            BEPUutilities.Quaternion end = Rotations[nextIndex];
+            BEPUutilities.Quaternion res = BEPUutilities.Quaternion.Slerp(start, end, (double)factor);
             res.Normalize();
             return res;
         }

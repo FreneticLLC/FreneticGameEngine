@@ -92,7 +92,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// The starting orientation of the physics body.
         /// </summary>
-        private Quaternion InternalOrientation = Quaternion.Identity;
+        private BEPUutilities.Quaternion InternalOrientation = BEPUutilities.Quaternion.Identity;
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
@@ -253,7 +253,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Quaternion Orientation
+        public BEPUutilities.Quaternion Orientation
         {
             get
             {
@@ -311,7 +311,7 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="p">The new position.</param>
         public void PosCheck(Location p)
         {
-            Location coff = new Location(Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+            Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
             Location p2 = (p / PhysicsWorld.RelativeScale) + coff;
             if (p2.DistanceSquared(InternalPosition) > 0.01)
             {
@@ -323,10 +323,10 @@ namespace FreneticGameCore.EntitySystem
         /// Checks and handles an orientation update.
         /// </summary>
         /// <param name="q">The new orientation.</param>
-        public void OriCheck(Quaternion q)
+        public void OriCheck(BEPUutilities.Quaternion q)
         {
-            Quaternion.GetRelativeRotation(ref q, ref InternalOrientation, out Quaternion rel);
-            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
+            BEPUutilities.Quaternion.GetRelativeRotation(ref q, ref InternalOrientation, out BEPUutilities.Quaternion rel);
+            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
             {
                 Orientation = q;
             }
@@ -371,7 +371,7 @@ namespace FreneticGameCore.EntitySystem
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
             InternalPosition = Location.Zero;
-            InternalOrientation = Quaternion.Identity;
+            InternalOrientation = BEPUutilities.Quaternion.Identity;
             TickUpdates();
         }
         
@@ -392,12 +392,12 @@ namespace FreneticGameCore.EntitySystem
             if (InternalPosition.DistanceSquared(bpos) > 0.0001) // TODO: || Active?
             {
                 InternalPosition = bpos;
-                Location coff = new Location(Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+                Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
                 Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScale);
             }
-            Quaternion cur = SpawnedBody.Orientation;
-            Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out Quaternion rel);
-            if (Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001) // TODO: || Active?
+            BEPUutilities.Quaternion cur = SpawnedBody.Orientation;
+            BEPUutilities.Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out BEPUutilities.Quaternion rel);
+            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001) // TODO: || Active?
             {
                 InternalOrientation = cur;
                 Entity.OnOrientationChanged?.Invoke(cur);

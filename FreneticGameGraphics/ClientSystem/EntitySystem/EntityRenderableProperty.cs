@@ -54,7 +54,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// What orientation to render the entity at.
         /// </summary>
-        public Quaternion RenderOrientation = Quaternion.Identity;
+        public OpenTK.Quaternion RenderOrientation = OpenTK.Quaternion.Identity;
 
         /// <summary>
         /// Fired when the entity is spawned.

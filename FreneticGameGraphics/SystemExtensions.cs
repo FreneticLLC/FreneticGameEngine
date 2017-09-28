@@ -26,9 +26,9 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">The BEPU quaternion.</param>
         /// <returns>The OpenTK quaternion.</returns>
-        public static Quaternion ToOpenTK(this BEPUutilities.Quaternion q)
+        public static OpenTK.Quaternion ToOpenTK(this BEPUutilities.Quaternion q)
         {
-            return new Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+            return new OpenTK.Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">The OpenTK quaternion.</param>
         /// <returns>The BEPU quaternion.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this Quaternion q)
+        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Quaternion q)
         {
             return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
         }
@@ -46,7 +46,7 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">Float quaternion.</param>
         /// <returns>Double quaternion.</returns>
-        public static Quaterniond ToDoubles(this Quaternion q)
+        public static Quaterniond ToDoubles(this OpenTK.Quaternion q)
         {
             return new Quaterniond(q.X, q.Y, q.Z, q.W);
         }

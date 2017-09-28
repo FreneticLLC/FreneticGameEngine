@@ -67,7 +67,7 @@ namespace FreneticGameCore.EntitySystem
         /// Fired when the entity's orientation is changed.
         /// TODO: Actual event?
         /// </summary>
-        public Action<Quaternion> OnOrientationChanged;
+        public Action<BEPUutilities.Quaternion> OnOrientationChanged;
 
         /// <summary>
         /// Fired when this entity is spawned into a world.

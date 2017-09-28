@@ -97,8 +97,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
             mm.vbo.AddSide(-Location.UnitY, tc);
             mm.vbo.AddSide(-Location.UnitZ, tc);
             m.Original = new Model3D();
-            Model3DMesh m3m = new Model3DMesh();
-            m3m.Name = "cube";
+            Model3DMesh m3m = new Model3DMesh()
+            {
+                Name = "cube"
+            };
             m3m.Indices = new List<int>(mm.vbo.Indices.ConvertAll((u) => (int)u));
             m3m.Vertices = new List<BEPUutilities.Vector3>(mm.vbo.Vertices.ConvertAll((o) => o.ToLocation().ToBVector()));
             m3m.TexCoords = new List<BEPUutilities.Vector2>(mm.vbo.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y)));
@@ -553,7 +555,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 BEPUutilities.Vector3 vec = pNodeAnim.LerpPos(time);
                 BEPUutilities.Quaternion quat = pNodeAnim.LerpRotate(time);
-                Quaternion oquat = new Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
+                OpenTK.Quaternion oquat = new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
                 Matrix4.CreateTranslation((float)vec.X, (float)vec.Y, (float)vec.Z, out Matrix4 trans);
                 trans.Transpose();
                 Matrix4.CreateFromQuaternion(ref oquat, out Matrix4 rot);
