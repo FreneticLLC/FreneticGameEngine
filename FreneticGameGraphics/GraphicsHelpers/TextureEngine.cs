@@ -291,6 +291,23 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             return (LoadTexture(name, twidth) ?? LoadTexture("white", twidth)).Original_InternalID;
         }
+        
+        /// <summary>
+        /// Resizes an image texture.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="twidth">The new texture width.</param>
+        /// <returns>The output.</returns>
+        public Bitmap ResizeTexture(Bitmap input, int twidth)
+        {
+            Bitmap tr = new Bitmap(twidth, twidth);
+            using (Graphics g = Graphics.FromImage(tr))
+            {
+                g.DrawImage(input, new Rectangle(0, 0, twidth, twidth), new Rectangle(0, 0, input.Width - 1, input.Height - 1), GraphicsUnit.Pixel); // TODO: how did -1 end up required here?
+                g.Flush();
+            }
+            return tr;
+        }
 
         /// <summary>
         /// loads a texture by name and puts it into a texture array.
@@ -312,9 +329,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     return;
                 }
                 Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png"));
-                Bitmap bmp2 = new Bitmap(bmp, new Size(twidth, twidth));
-                LockBitmapToTexture(bmp2, depth);
-                bmp2.Dispose();
+                if (bmp.Width != twidth || bmp.Height != twidth)
+                {
+                    Bitmap bmp2 = ResizeTexture(bmp, twidth);
+                    bmp.Dispose();
+                    bmp = bmp2;
+                }
+                LockBitmapToTexture(bmp, depth);
                 bmp.Dispose();
             }
             catch (Exception ex)
@@ -378,8 +399,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="depth">The depth in a 3D texture.</param>
         public void LockBitmapToTexture(Bitmap bmp, int depth)
         {
-            BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
             bmp.UnlockBits(bmp_data);
         }
