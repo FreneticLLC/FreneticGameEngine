@@ -27,7 +27,7 @@ namespace FreneticGameCore.EntitySystem
 
         /// <summary>
         /// Whether the entity should tick normally.
-        /// <para>Note: Setting this after it's spawned is not required to validly modify its value.</para>
+        /// <para>Note: Setting this after it's spawned is not guaranteed to validly modify its value.</para>
         /// </summary>
         public bool Ticks;
 
@@ -58,6 +58,11 @@ namespace FreneticGameCore.EntitySystem
         public Location LastKnownPosition;
 
         /// <summary>
+        /// Last orientation known that this entity was or is exactly upon.
+        /// </summary>
+        public BEPUutilities.Quaternion LastKnownOrientation;
+
+        /// <summary>
         /// Fired when the entity is moved.
         /// TODO: Actual event?
         /// </summary>
@@ -80,12 +85,61 @@ namespace FreneticGameCore.EntitySystem
         public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>();
 
         /// <summary>
+        /// Rotates the entity around a normalized axis by an angle.
+        /// <para>Updates only the orientation.</para>
+        /// </summary>
+        /// <param name="axis">The normalized axis.</param>
+        /// <param name="angle">The angle.</param>
+        public void RotateAround(Location axis, double angle)
+        {
+            SetOrientation(LastKnownOrientation * BEPUutilities.Quaternion.CreateFromAxisAngle(axis.ToBVector(), angle));
+        }
+
+        /// <summary>
+        /// Moves the entity relative to its current position.
+        /// </summary>
+        /// <param name="x">X motion.</param>
+        /// <param name="y">Y motion.</param>
+        /// <param name="z">Z motion, if any..</param>
+        public void MoveRelative(double x, double y, double z = 0)
+        {
+            SetPosition(LastKnownPosition + new Location(x, y, z));
+        }
+
+        /// <summary>
+        /// Moves the entity relative to its current position.
+        /// </summary>
+        /// <param name="motion">The motion to make.</param>
+        public void MoveRelative(Location motion)
+        {
+            SetPosition(LastKnownPosition + motion);
+        }
+
+        /// <summary>
+        /// Sets the orientation of the entity.
+        /// </summary>
+        /// <param name="q">The new orientation quaternion.</param>
+        public void SetOrientation(BEPUutilities.Quaternion q)
+        {
+            OnOrientationChanged?.Invoke(q);
+        }
+
+        /// <summary>
         /// Sets the position of the entity.
         /// </summary>
         /// <param name="p">New position.</param>
         public void SetPosition(Location p)
         {
-            OnPositionChanged(p);
+            OnPositionChanged?.Invoke(p);
+        }
+
+        /// <summary>
+        /// Sets the last known orientation to the input value.
+        /// </summary>
+        /// <param name="q">The last known orientation.</param>
+        private void SetLKO(BEPUutilities.Quaternion q)
+        {
+            LastKnownOrientation = q;
         }
 
         /// <summary>
@@ -107,6 +161,7 @@ namespace FreneticGameCore.EntitySystem
             Engine = eng;
             Ticks = _ticks;
             OnPositionChanged += SetLKP;
+            OnOrientationChanged += SetLKO;
         }
 
         /// <summary>
