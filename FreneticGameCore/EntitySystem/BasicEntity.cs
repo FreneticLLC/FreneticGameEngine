@@ -60,7 +60,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Last orientation known that this entity was or is exactly upon.
         /// </summary>
-        public BEPUutilities.Quaternion LastKnownOrientation;
+        public Quaternion LastKnownOrientation;
 
         /// <summary>
         /// Fired when the entity is moved.
@@ -72,7 +72,7 @@ namespace FreneticGameCore.EntitySystem
         /// Fired when the entity's orientation is changed.
         /// TODO: Actual event?
         /// </summary>
-        public Action<BEPUutilities.Quaternion> OnOrientationChanged;
+        public Action<Quaternion> OnOrientationChanged;
 
         /// <summary>
         /// Fired when this entity is spawned into a world.
@@ -92,7 +92,7 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="angle">The angle.</param>
         public void RotateAround(Location axis, double angle)
         {
-            SetOrientation(LastKnownOrientation * BEPUutilities.Quaternion.CreateFromAxisAngle(axis.ToBVector(), angle));
+            SetOrientation(LastKnownOrientation * Quaternion.FromAxisAngle(axis, angle));
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace FreneticGameCore.EntitySystem
         /// Sets the orientation of the entity.
         /// </summary>
         /// <param name="q">The new orientation quaternion.</param>
-        public void SetOrientation(BEPUutilities.Quaternion q)
+        public void SetOrientation(Quaternion q)
         {
             OnOrientationChanged?.Invoke(q);
         }
@@ -137,7 +137,7 @@ namespace FreneticGameCore.EntitySystem
         /// Sets the last known orientation to the input value.
         /// </summary>
         /// <param name="q">The last known orientation.</param>
-        private void SetLKO(BEPUutilities.Quaternion q)
+        private void SetLKO(Quaternion q)
         {
             LastKnownOrientation = q;
         }

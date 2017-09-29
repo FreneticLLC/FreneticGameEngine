@@ -13,6 +13,7 @@ namespace FreneticGameCore
     /// Represents a 3D rotation, using 4 double-precision floating-point coordinates.
     /// Occupies 32 bytes, calculated as 8 * 4, as it has 4 fields (X, Y, Z, W) each occupying 8 bytes (a double).
     /// </summary>
+    /// <remarks>Based upon BEPU utilities Quaternion.</remarks>
     [StructLayout(LayoutKind.Explicit)]
     public struct Quaternion : IEquatable<Quaternion>
     {
@@ -300,6 +301,111 @@ namespace FreneticGameCore
         public override string ToString()
         {
             return "(" + X + ", " + Y + ", " + Z + ", " + W + ")";
+        }
+
+        /// <summary>
+        /// Creates a Quaternion from an axis and an angle around the axis.
+        /// </summary>
+        /// <param name="axis">The axis.</param>
+        /// <param name="angle">The angle.</param>
+        /// <returns>The resultant Quaternion.</returns>
+        public static Quaternion FromAxisAngle(Location axis, double angle)
+        {
+            double s = Math.Sin(angle * 0.5);
+            return new Quaternion( axis.X * s, axis.Y * s, axis.Z * s, Math.Cos(angle * 0.5));
+        }
+
+        /// <summary>
+        /// Gets the quaternion between two normalized vector locations.
+        /// </summary>
+        /// <param name="v1">First vector location.</param>
+        /// <param name="v2">Second vector location.</param>
+        /// <returns>The quaternion.</returns>
+        public static Quaternion GetQuaternionBetween(Location v1, Location v2)
+        {
+            double dot = v1.Dot(v2);
+            if (dot < -0.9999f)
+            {
+                double absX = Math.Abs(v1.X);
+                double absY = Math.Abs(v1.Y);
+                double absZ = Math.Abs(v1.Z);
+                if (absX < absY && absX < absZ)
+                {
+                    return new Quaternion(0, -v1.Z, v1.Y, 0).Normalized();
+                }
+                else if (absY < absZ)
+                {
+                    return new Quaternion(-v1.Z, 0, v1.X, 0).Normalized();
+                }
+                else
+                {
+                    return new Quaternion(-v1.Y, v1.X, 0, 0).Normalized();
+                }
+            }
+            else
+            {
+                Location axis = v1.CrossProduct(v2);
+                return new Quaternion(axis.X, axis.Y, axis.Z, dot + 1).Normalized();
+            }
+        }
+
+        /// <summary>
+        /// Transforms a location vector by this Quaternion and returns the result.
+        /// </summary>
+        /// <param name="v">The location vector.</param>
+        /// <returns>The transformed location vector.</returns>
+        public Location Transform(Location v)
+        {
+            double x2 = X * 2;
+            double y2 = Y * 2;
+            double z2 = Z * 2;
+            double xx2 = X * x2;
+            double xy2 = X * y2;
+            double xz2 = X * z2;
+            double yy2 = Y * y2;
+            double yz2 = Y * z2;
+            double zz2 = Z * z2;
+            double wx2 = W * x2;
+            double wy2 = W * y2;
+            double wz2 = W * z2;
+            return new Location(v.X * (1f - yy2 - zz2) + v.Y * (xy2 - wz2) + v.Z * (xz2 + wy2),
+                v.X * (xy2 + wz2) + v.Y * (1f - xx2 - zz2) + v.Z * (yz2 - wx2),
+                v.X * (xz2 - wy2) + v.Y * (yz2 + wx2) + v.Z * (1f - xx2 - yy2));
+        }
+
+        /// <summary>
+        /// Transform the normal X axis by this Quaternion.
+        /// </summary>
+        /// <returns>The transformed axis.</returns>
+        public Location TransformX()
+        {
+            double y2 = Y * 2;
+            double z2 = Z * 2;
+            return new Location(1.0 - (Y * y2) - (Z * z2), (X * y2) + (W * z2), (X * z2) - (W * y2));
+        }
+
+        /// <summary>
+        /// Gets or sets this Quaternion as a 2D angle.
+        /// </summary>
+        public double Angle2D
+        {
+            get
+            {
+                // TODO: Perhaps simplify logic for if the Orientation is 2D anyway?
+                // This is slower than it should be!
+                Location ra = new Location(X, Y, Z);
+                Location p = ra.Project(Location.UnitZ);
+                Quaternion twist = new Quaternion(p.X, p.Y, p.Z, W).Normalized();
+                Location newFor = twist.TransformX();
+                return Utilities.VectorToAnglesYawRad(newFor);
+            }
+            set
+            {
+                X = 0;
+                Y = 0;
+                Z = Math.Sin(value * 0.5);
+                W = Math.Cos(value * 0.5);
+            }
         }
     }
 }

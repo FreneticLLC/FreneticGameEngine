@@ -22,6 +22,16 @@ namespace FreneticGameGraphics
     public static class SystemExtensions
     {
         /// <summary>
+        /// Converts a Core quaternion to an OpenTK quaternion.
+        /// </summary>
+        /// <param name="q">The Core quaternion.</param>
+        /// <returns>The OpenTK quaternion.</returns>
+        public static OpenTK.Quaternion ToOpenTK(this FreneticGameCore.Quaternion q)
+        {
+            return new OpenTK.Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+        }
+
+        /// <summary>
         /// Converts a BEPU quaternion to an OpenTK quaternion.
         /// </summary>
         /// <param name="q">The BEPU quaternion.</param>
@@ -32,7 +42,17 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
-        /// Converts a BEPU quaternion to an OpenTK quaternion.
+        /// Converts an OpenTK quaternion to a Core quaternion.
+        /// </summary>
+        /// <param name="q">The OpenTK quaternion.</param>
+        /// <returns>The Core quaternion.</returns>
+        public static FreneticGameCore.Quaternion ToCore(this OpenTK.Quaternion q)
+        {
+            return new FreneticGameCore.Quaternion(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
+        /// Converts an OpenTK quaternion to a BEPU quaternion.
         /// </summary>
         /// <param name="q">The OpenTK quaternion.</param>
         /// <returns>The BEPU quaternion.</returns>

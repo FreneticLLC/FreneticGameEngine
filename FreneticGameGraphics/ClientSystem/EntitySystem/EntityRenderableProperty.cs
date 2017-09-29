@@ -116,7 +116,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// Fixes the orientation of the renderable.
         /// </summary>
         /// <param name="q">The new orientation.</param>
-        public void FixOrientation(BEPUutilities.Quaternion q)
+        public void FixOrientation(FreneticGameCore.Quaternion q)
         {
             RenderOrientation = q.ToOpenTK();
         }

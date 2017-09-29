@@ -728,6 +728,28 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Converts a forward vector to a yaw angle, in radians.
+        /// </summary>
+        /// <param name="input">The forward vector.</param>
+        /// <returns>The yaw angle.</returns>
+        public static double VectorToAnglesYawRad(Location input)
+        {
+            if (input.X == 0 && input.Y == 0)
+            {
+                return 0;
+            }
+            if (input.X != 0)
+            {
+                return Math.Atan2(input.Y, input.X);
+            }
+            if (input.Y > 0)
+            {
+                return 0;
+            }
+            return Math.PI;
+        }
+
+        /// <summary>
         /// Converts a forward vector to yaw/pitch angles.
         /// </summary>
         /// <param name="input">The forward vector.</param>

@@ -104,6 +104,26 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Converts a Core quaternion to a BEPU quaternion.
+        /// </summary>
+        /// <param name="q">The OpenTK quaternion.</param>
+        /// <returns>The BEPU quaternion.</returns>
+        public static BEPUutilities.Quaternion ToBEPU(this FreneticGameCore.Quaternion q)
+        {
+            return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
+        /// Converts a BEPU quaternion to a Core quaternion.
+        /// </summary>
+        /// <param name="q">The BEPU quaternion.</param>
+        /// <returns>The Core quaternion.</returns>
+        public static Quaternion ToCore(this BEPUutilities.Quaternion q)
+        {
+            return new Quaternion(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
         /// Converts a <see cref="TextElementEnumerator"/> to an Enumerable.
         /// </summary>
         /// <typeparam name="T">The expected Enumerable type.</typeparam>

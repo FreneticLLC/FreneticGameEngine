@@ -92,7 +92,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// The starting orientation of the physics body.
         /// </summary>
-        private BEPUutilities.Quaternion InternalOrientation = BEPUutilities.Quaternion.Identity;
+        private Quaternion InternalOrientation = Quaternion.Identity;
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
@@ -253,18 +253,18 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public BEPUutilities.Quaternion Orientation
+        public Quaternion Orientation
         {
             get
             {
-                return SpawnedBody == null ? InternalOrientation : SpawnedBody.Orientation;
+                return SpawnedBody == null ? InternalOrientation : SpawnedBody.Orientation.ToCore();
             }
             set
             {
                 InternalOrientation = value;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.Orientation = InternalOrientation;
+                    SpawnedBody.Orientation = InternalOrientation.ToBEPU();
                 }
             }
         }
@@ -323,9 +323,11 @@ namespace FreneticGameCore.EntitySystem
         /// Checks and handles an orientation update.
         /// </summary>
         /// <param name="q">The new orientation.</param>
-        public void OriCheck(BEPUutilities.Quaternion q)
+        public void OriCheck(Quaternion q)
         {
-            BEPUutilities.Quaternion.GetRelativeRotation(ref q, ref InternalOrientation, out BEPUutilities.Quaternion rel);
+            BEPUutilities.Quaternion qb = q.ToBEPU();
+            BEPUutilities.Quaternion qio = InternalOrientation.ToBEPU();
+            BEPUutilities.Quaternion.GetRelativeRotation(ref qb, ref qio, out BEPUutilities.Quaternion rel);
             if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
             {
                 Orientation = q;
@@ -356,7 +358,7 @@ namespace FreneticGameCore.EntitySystem
             {
                 SpawnedBody = new Entity(Shape.GetBEPUShape(), InternalMass);
                 OriginalObject = SpawnedBody;
-                SpawnedBody.Orientation = InternalOrientation;
+                SpawnedBody.Orientation = InternalOrientation.ToBEPU();
             }
             SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
             SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
@@ -371,7 +373,7 @@ namespace FreneticGameCore.EntitySystem
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
             InternalPosition = Location.Zero;
-            InternalOrientation = BEPUutilities.Quaternion.Identity;
+            InternalOrientation = Quaternion.Identity;
             TickUpdates();
         }
         
@@ -396,11 +398,12 @@ namespace FreneticGameCore.EntitySystem
                 Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScale);
             }
             BEPUutilities.Quaternion cur = SpawnedBody.Orientation;
-            BEPUutilities.Quaternion.GetRelativeRotation(ref cur, ref InternalOrientation, out BEPUutilities.Quaternion rel);
+            BEPUutilities.Quaternion qio = InternalOrientation.ToBEPU();
+            BEPUutilities.Quaternion.GetRelativeRotation(ref cur, ref qio, out BEPUutilities.Quaternion rel);
             if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001) // TODO: || Active?
             {
-                InternalOrientation = cur;
-                Entity.OnOrientationChanged?.Invoke(cur);
+                InternalOrientation = cur.ToCore();
+                Entity.OnOrientationChanged?.Invoke(cur.ToCore());
             }
         }
 
@@ -416,7 +419,7 @@ namespace FreneticGameCore.EntitySystem
             InternalLinearVelocity = new Location(SpawnedBody.LinearVelocity);
             InternalAngularVelocity = new Location(SpawnedBody.AngularVelocity);
             InternalPosition = new Location(SpawnedBody.Position);
-            InternalOrientation = SpawnedBody.Orientation;
+            InternalOrientation = SpawnedBody.Orientation.ToCore();
         }
 
         /// <summary>

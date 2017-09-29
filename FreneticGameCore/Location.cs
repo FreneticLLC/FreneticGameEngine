@@ -403,6 +403,16 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Projects this location onto another.
+        /// </summary>
+        /// <param name="b">The other.</param>
+        /// <returns>The projection.</returns>
+        public Location Project(Location b)
+        {
+            return b * (Dot(b) / b.LengthSquared());
+        }
+
+        /// <summary>
         /// Converts the Location to a simple byte[] representation.
         /// Contains 24 bytes.
         /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
