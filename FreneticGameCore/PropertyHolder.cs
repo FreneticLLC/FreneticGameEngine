@@ -161,9 +161,9 @@ namespace FreneticGameCore
                 Loader = (b) => Location.FromDoubleBytes(b, 0).ToBVector(),
                 SaveString = "C/B/vector3"
             });
-            TypeSavers.Add(typeof(Quaternion), new PropertySaverLoader()
+            TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()
             {
-                Saver = (o) => Utilities.QuaternionToBytes((Quaternion)o),
+                Saver = (o) => Utilities.QuaternionToBytes((BEPUutilities.Quaternion)o),
                 Loader = (b) => Utilities.BytesToQuaternion(b, 0),
                 SaveString = "C/B/quaternion"
             });

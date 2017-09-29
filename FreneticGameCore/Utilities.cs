@@ -634,14 +634,14 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="input">The string.</param>
         /// <returns>The quaternion, or the identity quaternion.</returns>
-        public static Quaternion StringToQuat(string input)
+        public static BEPUutilities.Quaternion StringToQuat(string input)
         {
             string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
             if (data.Length != 4)
             {
-                return Quaternion.Identity;
+                return BEPUutilities.Quaternion.Identity;
             }
-            return new Quaternion(StringToFloat(data[0]), StringToFloat(data[1]), StringToFloat(data[2]), StringToFloat(data[3]));
+            return new BEPUutilities.Quaternion(StringToFloat(data[0]), StringToFloat(data[1]), StringToFloat(data[2]), StringToFloat(data[3]));
         }
 
         /// <summary>
@@ -649,7 +649,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="quat">The quaternion.</param>
         /// <returns>The string.</returns>
-        public static string QuatToString(Quaternion quat)
+        public static string QuatToString(BEPUutilities.Quaternion quat)
         {
             return "(" + quat.X + ", " + quat.Y + ", " + quat.Z + ", " + quat.W + ")";
         }
@@ -660,7 +660,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="quat">The quaternion.</param>
         /// <returns>The byte array.</returns>
-        public static byte[] QuaternionToBytes(Quaternion quat)
+        public static byte[] QuaternionToBytes(BEPUutilities.Quaternion quat)
         {
             byte[] dat = new byte[4 + 4 + 4 + 4];
             FloatToBytes((float)quat.X).CopyTo(dat, 0);
@@ -676,9 +676,9 @@ namespace FreneticGameCore
         /// <param name="dat">The byte array.</param>
         /// <param name="offset">The offset in the array.</param>
         /// <returns>The quaternion.</returns>
-        public static Quaternion BytesToQuaternion(byte[] dat, int offset)
+        public static BEPUutilities.Quaternion BytesToQuaternion(byte[] dat, int offset)
         {
-            return new Quaternion(BytesToFloat(BytesPartial(dat, offset, 4)), BytesToFloat(BytesPartial(dat, offset + 4, 4)),
+            return new BEPUutilities.Quaternion(BytesToFloat(BytesPartial(dat, offset, 4)), BytesToFloat(BytesPartial(dat, offset + 4, 4)),
                 BytesToFloat(BytesPartial(dat, offset + 4 + 4, 4)), BytesToFloat(BytesPartial(dat, offset + 4 + 4 + 4, 4)));
 
         }
