@@ -49,13 +49,12 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         {
             get
             {
-                return (float)RenderOrientation.ToCore().Angle2D;
+                return (float)RenderOrientation.Angle2D;
             }
             set
             {
-                FreneticGameCore.Quaternion q = new FreneticGameCore.Quaternion() { Angle2D = value };
-                RenderOrientation = q.ToOpenTK();
-                Entity?.OnOrientationChanged?.Invoke(q);
+                RenderOrientation = new FreneticGameCore.Quaternion() { Angle2D = value };
+                Entity?.OnOrientationChanged?.Invoke(RenderOrientation);
             }
         }
 

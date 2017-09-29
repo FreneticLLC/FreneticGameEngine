@@ -32,6 +32,16 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
+        /// Converts a Core quaternion to an OpenTK quaternion D.
+        /// </summary>
+        /// <param name="q">The Core quaternion.</param>
+        /// <returns>The OpenTK quaternion D.</returns>
+        public static Quaterniond ToOpenTKDoubles(this FreneticGameCore.Quaternion q)
+        {
+            return new Quaterniond(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
         /// Converts a BEPU quaternion to an OpenTK quaternion.
         /// </summary>
         /// <param name="q">The BEPU quaternion.</param>

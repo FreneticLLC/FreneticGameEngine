@@ -12,7 +12,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore;
-using OpenTK;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
@@ -54,7 +53,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// What orientation to render the entity at.
         /// </summary>
-        public OpenTK.Quaternion RenderOrientation = OpenTK.Quaternion.Identity;
+        public Quaternion RenderOrientation = Quaternion.Identity;
 
         /// <summary>
         /// Fired when the entity is spawned.
@@ -116,9 +115,17 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// Fixes the orientation of the renderable.
         /// </summary>
         /// <param name="q">The new orientation.</param>
-        public void FixOrientation(FreneticGameCore.Quaternion q)
+        public void FixOrientation(Quaternion q)
         {
-            RenderOrientation = q.ToOpenTK();
+            RenderOrientation = q;
+            OtherOrientationPatch();
+        }
+
+        /// <summary>
+        /// Fired when the orientation is fixed.
+        /// </summary>
+        public virtual void OtherOrientationPatch()
+        {
         }
 
         /// <summary>
