@@ -80,6 +80,7 @@
     <Compile Include="ClientSystem\EntitySystem\ClientEntityPhysics2DLimitProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntityPhysicsProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\ClientEntityProperty.cs" />
+    <Compile Include="ClientSystem\EntitySystem\ClientEntitySimpleAttachProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\Entity2DRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntityLight2DCasterProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySkyLight3DProperty.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
     <Compile Include="ClientSystem\EntitySystem\EntitySimple3DRenderableModelProperty.cs" />
+    <Compile Include="ClientSystem\EntitySystem\ClientEntityCharacterAttachProperty.cs" />
     <Compile Include="ClientSystem\GameClientWindow.cs" />
     <Compile Include="ClientSystem\GameEngine3D.cs" />
     <Compile Include="ClientSystem\GameEngineBase.cs" />

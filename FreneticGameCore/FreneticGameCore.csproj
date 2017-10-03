@@ -67,7 +67,9 @@
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
+    <Compile Include="EntitySystem\EntityCharacterAttachProperty.cs" />
     <Compile Include="EntitySystem\EntityPhysics2DLimitProperty.cs" />
+    <Compile Include="EntitySystem\EntitySimpleAttachProperty.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityConvexHullShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntitySphereShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysics2DLimitProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysicsProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityProperty.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntityCharacterAttachProperty.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntitySimpleAttachProperty.cs" />
     <Compile Include="ServerSystem\ServerEngine.cs" />
     <Compile Include="ServerSystem\ServerGameInstance.cs" />
     <Compile Include="SimplexNoise.cs" />
