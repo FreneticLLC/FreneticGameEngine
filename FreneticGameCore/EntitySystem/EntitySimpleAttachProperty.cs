@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BEPUutilities;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -21,14 +22,29 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
-        /// The relative position offset to maintain.
+        /// Set the relative offset to the current relative locations and orientation.
         /// </summary>
-        public Location PosOffset;
+        public virtual void SetRelativeToCurrent()
+        {
+            SetRelativeBasedOn(AttachedTo.LastKnownOrientation, AttachedTo.LastKnownPosition);
+        }
 
         /// <summary>
-        /// The relative orientation offset to maintain.
+        /// Sets the relative offset based on the attached properties.
         /// </summary>
-        public Quaternion OrientOffset;
+        /// <param name="orient">The attached orientation.</param>
+        /// <param name="pos">The attached position.</param>
+        public void SetRelativeBasedOn(Quaternion orient, Location pos)
+        {
+            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(pos.ToBVector());
+            Matrix.Invert(ref worldTrans, out Matrix inverted);
+            RelativeOffset = Matrix.CreateFromQuaternion(Entity.LastKnownOrientation.ToBEPU()) * Matrix.CreateTranslation(Entity.LastKnownPosition.ToBVector()) * inverted;
+        }
+
+        /// <summary>
+        /// The relative offset matrix offset to maintain.
+        /// </summary>
+        public Matrix RelativeOffset = Matrix.Identity;
 
         /// <summary>
         /// Handles the spawn event.
@@ -64,11 +80,8 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="orient">The attached-to entity's orientation.</param>
         public void SetPositionOrientation(Location position, Quaternion orient)
         {
-            BEPUutilities.Matrix worldTrans = BEPUutilities.Matrix.CreateFromQuaternion(orient.ToBEPU())
-                * BEPUutilities.Matrix.CreateTranslation(position.ToBVector());
-            BEPUutilities.Matrix tmat = (BEPUutilities.Matrix.CreateFromQuaternion(OrientOffset.ToBEPU())
-                * BEPUutilities.Matrix.CreateTranslation(PosOffset.ToBVector()))
-                * worldTrans;
+            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(position.ToBVector());
+            Matrix tmat = RelativeOffset * worldTrans;
             Location pos = new Location(tmat.Translation);
             Quaternion quat = BEPUutilities.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
             Entity.SetPosition(pos);

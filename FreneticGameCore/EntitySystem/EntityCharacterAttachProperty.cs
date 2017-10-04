@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BEPUutilities;
 using BEPUphysics.Character;
 
 namespace FreneticGameCore.EntitySystem
@@ -43,11 +44,31 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Gets the relative quaternion for this attachment.
+        /// </summary>
+        /// <returns>The relative quaternion.</returns>
+        public Quaternion GetRelativeQuaternion()
+        {
+            // TODO: Less complicated option?!
+            Location angles = Utilities.VectorToAngles(new Location(Character.ViewDirection));
+            Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, Character.ViewDirection, -Character.Down);
+            return BEPUutilities.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
+        }
+
+        /// <summary>
+        /// Set the relative offset to the current relative locations and orientation.
+        /// </summary>
+        public override void SetRelativeToCurrent()
+        {
+            SetRelativeBasedOn(GetRelativeQuaternion(), AttachedTo.LastKnownPosition);
+        }
+
+        /// <summary>
         /// Fixes this entity's position based on its attachment.
         /// </summary>
         public override void FixPosition(Location position)
         {
-            SetPositionOrientation(position, Quaternion.GetQuaternionBetween(Location.UnitX, new Location(Character.ViewDirection)));
+            SetPositionOrientation(position, GetRelativeQuaternion());
         }
 
         /// <summary>
