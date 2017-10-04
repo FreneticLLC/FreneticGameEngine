@@ -90,12 +90,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
             ModelMesh mm = new ModelMesh("cube");
             mm.vbo.Prepare();
             TextureCoordinates tc = new TextureCoordinates();
-            mm.vbo.AddSide(Location.UnitX, tc);
-            mm.vbo.AddSide(Location.UnitY, tc);
-            mm.vbo.AddSide(Location.UnitZ, tc);
-            mm.vbo.AddSide(-Location.UnitX, tc);
-            mm.vbo.AddSide(-Location.UnitY, tc);
-            mm.vbo.AddSide(-Location.UnitZ, tc);
+            mm.vbo.AddSide(Location.UnitX, tc, offs: true);
+            mm.vbo.AddSide(Location.UnitY, tc, offs: true);
+            mm.vbo.AddSide(Location.UnitZ, tc, offs: true);
+            mm.vbo.AddSide(-Location.UnitX, tc, offs: true);
+            mm.vbo.AddSide(-Location.UnitY, tc, offs: true);
+            mm.vbo.AddSide(-Location.UnitZ, tc, offs: true);
             m.Original = new Model3D();
             Model3DMesh m3m = new Model3DMesh()
             {
