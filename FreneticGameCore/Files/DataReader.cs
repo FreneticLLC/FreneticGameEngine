@@ -115,6 +115,26 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Read a quaternion object (32 bytes).
+        /// </summary>
+        public Quaternion ReadQuaternion()
+        {
+            return Quaternion.FromDoubleBytes(ReadBytes(32), 0);
+        }
+
+        /// <summary>
+        /// Read a quaternion object (16 bytes).
+        /// </summary>
+        public Quaternion ReadQuaternionFloat()
+        {
+            float x = ReadFloat();
+            float y = ReadFloat();
+            float z = ReadFloat();
+            float w = ReadFloat();
+            return new Quaternion(x, y, z, w);
+        }
+
+        /// <summary>
         /// Read a view direction into a location object (4 bytes).
         /// </summary>
         /// <returns>The view direction location.</returns>

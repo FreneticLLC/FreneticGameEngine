@@ -55,6 +55,27 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
+        /// Write a quaternion object (32 bytes).
+        /// </summary>
+        /// <param name="quat">The data.</param>
+        public void WriteQuaternion(Quaternion quat)
+        {
+            Internal.Write(quat.ToDoubleBytes(), 0, 32);
+        }
+
+        /// <summary>
+        /// Write a quaternion object (16 bytes).
+        /// </summary>
+        /// <param name="quat">The data.</param>
+        public void WriteQuaternionFloat(Quaternion quat)
+        {
+            WriteFloat(quat.XF);
+            WriteFloat(quat.YF);
+            WriteFloat(quat.ZF);
+            WriteFloat(quat.WF);
+        }
+
+        /// <summary>
         /// Write a view direction from a location object (4 bytes).
         /// </summary>
         /// <param name="loc">The data.</param>

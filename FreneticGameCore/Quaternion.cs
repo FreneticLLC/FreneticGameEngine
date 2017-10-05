@@ -350,6 +350,42 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Reads the byte array to a Quaternion object.
+        /// Expects 32 bytes.
+        /// Inverts <see cref="ToDoubleBytes"/>.
+        /// </summary>
+        /// <param name="bytes">The bytes to read.</param>
+        /// <param name="index">The index to start at.</param>
+        /// <returns>the location object.</returns>
+        public static Quaternion FromDoubleBytes(byte[] bytes, int index)
+        {
+            if (bytes.Length - index < 32)
+            {
+                return Identity; // TODO: Exception?
+            }
+            double X = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index, 8));
+            double Y = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8, 8));
+            double Z = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8 + 8, 8));
+            double W = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8 + 8 + 8, 8));
+            return new Quaternion(X, Y, Z, W);
+        }
+
+        /// <summary>
+        /// Converts the Quaternion to a simple byte[] representation.
+        /// Contains 32 bytes.
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
+        /// </summary>
+        public byte[] ToDoubleBytes()
+        {
+            byte[] toret = new byte[32];
+            Utilities.DoubleToBytes(X).CopyTo(toret, 0);
+            Utilities.DoubleToBytes(Y).CopyTo(toret, 8);
+            Utilities.DoubleToBytes(Z).CopyTo(toret, 8 + 8);
+            Utilities.DoubleToBytes(W).CopyTo(toret, 8 + 8 + 8);
+            return toret;
+        }
+
+        /// <summary>
         /// Transforms a location vector by this Quaternion and returns the result.
         /// </summary>
         /// <param name="v">The location vector.</param>
