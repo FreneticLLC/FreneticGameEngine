@@ -1107,34 +1107,32 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1.0f });
             cameraBasePos = CameraPos;
             cameraAdjust = -camforward.CrossProduct(camup) * 0.25;
-            // TODO: VR Patch
-            /*if (Engine.VR != null)
+            if (Engine.Client.VR != null)
             {
                 //cameraAdjust = -cameraAdjust;
                 cameraAdjust = Location.Zero;
-            }*/
+            }
             RenderRelative = CameraPos;
             OSetViewport();
             CameraTarget = CameraPos + camforward;
             OffsetWorld = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D());
             Matrix4d outviewD;
-            // TODO: VR Patch
-            /*if (Engine.VR != null)
+            if (Engine.Client.VR != null)
             {
-                Matrix4 proj = Engine.VR.GetProjection(true, Engine.ZNear, Engine.ZFar());
-                Matrix4 view = Engine.VR.Eye(true);
+                Matrix4 proj = Engine.Client.VR.GetProjection(true, Engine.ZNear, Engine.ZFar());
+                Matrix4 view = Engine.Client.VR.Eye(true);
                 PrimaryMatrix = view * proj;
-                Matrix4 proj2 = Engine.VR.GetProjection(false, Engine.ZNear, Engine.ZFar());
-                Matrix4 view2 = Engine.VR.Eye(false);
+                Matrix4 proj2 = Engine.Client.VR.GetProjection(false, Engine.ZNear, Engine.ZFar());
+                Matrix4 view2 = Engine.Client.VR.Eye(false);
                 PrimaryMatrix_OffsetFor3D = view2 * proj2;
                 PrimaryMatrixd = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view.ConvertToD() * proj.ConvertToD();
                 PrimaryMatrix_OffsetFor3Dd = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view2.ConvertToD() * proj2.ConvertToD();
-                Matrix4 projo = Engine.VR.GetProjection(true, 60f, Engine.ZFarOut());
+                Matrix4 projo = Engine.Client.VR.GetProjection(true, 60f, Engine.ZFarOut());
                 OutViewMatrix = view * projo;
                 outviewD = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view.ConvertToD() * projo.ConvertToD();
                 // TODO: Transform VR by cammod?
             }
-            else*/
+            else
             {
                 Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Width / (float)Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
                 Location bx = Engine.Render3DView ? (cameraAdjust) : Location.Zero;
@@ -1516,7 +1514,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform3(11, maxLit);
             }
             GraphicsUtil.CheckError("Render/Fast - Uniforms");
-            if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR patch
+            if (Engine.Render3DView || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
@@ -1597,7 +1595,7 @@ namespace FreneticGameGraphics.ClientSystem
                 FBOid = FBOID.FORWARD_EXTRAS;
                 GL.DepthMask(false);
                 GraphicsUtil.CheckError("Render/Fast - Decal Prep");
-                if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR Patch!
+                if (Engine.Render3DView || Engine.Client.VR != null)
                 {
                     Viewport(Width / 2, 0, Width / 2, Height);
                     DecalRender?.Invoke(this);
@@ -1652,7 +1650,7 @@ namespace FreneticGameGraphics.ClientSystem
             Engine.Rendering.SetColor(Color4.White, this);
             PostFirstRender?.Invoke();
             GraphicsUtil.CheckError("Render/Fast - Transp Unifs");
-            if (Engine.Render3DView/* || Engine.VR != null*/) // TODO: VR Patch!
+            if (Engine.Render3DView || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
@@ -1910,8 +1908,7 @@ namespace FreneticGameGraphics.ClientSystem
             Engine.Rendering.SetColor(Color4.White, this);
             StandardBlend();
             GraphicsUtil.CheckError("Render - GBuffer - 1");
-            // TODO: VR Patch!
-            if (Engine.Render3DView/* || TheClient.VR != null*/)
+            if (Engine.Render3DView || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
@@ -1965,8 +1962,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.DepthMask(false);
             GraphicsUtil.CheckError("Render - Decals - 0");
-            // TODO: VR patch!
-            if (Engine.Render3DView /* || TheClient.VR != null*/)
+            if (Engine.Render3DView  || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 DecalRender?.Invoke(this);
@@ -2006,8 +2002,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.DepthMask(false);
             GraphicsUtil.CheckError("Render - Refract - 0");
-            // TODO: VR Patch!
-            if (Engine.Render3DView/* || TheClient.VR != null*/)
+            if (Engine.Render3DView || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 Render3D(this);
@@ -2452,7 +2447,7 @@ namespace FreneticGameGraphics.ClientSystem
             int lightc = 0;
             GraphicsUtil.CheckError("PreTransp");
             // TODO: VR Patch!
-            if (Engine.Render3DView/* || TheClient.VR != null*/)
+            if (Engine.Render3DView || Engine.Client.VR != null)
             {
                 Viewport(Width / 2, 0, Width / 2, Height);
                 CameraPos = cameraBasePos + cameraAdjust;

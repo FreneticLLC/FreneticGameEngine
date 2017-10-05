@@ -68,6 +68,11 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// The VR support system, if any.
+        /// </summary>
+        public VRSupport VR = null;
+
+        /// <summary>
         /// The title of the window.
         /// </summary>
         public readonly string StartingWindowTitle;

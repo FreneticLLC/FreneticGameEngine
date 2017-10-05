@@ -104,6 +104,7 @@
     <Compile Include="GraphicsHelpers\ModelEngine.cs" />
     <Compile Include="GraphicsHelpers\Renderer.cs" />
     <Compile Include="GraphicsHelpers\RenderSurface4Part.cs" />
+    <Compile Include="GraphicsHelpers\VRSupport.cs" />
     <Compile Include="LightingSystem\Light.cs" />
     <Compile Include="LightingSystem\LightObject.cs" />
     <Compile Include="LightingSystem\LightOrtho.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="UISystem\UIScreen.cs" />
     <Compile Include="UISystem\UIScrollBox.cs" />
     <Compile Include="UISystem\UITextLink.cs" />
+    <Compile Include="openvr_api.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
@@ -322,6 +324,12 @@
     <None Include="data\info\characters.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="openvr_api.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="openvr_api.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
