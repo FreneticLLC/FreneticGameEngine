@@ -27,6 +27,11 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         public Location Up = Location.UnitZ;
 
         /// <summary>
+        /// View direction of the character.
+        /// </summary>
+        public Location ViewDirection = -Location.UnitY;
+
+        /// <summary>
         /// Half-width of the character.
         /// </summary>
         public double Radius = 0.6;
@@ -55,7 +60,8 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
             return new CharacterController(height: Height, crouchingHeight: Height * 0.7, proneHeight: Radius, radius: Radius,
                 standingSpeed: Speed, crouchingSpeed: Speed * 0.4, proneSpeed: Speed * 0.1, airSpeed: Speed * 0.05, jumpSpeed: JumpSpeed, slidingJumpSpeed: JumpSpeed * 0.5)
             {
-                Down = -Up.ToBVector()
+                Down = -Up.ToBVector(),
+                ViewDirection = ViewDirection.ToBVector()
             };
         }
 
