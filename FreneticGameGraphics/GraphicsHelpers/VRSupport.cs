@@ -65,6 +65,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// The currently running VR model, EG 'oculus'. Can be 'unknown'.
+        /// </summary>
+        public string VRModel = "Unknown";
+        
+        /// <summary>
         /// Internal start call for VR setup.
         /// </summary>
         public void Start()
@@ -79,7 +84,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
             w *= 2;
             TheClient.Engine3D.MainView.Generate(TheClient.Engine3D, (int)w, (int)h);
             TheClient.Engine3D.MainView.GenerateFBO();
-            SysConsole.Output(OutputType.INFO, "Switching to VR mode: " + w + "/" + h);
+            StringBuilder val = new StringBuilder(256);
+            ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
+            VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
+            SysConsole.Output(OutputType.INIT, "Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
+            VRModel = val.ToString();
             Compositor = OpenVR.Compositor;
             Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseStanding);
             Compositor.CompositorBringToFront();
