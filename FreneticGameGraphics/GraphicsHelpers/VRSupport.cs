@@ -299,6 +299,22 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public const int AXIS_TRIGGER = 1;
 
         /// <summary>
+        /// Side grip axis ID.
+        /// </summary>
+        public const int AXIS_SIDEGRIP = 2;
+
+        /// <summary>
+        /// The side-grip axis.
+        /// </summary>
+        public float SideGrip
+        {
+            get
+            {
+                return Axes[AXIS_SIDEGRIP].X;
+            }
+        }
+
+        /// <summary>
         /// Gets the trackpad positioning.
         /// </summary>
         public Vector2 TrackPad
@@ -483,9 +499,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>Unknown button.</summary>
         __A__ONE = 1,
         /// <summary>
-        /// The menu button.
+        /// The menu button (Or "B", or "Y").
         /// </summary>
-        MENU_BUTTON = 2,
+        MENU_BUTTON_BY = 2,
         /// <summary>
         /// The side grip.
         /// </summary>
@@ -498,8 +514,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
         __A__THIRTY_TWO = 32,
         /// <summary>Unknown button.</summary>
         __A__SIXTY_FOUR = 64,
-        /// <summary>Unknown button.</summary>
-        __A__ONE_TWENTY_EIGHT = 128,
+        /// <summary>
+        /// The "A" or "X" button.
+        /// </summary>
+        BUTTON_AX = 128,
         /// <summary>Unknown button.</summary>
         __A__TWO_FIFTY_SIX = 256,
         /// <summary>Unknown button.</summary>
