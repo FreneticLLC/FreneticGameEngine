@@ -1090,6 +1090,16 @@ namespace FreneticGameGraphics.ClientSystem
         public Func<Location> CameraUp = () => Location.UnitZ;
 
         /// <summary>
+        /// Outview matrix, offset for VR.
+        /// </summary>
+        public Matrix4 OutView_OffsetVR;
+
+        /// <summary>
+        /// Outview matrix, offset for VR.
+        /// </summary>
+        public Matrix4d OutView_OffsetVRd;
+
+        /// <summary>
         /// Set up the rendering engine.
         /// </summary>
         public void RenderPass_Setup()
@@ -1130,6 +1140,9 @@ namespace FreneticGameGraphics.ClientSystem
                 Matrix4 projo = Engine.Client.VR.GetProjection(true, 60f, Engine.ZFarOut());
                 OutViewMatrix = view * projo;
                 outviewD = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view.ConvertToD() * projo.ConvertToD();
+                Matrix4 projo2 = Engine.Client.VR.GetProjection(false, 60f, Engine.ZFarOut());
+                OutView_OffsetVR = view2 * projo2;
+                OutView_OffsetVRd = Matrix4d.CreateTranslation((-CameraPos).ToOpenTK3D()) * view2.ConvertToD() * projo2.ConvertToD();
                 // TODO: Transform VR by cammod?
             }
             else
@@ -1245,6 +1258,11 @@ namespace FreneticGameGraphics.ClientSystem
         /// Executable view patch.
         /// </summary>
         public Action ViewPatchFifteen;
+
+        /// <summary>
+        /// Whether the system is currently rendering the second eye (When VR or 3D enabled).
+        /// </summary>
+        public bool IsSecondEye = false;
 
         /// <summary>
         /// Render everything as quickly as possible: a simple forward renderer.
@@ -1523,11 +1541,30 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchTwo?.Invoke();
+                Engine.Shaders3D.s_forw_particles.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forw_grass.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forwdecal.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forwt_nofog.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forwt_obj.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forwt.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                Engine.Shaders3D.s_forw_nobones.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Engine.Shaders3D.s_forw = Engine.Shaders3D.s_forw.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 Render3D(this);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -1603,7 +1640,9 @@ namespace FreneticGameGraphics.ClientSystem
                     Viewport(0, 0, Width / 2, Height);
                     CameraPos = cameraBasePos - cameraAdjust;
                     GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
+                    IsSecondEye = true;
                     DecalRender?.Invoke(this);
+                    IsSecondEye = false;
                     Viewport(0, 0, Width, Height);
                     CameraPos = cameraBasePos + cameraAdjust;
                     CFrust = camFrust;
@@ -1658,11 +1697,18 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchFour?.Invoke();
+                Engine.Shaders3D.s_forw_trans_nobones.Bind();
+                GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Engine.Shaders3D.s_forw_trans = Engine.Shaders3D.s_forw_trans.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 Render3D(this);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -1922,7 +1968,12 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 Render3D(this);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -1972,7 +2023,12 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 DecalRender?.Invoke(this);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -2014,7 +2070,12 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 Render3D(this);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
@@ -2502,7 +2563,12 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = cameraBasePos - cameraAdjust;
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
+                Matrix4 orig_out = OutViewMatrix;
+                OutViewMatrix = OutView_OffsetVR;
+                IsSecondEye = true;
                 RenderTransp(ref lightc, cf2);
+                IsSecondEye = false;
+                OutViewMatrix = orig_out;
                 PrimaryMatrix = orig;
                 Viewport(0, 0, Width, Height);
                 CameraPos = cameraBasePos + cameraAdjust;
