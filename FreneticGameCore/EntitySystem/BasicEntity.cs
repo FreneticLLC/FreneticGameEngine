@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BEPUutilities;
+using FreneticGameCore.Files;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -202,6 +203,33 @@ namespace FreneticGameCore.EntitySystem
                 sb.Append(t.Name).Append(" | ");
             }
             return sb.Length > 0 ? sb.ToString().Substring(0, sb.Length - 3) : "";
+        }
+
+        /// <summary>
+        /// Saves the entity's data to a DataWriter, appending its generated strings to a string list and lookup table.
+        /// <para>Is not a compiled method (Meaning, this method is reflection-driven)!</para>
+        /// </summary>
+        /// <param name="dw">Data writer to use.</param>
+        /// <param name="strs">Strings to reference.</param>
+        /// <param name="strMap">The string lookup table.</param>
+        public void SaveNC(DataWriter dw, List<string> strs, Dictionary<string, int> strMap)
+        {
+            dw.WriteLong(EID);
+            dw.WriteBool(IsSpawned);
+            List<Property> props = GetAllProperties();
+            dw.WriteVarInt(props.Count);
+            foreach (Property saveme in props)
+            {
+                string nm = saveme.GetType().FullName;
+                if (!strMap.TryGetValue(nm, out int id))
+                {
+                    id = strs.Count;
+                    strs.Add(nm);
+                    strMap[nm] = id;
+                }
+                dw.WriteVarInt(id);
+                saveme.Helper.SaveNC(saveme, dw, strs, strMap);
+            }
         }
     }
 

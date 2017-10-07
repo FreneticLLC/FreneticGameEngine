@@ -240,7 +240,7 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
-        /// Returns the internal data array.
+        /// Returns a copy of the internal data array, trimmed to match the stream length.
         /// </summary>
         /// <returns>Bytes.</returns>
         public byte[] ToArray()

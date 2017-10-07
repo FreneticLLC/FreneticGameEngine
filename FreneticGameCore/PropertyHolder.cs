@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using BEPUutilities;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
+using FreneticGameCore.Files;
 
 namespace FreneticGameCore
 {
@@ -804,6 +805,60 @@ namespace FreneticGameCore
             PropertiesHelper.Add(t, ph);
             return ph;
         }
+        
+        /// <summary>
+        /// Saves the property's data to a DataWriter, appending its generated strings to a string list and lookup table.
+        /// <para>Is not a compiled method (Meaning, this method is reflection-driven)!</para>
+        /// </summary>
+        /// <param name="p">The object to get the data from.</param>
+        /// <param name="dw">Data writer to use.</param>
+        /// <param name="strs">Strings to reference.</param>
+        /// <param name="strMap">The string lookup table.</param>
+        public void SaveNC(Object p, DataWriter dw, List<string> strs, Dictionary<string, int> strMap)
+        {
+            dw.WriteVarInt(FieldsAutoSaveable.Count);
+            foreach (KeyValuePair<double, FieldInfo> saveme in FieldsAutoSaveable)
+            {
+                if (!strMap.TryGetValue(saveme.Value.Name, out int id))
+                {
+                    id = strs.Count;
+                    strs.Add(saveme.Value.Name);
+                    strMap[saveme.Value.Name] = id;
+                }
+                dw.WriteVarInt(id);
+                PropertyHelper ph = EnsureHandled(saveme.Value.FieldType);
+                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterMethodsDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
+                {
+                    ph.SaveNC(saveme.Value.GetValue(p), dw, strs, strMap);
+                }
+                else if (PropertyHolder.TypeSavers.TryGetValue(saveme.Value.FieldType, out PropertySaverLoader psl))
+                {
+                    dw.WriteFullBytesVar(psl.Saver(saveme.Value.GetValue(p)));
+                }
+            }
+            dw.WriteVarInt(GetterSetterSaveable.Count);
+            foreach (KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>> saveme in GetterSetterSaveable)
+            {
+                if (!strMap.TryGetValue(saveme.Value.Key, out int id))
+                {
+                    id = strs.Count;
+                    strs.Add(saveme.Value.Key);
+                    strMap[saveme.Value.Key] = id;
+                }
+                dw.WriteVarInt(id);
+                PropertyHelper ph = EnsureHandled(saveme.Value.Value.Key.ReturnType);
+                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterMethodsDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
+                {
+                    ph.SaveNC(saveme.Value.Value.Key.Invoke(p, NoObjects), dw, strs, strMap);
+                }
+                else if (PropertyHolder.TypeSavers.TryGetValue(saveme.Value.Value.Key.ReturnType, out PropertySaverLoader psl))
+                {
+                    dw.WriteFullBytesVar(psl.Saver(saveme.Value.Value.Key.Invoke(p, NoObjects)));
+                }
+            }
+        }
+
+        private static readonly Object[] NoObjects = new object[0];
 
         /// <summary>
         /// The <see cref="Object.ToString"/> method.
@@ -859,7 +914,7 @@ namespace FreneticGameCore
             }
             PropertyHelper ph = EnsureHandled(a.GetType());
             Dictionary<string, string> outp = new Dictionary<string, string>();
-            ph.GetDebuggableInfoOutput(a, outp);
+            ph.GetDebuggableInfoOutputTyped(a, outp);
             StringBuilder outpstr = new StringBuilder();
             outpstr.Append("{");
             foreach (KeyValuePair<string, string> oss in outp)
@@ -884,7 +939,7 @@ namespace FreneticGameCore
         {
             PropertyHelper ph = EnsureHandled(typeof(T));
             Dictionary<string, string> outp = new Dictionary<string, string>();
-            ph.GetDebuggableInfoOutputTyped<T>(a, outp);
+            ph.GetDebuggableInfoOutputTyped(a, outp);
             StringBuilder outpstr = new StringBuilder();
             outpstr.Append("{");
             foreach (KeyValuePair<string, string> oss in outp)
