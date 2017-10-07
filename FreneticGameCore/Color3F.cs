@@ -85,6 +85,42 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Returns a 12-byte set representation of this color.
+        /// </summary>
+        /// <returns>The color bytes.</returns>
+        public byte[] ToBytes()
+        {
+            byte[] b = new byte[12];
+            Utilities.FloatToBytes(R).CopyTo(b, 0);
+            Utilities.FloatToBytes(G).CopyTo(b, 4);
+            Utilities.FloatToBytes(B).CopyTo(b, 8);
+            return b;
+        }
+
+        /// <summary>
+        /// Converts a 12-byte set to a color.
+        /// </summary>
+        /// <param name="b">The byte input.</param>
+        /// <returns>The color.</returns>
+        public static Color3F FromBytes(byte[] b)
+        {
+            return new Color3F(
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 0, 4)),
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 4, 4)),
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 8, 4))
+                );
+        }
+
+        /// <summary>
+        /// Returns a string form of this color.
+        /// </summary>
+        /// <returns>The string form.</returns>
+        public override string ToString()
+        {
+            return "(" + R + ", " + G + ", " + B + ")";
+        }
+
+        /// <summary>
         /// Multiplies a color by a scale.
         /// </summary>
         /// <param name="v">The color.</param>

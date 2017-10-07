@@ -182,6 +182,15 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Gets a string list of all properties, with debug informational output.
+        /// </summary>
+        /// <returns>The string list.</returns>
+        public string DebugPropList()
+        {
+            return string.Join(" | ", GetAllProperties().ConvertStream((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().ConvertStream((k) => k.Key + ": " + k.Value)) + "}"));
+        }
+
+        /// <summary>
         /// Gets a string list of all properties.
         /// </summary>
         /// <returns>The string list.</returns>

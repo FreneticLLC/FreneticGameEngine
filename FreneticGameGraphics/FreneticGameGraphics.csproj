@@ -96,6 +96,7 @@
     <Compile Include="ClientSystem\ShaderLocations.cs" />
     <Compile Include="ClientSystem\View3D.cs" />
     <Compile Include="ClientSystem\ViewUI2D.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GraphicsHelpers\DecalInfo.cs" />
     <Compile Include="GraphicsHelpers\FontSetEngine.cs" />
     <Compile Include="ClientSystem\GameEngine2D.cs" />

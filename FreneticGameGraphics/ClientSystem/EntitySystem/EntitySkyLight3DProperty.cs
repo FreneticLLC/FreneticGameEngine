@@ -84,7 +84,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// The represented 3D sky light.
         /// </summary>
-        [PropertyDebuggable]
         public SkyLight InternalLight;
 
         /// <summary>

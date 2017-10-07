@@ -19,9 +19,13 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// </summary>
         public ConvexHullShape Internal;
 
+        // TODO: Savable vertex set?
+
         /// <summary>
         /// The center offset for this shape.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Vector3 Center;
 
         /// <summary>

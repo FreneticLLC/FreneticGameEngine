@@ -24,6 +24,8 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// <summary>
         /// The radius of the sphere.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public double Size;
 
         /// <summary>

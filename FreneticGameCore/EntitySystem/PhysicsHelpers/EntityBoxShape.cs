@@ -24,6 +24,8 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// <summary>
         /// The size of the box on each axis.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location Size;
 
         /// <summary>
@@ -42,28 +44,6 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         public override string ToString()
         {
             return "BoxShape, size=" + Size;
-        }
-
-        /// <summary>
-        /// Converts the box shape to a byte array.
-        /// </summary>
-        /// <returns>The byte array.</returns>
-        public byte[] ToBytes()
-        {
-            return Size.ToDoubleBytes();
-        }
-
-        /// <summary>
-        /// Converts the byte array to box shape.
-        /// </summary>
-        /// <param name="b">The bytes.</param>
-        /// <returns>The box.</returns>
-        public static EntityBoxShape FromBytes(byte[] b)
-        {
-            return new EntityBoxShape()
-            {
-                Size = Location.FromDoubleBytes(b, 0)
-            };
         }
     }
 }

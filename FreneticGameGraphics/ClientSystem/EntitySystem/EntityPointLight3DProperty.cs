@@ -62,7 +62,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// The represented 3D point light.
         /// </summary>
-        [PropertyDebuggable]
         public PointLight InternalLight;
 
         /// <summary>

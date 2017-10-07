@@ -163,6 +163,44 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Returns a string form of this color.
+        /// </summary>
+        /// <returns>The string form.</returns>
+        public override string ToString()
+        {
+            return "(" + R + ", " + G + ", " + B + ", " + A + ")";
+        }
+
+        /// <summary>
+        /// Returns a 16-byte set representation of this color.
+        /// </summary>
+        /// <returns>The color bytes.</returns>
+        public byte[] ToBytes()
+        {
+            byte[] b = new byte[16];
+            Utilities.FloatToBytes(R).CopyTo(b, 0);
+            Utilities.FloatToBytes(G).CopyTo(b, 4);
+            Utilities.FloatToBytes(B).CopyTo(b, 8);
+            Utilities.FloatToBytes(A).CopyTo(b, 12);
+            return b;
+        }
+
+        /// <summary>
+        /// Converts a 16-byte set to a color.
+        /// </summary>
+        /// <param name="b">The byte input.</param>
+        /// <returns>The color.</returns>
+        public static Color4F FromBytes(byte[] b)
+        {
+            return new Color4F(
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 0, 4)),
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 4, 4)),
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 8, 4)),
+                Utilities.BytesToFloat(Utilities.BytesPartial(b, 12, 4))
+                );
+        }
+
+        /// <summary>
         /// A float of 1/255.
         /// </summary>
         public const float BYTE_TO_FLOAT = 1f / 255f;

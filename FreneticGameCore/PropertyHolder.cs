@@ -51,6 +51,11 @@ namespace FreneticGameCore
         public static Dictionary<Type, PropertySaverLoader> TypeSavers = new Dictionary<Type, PropertySaverLoader>(1024);
 
         /// <summary>
+        /// All type loader methods.
+        /// </summary>
+        public static Dictionary<string, PropertySaverLoader> TypeLoaders = new Dictionary<string, PropertySaverLoader>(1024);
+
+        /// <summary>
         /// Ensures initialization.
         /// </summary>
         static PropertyHolder()
@@ -74,6 +79,12 @@ namespace FreneticGameCore
             }
             Initted = true;
             // Core Helpers
+            TypeSavers.Add(typeof(bool), new PropertySaverLoader()
+            {
+                Saver = (o) => new byte[] { ((bool)o) ? (byte)1 : (byte)0 },
+                Loader = (b) => b[0] != 0 ? true : false,
+                SaveString = "C/bool"
+            });
             TypeSavers.Add(typeof(byte), new PropertySaverLoader()
             {
                 Saver = (o) => new byte[] { (byte)o },
@@ -136,7 +147,7 @@ namespace FreneticGameCore
             });
             TypeSavers.Add(typeof(string), new PropertySaverLoader()
             {
-                Saver = (o) => Utilities.DefaultEncoding.GetBytes((string)o),
+                Saver = (o) => Utilities.DefaultEncoding.GetBytes(o as string),
                 Loader = (b) => Utilities.DefaultEncoding.GetString(b),
                 SaveString = "C/string"
             });
@@ -147,12 +158,23 @@ namespace FreneticGameCore
                 Loader = (b) => Location.FromDoubleBytes(b, 0),
                 SaveString = "C/location"
             });
-            // FGE/Core/Entity/Physics
-            TypeSavers.Add(typeof(EntityBoxShape), new PropertySaverLoader()
+            TypeSavers.Add(typeof(Color3F), new PropertySaverLoader()
             {
-                Saver = (o) => ((EntityBoxShape)o).ToBytes(),
-                Loader = (b) => EntityBoxShape.FromBytes(b),
-                SaveString = "C/P/S/boxshape"
+                Saver = (o) => ((Color3F)o).ToBytes(),
+                Loader = (b) => Color3F.FromBytes(b),
+                SaveString = "C/color3f"
+            });
+            TypeSavers.Add(typeof(Color4F), new PropertySaverLoader()
+            {
+                Saver = (o) => ((Color4F)o).ToBytes(),
+                Loader = (b) => Color4F.FromBytes(b),
+                SaveString = "C/color4f"
+            });
+            TypeSavers.Add(typeof(Quaternion), new PropertySaverLoader()
+            {
+                Saver = (o) => ((Quaternion)o).ToDoubleBytes(),
+                Loader = (b) => Quaternion.FromDoubleBytes(b, 0),
+                SaveString = "C/quaternion"
             });
             // BEPU Helpers
             TypeSavers.Add(typeof(Vector3), new PropertySaverLoader()
@@ -167,6 +189,10 @@ namespace FreneticGameCore
                 Loader = (b) => Utilities.BytesToQuaternion(b, 0),
                 SaveString = "C/B/quaternion"
             });
+            foreach (PropertySaverLoader psl in TypeSavers.Values)
+            {
+                TypeLoaders.Add(psl.SaveString, psl);
+            }
         }
 
         /// <summary>
@@ -510,7 +536,37 @@ namespace FreneticGameCore
     public class PropertyAutoSavable : Attribute
     {
     }
-    
+
+    /// <summary>
+    /// Used to indicate that a property field must be tested before a property or object is included in a property save or debug (will expect a boolean field).
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public class PropertyRequiredBool : Attribute
+    {
+    }
+
+    /// <summary>
+    /// Used to indicate that the numerical priority (order of usage, lowest = first, highest = last) a property should be handled in.
+    /// <para>Note that fields always come before property methods.</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public class PropertyPriority : Attribute
+    {
+        /// <summary>
+        /// The priority.
+        /// </summary>
+        public double Priority;
+
+        /// <summary>
+        /// Construct the priority.
+        /// </summary>
+        /// <param name="_prio">The priority value.</param>
+        public PropertyPriority(double _prio)
+        {
+            Priority = _prio;
+        }
+    }
+
     /// <summary>
     /// Helper for the systems on a property.
     /// </summary>
@@ -534,13 +590,9 @@ namespace FreneticGameCore
             {
                 return helper;
             }
-            if (!typeof(Property).IsAssignableFrom(t))
-            {
-                throw new Exception("Trying to handle a type that isn't a property!");
-            }
             CPropID++;
-            List<FieldInfo> fdbg = new List<FieldInfo>();
-            List<FieldInfo> fautosave = new List<FieldInfo>();
+            List<KeyValuePair<double, FieldInfo>> fdbg = new List<KeyValuePair<double, FieldInfo>>();
+            List<KeyValuePair<double, FieldInfo>> fautosave = new List<KeyValuePair<double, FieldInfo>>();
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
             for (int i = 0; i < fields.Length; i++)
             {
@@ -549,18 +601,25 @@ namespace FreneticGameCore
                 {
                     continue;
                 }
+                PropertyPriority propPrio = fields[i].GetCustomAttribute<PropertyPriority>();
+                double prio = 0;
+                if (propPrio != null)
+                {
+                    prio = propPrio.Priority;
+                }
                 PropertyDebuggable dbgable = fields[i].GetCustomAttribute<PropertyDebuggable>();
                 if (dbgable != null)
                 {
-                    fdbg.Add(fields[i]);
+                    fdbg.Add(new KeyValuePair<double, FieldInfo>(prio, fields[i]));
                 }
                 PropertyAutoSavable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSavable>();
                 if (autosaveable != null)
                 {
-                    fautosave.Add(fields[i]);
+                    fautosave.Add(new KeyValuePair<double, FieldInfo>(prio, fields[i]));
                 }
             }
-            List<KeyValuePair<string, MethodInfo>> fdbgm = new List<KeyValuePair<string, MethodInfo>>();
+            List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> fdbgm = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
+            List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>> fsavm = new List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>>();
             PropertyInfo[] props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             for (int i = 0; i < props.Length; i++)
             {
@@ -568,58 +627,125 @@ namespace FreneticGameCore
                 {
                     continue;
                 }
+                PropertyPriority propPrio = props[i].GetCustomAttribute<PropertyPriority>();
+                double prio = 0;
+                if (propPrio != null)
+                {
+                    prio = propPrio.Priority;
+                }
                 PropertyDebuggable dbgable = props[i].GetCustomAttribute<PropertyDebuggable>();
                 if (dbgable != null)
                 {
-                    fdbgm.Add(new KeyValuePair<string, MethodInfo>(props[i].Name, props[i].GetMethod));
+                    fdbgm.Add(new KeyValuePair<double, KeyValuePair<string, MethodInfo>>(prio, new KeyValuePair<string, MethodInfo>(props[i].Name, props[i].GetMethod)));
+                }
+                PropertyAutoSavable savable = props[i].GetCustomAttribute<PropertyAutoSavable>();
+                if (props[i].CanWrite && savable != null)
+                {
+                    fsavm.Add(new KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>(prio, new KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>(props[i].Name, new KeyValuePair<MethodInfo, MethodInfo>(props[i].GetMethod, props[i].SetMethod))));
                 }
             }
+            fdbg = fdbg.OrderBy((k) => k.Key).ToList();
+            fautosave = fautosave.OrderBy((k) => k.Key).ToList();
+            fdbgm = fdbgm.OrderBy((k) => k.Key).ToList();
+            fsavm = fsavm.OrderBy((k) => k.Key).ToList();
             string tid = "__FGE_Property_" + CPropID + "__" + t.Name + "__";
             AssemblyName asmn = new AssemblyName(tid);
             AssemblyBuilder asmb = AppDomain.CurrentDomain.DefineDynamicAssembly(asmn, AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder modb = asmb.DefineDynamicModule(tid);
             TypeBuilder typeb_c = modb.DefineType(tid + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
-            MethodBuilder methodb_c = typeb_c.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Property), typeof(Dictionary<string, string>) });
+            MethodBuilder methodb_c = typeb_c.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Object), typeof(Dictionary<string, string>) });
             ILGenerator ilgen = methodb_c.GetILGenerator();
             for (int i = 0; i < fdbg.Count; i++)
             {
-                bool isClass = fdbg[i].FieldType.IsClass;
+                bool isClass = fdbg[i].Value.FieldType.IsClass;
+                PropertyHelper pht = EnsureHandled(fdbg[i].Value.FieldType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterMethodsDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
                 ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
-                ilgen.Emit(OpCodes.Ldstr, fdbg[i].FieldType.Name + "(" + fdbg[i].Name + ")"); // Load the field name as a string.
+                if (is_handlable)
+                {
+                    ilgen.Emit(OpCodes.Ldstr, fdbg[i].Value.FieldType.FullName + "(" + fdbg[i].Value.Name + ")"); // Load the field name and full type as a string.
+                }
+                else
+                {
+                    ilgen.Emit(OpCodes.Ldstr, fdbg[i].Value.FieldType.Name + "(" + fdbg[i].Value.Name + ")"); // Load the field name and type as a string.
+                }
                 ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
                 ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-                ilgen.Emit(OpCodes.Ldfld, fdbg[i]); // Load the field's value.
+                ilgen.Emit(OpCodes.Ldfld, fdbg[i].Value); // Load the field's value.
                 if (isClass) // If a class
                 {
-                    // CODE: vals.Add("FType(fname)", Stringify(p.fname));
-                    ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", Stringify(p.fname));
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                    }
                 }
                 else // if a struct
                 {
-                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
-                    MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbg[i].FieldType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
+                        MethodInfo structy = Method_PropertyHelper_StringifyDebuggableStruct.MakeGenericMethod(fdbg[i].Value.FieldType);
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
+                        MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbg[i].Value.FieldType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
                 }
                 ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
             for (int i = 0; i < fdbgm.Count; i++)
             {
-                bool isClass = fdbgm[i].Value.ReturnType.IsClass;
+                bool isClass = fdbgm[i].Value.Value.ReturnType.IsClass;
+                PropertyHelper pht = EnsureHandled(fdbgm[i].Value.Value.ReturnType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterMethodsDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
                 ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
-                ilgen.Emit(OpCodes.Ldstr, fdbgm[i].Value.ReturnType.Name + "(" + fdbgm[i].Key + ")"); // Load the method name as a string.
+                if (is_handlable)
+                {
+                    ilgen.Emit(OpCodes.Ldstr, fdbgm[i].Value.Value.ReturnType.FullName + "(" + fdbgm[i].Value.Key + ")"); // Load the field name and full return type as a string.
+                } 
+                else
+                {
+                    ilgen.Emit(OpCodes.Ldstr, fdbgm[i].Value.Value.ReturnType.Name + "(" + fdbgm[i].Value.Key + ")"); // Load the method name and return type as a string.
+                }
                 ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
                 ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?)
-                ilgen.Emit(OpCodes.Call, fdbgm[i].Value); // Call the method and load the method's return value.
+                ilgen.Emit(OpCodes.Call, fdbgm[i].Value.Value); // Call the method and load the method's return value.
                 if (isClass) // If a class
                 {
-                    // CODE: vals.Add("FType(fname)", Stringify(p.mname()));
-                    ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", Stringify(p.fname));
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                    }
                 }
                 else // if a struct
                 {
-                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.mname()));
-                    MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbgm[i].Value.ReturnType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
+                        MethodInfo structy = Method_PropertyHelper_StringifyDebuggableStruct.MakeGenericMethod(fdbgm[i].Value.Value.ReturnType);
+                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
+                        MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbgm[i].Value.Value.ReturnType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
                 }
                 ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
@@ -631,6 +757,7 @@ namespace FreneticGameCore
             ph.FieldsDebuggable.AddRange(fdbg);
             ph.FieldsAutoSaveable.AddRange(fautosave);
             ph.GetterMethodsDebuggable.AddRange(fdbgm);
+            ph.GetterSetterSaveable.AddRange(fsavm);
             PropertiesHelper.Add(t, ph);
             return ph;
         }
@@ -651,6 +778,16 @@ namespace FreneticGameCore
         public static readonly MethodInfo Method_PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod("GetDebuggableInfoOutput");
 
         /// <summary>
+        /// The <see cref="StringifyDebuggable"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_PropertyHelper_StringifyDebuggable = typeof(PropertyHelper).GetMethod("StringifyDebuggable");
+
+        /// <summary>
+        /// The <see cref="StringifyDebuggableStruct"/> method.
+        /// </summary>
+        public static readonly MethodInfo Method_PropertyHelper_StringifyDebuggableStruct = typeof(PropertyHelper).GetMethod("StringifyDebuggableStruct");
+
+        /// <summary>
         /// The <see cref="Stringify"/> method.
         /// </summary>
         public static readonly MethodInfo Method_PropertyHelper_Stringify = typeof(PropertyHelper).GetMethod("Stringify");
@@ -659,6 +796,60 @@ namespace FreneticGameCore
         /// The <see cref="StringifyStruct"/> method.
         /// </summary>
         public static readonly MethodInfo Method_PropertyHelper_StringifyStruct = typeof(PropertyHelper).GetMethod("StringifyStruct");
+
+        /// <summary>
+        /// Safely converts a debuggable object to a string.
+        /// </summary>
+        /// <param name="a">The object.</param>
+        /// <returns>The string.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string StringifyDebuggable(Object a)
+        {
+            if (a == null)
+            {
+                return "null";
+            }
+            PropertyHelper ph = EnsureHandled(a.GetType());
+            Dictionary<string, string> outp = new Dictionary<string, string>();
+            ph.GetDebuggableInfoOutput(a, outp);
+            StringBuilder outpstr = new StringBuilder();
+            outpstr.Append("{");
+            foreach (KeyValuePair<string, string> oss in outp)
+            {
+                outpstr.Append(oss.Key + ": " + oss.Value + ", ");
+            }
+            if (outpstr.Length > 1)
+            {
+                outpstr.Length -= 2;
+            }
+            outpstr.Append("}");
+            return outpstr.ToString();
+        }
+
+        /// <summary>
+        /// Safely converts a debuggable struct to a string.
+        /// </summary>
+        /// <param name="a">The object.</param>
+        /// <returns>The string.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string StringifyDebuggableStruct<T>(T a) where T:  struct
+        {
+            PropertyHelper ph = EnsureHandled(a.GetType());
+            Dictionary<string, string> outp = new Dictionary<string, string>();
+            ph.GetDebuggableInfoOutput(a, outp);
+            StringBuilder outpstr = new StringBuilder();
+            outpstr.Append("{");
+            foreach (KeyValuePair<string, string> oss in outp)
+            {
+                outpstr.Append(oss.Key + ": " + oss.Value + ", ");
+            }
+            if (outpstr.Length > 1)
+            {
+                outpstr.Length -= 2;
+            }
+            outpstr.Append("}");
+            return outpstr.ToString();
+        }
 
         /// <summary>
         /// Safely converts a struct to a string.
@@ -689,7 +880,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="p">The property.</param>
         /// <param name="vals">The string dictionary.</param>
-        public abstract void GetDebuggableInfoOutput(Property p, Dictionary<string, string> vals);
+        public abstract void GetDebuggableInfoOutput(Object p, Dictionary<string, string> vals);
 
         /// <summary>
         /// The type of the property to monitor.
@@ -699,17 +890,22 @@ namespace FreneticGameCore
         /// <summary>
         /// A list of all getter methods that are debuggable.
         /// </summary>
-        public readonly List<KeyValuePair<string, MethodInfo>> GetterMethodsDebuggable = new List<KeyValuePair<string, MethodInfo>>();
+        public readonly List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> GetterMethodsDebuggable = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
+
+        /// <summary>
+        /// A list of all getter/setter method pairs that are autao-saveable.
+        /// </summary>
+        public readonly List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>> GetterSetterSaveable = new List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>>();
 
         /// <summary>
         /// A list of all fields that are debuggable.
         /// </summary>
-        public readonly List<FieldInfo> FieldsDebuggable = new List<FieldInfo>();
+        public readonly List<KeyValuePair<double, FieldInfo>> FieldsDebuggable = new List<KeyValuePair<double, FieldInfo>>();
 
         /// <summary>
         /// A list of all fields that are auto-saveable.
         /// </summary>
-        public readonly List<FieldInfo> FieldsAutoSaveable = new List<FieldInfo>();
+        public readonly List<KeyValuePair<double, FieldInfo>> FieldsAutoSaveable = new List<KeyValuePair<double, FieldInfo>>();
     }
 
     /// <summary>

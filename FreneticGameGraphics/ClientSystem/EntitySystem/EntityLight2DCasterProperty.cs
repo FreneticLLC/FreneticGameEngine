@@ -98,7 +98,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// The actual light object.
         /// </summary>
-        [PropertyDebuggable]
         public PointLight2D ActualLight;
 
         /// <summary>

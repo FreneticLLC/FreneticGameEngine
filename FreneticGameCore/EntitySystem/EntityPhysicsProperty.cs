@@ -45,6 +45,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
+        [PropertyPriority(-1000)]
         public EntityShapeHelper Shape; // Set by client.
 
         /// <summary>
@@ -266,6 +267,18 @@ namespace FreneticGameCore.EntitySystem
                 {
                     SpawnedBody.Orientation = InternalOrientation.ToBEPU();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets relevant helper systems for the entity (if it is a character... check <see cref="EntityPhysicsCharacterHelper.IsValid"/>!)
+        /// </summary>
+        [PropertyPriority(1000)]
+        public EntityPhysicsCharacterHelper Character
+        {
+            get
+            {
+                return (OriginalObject is CharacterController cc) ? new EntityPhysicsCharacterHelper() { Internal = cc } : default(EntityPhysicsCharacterHelper);
             }
         }
 

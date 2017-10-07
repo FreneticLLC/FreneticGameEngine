@@ -265,5 +265,21 @@ namespace FreneticGameCore
             CommonResources.GiveBack(triangles);
             return new ConvexHullShape(newlist, csd);
         }
+
+        /// <summary>
+        /// Converts a stream of data to another type.
+        /// </summary>
+        /// <typeparam name="T">The input type.</typeparam>
+        /// <typeparam name="T2">The output type.</typeparam>
+        /// <param name="inp">The input stream.</param>
+        /// <param name="conversion">The conversion function.</param>
+        /// <returns>The output stream.</returns>
+        public static IEnumerable<T2> ConvertStream<T, T2>(this IEnumerable<T> inp, Func<T, T2> conversion)
+        {
+            foreach (T a in inp)
+            {
+                yield return conversion(a);
+            }
+        }
     }
 }

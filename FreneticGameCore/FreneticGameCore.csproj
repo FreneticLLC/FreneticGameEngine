@@ -69,6 +69,7 @@
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
     <Compile Include="EntitySystem\EntityCharacterAttachProperty.cs" />
     <Compile Include="EntitySystem\EntityPhysics2DLimitProperty.cs" />
+    <Compile Include="EntitySystem\EntityPhysicsCharacterHelper.cs" />
     <Compile Include="EntitySystem\EntitySimpleAttachProperty.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityConvexHullShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntitySphereShape.cs" />

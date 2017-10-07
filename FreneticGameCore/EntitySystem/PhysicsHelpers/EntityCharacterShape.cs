@@ -24,31 +24,43 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// <summary>
         /// Upward axis.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location Up = Location.UnitZ;
 
         /// <summary>
         /// View direction of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location ViewDirection = -Location.UnitY;
 
         /// <summary>
         /// Half-width of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public double Radius = 0.6;
 
         /// <summary>
         /// Height of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public double Height = 1.7;
 
         /// <summary>
         /// Standing speed of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public double Speed = 8;
 
         /// <summary>
         /// Jumping speed of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public double JumpSpeed = 4.5;
 
         /// <summary>
