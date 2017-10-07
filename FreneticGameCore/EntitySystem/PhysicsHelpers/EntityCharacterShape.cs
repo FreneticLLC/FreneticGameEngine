@@ -78,6 +78,15 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         }
 
         /// <summary>
+        /// Stringifies the character shape.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return "CharacterShape";
+        }
+
+        /// <summary>
         /// Returns null as a special case to the internal shape options.
         /// </summary>
         /// <returns>Null.</returns>

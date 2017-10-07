@@ -8,31 +8,20 @@ using BEPUphysics.Character;
 namespace FreneticGameCore.EntitySystem
 {
     /// <summary>
-    /// Helper for character shapes on a physics entity. Check <see cref="IsValid"/> before using anything else.
+    /// Helper for character shapes on a physics entity.
     /// </summary>
-    public struct EntityPhysicsCharacterHelper
+    public class EntityPhysicsCharacterHelper
     {
         /// <summary>
         /// The internal character controller for this entity.
         /// </summary>
         public CharacterController Internal;
-
-        /// <summary>
-        /// Gets whether the character is valid.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyRequiredBool]
-        public bool IsValid
-        {
-            get
-            {
-                return Internal != null;
-            }
-        }
-
+        
         /// <summary>
         /// Gets or sets the view direction of the character.
         /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location ViewDirection
         {
             get

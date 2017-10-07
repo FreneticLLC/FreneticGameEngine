@@ -271,14 +271,16 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
-        /// Gets relevant helper systems for the entity (if it is a character... check <see cref="EntityPhysicsCharacterHelper.IsValid"/>!)
+        /// Gets relevant helper systems for the entity (if it is a character, otherwise: null).
         /// </summary>
         [PropertyPriority(1000)]
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public EntityPhysicsCharacterHelper Character
         {
             get
             {
-                return (OriginalObject is CharacterController cc) ? new EntityPhysicsCharacterHelper() { Internal = cc } : default(EntityPhysicsCharacterHelper);
+                return (OriginalObject is CharacterController cc) ? new EntityPhysicsCharacterHelper() { Internal = cc } : null;
             }
         }
 
