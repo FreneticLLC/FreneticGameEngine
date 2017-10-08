@@ -11,7 +11,7 @@ namespace FreneticGameCore.EntitySystem
      /// <summary>
      /// Attaches an entity to a character.
      /// </summary>
-    public class EntityCharacterAttachProperty<T, T2, T3> : EntitySimpleAttachProperty<T, T2> where T : BasicEntity<T2> where T2 : BasicEngine<T, T2> where T3 : EntityPhysicsProperty<T, T2>
+    public class EntityCharacterAttachProperty<T, T2, T3> : EntitySimpleAttachProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2> where T3 : EntityPhysicsProperty<T, T2>
     {
         /// <summary>
         /// The entity this entity is attached to.

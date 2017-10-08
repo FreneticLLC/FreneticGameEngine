@@ -17,7 +17,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Represents a property on a basic entity.
     /// </summary>
-    public class BasicEntityProperty<T, T2> : Property where T: BasicEntity<T2> where T2: BasicEngine<T, T2>
+    public class BasicEntityProperty<T, T2> : Property where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>
         /// Run when the entity is spawned.

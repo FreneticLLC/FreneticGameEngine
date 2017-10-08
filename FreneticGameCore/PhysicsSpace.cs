@@ -25,7 +25,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Represents a physical world (space).
     /// </summary>
-    public class PhysicsSpace<T, T2> where T: BasicEntity<T2> where T2: BasicEngine<T, T2>
+    public class PhysicsSpace<T, T2> where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>
         /// The actual internal physics space.

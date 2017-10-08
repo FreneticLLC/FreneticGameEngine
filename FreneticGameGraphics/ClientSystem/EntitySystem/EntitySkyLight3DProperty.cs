@@ -26,7 +26,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
     {
         /// <summary>
         /// Fixes the position of the light to match a new location.
-        /// Automatically called by <see cref="BasicEntity{T}.OnPositionChanged"/>.
+        /// Automatically called by <see cref="BasicEntity{T, T2}.OnPositionChanged"/>.
         /// </summary>
         /// <param name="pos">The new position.</param>
         public void FixPosition(Location pos)

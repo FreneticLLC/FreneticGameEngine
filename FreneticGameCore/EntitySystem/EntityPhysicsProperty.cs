@@ -23,7 +23,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
     /// </summary>
-    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T2> where T2 : BasicEngine<T, T2>
+    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// The owning physics world.

@@ -19,7 +19,7 @@ namespace FreneticGameCore.ServerSystem.EntitySystem
     /// <summary>
     /// Represents an entity on the server side.
     /// </summary>
-    public class ServerEntity : BasicEntity<ServerEngine>
+    public class ServerEntity : BasicEntity<ServerEntity, ServerEngine>
     {
         /// <summary>
         /// Whether this entity should be sent over the network.

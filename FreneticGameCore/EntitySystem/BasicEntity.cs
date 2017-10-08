@@ -19,12 +19,12 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// The base most class of an entity in the FreneticGameEngine.
     /// </summary>
-    public abstract class BasicEntity<T> : PropertyHolder
+    public abstract class BasicEntity<T, T2> : PropertyHolder where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// The owning engine.
         /// </summary>
-        public T Engine;
+        public T2 Engine;
 
         /// <summary>
         /// Whether the entity should tick normally.
@@ -157,7 +157,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         /// <param name="eng">The owning engine.</param>
         /// <param name="_ticks">Whether the entity ticks.</param>
-        public BasicEntity(T eng, bool _ticks)
+        public BasicEntity(T2 eng, bool _ticks)
         {
             Engine = eng;
             Ticks = _ticks;
@@ -229,6 +229,30 @@ namespace FreneticGameCore.EntitySystem
                 }
                 dw.WriteVarInt(id);
                 saveme.Helper.SaveNC(saveme, dw, strs, strMap);
+            }
+        }
+
+        /// <summary>
+        /// Fired when a property is added.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public override void OnAdded(Property prop)
+        {
+            if (IsSpawned && prop is BasicEntityProperty<T, T2> bep)
+            {
+                bep.OnSpawn();
+            }
+        }
+
+        /// <summary>
+        /// Fired when a property is removed.
+        /// </summary>
+        /// <param name="prop">The property.</param>
+        public override void OnRemoved(Property prop)
+        {
+            if (IsSpawned && prop is BasicEntityProperty<T, T2> bep)
+            {
+                bep.OnDespawn();
             }
         }
     }

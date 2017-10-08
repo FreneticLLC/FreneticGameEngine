@@ -18,7 +18,7 @@ namespace FreneticGameCore
     /// <summary>
     /// Represents the common code shared by a server and client engine.
     /// </summary>
-    public abstract class BasicEngine<T, T2> where T : BasicEntity<T2> where T2: BasicEngine<T, T2>
+    public abstract class BasicEngine<T, T2> where T : BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>
         /// The general-purpose physics world.

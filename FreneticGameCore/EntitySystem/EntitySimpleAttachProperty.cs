@@ -10,7 +10,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Attaches an entity to another entity.
     /// </summary>
-    public class EntitySimpleAttachProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T2> where T2 : BasicEngine<T, T2>
+    public class EntitySimpleAttachProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// The entity this entity is attached to.
