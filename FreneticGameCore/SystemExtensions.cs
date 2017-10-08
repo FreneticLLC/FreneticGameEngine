@@ -281,5 +281,20 @@ namespace FreneticGameCore
                 yield return conversion(a);
             }
         }
+
+        /// <summary>
+        /// Returns an array where additional objects are joined into the array.
+        /// </summary>
+        /// <typeparam name="T">The array type.</typeparam>
+        /// <param name="arr">The main array.</param>
+        /// <param name="other">The additional objects.</param>
+        /// <returns>The joined result.</returns>
+        public static T[] JoinWith<T>(this T[] arr, params T[] other)
+        {
+            T[] res = new T[arr.Length + other.Length];
+            arr.CopyTo(res, 0);
+            other.CopyTo(res, arr.Length);
+            return res;
+        }
     }
 }
