@@ -475,6 +475,19 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Adds several properties in one go.
+        /// <para>Does no special sequencing, just adds them all in given order.</para>
+        /// </summary>
+        /// <param name="props">The properties.</param>
+        public void AddProperties(params Property[] props)
+        {
+            foreach (Property p in props)
+            {
+                AddProperty(p);
+            }
+        }
+
+        /// <summary>
         /// Internal: Notice a property (called when a property is added).
         /// </summary>
         /// <param name="t">The type.</param>
