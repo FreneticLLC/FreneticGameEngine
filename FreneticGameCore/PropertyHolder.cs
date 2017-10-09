@@ -261,7 +261,26 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets all currently held property types.
+        /// </summary>
+        /// <returns>The set of property types.</returns>
+        public IEnumerable<Type> EnumerateAllPropertyTypes()
+        {
+            return HeldProperties.Keys;
+        }
+
+        /// <summary>
+        /// Gets all currently held properties.
+        /// </summary>
+        /// <returns>The set of properties.</returns>
+        public IEnumerable<Property> EnumerateAllProperties()
+        {
+            return HeldProperties.Values;
+        }
+        
+        /// <summary>
         /// Gets all currently held property types in a safe copied container.
+        /// <para>Generally, prefer <see cref="EnumerateAllPropertyTypes"/>.</para>
         /// </summary>
         /// <returns>The set of property types.</returns>
         public List<Type> GetAllPropertyTypes()
@@ -271,6 +290,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Gets all currently held properties in a safe copied container.
+        /// <para>Generally, prefer <see cref="EnumerateAllProperties"/>.</para>
         /// </summary>
         /// <returns>The set of properties.</returns>
         public List<Property> GetAllProperties()

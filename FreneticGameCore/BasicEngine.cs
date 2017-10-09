@@ -163,7 +163,7 @@ namespace FreneticGameCore
         /// Spawns an entity into the world.
         /// </summary>
         /// <param name="ticks">Whether it should tick.</param>
-        /// <param name="configure">A method to configure the entity prior to spawn, if one applies.</param>
+        /// <param name="configure">A method to configure the entity prior to spawn or property add, if one applies.</param>
         /// <param name="props">Any properties to apply.</param>
         /// <returns>The spawned entity.</returns>
         public T SpawnEntity(bool ticks, Action<T> configure, params Property[] props)
@@ -177,9 +177,9 @@ namespace FreneticGameCore
             }
             AddEntity(ce);
             ce.IsSpawned = true;
-            foreach (Property prop in ce.GetAllProperties())
+            for (int i = 0; i < props.Length; i++)
             {
-                if (prop is BasicEntityProperty<T, T2> bep)
+                if (props[i] is BasicEntityProperty<T, T2> bep)
                 {
                     bep.OnSpawn();
                 }
@@ -231,7 +231,7 @@ namespace FreneticGameCore
                 SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
                 return;
             }
-            foreach (Property prop in ent.GetAllProperties())
+            foreach (Property prop in ent.EnumerateAllProperties())
             {
                 if (prop is BasicEntityProperty<T, T2> bep)
                 {

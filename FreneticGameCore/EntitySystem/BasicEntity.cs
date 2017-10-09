@@ -188,7 +188,7 @@ namespace FreneticGameCore.EntitySystem
         /// <returns>The string list.</returns>
         public string DebugPropList()
         {
-            return string.Join(" | ", GetAllProperties().ConvertStream((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().ConvertStream((k) => k.Key + ": " + k.Value)) + "}"));
+            return string.Join(" | ", EnumerateAllProperties().ConvertStream((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().ConvertStream((k) => k.Key + ": " + k.Value)) + "}"));
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace FreneticGameCore.EntitySystem
         public string PropertyList()
         {
             StringBuilder sb = new StringBuilder();
-            foreach (Type t in GetAllPropertyTypes())
+            foreach (Type t in EnumerateAllPropertyTypes())
             {
                 sb.Append(t.Name).Append(" | ");
             }
@@ -216,8 +216,8 @@ namespace FreneticGameCore.EntitySystem
         {
             dw.WriteLong(EID);
             dw.WriteBool(IsSpawned);
-            List<Property> props = GetAllProperties();
-            dw.WriteVarInt(props.Count);
+            IEnumerable<Property> props = EnumerateAllProperties();
+            dw.WriteVarInt(props.Count());
             foreach (Property saveme in props)
             {
                 string nm = saveme.GetType().FullName;
