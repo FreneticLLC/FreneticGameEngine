@@ -296,5 +296,16 @@ namespace FreneticGameCore
             other.CopyTo(res, arr.Length);
             return res;
         }
+
+        /// <summary>
+        /// Returns whether a stream is empty. Invert of "Any()" call.
+        /// </summary>
+        /// <typeparam name="T">The stream type.</typeparam>
+        /// <param name="inp">The input stream.</param>
+        /// <returns>Whether the stream is empty.</returns>
+        public static bool IsEmpty<T>(this IEnumerable<T> inp)
+        {
+            return !inp.Any();
+        }
     }
 }
