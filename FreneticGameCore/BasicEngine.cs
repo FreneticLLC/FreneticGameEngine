@@ -115,6 +115,22 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets all properties with a specific property type from any and all entities currently spawned.
+        /// </summary>
+        /// <param name="t">The property type.</param>
+        /// <returns>All properties that match.</returns>
+        public IEnumerable<Property> GetAllByType(Type t)
+        {
+            foreach (T ent in EntityList)
+            {
+                if (ent.TryGetProperty(t, out Property resAdd))
+                {
+                    yield return resAdd;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets all properties that are a sub-type of the given property type from any and all entities currently spawned.
         /// <para>This can return multiple properties for any given entity.</para>
         /// </summary>
@@ -125,6 +141,23 @@ namespace FreneticGameCore
             foreach (T ent in EntityList)
             {
                 foreach (TP prop in ent.GetAllSubTypes<TP>())
+                {
+                    yield return prop;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets all properties that are a sub-type of the given property type from any and all entities currently spawned.
+        /// <para>This can return multiple properties for any given entity.</para>
+        /// </summary>
+        /// <param name="t">The property type.</param>
+        /// <returns>All properties that match.</returns>
+        public IEnumerable<Property> GetAllSubTypes(Type t)
+        {
+            foreach (T ent in EntityList)
+            {
+                foreach (Property prop in ent.GetAllSubTypes(t))
                 {
                     yield return prop;
                 }
@@ -145,6 +178,27 @@ namespace FreneticGameCore
             foreach (T ent in EntityList)
             {
                 if (ent.TryGetProperty(out TP retme))
+                {
+                    return retme;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets any one property with a specific property type from any and all entities currently spawned.
+        /// <para>This does not care for any order if multiple entities contain the property.</para>
+        /// <para>This works best when only one entity will ever have a certain property in an engine.
+        /// For example, the main player, or a game controller.</para>
+        /// <para>Returns null if none found.</para>
+        /// </summary>
+        /// <param name="t">The property type.</param>
+        /// <returns>One property that matches, or null.</returns>
+        public Property GetAnyByType(Type t)
+        {
+            foreach (T ent in EntityList)
+            {
+                if (ent.TryGetProperty(out Property retme))
                 {
                     return retme;
                 }
