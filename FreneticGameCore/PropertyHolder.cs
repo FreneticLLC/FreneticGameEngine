@@ -290,6 +290,39 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets all properties that are a sub-type of the given property type.
+        /// <para>This method is likely slower than its generic version!</para>
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <returns>The set of properties.</returns>
+        public IEnumerable<Property> GetAllSubTypes(Type t)
+        {
+            foreach (KeyValuePair<Type, Property> p in HeldProperties)
+            {
+                if (t.IsAssignableFrom(p.Key))
+                {
+                    yield return p.Value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets all properties that are a sub-type of the given property type.
+        /// </summary>
+        /// <typeparam name="T">The type of the property.</typeparam>
+        /// <returns>The property set.</returns>
+        public IEnumerable<T> GetAllSubTypes<T>() where T: Property
+        {
+            foreach (Property p in HeldProperties.Values)
+            {
+                if (p is T a)
+                {
+                    yield return a;
+                }
+            }
+        }
+
+        /// <summary>
         /// Checks whether a property of a specified type is held.
         /// </summary>
         /// <param name="t">The type.</param>
@@ -442,7 +475,7 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Internal: Notice a property.
+        /// Internal: Notice a property (called when a property is added).
         /// </summary>
         /// <param name="t">The type.</param>
         /// <param name="p">The property.</param>
