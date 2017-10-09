@@ -94,7 +94,7 @@ void main()
 	float currDepth = linearizeDepth(texture(depthtex, f.texcoord).x);
 	vec3 eyePosition = normalize(-pos);
 	vec4 reflectionVector = proj_mat * vec4(reflect(eyePosition, normal), 0.0);
-	reflectionVector.x *= -1.0; // TODO: ???
+	reflectionVector.x = 0.0; // TODO: ???
 	vec4 SSR = raytrace(reflectionVector.xyz / reflectionVector.w, currDepth);
 	color = texture(colortex, f.texcoord);
 	if (SSR.w > 0.0)
