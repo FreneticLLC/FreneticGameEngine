@@ -99,32 +99,47 @@ namespace FreneticGameCore
         public long CurrentEID = 1;
 
         /// <summary>
-        /// Gets all entities with a specific property.
+        /// Gets all properties with a specific property type from any and all entities currently spawned.
         /// </summary>
         /// <typeparam name="TP">The property type.</typeparam>
-        /// <returns>All entities that match.</returns>
-        public List<TP> GetAllByType<TP>() where TP: Property
+        /// <returns>All properties that match.</returns>
+        public IEnumerable<TP> GetAllByType<TP>() where TP: Property
         {
-            List<TP> result = new List<TP>();
             foreach (T ent in EntityList)
             {
                 if (ent.TryGetProperty(out TP resAdd))
                 {
-                    result.Add(resAdd);
+                    yield return resAdd;
                 }
             }
-            return result;
         }
 
         /// <summary>
-        /// Gets any one entity with a specific property.
+        /// Gets all properties that are a sub-type of the given property type from any and all entities currently spawned.
+        /// <para>This can return multiple properties for any given entity.</para>
+        /// </summary>
+        /// <typeparam name="TP">The property type.</typeparam>
+        /// <returns>All properties that match.</returns>
+        public IEnumerable<TP> GetAllSubTypes<TP>() where TP : Property
+        {
+            foreach (T ent in EntityList)
+            {
+                foreach (TP prop in ent.GetAllSubTypes<TP>())
+                {
+                    yield return prop;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets any one property with a specific property type from any and all entities currently spawned.
         /// <para>This does not care for any order if multiple entities contain the property.</para>
         /// <para>This works best when only one entity will ever have a certain property in an engine.
         /// For example, the main player, or a game controller.</para>
         /// <para>Returns null if none found.</para>
         /// </summary>
         /// <typeparam name="TP">The property type.</typeparam>
-        /// <returns>One entity, or null.</returns>
+        /// <returns>One property that matches, or null.</returns>
         public TP GetAnyByType<TP>() where TP : Property
         {
             foreach (T ent in EntityList)
