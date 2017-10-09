@@ -12,6 +12,7 @@
 #define MCM_TOONIFY 0
 #define MCM_MOTBLUR 0
 #define MCM_LIGHTS 0
+#define MCM_SPECIAL_FOG 0
 
 layout (binding = 0) uniform sampler2D colortex; // Color G-Buffer Texture
 layout (binding = 1) uniform sampler2D positiontex; // Positions G-Buffer Texture
@@ -202,12 +203,14 @@ void main() // The central entry point of the shader. Handles everything!
 	vec3 renderhint2 = texture(renderhint2tex, f_texcoord).xyz;
 	vec3 pos = texture(positiontex, f_texcoord).xyz;
 	float dist = linearizeDepth(texture(depthtex, f_texcoord).x); // This is useful for both fog and reflection, so grab it here.
-	if (renderhint.z < 1.0 || fogCol.w > 1.0)
+	if (renderhint.z < 0.99 || fogCol.w > 1.0)
 	{
 		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);
 		float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
 		float fmz = min(fogMod, 1.0);
+#if MCM_SPECIAL_FOG
 		fmz *= fmz * fmz * fmz;
+#endif
 		light_color.xyz = light_color.xyz * (1.0 - fmz) + fogCol.xyz * fmz + vec3(fogMod - fmz);
 	}
 	if (dot(renderhint2, renderhint2) > 0.99) // Apply refraction if set. This is set by having a strong renderhint2 value that has a length-squared of at least 1.0!
