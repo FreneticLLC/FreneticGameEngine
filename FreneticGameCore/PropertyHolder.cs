@@ -388,6 +388,32 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Runs a set of code on a property, if the property is present.
+        /// </summary>
+        /// <param name="t">The property type.</param>
+        /// <param name="logic">The logic to run.</param>
+        public void InvokeIfPresent(Type t, Action<Property> logic)
+        {
+            if (HeldProperties.TryGetValue(t, out Property p))
+            {
+                logic(p);
+            }
+        }
+
+        /// <summary>
+        /// Runs a set of code on a property, if the property is present.
+        /// </summary>
+        /// <typeparam name="T">The property type.</typeparam>
+        /// <param name="logic">The logic to run.</param>
+        public void InvokeIfPresent<T>(Action<T> logic) where T: Property
+        {
+            if (HeldProperties.TryGetValue(typeof(T), out Property p))
+            {
+                logic(p as T);
+            }
+        }
+
+        /// <summary>
         /// Gets the property by type, or gives an exception.
         /// </summary>
         /// <param name="t">The type.</param>
