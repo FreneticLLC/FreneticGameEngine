@@ -146,6 +146,7 @@ namespace FreneticGameCore.Files
         /// <param name="allfiles">A list of all files that need to be loaded.</param>
         public void Load(string pth, string[] allfiles)
         {
+            List<PakFile> pfs_t = new List<PakFile>();
             foreach (string tfile in allfiles)
             {
                 string file = tfile.Replace('\\', '/');
@@ -155,7 +156,7 @@ namespace FreneticGameCore.Files
                 }
                 if (file.EndsWith(".pak"))
                 {
-                    Paks.Add(new PakFile(file.Replace(pth, "").ToLowerFast(), file));
+                    pfs_t.Add(new PakFile(file.Replace(pth, "").ToLowerFast(), file));
                 }
                 else
                 {
@@ -164,8 +165,9 @@ namespace FreneticGameCore.Files
                     FileMap[pf.Name] = pf;
                 }
             }
+            Paks.AddRange(pfs_t);
             int id = 0;
-            foreach (PakFile pak in Paks)
+            foreach (PakFile pak in pfs_t)
             {
                 List<ZipStorer.ZipFileEntry> zents = pak.Storer.ReadCentralDir();
                 pak.FileListIndex = Files.Count;
