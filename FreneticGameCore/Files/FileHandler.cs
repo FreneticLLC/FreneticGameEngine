@@ -140,10 +140,11 @@ namespace FreneticGameCore.Files
 
         /// <summary>
         /// Load a set of files from a path.
+        /// <para>Should generally use <see cref="LoadDir(string)"/> instead.</para>
         /// </summary>
         /// <param name="pth">The path.</param>
         /// <param name="allfiles">A list of all files that need to be loaded.</param>
-        void Load(string pth, string[] allfiles)
+        public void Load(string pth, string[] allfiles)
         {
             foreach (string tfile in allfiles)
             {
