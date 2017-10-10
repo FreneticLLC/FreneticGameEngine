@@ -444,8 +444,8 @@ namespace FreneticGameCore.Files
             }
             for (int i = 0; i < Files.Count; i++)
             {
-                string fina = "/" + Files[i].Name;
-                if (fina.StartsWith(fn2))
+                string fina = Files[i].Name;
+                if (("/" + fina).StartsWith(fn2))
                 {
                     folds.Add(fina);
                 }
