@@ -224,14 +224,15 @@ namespace FreneticGameGraphics.ClientSystem
                 }
             }
         }
-
+        
         /// <summary>
         /// Starts the game engine, and begins the primary loop.
         /// </summary>
-        public void Start()
+        /// <param name="initialFlags">The initial window flag.</param>
+        public void Start(GameWindowFlags initialFlags = GameWindowFlags.FixedWindow)
         {
             SysConsole.Output(OutputType.INIT, "GameEngine loading...");
-            Window = new GameWindow(WindWid, WindHei, GraphicsMode.Default, StartingWindowTitle, GameWindowFlags.FixedWindow, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
+            Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
             Window.Load += Window_Load;
             Window.RenderFrame += Window_RenderFrame;
             Window.Mouse.Move += Mouse_Move;
