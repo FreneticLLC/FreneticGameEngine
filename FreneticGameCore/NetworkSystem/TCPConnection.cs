@@ -54,11 +54,16 @@ namespace FreneticGameCore.NetworkSystem
         public int Channel;
 
         /// <summary>
+        /// Any tag applied to this Object by the game.
+        /// </summary>
+        public Object Tag;
+
+        /// <summary>
         /// Processes a received packet.
         /// </summary>
         /// <param name="pid">The packet ID.</param>
         /// <param name="reader">The data reader.</param>
-        public void ProcesPacket(long pid, DataReader reader)
+        public void ProcessPacket(long pid, DataReader reader)
         {
             // TODO
         }
@@ -145,6 +150,7 @@ namespace FreneticGameCore.NetworkSystem
                             OpeningInformation = str;
                             if (Network.WantsReady?.Invoke(this) ?? true)
                             {
+                                // TODO: Send counter header, all default packets, etc.
                                 IsReady = true;
                             }
                             else
@@ -196,7 +202,7 @@ namespace FreneticGameCore.NetworkSystem
                             DataStream packStr = new DataStream(packet);
                             DataReader reader = new DataReader(packStr);
                             long pid = reader.ReadVarInt();
-                            ProcesPacket(pid, reader);
+                            ProcessPacket(pid, reader);
                             if (ReadData.Length == 0)
                             {
                                 ReadData.Ind = 0;

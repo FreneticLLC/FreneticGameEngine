@@ -19,6 +19,16 @@ namespace FreneticGameCore.NetworkSystem
         public TcpListener Listening = null;
 
         /// <summary>
+        /// A mapping of packet names to their packet data.
+        /// </summary>
+        public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = new Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>>();
+
+        /// <summary>
+        /// Packets, listed by ID number.
+        /// </summary>
+        public List<Func<ServerTCPDataPacketIn>> Packets = new List<Func<ServerTCPDataPacketIn>>();
+
+        /// <summary>
         /// All present connections.
         /// </summary>
         public List<TCPConnection> Connections = new List<TCPConnection>();
@@ -84,6 +94,28 @@ namespace FreneticGameCore.NetworkSystem
         }
 
         /// <summary>
+        /// Constructs the TCP Game Network (server).
+        /// </summary>
+        public TCPGameNetwork()
+        {
+            // TODO: Register default packets.
+        }
+
+        /// <summary>
+        /// Registers a packet, returning the new ID. May not register the same name twice!
+        /// </summary>
+        /// <param name="name">The name of the packet.</param>
+        /// <param name="packetGetter">The packet getter function.</param>
+        /// <returns>The ID.</returns>
+        public long RegisterPacket(string name, Func<ServerTCPDataPacketIn> packetGetter)
+        {
+            long id = Packets.Count;
+            NamesToPackets.Add(name, new KeyValuePair<long, Func<ServerTCPDataPacketIn>>(id, packetGetter));
+            Packets.Add(packetGetter);
+            return id;
+        }
+
+        /// <summary>
         /// Maximum size of a header data.
         /// </summary>
         public int HeaderLimit = 1024 * 10;
@@ -95,6 +127,8 @@ namespace FreneticGameCore.NetworkSystem
 
         /// <summary>
         /// Set this to control whether a game connection is permitted or denied.
+        /// <para>If return is true, the connection will be marked ready and loaded in.</para>
+        /// <para>If intending to return true, this is a good spot to set <see cref="TCPConnection.Tag"/> and spawn any relevant objects.</para>
         /// </summary>
         public Func<TCPConnection, bool> WantsReady;
     }
