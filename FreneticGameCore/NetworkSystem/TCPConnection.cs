@@ -54,6 +54,60 @@ namespace FreneticGameCore.NetworkSystem
         public int Channel;
 
         /// <summary>
+        /// Processes a received packet.
+        /// </summary>
+        /// <param name="pid">The packet ID.</param>
+        /// <param name="reader">The data reader.</param>
+        public void ProcesPacket(long pid, DataReader reader)
+        {
+            // TODO
+        }
+
+        /// <summary>
+        /// The number of bytes waiting to send.
+        /// </summary>
+        public int SentWaiting = 0;
+
+        /// <summary>
+        /// Sends a packet through the socket.
+        /// </summary>
+        /// <param name="packID">The packet ID.</param>
+        /// <param name="data">The data.</param>
+        public void SendPacket(long packID, byte[] data)
+        {
+            if (RelevantSocket == null)
+            {
+                return;
+            }
+            DataStream outp = new DataStream();
+            DataWriter dw = new DataWriter(outp);
+            dw.WriteInt(data.Length);
+            dw.WriteVarInt(packID);
+            dw.WriteBytes(data);
+            SentWaiting += data.Length;
+            try
+            {
+                RelevantSocket.BeginSend(data, 0, data.Length, SocketFlags.None, SendComplete, data.Length);
+            }
+            catch (Exception ex)
+            {
+                Utilities.CheckException(ex);
+                RelevantSocket.Close();
+                RelevantSocket = null;
+                SysConsole.Output(OutputType.INFO, "[Connections:Error] " + ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Called when a send operation completes.
+        /// </summary>
+        /// <param name="res"></param>
+        public void SendComplete(IAsyncResult res)
+        {
+            SentWaiting -= (int)res.AsyncState;
+        }
+
+        /// <summary>
         /// Run every frame to tick any network updates.
         /// </summary>
         public void Tick()
@@ -142,7 +196,11 @@ namespace FreneticGameCore.NetworkSystem
                             DataStream packStr = new DataStream(packet);
                             DataReader reader = new DataReader(packStr);
                             long pid = reader.ReadVarInt();
-                            // TODO: Process packet
+                            ProcesPacket(pid, reader);
+                            if (ReadData.Length == 0)
+                            {
+                                ReadData.Ind = 0;
+                            }
                         }
                         else
                         {
@@ -157,7 +215,7 @@ namespace FreneticGameCore.NetworkSystem
                 Utilities.CheckException(ex);
                 RelevantSocket.Close();
                 RelevantSocket = null;
-                SysConsole.Output(OutputType.INFO, ex.Message);
+                SysConsole.Output(OutputType.INFO, "[Connections:Error] " + ex.Message);
             }
         }
     }
