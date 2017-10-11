@@ -18,10 +18,7 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.Files;
 using FreneticGameGraphics.GraphicsHelpers;
-using FreneticGameCore.EntitySystem;
-using FreneticGameGraphics.ClientSystem.EntitySystem;
-using FreneticGameGraphics.UISystem;
-using FreneticGameGraphics.AudioSystem;
+using FreneticGameCore.Collision;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -167,13 +164,74 @@ namespace FreneticGameGraphics.ClientSystem
             MouseY = e.Y;
         }
 
+        private int WindWid = 800;
+        private int WindHei = 600;
+
+        /// <summary>
+        /// Window width.
+        /// </summary>
+        public int WindowWidth
+        {
+            get
+            {
+                return Window == null ? WindWid : Window.Width;
+            }
+            set
+            {
+                WindWid = value;
+                if (Window != null)
+                {
+                    Window.Width = WindWid;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Window height.
+        /// </summary>
+        public int WindowHeight
+        {
+            get
+            {
+                return Window == null ? WindHei : Window.Height;
+            }
+            set
+            {
+                WindHei = value;
+                if (Window != null)
+                {
+                    Window.Height = WindHei;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Size of the window.
+        /// </summary>
+        public Vector2i WindowSize
+        {
+            get
+            {
+                return Window == null ? new Vector2i(WindWid, WindHei) : new Vector2i(Window.Width, Window.Height);
+            }
+            set
+            {
+                WindWid = value.X;
+                WindHei = value.Y;
+                if (Window != null)
+                {
+                    Window.ClientSize = new System.Drawing.Size(value.X, value.Y);
+                }
+            }
+        }
+
         /// <summary>
         /// Starts the game engine, and begins the primary loop.
         /// </summary>
         public void Start()
         {
             SysConsole.Output(OutputType.INIT, "GameEngine loading...");
-            Window = new GameWindow(800, 600, GraphicsMode.Default, StartingWindowTitle, GameWindowFlags.FixedWindow, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
+            Window = new GameWindow(WindWid, WindHei, GraphicsMode.Default, StartingWindowTitle, GameWindowFlags.FixedWindow, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
             Window.Load += Window_Load;
             Window.RenderFrame += Window_RenderFrame;
             Window.Mouse.Move += Mouse_Move;
