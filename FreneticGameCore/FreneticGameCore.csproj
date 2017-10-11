@@ -49,6 +49,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -89,7 +91,6 @@
     <Compile Include="Files\DataWriter.cs" />
     <Compile Include="Files\FileHandler.cs" />
     <Compile Include="Files\UnknownFileException.cs" />
-    <Compile Include="Files\ZipStorer.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="LockedLinkedList.cs" />
     <Compile Include="MTRandom.cs" />

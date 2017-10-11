@@ -169,11 +169,11 @@ namespace FreneticGameCore.Files
             int id = 0;
             foreach (PakFile pak in pfs_t)
             {
-                List<ZipStorer.ZipFileEntry> zents = pak.Storer.ReadCentralDir();
+                IReadOnlyCollection<ZipArchiveEntry> zents = pak.Storer.Entries;
                 pak.FileListIndex = Files.Count;
-                foreach (ZipStorer.ZipFileEntry zent in zents)
+                foreach (ZipArchiveEntry zent in zents)
                 {
-                    string name = CleanFileName(zent.FilenameInZip);
+                    string name = CleanFileName(zent.FullName);
                     if (name.Length == 0 || name[name.Length - 1] == '/')
                     {
                         continue;
@@ -335,8 +335,10 @@ namespace FreneticGameCore.Files
             fref = file;
             if (file.IsPakked)
             {
+                Stream s = file.Entry.Open();
                 MemoryStream ms = new MemoryStream();
-                Paks[file.PakIndex].Storer.ExtractFile(file.Entry, ms);
+                s.CopyTo(ms);
+                s.Close();
                 byte[] toret = ms.ToArray();
                 ms.Close();
                 return toret;
@@ -659,7 +661,7 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// The PAK file inner file object.
         /// </summary>
-        public ZipStorer.ZipFileEntry Entry;
+        public ZipArchiveEntry Entry;
 
         /// <summary>
         /// Constructs a pakked file.
@@ -679,7 +681,7 @@ namespace FreneticGameCore.Files
         /// <param name="handle">The PAK file path.</param>
         /// <param name="index">The PAK index.</param>
         /// <param name="entry">The PAK entry.</param>
-        public PakkedFile(string name, string handle, int index, ZipStorer.ZipFileEntry entry)
+        public PakkedFile(string name, string handle, int index, ZipArchiveEntry entry)
         {
             Name = name;
             Handle = handle;
@@ -707,7 +709,7 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// The PAK file object.
         /// </summary>
-        public ZipStorer Storer = null;
+        public ZipArchive Storer = null;
 
         /// <summary>
         /// The index in the file list.
@@ -723,7 +725,7 @@ namespace FreneticGameCore.Files
         {
             Handle = handle;
             Name = name;
-            Storer = ZipStorer.Open(handle, FileAccess.Read);
+            Storer = ZipFile.OpenRead(handle);
         }
     }
 }
