@@ -141,6 +141,7 @@ namespace FreneticGameCore.Files
         /// <returns>New index.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            // TODO: More logical seek operation
             if (origin == SeekOrigin.Begin)
             {
                 Ind = offset;

@@ -36,6 +36,8 @@ namespace FreneticGameCore.NetworkSystem
 
         private byte[] OneByteHolder = new byte[1];
 
+        private byte[] KiloByteHolder = new byte[1024];
+
         /// <summary>
         /// Any information used for the connection period.
         /// </summary>
@@ -95,6 +97,7 @@ namespace FreneticGameCore.NetworkSystem
                             {
                                 throw new Exception("Connection refused: Rejected by game systems.");
                             }
+                            ReadData.SetLength(0);
                             return;
                         }
                         ReadData.WriteByte(OneByteHolder[0]);
@@ -102,16 +105,59 @@ namespace FreneticGameCore.NetworkSystem
                         {
                             throw new Exception("Connection refused: Too much header data.");
                         }
+                        avail = RelevantSocket.Available;
                     }
                     return;
                 }
                 // If we reached here, IsReady = true.
-
+                while (avail > 0)
+                {
+                    int rd = RelevantSocket.Receive(KiloByteHolder, Math.Min(avail, KiloByteHolder.Length), SocketFlags.None);
+                    if (rd <= 0)
+                    {
+                        return;
+                    }
+                    ReadData.Write(KiloByteHolder, 0, rd);
+                    if (ReadData.Length > Network.MaxPacketWaiting)
+                    {
+                        throw new Exception("Connection quick-closed: massive packet!");
+                    }
+                    if (ReadData.Length > 5)
+                    {
+                        rd = ReadData.Read(KiloByteHolder, 0, 4);
+                        int d = BitConverter.ToInt32(KiloByteHolder, 0);
+                        if (ReadData.Length >= d)
+                        {
+                            byte[] packet = new byte[d];
+                            rd = 0;
+                            while (rd < d)
+                            {
+                                int trd = ReadData.Read(packet, rd, d);
+                                if (trd <= 0)
+                                {
+                                    throw new Exception("Connection quick-closed: streaming error.");
+                                }
+                                rd += trd;
+                            }
+                            DataStream packStr = new DataStream(packet);
+                            DataReader reader = new DataReader(packStr);
+                            long pid = reader.ReadVarInt();
+                            // TODO: Process packet
+                        }
+                        else
+                        {
+                            ReadData.Ind -= rd;
+                        }
+                    }
+                    avail = RelevantSocket.Available;
+                }
             }
             catch (Exception ex)
             {
                 Utilities.CheckException(ex);
+                RelevantSocket.Close();
                 RelevantSocket = null;
+                SysConsole.Output(OutputType.INFO, ex.Message);
             }
         }
     }

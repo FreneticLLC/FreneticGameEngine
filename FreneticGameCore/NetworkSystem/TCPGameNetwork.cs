@@ -89,6 +89,11 @@ namespace FreneticGameCore.NetworkSystem
         public int HeaderLimit = 1024 * 10;
 
         /// <summary>
+        /// Maximum size of a waiting packet.
+        /// </summary>
+        public int MaxPacketWaiting = 1024 * 1024 * 10;
+
+        /// <summary>
         /// Set this to control whether a game connection is permitted or denied.
         /// </summary>
         public Func<TCPConnection, bool> WantsReady;
