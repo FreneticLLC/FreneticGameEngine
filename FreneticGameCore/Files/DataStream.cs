@@ -141,6 +141,7 @@ namespace FreneticGameCore.Files
         /// <returns>New index.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            // TODO: More logical seek operation
             if (origin == SeekOrigin.Begin)
             {
                 Ind = offset;
@@ -163,6 +164,10 @@ namespace FreneticGameCore.Files
         public override void SetLength(long res_len)
         {
             Len = res_len;
+            if (Len == 0)
+            {
+                Ind = 0;
+            }
         }
 
         /// <summary>
