@@ -17,6 +17,7 @@ using BEPUphysics.Character;
 using BEPUphysics.Entities;
 using BEPUphysics.CollisionShapes;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
+using FreneticGameCore.NetworkSystem;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -97,7 +98,7 @@ namespace FreneticGameCore.EntitySystem
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
-
+        
         /// <summary>
         /// Gets or sets the entity's mass.
         /// </summary>

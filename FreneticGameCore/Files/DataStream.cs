@@ -163,6 +163,10 @@ namespace FreneticGameCore.Files
         public override void SetLength(long res_len)
         {
             Len = res_len;
+            if (Len == 0)
+            {
+                Ind = 0;
+            }
         }
 
         /// <summary>
