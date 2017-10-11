@@ -546,9 +546,9 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
-        /// Compresses a byte array.
+        /// Compresses a byte array using LZ4.
         /// </summary>
-        /// <param name="input">Uncompressed data.</param>
+        /// <param name="input">Non-compressed data.</param>
         /// <returns>Compressed data.</returns>
         public static byte[] Compress(byte[] input)
         {
@@ -562,11 +562,11 @@ namespace FreneticGameCore.Files
         }
 
         /// <summary>
-        /// Decompress a byte array.
+        /// Decompresses a byte array using LZ4.
         /// </summary>
         /// <param name="input">Compressed data.</param>
-        /// <returns>Uncompressed data.</returns>
-        public static byte[] Uncompress(byte[] input)
+        /// <returns>Non-compressed data.</returns>
+        public static byte[] Decompress(byte[] input)
         {
             using (MemoryStream output = new MemoryStream())
             {
@@ -583,7 +583,7 @@ namespace FreneticGameCore.Files
         /// <summary>
         /// Compresses a byte array using the GZip algorithm.
         /// </summary>
-        /// <param name="input">Uncompressed data.</param>
+        /// <param name="input">Non-compressed data.</param>
         /// <returns>Compressed data.</returns>
         public static byte[] GZip(byte[] input)
         {
@@ -600,7 +600,7 @@ namespace FreneticGameCore.Files
         /// Decompress a byte array using the GZip algorithm.
         /// </summary>
         /// <param name="input">Compressed data.</param>
-        /// <returns>Uncompressed data.</returns>
+        /// <returns>Non-compressed data.</returns>
         public static byte[] UnGZip(byte[] input)
         {
             using (MemoryStream output = new MemoryStream())
