@@ -1258,7 +1258,12 @@ namespace FreneticGameGraphics.ClientSystem
         /// Executable view patch.
         /// </summary>
         public Action ViewPatchFifteen;
-
+        
+        /// <summary>
+        /// Executable view patch.
+        /// </summary>
+        public Action ViewPatchSixteen;
+        
         /// <summary>
         /// Whether the system is currently rendering the second eye (When VR or 3D enabled).
         /// </summary>
@@ -1720,6 +1725,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Render3D(this);
                 GraphicsUtil.CheckError("Render/Fast - Transp");
             }
+            ViewPatchSixteen?.Invoke();
             if (Engine.Forward_Shadows)
             {
                 GL.ActiveTexture(TextureUnit.Texture5);
