@@ -136,13 +136,18 @@ namespace FreneticGameGraphics.ClientSystem
             LastRenderedSet.Clear();
             CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            foreach (UIElement elem in LastRenderedSet.OrderBy((e) => e.RenderPriority))
+            foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
             {
                 elem.Render(this, Client.Delta);
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixTo = s;
         }
+
+        /// <summary>
+        /// Whether to sort the view by priority order (if not, will be parent/child logical order).
+        /// </summary>
+        public bool SortToPriority = false;
 
         /// <summary>
         /// The last set of elements that were rendered (not sorted).

@@ -84,6 +84,7 @@ namespace FreneticGameGraphics.UISystem
 
         /// <summary>
         /// Priority for rendering logic.
+        /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
         /// </summary>
         public double RenderPriority = 0;
 
