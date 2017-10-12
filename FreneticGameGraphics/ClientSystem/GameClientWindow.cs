@@ -224,7 +224,12 @@ namespace FreneticGameGraphics.ClientSystem
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Whether to enable the CPU waste patch.
+        /// </summary>
+        public bool CPUWastePatch = true;
+
         /// <summary>
         /// Starts the game engine, and begins the primary loop.
         /// </summary>
@@ -237,10 +242,19 @@ namespace FreneticGameGraphics.ClientSystem
             Window.RenderFrame += Window_RenderFrame;
             Window.Mouse.Move += Mouse_Move;
             Window.Closed += Window_Closed;
+            Window.ReduceCPUWaste = CPUWastePatch;
             SysConsole.Output(OutputType.INIT, "GameEngine calling SetUp event...");
             OnWindowSetUp?.Invoke();
             SysConsole.Output(OutputType.INIT, "GameEngine running...");
-            Window.Run();
+            if (CPUWastePatch)
+            {
+                double rate = DisplayDevice.Default.RefreshRate;
+                Window.Run(rate, rate);
+            }
+            else
+            {
+                Window.Run();
+            }
         }
 
         /// <summary>
