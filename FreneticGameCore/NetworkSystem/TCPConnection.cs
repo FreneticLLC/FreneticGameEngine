@@ -12,7 +12,7 @@ namespace FreneticGameCore.NetworkSystem
     /// <summary>
     /// Represents a present TCP Connection.
     /// </summary>
-    public class TCPConnection
+    public class TCPConnection : IDisposable
     {
         /// <summary>
         /// The backing socket.
@@ -223,6 +223,27 @@ namespace FreneticGameCore.NetworkSystem
                 RelevantSocket = null;
                 SysConsole.Output(OutputType.INFO, "[Connections:Error] " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Dumb MS logic dispose method.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ReadData.Dispose();
+                RelevantSocket.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the window client.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
         }
     }
 }

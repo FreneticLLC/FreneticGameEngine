@@ -311,7 +311,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Dumb MS logic dispoe method.
+        /// Dumb MS logic dispose method.
         /// </summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
@@ -627,7 +627,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Dumb MS logic dispoe method.
+        /// Dumb MS logic dispose method.
         /// </summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
