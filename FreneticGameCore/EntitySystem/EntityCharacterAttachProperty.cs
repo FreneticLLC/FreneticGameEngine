@@ -35,6 +35,12 @@ namespace FreneticGameCore.EntitySystem
         public CharacterController Character;
 
         /// <summary>
+        /// The view height multiplier of the character controller.
+        /// <para>That is, standing height * 0.5 * view height = used height.</para>
+        /// </summary>
+        public double ViewHeight = 0.95;
+
+        /// <summary>
         /// Handles the spawn event.
         /// </summary>
         public override void OnSpawn()
@@ -56,11 +62,21 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Gets the accurate location for this attachment.
+        /// </summary>
+        /// <param name="basePos">The base entity position of the character.</param>
+        /// <returns>The accurate position.</returns>
+        public Location GetAccuratePosition(Location basePos)
+        {
+            return basePos + new Location(Character.Down) * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+        }
+
+        /// <summary>
         /// Set the relative offset to the current relative locations and orientation.
         /// </summary>
         public override void SetRelativeToCurrent()
         {
-            SetRelativeBasedOn(GetRelativeQuaternion(), AttachedTo.LastKnownPosition);
+            SetRelativeBasedOn(GetRelativeQuaternion(), GetAccuratePosition(AttachedTo.LastKnownPosition));
         }
 
         /// <summary>
@@ -68,7 +84,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void FixPosition(Location position)
         {
-            SetPositionOrientation(position, GetRelativeQuaternion());
+            SetPositionOrientation(GetAccuratePosition(position), GetRelativeQuaternion());
         }
 
         /// <summary>
