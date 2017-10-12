@@ -84,6 +84,7 @@
     <Compile Include="LanguageEngine.cs" />
     <Compile Include="Model3D.cs" />
     <Compile Include="ModelHandler.cs" />
+    <Compile Include="NetworkSystem\DataPacketIn.cs" />
     <Compile Include="NetworkSystem\GameNetwork.cs" />
     <Compile Include="NetworkSystem\NetworkableData.cs" />
     <Compile Include="NetworkSystem\TCPConnection.cs" />
