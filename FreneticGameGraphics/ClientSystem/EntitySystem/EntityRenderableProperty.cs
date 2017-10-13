@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore;
+using FreneticGameCore.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
@@ -46,15 +47,29 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
 
         /// <summary>
         /// Where the entity should render at.
+        /// <para>Use <see cref="BasicEntity{T, T2}.SetPosition(Location)"/> to update this.</para>
         /// </summary>
         [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Location RenderAt;
+        public Location RenderAt
+        {
+            get
+            {
+                return Entity.LastKnownPosition;
+            }
+        }
 
         /// <summary>
         /// What orientation to render the entity at.
+        /// <para>Use <see cref="BasicEntity{T, T2}.SetOrientation(Quaternion)"/> to update this.</para>
         /// </summary>
-        public Quaternion RenderOrientation = Quaternion.Identity;
+        [PropertyDebuggable]
+        public Quaternion RenderOrientation
+        {
+            get
+            {
+                return Entity.LastKnownOrientation;
+            }
+        }
 
         /// <summary>
         /// Fired when the entity is spawned.
@@ -101,7 +116,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="loc">The new location.</param>
         public void FixLocation(Location loc)
         {
-            RenderAt = loc;
             OtherLocationPatch();
         }
 
@@ -118,7 +132,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <param name="q">The new orientation.</param>
         public void FixOrientation(Quaternion q)
         {
-            RenderOrientation = q;
             OtherOrientationPatch();
         }
 
