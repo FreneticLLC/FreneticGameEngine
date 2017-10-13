@@ -34,14 +34,19 @@ namespace FreneticGameGraphics.UISystem
         /// Constructs a new 3D sub-engine.
         /// </summary>
         /// <param name="pos">The position of the element.</param>
-        public UI3DSubEngine(UIPositionHelper pos)
+        /// <param name="alphaBack">Whether to have an alpha background.</param>
+        public UI3DSubEngine(UIPositionHelper pos, bool alphaBack)
             : base(pos)
         {
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new FreneticGameCore.Collision.Vector2i(TextureEngine.GetNextPOTValue(Position.Width), TextureEngine.GetNextPOTValue(Position.Height))
+                SubSize = new FreneticGameCore.Collision.Vector2i(/*TextureEngine.GetNextPOTValue*/(Position.Width), /*TextureEngine.GetNextPOTValue*/(Position.Height))
             };
+            if (alphaBack)
+            {
+                SubEngine.MainView.ClearColor = new float[] { 0f, 0f, 0f, 0f };
+            }
         }
 
         /// <summary>
@@ -84,7 +89,7 @@ namespace FreneticGameGraphics.UISystem
             int y = LastAbsolutePosition.Y;
             int w = LastAbsoluteSize.X;
             int h = LastAbsoluteSize.Y;
-            GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.CurrentFBO);
+            GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.CurrentFBOTexture);
             view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         }
     }

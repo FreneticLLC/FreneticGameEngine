@@ -56,11 +56,44 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         }
 
         /// <summary>
+        /// PRIMARILY FOR INTERNAL USAGE.
+        /// Caps to disable for this render.
+        /// </summary>
+        public HashSet<EnableCap> DisabledCaps = new HashSet<EnableCap>();
+
+        /// <summary>
+        /// Gets or sets whether the object is always visible through walls.
+        /// <para>WILL LIKELY CAUSE VISUAL GLITCHES. MAY BE ABLE TO SEE PARTS OF IT THROUGH ITSELF.</para>
+        /// </summary>
+        public bool VisibleThroughWalls
+        {
+            get
+            {
+                return DisabledCaps.Contains(EnableCap.DepthTest);
+            }
+            set
+            {
+                if (value)
+                {
+                    DisabledCaps.Add(EnableCap.DepthTest);
+                }
+                else
+                {
+                    DisabledCaps.Remove(EnableCap.DepthTest);
+                }
+            }
+        }
+
+        /// <summary>
         /// Render the entity as seen normally, in 3D.
         /// </summary>
         /// <param name="context">The render context.</param>
         public override void RenderStandard(RenderContext context)
         {
+            foreach (EnableCap ec in DisabledCaps)
+            {
+                GL.Disable(ec);
+            }
             if (DiffuseTexture != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture0);
@@ -70,6 +103,10 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             Matrix4d mat = Matrix4d.Scale(Scale.ToOpenTK3D()) * Matrix4d.CreateFromQuaternion(RenderOrientation.ToOpenTKDoubles()) * Matrix4d.CreateTranslation(RenderAt.ToOpenTK3D());
             context.Engine.MainView.SetMatrix(ShaderLocations.Common.WORLD, mat);
             EntityModel.Draw();
+            foreach (EnableCap ec in DisabledCaps)
+            {
+                GL.Enable(ec);
+            }
         }
 
         /// <summary>

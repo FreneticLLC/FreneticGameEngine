@@ -201,7 +201,10 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
-            SubSize = new Vector2i(Window.Width, Window.Height);
+            if (!IsSubEngine)
+            {
+                SubSize = new Vector2i(Window.Width, Window.Height);
+            }
             MainView.Width = SubSize.X;
             MainView.Height = SubSize.Y;
             if (IsSubEngine)
