@@ -24,15 +24,51 @@ namespace FreneticGameGraphics.UISystem
     public class UILabel : UIElement
     {
         /// <summary>
-        /// The text to display on this label.
+        /// The internal text value.
+        /// <para>This will not update this label's width or height.</para>
         /// </summary>
-        public string Text;
+        public string InternalText;
+
+        /// <summary>
+        /// The text to display on this label.
+        /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
+        /// </summary>
+        public string Text
+        {
+            get
+            {
+                return InternalText;
+            }
+            set
+            {
+                InternalText = value;
+                FixScale();
+            }
+        }
+
+        /// <summary>
+        /// The internal text font value.
+        /// <para>This will not update this label's width or height.</para>
+        /// </summary>
+        public FontSet InternalTextFont;
 
         /// <summary>
         /// The font to use.
+        /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
         /// </summary>
-        public FontSet TextFont;
-        
+        public FontSet TextFont
+        {
+            get
+            {
+                return InternalTextFont;
+            }
+            set
+            {
+                InternalTextFont = value;
+                FixScale();
+            }
+        }
+
         /// <summary>
         /// The background color for this label.
         /// <para>Set to Vector4.Zero (or any values with W=0) to disable the background color.</para>
@@ -53,19 +89,26 @@ namespace FreneticGameGraphics.UISystem
         public UILabel(string btext, FontSet font, UIPositionHelper pos)
             : base(pos)
         {
-            Text = btext;
-            TextFont = font;
+            InternalText = btext;
+            InternalTextFont = font;
             // TODO: Dynamic scaling support?
-            int pwidth = Position.Width;
-            CustomWidth = pwidth > 0;
-            Location scale = TextFont.MeasureFancyLinesOfText(CustomWidth ? TextFont.SplitAppropriately(Text, pwidth) : Text, BColor);
-            pos.ConstantWidthHeight((int)scale.X, (int)scale.Y);
+            CustomWidthValue = Position.Width;
+            FixScale();
         }
 
         /// <summary>
-        /// Whether to custom-limit the width.
+        /// Fixes this label's width and height based on <see cref="Text"/> and <see cref="TextFont"/>.
         /// </summary>
-        public bool CustomWidth;
+        public void FixScale()
+        {
+            Location scale = TextFont.MeasureFancyLinesOfText(CustomWidthValue > 0 ? TextFont.SplitAppropriately(Text, CustomWidthValue) : Text, BColor);
+            Position.ConstantWidthHeight((int)scale.X, (int)scale.Y);
+        }
+
+        /// <summary>
+        /// The custom-limit width.
+        /// </summary>
+        public int CustomWidthValue;
 
         /// <summary>
         /// Renders this label on the screen.
@@ -74,7 +117,7 @@ namespace FreneticGameGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
         {
-            string tex = CustomWidth ? TextFont.SplitAppropriately(Text, LastAbsoluteSize.X) : Text;
+            string tex = CustomWidthValue > 0 ? TextFont.SplitAppropriately(Text, LastAbsoluteSize.X) : Text;
             int bx = LastAbsolutePosition.X;
             int by = LastAbsolutePosition.Y;
             if (BackColor.W > 0)
