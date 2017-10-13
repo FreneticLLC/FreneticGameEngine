@@ -72,7 +72,7 @@ namespace FreneticGameCore.EntitySystem
         {
             SetPositionOrientation(AttachedTo.LastKnownPosition, orientation);
         }
-
+        
         /// <summary>
         /// Sets this entity's position and orientation relative to <see cref="AttachedTo"/>.
         /// </summary>

@@ -312,7 +312,7 @@ namespace FreneticGameCore
         public static Quaternion FromAxisAngle(Location axis, double angle)
         {
             double s = Math.Sin(angle * 0.5);
-            return new Quaternion( axis.X * s, axis.Y * s, axis.Z * s, Math.Cos(angle * 0.5));
+            return new Quaternion(axis.X * s, axis.Y * s, axis.Z * s, Math.Cos(angle * 0.5));
         }
 
         /// <summary>

@@ -56,7 +56,6 @@ namespace FreneticGameCore.EntitySystem
         public Quaternion GetRelativeQuaternion()
         {
             // TODO: Less complicated option?!
-            Location angles = Utilities.VectorToAngles(new Location(Character.ViewDirection));
             Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, Character.ViewDirection, -Character.Down);
             return BEPUutilities.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
@@ -69,6 +68,26 @@ namespace FreneticGameCore.EntitySystem
         public Location GetAccuratePosition(Location basePos)
         {
             return basePos + new Location(Character.Down) * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+        }
+
+        /// <summary>
+        /// Set relative offset, based on an entity's offsets from the default positioning.
+        /// </summary>
+        /// <param name="relPos">The relative position.</param>
+        /// <param name="relQuat">The relative quaternion.</param>
+        public void SetRelativeForEntity(Location relPos, Quaternion relQuat)
+        {
+            // TODO: Less cheating! This can be resolved mathematically!
+            Vector3 viewDir = Character.ViewDirection;
+            Vector3 downDir = Character.Down;
+            Character.Down = -Vector3.UnitZ;
+            Character.ViewDirection = Vector3.UnitY;
+            Entity.SetPosition(GetAccuratePosition(AttachedTo.LastKnownPosition) + relPos);
+            Entity.SetOrientation(relQuat);
+            SetRelativeToCurrent();
+            Character.Down = downDir;
+            Character.ViewDirection = viewDir;
+            Tick();
         }
 
         /// <summary>
