@@ -45,6 +45,44 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Fire the event with the given arguments, with a callback action to indicate delayed completion.
+        /// </summary>
+        /// <param name="schedule">The scheduler of relevance.</param>
+        /// <param name="args">The arguments.</param>
+        /// <param name="complete">Action to fire when completed.</param>
+        public void Fire(Scheduler schedule, T args, Action complete)
+        {
+            List<FreneticEventWaiter> fews = new List<FreneticEventWaiter>();
+            for (int i = 0; i < Handlers.Count; i++)
+            {
+                FreneticEventArgs<T> fargs = new FreneticEventArgs<T>()
+                {
+                    PriorityPosition = Handlers[i].Priority,
+                    Context = args,
+                    ScheduleHelper = schedule
+                };
+                FreneticEventWaiter few = Handlers[i].Fire(fargs);
+                if (few != null)
+                {
+                    fews.Add(few);
+                }
+            }
+            if (fews.Count == 0)
+            {
+                complete();
+                return;
+            }
+            schedule.StartAsyncTask(() =>
+            {
+                foreach (FreneticEventWaiter few in fews)
+                {
+                    few.MREFinalComplete.WaitOne();
+                }
+                schedule.ScheduleSyncTask(complete);
+            });
+        }
+
+        /// <summary>
         /// Removes all event handlers from a given source.
         /// </summary>
         /// <param name="sourceTracker">The source.</param>
@@ -158,6 +196,11 @@ namespace FreneticGameCore
         public ManualResetEvent MREFirst = new ManualResetEvent(false);
 
         /// <summary>
+        /// Locked until the wait is entirely complete.
+        /// </summary>
+        public ManualResetEvent MREFinalComplete = new ManualResetEvent(false);
+
+        /// <summary>
         /// Waits for a delay in seconds.
         /// </summary>
         /// <param name="delay">The delay, in seconds.</param>
@@ -203,6 +246,7 @@ namespace FreneticGameCore
         {
             MREFirst.Set();
             MRECompletion.Set();
+            MREFinalComplete.Set();
         }
 
         /// <summary>
@@ -219,6 +263,7 @@ namespace FreneticGameCore
             // Actual dispose
             MREFirst.Dispose();
             MRECompletion.Dispose();
+            MREFinalComplete.Dispose();
         }
 
         /// <summary>

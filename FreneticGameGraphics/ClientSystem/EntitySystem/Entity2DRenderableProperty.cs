@@ -42,7 +42,8 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Gets the 2D angle to render around.
         /// Assumes the renderable is rotated only around the Z axis.
-        /// Setting this will broadcast an orientation update.
+        /// <para>Setting this will broadcast an orientation update.</para>
+        /// <para>MUST have a valid spawned entity for this to work!</para>
         /// </summary>
         [PropertyDebuggable]
         public float RenderAngle
