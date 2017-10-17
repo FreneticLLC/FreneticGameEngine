@@ -24,7 +24,7 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
     /// </summary>
-    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
+    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2>, ICharacterTag where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>
         /// The owning physics world.
@@ -286,6 +286,17 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Character instance ID.
+        /// </summary>
+        public long InstanceId
+        {
+            get
+            {
+                return SpawnedBody.InstanceId;
+            }
+        }
+
+        /// <summary>
         /// Construct the physics entity property.
         /// </summary>
         public EntityPhysicsProperty()
@@ -384,7 +395,7 @@ namespace FreneticGameCore.EntitySystem
             SpawnedBody.Position = InternalPosition.ToBVector();
             SpawnedBody.Gravity = InternalGravity.ToBVector();
             SpawnedBody.Tag = Entity;
-            SpawnedBody.CollisionInformation.Tag = Entity;
+            SpawnedBody.CollisionInformation.Tag = this;
             // TODO: Other settings
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;

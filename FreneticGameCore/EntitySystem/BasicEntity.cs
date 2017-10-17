@@ -61,7 +61,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Last orientation known that this entity was or is exactly upon.
         /// </summary>
-        public Quaternion LastKnownOrientation;
+        public Quaternion LastKnownOrientation = Quaternion.Identity;
 
         /// <summary>
         /// Fired when the entity is moved.
