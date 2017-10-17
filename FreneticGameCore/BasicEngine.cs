@@ -231,9 +231,9 @@ namespace FreneticGameCore
             }
             AddEntity(ce);
             ce.IsSpawned = true;
-            for (int i = 0; i < props.Length; i++)
+            foreach (Property prop in ce.GetAllProperties())
             {
-                if (props[i] is BasicEntityProperty<T, T2> bep)
+                if (prop is BasicEntityProperty<T, T2> bep)
                 {
                     bep.OnSpawn();
                 }
