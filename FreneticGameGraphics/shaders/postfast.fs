@@ -81,6 +81,23 @@ vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray acro
 	return vec4(0.0);
 }
 
+#if ADVANCED_REFLECTION
+const int OFF_COUNT = 4;
+
+const vec2[] offsets = vec2[OFF_COUNT] (
+	vec2(-0.001, 0.0),
+	vec2(0.001, 0.0),
+	vec2(0.0, -0.001),
+	vec2(0.0, 0.001)
+);
+#else
+const int OFF_COUNT = 1;
+
+const vec2[] offsets = vec2[OFF_COUNT] (
+	vec2(0.0, 0.0)
+);
+#endif
+
 void main()
 {
 	vec4 rhc = texture(rht, f.texcoord);
@@ -88,18 +105,24 @@ void main()
 	{
 		discard;
 	}
-	vec3 pos = texture(postex, f.texcoord).xyz;
-	vec3 norm = texture(normaltex, f.texcoord).xyz;
-	vec3 normal = normalize(norm);
-	float currDepth = linearizeDepth(texture(depthtex, f.texcoord).x);
-	vec3 eyePosition = normalize(-pos);
-	vec4 reflectionVector = proj_mat * vec4(reflect(eyePosition, normal), 0.0);
-	reflectionVector.x = 0.0; // TODO: ???
-	vec4 SSR = raytrace(reflectionVector.xyz / reflectionVector.w, currDepth);
 	color = texture(colortex, f.texcoord);
-	if (SSR.w > 0.0)
+	vec4 ssr_res = vec4(0.0);
+	for (int i = 0; i < OFF_COUNT; i++)
+	{
+		vec3 pos = texture(postex, f.texcoord + offsets[i]).xyz;
+		vec3 norm = texture(normaltex, f.texcoord + offsets[i]).xyz;
+		vec3 normal = normalize(norm);
+		float currDepth = linearizeDepth(texture(depthtex, f.texcoord + offsets[i]).x);
+		vec3 eyePosition = normalize(-pos);
+		vec4 reflectionVector = proj_mat * vec4(reflect(eyePosition, normal), 0.0);
+		reflectionVector.x = 0.0; // TODO: ???
+		vec4 SSR = raytrace(reflectionVector.xyz / reflectionVector.w, currDepth);
+		ssr_res += SSR;
+	}
+	ssr_res /= OFF_COUNT;
+	if (ssr_res.w > 0.0)
 	{
 		float rhy = min(rhc.y, 1.0);
-		color = color * (1.0 - rhy) + SSR * rhy; // If we found a reflection, apply it at the strength specified.
+		color = color * (1.0 - rhy) + ssr_res * rhy; // If we found a reflection, apply it at the strength specified.
 	}
 }
