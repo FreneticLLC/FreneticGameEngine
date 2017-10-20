@@ -70,6 +70,7 @@
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
     <Compile Include="EntitySystem\EntityCharacterAttachProperty.cs" />
+    <Compile Include="EntitySystem\EntityPhysicsCharacterProperty.cs" />
     <Compile Include="EntitySystem\EntityPhysics2DLimitProperty.cs" />
     <Compile Include="EntitySystem\EntityPhysicsCharacterHelper.cs" />
     <Compile Include="EntitySystem\EntitySimpleAttachProperty.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Quaternion.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntity.cs" />
+    <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysicsCharacterProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysics2DLimitProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysicsProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityProperty.cs" />

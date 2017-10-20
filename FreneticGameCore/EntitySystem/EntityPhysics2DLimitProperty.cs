@@ -93,25 +93,10 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public override void OnDespawn()
         {
-            if (HandledRemove)
-            {
-                return;
-            }
-            HandledRemove = true;
             Entity.OnSpawnEvent.RemoveBySource(this);
             Entity.OnTick -= TickHandle;
         }
-
-        private bool HandledRemove = false;
-
-        /// <summary>
-        /// Handles removal event.
-        /// </summary>
-        public override void OnRemoved()
-        {
-            OnDespawn();
-        }
-
+        
         /// <summary>
         /// The relevant physics entity.
         /// </summary>
