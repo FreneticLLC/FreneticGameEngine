@@ -116,6 +116,10 @@ namespace FreneticGameCore
                 {
                     yield return bres;
                 }
+                else if (bpe.Tag is EntityPhysicsProperty<T, T2> pres)
+                {
+                    yield return pres.Entity;
+                }
             }
         }
 
@@ -145,7 +149,14 @@ namespace FreneticGameCore
             }
             if (rcr.HitObject != null && rcr.HitObject.Tag != null)
             {
-                return rcr.HitObject.Tag as T;
+                if (rcr.HitObject.Tag is T res)
+                {
+                    return res;
+                }
+                else if (rcr.HitObject.Tag is EntityPhysicsProperty<T, T2> pres)
+                {
+                    return pres.Entity;
+                }
             }
             SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " +rcr.HitObject + " ? " + rcr.HitObject?.Tag);
             return null;
