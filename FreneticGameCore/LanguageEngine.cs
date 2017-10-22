@@ -26,7 +26,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Used for <see cref="DefaultLanguage"/> and <see cref="CurrentLanguage"/>.
         /// </summary>
-        private const string AUTO_DEFAULT = "en_us";
+        public const string AUTO_DEFAULT = "en_us";
 
         /// <summary>
         /// The default language.
@@ -109,7 +109,7 @@ namespace FreneticGameCore
         /// <summary>
         /// The key that represents a missing key.
         /// </summary>
-        const string BADKEY = "common.languages.badkey";
+        public const string BADKEY = "common.languages.badkey";
 
         /// <summary>
         /// Helper to handle vars.
@@ -141,6 +141,68 @@ namespace FreneticGameCore
                 infolist[i] = Handle(infolist[i], pathAndVars);
             }
             return infolist;
+        }
+
+        /// <summary>
+        /// Gets a list of texts, in the default language.
+        /// </summary>
+        /// <param name="Files">The file system.</param>
+        /// <param name="pathAndVars">The path and its vars.</param>
+        /// <returns>The text list.</returns>
+        public List<string> GetTextListDefault(FileHandler Files, params string[] pathAndVars)
+        {
+            if (pathAndVars.Length < 2)
+            {
+                return GetTextListDefault(Files, "core", "common.languages.badinput");
+            }
+            string category = pathAndVars[0].ToLowerFast();
+            string defPath = pathAndVars[1].ToLowerFast();
+            FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
+            List<string> str = null;
+            if (langen != null)
+            {
+                str = langen.GetStringList(defPath);
+                if (str != null)
+                {
+                    return HandleList(str, pathAndVars);
+                }
+            }
+            if (defPath == BADKEY)
+            {
+                return new List<string>() { "((Invalid key!))" };
+            }
+            return GetTextListDefault(Files, "core", BADKEY);
+        }
+
+        /// <summary>
+        /// Gets a text, in the default language.
+        /// </summary>
+        /// <param name="Files">The file system.</param>
+        /// <param name="pathAndVars">The path and its vars.</param>
+        /// <returns>The text.</returns>
+        public string GetTextDefault(FileHandler Files, params string[] pathAndVars)
+        {
+            if (pathAndVars.Length < 2)
+            {
+                return GetTextDefault(Files, "core", "common.languages.badinput");
+            }
+            string category = pathAndVars[0].ToLowerFast();
+            string defPath = pathAndVars[1].ToLowerFast();
+            FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
+            string str = null;
+            if (langen != null)
+            {
+                str = langen.GetString(defPath, null);
+                if (str != null)
+                {
+                    return Handle(str, pathAndVars);
+                }
+            }
+            if (defPath == BADKEY)
+            {
+                return "((Invalid key!))";
+            }
+            return GetTextDefault(Files, "core", BADKEY);
         }
 
         /// <summary>
