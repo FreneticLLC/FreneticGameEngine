@@ -26,6 +26,15 @@ namespace FreneticGameCore
         public List<FreneticEventFirer<T>> Handlers = new List<FreneticEventFirer<T>>();
 
         /// <summary>
+        /// Returns whether the <see cref="FreneticEvent{T}"/> has any handlers. If this returns false, firing the event will do nothing.
+        /// </summary>
+        /// <returns>Whether the event is handled.</returns>
+        public bool IsHandled()
+        {
+            return Handlers.Count > 0;
+        }
+
+        /// <summary>
         /// Fire the event with the given arguments.
         /// </summary>
         /// <param name="schedule">The scheduler of relevance.</param>
