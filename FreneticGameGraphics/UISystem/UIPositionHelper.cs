@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
+using FreneticGameCore.Collision;
 
 namespace FreneticGameGraphics.UISystem
 {
@@ -423,6 +424,37 @@ namespace FreneticGameGraphics.UISystem
                 }
                 return 0f;
             }
+        }
+
+        /// <summary>
+        /// Gets the X/Y coordinate pair.
+        /// </summary>
+        public Vector2i Position
+        {
+            get
+            {
+                return new Vector2i(X, Y);
+            }
+        }
+
+        /// <summary>
+        /// Gets the Width/Height coordinate pair.
+        /// </summary>
+        public Vector2i Size
+        {
+            get
+            {
+                return new Vector2i(Width, Height);
+            }
+        }
+
+        /// <summary>
+        /// Converts this position helper's present data to a simplified debug string.
+        /// </summary>
+        /// <returns>The debug string.</returns>
+        public override string ToString()
+        {
+            return "UIPositionHelper:PresentState{XY: " + X + ", " + Y + " / WH: " + Width + ", " + Height + " / Rot: " + Rotation + "}";
         }
     }
 
