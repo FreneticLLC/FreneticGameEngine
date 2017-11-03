@@ -41,8 +41,9 @@ namespace FreneticGameGraphics.UISystem
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new FreneticGameCore.Collision.Vector2i(/*TextureEngine.GetNextPOTValue*/(Position.Width), /*TextureEngine.GetNextPOTValue*/(Position.Height))
+                SubSize = new FreneticGameCore.Collision.Vector2i(Position.Width, Position.Height)
             };
+            SubEngine.Client = pos.View.Client;
             if (alphaBack)
             {
                 SubEngine.MainView.ClearColor = new float[] { 0f, 0f, 0f, 0f };
