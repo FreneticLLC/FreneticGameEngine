@@ -649,8 +649,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
             return X;
         }
 
+        /// <summary>
+        /// Definitely not valid emoji values.
+        /// </summary>
         public HashSet<string> InvalidEmoji = new HashSet<string>();
 
+        /// <summary>
+        /// Returns whether the string is an emoji name.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <returns>Whether it's an emoji name.</returns>
         public bool IsEmojiName(string str)
         {
             if (InvalidEmoji.Contains(str))
@@ -660,6 +668,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
             return Engine.Files.Exists("textures/emoji/" + str + ".png");
         }
 
+        /// <summary>
+        /// Separates emoji and special characters from a complex string.
+        /// </summary>
+        /// <param name="inp">The input string.</param>
+        /// <returns>The enumerable of emojis, characters, and special characters.</returns>
         public IEnumerable<string> SeparateEmojiAndSpecialChars(string inp)
         {
             int lstart = 0;
@@ -681,7 +694,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                                 InvalidEmoji.Add(split);
                                 break;
                             }
-                            string pre_pieces = inp.Substring(lstart, i);
+                            string pre_pieces = inp.Substring(lstart, i - lstart);
                             foreach (string stx in StringInfo.GetTextElementEnumerator(pre_pieces).AsEnumerable<string>())
                             {
                                 yield return stx;
