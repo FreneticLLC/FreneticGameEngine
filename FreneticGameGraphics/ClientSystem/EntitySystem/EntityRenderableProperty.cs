@@ -30,6 +30,13 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         public bool CastShadows = true;
 
         /// <summary>
+        /// Whether to ONLY RENDER as a shadow.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool ShadowsOnly = false;
+
+        /// <summary>
         /// Whether this Renderable entity is currently visible.
         /// </summary>
         [PropertyDebuggable]

@@ -342,7 +342,7 @@ namespace FreneticGameGraphics.ClientSystem
             RenderAllObjectsPre?.Invoke(lights);
             // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
             foreach (ClientEntity ent in Entities.Values
-                .Where((e) => e.Renderer != null && e.Renderer.IsVisible && (lights || e.Renderer.CastShadows) && (shouldShadow == null || shouldShadow(e)))
+                .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
                 .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
             {
                 ent.Renderer.RenderStandard2D(MainRenderContext);

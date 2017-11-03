@@ -165,5 +165,24 @@ namespace FreneticGameGraphics.ClientSystem
         /// Any post-load actions.
         /// </summary>
         public abstract void PostLoad();
+
+        /// <summary>
+        /// Calculates whether a renderable should render.
+        /// </summary>
+        /// <param name="render">The renderable.</param>
+        /// <param name="cast_shadows">Whether currently casting shadows.</param>
+        /// <returns>Whether it should render.</returns>
+        public static bool ShouldRender(EntityRenderableProperty render, bool cast_shadows)
+        {
+            if (render == null || !render.IsVisible)
+            {
+                return false;
+            }
+            if (cast_shadows ? !render.CastShadows : render.ShadowsOnly)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

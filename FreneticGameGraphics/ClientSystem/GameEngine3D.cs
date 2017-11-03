@@ -250,7 +250,7 @@ namespace FreneticGameGraphics.ClientSystem
             foreach (ClientEntity ce in EntityList)
             {
                 // TODO: layering logic of some form instead of this overly basic stuff.
-                if (ce.Renderer != null && ce.Renderer.IsVisible && (ce.Renderer.CastShadows || !view.RenderingShadows))
+                if (ShouldRender(ce.Renderer, view.RenderingShadows))
                 {
                     ce.Renderer?.RenderStandard(MainContext);
                 }
