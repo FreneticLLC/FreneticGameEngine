@@ -108,7 +108,7 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="q">The OpenTK quaternion.</param>
         /// <returns>The BEPU quaternion.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this FreneticGameCore.Quaternion q)
+        public static BEPUutilities.Quaternion ToBEPU(this Quaternion q)
         {
             return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
         }
@@ -129,11 +129,11 @@ namespace FreneticGameCore
         /// <typeparam name="T">The expected Enumerable type.</typeparam>
         /// <param name="enumerator">The original Enumerator.</param>
         /// <returns>The enumerable.</returns>
-        public static IEnumerable<T> AsEnumerable<T>(this TextElementEnumerator enumerator)
+        public static IEnumerable<T> AsEnumerable<T>(this TextElementEnumerator enumerator) where T: class
         {
             while (enumerator.MoveNext())
             {
-                yield return (T)enumerator.Current;
+                yield return enumerator.Current as T;
             }
         }
 

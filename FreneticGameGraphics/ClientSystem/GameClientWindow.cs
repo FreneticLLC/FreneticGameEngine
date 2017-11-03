@@ -283,7 +283,7 @@ namespace FreneticGameGraphics.ClientSystem
             Textures.InitTextureSystem(Files);
             GraphicsUtil.CheckError("GEB - Textures");
             SysConsole.Output(OutputType.INIT, "GameClient loading font helpers...");
-            GLFonts = new GLFontEngine(Shaders);
+            GLFonts = new GLFontEngine(Textures, Shaders);
             GLFonts.Init(Files);
             FontSets = new FontSetEngine(GLFonts)
             {

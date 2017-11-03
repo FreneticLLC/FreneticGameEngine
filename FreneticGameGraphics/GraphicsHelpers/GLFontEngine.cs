@@ -31,11 +31,18 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Constructs a GLFontEngine. Does not initialize.
         /// </summary>
+        /// <param name="teng">The texture system.</param>
         /// <param name="sengine">The shader system.</param>
-        public GLFontEngine(ShaderEngine sengine)
+        public GLFontEngine(TextureEngine teng, ShaderEngine sengine)
         {
+            Textures = teng;
             Shaders = sengine;
         }
+
+        /// <summary>
+        /// The texture system.
+        /// </summary>
+        public TextureEngine Textures;
 
         /// <summary>
         /// The shader system.
@@ -430,7 +437,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void RecognizeCharacters(string inp)
         {
             List<string> NeedsAdding = new List<string>();
-            foreach (string str in StringInfo.GetTextElementEnumerator(inp).AsEnumerable<string>().Distinct())
+            foreach (string str in SeparateEmojiAndSpecialChars(inp).Distinct())
             {
                 if (!CharacterLocations.ContainsKey(str))
                 {
@@ -453,7 +460,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         /// <param name="inp">The list of symbols.</param>
         /// <returns>The list of symbols not able to added without expaninding, if any.</returns>
-        private List<string> AddAll(List<string> inp)
+        private List<string> AddAll(List<string> inp) // TODO: Enumerable input?
         {
             using (Graphics gfx = Graphics.FromImage(Engine.CurrentBMP))
             {
@@ -464,12 +471,17 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Engine.CMinHeight = Math.Max((int)Height + 8, Engine.CMinHeight); // TODO: 8 -> ???
                 for (int i = 0; i < inp.Count; i++)
                 {
+                    bool isEmoji = inp[i].Length > 2 && inp[i].StartsWith(":") && inp[i].EndsWith(":");
                     Font fnt = (inp[i].Length == 1 ? Internal_Font : BackupFont);
                     string chr = inp[i] == "\t" ? "    " : inp[i];
-                    float nwidth = (float)Math.Ceiling(gfx.MeasureString(chr, fnt, new PointF(0, 0), sf).Width);
-                    if (fnt.Italic)
+                    float nwidth = Height;
+                    if (!isEmoji)
                     {
-                        nwidth += (int)(fnt.SizeInPoints * 0.17);
+                        nwidth = (float)Math.Ceiling(gfx.MeasureString(chr, fnt, new PointF(0, 0), sf).Width);
+                        if (fnt.Italic)
+                        {
+                            nwidth += (int)(fnt.SizeInPoints * 0.17);
+                        }
                     }
                     if (X + nwidth >= GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH)
                     {
@@ -488,7 +500,18 @@ namespace FreneticGameGraphics.GraphicsHelpers
                             return toret;
                         }
                     }
-                    gfx.DrawString(chr, fnt, brush, new PointF(X, Y), sf);
+                    if (isEmoji)
+                    {
+                        Texture t = Engine.Textures.GetTexture("emoji/" + inp[i].Substring(1, inp[i].Length - 2));
+                        using (Bitmap bmp = t.SaveToBMP())
+                        {
+                            gfx.DrawImage(bmp, new Rectangle(X, Y, (int)nwidth, (int)nwidth));
+                        }
+                    }
+                    else
+                    {
+                        gfx.DrawString(chr, fnt, brush, new PointF(X, Y), sf);
+                    }
                     RectangleF rect = new RectangleF(X, Y, nwidth, Height);
                     CharacterLocations[inp[i]] = rect;
                     if (chr.Length == 1 && chr[0] < 128)
@@ -580,30 +603,30 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The length of the string in pixels.</returns>
         public float DrawString(string str, float X, float Y, Vector4 color, TextVBO vbo, bool flip = false)
         {
-            List<string> strs = StringInfo.GetTextElementEnumerator(str).AsEnumerable<string>().ToList();
+            IEnumerable<string> strs = SeparateEmojiAndSpecialChars(str).ToList();
             float nX = 0;
             if (flip)
             {
-                for (int i = 0; i < strs.Count; i++)
+                foreach (string stri in strs)
                 {
-                    if (str[i] == '\n')
+                    if (stri == "\n")
                     {
                         Y += Height;
                         nX = 0;
                     }
-                    nX += DrawSingleCharacterFlipped(strs[i], X + nX, Y, vbo, color);
+                    nX += DrawSingleCharacterFlipped(stri, X + nX, Y, vbo, color);
                 }
             }
             else
             {
-                for (int i = 0; i < strs.Count; i++)
+                foreach (string stri in strs)
                 {
-                    if (str[i] == '\n')
+                    if (stri == "\n")
                     {
                         Y += Height;
                         nX = 0;
                     }
-                    nX += DrawSingleCharacter(strs[i], X + nX, Y, vbo, color);
+                    nX += DrawSingleCharacter(stri, X + nX, Y, vbo, color);
                 }
             }
             return nX;
@@ -619,11 +642,63 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public float MeasureString(string str)
         {
             float X = 0;
-            foreach (string stx in StringInfo.GetTextElementEnumerator(str).AsEnumerable<string>())
+            foreach (string stx in SeparateEmojiAndSpecialChars(str))
             {
                 X += RectForSymbol(stx).Width;
             }
             return X;
+        }
+
+        public HashSet<string> InvalidEmoji = new HashSet<string>();
+
+        public bool IsEmojiName(string str)
+        {
+            if (InvalidEmoji.Contains(str))
+            {
+                return false;
+            }
+            return Engine.Files.Exists("textures/emoji/" + str + ".png");
+        }
+
+        public IEnumerable<string> SeparateEmojiAndSpecialChars(string inp)
+        {
+            int lstart = 0;
+            for (int i = 0; i < inp.Length; i++)
+            {
+                if (inp[i] == ':')
+                {
+                    for (int x = i + 1; x < inp.Length; x++)
+                    {
+                        if (inp[x] == ' ')
+                        {
+                            break;
+                        }
+                        else if (inp[x] == ':')
+                        {
+                            string split = inp.Substring(i + 1, x - (i + 1));
+                            if (!IsEmojiName(split))
+                            {
+                                InvalidEmoji.Add(split);
+                                break;
+                            }
+                            string pre_pieces = inp.Substring(lstart, i);
+                            foreach (string stx in StringInfo.GetTextElementEnumerator(pre_pieces).AsEnumerable<string>())
+                            {
+                                yield return stx;
+                            }
+                            yield return ":" + split + ":";
+                            i = x;
+                            lstart = x + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            string final_pieces = inp.Substring(lstart);
+            foreach (string stx in StringInfo.GetTextElementEnumerator(final_pieces).AsEnumerable<string>())
+            {
+                yield return stx;
+            }
         }
 
         /// <summary>

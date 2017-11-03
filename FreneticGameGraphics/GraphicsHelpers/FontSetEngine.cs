@@ -763,7 +763,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             if (obfu || pseudo || random || jello)
             {
                 float nX = 0;
-                foreach (string txt in StringInfo.GetTextElementEnumerator(text).AsEnumerable<string>())
+                foreach (string txt in font.SeparateEmojiAndSpecialChars(text))
                 {
                     string chr = txt;
                     // int col = color;

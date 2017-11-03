@@ -184,7 +184,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     Name = texturename,
                     Internal_Texture = White.Original_InternalID,
                     Original_InternalID = White.Original_InternalID,
-                    LoadedProperly = false
+                    LoadedProperly = false,
+                    Width = White.Width,
+                    Height = White.Height,
                 };
             }
             if (Loaded == null)
