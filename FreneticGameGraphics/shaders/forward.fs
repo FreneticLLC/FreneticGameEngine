@@ -258,13 +258,13 @@ void main()
 			{
 				for (float y = -oneoverdj * 2; y < oneoverdj * 2 + 1; y++)
 				{
-					float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 1000.0; // Use the calculus magic from before to get a safe Z-modifier.
-					if (offz > -0.000001) // (Potentially removable?) It MUST be negative, and below a certain threshold. If it's not...
+					float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 2000.0; // Use the calculus magic from before to get a safe Z-modifier.
+					if (offz > -0.00001 || offz < -1.0 || isnan(offz) || isinf(offz)) // It MUST be negative, and below a certain threshold. If it's not...
 					{
-						offz = -0.000001; // Force it to the threshold value to reduce errors.
+						offz = -0.00001; // Force it to the threshold value to reduce errors.
 					}
-					//offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
-					float rd = texture(shadowtex, vec3((fs.x + x * jump) * mdX + rdX, (fs.y + y * jump) * mdY + rdY, shadowID)).r; // Calculate the depth of the pixel.
+					//offz -= 0.001; // OPTIONAL: Set it a bit farther regardless to reduce bad shadows.
+					float rd = texture(shadowtex, vec3((fs.x + x * jump) * mdX + rdX, (fs.y + y * jump) * mdY + rdY, shadowID)).x; // Calculate the depth of the pixel.
 					depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
 					depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.
 				}
