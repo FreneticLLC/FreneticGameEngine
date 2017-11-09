@@ -281,6 +281,88 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Caps the location to a specific maximum length, returning the result.
+        /// <para>Negative numbers will cause issues!</para>
+        /// </summary>
+        /// <param name="len">New max length.</param>
+        /// <returns>Same or shortened Location vector.</returns>
+        public Location CappedToLength(double len)
+        {
+            double lsq = LengthSquared();
+            if (lsq > len * len)
+            {
+                return this * (len / Math.Sqrt(lsq));
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a minimum length for this Location vector.
+        /// Meaning, if the vector has a lower length than the input value, the vector will extend to the given length exactly.
+        /// Zero locations will result in Zero output.
+        /// </summary>
+        /// <param name="len">Minimum length.</param>
+        /// <returns>The new Location vector.</returns>
+        public Location MinimumLengthXP(double len)
+        {
+            double lsq = LengthSquared();
+            if (lsq < len * len)
+            {
+                if (lsq == 0)
+                {
+                    return UnitX;
+                }
+                return this * (len / Math.Sqrt(lsq));
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a minimum length for this Location vector.
+        /// Meaning, if the vector has a lower length than the input value, the vector will extend to the given length exactly.
+        /// Zero locations will result in Zero output.
+        /// </summary>
+        /// <param name="len">Minimum length.</param>
+        /// <returns>The new Location vector.</returns>
+        public Location MinimumLength(double len)
+        {
+            double lsq = LengthSquared();
+            if (lsq < len * len)
+            {
+                if (lsq == 0)
+                {
+                    return Zero;
+                }
+                return this * (len / Math.Sqrt(lsq));
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the length of a location.
+        /// This will return Zero if the Location vector is Zero.
+        /// Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length, or zero.
+        /// </summary>
+        /// <param name="len">The new length.</param>
+        /// <returns>The Location with a length, or XP vector with the length.</returns>
+        public Location SetLength(double len)
+        {
+            return Normalize() * len;
+        }
+
+        /// <summary>
+        /// Sets the length of a location.
+        /// This will return an X-Positive directional vector if the Location vector is Zero.
+        /// Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length.
+        /// </summary>
+        /// <param name="len">The new length.</param>
+        /// <returns>The Location with a length, or zero.</returns>
+        public Location SetLengthXP(double len)
+        {
+            return NormalizeOrXP() * len;
+        }
+
+        /// <summary>
         /// Returns the full linear length of the vector location, squared for efficiency.
         /// </summary>
         /// <returns>The squared length.</returns>
@@ -363,6 +445,22 @@ namespace FreneticGameCore
         public string ToSimpleString()
         {
             return X + ", " + Y + ", " + Z;
+        }
+
+        /// <summary>
+        /// Returns a normal form of this location.
+        /// Zeroes become X-Positive vector.
+        /// </summary>
+        /// <returns>A valid normal location.</returns>
+        public Location NormalizeOrXP()
+        {
+            double len = Length();
+            if (len == 0.0)
+            {
+                return UnitX;
+            }
+            len = 1.0 / len;
+            return new Location(X * len, Y * len, Z * len);
         }
 
         /// <summary>
