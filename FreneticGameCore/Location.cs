@@ -299,7 +299,7 @@ namespace FreneticGameCore
         /// <summary>
         /// Sets a minimum length for this Location vector.
         /// Meaning, if the vector has a lower length than the input value, the vector will extend to the given length exactly.
-        /// Zero locations will result in Zero output.
+        /// Zero locations will result in an X-Positive vector.
         /// </summary>
         /// <param name="len">Minimum length.</param>
         /// <returns>The new Location vector.</returns>
