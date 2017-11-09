@@ -18,7 +18,6 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {
     /// <summary>
     /// A cylinder shape for an entity.
-    /// <para>This will be Y-Up by default, might be beneficial to use <see cref="BasicEntity{T, T2}.RotateYToZ"/>.</para>
     /// </summary>
     public class EntityCylinderShape : EntityShapeHelper
     {
@@ -37,11 +36,28 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         public double Radius;
 
         /// <summary>
+        /// Whether to auto fix the orientation of the cylinder.
+        /// <para>This will be Y-Up if false, might be beneficial to use <see cref="BasicEntity{T, T2}.RotateYToZ"/>.</para>
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public bool FixedOrientation = true;
+
+        /// <summary>
+        /// Used with <see cref="FixedOrientation"/>.
+        /// </summary>
+        private static Quaternion Y2Z = Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ);
+
+        /// <summary>
         /// Gets the BEPU shape object.
         /// </summary>
         /// <returns>The BEPU shape.</returns>
         public override EntityShape GetBEPUShape()
         {
+            if (FixedOrientation)
+            {
+                return new CompoundShape(new CompoundShapeEntry[] { new CompoundShapeEntry(new CylinderShape(Height, Radius), Y2Z.ToBEPU()) });
+            }
             return new CylinderShape(Height, Radius);
         }
 
