@@ -117,6 +117,9 @@
     <Compile Include="ServerSystem\ServerEngine.cs" />
     <Compile Include="ServerSystem\ServerGameInstance.cs" />
     <Compile Include="SimplexNoise.cs" />
+    <Compile Include="StackNoteSystem\StackNote.cs" />
+    <Compile Include="StackNoteSystem\StackNoteHelper.cs" />
+    <Compile Include="StackNoteSystem\StackNoteSet.cs" />
     <Compile Include="SysConsole.cs" />
     <Compile Include="SystemExtensions.cs" />
     <Compile Include="TextStyle.cs" />

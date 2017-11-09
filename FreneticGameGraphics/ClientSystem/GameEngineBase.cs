@@ -22,6 +22,7 @@ using FreneticGameCore.EntitySystem;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
 using FreneticGameGraphics.UISystem;
 using FreneticGameGraphics.AudioSystem;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -149,16 +150,24 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void Load()
         {
-            SysConsole.Output(OutputType.INIT, "GameEngine starting load sequence, start with basic...");
-            LoadBasic();
-            SysConsole.Output(OutputType.INIT, "GameEngine loading shaders...");
-            GetShaders();
-            SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
-            PostLoad();
-            SysConsole.Output(OutputType.INIT, "GameEngine prepping audio systems...");
-            Sounds = new SoundEngine();
-            Sounds.Init(this);
-            SysConsole.Output(OutputType.INIT, "GameEngine load sequence complete.");
+            try
+            {
+                StackNoteHelper.Push("GameEngineBase - Loading", this);
+                SysConsole.Output(OutputType.INIT, "GameEngine starting load sequence, start with basic...");
+                LoadBasic();
+                SysConsole.Output(OutputType.INIT, "GameEngine loading shaders...");
+                GetShaders();
+                SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
+                PostLoad();
+                SysConsole.Output(OutputType.INIT, "GameEngine prepping audio systems...");
+                Sounds = new SoundEngine();
+                Sounds.Init(this);
+                SysConsole.Output(OutputType.INIT, "GameEngine load sequence complete.");
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>

@@ -161,5 +161,14 @@ namespace FreneticGameCore
             SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " +rcr.HitObject + " ? " + rcr.HitObject?.Tag);
             return null;
         }
+
+        /// <summary>
+        /// Returns a simple string form of this physics world.
+        /// </summary>
+        /// <returns>The simple string form.</returns>
+        public override string ToString()
+        {
+            return "Physics World, with entity count=" + Internal.Entities.Count;
+        }
     }
 }

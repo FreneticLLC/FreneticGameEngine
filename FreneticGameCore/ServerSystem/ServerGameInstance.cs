@@ -13,6 +13,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameCore.ServerSystem
 {
@@ -42,8 +43,16 @@ namespace FreneticGameCore.ServerSystem
         /// </summary>
         public ServerGameInstance()
         {
-            Engines.Add(new ServerEngine());
-            DefaultEngine.LoadBasic();
+            try
+            {
+                StackNoteHelper.Push("ServerGameInstance construction, preparating of default engine", this);
+                Engines.Add(new ServerEngine());
+                DefaultEngine.LoadBasic();
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -120,6 +129,7 @@ namespace FreneticGameCore.ServerSystem
             int targettime = 0;
             try
             {
+                StackNoteHelper.Push("ServerGameInstance main loop - StartAndRun", this);
                 while (true)
                 {
                     // Update the tick time usage counter
@@ -180,6 +190,10 @@ namespace FreneticGameCore.ServerSystem
             {
                 SysConsole.Output("Server crash", ex);
             }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -194,15 +208,32 @@ namespace FreneticGameCore.ServerSystem
         /// <param name="delta">How much time has passed since the last tick.</param>
         public void Tick(double delta)
         {
-            tpsc++;
-            Delta = delta;
-            GlobalTickTime += delta;
-            Schedule.RunAllSyncTasks(delta);
-            foreach (ServerEngine engine in Engines)
+            try
             {
-                engine.Delta = delta;
-                engine.Tick();
+                StackNoteHelper.Push("ServerGameInstance tick sequence - Tick", this);
+                tpsc++;
+                Delta = delta;
+                GlobalTickTime += delta;
+                Schedule.RunAllSyncTasks(delta);
+                foreach (ServerEngine engine in Engines)
+                {
+                    engine.Delta = delta;
+                    engine.Tick();
+                }
             }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Returns a simple output string for the server game instance.
+        /// </summary>
+        /// <returns>The server game instance.</returns>
+        public override string ToString()
+        {
+            return "ServerGameInstance, root Engine count=" + Engines.Count;
         }
     }
 }

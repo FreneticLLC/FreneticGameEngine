@@ -18,6 +18,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -243,17 +244,33 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="view">The view object.</param>
         public void Render3D(View3D view)
         {
-            // TODO: Out View Rendering!
-            GL.ActiveTexture(TextureUnit.Texture1);
-            Textures.NormalDef.Bind();
-            GL.ActiveTexture(TextureUnit.Texture0);
-            foreach (ClientEntity ce in EntityList)
+            try
             {
-                // TODO: layering logic of some form instead of this overly basic stuff.
-                if (ShouldRender(ce.Renderer, view.RenderingShadows))
+                StackNoteHelper.Push("GameEngine3D - Render All Entities", this);
+                // TODO: Out View Rendering!
+                GL.ActiveTexture(TextureUnit.Texture1);
+                Textures.NormalDef.Bind();
+                GL.ActiveTexture(TextureUnit.Texture0);
+                foreach (ClientEntity ce in EntityList)
                 {
-                    ce.Renderer?.RenderStandard(MainContext);
+                    // TODO: layering logic of some form instead of this overly basic stuff.
+                    if (ShouldRender(ce.Renderer, view.RenderingShadows))
+                    {
+                        try
+                        {
+                            StackNoteHelper.Push("GameEngine3D - Render Specific Entity", ce);
+                            ce.Renderer?.RenderStandard(MainContext);
+                        }
+                        finally
+                        {
+                            StackNoteHelper.Pop();
+                        }
+                    }
                 }
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
             }
         }
 

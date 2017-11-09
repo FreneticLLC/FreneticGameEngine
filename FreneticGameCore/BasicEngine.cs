@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore.EntitySystem;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameCore
 {
@@ -222,24 +223,40 @@ namespace FreneticGameCore
         /// <returns>The spawned entity.</returns>
         public T SpawnEntity(bool ticks, Action<T> configure, params Property[] props)
         {
-            T ce = CreateEntity(ticks);
-            ce.EID = CurrentEID++;
-            configure?.Invoke(ce);
-            for (int i = 0; i < props.Length; i++)
+            try
             {
-                ce.AddProperty(props[i]);
-            }
-            AddEntity(ce);
-            ce.IsSpawned = true;
-            foreach (Property prop in ce.GetAllProperties())
-            {
-                if (prop is BasicEntityProperty<T, T2> bep)
+                StackNoteHelper.Push("BasicEngine - Spawn Entity", this);
+                T ce = CreateEntity(ticks);
+                ce.EID = CurrentEID++;
+                try
                 {
-                    bep.OnSpawn();
+                    StackNoteHelper.Push("BasicEngine - Configure Entity", ce);
+                    configure?.Invoke(ce);
+                    for (int i = 0; i < props.Length; i++)
+                    {
+                        ce.AddProperty(props[i]);
+                    }
+                    AddEntity(ce);
+                    ce.IsSpawned = true;
+                    foreach (Property prop in ce.GetAllProperties())
+                    {
+                        if (prop is BasicEntityProperty<T, T2> bep)
+                        {
+                            bep.OnSpawn();
+                        }
+                    }
+                    ce.OnSpawnEvent?.Fire(Schedule, new EntitySpawnEventArgs());
                 }
+                finally
+                {
+                    StackNoteHelper.Pop();
+                }
+                return ce;
             }
-            ce.OnSpawnEvent?.Fire(Schedule, new EntitySpawnEventArgs());
-            return ce;
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -285,16 +302,24 @@ namespace FreneticGameCore
                 SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
                 return;
             }
-            foreach (Property prop in ent.EnumerateAllProperties())
+            try
             {
-                if (prop is BasicEntityProperty<T, T2> bep)
+                StackNoteHelper.Push("BasicEngine - Despawn Entity", ent);
+                foreach (Property prop in ent.EnumerateAllProperties())
                 {
-                    bep.OnDespawn();
+                    if (prop is BasicEntityProperty<T, T2> bep)
+                    {
+                        bep.OnDespawn();
+                    }
                 }
+                ent.OnDespawnEvent?.Fire(Schedule, new EntityDespawnEventArgs());
+                RemoveEntity(ent);
+                ent.IsSpawned = false;
             }
-            ent.OnDespawnEvent?.Fire(Schedule, new EntityDespawnEventArgs());
-            RemoveEntity(ent);
-            ent.IsSpawned = false;
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -302,16 +327,48 @@ namespace FreneticGameCore
         /// </summary>
         public void Tick()
         {
-            Schedule.RunAllSyncTasks(Delta);
-            PhysicsWorld.Internal.Update(Delta);
-            // Dup list, to ensure ents can despawn themselves in the tick method!
-            IReadOnlyList<T> ents = EntityListDuplicate();
-            for (int i = 0; i < ents.Count; i++)
+            try
             {
-                if (ents[i].Ticks)
+                StackNoteHelper.Push("BasicEngine - Tick Scheduler", Schedule);
+                Schedule.RunAllSyncTasks(Delta);
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
+            try
+            {
+                StackNoteHelper.Push("BasicEngine - Update Physics", PhysicsWorld);
+                PhysicsWorld.Internal.Update(Delta);
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
+            try
+            {
+                StackNoteHelper.Push("BasicEngine - Tick all entities", this);
+                // Dup list, to ensure ents can despawn themselves in the tick method!
+                IReadOnlyList<T> ents = EntityListDuplicate();
+                for (int i = 0; i < ents.Count; i++)
                 {
-                    ents[i].TickThis();
+                    if (ents[i].Ticks)
+                    {
+                        try
+                        {
+                            StackNoteHelper.Push("BasicEngine - Tick specific entity", ents[i]);
+                            ents[i].TickThis();
+                        }
+                        finally
+                        {
+                            StackNoteHelper.Pop();
+                        }
+                    }
                 }
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
             }
         }
     }

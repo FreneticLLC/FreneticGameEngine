@@ -19,6 +19,7 @@ using FreneticGameCore;
 using FreneticGameCore.Files;
 using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore.Collision;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -236,24 +237,32 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="initialFlags">The initial window flag.</param>
         public void Start(GameWindowFlags initialFlags = GameWindowFlags.FixedWindow)
         {
-            SysConsole.Output(OutputType.INIT, "GameEngine loading...");
-            Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
-            Window.Load += Window_Load;
-            Window.RenderFrame += Window_RenderFrame;
-            Window.Mouse.Move += Mouse_Move;
-            Window.Closed += Window_Closed;
-            Window.ReduceCPUWaste = CPUWastePatch;
-            SysConsole.Output(OutputType.INIT, "GameEngine calling SetUp event...");
-            OnWindowSetUp?.Invoke();
-            SysConsole.Output(OutputType.INIT, "GameEngine running...");
-            if (CPUWastePatch)
+            try
             {
-                double rate = DisplayDevice.Default.RefreshRate;
-                Window.Run(rate, rate);
+                StackNoteHelper.Push("GameCliengWindow - Start, run", this);
+                SysConsole.Output(OutputType.INIT, "GameEngine loading...");
+                Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
+                Window.Load += Window_Load;
+                Window.RenderFrame += Window_RenderFrame;
+                Window.Mouse.Move += Mouse_Move;
+                Window.Closed += Window_Closed;
+                Window.ReduceCPUWaste = CPUWastePatch;
+                SysConsole.Output(OutputType.INIT, "GameEngine calling SetUp event...");
+                OnWindowSetUp?.Invoke();
+                SysConsole.Output(OutputType.INIT, "GameEngine running...");
+                if (CPUWastePatch)
+                {
+                    double rate = DisplayDevice.Default.RefreshRate;
+                    Window.Run(rate, rate);
+                }
+                else
+                {
+                    Window.Run();
+                }
             }
-            else
+            finally
             {
-                Window.Run();
+                StackNoteHelper.Pop();
             }
         }
 
@@ -345,57 +354,65 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="e">Holds the frame time (delta).</param>
         private void Window_RenderFrame(object sender, FrameEventArgs e)
         {
-            // First step: check delta
-            Delta = e.Time;
-            CurrentEngine.Delta = Delta;
-            if (e.Time <= 0.0)
+            try
             {
-                return;
+                StackNoteHelper.Push("GameCliengWindow - Render and tick frame", this);
+                // First step: check delta
+                Delta = e.Time;
+                CurrentEngine.Delta = Delta;
+                if (e.Time <= 0.0)
+                {
+                    return;
+                }
+                GlobalTickTime += Delta;
+                ErrorCode ec = GL.GetError();
+                while (ec != ErrorCode.NoError)
+                {
+                    SysConsole.Output(OutputType.WARNING, "Uncaught GL Error: " + ec);
+                    ec = GL.GetError();
+                }
+                // Second step: clear the screen
+                GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
+                GL.ClearBuffer(ClearBuffer.Depth, 0, DepthClear);
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                GL.DrawBuffer(DrawBufferMode.Back);
+                GraphicsUtil.CheckError("GameClient - Pre");
+                // Tick helpers
+                Models.Update(GlobalTickTime);
+                GraphicsUtil.CheckError("GameClient - PostModelUpdate");
+                // Third step: general game rendering
+                if (ProcessMainEngine)
+                {
+                    CurrentEngine.RenderSingleFrame();
+                    GraphicsUtil.CheckError("GameClient - PostMainEngine");
+                }
+                // Add the UI Layer too
+                MainUI.Draw();
+                GraphicsUtil.CheckError("GameClient - PostUI");
+                // Fourth step: clean up!
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.BindVertexArray(0);
+                GL.UseProgram(0);
+                // Semi-final step: Tick logic!
+                GraphicsUtil.CheckError("GameClient - PreTick");
+                // Pre-tick.
+                ClientEngineTick();
+                // Primary entity tick
+                if (ProcessMainEngine)
+                {
+                    CurrentEngine.Tick();
+                }
+                // Primary UI tick
+                MainUI.Tick();
+                GraphicsUtil.CheckError("GameClient - PostTick");
+                // Final step: Swap the render buffer onto the screen!
+                Window.SwapBuffers();
+                GraphicsUtil.CheckError("GameClient - Post");
             }
-            GlobalTickTime += Delta;
-            ErrorCode ec = GL.GetError();
-            while (ec != ErrorCode.NoError)
+            finally
             {
-                SysConsole.Output(OutputType.WARNING, "Uncaught GL Error: " + ec);
-                ec = GL.GetError();
+                StackNoteHelper.Pop();
             }
-            // Second step: clear the screen
-            GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
-            GL.ClearBuffer(ClearBuffer.Depth, 0, DepthClear);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.DrawBuffer(DrawBufferMode.Back);
-            GraphicsUtil.CheckError("GameClient - Pre");
-            // Tick helpers
-            Models.Update(GlobalTickTime);
-            GraphicsUtil.CheckError("GameClient - PostModelUpdate");
-            // Third step: general game rendering
-            if (ProcessMainEngine)
-            {
-                CurrentEngine.RenderSingleFrame();
-                GraphicsUtil.CheckError("GameClient - PostMainEngine");
-            }
-            // Add the UI Layer too
-            MainUI.Draw();
-            GraphicsUtil.CheckError("GameClient - PostUI");
-            // Fourth step: clean up!
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.BindVertexArray(0);
-            GL.UseProgram(0);
-            // Semi-final step: Tick logic!
-            GraphicsUtil.CheckError("GameClient - PreTick");
-            // Pre-tick.
-            ClientEngineTick();
-            // Primary entity tick
-            if (ProcessMainEngine)
-            {
-                CurrentEngine.Tick();
-            }
-            // Primary UI tick
-            MainUI.Tick();
-            GraphicsUtil.CheckError("GameClient - PostTick");
-            // Final step: Swap the render buffer onto the screen!
-            Window.SwapBuffers();
-            GraphicsUtil.CheckError("GameClient - Post");
         }
 
         /// <summary>

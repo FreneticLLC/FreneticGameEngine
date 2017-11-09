@@ -27,6 +27,15 @@ namespace FreneticGameCore
         public LockedLinkedList<SyncScheduleItem> Tasks = new LockedLinkedList<SyncScheduleItem>();
 
         /// <summary>
+        /// Gets a simple string representation of this scheduler.
+        /// </summary>
+        /// <returns>The simple string.</returns>
+        public override string ToString()
+        {
+            return "Scheduler engine...";
+        }
+
+        /// <summary>
         /// Gets a sync task object, not yet scheduled.
         /// </summary>
         /// <param name="act">The action to call.</param>

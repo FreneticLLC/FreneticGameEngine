@@ -20,6 +20,7 @@ using FreneticGameCore.Files;
 using FreneticGameGraphics.LightingSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Threading;
+using FreneticGameCore.StackNoteSystem;
 using FreneticGameGraphics.ClientSystem.EntitySystem;
 
 namespace FreneticGameGraphics.ClientSystem
@@ -337,18 +338,34 @@ namespace FreneticGameGraphics.ClientSystem
         /// <param name="shouldShadow">The method to determine if an object should cast a shadow.</param>
         private void RenderAll(bool lights, Func<ClientEntity, bool> shouldShadow)
         {
-            Textures.White.Bind();
-            RenderHelper.SetColor(Vector4.One);
-            RenderAllObjectsPre?.Invoke(lights);
-            // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
-            foreach (ClientEntity ent in Entities.Values
-                .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
-                .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
+            try
             {
-                ent.Renderer.RenderStandard2D(MainRenderContext);
+                StackNoteHelper.Push("GameEngine2D - RenderAll", this);
+                Textures.White.Bind();
+                RenderHelper.SetColor(Vector4.One);
+                RenderAllObjectsPre?.Invoke(lights);
+                // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
+                foreach (ClientEntity ent in Entities.Values
+                    .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
+                    .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
+                {
+                    try
+                    {
+                        StackNoteHelper.Push("GameEngine2D - Render Specific Entity", ent);
+                        ent.Renderer.RenderStandard2D(MainRenderContext);
+                    }
+                    finally
+                    {
+                        StackNoteHelper.Pop();
+                    }
+                }
+                RenderAllObjectsPost?.Invoke(lights);
+                GraphicsUtil.CheckError("Render - all Entities rendered");
             }
-            RenderAllObjectsPost?.Invoke(lights);
-            GraphicsUtil.CheckError("Render - all Entities rendered");
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
