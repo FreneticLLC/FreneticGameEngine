@@ -83,7 +83,6 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
-            base.OnSpawn();
             Entity.OnPositionChanged += FixLocation;
             Entity.OnOrientationChanged += FixOrientation;
             HandledRemove = false;

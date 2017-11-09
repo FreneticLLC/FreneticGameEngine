@@ -96,7 +96,7 @@ namespace FreneticGameCore
             }
             set
             {
-                R = value / 255f;
+                R = value * BYTE_TO_FLOAT;
             }
         }
 
@@ -111,7 +111,7 @@ namespace FreneticGameCore
             }
             set
             {
-                G = value / 255f;
+                G = value * BYTE_TO_FLOAT;
             }
         }
 
@@ -126,7 +126,7 @@ namespace FreneticGameCore
             }
             set
             {
-                B = value / 255f;
+                B = value * BYTE_TO_FLOAT;
             }
         }
 
@@ -141,7 +141,7 @@ namespace FreneticGameCore
             }
             set
             {
-                A = value / 255f;
+                A = value * BYTE_TO_FLOAT;
             }
         }
 
