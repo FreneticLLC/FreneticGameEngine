@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using FreneticGameCore.Files;
 using System.IO;
+using FreneticGameCore.StackNoteSystem;
 
 namespace FreneticGameCore
 {
@@ -315,7 +316,7 @@ namespace FreneticGameCore
         /// <param name="ex">The exception.</param>
         public static void Output(string message, Exception ex)
         {
-            Output(OutputType.ERROR, message + ": " + ex.ToString() + "\n\n" + Environment.StackTrace);
+            Output(OutputType.ERROR, message + ": " + ex.ToString() + "\n\n" + Environment.StackTrace + "\n\n" + StackNoteHelper.Notes);
         }
 
         /// <summary>
@@ -324,7 +325,7 @@ namespace FreneticGameCore
         /// <param name="ex">The exception.</param>
         public static void Output(Exception ex)
         {
-            Output(OutputType.ERROR, ex.ToString() + "\n\n" + Environment.StackTrace);
+            Output(OutputType.ERROR, ex.ToString() + "\n\n" + Environment.StackTrace + "\n\n" + StackNoteHelper.Notes);
         }
 
         /// <summary>
