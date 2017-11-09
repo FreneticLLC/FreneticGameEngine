@@ -17,16 +17,24 @@ using BEPUphysics.CollisionShapes.ConvexShapes;
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {
     /// <summary>
-    /// A sphere shape for an entity.
+    /// A cylinder shape for an entity.
+    /// <para>This will be Y-Up by default, might be beneficial to use <see cref="BasicEntity{T, T2}.RotateYToZ"/>.</para>
     /// </summary>
-    public class EntitySphereShape : EntityShapeHelper
+    public class EntityCylinderShape : EntityShapeHelper
     {
         /// <summary>
-        /// The radius of the sphere.
+        /// The height of the cylinder.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public double Size;
+        public double Height;
+
+        /// <summary>
+        /// The radius of the cylinder.
+        /// </summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public double Radius;
 
         /// <summary>
         /// Gets the BEPU shape object.
@@ -34,7 +42,7 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// <returns>The BEPU shape.</returns>
         public override EntityShape GetBEPUShape()
         {
-            return new SphereShape(Size);
+            return new CylinderShape(Height, Radius);
         }
 
         /// <summary>
@@ -43,7 +51,7 @@ namespace FreneticGameCore.EntitySystem.PhysicsHelpers
         /// <returns>String form.</returns>
         public override string ToString()
         {
-            return "SphereShape, size=" + Size;
+            return "CylinderShape, Radius=" + Radius + ", Height=" + Height;
         }
     }
 }

@@ -75,6 +75,7 @@
     <Compile Include="EntitySystem\EntityPhysicsCharacterHelper.cs" />
     <Compile Include="EntitySystem\EntitySimpleAttachProperty.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityConvexHullShape.cs" />
+    <Compile Include="EntitySystem\PhysicsHelpers\EntityCylinderShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntitySphereShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityCharacterShape.cs" />

@@ -255,6 +255,19 @@ namespace FreneticGameCore.EntitySystem
                 bep.OnDespawn();
             }
         }
+
+        /// <summary>
+        /// Rotates the entity to be "Z-Up" if it was originally "Y-Up".
+        /// </summary>
+        public void RotateYToZ()
+        {
+            SetOrientation(Y2Z);
+        }
+
+        /// <summary>
+        /// Used with <see cref="RotateYToZ"/>.
+        /// </summary>
+        private static Quaternion Y2Z = Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ);
     }
 
     /// <summary>
