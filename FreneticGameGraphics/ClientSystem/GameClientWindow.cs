@@ -239,7 +239,7 @@ namespace FreneticGameGraphics.ClientSystem
         {
             try
             {
-                StackNoteHelper.Push("GameCliengWindow - Start, run", this);
+                StackNoteHelper.Push("GameClientWindow - Start, run", this);
                 SysConsole.Output(OutputType.INIT, "GameEngine loading...");
                 Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
                 Window.Load += Window_Load;
@@ -356,7 +356,7 @@ namespace FreneticGameGraphics.ClientSystem
         {
             try
             {
-                StackNoteHelper.Push("GameCliengWindow - Render and tick frame", this);
+                StackNoteHelper.Push("GameClientWindow - Render and tick frame", this);
                 // First step: check delta
                 Delta = e.Time;
                 CurrentEngine.Delta = Delta;
@@ -498,6 +498,15 @@ namespace FreneticGameGraphics.ClientSystem
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Returns a string of this object.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString()
+        {
+            return "GameClientWindow";
         }
     }
 }
