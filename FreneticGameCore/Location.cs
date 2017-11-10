@@ -425,7 +425,7 @@ namespace FreneticGameCore
         /// <summary>
         /// The number format for <see cref="ToBasicString"/>.
         /// </summary>
-        public const string BasicFormat = "#.00";
+        public const string BasicFormat = "0.00";
 
         /// <summary>
         /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
