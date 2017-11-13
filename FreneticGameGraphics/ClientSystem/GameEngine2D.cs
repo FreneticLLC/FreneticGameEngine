@@ -54,7 +54,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// Fires AFTER standard render path. See <see cref="RenderAllObjectsPre"/>.
         /// </summary>
         public Action<bool> RenderAllObjectsPost;
-        
+
         /// <summary>
         /// First shader stage: computes a 'light map' for each light source.
         /// </summary>
@@ -139,7 +139,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// How much to pixelate the view. 1 = no pixelation.
         /// </summary>
         public int Pixelation = 1;
-        
+
         /// <summary>
         /// Loads all shaders for the standard Game Engine 2D.
         /// </summary>
@@ -252,7 +252,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// The current world-space mouse coordinates.
         /// </summary>
         public Vector2 MouseCoords;
-        
+
         /// <summary>
         /// Renders a single frame of the 2D game engine.
         /// </summary>
@@ -400,7 +400,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform2(2, ref Adder);
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
-                RenderAll(true, null);
+                RenderAll(false, null);
                 return;
             }
             GraphicsUtil.CheckError("Render - Begin");
@@ -438,7 +438,7 @@ namespace FreneticGameGraphics.ClientSystem
                 MainRenderContext.Scaler = Scaler;
                 MainRenderContext.Adder = Adder;
                 GraphicsUtil.CheckError("Render - Light Precalcer");
-                RenderAll(false, Lights[i].ShouldShadow);
+                RenderAll(true, Lights[i].ShouldShadow);
             }
             if (OneDLights)
             {
@@ -459,7 +459,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
             GraphicsUtil.CheckError("Render - Lights prepped");
-            RenderAll(true, null);
+            RenderAll(false, null);
             if (OneDLights)
             {
                 Shader_ApplyLights1D.Bind();

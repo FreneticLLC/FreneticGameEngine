@@ -40,7 +40,7 @@ namespace FreneticGameCore
             int mod = 1;
             for (int i = 1; i < 31; i++)
             {
-                if (1 << mod <= x)
+                if ((1 << mod) <= x)
                 {
                     return 1 << mod;
                 }
@@ -519,6 +519,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Combines a list of strings into a single string, separated by spaces.
+        /// <para>Note: generally, favor <see cref="String.Join(string, IEnumerable{string})"/>.</para>
         /// </summary>
         /// <param name="input">The list of strings to combine.</param>
         /// <param name="start">The index to start from.</param>

@@ -198,5 +198,14 @@ namespace FreneticGameGraphics.ClientSystem
             }
             return true;
         }
+
+        /// <summary>
+        /// Returns a string of this object.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString()
+        {
+            return "GameEngine";
+        }
     }
 }

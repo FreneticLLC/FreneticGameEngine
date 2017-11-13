@@ -21,6 +21,11 @@ namespace FreneticGameCore
     public class MTRandom
     {
         /// <summary>
+        /// The default or reference buffer size.
+        /// </summary>
+        private const ulong REF_BUF_SIZE = 624;
+
+        /// <summary>
         /// A lower integer bit mask.
         /// </summary>
         private const ulong lower_mask = 0x7FFFFFFF;
@@ -41,10 +46,10 @@ namespace FreneticGameCore
         private ulong index;
 
         /// <summary>
-        /// Constructs the MT Random with a current-time-based seed.
+        /// Constructs the MT Random with a current-time-based seed, and a default buffer size.
         /// </summary>
         public MTRandom()
-            : this(624, (ulong)DateTime.UtcNow.ToBinary())
+            : this(REF_BUF_SIZE, (ulong)DateTime.UtcNow.ToBinary())
         {
         }
 
@@ -53,12 +58,12 @@ namespace FreneticGameCore
         /// </summary>
         /// <param name="seed">The seed.</param>
         public MTRandom(ulong seed)
-            : this(624, seed)
+            : this(REF_BUF_SIZE, seed)
         {
         }
 
         /// <summary>
-        /// Constructs the MT Random with a specific seed and specific buffer size.
+        /// Constructs the MT Random with a specific seed and specific buffer size, and a default buffer size.
         /// </summary>
         /// <param name="n">The buffer size.</param>
         /// <param name="seed">The seed.</param>
@@ -87,7 +92,7 @@ namespace FreneticGameCore
         public int Next(int cap)
         {
             // TODO: Maybe just a modulo?
-            return (int)(Next() * ((double)cap / int.MaxValue)); // TODO: Sanity!
+            return (int)(Next() * (cap / (double)int.MaxValue)); // TODO: Sanity!
         }
 
         /// <summary>
