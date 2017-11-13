@@ -146,6 +146,11 @@ namespace FreneticGameGraphics.ClientSystem
         public abstract void GetShaders();
 
         /// <summary>
+        /// Reload any relevant screen buffers.
+        /// </summary>
+        public abstract void ReloadScreenBuffers();
+
+        /// <summary>
         /// Loads the engine.
         /// </summary>
         public void Load()

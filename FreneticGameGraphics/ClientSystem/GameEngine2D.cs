@@ -212,6 +212,18 @@ namespace FreneticGameGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Reloads the 2D engine screen buffers.
+        /// </summary>
+        public override void ReloadScreenBuffers()
+        {
+            GL.DeleteFramebuffer(c_FBO);
+            GL.DeleteTexture(c_FBO_Tex);
+            GL.DeleteFramebuffer(l_FBO);
+            GL.DeleteTexture(l_FBO_Tex);
+            LoadLightHelpers();
+        }
+
+        /// <summary>
         /// The primary render context for this game engine 2D.
         /// </summary>
         public RenderContext2D MainRenderContext = new RenderContext2D();

@@ -176,6 +176,14 @@ namespace FreneticGameGraphics.ClientSystem
         public View3D MainView = new View3D();
 
         /// <summary>
+        /// Reloads relevant 3D screen buffers.
+        /// </summary>
+        public override void ReloadScreenBuffers()
+        {
+            MainView.Generate(this, Window.Width, Window.Height);
+        }
+
+        /// <summary>
         /// The main rendering context.
         /// </summary>
         public RenderContext MainContext = new RenderContext();

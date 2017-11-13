@@ -231,6 +231,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public bool CPUWastePatch = true;
 
+        private bool Loaded = false;
+
         /// <summary>
         /// Starts the game engine, and begins the primary loop.
         /// </summary>
@@ -246,6 +248,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Window.RenderFrame += Window_RenderFrame;
                 Window.Mouse.Move += Mouse_Move;
                 Window.Closed += Window_Closed;
+                Window.Resize += Window_Resize;
                 Window.ReduceCPUWaste = CPUWastePatch;
                 SysConsole.Output(OutputType.INIT, "GameEngine calling SetUp event...");
                 OnWindowSetUp?.Invoke();
@@ -263,6 +266,19 @@ namespace FreneticGameGraphics.ClientSystem
             finally
             {
                 StackNoteHelper.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Fired when the window is resized.
+        /// </summary>
+        /// <param name="sender">Irrelevant.</param>
+        /// <param name="e">Irrelevant.</param>
+        private void Window_Resize(object sender, EventArgs e)
+        {
+            if (Loaded)
+            {
+                CurrentEngine.ReloadScreenBuffers();
             }
         }
 
@@ -318,6 +334,7 @@ namespace FreneticGameGraphics.ClientSystem
             OnWindowLoad?.Invoke();
             SysConsole.Output(OutputType.INIT, "GameClient is ready and loaded! Starting main game loop...");
             GraphicsUtil.CheckError("GEB - Loaded");
+            Loaded = true;
         }
 
         /// <summary>
