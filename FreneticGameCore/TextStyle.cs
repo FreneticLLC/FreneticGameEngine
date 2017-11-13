@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace FreneticGameCore
 {
     /// <summary>
-    /// Holds all text styles to be used... (mainly by the SysConsole, can be used elsewhere).
+    /// Holds all text styles to be used by 'standard' system (otherwise just a reference sheet)... (mainly used with the SysConsole, can be used elsewhere).
     /// </summary>
     public class TextStyle
     {
