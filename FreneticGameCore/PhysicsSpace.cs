@@ -125,12 +125,53 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Sends a world ray trace, giving back the single found object, or null if none.
+        /// Uses a standard filter.
         /// </summary>
         /// <param name="start">The start position.</param>
         /// <param name="dir">The direction.</param>
         /// <param name="dist">The distance.</param>
         /// <param name="filter">The filter, if any.</param>
-        public T RayTraceSingle(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null) // TODO: Func<T, bool> filter!
+        public T RayTraceSingle(Location start, Location dir, double dist, Func<T, bool> filter = null)
+        {
+            RayCastResult rcr;
+            if (filter != null)
+            {
+                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty<T, T2> t2) ? filter(t2.Entity) : false), out rcr))
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, out rcr))
+                {
+                    return null;
+                }
+            }
+            if (rcr.HitObject != null && rcr.HitObject.Tag != null)
+            {
+                if (rcr.HitObject.Tag is T res)
+                {
+                    return res;
+                }
+                else if (rcr.HitObject.Tag is EntityPhysicsProperty<T, T2> pres)
+                {
+                    return pres.Entity;
+                }
+            }
+            SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " + rcr.HitObject + " ? " + rcr.HitObject?.Tag);
+            return null;
+        }
+
+        /// <summary>
+        /// Sends a world ray trace, giving back the single found object, or null if none.
+        /// Uses a raw filter.
+        /// </summary>
+        /// <param name="start">The start position.</param>
+        /// <param name="dir">The direction.</param>
+        /// <param name="dist">The distance.</param>
+        /// <param name="filter">The filter, if any.</param>
+        public T RayTraceSingle_RawFilter(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null)
         {
             RayCastResult rcr;
             if (filter != null)
