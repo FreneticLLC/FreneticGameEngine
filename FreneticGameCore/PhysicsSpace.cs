@@ -159,7 +159,6 @@ namespace FreneticGameCore
                     return pres.Entity;
                 }
             }
-            SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " + rcr.HitObject + " ? " + rcr.HitObject?.Tag);
             return null;
         }
 
@@ -199,7 +198,6 @@ namespace FreneticGameCore
                     return pres.Entity;
                 }
             }
-            SysConsole.Output(OutputType.DEBUG, "FAILED : " + start + ", " + dir + ", " + dist + ": " +rcr.HitObject + " ? " + rcr.HitObject?.Tag);
             return null;
         }
 
