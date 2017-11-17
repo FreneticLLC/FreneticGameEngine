@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using FreneticGameCore;
 using FreneticGameGraphics.UISystem;
 using FreneticGameGraphics.GraphicsHelpers;
 
@@ -126,6 +127,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             // TODO: alternate Ortho setting from scaler/adder def!
             Client.Shaders.ColorMult2DShader.Bind();
+            Rendering.SetColor(Color4F.White);
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
