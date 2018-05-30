@@ -86,31 +86,40 @@ namespace FreneticGameCore.EntitySystem
         public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>();
 
         /// <summary>
-        /// Rotates the entity around a normalized axis by an angle.
-        /// <para>Updates only the orientation.</para>
+        /// Rotates the entity around a normalized axis by an angle, relative to its current orientation (based on <see cref="LastKnownOrientation"/>).
+        /// <para>Updates only the orientation. May act differently than expected for some types of entities (such as physics based entities with a center offset).</para>
         /// </summary>
         /// <param name="axis">The normalized axis.</param>
         /// <param name="angle">The angle.</param>
         public void RotateAround(Location axis, double angle)
         {
-            SetOrientation(LastKnownOrientation * Quaternion.FromAxisAngle(axis, angle));
+            Rotate(Quaternion.FromAxisAngle(axis, angle));
         }
 
         /// <summary>
-        /// Moves the entity relative to its current position.
+        /// Rotates the entity relative to its current orientation (based on <see cref="LastKnownOrientation"/>).
+        /// </summary>
+        /// <param name="rotation">The rotation to take, described as a relative offset quaternion.</param>
+        public void Rotate(Quaternion rotation)
+        {
+            SetOrientation(LastKnownOrientation * rotation);
+        }
+
+        /// <summary>
+        /// Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).
         /// </summary>
         /// <param name="x">X motion.</param>
         /// <param name="y">Y motion.</param>
-        /// <param name="z">Z motion, if any..</param>
+        /// <param name="z">Z motion, if any.</param>
         public void MoveRelative(double x, double y, double z = 0)
         {
             SetPosition(LastKnownPosition + new Location(x, y, z));
         }
 
         /// <summary>
-        /// Moves the entity relative to its current position.
+        /// Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).
         /// </summary>
-        /// <param name="motion">The motion to make.</param>
+        /// <param name="motion">The motion to make, described as a relative offset vector.</param>
         public void MoveRelative(Location motion)
         {
             SetPosition(LastKnownPosition + motion);

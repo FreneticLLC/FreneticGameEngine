@@ -105,6 +105,7 @@ void main()
 #if MCM_FADE_DEPTH
 	fi.size = 1.0 / scale;
 #endif
+	// TODO: Drop angle based logic. There's almost certainly a more stable and better optimized method to do this.
 	float angle = (scale * 5.0) * (float(int(tid) % 2) * 2.0) - 1.0;
 	float c = cos(angle);
 	float s = sin(angle);

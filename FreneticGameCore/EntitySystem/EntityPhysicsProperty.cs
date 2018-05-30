@@ -230,6 +230,7 @@ namespace FreneticGameCore.EntitySystem
 
         /// <summary>
         /// Gets or sets the entity's position.
+        /// This value is scaled to the physics scaling factor defined by <see cref="PhysicsSpace{T, T2}.RelativeScale"/>.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -251,7 +252,6 @@ namespace FreneticGameCore.EntitySystem
 
         /// <summary>
         /// Gets or sets the entity's orientation.
-        /// TODO: Custom FGE quaternion type?
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -333,14 +333,31 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty{T, T2}"/> is pushing its own updates.
+        /// </summary>
+        public bool CheckDisableAllowed = true;
+
+        /// <summary>
+        /// Set to indicate that Position/Orientation checks are not needed currently.
+        /// This will be set (to true) automatically when the <see cref="EntityPhysicsProperty{T, T2}"/> is pushing out its own position updates,
+        /// and must be explicitly disabled to update anyway.
+        /// If disabling this explicitly may be problematic, consider disabling <see cref="CheckDisableAllowed"/> instead.
+        /// </summary>
+        public bool NoCheck = false;
+
+        /// <summary>
         /// Checks and handles a position update.
         /// </summary>
         /// <param name="p">The new position.</param>
         public void PosCheck(Location p)
         {
+            if (NoCheck)
+            {
+                return;
+            }
             Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
-            Location p2 = (p / PhysicsWorld.RelativeScale) + coff;
-            if (p2.DistanceSquared(InternalPosition) > 0.01)
+            Location p2 = (p * PhysicsWorld.RelativeScaleInverse) + coff;
+            if (p2.DistanceSquared(InternalPosition) > 0.01) // TODO: Is this validation needed?
             {
                 Position = p2;
             }
@@ -352,10 +369,14 @@ namespace FreneticGameCore.EntitySystem
         /// <param name="q">The new orientation.</param>
         public void OriCheck(Quaternion q)
         {
+            if (NoCheck)
+            {
+                return;
+            }
             BEPUutilities.Quaternion qb = q.ToBEPU();
             BEPUutilities.Quaternion qio = InternalOrientation.ToBEPU();
             BEPUutilities.Quaternion.GetRelativeRotation(ref qb, ref qio, out BEPUutilities.Quaternion rel);
-            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.01)
+            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.01) // TODO: Is this validation needed? This is very expensive to run.
             {
                 Orientation = q;
             }
@@ -417,21 +438,23 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         public void TickUpdates()
         {
+            NoCheck = CheckDisableAllowed;
             Location bpos = new Location(SpawnedBody.Position);
-            if (InternalPosition.DistanceSquared(bpos) > 0.0001) // TODO: || Active?
+            if (InternalPosition.DistanceSquared(bpos) > 0.0001)
             {
                 InternalPosition = bpos;
                 Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
-                Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScale);
+                Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScaleForward);
             }
             BEPUutilities.Quaternion cur = SpawnedBody.Orientation;
             BEPUutilities.Quaternion qio = InternalOrientation.ToBEPU();
             BEPUutilities.Quaternion.GetRelativeRotation(ref cur, ref qio, out BEPUutilities.Quaternion rel);
-            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001) // TODO: || Active?
+            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001)
             {
                 InternalOrientation = cur.ToCore();
                 Entity.OnOrientationChanged?.Invoke(cur.ToCore());
             }
+            NoCheck = false;
         }
 
         /// <summary>

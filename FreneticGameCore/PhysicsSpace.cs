@@ -34,8 +34,33 @@ namespace FreneticGameCore
 
         /// <summary>
         /// The scale of all physics vs. rendered objects. Phys * Scale = Render.
+        /// Use this for setting.
+        /// To get values, use <see cref="RelativeScaleForward"/> and <see cref="RelativeScaleInverse"/>.
         /// </summary>
-        public double RelativeScale = 1f;
+        public double RelativeScale
+        {
+            get
+            {
+                return RelativeScaleForward;
+            }
+            set
+            {
+                RelativeScaleForward = value;
+                RelativeScaleInverse = 1.0 / value;
+            }
+        }
+
+        /// <summary>
+        /// The scale of all physics vs. rendered objects. Phys * Scale = Render.
+        /// Valid only for getting.
+        /// </summary>
+        public double RelativeScaleForward = 1.0;
+
+        /// <summary>
+        /// The scale of all rendered objects vs physics. Phys = Render * Scale.
+        /// Valid only for getting.
+        /// </summary>
+        public double RelativeScaleInverse = 1.0;
 
         /// <summary>
         /// Construct the physics space.
