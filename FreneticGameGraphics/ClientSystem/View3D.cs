@@ -1073,7 +1073,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void StandardBlend()
         {
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
         /// <summary>
@@ -1081,7 +1081,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void TranspBlend()
         {
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
         }
 
         /// <summary>
@@ -1856,7 +1856,7 @@ namespace FreneticGameGraphics.ClientSystem
                                     Lights[i].InternalLights[x].SetProj(this);
                                     GraphicsUtil.CheckError("Pre-Prerender4 - Shadows - " + i);
                                     DrawBuffer(DrawBufferMode.ColorAttachment0);
-                                    GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                                    GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
                                     if (Lights[i] is SkyLight sky)
                                     {
                                         if (redraw || sky.InternalLights[x].NeedsUpdate)
@@ -2298,7 +2298,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Disable(EnableCap.CullFace);
                 GL.Disable(EnableCap.DepthTest);
                 GL.BindTexture(TextureTarget.Texture2D, fbo_texture);
-                GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
                 BindFramebuffer(FramebufferTarget.Framebuffer, hdrfbo);
                 DrawBuffer(DrawBufferMode.ColorAttachment0);
                 GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);

@@ -403,7 +403,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public GLFont(Font font, GLFontEngine eng)
         {
             Engine = eng;
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             Engine.Shaders.ColorMultShader.Bind();
             Name = font.Name;
             Size = (int)(font.Size * eng.DPIScale);

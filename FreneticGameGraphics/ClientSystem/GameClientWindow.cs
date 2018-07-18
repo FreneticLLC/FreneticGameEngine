@@ -246,7 +246,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
                 Window.Load += Window_Load;
                 Window.RenderFrame += Window_RenderFrame;
-                Window.Mouse.Move += Mouse_Move;
+                Window.MouseMove += Mouse_Move;
                 Window.Closed += Window_Closed;
                 Window.Resize += Window_Resize;
                 Window.ReduceCPUWaste = CPUWastePatch;
@@ -293,7 +293,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Viewport(0, 0, Window.Width, Window.Height);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
             GraphicsUtil.CheckError("GEB - Initial");
@@ -441,7 +441,7 @@ namespace FreneticGameGraphics.ClientSystem
             Schedule.RunAllSyncTasks(Delta);
             // Mouse handling
             PreviousMouse = CurrentMouse;
-            CurrentMouse = Window.Mouse.GetState();
+            CurrentMouse = Mouse.GetState();
         }
 
         /// <summary>

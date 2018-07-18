@@ -388,7 +388,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Render - Pre");
             if (!UseLightEngine)
             {
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Disable(EnableCap.DepthTest);
                 GL.DepthMask(false);
                 GL.Viewport(0, 0, Window.Width / Pixelation, Window.Height / Pixelation);
@@ -413,7 +413,7 @@ namespace FreneticGameGraphics.ClientSystem
             if (OneDLights)
             {
                 Shader_Lightmap1D.Bind();
-                GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
                 GL.Enable(EnableCap.DepthTest);
                 GL.DepthMask(true);
             }
@@ -442,7 +442,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             if (OneDLights)
             {
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Disable(EnableCap.DepthTest);
                 GL.DepthMask(false);
             }
@@ -477,7 +477,7 @@ namespace FreneticGameGraphics.ClientSystem
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
             MainRenderContext.Engine = this;
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
             GraphicsUtil.CheckError("Render - Setup Lights combine");
             for (int i = 0; i < Lights.Count; i++)
             {
@@ -498,7 +498,7 @@ namespace FreneticGameGraphics.ClientSystem
                 RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             }
             GraphicsUtil.CheckError("Render - Lights combined");
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, l_FBO_Tex);
             GL.ActiveTexture(TextureUnit.Texture0);
