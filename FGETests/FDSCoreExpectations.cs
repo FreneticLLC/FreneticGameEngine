@@ -12,7 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using FreneticDataSyntax;
+using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticDataSyntax;
 
 namespace FGETests
 {
@@ -65,7 +66,7 @@ namespace FGETests
             Assert.AreEqual(test_section.GetInt("my root section 1.my_sub_section.my numeric key"), 3, "Key == 3!");
             Assert.AreEqual(test_section.GetDouble("my root section 1.my_sub_section.my decimal key"), 3.14159, "Key == 3.14159!");
             Assert.AreEqual(test_section.GetString("my root section 1.my other section.my string key"), "alpha", "Key == alpha!");
-            Assert.AreEqual(FDSUtility.UTF8.GetString(test_section.GetData("my second root section.my binary key").Internal as byte[]),
+            Assert.AreEqual(StringConversionHelper.UTF8Encoding.GetString(test_section.GetData("my second root section.my binary key").Internal as byte[]),
                 "Hello world, and all who inhabit it!", "Key string from binary check!");
            List<string> list = test_section.GetStringList("my second root section.my list key");
             Assert.AreEqual(list[0], "1", "Key->List yields 1!");

@@ -1,6 +1,6 @@
-[submodule "FreneticDataSyntax"]
-	path = FreneticDataSyntax
-	url = https://github.com/FreneticLLC/FreneticDataSyntax
 [submodule "FreneticScript"]
 	path = FreneticScript
 	url = https://github.com/FreneticLLC/FreneticScript
+[submodule "FreneticUtilities"]
+	path = FreneticUtilities
+	url = https://github.com/FreneticLLC/FreneticUtilities

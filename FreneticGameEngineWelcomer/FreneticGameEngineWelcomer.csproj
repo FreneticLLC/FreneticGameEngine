@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FreneticGameEngineWelcomer.xml</DocumentationFile>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>FGE_Icon.ico</ApplicationIcon>
@@ -147,9 +149,9 @@
     <None Include="Exit_Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
+    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
       <Project>{1db47d6a-4225-4f25-8559-2c6292496953}</Project>
-      <Name>FreneticDataSyntax</Name>
+      <Name>FreneticUtilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
       <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>

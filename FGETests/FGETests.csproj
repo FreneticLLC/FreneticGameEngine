@@ -27,6 +27,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>bin\Debug\FGETests.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,6 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
     <NoWarn>
     </NoWarn>
   </PropertyGroup>
@@ -95,9 +97,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj">
+    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
       <Project>{1db47d6a-4225-4f25-8559-2c6292496953}</Project>
-      <Name>FreneticDataSyntax</Name>
+      <Name>FreneticUtilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
       <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>

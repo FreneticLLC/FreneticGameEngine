@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameCore", "Freneti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameGraphics", "FreneticGameGraphics\FreneticGameGraphics.csproj", "{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticDataSyntax", "FreneticDataSyntax\FreneticDataSyntax\FreneticDataSyntax.csproj", "{1DB47D6A-4225-4F25-8559-2C6292496953}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticUtilities", "FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj", "{1DB47D6A-4225-4F25-8559-2C6292496953}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticScript", "FreneticScript\FreneticScript\FreneticScript.csproj", "{0672DD5F-6F33-4853-BD6E-8716D3ABC7AD}"
 EndProject
