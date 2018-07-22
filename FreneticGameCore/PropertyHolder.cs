@@ -1,6 +1,6 @@
 //
 // This file is created by Frenetic LLC.
-// This code is Copyright (C) 2017 Frenetic LLC under the terms of a strict license.
+// This code is Copyright (C) 2017-2018 Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the source root for the contents of the license.
 // If neither of these are available, assume that neither you nor anyone other than the copyright holder
 // hold any right or permission to use this software until such time as the official license is identified.
@@ -190,6 +190,7 @@ namespace FreneticGameCore
                 Loader = (b) => Utilities.BytesToQuaternion(b, 0),
                 SaveString = "C/B/quaternion"
             });
+            // End default helpers
             foreach (PropertySaverLoader psl in TypeSavers.Values)
             {
                 TypeLoaders.Add(psl.SaveString, psl);
@@ -209,12 +210,43 @@ namespace FreneticGameCore
         /// <summary>
         /// Special helper: Default empty list for some returns.
         /// </summary>
-        private static readonly List<Object> DefaultReturn = new List<Object>();
+        private static readonly IReadOnlyList<Object> DefaultReturnEmptyList = new List<Object>();
+
+        /// <summary>
+        /// Gets the first property with a specific interface.
+        /// Returns null when nothing is found.
+        /// </summary>
+        /// <param name="t">The type of the interface.</param>
+        /// <returns>The first found object, or null.</returns>
+        public Object GetFirstInterfacedProperty(Type t)
+        {
+            if (HeldInterfaces.TryGetValue(t, out List<Object> objs) && objs.Count > 0)
+            {
+                return objs[0];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the first property with a specific interface.
+        /// Returns null when nothing is found.
+        /// </summary>
+        /// <typeparam name="T">The type of the interface.</typeparam>
+        /// <returns>The first found object, or null.</returns>
+        public T GetFirstInterfacedProperty<T>() where T: class
+        {
+            if (HeldInterfaces.TryGetValue(typeof(T), out List<Object> objs) && objs.Count > 0)
+            {
+                return objs[0] as T;
+            }
+            return null;
+        }
 
         /// <summary>
         /// Gets all properties with a specific interface.
         /// Note that this is faster but less clean than <see cref="GetAllInterfacedProperties{T}"/>.
         /// Good for foreach loops. Bad for when you need a typed list.
+        /// Returns an empty list when nothing is found.
         /// </summary>
         /// <param name="t">The type of the interface.</param>
         /// <returns>All the objects.</returns>
@@ -224,13 +256,14 @@ namespace FreneticGameCore
             {
                 return objs;
             }
-            return DefaultReturn;
+            return DefaultReturnEmptyList;
         }
 
         /// <summary>
         /// Gets all properties with a specific interface.
         /// Note that this is slower but cleaner than <see cref="GetAllInterfacedProperties(Type)"/>.
         /// Good for when you need a typed list. Bad for foreach loops.
+        /// Returns an empty list when nothing is found.
         /// </summary>
         /// <typeparam name="T">The type of the interface.</typeparam>
         /// <returns>All the objects.</returns>
@@ -308,7 +341,44 @@ namespace FreneticGameCore
                 return HeldProperties.Count;
             }
         }
+        
+        /// <summary>
+        /// Gets the first property that is a sub-type of the given property type.
+        /// <para>This method is likely slower than its generic version! Prefer to use <see cref="GetFirstSubType{T}"/> when possible.</para>
+        /// Returns null if none found.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <returns>The property, or null.</returns>
+        public Property GetFirstSubType(Type t)
+        {
+            foreach (KeyValuePair<Type, Property> p in HeldProperties)
+            {
+                if (t.IsAssignableFrom(p.Key))
+                {
+                    return p.Value;
+                }
+            }
+            return null;
+        }
 
+        /// <summary>
+        /// Gets the first property that is a sub-type of the given property type.
+        /// Returns null if none found.
+        /// </summary>
+        /// <typeparam name="T">The type of the property.</typeparam>
+        /// <returns>The property, or null.</returns>
+        public T GetFirstSubType<T>() where T : Property
+        {
+            foreach (Property p in HeldProperties.Values)
+            {
+                if (p is T a)
+                {
+                    return a;
+                }
+            }
+            return null;
+        }
+        
         /// <summary>
         /// Gets all properties that are a sub-type of the given property type.
         /// <para>This method is likely slower than its generic version!</para>
@@ -1072,6 +1142,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Call this method to get debuggable information output added to a string dictionary.
+        /// This method's implementation is dynamically generated.
         /// </summary>
         /// <param name="p">The property.</param>
         /// <param name="vals">The string dictionary.</param>
@@ -1079,6 +1150,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Call this method to get debuggable information output added to a string dictionary.
+        /// This method's implementation is dynamically generated.
         /// </summary>
         /// <param name="p">The property.</param>
         /// <param name="vals">The string dictionary.</param>
