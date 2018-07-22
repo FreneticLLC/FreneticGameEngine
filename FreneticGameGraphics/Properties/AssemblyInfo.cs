@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Frenetic LLC")]
 [assembly: AssemblyProduct("FreneticGameGraphics")]
-[assembly: AssemblyCopyright("Copyright © Frenetic LLC 2017")]
+[assembly: AssemblyCopyright("Copyright © Frenetic LLC 2017-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

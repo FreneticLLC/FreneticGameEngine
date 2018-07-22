@@ -24,4 +24,4 @@ Learn more at https://freneticllc.com/
 
 -----
 
-Current license is Copyright (C) 2017 Frenetic LLC, All Rights Reserved.
+Current license is Copyright (C) 2017-2018 Frenetic LLC, All Rights Reserved.
