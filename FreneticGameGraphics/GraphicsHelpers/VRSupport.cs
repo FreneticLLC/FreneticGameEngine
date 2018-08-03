@@ -499,7 +499,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
     /// An enumeration of buttons known to the VR system.
     /// </summary>
     [Flags]
-    public enum VRButtons : ulong
+    public enum VRButtons : ulong // TODO: Less weird enum values/names. Also, Vive/Rift controller separation and explicit support.
     {
         /// <summary>
         /// No buttons down.

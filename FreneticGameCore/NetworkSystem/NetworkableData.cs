@@ -84,6 +84,6 @@ namespace FreneticGameCore.NetworkSystem
         /// <summary>
         /// network the value during update transmission. (Will generally also run from existence transmission!)
         /// </summary>
-        UPDATE = 2
+        UPDATE = 1 << 1
     }
 }
