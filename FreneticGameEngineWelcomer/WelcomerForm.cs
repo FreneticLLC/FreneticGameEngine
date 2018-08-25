@@ -334,12 +334,13 @@ namespace FreneticGameEngineWelcomer
         string[] FILES = new string[] { "BEPUphysics.dll", "BEPUphysics.pdb", "BEPUphysics.xml",
             "BEPUutilities.dll", "BEPUutilities.pdb", "BEPUutilities.xml",
             "csogg.dll", "csvorbis.dll",
-            "FreneticDataSyntax.dll", "FreneticDataSyntax.pdb", "FreneticDataSyntax.xml",
+            "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",
             "FreneticGameCore.dll", "FreneticGameCore.pdb", "FreneticGameCore.xml",
             "FreneticGameGraphics.dll", "FreneticGameGraphics.pdb", "FreneticGameGraphics.xml",
             "FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
             "LZ4.dll",
-            "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml"
+            "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml",
+            "openvr_api.dll", "openvr_api.pdb"
         };
 
         /// <summary>
