@@ -44,8 +44,8 @@
     <Reference Include="csvorbis">
       <HintPath>.\csvorbis.dll</HintPath>
     </Reference>
-    <Reference Include="FreneticDataSyntax">
-      <HintPath>.\FreneticDataSyntax.dll</HintPath>
+    <Reference Include="FreneticUtilities">
+      <HintPath>.\FreneticUtilities.dll</HintPath>
     </Reference>
     <Reference Include="FreneticGameCore">
       <HintPath>.\FreneticGameCore.dll</HintPath>
