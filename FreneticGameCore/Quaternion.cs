@@ -127,7 +127,7 @@ namespace FreneticGameCore
             return new Quaternion(
                 X * b.W + b.X * W + Y * b.Z - Z * b.Y,
                 Y * b.W + b.Y * W + Z * b.X - X * b.Z,
-                Z * b.W + b.Z + W + X * b.Y - Y * b.X,
+                Z * b.W + b.Z * W + X * b.Y - Y * b.X,
                 W * b.W - X * b.X - Y * b.Y - Z * b.Z
                 );
         }
