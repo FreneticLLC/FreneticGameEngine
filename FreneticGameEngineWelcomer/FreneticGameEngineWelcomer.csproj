@@ -149,10 +149,6 @@
     <None Include="Exit_Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
-      <Project>{1db47d6a-4225-4f25-8559-2c6292496953}</Project>
-      <Name>FreneticUtilities</Name>
-    </ProjectReference>
     <ProjectReference Include="..\FreneticGameCore\FreneticGameCore.csproj">
       <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>
       <Name>FreneticGameCore</Name>
@@ -164,6 +160,10 @@
     <ProjectReference Include="..\FreneticScript\FreneticScript\FreneticScript.csproj">
       <Project>{0672dd5f-6f33-4853-bd6e-8716d3abc7ad}</Project>
       <Name>FreneticScript</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FreneticScript\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
+      <Project>{7cc90111-81a0-48eb-bbad-8ae0598c5add}</Project>
+      <Name>FreneticUtilities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
