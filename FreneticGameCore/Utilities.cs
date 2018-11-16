@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using BEPUutilities;
 using System.Threading;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameCore
 {
@@ -103,6 +104,8 @@ namespace FreneticGameCore
             return Convert.ToBase64String(sha512.ComputeHash(DefaultEncoding.GetBytes(salt1 + username + salt2 + password + salt3)));
         }
 
+        // TODO: Delete all these convertion methods, instead just use PrimitiveConversionHelper
+
         /// <summary>
         /// Converts a byte array to a ushort.
         /// </summary>
@@ -110,7 +113,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static ushort BytesToUShort(byte[] bytes)
         {
-            return BitConverter.ToUInt16(bytes, 0);
+            return PrimitiveConversionHelper.BytesToUShort16(bytes);
         }
 
         /// <summary>
@@ -120,7 +123,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static float BytesToFloat(byte[] bytes)
         {
-            return BitConverter.ToSingle(bytes, 0);
+            return PrimitiveConversionHelper.BytesToFloat32(bytes);
         }
 
         /// <summary>
@@ -130,7 +133,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static double BytesToDouble(byte[] bytes)
         {
-            return BitConverter.ToDouble(bytes, 0);
+            return PrimitiveConversionHelper.BytesToDouble64(bytes);
         }
 
         /// <summary>
@@ -140,7 +143,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] CharToBytes(char ch)
         {
-            return BitConverter.GetBytes(ch);
+            return PrimitiveConversionHelper.UShort16ToBytes(ch);
         }
 
         /// <summary>
@@ -150,7 +153,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] ShortToBytes(short sh)
         {
-            return BitConverter.GetBytes(sh);
+            return PrimitiveConversionHelper.Short16ToBytes(sh);
         }
 
         /// <summary>
@@ -160,7 +163,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] UShortToBytes(ushort ush)
         {
-            return BitConverter.GetBytes(ush);
+            return PrimitiveConversionHelper.UShort16ToBytes(ush);
         }
 
         /// <summary>
@@ -170,7 +173,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] FloatToBytes(float flt)
         {
-            return BitConverter.GetBytes(flt);
+            return PrimitiveConversionHelper.Float32ToBytes(flt);
         }
 
         /// <summary>
@@ -180,7 +183,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] DoubleToBytes(double flt)
         {
-            return BitConverter.GetBytes(flt);
+            return PrimitiveConversionHelper.Double64ToBytes(flt);
         }
 
         /// <summary>
@@ -190,7 +193,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static char BytesToChar(byte[] bytes)
         {
-            return BitConverter.ToChar(bytes, 0);
+            return (char) PrimitiveConversionHelper.BytesToUShort16(bytes);
         }
 
         /// <summary>
@@ -200,7 +203,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static short BytesToShort(byte[] bytes)
         {
-            return BitConverter.ToInt16(bytes, 0);
+            return PrimitiveConversionHelper.BytesToShort16(bytes);
         }
 
         /// <summary>
@@ -210,7 +213,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static int BytesToInt(byte[] bytes)
         {
-            return BitConverter.ToInt32(bytes, 0);
+            return PrimitiveConversionHelper.BytesToInt32(bytes);
         }
 
         /// <summary>
@@ -220,7 +223,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static uint BytesToUInt(byte[] bytes)
         {
-            return BitConverter.ToUInt32(bytes, 0);
+            return PrimitiveConversionHelper.BytesToUInt32(bytes);
         }
 
         /// <summary>
@@ -230,7 +233,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static long BytesToLong(byte[] bytes)
         {
-            return BitConverter.ToInt64(bytes, 0);
+            return PrimitiveConversionHelper.BytesToLong64(bytes);
         }
 
         /// <summary>
@@ -240,7 +243,7 @@ namespace FreneticGameCore
         /// <returns>The actual value of it.</returns>
         public static ulong BytesToULong(byte[] bytes)
         {
-            return BitConverter.ToUInt64(bytes, 0);
+            return PrimitiveConversionHelper.BytesToUInt32(bytes);
         }
 
         /// <summary>
@@ -250,7 +253,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] IntToBytes(int intty)
         {
-            return BitConverter.GetBytes(intty);
+            return PrimitiveConversionHelper.Int32ToBytes(intty);
         }
 
         /// <summary>
@@ -260,7 +263,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] UIntToBytes(uint intty)
         {
-            return BitConverter.GetBytes(intty);
+            return PrimitiveConversionHelper.UInt32ToBytes(intty);
         }
 
         /// <summary>
@@ -270,7 +273,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] LongToBytes(long intty)
         {
-            return BitConverter.GetBytes(intty);
+            return PrimitiveConversionHelper.Long64ToBytes(intty);
         }
 
         /// <summary>
@@ -280,7 +283,7 @@ namespace FreneticGameCore
         /// <returns>The byte array.</returns>
         public static byte[] ULongToBytes(ulong intty)
         {
-            return BitConverter.GetBytes(intty);
+            return PrimitiveConversionHelper.ULong64ToBytes(intty);
         }
 
         /// <summary>
@@ -297,7 +300,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Grabs a sub section of a byte array.
-        /// TODO: Reduce need for BytesPartial in packets via adding an index to BytesTo[Type]!
+        /// TODO: Don't use this, use sub-indices with calls to <see cref="PrimitiveConversionHelper"/> methods.
         /// </summary>
         /// <param name="full">The original byte array.</param>
         /// <param name="start">The start index.</param>
