@@ -549,26 +549,19 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.
+        /// </summary>
+        public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
+            "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
+
+        /// <summary>
         /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText
         /// </summary>
         /// <param name="c"><paramref name="c"/>The character to check.</param>
         /// <returns>whether the character is a valid color symbol.</returns>
         public static bool IsColorSymbol(char c)
         {
-            return ((c >= '0' && c <= '9') /* 0123456789 */ ||
-                    (c >= 'a' && c <= 'b') /* ab */ ||
-                    (c >= 'd' && c <= 'f') /* def */ ||
-                    (c >= 'h' && c <= 'l') /* hijkl */ ||
-                    (c >= 'n' && c <= 'u') /* nopqrstu */ ||
-                    (c >= 'R' && c <= 'T') /* RST */ ||
-                    (c >= '#' && c <= '&') /* #$%& */ || // 35 - 38
-                    (c >= '(' && c <= '*') /* ()* */ || // 40 - 42
-                    (c == 'A') ||
-                    (c == 'O') ||
-                    (c == '-') || // 45
-                    (c == '!') || // 33
-                    (c == '@') // 64
-                    );
+            return ColorSymbolMatcher.IsMatch(c);
         }
 
         /// <summary>
@@ -814,7 +807,14 @@ namespace FreneticGameCore
         }
 
         /// <summary>
-        /// Validates a username as correctly formatted.
+        /// Valid ASCII symbols for a plaintext alphanumeric username.
+        /// </summary>
+        public static AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(
+            "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "_");
+
+        /// <summary>
+        /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII.
+        /// Also enforces length between 4 and 15 symbols, inclusive.
         /// </summary>
         /// <param name="str">The username to validate.</param>
         /// <returns>Whether the username is valid.</returns>
@@ -835,16 +835,7 @@ namespace FreneticGameCore
                 return false;
             }
             // All symbols are A-Z, 0-9, _
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (!(str[i] >= 'a' && str[i] <= 'z') && !(str[i] >= 'A' && str[i] <= 'Z')
-                    && !(str[i] >= '0' && str[i] <= '9') && !(str[i] == '_'))
-                {
-                    return false;
-                }
-            }
-            // Valid if all tests above passed
-            return true;
+            return UsernameValidationMatcher.IsOnlyMatches(str);
         }
 
         /// <summary>
