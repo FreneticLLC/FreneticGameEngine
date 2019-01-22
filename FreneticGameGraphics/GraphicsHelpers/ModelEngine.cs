@@ -18,6 +18,7 @@ using FreneticGameCore;
 using FreneticGameCore.Files;
 using FreneticGameCore.Collision;
 using FreneticGameGraphics.ClientSystem;
+using FreneticGameCore.ConsoleHelpers;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -139,7 +140,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!TheClient.Files.Exists("models/" + filename + ".vmd"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
-                        TextStyle.Color_Standout + "models/" + filename + ".vmd" + TextStyle.Color_Warning +
+                        TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Warning +
                         "' does not exist.");
                     return null;
                 }
@@ -153,7 +154,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load model from filename '" +
-                    TextStyle.Color_Standout + "models/" + filename + ".vmd" + TextStyle.Color_Error + "': " + ex.ToString());
+                    TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Error + "': " + ex.ToString());
                 return null;
             }
         }
@@ -455,7 +456,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The LOD box.
         /// </summary>
-        public AABB LODBox = default(AABB);
+        public AABB LODBox = default;
 
         /// <summary>
         /// All the meshes this model has.

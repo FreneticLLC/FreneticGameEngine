@@ -17,6 +17,7 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.Files;
 using System.Diagnostics.CodeAnalysis;
+using FreneticGameCore.ConsoleHelpers;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -241,7 +242,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
                     SysConsole.Output(OutputType.ERROR, "Cannot load texture, file '" +
-                        TextStyle.Color_Standout + "textures/" + filename + ".png" + TextStyle.Color_Error +
+                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error +
                         "' does not exist.");
                     return null;
                 }
@@ -278,7 +279,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
-                    TextStyle.Color_Standout + "textures/" + filename + ".png" + TextStyle.Color_Error + "': " + ex.ToString());
+                    TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
                 return null;
             }
         }
@@ -326,7 +327,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
                     SysConsole.Output(OutputType.ERROR, "Cannot load texture, file '" +
-                        TextStyle.Color_Standout + "textures/" + filename + ".png" + TextStyle.Color_Error +
+                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error +
                         "' does not exist.");
                     return;
                 }
@@ -343,7 +344,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
-                    TextStyle.Color_Standout + "textures/" + filename + ".png" + TextStyle.Color_Error + "': " + ex.ToString());
+                    TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
                 return;
             }
         }

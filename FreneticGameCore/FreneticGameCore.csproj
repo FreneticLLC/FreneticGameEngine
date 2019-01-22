@@ -68,6 +68,7 @@
     <Compile Include="Collision\Vector3i.cs" />
     <Compile Include="Color3F.cs" />
     <Compile Include="Color4F.cs" />
+    <Compile Include="ConsoleHelpers\TextStyle.cs" />
     <Compile Include="EntitySystem\BasicEntity.cs" />
     <Compile Include="Collision\AABB.cs" />
     <Compile Include="EntitySystem\BasicEntityProperty.cs" />
@@ -124,7 +125,6 @@
     <Compile Include="StackNoteSystem\StackNoteSet.cs" />
     <Compile Include="SysConsole.cs" />
     <Compile Include="SystemExtensions.cs" />
-    <Compile Include="TextStyle.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

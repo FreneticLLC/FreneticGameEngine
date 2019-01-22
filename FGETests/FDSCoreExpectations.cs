@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticDataSyntax;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGETests
 {

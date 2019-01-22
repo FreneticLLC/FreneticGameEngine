@@ -15,6 +15,7 @@ using System.Security.Cryptography;
 using BEPUutilities;
 using System.Threading;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {

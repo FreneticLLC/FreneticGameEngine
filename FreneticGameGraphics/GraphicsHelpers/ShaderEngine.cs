@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using FreneticGameCore;
 using FreneticGameCore.Files;
 using OpenTK.Graphics.OpenGL4;
+using FreneticGameCore.ConsoleHelpers;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -145,14 +146,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!File.Exists("shaders/" + filename + ".vs"))
                 {
                     SysConsole.Output(OutputType.ERROR, "Cannot load vertex shader, file '" +
-                        TextStyle.Color_Standout + "shaders/" + filename + ".vs" + TextStyle.Color_Error +
+                        TextStyle.Standout + "shaders/" + filename + ".vs" + TextStyle.Error +
                         "' does not exist.");
                     return null;
                 }
                 if (!File.Exists("shaders/" + filename + ".fs"))
                 {
                     SysConsole.Output(OutputType.ERROR, "Cannot load fragment shader, file '" +
-                        TextStyle.Color_Standout + "shaders/" + filename + ".fs" + TextStyle.Color_Error +
+                        TextStyle.Standout + "shaders/" + filename + ".fs" + TextStyle.Error +
                         "' does not exist.");
                     return null;
                 }
@@ -165,7 +166,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     if (!File.Exists("shaders/" + geom + ".geom"))
                     {
                         SysConsole.Output(OutputType.ERROR, "Cannot load geomry shader, file '" +
-                            TextStyle.Color_Standout + "shaders/" + geom + ".geom" + TextStyle.Color_Error +
+                            TextStyle.Standout + "shaders/" + geom + ".geom" + TextStyle.Error +
                             "' does not exist.");
                         return null;
                     }
@@ -176,7 +177,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load shader from filename '" +
-                    TextStyle.Color_Standout + "shaders/" + filename + ".fs or .vs" + TextStyle.Color_Error + "': " + ex.ToString());
+                    TextStyle.Standout + "shaders/" + filename + ".fs or .vs" + TextStyle.Error + "': " + ex.ToString());
                 return null;
             }
         }
