@@ -140,7 +140,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 if (!TheClient.Files.Exists("models/" + filename + ".vmd"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
-                        TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Warning +
+                        TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
                         "' does not exist.");
                     return null;
                 }

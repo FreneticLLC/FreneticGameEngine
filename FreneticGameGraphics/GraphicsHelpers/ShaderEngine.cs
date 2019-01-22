@@ -145,15 +145,15 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 filename = FileHandler.CleanFileName(dat1[0]);
                 if (!File.Exists("shaders/" + filename + ".vs"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load vertex shader, file '" +
-                        TextStyle.Standout + "shaders/" + filename + ".vs" + TextStyle.Error +
+                    SysConsole.Output(OutputType.WARNING, "Cannot load vertex shader, file '" +
+                        TextStyle.Standout + "shaders/" + filename + ".vs" + TextStyle.Base +
                         "' does not exist.");
                     return null;
                 }
                 if (!File.Exists("shaders/" + filename + ".fs"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load fragment shader, file '" +
-                        TextStyle.Standout + "shaders/" + filename + ".fs" + TextStyle.Error +
+                    SysConsole.Output(OutputType.WARNING, "Cannot load fragment shader, file '" +
+                        TextStyle.Standout + "shaders/" + filename + ".fs" + TextStyle.Base +
                         "' does not exist.");
                     return null;
                 }
@@ -165,8 +165,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     geom = FileHandler.CleanFileName(geom);
                     if (!File.Exists("shaders/" + geom + ".geom"))
                     {
-                        SysConsole.Output(OutputType.ERROR, "Cannot load geomry shader, file '" +
-                            TextStyle.Standout + "shaders/" + geom + ".geom" + TextStyle.Error +
+                        SysConsole.Output(OutputType.WARNING, "Cannot load geomry shader, file '" +
+                            TextStyle.Standout + "shaders/" + geom + ".geom" + TextStyle.Base +
                             "' does not exist.");
                         return null;
                     }
@@ -177,7 +177,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load shader from filename '" +
-                    TextStyle.Standout + "shaders/" + filename + ".fs or .vs" + TextStyle.Error + "': " + ex.ToString());
+                    TextStyle.Standout + "shaders/" + filename + ".fs or .vs" + TextStyle.Base + "': " + ex.ToString());
                 return null;
             }
         }

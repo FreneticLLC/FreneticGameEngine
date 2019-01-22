@@ -241,8 +241,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 filename = FileHandler.CleanFileName(filename);
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load texture, file '" +
-                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error +
+                    SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
+                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
                         "' does not exist.");
                     return null;
                 }
@@ -326,8 +326,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 filename = FileHandler.CleanFileName(filename);
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
-                    SysConsole.Output(OutputType.ERROR, "Cannot load texture, file '" +
-                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error +
+                    SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
+                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
                         "' does not exist.");
                     return;
                 }
