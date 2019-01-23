@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using FreneticGameCore;
+using FreneticGameCore.CoreSystems;
+using FreneticGameCore.MathHelpers;
 using {{{name}}}.MainGame;
 
 namespace {{{name}}}
