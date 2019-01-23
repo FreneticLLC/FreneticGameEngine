@@ -19,6 +19,7 @@ using FreneticGameCore.EntitySystem.PhysicsHelpers;
 using FreneticGameCore.Files;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore
 {
@@ -188,8 +189,8 @@ namespace FreneticGameCore
             });
             TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()
             {
-                Saver = (o) => Utilities.QuaternionToBytes((BEPUutilities.Quaternion)o),
-                Loader = (b) => Utilities.BytesToQuaternion(b, 0),
+                Saver = (o) => BepuUtilities.QuaternionToBytes((BEPUutilities.Quaternion)o),
+                Loader = (b) => BepuUtilities.BytesToQuaternion(b, 0),
                 SaveString = "C/B/quaternion"
             });
             // End default helpers

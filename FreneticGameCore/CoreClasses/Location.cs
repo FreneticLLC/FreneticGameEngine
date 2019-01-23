@@ -521,10 +521,20 @@ namespace FreneticGameCore
         public byte[] ToDoubleBytes()
         {
             byte[] toret = new byte[24];
-            Utilities.DoubleToBytes(X).CopyTo(toret, 0);
-            Utilities.DoubleToBytes(Y).CopyTo(toret, 8);
-            Utilities.DoubleToBytes(Z).CopyTo(toret, 8 + 8);
+            ToDoubleBytes(toret, 0);
             return toret;
+        }
+
+        /// <summary>
+        /// Copies the Location into a byte array.
+        /// Copies 24 bytes.
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
+        /// </summary>
+        public void ToDoubleBytes(byte[] outputBytes, int offset)
+        {
+            PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset + 0);
+            PrimitiveConversionHelper.Double64ToBytes(Y, outputBytes, offset + 8);
+            PrimitiveConversionHelper.Double64ToBytes(Z, outputBytes, offset + (8 + 8));
         }
 
         /// <summary>
@@ -704,7 +714,7 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Converts a string representation of a location to a Location object.
-        /// Inverts .ToString(), .ToSimpleString()
+        /// Inverts <see cref="ToString"/> and <see cref="ToSimpleString"/>.
         /// </summary>
         /// <param name="input">The location string.</param>
         /// <returns>the location object.</returns>
@@ -721,21 +731,18 @@ namespace FreneticGameCore
         /// <summary>
         /// Reads the byte array to a Location object.
         /// Expects 24 bytes.
-        /// Inverts <see cref="ToDoubleBytes"/>.
+        /// Inverts <see cref="ToDoubleBytes(byte[], int)"/>.
         /// </summary>
         /// <param name="bytes">The bytes to read.</param>
         /// <param name="index">The index to start at.</param>
         /// <returns>the location object.</returns>
         public static Location FromDoubleBytes(byte[] bytes, int index)
         {
-            if (bytes.Length - index < 24)
-            {
-                return new Location(0); // TODO: Exception?
-            }
-            double X = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index, 8));
-            double Y = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8, 8));
-            double Z = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8 + 8, 8));
-            return new Location(X, Y, Z);
+            return new Location(
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index),
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index + 8),
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index + (8 + 8))
+                );
         }
 
         /// <summary>

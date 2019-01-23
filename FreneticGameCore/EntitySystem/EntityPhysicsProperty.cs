@@ -19,6 +19,7 @@ using BEPUphysics.CollisionShapes;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
 using FreneticGameCore.NetworkSystem;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore.EntitySystem
 {

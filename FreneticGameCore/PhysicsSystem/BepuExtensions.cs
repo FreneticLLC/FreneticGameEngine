@@ -18,8 +18,9 @@ using BEPUutilities.ResourceManagement;
 using BEPUutilities.DataStructures;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.PhysicsSystem;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.PhysicsSystem
 {
     /// <summary>
     /// Helpers for BEPU classes.
@@ -35,7 +36,7 @@ namespace FreneticGameCore
         public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, Vector3 axis)
         {
             Vector3 ra = new Vector3(rotation.X, rotation.Y, rotation.Z);
-            Vector3 p = Utilities.Project(ra, axis);
+            Vector3 p = BepuUtilities.Project(ra, axis);
             BEPUutilities.Quaternion twist = new BEPUutilities.Quaternion(p.X, p.Y, p.Z, rotation.W);
             twist.Normalize();
             Vector3 new_forward = BEPUutilities.Quaternion.Transform(Vector3.UnitX, twist);

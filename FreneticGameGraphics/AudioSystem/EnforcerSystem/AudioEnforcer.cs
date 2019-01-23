@@ -17,6 +17,7 @@ using OpenTK;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using System.Diagnostics;
+using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameGraphics.AudioSystem.EnforcerSystem
 {

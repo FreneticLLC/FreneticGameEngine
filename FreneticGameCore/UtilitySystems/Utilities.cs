@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
 using System.Threading;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
@@ -21,7 +20,7 @@ namespace FreneticGameCore.UtilitySystems
     /// <summary>
     /// Helpful utilities for general usage.
     /// </summary>
-    public class Utilities
+    public static class Utilities
     {
         /// <summary>
         /// Returns the next power of two.
@@ -249,18 +248,6 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Checks an exception for rethrow necessity.
-        /// </summary>
-        /// <param name="ex">The exception to check.</param>
-        public static void CheckException(Exception ex)
-        {
-            if (ex is ThreadAbortException)
-            {
-                throw ex;
-            }
-        }
-
-        /// <summary>
         /// Grabs a sub section of a byte array.
         /// TODO: Don't use this, use sub-indices with calls to <see cref="PrimitiveConversionHelper"/> methods.
         /// </summary>
@@ -276,6 +263,18 @@ namespace FreneticGameCore.UtilitySystems
                 data[i] = full[i + start];
             }
             return data;
+        }
+
+        /// <summary>
+        /// Checks an exception for rethrow necessity.
+        /// </summary>
+        /// <param name="ex">The exception to check.</param>
+        public static void CheckException(Exception ex)
+        {
+            if (ex is ThreadAbortException)
+            {
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -416,105 +415,6 @@ namespace FreneticGameCore.UtilitySystems
             double bX = vec.Z * sinpitch + vec.X * cospitch;
             double bZ = vec.Z * cospitch - vec.X * sinpitch;
             return new Location(bX * cosyaw - vec.Y * sinyaw, bX * sinyaw + vec.Y * cosyaw, bZ);
-        }
-
-        /// <summary>
-        /// Converts a string to a quaternion.
-        /// </summary>
-        /// <param name="input">The string.</param>
-        /// <returns>The quaternion, or the identity quaternion.</returns>
-        public static BEPUutilities.Quaternion StringToQuat(string input)
-        {
-            string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
-            if (data.Length != 4)
-            {
-                return BEPUutilities.Quaternion.Identity;
-            }
-            return new BEPUutilities.Quaternion(StringConversionHelper.StringToFloat(data[0]), StringConversionHelper.StringToFloat(data[1]),
-                StringConversionHelper.StringToFloat(data[2]), StringConversionHelper.StringToFloat(data[3]));
-        }
-
-        /// <summary>
-        /// Converts a quaternion to a string.
-        /// </summary>
-        /// <param name="quat">The quaternion.</param>
-        /// <returns>The string.</returns>
-        public static string QuatToString(BEPUutilities.Quaternion quat)
-        {
-            return "(" + quat.X + ", " + quat.Y + ", " + quat.Z + ", " + quat.W + ")";
-        }
-
-        /// <summary>
-        /// Converts a quaternion to a byte array.
-        /// 16 bytes.
-        /// </summary>
-        /// <param name="quat">The quaternion.</param>
-        /// <returns>The byte array.</returns>
-        public static byte[] QuaternionToBytes(BEPUutilities.Quaternion quat)
-        {
-            byte[] dat = new byte[4 + 4 + 4 + 4];
-            FloatToBytes((float)quat.X).CopyTo(dat, 0);
-            FloatToBytes((float)quat.Y).CopyTo(dat, 4);
-            FloatToBytes((float)quat.Z).CopyTo(dat, 4 + 4);
-            FloatToBytes((float)quat.W).CopyTo(dat, 4 + 4 + 4);
-            return dat;
-        }
-
-        /// <summary>
-        /// Converts a byte array to a quaternion.
-        /// </summary>
-        /// <param name="dat">The byte array.</param>
-        /// <param name="offset">The offset in the array.</param>
-        /// <returns>The quaternion.</returns>
-        public static BEPUutilities.Quaternion BytesToQuaternion(byte[] dat, int offset)
-        {
-            return new BEPUutilities.Quaternion(BytesToFloat(BytesPartial(dat, offset, 4)), BytesToFloat(BytesPartial(dat, offset + 4, 4)),
-                BytesToFloat(BytesPartial(dat, offset + 4 + 4, 4)), BytesToFloat(BytesPartial(dat, offset + 4 + 4 + 4, 4)));
-
-        }
-
-        /// <summary>
-        /// Creates a Matrix that "looks at" a target from a location, left-hand notation.
-        /// </summary>
-        /// <param name="start">The starting coordinate.</param>
-        /// <param name="end">The end target.</param>
-        /// <param name="up">The normalized up vector.</param>
-        /// <returns>A matrix.</returns>
-        public static Matrix LookAtLH(Location start, Location end, Location up)
-        {
-            Location zAxis = (end - start).Normalize();
-            Location xAxis = up.CrossProduct(zAxis).Normalize();
-            Location yAxis = zAxis.CrossProduct(xAxis);
-            return new Matrix(xAxis.X, yAxis.X, zAxis.X, 0, xAxis.Y,
-                yAxis.Y, zAxis.Y, 0, xAxis.Z, yAxis.Z, zAxis.Z, 0,
-                -xAxis.Dot(start), -yAxis.Dot(start), -zAxis.Dot(start), 1);
-        }
-
-        /// <summary>
-        /// Converts a matrix to Euler angles.
-        /// </summary>
-        /// <param name="WorldTransform">The matrix.</param>
-        /// <returns>The Euler angles.</returns>
-        public static Location MatrixToAngles(Matrix WorldTransform)
-        {
-            Location rot;
-            rot.X = Math.Atan2(WorldTransform.M32, WorldTransform.M33) * 180 / Math.PI;
-            rot.Y = -Math.Asin(WorldTransform.M31) * 180 / Math.PI;
-            rot.Z = Math.Atan2(WorldTransform.M21, WorldTransform.M11) * 180 / Math.PI;
-            return rot;
-        }
-
-        /// <summary>
-        /// Converts Euler angles to a matrix.
-        /// </summary>
-        /// <param name="rot">The Euler angles.</param>
-        /// <returns>The matrix.</returns>
-        public static Matrix AnglesToMatrix(Location rot)
-        {
-            // TODO: better method?
-            return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (rot.X * PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 1, 0), (rot.Y * PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), (rot.Z * PI180));
         }
 
         /// <summary>
@@ -678,17 +578,6 @@ namespace FreneticGameCore.UtilitySystems
                 c++;
             }
             return creation;
-        }
-
-        /// <summary>
-        /// Projects a vector onto another.
-        /// </summary>
-        /// <param name="a">The first vector.</param>
-        /// <param name="b">The second vector.</param>
-        /// <returns>The projected vector.</returns>
-        public static Vector3 Project(Vector3 a, Vector3 b)
-        {
-            return b * (Vector3.Dot(a, b) / b.LengthSquared());
         }
     }
 }

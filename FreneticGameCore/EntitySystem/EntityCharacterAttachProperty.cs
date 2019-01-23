@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BEPUutilities;
 using BEPUphysics.Character;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore.EntitySystem
 {   

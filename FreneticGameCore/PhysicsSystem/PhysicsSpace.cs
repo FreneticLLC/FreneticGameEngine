@@ -20,7 +20,7 @@ using BEPUphysics.BroadPhaseEntries;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using FreneticGameCore.Collision;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.PhysicsSystem
 {
     /// <summary>
     /// Represents a physical world (space).

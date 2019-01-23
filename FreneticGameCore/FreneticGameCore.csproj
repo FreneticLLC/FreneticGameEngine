@@ -94,7 +94,8 @@
     <Compile Include="NetworkSystem\NetworkableData.cs" />
     <Compile Include="NetworkSystem\TCPConnection.cs" />
     <Compile Include="NetworkSystem\TCPGameNetwork.cs" />
-    <Compile Include="CoreClasses\PhysicsSpace.cs" />
+    <Compile Include="PhysicsSystem\BepuUtilities.cs" />
+    <Compile Include="PhysicsSystem\PhysicsSpace.cs" />
     <Compile Include="CoreClasses\Plane.cs" />
     <Compile Include="Files\DataReader.cs" />
     <Compile Include="Files\DataStream.cs" />
@@ -124,7 +125,7 @@
     <Compile Include="StackNoteSystem\StackNoteHelper.cs" />
     <Compile Include="StackNoteSystem\StackNoteSet.cs" />
     <Compile Include="CoreClasses\SysConsole.cs" />
-    <Compile Include="CoreClasses\BepuExtensions.cs" />
+    <Compile Include="PhysicsSystem\BepuExtensions.cs" />
     <Compile Include="UtilitySystems\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

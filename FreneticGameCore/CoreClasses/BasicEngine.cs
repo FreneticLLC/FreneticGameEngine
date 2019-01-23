@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FreneticGameCore.EntitySystem;
 using FreneticGameCore.StackNoteSystem;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore
 {
