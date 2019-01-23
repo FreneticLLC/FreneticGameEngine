@@ -11,10 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FreneticGameCore.Collision;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameGraphics.GraphicsHelpers;
 using OpenTK;
+using FreneticGameCore.MathHelpers;
 using OpenTK.Input;
 
 namespace FreneticGameGraphics.UISystem

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BEPUutilities;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.PhysicsSystem;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -36,7 +37,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         /// <param name="orient">The attached orientation.</param>
         /// <param name="pos">The attached position.</param>
-        public void SetRelativeBasedOn(Quaternion orient, Location pos)
+        public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
         {
             Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(pos.ToBVector());
             Matrix.Invert(ref worldTrans, out Matrix inverted);
@@ -70,7 +71,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fixes this entity's orientation based on its attachment.
         /// </summary>
-        public virtual void FixOrientation(Quaternion orientation)
+        public virtual void FixOrientation(MathHelpers.Quaternion orientation)
         {
             SetPositionOrientation(AttachedTo.LastKnownPosition, orientation);
         }
@@ -80,12 +81,12 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         /// <param name="position">The attached-to entity's position.</param>
         /// <param name="orient">The attached-to entity's orientation.</param>
-        public void SetPositionOrientation(Location position, Quaternion orient)
+        public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
         {
             Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(position.ToBVector());
             Matrix tmat = RelativeOffset * worldTrans;
             Location pos = new Location(tmat.Translation);
-            Quaternion quat = BEPUutilities.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
+            MathHelpers.Quaternion quat = BEPUutilities.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
             Entity.SetPosition(pos);
             Entity.SetOrientation(quat);
         }

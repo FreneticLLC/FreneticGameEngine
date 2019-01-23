@@ -18,7 +18,7 @@ using BEPUphysics.Entities;
 using BEPUutilities.Threading;
 using BEPUphysics.BroadPhaseEntries;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
-using FreneticGameCore.Collision;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore.PhysicsSystem
 {

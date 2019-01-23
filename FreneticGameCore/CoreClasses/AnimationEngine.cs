@@ -15,6 +15,7 @@ using FreneticGameCore.Files;
 using FreneticUtilities.FreneticExtensions;
 using BEPUutilities;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.MathHelpers;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore

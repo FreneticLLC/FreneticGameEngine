@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents a 4-piece floating point color.

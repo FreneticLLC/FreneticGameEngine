@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.ClientSystem;
-using FreneticGameCore.Collision;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameGraphics.UISystem
 {

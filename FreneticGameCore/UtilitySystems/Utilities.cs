@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using FreneticUtilities.FreneticExtensions;
+using FreneticGameCore.MathHelpers;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.UtilitySystems

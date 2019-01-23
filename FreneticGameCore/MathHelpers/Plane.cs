@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents a triangle in 3D space.

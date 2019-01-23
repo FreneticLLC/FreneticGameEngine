@@ -12,39 +12,47 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BEPUutilities;
+using System.Runtime.CompilerServices;
 
-namespace FreneticGameCore.Collision
+namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
-    /// Represents a 2D vector of integers.
+    /// Represents a 3D vector of integers.
     /// </summary>
-    public struct Vector2i : IEquatable<Vector2i>
+    public struct Vector3i : IEquatable<Vector3i>
     {
         /// <summary>
-        /// Construct the vec2i.
+        /// Construct the vec3i.
         /// </summary>
         /// <param name="x">X coordinaate.</param>
         /// <param name="y">Y coordinate.</param>
-        public Vector2i(int x, int y)
+        /// <param name="z">Z coordinate.</param>
+        public Vector3i(int x, int y, int z)
         {
             X = x;
             Y = y;
+            Z = z;
         }
 
         /// <summary>
         /// The zero vector.
         /// </summary>
-        public static readonly Vector2i Zero = new Vector2i(0, 0);
+        public static readonly Vector3i Zero = new Vector3i(0, 0, 0);
 
         /// <summary>
-        /// The x coordinate.
+        /// The X coordinate.
         /// </summary>
         public int X;
 
         /// <summary>
-        /// The y coordinate.
+        /// The Y coordinate.
         /// </summary>
         public int Y;
+
+        /// <summary>
+        /// The Z coordinate.
+        /// </summary>
+        public int Z;
 
         /// <summary>
         /// Gets a cheap hash code.
@@ -52,7 +60,7 @@ namespace FreneticGameCore.Collision
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return X * 23 + Y;
+            return X * 23 + Y * 77 + Z;
         }
 
         /// <summary>
@@ -60,9 +68,10 @@ namespace FreneticGameCore.Collision
         /// </summary>
         /// <param name="other">The other vector.</param>
         /// <returns>Whether they are equal.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object other)
         {
-            return Equals((Vector2i)other);
+            return Equals((Vector3i)other);
         }
 
         /// <summary>
@@ -70,28 +79,30 @@ namespace FreneticGameCore.Collision
         /// </summary>
         /// <param name="other">The other vector.</param>
         /// <returns>Whether they are equal.</returns>
-        public bool Equals(Vector2i other)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Vector3i other)
         {
-            return other.X == X && other.Y == Y;
+            return other.X == X && other.Y == Y && other.Z == Z;
         }
 
         /// <summary>
         /// Converts this vector a BEPU floating point vector.
         /// </summary>
         /// <returns>The float vector.</returns>
-        public Vector2 ToVector2()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 ToVector3()
         {
-            return new Vector2(X, Y);
+            return new Vector3(X, Y, Z);
         }
 
         /// <summary>
         /// Converts this vector a floating point Location.
-        /// Zero on Z axis.
         /// </summary>
         /// <returns>The Location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location ToLocation()
         {
-            return new Location(X, Y, 0);
+            return new Location(X, Y, Z);
         }
 
         /// <summary>
@@ -100,7 +111,7 @@ namespace FreneticGameCore.Collision
         /// <returns>The string.</returns>
         public override string ToString()
         {
-            return "(" + X + ", " + Y + ")";
+            return "(" + X + ", " + Y + ", " + Z + ")";
         }
 
         /// <summary>
@@ -109,7 +120,8 @@ namespace FreneticGameCore.Collision
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
-        public static bool operator !=(Vector2i one, Vector2i two)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Vector3i one, Vector3i two)
         {
             return !one.Equals(two);
         }
@@ -120,42 +132,46 @@ namespace FreneticGameCore.Collision
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
-        public static bool operator ==(Vector2i one, Vector2i two)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Vector3i one, Vector3i two)
         {
             return one.Equals(two);
         }
 
         /// <summary>
-        /// Mathematical comparison.
+        /// Mathematical operation.
         /// </summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
-        public static Vector2i operator +(Vector2i one, Vector2i two)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3i operator +(Vector3i one, Vector3i two)
         {
-            return new Vector2i(one.X + two.X, one.Y + two.Y);
+            return new Vector3i(one.X + two.X, one.Y + two.Y, one.Z + two.Z);
         }
 
         /// <summary>
-        /// Mathematical comparison.
+        /// Mathematical operation.
+        /// </summary>
+        /// <param name="one">First vec.</param>
+        /// <param name="two">Second vec.</param>
+        /// <returns>Result.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3i operator -(Vector3i one, Vector3i two)
+        {
+            return new Vector3i(one.X - two.X, one.Y - two.Y, one.Z - two.Z);
+        }
+
+        /// <summary>
+        /// Mathematical operation.
         /// </summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Int scalar.</param>
         /// <returns>Result.</returns>
-        public static Vector2i operator *(Vector2i one, int two)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3i operator *(Vector3i one, int two)
         {
-            return new Vector2i(one.X * two, one.Y * two);
-        }
-
-        /// <summary>
-        /// Mathematical comparison.
-        /// </summary>
-        /// <param name="one">First vec.</param>
-        /// <param name="two">Int scalar.</param>
-        /// <returns>Result.</returns>
-        public static Vector2i operator /(Vector2i one, int two)
-        {
-            return new Vector2i(one.X / two, one.Y / two);
+            return new Vector3i(one.X * two, one.Y * two, one.Z * two);
         }
     }
 }

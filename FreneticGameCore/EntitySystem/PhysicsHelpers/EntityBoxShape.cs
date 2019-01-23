@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes;
 using BEPUphysics.CollisionShapes.ConvexShapes;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {

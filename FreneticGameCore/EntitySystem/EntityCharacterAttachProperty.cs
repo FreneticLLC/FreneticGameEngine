@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BEPUutilities;
 using BEPUphysics.Character;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.MathHelpers;
 using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore.EntitySystem
@@ -55,7 +56,7 @@ namespace FreneticGameCore.EntitySystem
         /// Gets the relative quaternion for this attachment.
         /// </summary>
         /// <returns>The relative quaternion.</returns>
-        public Quaternion GetRelativeQuaternion()
+        public MathHelpers.Quaternion GetRelativeQuaternion()
         {
             // TODO: Less complicated option?!
             Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, Character.ViewDirection, -Character.Down);
@@ -77,7 +78,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         /// <param name="relPos">The relative position.</param>
         /// <param name="relQuat">The relative quaternion.</param>
-        public void SetRelativeForEntity(Location relPos, Quaternion relQuat)
+        public void SetRelativeForEntity(Location relPos, MathHelpers.Quaternion relQuat)
         {
             // TODO: Less cheating! This can be resolved mathematically!
             Vector3 viewDir = Character.ViewDirection;
@@ -112,7 +113,7 @@ namespace FreneticGameCore.EntitySystem
         /// Fixes this entity's orientation based on its attachment.
         /// Does nothing for this property.
         /// </summary>
-        public override void FixOrientation(Quaternion orientation)
+        public override void FixOrientation(MathHelpers.Quaternion orientation)
         {
         }
 

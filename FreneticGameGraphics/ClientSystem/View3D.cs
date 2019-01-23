@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using FreneticGameGraphics.GraphicsHelpers;
 using System.Diagnostics;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 using FreneticGameGraphics.LightingSystem;
 using FreneticGameCore.UtilitySystems;
 

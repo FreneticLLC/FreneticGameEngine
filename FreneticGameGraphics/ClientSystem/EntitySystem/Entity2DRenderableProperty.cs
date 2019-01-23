@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameGraphics.ClientSystem.EntitySystem
 {
@@ -54,7 +55,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             }
             set
             {
-                Entity.SetOrientation(new FreneticGameCore.Quaternion() { Angle2D = value });
+                Entity.SetOrientation(new FreneticGameCore.MathHelpers.Quaternion() { Angle2D = value });
             }
         }
 

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameGraphics
 {
@@ -26,7 +27,7 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">The Core quaternion.</param>
         /// <returns>The OpenTK quaternion.</returns>
-        public static OpenTK.Quaternion ToOpenTK(this FreneticGameCore.Quaternion q)
+        public static OpenTK.Quaternion ToOpenTK(this FreneticGameCore.MathHelpers.Quaternion q)
         {
             return new OpenTK.Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
         }
@@ -36,7 +37,7 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">The Core quaternion.</param>
         /// <returns>The OpenTK quaternion D.</returns>
-        public static Quaterniond ToOpenTKDoubles(this FreneticGameCore.Quaternion q)
+        public static Quaterniond ToOpenTKDoubles(this FreneticGameCore.MathHelpers.Quaternion q)
         {
             return new Quaterniond(q.X, q.Y, q.Z, q.W);
         }
@@ -56,9 +57,9 @@ namespace FreneticGameGraphics
         /// </summary>
         /// <param name="q">The OpenTK quaternion.</param>
         /// <returns>The Core quaternion.</returns>
-        public static FreneticGameCore.Quaternion ToCore(this OpenTK.Quaternion q)
+        public static FreneticGameCore.MathHelpers.Quaternion ToCore(this OpenTK.Quaternion q)
         {
-            return new FreneticGameCore.Quaternion(q.X, q.Y, q.Z, q.W);
+            return new FreneticGameCore.MathHelpers.Quaternion(q.X, q.Y, q.Z, q.W);
         }
 
         /// <summary>

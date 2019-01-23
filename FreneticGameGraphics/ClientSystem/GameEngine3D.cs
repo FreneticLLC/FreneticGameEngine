@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore;
-using FreneticGameCore.Collision;
+using FreneticGameCore.MathHelpers;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;

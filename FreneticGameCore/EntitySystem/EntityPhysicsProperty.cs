@@ -20,6 +20,7 @@ using FreneticGameCore.EntitySystem.PhysicsHelpers;
 using FreneticGameCore.NetworkSystem;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.PhysicsSystem;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -96,7 +97,7 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// The starting orientation of the physics body.
         /// </summary>
-        private Quaternion InternalOrientation = Quaternion.Identity;
+        private MathHelpers.Quaternion InternalOrientation = MathHelpers.Quaternion.Identity;
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
@@ -257,7 +258,7 @@ namespace FreneticGameCore.EntitySystem
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public Quaternion Orientation
+        public MathHelpers.Quaternion Orientation
         {
             get
             {
@@ -369,7 +370,7 @@ namespace FreneticGameCore.EntitySystem
         /// Checks and handles an orientation update.
         /// </summary>
         /// <param name="q">The new orientation.</param>
-        public void OriCheck(Quaternion q)
+        public void OriCheck(MathHelpers.Quaternion q)
         {
             if (NoCheck)
             {
@@ -423,7 +424,7 @@ namespace FreneticGameCore.EntitySystem
             PhysicsWorld.Spawn(Entity, OriginalObject);
             Entity.OnTick += Tick;
             InternalPosition = Location.Zero;
-            InternalOrientation = Quaternion.Identity;
+            InternalOrientation = MathHelpers.Quaternion.Identity;
             TickUpdates();
         }
         

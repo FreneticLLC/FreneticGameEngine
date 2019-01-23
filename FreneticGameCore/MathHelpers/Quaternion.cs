@@ -5,11 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using FreneticGameCore.Collision;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents a 3D rotation, using 4 double-precision floating-point coordinates.

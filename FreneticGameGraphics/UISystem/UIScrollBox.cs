@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 using FreneticGameGraphics.ClientSystem;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;

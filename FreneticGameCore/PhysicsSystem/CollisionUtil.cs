@@ -18,8 +18,9 @@ using BEPUphysics.Entities;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using BEPUphysics.BroadPhaseEntries;
 using BEPUphysics.CollisionRuleManagement;
+using FreneticGameCore.MathHelpers;
 
-namespace FreneticGameCore.Collision
+namespace FreneticGameCore.PhysicsSystem
 {
     /// <summary>
     /// Represents the results of a collision trace.

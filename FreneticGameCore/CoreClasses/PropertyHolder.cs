@@ -20,6 +20,7 @@ using FreneticGameCore.Files;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 using FreneticGameCore.PhysicsSystem;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore
 {
@@ -174,10 +175,10 @@ namespace FreneticGameCore
                 Loader = (b) => Color4F.FromBytes(b),
                 SaveString = "C/color4f"
             });
-            TypeSavers.Add(typeof(Quaternion), new PropertySaverLoader()
+            TypeSavers.Add(typeof(MathHelpers.Quaternion), new PropertySaverLoader()
             {
-                Saver = (o) => ((Quaternion)o).ToDoubleBytes(),
-                Loader = (b) => Quaternion.FromDoubleBytes(b, 0),
+                Saver = (o) => ((MathHelpers.Quaternion)o).ToDoubleBytes(),
+                Loader = (b) => MathHelpers.Quaternion.FromDoubleBytes(b, 0),
                 SaveString = "C/quaternion"
             });
             // BEPU Helpers

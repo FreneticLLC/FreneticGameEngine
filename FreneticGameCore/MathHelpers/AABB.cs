@@ -10,9 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FreneticGameCore.MathHelpers;
 using System.Threading.Tasks;
 
-namespace FreneticGameCore.Collision
+namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents an Axis-Aligned Bounding Box.

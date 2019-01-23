@@ -18,6 +18,7 @@ using BEPUutilities.ResourceManagement;
 using BEPUutilities.DataStructures;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.MathHelpers;
 using FreneticGameCore.PhysicsSystem;
 
 namespace FreneticGameCore.PhysicsSystem
@@ -48,7 +49,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// </summary>
         /// <param name="q">The OpenTK quaternion.</param>
         /// <returns>The BEPU quaternion.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this Quaternion q)
+        public static BEPUutilities.Quaternion ToBEPU(this MathHelpers.Quaternion q)
         {
             return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
         }
@@ -58,9 +59,9 @@ namespace FreneticGameCore.PhysicsSystem
         /// </summary>
         /// <param name="q">The BEPU quaternion.</param>
         /// <returns>The Core quaternion.</returns>
-        public static Quaternion ToCore(this BEPUutilities.Quaternion q)
+        public static MathHelpers.Quaternion ToCore(this BEPUutilities.Quaternion q)
         {
-            return new Quaternion(q.X, q.Y, q.Z, q.W);
+            return new MathHelpers.Quaternion(q.X, q.Y, q.Z, q.W);
         }
 
         /// <summary>

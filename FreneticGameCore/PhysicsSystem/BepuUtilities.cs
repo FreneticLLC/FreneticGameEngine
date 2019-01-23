@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BEPUutilities;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using FreneticGameCore.MathHelpers;
 
 namespace FreneticGameCore.PhysicsSystem
 {

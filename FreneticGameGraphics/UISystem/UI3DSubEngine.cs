@@ -16,6 +16,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 using FreneticGameGraphics.GraphicsHelpers;
 
 namespace FreneticGameGraphics.UISystem
@@ -41,7 +42,7 @@ namespace FreneticGameGraphics.UISystem
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new FreneticGameCore.Collision.Vector2i(Position.Width, Position.Height)
+                SubSize = new Vector2i(Position.Width, Position.Height)
             };
             SubEngine.Client = pos.View.Client;
             if (alphaBack)

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameGraphics.AudioSystem.EnforcerSystem;
 using FreneticGameCore;
+using FreneticGameCore.MathHelpers;
 using OpenTK;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
