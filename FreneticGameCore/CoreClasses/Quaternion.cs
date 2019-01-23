@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using FreneticGameCore.Collision;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -352,23 +353,68 @@ namespace FreneticGameCore
 
         /// <summary>
         /// Reads the byte array to a Quaternion object.
+        /// Expects 16 bytes.
+        /// Inverts <see cref="ToFloatBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="bytes">The bytes to read.</param>
+        /// <param name="index">The index to start at.</param>
+        /// <returns>the location object.</returns>
+        public static Quaternion FromFloatBytes(byte[] bytes, int index)
+        {
+            return new Quaternion(
+                PrimitiveConversionHelper.BytesToFloat32(bytes, index),
+                PrimitiveConversionHelper.BytesToFloat32(bytes, index + 4),
+                PrimitiveConversionHelper.BytesToFloat32(bytes, index + (4 + 4)),
+                PrimitiveConversionHelper.BytesToFloat32(bytes, index + (4 + 4 + 4))
+                );
+        }
+
+        /// <summary>
+        /// Copies the quaterion to a byte array.
+        /// Contains 16 bytes.
+        /// Inverts <see cref="FromFloatBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
+        public void ToFloatBytes(byte[] outputBytes, int offset)
+        {
+            PrimitiveConversionHelper.Float32ToBytes((float)X, outputBytes, offset);
+            PrimitiveConversionHelper.Float32ToBytes((float)Y, outputBytes, offset + 4);
+            PrimitiveConversionHelper.Float32ToBytes((float)Z, outputBytes, offset + (4 + 4));
+            PrimitiveConversionHelper.Float32ToBytes((float)W, outputBytes, offset + (4 + 4 + 4));
+        }
+
+        /// <summary>
+        /// Reads the byte array to a Quaternion object.
         /// Expects 32 bytes.
-        /// Inverts <see cref="ToDoubleBytes"/>.
+        /// Inverts <see cref="ToDoubleBytes(byte[], int)"/>.
         /// </summary>
         /// <param name="bytes">The bytes to read.</param>
         /// <param name="index">The index to start at.</param>
         /// <returns>the location object.</returns>
         public static Quaternion FromDoubleBytes(byte[] bytes, int index)
         {
-            if (bytes.Length - index < 32)
-            {
-                return Identity; // TODO: Exception?
-            }
-            double X = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index, 8));
-            double Y = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8, 8));
-            double Z = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8 + 8, 8));
-            double W = Utilities.BytesToDouble(Utilities.BytesPartial(bytes, index + 8 + 8 + 8, 8));
-            return new Quaternion(X, Y, Z, W);
+            return new Quaternion(
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index),
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index + 8),
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index + (8 + 8)),
+                PrimitiveConversionHelper.BytesToDouble64(bytes, index + (8 + 8 + 8))
+                );
+        }
+
+        /// <summary>
+        /// Copies the quaterion to a byte array.
+        /// Contains 32 bytes.
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
+        public void ToDoubleBytes(byte[] outputBytes, int offset)
+        {
+            PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset);
+            PrimitiveConversionHelper.Double64ToBytes(Y, outputBytes, offset + 8);
+            PrimitiveConversionHelper.Double64ToBytes(Z, outputBytes, offset + (8 + 8));
+            PrimitiveConversionHelper.Double64ToBytes(W, outputBytes, offset + (8 + 8 + 8));
         }
 
         /// <summary>
@@ -376,13 +422,11 @@ namespace FreneticGameCore
         /// Contains 32 bytes.
         /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
+        /// <returns>The byte array.</returns>
         public byte[] ToDoubleBytes()
         {
             byte[] toret = new byte[32];
-            Utilities.DoubleToBytes(X).CopyTo(toret, 0);
-            Utilities.DoubleToBytes(Y).CopyTo(toret, 8);
-            Utilities.DoubleToBytes(Z).CopyTo(toret, 8 + 8);
-            Utilities.DoubleToBytes(W).CopyTo(toret, 8 + 8 + 8);
+            ToDoubleBytes(toret, 0);
             return toret;
         }
 

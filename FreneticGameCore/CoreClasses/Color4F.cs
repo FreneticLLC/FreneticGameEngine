@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -179,25 +180,38 @@ namespace FreneticGameCore
         public byte[] ToBytes()
         {
             byte[] b = new byte[16];
-            Utilities.FloatToBytes(R).CopyTo(b, 0);
-            Utilities.FloatToBytes(G).CopyTo(b, 4);
-            Utilities.FloatToBytes(B).CopyTo(b, 8);
-            Utilities.FloatToBytes(A).CopyTo(b, 12);
+            ToBytes(b, 0);
             return b;
         }
 
         /// <summary>
+        /// Returns a 16-byte set representation of this color.
+        /// Inverts <see cref="FromBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
+        public void ToBytes(byte[] outputBytes, int offset)
+        {
+            PrimitiveConversionHelper.Float32ToBytes(R, outputBytes, offset);
+            PrimitiveConversionHelper.Float32ToBytes(G, outputBytes, offset + 4);
+            PrimitiveConversionHelper.Float32ToBytes(B, outputBytes, offset + (4 + 4));
+            PrimitiveConversionHelper.Float32ToBytes(A, outputBytes, offset + (4 + 4 + 4));
+        }
+
+        /// <summary>
         /// Converts a 16-byte set to a color.
+        /// Inverts <see cref="ToBytes(byte[], int)"/>.
         /// </summary>
         /// <param name="b">The byte input.</param>
+        /// <param name="offset">The offset in the byte array.</param>
         /// <returns>The color.</returns>
-        public static Color4F FromBytes(byte[] b)
+        public static Color4F FromBytes(byte[] b, int offset = 0)
         {
             return new Color4F(
-                Utilities.BytesToFloat(Utilities.BytesPartial(b, 0, 4)),
-                Utilities.BytesToFloat(Utilities.BytesPartial(b, 4, 4)),
-                Utilities.BytesToFloat(Utilities.BytesPartial(b, 8, 4)),
-                Utilities.BytesToFloat(Utilities.BytesPartial(b, 12, 4))
+                PrimitiveConversionHelper.BytesToFloat32(b, offset),
+                PrimitiveConversionHelper.BytesToFloat32(b, offset + 4),
+                PrimitiveConversionHelper.BytesToFloat32(b, offset + (4 + 4)),
+                PrimitiveConversionHelper.BytesToFloat32(b, offset + (4 + 4 + 4))
                 );
         }
 

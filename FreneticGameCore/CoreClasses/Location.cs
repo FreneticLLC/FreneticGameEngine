@@ -518,6 +518,7 @@ namespace FreneticGameCore
         /// Contains 24 bytes.
         /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
+        /// <returns>The bytes.</returns>
         public byte[] ToDoubleBytes()
         {
             byte[] toret = new byte[24];
@@ -530,6 +531,8 @@ namespace FreneticGameCore
         /// Copies 24 bytes.
         /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
         public void ToDoubleBytes(byte[] outputBytes, int offset)
         {
             PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset + 0);

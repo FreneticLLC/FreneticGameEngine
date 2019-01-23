@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using FreneticGameCore;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGETests
 {
@@ -54,19 +55,19 @@ namespace FGETests
             }
             else
             {
-                byte[] bI = Utilities.IntToBytes(1 + 512);
+                byte[] bI = PrimitiveConversionHelper.Int32ToBytes(1 + 512);
                 Assert.That(bI.Length == 4, "Bit length (int->bytes)");
                 Assert.That(bI[0] == 1, "Bit contents (int->bytes)[0]");
                 Assert.That(bI[1] == 2, "Bit contents (int->bytes)[1]");
                 Assert.That(bI[2] == 0, "Bit contents (int->bytes)[2]");
                 Assert.That(bI[3] == 0, "Bit contents (int->bytes)[3]");
-                byte[] bF = Utilities.FloatToBytes(127.125f);
+                byte[] bF = PrimitiveConversionHelper.Float32ToBytes(127.125f);
                 Assert.That(bF.Length == 4, "Bit length (float->bytes)");
                 Assert.That(bF[0] == 0, "Bit contents (float->bytes)[0]");
                 Assert.That(bF[1] == 64, "Bit contents (float->bytes)[1]");
                 Assert.That(bF[2] == 254, "Bit contents (float->bytes)[2]");
                 Assert.That(bF[3] == 66, "Bit contents (float->bytes)[3]");
-                Assert.That(Utilities.BytesToDouble(Utilities.DoubleToBytes(1.73e5)) == 1.73e5, "Double parseback validity");
+                Assert.That(PrimitiveConversionHelper.BytesToDouble64(PrimitiveConversionHelper.Double64ToBytes(1.73e5)) == 1.73e5, "Double parseback validity");
             }
         }
     }

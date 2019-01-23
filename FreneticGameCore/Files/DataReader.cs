@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.Files
 {
@@ -25,6 +26,8 @@ namespace FreneticGameCore.Files
         /// The internal stream.
         /// </summary>
         public DataStream Internal;
+
+        private byte[] HelperBytes = new byte[32];
 
         /// <summary>
         /// Constructs the data reader.
@@ -63,6 +66,7 @@ namespace FreneticGameCore.Files
         /// Read a set of bytes.
         /// </summary>
         /// <param name="count">The number of bytes.</param>
+        /// <returns>The read bytes.</returns>
         public byte[] ReadBytes(int count)
         {
             byte[] b = new byte[count];
@@ -71,6 +75,20 @@ namespace FreneticGameCore.Files
                 b[i] = ReadByte();
             }
             return b;
+        }
+
+        /// <summary>
+        /// Read a set of bytes.
+        /// </summary>
+        /// <param name="outputBytes">The byte array to read into.</param>
+        /// <param name="offset">The starting offset.</param>
+        /// <param name="count">The number of bytes.</param>
+        public void ReadBytes(byte[] outputBytes, int offset, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                outputBytes[offset + i] = ReadByte();
+            }
         }
 
         /// <summary>
@@ -101,7 +119,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public Location ReadLocation()
         {
-            return Location.FromDoubleBytes(ReadBytes(24), 0);
+            ReadBytes(HelperBytes, 0, 24);
+            return Location.FromDoubleBytes(HelperBytes, 0);
         }
 
         /// <summary>
@@ -120,7 +139,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public Quaternion ReadQuaternion()
         {
-            return Quaternion.FromDoubleBytes(ReadBytes(32), 0);
+            ReadBytes(HelperBytes, 0, 32);
+            return Quaternion.FromDoubleBytes(HelperBytes, 0);
         }
 
         /// <summary>
@@ -158,7 +178,8 @@ namespace FreneticGameCore.Files
         /// <returns></returns>
         public char ReadChar()
         {
-            return Utilities.BytesToChar(ReadBytes(2));
+            ReadBytes(HelperBytes, 0, 2);
+            return (char) PrimitiveConversionHelper.BytesToUShort16(HelperBytes);
         }
 
         /// <summary>
@@ -166,7 +187,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public short ReadShort()
         {
-            return Utilities.BytesToShort(ReadBytes(2));
+            ReadBytes(HelperBytes, 0, 2);
+            return PrimitiveConversionHelper.BytesToShort16(HelperBytes);
         }
 
         /// <summary>
@@ -174,7 +196,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public ushort ReadUShort()
         {
-            return Utilities.BytesToUShort(ReadBytes(2));
+            ReadBytes(HelperBytes, 0, 2);
+            return PrimitiveConversionHelper.BytesToUShort16(HelperBytes);
         }
 
         /// <summary>
@@ -182,7 +205,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public int ReadInt()
         {
-            return Utilities.BytesToInt(ReadBytes(4));
+            ReadBytes(HelperBytes, 0, 4);
+            return PrimitiveConversionHelper.BytesToInt32(HelperBytes);
         }
 
         /// <summary>
@@ -190,7 +214,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public uint ReadUInt()
         {
-            return Utilities.BytesToUInt(ReadBytes(4));
+            ReadBytes(HelperBytes, 0, 4);
+            return PrimitiveConversionHelper.BytesToUInt32(HelperBytes);
         }
 
         /// <summary>
@@ -198,7 +223,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public long ReadLong()
         {
-            return Utilities.BytesToLong(ReadBytes(8));
+            ReadBytes(HelperBytes, 0, 8);
+            return PrimitiveConversionHelper.BytesToLong64(HelperBytes);
         }
 
         /// <summary>
@@ -206,7 +232,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public ulong ReadULong()
         {
-            return Utilities.BytesToULong(ReadBytes(8));
+            ReadBytes(HelperBytes, 0, 8);
+            return PrimitiveConversionHelper.BytesToULong64(HelperBytes);
         }
 
         /// <summary>
@@ -214,7 +241,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public float ReadFloat()
         {
-            return Utilities.BytesToFloat(ReadBytes(4));
+            ReadBytes(HelperBytes, 0, 4);
+            return PrimitiveConversionHelper.BytesToFloat32(HelperBytes);
         }
 
         /// <summary>
@@ -222,7 +250,8 @@ namespace FreneticGameCore.Files
         /// </summary>
         public double ReadDouble()
         {
-            return Utilities.BytesToDouble(ReadBytes(8));
+            ReadBytes(HelperBytes, 0, 8);
+            return PrimitiveConversionHelper.BytesToDouble64(HelperBytes);
         }
 
         /// <summary>
@@ -230,7 +259,12 @@ namespace FreneticGameCore.Files
         /// </summary>
         public string ReadString(int length)
         {
-            return FileHandler.DefaultEncoding.GetString(ReadBytes(length));
+            if (length <= 32)
+            {
+                ReadBytes(HelperBytes, 0, length);
+                return FileHandler.DefaultEncoding.GetString(HelperBytes, 0, length);
+            }
+            return FileHandler.DefaultEncoding.GetString(ReadBytes(length), 0, length);
         }
 
         /// <summary>

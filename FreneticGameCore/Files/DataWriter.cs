@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.Files
 {
@@ -25,6 +26,8 @@ namespace FreneticGameCore.Files
         /// The internal stream.
         /// </summary>
         public DataStream Internal;
+
+        private byte[] HelperBytes = new byte[32];
 
         /// <summary>
         /// Constructs the data writer.
@@ -41,7 +44,8 @@ namespace FreneticGameCore.Files
         /// <param name="loc">The data.</param>
         public void WriteLocation(Location loc)
         {
-            Internal.Write(loc.ToDoubleBytes(), 0, 24);
+            loc.ToDoubleBytes(HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 24);
         }
 
         /// <summary>
@@ -61,7 +65,8 @@ namespace FreneticGameCore.Files
         /// <param name="quat">The data.</param>
         public void WriteQuaternion(Quaternion quat)
         {
-            Internal.Write(quat.ToDoubleBytes(), 0, 32);
+            quat.ToDoubleBytes(HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 32);
         }
 
         /// <summary>
@@ -138,7 +143,8 @@ namespace FreneticGameCore.Files
         /// <param name="x"></param>
         public void WriteChar(char x)
         {
-            Internal.Write(Utilities.CharToBytes(x), 0, 2);
+            PrimitiveConversionHelper.UShort16ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 2);
         }
 
         /// <summary>
@@ -147,7 +153,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteShort(short x)
         {
-            Internal.Write(Utilities.ShortToBytes(x), 0, 2);
+            PrimitiveConversionHelper.Short16ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 2);
         }
 
         /// <summary>
@@ -156,7 +163,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteUShort(ushort x)
         {
-            Internal.Write(Utilities.UShortToBytes(x), 0, 2);
+            PrimitiveConversionHelper.UShort16ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 2);
         }
 
         /// <summary>
@@ -165,7 +173,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteInt(int x)
         {
-            Internal.Write(Utilities.IntToBytes(x), 0, 4);
+            PrimitiveConversionHelper.Int32ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 4);
         }
 
         /// <summary>
@@ -174,7 +183,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteUInt(uint x)
         {
-            Internal.Write(Utilities.UIntToBytes(x), 0, 4);
+            PrimitiveConversionHelper.UInt32ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 4);
         }
 
         /// <summary>
@@ -183,7 +193,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteFloat(float x)
         {
-            Internal.Write(Utilities.FloatToBytes(x), 0, 4);
+            PrimitiveConversionHelper.Float32ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 4);
         }
 
         /// <summary>
@@ -192,7 +203,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteDouble(double x)
         {
-            Internal.Write(Utilities.DoubleToBytes(x), 0, 8);
+            PrimitiveConversionHelper.Double64ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 8);
         }
 
         /// <summary>
@@ -201,7 +213,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteLong(long x)
         {
-            Internal.Write(Utilities.LongToBytes(x), 0, 8);
+            PrimitiveConversionHelper.Long64ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 8);
         }
 
         /// <summary>
@@ -210,7 +223,8 @@ namespace FreneticGameCore.Files
         /// <param name="x">The data.</param>
         public void WriteULong(ulong x)
         {
-            Internal.Write(Utilities.ULongToBytes(x), 0, 8);
+            PrimitiveConversionHelper.ULong64ToBytes(x, HelperBytes, 0);
+            Internal.Write(HelperBytes, 0, 8);
         }
 
         /// <summary>
