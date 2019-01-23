@@ -17,6 +17,7 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameCore;
+using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.Files;
 using OggDecoder;

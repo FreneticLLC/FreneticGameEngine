@@ -18,7 +18,7 @@ using FreneticGameCore.StackNoteSystem;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// A helper wrapper for the System Console.

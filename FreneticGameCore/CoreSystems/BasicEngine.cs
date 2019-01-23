@@ -16,7 +16,7 @@ using FreneticGameCore.StackNoteSystem;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.PhysicsSystem;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Represents the common code shared by a server and client engine.

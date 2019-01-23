@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using FreneticGameCore.Files;
 using FreneticGameCore.UtilitySystems;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.NetworkSystem
 {

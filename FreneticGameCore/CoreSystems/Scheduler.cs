@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FreneticGameCore.UtilitySystems;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Helper to schedule sync or async tasks.

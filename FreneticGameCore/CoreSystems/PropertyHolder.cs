@@ -22,7 +22,7 @@ using FreneticUtilities.FreneticToolkit;
 using FreneticGameCore.PhysicsSystem;
 using FreneticGameCore.MathHelpers;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Represents a helper to save or load an object.

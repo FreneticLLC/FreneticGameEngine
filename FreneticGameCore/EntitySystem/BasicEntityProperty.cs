@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem
 {

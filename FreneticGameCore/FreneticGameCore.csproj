@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelSystems\AnimationEngine.cs" />
-    <Compile Include="CoreClasses\BasicEngine.cs" />
+    <Compile Include="CoreSystems\BasicEngine.cs" />
     <Compile Include="PhysicsSystem\CollisionUtil.cs" />
     <Compile Include="MathHelpers\Vector2i.cs" />
     <Compile Include="MathHelpers\Vector3i.cs" />
@@ -83,10 +83,10 @@
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityCharacterShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityShapeHelper.cs" />
-    <Compile Include="CoreClasses\FreneticEvent.cs" />
+    <Compile Include="CoreSystems\FreneticEvent.cs" />
     <Compile Include="MathHelpers\Frustum.cs" />
     <Compile Include="EntitySystem\EntityPhysicsProperty.cs" />
-    <Compile Include="CoreClasses\LanguageEngine.cs" />
+    <Compile Include="CoreSystems\LanguageEngine.cs" />
     <Compile Include="ModelSystems\Model3D.cs" />
     <Compile Include="ModelSystems\ModelHandler.cs" />
     <Compile Include="NetworkSystem\DataPacketIn.cs" />
@@ -106,11 +106,11 @@
     <Compile Include="UtilitySystems\LockedLinkedList.cs" />
     <Compile Include="UtilitySystems\MTRandom.cs" />
     <Compile Include="UtilitySystems\PriorityQueue.cs" />
-    <Compile Include="CoreClasses\Program.cs" />
+    <Compile Include="CoreSystems\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CoreClasses\PropertyHolder.cs" />
+    <Compile Include="CoreSystems\PropertyHolder.cs" />
     <Compile Include="MathHelpers\Quaternion.cs" />
-    <Compile Include="CoreClasses\Scheduler.cs" />
+    <Compile Include="CoreSystems\Scheduler.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntity.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysicsCharacterProperty.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntityPhysics2DLimitProperty.cs" />
@@ -124,7 +124,7 @@
     <Compile Include="StackNoteSystem\StackNote.cs" />
     <Compile Include="StackNoteSystem\StackNoteHelper.cs" />
     <Compile Include="StackNoteSystem\StackNoteSet.cs" />
-    <Compile Include="CoreClasses\SysConsole.cs" />
+    <Compile Include="CoreSystems\SysConsole.cs" />
     <Compile Include="PhysicsSystem\BepuExtensions.cs" />
     <Compile Include="UtilitySystems\Utilities.cs" />
   </ItemGroup>

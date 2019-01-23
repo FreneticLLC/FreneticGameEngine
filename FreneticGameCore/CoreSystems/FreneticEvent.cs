@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Represents an event within the Frenetic Game Engine.

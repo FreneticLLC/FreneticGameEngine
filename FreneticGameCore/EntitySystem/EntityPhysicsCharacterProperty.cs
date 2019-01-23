@@ -17,6 +17,7 @@ using BEPUphysics.Character;
 using BEPUutilities.DataStructures;
 using BEPUphysics.NarrowPhaseSystems.Pairs;
 using BEPUphysics.Materials;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem
 {

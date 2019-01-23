@@ -16,7 +16,7 @@ using FreneticGameCore.Files;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Handles internationalization of text (translation to other languages).

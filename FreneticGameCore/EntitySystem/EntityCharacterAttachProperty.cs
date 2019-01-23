@@ -8,6 +8,7 @@ using BEPUphysics.Character;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.PhysicsSystem;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem
 {   

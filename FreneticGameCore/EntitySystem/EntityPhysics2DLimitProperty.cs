@@ -18,6 +18,7 @@ using BEPUphysics.Constraints.SingleEntity;
 using BEPUphysics.Constraints.SolverGroups;
 using BEPUphysics.Constraints.TwoEntity;
 using BEPUphysics.Constraints.TwoEntity.Joints;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem
 {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics.Character;
 using FreneticGameCore.MathHelpers;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem
 {

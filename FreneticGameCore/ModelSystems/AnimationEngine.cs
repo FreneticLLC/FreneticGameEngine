@@ -17,6 +17,7 @@ using BEPUutilities;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.MathHelpers;
 using FreneticUtilities.FreneticToolkit;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.ModelSystems
 {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes;
 using BEPUphysics.CollisionShapes.ConvexShapes;
 using BEPUutilities;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {

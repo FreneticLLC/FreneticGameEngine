@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.NetworkSystem
 {

@@ -16,6 +16,7 @@ using BEPUphysics.CollisionShapes.ConvexShapes;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.PhysicsSystem;
 using FreneticGameCore.MathHelpers;
+using FreneticGameCore.CoreSystems;
 
 namespace FreneticGameCore.EntitySystem.PhysicsHelpers
 {

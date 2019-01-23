@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using FreneticGameCore;
+using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.UtilitySystems;
 #if WINDOWS

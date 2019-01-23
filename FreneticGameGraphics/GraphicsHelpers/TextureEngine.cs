@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
+using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.Files;
 using System.Diagnostics.CodeAnalysis;

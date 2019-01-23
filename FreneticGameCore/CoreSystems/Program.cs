@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Globalization;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.CoreSystems
 {
     /// <summary>
     /// Represents the current program abstractly.
