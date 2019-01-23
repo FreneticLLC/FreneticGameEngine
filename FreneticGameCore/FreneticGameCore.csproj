@@ -61,7 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreClasses\AnimationEngine.cs" />
+    <Compile Include="ModelSystems\AnimationEngine.cs" />
     <Compile Include="CoreClasses\BasicEngine.cs" />
     <Compile Include="PhysicsSystem\CollisionUtil.cs" />
     <Compile Include="MathHelpers\Vector2i.cs" />
@@ -87,8 +87,8 @@
     <Compile Include="MathHelpers\Frustum.cs" />
     <Compile Include="EntitySystem\EntityPhysicsProperty.cs" />
     <Compile Include="CoreClasses\LanguageEngine.cs" />
-    <Compile Include="CoreClasses\Model3D.cs" />
-    <Compile Include="CoreClasses\ModelHandler.cs" />
+    <Compile Include="ModelSystems\Model3D.cs" />
+    <Compile Include="ModelSystems\ModelHandler.cs" />
     <Compile Include="NetworkSystem\DataPacketIn.cs" />
     <Compile Include="NetworkSystem\GameNetwork.cs" />
     <Compile Include="NetworkSystem\NetworkableData.cs" />

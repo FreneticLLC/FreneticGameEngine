@@ -20,6 +20,7 @@ using FreneticGameCore.MathHelpers;
 using FreneticGameCore.Files;
 using FreneticGameGraphics.GraphicsHelpers;
 using FreneticGameCore.StackNoteSystem;
+using FreneticGameCore.ModelSystems;
 
 namespace FreneticGameGraphics.ClientSystem
 {

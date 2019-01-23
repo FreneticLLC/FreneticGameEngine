@@ -17,7 +17,7 @@ using BEPUphysics.CollisionShapes.ConvexShapes;
 using FreneticGameCore.Files;
 using FreneticUtilities.FreneticExtensions;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.ModelSystems
 {
     /// <summary>
     /// Handles abstract 3D models. Can be purposed for both collision systems and rendering.

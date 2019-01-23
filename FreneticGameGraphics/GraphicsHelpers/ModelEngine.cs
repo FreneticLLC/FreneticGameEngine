@@ -20,6 +20,7 @@ using FreneticGameCore.Files;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameCore.ConsoleHelpers;
 using FreneticUtilities.FreneticExtensions;
+using FreneticGameCore.ModelSystems;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {

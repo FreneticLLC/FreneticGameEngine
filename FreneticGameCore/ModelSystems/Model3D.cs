@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUutilities;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.ModelSystems
 {
     /// <summary>
     /// Represents an abstract 3D model.

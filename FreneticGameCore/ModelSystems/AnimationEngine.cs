@@ -18,7 +18,7 @@ using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.MathHelpers;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.ModelSystems
 {
     /// <summary>
     /// System for animations.
