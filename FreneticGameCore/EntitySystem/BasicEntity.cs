@@ -197,7 +197,7 @@ namespace FreneticGameCore.EntitySystem
         /// <returns>The string list.</returns>
         public string DebugPropList()
         {
-            return string.Join(" | ", EnumerateAllProperties().ConvertStream((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().ConvertStream((k) => k.Key + ": " + k.Value)) + "}"));
+            return string.Join(" | ", EnumerateAllProperties().Select((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().Select((k) => k.Key + ": " + k.Value)) + "}"));
         }
 
         /// <summary>

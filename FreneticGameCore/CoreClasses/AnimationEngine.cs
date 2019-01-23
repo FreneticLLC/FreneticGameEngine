@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore.Files;
+using FreneticUtilities.FreneticExtensions;
 using BEPUutilities;
 
 namespace FreneticGameCore

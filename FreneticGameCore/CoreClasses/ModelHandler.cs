@@ -15,6 +15,7 @@ using BEPUutilities;
 using BEPUphysics.CollisionShapes;
 using BEPUphysics.CollisionShapes.ConvexShapes;
 using FreneticGameCore.Files;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameCore
 {

@@ -26,68 +26,6 @@ namespace FreneticGameCore
     public static class SystemExtensions
     {
         /// <summary>
-        /// Rapidly converts a string to a lowercase representation.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <returns>A lowercase version.</returns>
-        public static string ToLowerFast(this string input)
-        {
-            char[] dt = input.ToCharArray();
-            for (int i = 0; i < dt.Length; i++)
-            {
-                if (dt[i] >= 'A' && dt[i] <= 'Z')
-                {
-                    dt[i] = (char)(dt[i] - ('A' - 'a'));
-                }
-            }
-            return new string(dt);
-        }
-
-        /// <summary>
-        /// Returns whether the string starts with a null character.
-        /// </summary>
-        /// <param name="input">The input string.</param>
-        /// <returns>A boolean.</returns>
-        public static bool StartsWithNull(this string input)
-        {
-            return input.Length > 0 && input[0] == '\0';
-        }
-
-        /// <summary>
-        /// Quickly split a string.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <param name="splitter">What to split it by.</param>
-        /// <param name="count">The maximum number of times to split it.</param>
-        /// <returns>The split string pieces.</returns>
-        public static string[] SplitFast(this string input, char splitter, int count = int.MaxValue)
-        {
-            int len = input.Length;
-            int c = 0;
-            for (int i = 0; i < len; i++)
-            {
-                if (input[i] == splitter)
-                {
-                    c++;
-                }
-            }
-            c = ((c > count) ? count : c);
-            string[] res = new string[c + 1];
-            int start = 0;
-            int x = 0;
-            for (int i = 0; i < len && x < c; i++)
-            {
-                if (input[i] == splitter)
-                {
-                    res[x++] = input.Substring(start, i - start);
-                    start = i + 1;
-                }
-            }
-            res[x] = input.Substring(start);
-            return res;
-        }
-
-        /// <summary>
         /// Get the angle around an axis for a specific quaternion.
         /// </summary>
         /// <param name="rotation">The quaternion.</param>
@@ -121,84 +59,6 @@ namespace FreneticGameCore
         public static Quaternion ToCore(this BEPUutilities.Quaternion q)
         {
             return new Quaternion(q.X, q.Y, q.Z, q.W);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="TextElementEnumerator"/> to an Enumerable.
-        /// </summary>
-        /// <typeparam name="T">The expected Enumerable type.</typeparam>
-        /// <param name="enumerator">The original Enumerator.</param>
-        /// <returns>The enumerable.</returns>
-        public static IEnumerable<T> AsEnumerable<T>(this TextElementEnumerator enumerator) where T: class
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current as T;
-            }
-        }
-
-        /// <summary>
-        /// Gets the part of a string before a specified portion.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <param name="match">The end marker.</param>
-        /// <returns>The prior portion.</returns>
-        public static string Before(this string input, string match)
-        {
-            int ind = input.IndexOf(match);
-            if (ind < 0)
-            {
-                return input;
-            }
-
-            return input.Substring(0, ind);
-        }
-
-        /// <summary>
-        /// Gets the parts of a string before and after a specified portion.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <param name="match">The end marker.</param>
-        /// <param name="after">The output of the latter portion.</param>
-        /// <returns>The prior portion.</returns>
-        public static string BeforeAndAfter(this string input, string match, out string after)
-        {
-            int ind = input.IndexOf(match);
-            if (ind < 0)
-            {
-                after = "";
-                return input;
-            }
-            after = input.Substring(ind + match.Length);
-            return input.Substring(0, ind);
-        }
-
-        /// <summary>
-        /// Gets the part of a string after a specified portion.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <param name="match">The end marker.</param>
-        /// <returns>The latter portion.</returns>
-        public static string After(this string input, string match)
-        {
-            int ind = input.IndexOf(match);
-            if (ind < 0)
-            {
-                return input;
-            }
-            return input.Substring(ind + match.Length);
-        }
-
-        /// <summary>
-        /// Gets a Gaussian random value from a Random object.
-        /// </summary>
-        /// <param name="input">The random object.</param>
-        /// <returns>The Gaussian value.</returns>
-        public static double NextGaussian(this Random input)
-        {
-            double u1 = input.NextDouble();
-            double u2 = input.NextDouble();
-            return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
         }
 
         /// <summary>
@@ -264,48 +124,6 @@ namespace FreneticGameCore
             };
             CommonResources.GiveBack(triangles);
             return new ConvexHullShape(newlist, csd);
-        }
-
-        /// <summary>
-        /// Converts a stream of data to another type.
-        /// </summary>
-        /// <typeparam name="T">The input type.</typeparam>
-        /// <typeparam name="T2">The output type.</typeparam>
-        /// <param name="inp">The input stream.</param>
-        /// <param name="conversion">The conversion function.</param>
-        /// <returns>The output stream.</returns>
-        public static IEnumerable<T2> ConvertStream<T, T2>(this IEnumerable<T> inp, Func<T, T2> conversion)
-        {
-            foreach (T a in inp)
-            {
-                yield return conversion(a);
-            }
-        }
-
-        /// <summary>
-        /// Returns an array where additional objects are joined into the array.
-        /// </summary>
-        /// <typeparam name="T">The array type.</typeparam>
-        /// <param name="arr">The main array.</param>
-        /// <param name="other">The additional objects.</param>
-        /// <returns>The joined result.</returns>
-        public static T[] JoinWith<T>(this T[] arr, params T[] other)
-        {
-            T[] res = new T[arr.Length + other.Length];
-            arr.CopyTo(res, 0);
-            other.CopyTo(res, arr.Length);
-            return res;
-        }
-
-        /// <summary>
-        /// Returns whether a stream is empty. Invert of "Any()" call.
-        /// </summary>
-        /// <typeparam name="T">The stream type.</typeparam>
-        /// <param name="inp">The input stream.</param>
-        /// <returns>Whether the stream is empty.</returns>
-        public static bool IsEmpty<T>(this IEnumerable<T> inp)
-        {
-            return !inp.Any();
         }
     }
 }

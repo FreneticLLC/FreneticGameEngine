@@ -18,6 +18,7 @@ using FreneticGameCore;
 using FreneticGameCore.Files;
 using System.Drawing;
 using System.Globalization;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {

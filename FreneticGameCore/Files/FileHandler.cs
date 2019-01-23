@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using LZ4;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameCore.Files
 {

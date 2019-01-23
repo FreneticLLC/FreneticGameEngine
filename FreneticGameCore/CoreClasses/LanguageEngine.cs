@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticDataSyntax;
 using FreneticGameCore.Files;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameCore
 {

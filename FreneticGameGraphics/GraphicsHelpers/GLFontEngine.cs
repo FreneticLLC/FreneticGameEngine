@@ -20,6 +20,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Drawing.Imaging;
 using System.Globalization;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {

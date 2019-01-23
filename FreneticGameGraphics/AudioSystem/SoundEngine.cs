@@ -19,6 +19,7 @@ using FreneticGameGraphics.ClientSystem;
 using FreneticGameCore;
 using FreneticGameCore.Files;
 using OggDecoder;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameGraphics.AudioSystem
 {

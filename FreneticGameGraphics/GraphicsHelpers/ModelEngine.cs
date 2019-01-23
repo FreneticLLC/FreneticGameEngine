@@ -19,6 +19,7 @@ using FreneticGameCore.Files;
 using FreneticGameCore.Collision;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameCore.ConsoleHelpers;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
