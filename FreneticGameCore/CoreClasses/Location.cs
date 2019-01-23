@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using FreneticGameCore.Collision;
 using FreneticUtilities.FreneticExtensions;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {

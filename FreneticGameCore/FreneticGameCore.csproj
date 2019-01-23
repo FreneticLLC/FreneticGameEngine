@@ -102,9 +102,9 @@
     <Compile Include="Files\FileHandler.cs" />
     <Compile Include="Files\UnknownFileException.cs" />
     <Compile Include="CoreClasses\Location.cs" />
-    <Compile Include="CoreClasses\LockedLinkedList.cs" />
-    <Compile Include="CoreClasses\MTRandom.cs" />
-    <Compile Include="CoreClasses\PriorityQueue.cs" />
+    <Compile Include="UtilitySystems\LockedLinkedList.cs" />
+    <Compile Include="UtilitySystems\MTRandom.cs" />
+    <Compile Include="UtilitySystems\PriorityQueue.cs" />
     <Compile Include="CoreClasses\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CoreClasses\PropertyHolder.cs" />
@@ -119,13 +119,13 @@
     <Compile Include="ServerSystem\EntitySystem\ServerEntitySimpleAttachProperty.cs" />
     <Compile Include="ServerSystem\ServerEngine.cs" />
     <Compile Include="ServerSystem\ServerGameInstance.cs" />
-    <Compile Include="CoreClasses\SimplexNoise.cs" />
+    <Compile Include="UtilitySystems\SimplexNoise.cs" />
     <Compile Include="StackNoteSystem\StackNote.cs" />
     <Compile Include="StackNoteSystem\StackNoteHelper.cs" />
     <Compile Include="StackNoteSystem\StackNoteSet.cs" />
     <Compile Include="CoreClasses\SysConsole.cs" />
-    <Compile Include="CoreClasses\SystemExtensions.cs" />
-    <Compile Include="CoreClasses\Utilities.cs" />
+    <Compile Include="CoreClasses\BepuExtensions.cs" />
+    <Compile Include="UtilitySystems\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />

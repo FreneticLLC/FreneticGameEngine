@@ -19,6 +19,7 @@ using FreneticGameGraphics.GraphicsHelpers;
 using System.Diagnostics;
 using FreneticGameCore;
 using FreneticGameGraphics.LightingSystem;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameGraphics.ClientSystem
 {

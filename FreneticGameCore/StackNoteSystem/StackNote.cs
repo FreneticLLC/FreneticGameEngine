@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore.StackNoteSystem
 {
     /// <summary>
     /// Represents a note about current stack data.
     /// </summary>
-    public class StackNote
+    public struct StackNote
     {
         /// <summary>
         /// The stack note.

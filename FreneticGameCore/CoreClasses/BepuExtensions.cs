@@ -17,13 +17,14 @@ using System.Globalization;
 using BEPUutilities.ResourceManagement;
 using BEPUutilities.DataStructures;
 using BEPUphysics.BroadPhaseEntries.MobileCollidables;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {
     /// <summary>
-    /// Helpers for various system classes.
+    /// Helpers for BEPU classes.
     /// </summary>
-    public static class SystemExtensions
+    public static class BepuExtensions
     {
         /// <summary>
         /// Get the angle around an axis for a specific quaternion.

@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.UtilitySystems
 {
     // mcmonkey - NOTE TO READERS: This class was found elsewhere. Can't locate a link to it.
     // mcmonkey - Original header is below, though I removed some unicode from the name to avoid file errors.

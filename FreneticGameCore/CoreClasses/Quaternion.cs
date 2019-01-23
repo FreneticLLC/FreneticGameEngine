@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using FreneticGameCore.Collision;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {

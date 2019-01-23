@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.UtilitySystems
 {
     /// <summary>
     /// Helper for live-sorted queues of data.

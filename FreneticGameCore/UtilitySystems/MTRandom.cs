@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.UtilitySystems
 {
     /// <summary>
     /// Mersenne-Twister Random implementation.

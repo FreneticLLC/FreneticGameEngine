@@ -15,6 +15,7 @@ using System.Diagnostics;
 using FreneticGameCore.Files;
 using System.IO;
 using FreneticGameCore.StackNoteSystem;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {

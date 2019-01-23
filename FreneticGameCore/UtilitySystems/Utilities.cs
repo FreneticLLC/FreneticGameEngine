@@ -17,7 +17,7 @@ using System.Threading;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.UtilitySystems
 {
     /// <summary>
     /// Helpful utilities for general usage.

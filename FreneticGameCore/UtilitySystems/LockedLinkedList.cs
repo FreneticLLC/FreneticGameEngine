@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FreneticGameCore
+namespace FreneticGameCore.UtilitySystems
 {
     /// <summary>
     /// This class isn't actually entirely locked/thread-safe, or even entirely functional as a linked-list, only done sufficiently for its first immediate use-case.

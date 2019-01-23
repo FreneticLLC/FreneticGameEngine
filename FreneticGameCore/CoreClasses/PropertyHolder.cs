@@ -17,6 +17,7 @@ using System.Reflection.Emit;
 using BEPUutilities;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
 using FreneticGameCore.Files;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {
