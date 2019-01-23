@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using FreneticGameCore.Collision;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -714,7 +715,7 @@ namespace FreneticGameCore
             {
                 return NaN;
             }
-            return new Location(Utilities.StringToDouble(data[0]), Utilities.StringToDouble(data[1]), Utilities.StringToDouble(data[2]));
+            return new Location(StringConversionHelper.StringToDouble(data[0]), StringConversionHelper.StringToDouble(data[1]), StringConversionHelper.StringToDouble(data[2]));
         }
 
         /// <summary>

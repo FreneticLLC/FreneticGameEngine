@@ -15,6 +15,7 @@ using FreneticGameCore.Files;
 using FreneticUtilities.FreneticExtensions;
 using BEPUutilities;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -153,7 +154,7 @@ namespace FreneticGameCore
                         {
                             if (entry.Key == "length")
                             {
-                                created.Length = Utilities.StringToDouble(entry.Value);
+                                created.Length = StringConversionHelper.StringToDouble(entry.Value);
                             }
                             else
                             {
@@ -170,9 +171,9 @@ namespace FreneticGameCore
                                     if (poses[x].Length > 0)
                                     {
                                         string[] posdata = poses[x].SplitFast('=');
-                                        node.PosTimes.Add(Utilities.StringToDouble(posdata[0]));
-                                        node.Positions.Add(new Location(Utilities.StringToFloat(posdata[1]),
-                                            Utilities.StringToFloat(posdata[2]), Utilities.StringToFloat(posdata[3])));
+                                        node.PosTimes.Add(StringConversionHelper.StringToDouble(posdata[0]));
+                                        node.Positions.Add(new Location(StringConversionHelper.StringToFloat(posdata[1]),
+                                            StringConversionHelper.StringToFloat(posdata[2]), StringConversionHelper.StringToFloat(posdata[3])));
                                     }
                                 }
                             }
@@ -184,9 +185,9 @@ namespace FreneticGameCore
                                     if (rots[x].Length > 0)
                                     {
                                         string[] posdata = rots[x].SplitFast('=');
-                                        node.RotTimes.Add(Utilities.StringToDouble(posdata[0]));
-                                        node.Rotations.Add(new BEPUutilities.Quaternion(Utilities.StringToFloat(posdata[1]), Utilities.StringToFloat(posdata[2]),
-                                            Utilities.StringToFloat(posdata[3]), Utilities.StringToFloat(posdata[4])));
+                                        node.RotTimes.Add(StringConversionHelper.StringToDouble(posdata[0]));
+                                        node.Rotations.Add(new BEPUutilities.Quaternion(StringConversionHelper.StringToFloat(posdata[1]), StringConversionHelper.StringToFloat(posdata[2]),
+                                            StringConversionHelper.StringToFloat(posdata[3]), StringConversionHelper.StringToFloat(posdata[4])));
                                     }
                                 }
                             }
@@ -197,8 +198,8 @@ namespace FreneticGameCore
                             else if (entry.Key == "offset")
                             {
                                 string[] posdata = entry.Value.SplitFast('=');
-                                node.Offset = new Location(Utilities.StringToFloat(posdata[0]),
-                                    Utilities.StringToFloat(posdata[1]), Utilities.StringToFloat(posdata[2]));
+                                node.Offset = new Location(StringConversionHelper.StringToFloat(posdata[0]),
+                                    StringConversionHelper.StringToFloat(posdata[1]), StringConversionHelper.StringToFloat(posdata[2]));
                             }
                             else
                             {

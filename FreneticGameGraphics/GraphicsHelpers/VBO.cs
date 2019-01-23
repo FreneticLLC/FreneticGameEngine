@@ -17,6 +17,7 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -749,10 +750,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             TextureCoordinates tc = new TextureCoordinates();
             string[] data = str.SplitFast('/');
-            tc.xscale = (float)Utilities.StringToFloat(data[0]);
-            tc.yscale = (float)Utilities.StringToFloat(data[1]);
-            tc.xshift = (float)Utilities.StringToFloat(data[2]);
-            tc.yshift = (float)Utilities.StringToFloat(data[3]);
+            tc.xscale = (float)StringConversionHelper.StringToFloat(data[0]);
+            tc.yscale = (float)StringConversionHelper.StringToFloat(data[1]);
+            tc.xshift = (float)StringConversionHelper.StringToFloat(data[2]);
+            tc.yshift = (float)StringConversionHelper.StringToFloat(data[3]);
             tc.xflip = data[4] == "t";
             tc.yflip = data[5] == "t";
             return tc;

@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using BEPUutilities;
 using System.Threading;
 using FreneticUtilities.FreneticExtensions;
@@ -24,11 +23,6 @@ namespace FreneticGameCore.UtilitySystems
     /// </summary>
     public class Utilities
     {
-        /// <summary>
-        /// A UTF-8 without BOM encoding.
-        /// </summary>
-        public static readonly Encoding DefaultEncoding = new UTF8Encoding(false);
-
         /// <summary>
         /// Returns the next power of two.
         /// Meaning, the next number in the sequence:
@@ -52,6 +46,7 @@ namespace FreneticGameCore.UtilitySystems
         }
         /// <summary>
         /// A thread-static random object for all non-deterministic objects to use.
+        /// When possible, this should be avoided in favor of contextually available random objects.
         /// </summary>
         public static MTRandom UtilRandom
         {
@@ -70,40 +65,6 @@ namespace FreneticGameCore.UtilitySystems
         /// </summary>
         [ThreadStatic]
         private static MTRandom intRandom;
-
-        /// <summary>
-        /// An SHA-512 hashing helper.
-        /// </summary>
-        public static SHA512Managed sha512 = new SHA512Managed();
-
-        /// <summary>
-        /// Password static salt part 1.
-        /// </summary>
-        public const string salt1 = "aB123!";
-
-        /// <summary>
-        /// Password static salt part 2.
-        /// </summary>
-        public const string salt2 = "--=123Tt=--";
-
-        /// <summary>
-        /// Password static salt part 3.
-        /// </summary>
-        public const string salt3 = "^&()xyZ";
-
-        /// <summary>
-        /// Quickly gets a Base-64 string of a hashed password input.
-        /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="password">The password.</param>
-        /// <returns>A hash code.</returns>
-        public static string HashQuick(string username, string password)
-        {
-            // TODO: Dynamic hash text maybe?
-            // TODO: Really, any amount of protection at all here ;-;
-            // Something fast but reasonably complex
-            return Convert.ToBase64String(sha512.ComputeHash(DefaultEncoding.GetBytes(salt1 + username + salt2 + password + salt3)));
-        }
 
         // TODO: Delete all these convertion methods, instead just use PrimitiveConversionHelper
 
@@ -353,140 +314,6 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Converts a string to a double. Returns 0 if the string is not a valid double.
-        /// </summary>
-        /// <param name="input">The string to convert.</param>
-        /// <returns>The converted double.</returns>
-        public static float StringToFloat(string input)
-        {
-            if (float.TryParse(input, out float output))
-            {
-                return output;
-            }
-            else
-            {
-                return 0f;
-            }
-        }
-
-        /// <summary>
-        /// Converts a string to a double. Returns 0 if the string is not a valid double.
-        /// </summary>
-        /// <param name="input">The string to convert.</param>
-        /// <returns>The converted double.</returns>
-        public static double StringToDouble(string input)
-        {
-            if (double.TryParse(input, out double output))
-            {
-                return output;
-            }
-            else
-            {
-                return 0f;
-            }
-        }
-
-        /// <summary>
-        /// Converts a string to a ushort. Returns 0 if the string is not a valid ushort.
-        /// </summary>
-        /// <param name="input">The string to convert.</param>
-        /// <returns>The converted ushort.</returns>
-        public static ushort StringToUShort(string input)
-        {
-            if (ushort.TryParse(input, out ushort output))
-            {
-                return output;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Converts a string to a int. Returns 0 if the string is not a valid int.
-        /// </summary>
-        /// <param name="input">The string to convert.</param>
-        /// <returns>The converted int.</returns>
-        public static int StringToInt(string input)
-        {
-            if (int.TryParse(input, out int output))
-            {
-                return output;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Converts a string to a long. Returns 0 if the string is not a valid long.
-        /// </summary>
-        /// <param name="input">The string to convert.</param>
-        /// <returns>The converted long.</returns>
-        public static long StringToLong(string input)
-        {
-            if (long.TryParse(input, out long output))
-            {
-                return output;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Returns a string representation of the specified time.
-        /// </summary>
-        /// <returns>The time as a string.</returns>
-        public static string DateTimeToString(DateTime dt)
-        {
-            string utcoffset = "";
-            DateTime UTC = dt.ToUniversalTime();
-            if (dt.CompareTo(UTC) < 0)
-            {
-                TimeSpan span = UTC.Subtract(dt);
-                utcoffset = "-" + Pad(((int)Math.Floor(span.TotalHours)).ToString(), '0', 2) + ":" + Pad(span.Minutes.ToString(), '0', 2);
-            }
-            else
-            {
-                TimeSpan span = dt.Subtract(UTC);
-                utcoffset = "+" + Pad(((int)Math.Floor(span.TotalHours)).ToString(), '0', 2) + ":" + Pad(span.Minutes.ToString(), '0', 2);
-            }
-            return Pad(dt.Year.ToString(), '0', 4) + "/" + Pad(dt.Month.ToString(), '0', 2) + "/" +
-                    Pad(dt.Day.ToString(), '0', 2) + " " + Pad(dt.Hour.ToString(), '0', 2) + ":" +
-                    Pad(dt.Minute.ToString(), '0', 2) + ":" + Pad(dt.Second.ToString(), '0', 2) + " UTC" + utcoffset;
-        }
-
-        /// <summary>
-        /// Pads a string to a specified length with a specified input, on a specified side.
-        /// </summary>
-        /// <param name="input">The original string.</param>
-        /// <param name="padding">The symbol to pad with.</param>
-        /// <param name="length">How far to pad it to.</param>
-        /// <param name="left">Whether to pad left (true), or right (false).</param>
-        /// <returns>The padded string.</returns>
-        public static string Pad(string input, char padding, int length, bool left = true)
-        {
-            int targetlength = length - input.Length;
-            StringBuilder pad = new StringBuilder(targetlength <= 0 ? 1 : targetlength);
-            for (int i = 0; i < targetlength; i++)
-            {
-                pad.Append(padding);
-            }
-            if (left)
-            {
-                return pad + input;
-            }
-            else
-            {
-                return input + pad;
-            }
-        }
-
-        /// <summary>
         /// Returns a peice of text copied a specified number of times.
         /// </summary>
         /// <param name="text">What text to copy.</param>
@@ -501,43 +328,7 @@ namespace FreneticGameCore.UtilitySystems
             }
             return toret.ToString();
         }
-
-        /// <summary>
-        /// Returns the number of times a character occurs in a string.
-        /// </summary>
-        /// <param name="input">The string containing the character.</param>
-        /// <param name="countme">The character which the string contains.</param>
-        /// <returns>How many times the character occurs.</returns>
-        public static int CountCharacter(string input, char countme)
-        {
-            int count = 0;
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] == countme)
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-
-        /// <summary>
-        /// Combines a list of strings into a single string, separated by spaces.
-        /// <para>Note: generally, favor <see cref="String.Join(string, IEnumerable{string})"/>.</para>
-        /// </summary>
-        /// <param name="input">The list of strings to combine.</param>
-        /// <param name="start">The index to start from.</param>
-        /// <returns>The combined string.</returns>
-        public static string Concat(List<string> input, int start = 0)
-        {
-            StringBuilder output = new StringBuilder();
-            for (int i = start; i < input.Count; i++)
-            {
-                output.Append(input[i]).Append(" ");
-            }
-            return (output.Length > 0 ? output.ToString().Substring(0, output.Length - 1) : "");
-        }
-
+        
         /// <summary>
         /// If raw string data is input by a user, call this function to clean it for tag-safety.
         /// </summary>
@@ -639,7 +430,8 @@ namespace FreneticGameCore.UtilitySystems
             {
                 return BEPUutilities.Quaternion.Identity;
             }
-            return new BEPUutilities.Quaternion(StringToFloat(data[0]), StringToFloat(data[1]), StringToFloat(data[2]), StringToFloat(data[3]));
+            return new BEPUutilities.Quaternion(StringConversionHelper.StringToFloat(data[0]), StringConversionHelper.StringToFloat(data[1]),
+                StringConversionHelper.StringToFloat(data[2]), StringConversionHelper.StringToFloat(data[3]));
         }
 
         /// <summary>
@@ -898,29 +690,5 @@ namespace FreneticGameCore.UtilitySystems
         {
             return b * (Vector3.Dot(a, b) / b.LengthSquared());
         }
-    }
-
-    /// <summary>
-    /// Holds a volatile integer.
-    /// TODO: Delete?
-    /// </summary>
-    public class IntHolder
-    {
-        /// <summary>
-        /// The value.
-        /// </summary>
-        public volatile int Value = 0;
-    }
-
-    /// <summary>
-    /// Holds any data in a class object.
-    /// </summary>
-    /// <typeparam name="T">The type of data to holder.</typeparam>
-    public class DataHolder<T>
-    {
-        /// <summary>
-        /// The held data.
-        /// </summary>
-        public T Data;
     }
 }

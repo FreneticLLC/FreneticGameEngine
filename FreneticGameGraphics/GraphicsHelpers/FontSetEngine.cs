@@ -20,6 +20,7 @@ using System.Drawing;
 using System.Globalization;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -41,6 +42,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Shader to revert to after rendering some text.
         /// </summary>
         public Shader FixTo;
+
+        /// <summary>
+        /// Random helper object.
+        /// </summary>
+        public MTRandom RandomHelper = new MTRandom();
 
         /// <summary>
         /// The lower font system.
@@ -444,10 +450,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
                                                 string[] coldat = sbl.After("color=").SplitFast(',');
                                                 if (coldat.Length == 4)
                                                 {
-                                                    int r = Utilities.StringToInt(coldat[0]);
-                                                    int g = Utilities.StringToInt(coldat[1]);
-                                                    int b = Utilities.StringToInt(coldat[2]);
-                                                    int a = Utilities.StringToInt(coldat[3]);
+                                                    int r = StringConversionHelper.StringToInt(coldat[0]);
+                                                    int g = StringConversionHelper.StringToInt(coldat[1]);
+                                                    int b = StringConversionHelper.StringToInt(coldat[2]);
+                                                    int a = StringConversionHelper.StringToInt(coldat[3]);
                                                     ccolor = Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
                                                     ttext = "";
                                                     highl = false;
@@ -760,7 +766,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="ccolor">The current color.</param>
         /// <returns>The length of the rendered text in pixels.</returns>
         public float RenderBaseText(TextVBO vbo, float X, float Y, string text, GLFont font, int color,
-            int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool obfu = false, Color ccolor = default(Color))
+            int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool obfu = false, Color ccolor = default)
         {
             if (obfu || pseudo || random || jello)
             {
@@ -788,14 +794,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     }
                     if (obfu)
                     {
-                        chr = ((char)Utilities.UtilRandom.Next(33, 126)).ToString();
+                        chr = ((char)Engine.RandomHelper.Next(33, 126)).ToString();
                     }
                     int iX = 0;
                     int iY = 0;
                     if (jello)
                     {
-                        iX = Utilities.UtilRandom.Next(-1, 1);
-                        iY = Utilities.UtilRandom.Next(-1, 1);
+                        iX = Engine.RandomHelper.Next(-1, 1);
+                        iY = Engine.RandomHelper.Next(-1, 1);
                     }
                     Vector4 col = new Vector4((float)tcol.R / 255f, (float)tcol.G / 255f, (float)tcol.B / 255f, (float)tcol.A / 255f);
                     if (flip)

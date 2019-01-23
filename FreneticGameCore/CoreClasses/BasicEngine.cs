@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticGameCore.EntitySystem;
 using FreneticGameCore.StackNoteSystem;
+using FreneticGameCore.UtilitySystems;
 
 namespace FreneticGameCore
 {
@@ -25,6 +26,11 @@ namespace FreneticGameCore
         /// The general-purpose physics world.
         /// </summary>
         public PhysicsSpace<T, T2> PhysicsWorld;
+
+        /// <summary>
+        /// Random helper object.
+        /// </summary>
+        public MTRandom RandomHelper = new MTRandom();
 
         /// <summary>
         /// Loads the basic engine.

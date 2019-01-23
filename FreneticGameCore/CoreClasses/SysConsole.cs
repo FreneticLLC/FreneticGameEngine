@@ -16,6 +16,7 @@ using FreneticGameCore.Files;
 using System.IO;
 using FreneticGameCore.StackNoteSystem;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -94,8 +95,8 @@ namespace FreneticGameCore
             try
             {
                 DateTime DT = DateTime.Now;
-                string logfolder = Environment.CurrentDirectory + "/logs/" + Utilities.Pad(DT.Year.ToString(), '0', 4) + "/" + Utilities.Pad(DT.Month.ToString(), '0', 2) + "/";
-                string logfile = logfolder + Utilities.Pad(DT.Day.ToString(), '0', 2) + "_" + Utilities.Pad(DT.Hour.ToString(), '0', 2) + "_" + Utilities.Pad(DT.Minute.ToString(), '0', 2) + "_" + Process.GetCurrentProcess().Id + ".log";
+                string logfolder = Environment.CurrentDirectory + "/logs/" + DT.Year.ToString().PadLeft(4, '0') + "/" + DT.Month.ToString().PadLeft(2, '0') + "/";
+                string logfile = logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Process.GetCurrentProcess().Id + ".log";
                 Directory.CreateDirectory(logfolder);
                 FSOUT = File.OpenWrite(logfile);
             }
@@ -214,7 +215,7 @@ namespace FreneticGameCore
             text = text.Replace("^B", bcolor);
             if (FSOUT != null)
             {
-                byte[] b = Utilities.DefaultEncoding.GetBytes(text);
+                byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
                 FSOUT.Write(b, 0, b.Length);
                 FSOUT.Flush(); // TODO: Flush(true)?
             }
@@ -330,6 +331,17 @@ namespace FreneticGameCore
         }
 
         /// <summary>
+        /// Gets a date-time-string for output.
+        /// </summary>
+        /// <param name="time">The DateTime.</param>
+        /// <returns>A string form of it.</returns>
+        public static string DateTimeString(DateTime time)
+        {
+            return time.Year.ToString().PadLeft(4, '0') + "/" + time.Month.ToString().PadLeft(2, '0') + "/" + time.Day.ToString().PadLeft(2, '0')
+                + " " + time.Hour.ToString().PadLeft(2, '0') + ":" + time.Minute.ToString().PadLeft(2, '0') + ":" + time.Second.ToString().PadLeft(2, '0');
+        }
+
+        /// <summary>
         /// Outputs custom debug information.
         /// </summary>
         /// <param name="type">The custom type.</param>
@@ -337,7 +349,7 @@ namespace FreneticGameCore
         /// <param name="bcolor">The custom base color.</param>
         public static void OutputCustom(string type, string message, string bcolor = "^r^7")
         {
-            WriteLine("^r^7" + Utilities.DateTimeToString(DateTime.Now) + " [" + bcolor + type + "^r^7] " + bcolor + message, bcolor);
+            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + bcolor + type + "^r^7] " + bcolor + message, bcolor);
         }
 
         /// <summary>
@@ -357,7 +369,7 @@ namespace FreneticGameCore
             {
                 return;
             }
-            WriteLine("^r^7" + Utilities.DateTimeToString(DateTime.Now) + " [" + OutputColors[(int)ot] +
+            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + OutputColors[(int)ot] +
                 OutputNames[(int)ot] + "^r^7] " + OutputColors[(int)ot] + text, bcolor ?? OutputColors[(int)ot]);
         }
 

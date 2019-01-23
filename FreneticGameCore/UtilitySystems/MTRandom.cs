@@ -79,7 +79,7 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Gets a random integer.
+        /// Gets a random positive integer (from 0 to <see cref="int.MaxValue"/>).
         /// </summary>
         public int Next()
         {
@@ -87,9 +87,9 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Gets a random integer up to a cap.
+        /// Gets a random integer from 0 up to a cap.
         /// </summary>
-        public int Next(int cap)
+        public int Next(int cap) // TODO: define Inclusive/exclusive
         {
             // TODO: Maybe just a modulo?
             return (int)(Next() * (cap / (double)int.MaxValue)); // TODO: Sanity!
@@ -98,7 +98,7 @@ namespace FreneticGameCore.UtilitySystems
         /// <summary>
         /// Gets a random integer between two bounds.
         /// </summary>
-        public int Next(int min, int max)
+        public int Next(int min, int max) // TODO: define Inclusive/exclusive
         {
             return Next(max - min) + min;
         }
@@ -131,7 +131,7 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Gets a random unsigned long.
+        /// Gets a random unsigned long (from 0 to <see cref="ulong.MaxValue"/>).
         /// </summary>
         public ulong NextUL()
         {

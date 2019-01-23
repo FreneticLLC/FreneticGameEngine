@@ -18,6 +18,7 @@ using BEPUutilities;
 using FreneticGameCore.EntitySystem.PhysicsHelpers;
 using FreneticGameCore.Files;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore
 {
@@ -149,8 +150,8 @@ namespace FreneticGameCore
             });
             TypeSavers.Add(typeof(string), new PropertySaverLoader()
             {
-                Saver = (o) => Utilities.DefaultEncoding.GetBytes(o as string),
-                Loader = (b) => Utilities.DefaultEncoding.GetString(b),
+                Saver = (o) => StringConversionHelper.UTF8Encoding.GetBytes(o as string),
+                Loader = (b) => StringConversionHelper.UTF8Encoding.GetString(b),
                 SaveString = "C/string"
             });
             // FGE/Core Helpers
