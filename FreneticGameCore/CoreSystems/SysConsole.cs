@@ -195,6 +195,22 @@ namespace FreneticGameCore.CoreSystems
         /// Event fired when the console is written to.
         /// </summary>
         public static EventHandler<ConsoleWrittenEventArgs> Written;
+        
+        /// <summary>
+        /// Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.
+        /// </summary>
+        public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
+            "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
+
+        /// <summary>
+        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText
+        /// </summary>
+        /// <param name="c"><paramref name="c"/>The character to check.</param>
+        /// <returns>whether the character is a valid color symbol.</returns>
+        public static bool IsColorSymbol(char c)
+        {
+            return ColorSymbolMatcher.IsMatch(c);
+        }
 
         /// <summary>
         /// Writes some colored text to the system console.
@@ -238,7 +254,7 @@ namespace FreneticGameCore.CoreSystems
             StringBuilder outme = new StringBuilder();
             for (int i = 0; i < text.Length; i++)
             {
-                if (text[i] == '^' && i + 1 < text.Length && Utilities.IsColorSymbol(text[i + 1]))
+                if (text[i] == '^' && i + 1 < text.Length && IsColorSymbol(text[i + 1]))
                 {
                     if (outme.Length > 0)
                     {

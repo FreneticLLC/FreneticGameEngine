@@ -135,7 +135,7 @@ namespace FreneticGameCore.UtilitySystems
         /// </summary>
         /// <param name="text">What text to copy.</param>
         /// <param name="times">How many times to copy it.</param>
-        /// <returns>.</returns>
+        /// <returns>The repeated text.</returns>
         public static string CopyText(string text, int times)
         {
             StringBuilder toret = new StringBuilder(text.Length * times);
@@ -144,33 +144,6 @@ namespace FreneticGameCore.UtilitySystems
                 toret.Append(text);
             }
             return toret.ToString();
-        }
-        
-        /// <summary>
-        /// If raw string data is input by a user, call this function to clean it for tag-safety.
-        /// </summary>
-        /// <param name="input">The raw string.</param>
-        /// <returns>A cleaned string.</returns>
-        public static string CleanStringInput(string input)
-        {
-            // No nulls!
-            return input.Replace('\0', ' ');
-        }
-
-        /// <summary>
-        /// Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.
-        /// </summary>
-        public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
-            "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
-
-        /// <summary>
-        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText
-        /// </summary>
-        /// <param name="c"><paramref name="c"/>The character to check.</param>
-        /// <returns>whether the character is a valid color symbol.</returns>
-        public static bool IsColorSymbol(char c)
-        {
-            return ColorSymbolMatcher.IsMatch(c);
         }
 
         /// <summary>
@@ -198,10 +171,7 @@ namespace FreneticGameCore.UtilitySystems
         /// <returns>.</returns>
         public static Location ForwardVector_Deg(double yaw, double pitch)
         {
-            double pitchdeg = pitch * PI180;
-            double yawdeg = yaw * PI180;
-            double cp = Math.Cos(pitchdeg);
-            return new Location(-(cp * Math.Cos(yawdeg)), -(cp * Math.Sin(yawdeg)), (Math.Sin(pitchdeg)));
+            return ForwardVector(yaw * PI180, pitch * PI180);
         }
 
         /// <summary>
