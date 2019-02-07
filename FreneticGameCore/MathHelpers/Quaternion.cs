@@ -359,6 +359,20 @@ namespace FreneticGameCore.MathHelpers
         }
 
         /// <summary>
+        /// Get the angle around an axis for a specific quaternion, in radians.
+        /// </summary>
+        /// <param name="axis">The relative axis.</param>
+        /// <returns>The angle.</returns>
+        public double AxisAngleForRadians(Location axis)
+        {
+            Location ra = new Location(X, Y, Z);
+            Location p = ra.Project(axis);
+            Quaternion twist = new Quaternion(p.X, p.Y, p.Z, W).Normalized();
+            Location new_forward = twist.TransformX();
+            return MathUtilities.VectorToAngles(new_forward).Yaw;
+        }
+
+        /// <summary>
         /// Reads the byte array to a Quaternion object.
         /// Expects 16 bytes.
         /// Inverts <see cref="ToFloatBytes(byte[], int)"/>.
@@ -479,13 +493,7 @@ namespace FreneticGameCore.MathHelpers
         {
             get
             {
-                // TODO: Perhaps simplify logic for if the Orientation is 2D anyway?
-                // This is slower than it should be!
-                Location ra = new Location(X, Y, Z);
-                Location p = ra.Project(Location.UnitZ);
-                Quaternion twist = new Quaternion(p.X, p.Y, p.Z, W).Normalized();
-                Location newFor = twist.TransformX();
-                return Utilities.VectorToAnglesYawRad(newFor);
+                return AxisAngleForRadians(Location.UnitZ);
             }
             set
             {

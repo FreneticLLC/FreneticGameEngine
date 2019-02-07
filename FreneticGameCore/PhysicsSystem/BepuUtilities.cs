@@ -107,9 +107,9 @@ namespace FreneticGameCore.PhysicsSystem
         public static Matrix AnglesToMatrix(Location rot)
         {
             // TODO: better method?
-            return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (rot.X * Utilities.PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 1, 0), (rot.Y * Utilities.PI180))
-                    * Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), (rot.Z * Utilities.PI180));
+            return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (rot.X * MathUtilities.PI180))
+                    * Matrix.CreateFromAxisAngle(new Vector3(0, 1, 0), (rot.Y * MathUtilities.PI180))
+                    * Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), (rot.Z * MathUtilities.PI180));
         }
 
         /// <summary>

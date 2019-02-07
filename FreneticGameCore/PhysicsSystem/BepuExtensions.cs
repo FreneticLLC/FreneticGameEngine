@@ -16,7 +16,6 @@ using BEPUutilities;
 using System.Globalization;
 using BEPUutilities.ResourceManagement;
 using BEPUutilities.DataStructures;
-using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.PhysicsSystem;
@@ -36,12 +35,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <returns>The angle.</returns>
         public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, Vector3 axis)
         {
-            Vector3 ra = new Vector3(rotation.X, rotation.Y, rotation.Z);
-            Vector3 p = BepuUtilities.Project(ra, axis);
-            BEPUutilities.Quaternion twist = new BEPUutilities.Quaternion(p.X, p.Y, p.Z, rotation.W);
-            twist.Normalize();
-            Vector3 new_forward = BEPUutilities.Quaternion.Transform(Vector3.UnitX, twist);
-            return Utilities.VectorToAngles(new Location(new_forward)).Yaw * Math.PI / 180.0;
+            return rotation.ToCore().AxisAngleForRadians(new Location(axis)) * MathUtilities.PI180;
         }
 
         /// <summary>

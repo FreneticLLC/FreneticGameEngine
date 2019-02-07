@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MathHelpers\MathUtilities.cs" />
     <Compile Include="ModelSystems\AnimationEngine.cs" />
     <Compile Include="CoreSystems\BasicEngine.cs" />
     <Compile Include="PhysicsSystem\CollisionUtil.cs" />

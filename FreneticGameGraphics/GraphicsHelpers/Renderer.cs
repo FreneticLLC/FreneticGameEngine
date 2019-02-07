@@ -323,11 +323,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             // TODO: Efficiency!
             float len = (float)(end - start).Length();
-            Location vecang = Utilities.VectorToAngles(start - end);
+            Location vecang = MathUtilities.VectorToAngles(start - end);
             vecang.Yaw += 180;
             Matrix4d mat = Matrix4d.Scale(len, 1, 1)
-                * Matrix4d.CreateRotationY((float)(vecang.Y * Utilities.PI180))
-                * Matrix4d.CreateRotationZ((float)(vecang.Z * Utilities.PI180))
+                * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
+                * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
                 * Matrix4d.CreateTranslation(start.ToOpenTK3D());
             view.SetMatrix(2, mat);
             GL.BindVertexArray(Line._VAO);
@@ -344,12 +344,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void RenderCylinder(Location start, Location end, float width, View3D view)
         {
             float len = (float)(end - start).Length();
-            Location vecang = Utilities.VectorToAngles(start - end);
+            Location vecang = MathUtilities.VectorToAngles(start - end);
             vecang.Yaw += 180;
-            Matrix4d mat = Matrix4d.CreateRotationY((float)(90 * Utilities.PI180))
+            Matrix4d mat = Matrix4d.CreateRotationY((float)(90 * MathUtilities.PI180))
                 * Matrix4d.Scale(len, width, width)
-                * Matrix4d.CreateRotationY((float)(vecang.Y * Utilities.PI180))
-                * Matrix4d.CreateRotationZ((float)(vecang.Z * Utilities.PI180))
+                * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
+                * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
                  * Matrix4d.CreateTranslation(start.ToOpenTK3D());
             view.SetMatrix(2, mat);
             Models.Cylinder.Draw(); // TODO: Models reference in constructor - or client reference?
