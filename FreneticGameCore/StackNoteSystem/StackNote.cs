@@ -42,7 +42,7 @@ namespace FreneticGameCore.StackNoteSystem
             }
             catch (Exception ex)
             {
-                Utilities.CheckException(ex);
+                CommonUtilities.CheckException(ex);
                 return Note + "(Exception parsing Related: " + ex.ToString() + ")";
             }
         }

@@ -127,7 +127,7 @@
     <Compile Include="StackNoteSystem\StackNoteSet.cs" />
     <Compile Include="CoreSystems\SysConsole.cs" />
     <Compile Include="PhysicsSystem\BepuExtensions.cs" />
-    <Compile Include="UtilitySystems\Utilities.cs" />
+    <Compile Include="UtilitySystems\CommonUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />

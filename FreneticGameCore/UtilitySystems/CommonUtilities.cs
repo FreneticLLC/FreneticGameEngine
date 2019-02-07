@@ -21,7 +21,7 @@ namespace FreneticGameCore.UtilitySystems
     /// <summary>
     /// Helpful utilities for general usage.
     /// </summary>
-    public static class Utilities
+    public static class CommonUtilities
     {
         /// <summary>
         /// A thread-static random object for all non-deterministic objects to use.

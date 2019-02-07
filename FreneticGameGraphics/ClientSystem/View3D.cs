@@ -906,7 +906,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             catch (Exception ex)
             {
-                Utilities.CheckException(ex);
+                CommonUtilities.CheckException(ex);
                 SysConsole.Output("Rendering (3D)", ex);
                 CurrentFBO = pfbo;
             }

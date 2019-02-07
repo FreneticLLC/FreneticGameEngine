@@ -80,7 +80,7 @@ namespace FreneticGameGraphics.AudioSystem
                 }
                 catch (Exception ex)
                 {
-                    Utilities.CheckException(ex);
+                    CommonUtilities.CheckException(ex);
                     TrySpeech = false;
                 }
                 if (!TrySpeech)

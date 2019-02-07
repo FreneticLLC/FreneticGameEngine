@@ -100,7 +100,7 @@ namespace FreneticGameCore.CoreSystems
                 }
                 catch (Exception ex)
                 {
-                    Utilities.CheckException(ex);
+                    CommonUtilities.CheckException(ex);
                     SysConsole.Output("Reading language documents", ex);
                 }
             }

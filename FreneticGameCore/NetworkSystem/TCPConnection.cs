@@ -106,7 +106,7 @@ namespace FreneticGameCore.NetworkSystem
             }
             catch (Exception ex)
             {
-                Utilities.CheckException(ex);
+                CommonUtilities.CheckException(ex);
                 RelevantSocket.Close();
                 RelevantSocket = null;
                 SysConsole.Output(OutputType.INFO, "[Connections:Error] " + ex.ToString());
@@ -228,7 +228,7 @@ namespace FreneticGameCore.NetworkSystem
             }
             catch (Exception ex)
             {
-                Utilities.CheckException(ex);
+                CommonUtilities.CheckException(ex);
                 RelevantSocket.Close();
                 RelevantSocket = null;
                 SysConsole.Output(OutputType.INFO, "[Connections:Error] " + ex.Message);
