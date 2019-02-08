@@ -33,7 +33,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <param name="rotation">The quaternion.</param>
         /// <param name="axis">The relative axis.</param>
         /// <returns>The angle.</returns>
-        public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, Vector3 axis)
+        public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, in Vector3 axis)
         {
             return rotation.ToCore().AxisAngleForRadians(new Location(axis)) * MathUtilities.PI180;
         }
@@ -96,7 +96,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <param name="shape">The shape.</param>
         /// <param name="scaleFactor">The scaling factor.</param>
         /// <returns>The new hull.</returns>
-        public static ConvexHullShape Rescale(this ConvexHullShape shape, Vector3 scaleFactor)
+        public static ConvexHullShape Rescale(this ConvexHullShape shape, in Vector3 scaleFactor)
         {
             ReadOnlyList<Vector3> verts = shape.Vertices;
             List<Vector3> newlist = new List<Vector3>(verts.Count);

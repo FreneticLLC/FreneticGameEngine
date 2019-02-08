@@ -29,7 +29,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// </summary>
         /// <param name="quat">The quaternion.</param>
         /// <returns>The byte array.</returns>
-        public static byte[] QuaternionToBytes(BEPUutilities.Quaternion quat)
+        public static byte[] QuaternionToBytes(in BEPUutilities.Quaternion quat)
         {
             byte[] dat = new byte[4 + 4 + 4 + 4];
             QuaternionToBytes(quat, dat, 0);
@@ -44,7 +44,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <param name="outputBytes">The output byte array.</param>
         /// <param name="offset">The starting offset in the output bytes.</param>
         /// <returns>The byte array.</returns>
-        public static void QuaternionToBytes(BEPUutilities.Quaternion quat, byte[] outputBytes, int offset)
+        public static void QuaternionToBytes(in BEPUutilities.Quaternion quat, byte[] outputBytes, int offset)
         {
             PrimitiveConversionHelper.Float32ToBytes((float)quat.X, outputBytes, offset);
             PrimitiveConversionHelper.Float32ToBytes((float)quat.Y, outputBytes, offset + 4);
@@ -75,7 +75,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <param name="end">The end target.</param>
         /// <param name="up">The normalized up vector.</param>
         /// <returns>A matrix.</returns>
-        public static Matrix LookAtLH(Location start, Location end, Location up)
+        public static Matrix LookAtLH(in Location start, in Location end, in Location up)
         {
             Location zAxis = (end - start).Normalize();
             Location xAxis = up.CrossProduct(zAxis).Normalize();
@@ -90,7 +90,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// </summary>
         /// <param name="WorldTransform">The matrix.</param>
         /// <returns>The Euler angles.</returns>
-        public static Location MatrixToAngles(Matrix WorldTransform)
+        public static Location MatrixToAngles(in Matrix WorldTransform)
         {
             Location rot;
             rot.X = Math.Atan2(WorldTransform.M32, WorldTransform.M33) * 180 / Math.PI;
@@ -104,7 +104,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// </summary>
         /// <param name="rot">The Euler angles.</param>
         /// <returns>The matrix.</returns>
-        public static Matrix AnglesToMatrix(Location rot)
+        public static Matrix AnglesToMatrix(in Location rot)
         {
             // TODO: better method?
             return Matrix.CreateFromAxisAngle(new Vector3(1, 0, 0), (rot.X * MathUtilities.PI180))
@@ -118,7 +118,7 @@ namespace FreneticGameCore.PhysicsSystem
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The projected vector.</returns>
-        public static Vector3 Project(Vector3 a, Vector3 b)
+        public static Vector3 Project(in Vector3 a, in Vector3 b)
         {
             return b * (Vector3.Dot(a, b) / b.LengthSquared());
         }

@@ -35,7 +35,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="box2">The second box.</param>
         /// <returns>Whether they intersect.</returns>
-        public bool Intersects(AABB box2)
+        public bool Intersects(in AABB box2)
         {
             Location min2 = box2.Min;
             Location max2 = box2.Max;
@@ -55,7 +55,7 @@ namespace FreneticGameCore.MathHelpers
         /// Includes a Location into the box's space, expanding as needed (but not shrinking).
         /// </summary>
         /// <param name="pos">The position to include.</param>
-        public void Include(Location pos)
+        public void Include(in Location pos)
         {
             if (pos.X < Min.X)
             {
