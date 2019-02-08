@@ -29,9 +29,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
     {
         /// <summary>
         /// A full list of currently loaded shaders.
-        /// TODO: List->Dictionary?
         /// </summary>
-        public List<Shader> LoadedShaders;
+        public Dictionary<string, Shader> LoadedShaders;
 
         /// <summary>
         /// A common shader that multiplies colors.
@@ -54,7 +53,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void InitShaderSystem()
         {
             // Reset shader list
-            LoadedShaders = new List<Shader>();
+            LoadedShaders = new Dictionary<string, Shader>(128);
             // Pregenerate a few needed shader
             ColorMultShader = GetShader("color_mult");
             if (File.Exists("shaders/color_mult2d.vs"))
@@ -83,11 +82,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < LoadedShaders.Count; i++)
+            foreach (Shader shader in LoadedShaders.Values)
             {
-                LoadedShaders[i].Original_Program = -1;
-                LoadedShaders[i].Internal_Program = -1;
-                LoadedShaders[i].Destroy();
+                shader.Original_Program = -1;
+                shader.Internal_Program = -1;
+                shader.Destroy();
             }
             LoadedShaders.Clear();
         }
@@ -104,12 +103,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>A valid shader object.</returns>
         public Shader GetShader(string shadername)
         {
-            for (int i = 0; i < LoadedShaders.Count; i++)
+            if (LoadedShaders.TryGetValue(shadername, out Shader foundShader))
             {
-                if (LoadedShaders[i].Name == shadername)
-                {
-                    return LoadedShaders[i];
-                }
+                return foundShader;
             }
             Shader Loaded = LoadShader(shadername);
             if (Loaded == null)
@@ -123,7 +119,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     Engine = this
                 };
             }
-            LoadedShaders.Add(Loaded);
+            LoadedShaders.Add(shadername, Loaded);
             return Loaded;
         }
 
@@ -423,7 +419,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void Remove()
         {
             Destroy();
-            Engine.LoadedShaders.Remove(this);
+            if (Engine.LoadedShaders.TryGetValue(Name, out Shader shad) && shad == this)
+            {
+                Engine.LoadedShaders.Remove(Name);
+            }
         }
 
         /// <summary>
