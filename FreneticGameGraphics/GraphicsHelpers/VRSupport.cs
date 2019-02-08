@@ -108,6 +108,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
             RightTexture.BaseTexture = TheClient.Textures.GetTexture("vr/controller/vive_circle_right");
             LeftTexture.GenerateFirst();
             RightTexture.GenerateFirst();
+            RightControllerModel = TheClient.Models.GetModel("vr/controller/vive");
+            LeftControllerModel = TheClient.Models.GetModel("vr/controller/vive");
         }
 
         /// <summary>
@@ -202,6 +204,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Current right controller.
         /// </summary>
         public VRController Right;
+
+        /// <summary>
+        /// Model for the left controller.
+        /// </summary>
+        public Model LeftControllerModel;
+
+        /// <summary>
+        /// Model for the right controller.
+        /// </summary>
+        public Model RightControllerModel;
 
         /// <summary>
         /// Helper for VR left controller textures.
