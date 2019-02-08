@@ -280,7 +280,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <returns>The squared distance.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double DistanceSquared_Flat(Location two)
+        public double DistanceSquared_Flat(in Location two)
         {
             double x1 = X - two.X;
             double y1 = Y - two.Y;
@@ -292,7 +292,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <returns>The squared distance.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double DistanceSquared(Location two)
+        public double DistanceSquared(in Location two)
         {
             double x1 = X - two.X;
             double y1 = Y - two.Y;
@@ -304,7 +304,7 @@ namespace FreneticGameCore.MathHelpers
         /// Returns the full linear distance of the vector location to another vector location, which goes through a square-root operation (inefficient).
         /// </summary>
         /// <returns>The square-rooted distance.</returns>
-        public double Distance(Location two)
+        public double Distance(in Location two)
         {
             double x1 = X - two.X;
             double y1 = Y - two.Y;
@@ -516,7 +516,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="two">The second location vector.</param>
         /// <returns>The cross product of the two.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location CrossProduct(Location two)
+        public Location CrossProduct(in Location two)
         {
             return new Location(Y * two.Z - two.Y * Z, two.X * Z - X * two.Z, X * two.Y - Y * two.X);
         }
@@ -527,7 +527,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="normal">The normal vector.</param>
         /// <returns>The reflected vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location Reflect(Location normal)
+        public Location Reflect(in Location normal)
         {
             return this - (2 * Dot(normal) * normal);
         }
@@ -537,7 +537,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="b">The other.</param>
         /// <returns>The projection.</returns>
-        public Location Project(Location b)
+        public Location Project(in Location b)
         {
             return b * (Dot(b) / b.LengthSquared());
         }
@@ -608,7 +608,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Location v1, Location v2)
+        public static bool operator ==(in Location v1, in Location v2)
         {
             return v1.X == v2.X && v1.Y == v2.Y && v1.Z == v2.Z;
         }
@@ -619,7 +619,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Location v1, Location v2)
+        public static bool operator !=(in Location v1, in Location v2)
         {
             return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
         }
@@ -638,7 +638,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        public static Location operator +(Location v1, Location v2)
+        public static Location operator +(in Location v1, in Location v2)
         {
             return new Location(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
         }
@@ -647,7 +647,7 @@ namespace FreneticGameCore.MathHelpers
         /// Negates a location.
         /// </summary>
         /// <param name="v">The first location.</param>
-        public static Location operator -(Location v)
+        public static Location operator -(in Location v)
         {
             return new Location(-v.X, -v.Y, -v.Z);
         }
@@ -657,7 +657,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        public static Location operator -(Location v1, Location v2)
+        public static Location operator -(in Location v1, in Location v2)
         {
             return new Location(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
         }
@@ -667,7 +667,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        public static Location operator *(Location v1, Location v2)
+        public static Location operator *(in Location v1, in Location v2)
         {
             return new Location(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
         }
@@ -677,7 +677,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
-        public static Location operator /(Location v1, Location v2)
+        public static Location operator /(in Location v1, in Location v2)
         {
             return new Location(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
         }
@@ -687,7 +687,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator *(Location v, double scale)
+        public static Location operator *(in Location v, double scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
@@ -697,7 +697,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator *(double scale, Location v)
+        public static Location operator *(double scale, in Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
@@ -707,7 +707,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator *(Location v, float scale)
+        public static Location operator *(in Location v, float scale)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
@@ -717,7 +717,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator *(float scale, Location v)
+        public static Location operator *(float scale, in Location v)
         {
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
@@ -727,7 +727,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator /(Location v, double scale)
+        public static Location operator /(in Location v, double scale)
         {
             double sc = 1.0 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
@@ -738,7 +738,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
-        public static Location operator /(Location v, float scale)
+        public static Location operator /(in Location v, float scale)
         {
             double sc = 1.0 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
@@ -817,21 +817,21 @@ namespace FreneticGameCore.MathHelpers
         }
 
         /// <summary>
-        /// Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies Math.Max to each coordinate.
+        /// Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(double, double)"/> to each coordinate.
         /// </summary>
         /// <param name="two">The second Location vector.</param>
         /// <returns>The bigger valued coordinates.</returns>
-        public Location Max(Location two)
+        public Location Max(in Location two)
         {
             return new Location(Math.Max(X, two.X), Math.Max(Y, two.Y), Math.Max(Z, two.Z));
         }
 
         /// <summary>
-        /// Returns the smaller valued coordinates for each of X, Y, and Z. Essentially, applies Math.Min to each coordinate.
+        /// Returns the smaller valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Min(double, double)"/> to each coordinate.
         /// </summary>
         /// <param name="two">The second Location vector.</param>
         /// <returns>The smaller valued coordinates.</returns>
-        public Location Min(Location two)
+        public Location Min(in Location two)
         {
             return new Location(Math.Min(X, two.X), Math.Min(Y, two.Y), Math.Min(Z, two.Z));
         }
@@ -852,15 +852,6 @@ namespace FreneticGameCore.MathHelpers
         public double SmallestValue()
         {
             return Math.Min(Math.Min(X, Y), Z);
-        }
-
-        /// <summary>
-        /// Accelerated method of adding 3 locations together, for debug reasons.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddThree(ref Location l1, ref Location l2, ref Location l3, out Location l4)
-        {
-            l4 = new Location(l1.X + l2.X + l3.X, l1.Y + l2.Y + l3.Y, l1.Z + l2.Z + l3.Z);
         }
     }
 }

@@ -120,7 +120,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="b">The other.</param>
         /// <returns>The added result.</returns>
-        public Quaternion Plus(Quaternion b)
+        public Quaternion Plus(in Quaternion b)
         {
             return new Quaternion(X + b.X, Y + b.Y, Z + b.Z, W + b.W);
         }
@@ -131,7 +131,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="b">The other.</param>
         /// <returns>The multiplied result.</returns>
-        public Quaternion MultipliedBy(Quaternion b)
+        public Quaternion MultipliedBy(in Quaternion b)
         {
             return new Quaternion(
                 X * b.W + b.X * W + Y * b.Z - Z * b.Y,
@@ -243,7 +243,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Equality.</returns>
-        public static bool operator==(Quaternion a, Quaternion b)
+        public static bool operator==(in Quaternion a, in Quaternion b)
         {
             return a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
         }
@@ -254,7 +254,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Non-equality.</returns>
-        public static bool operator !=(Quaternion a, Quaternion b)
+        public static bool operator !=(in Quaternion a, in Quaternion b)
         {
             return a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;
         }
@@ -265,7 +265,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Multiplication result.</returns>
-        public static Quaternion operator *(Quaternion a, Quaternion b)
+        public static Quaternion operator *(in Quaternion a, in Quaternion b)
         {
             return a.MultipliedBy(b);
         }
@@ -318,7 +318,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="axis">The axis.</param>
         /// <param name="angle">The angle (in radians).</param>
         /// <returns>The resultant Quaternion.</returns>
-        public static Quaternion FromAxisAngle(Location axis, double angle)
+        public static Quaternion FromAxisAngle(in Location axis, double angle)
         {
             double s = Math.Sin(angle * 0.5);
             return new Quaternion(axis.X * s, axis.Y * s, axis.Z * s, Math.Cos(angle * 0.5));
@@ -330,7 +330,7 @@ namespace FreneticGameCore.MathHelpers
         /// <param name="v1">First vector location.</param>
         /// <param name="v2">Second vector location.</param>
         /// <returns>The quaternion.</returns>
-        public static Quaternion GetQuaternionBetween(Location v1, Location v2)
+        public static Quaternion GetQuaternionBetween(in Location v1, in Location v2)
         {
             double dot = v1.Dot(v2);
             if (dot < -0.9999f)
@@ -363,7 +363,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="axis">The relative axis.</param>
         /// <returns>The angle.</returns>
-        public double AxisAngleForRadians(Location axis)
+        public double AxisAngleForRadians(in Location axis)
         {
             Location ra = new Location(X, Y, Z);
             Location p = ra.Project(axis);
@@ -456,7 +456,7 @@ namespace FreneticGameCore.MathHelpers
         /// </summary>
         /// <param name="v">The location vector.</param>
         /// <returns>The transformed location vector.</returns>
-        public Location Transform(Location v)
+        public Location Transform(in Location v)
         {
             double x2 = X * 2;
             double y2 = Y * 2;
