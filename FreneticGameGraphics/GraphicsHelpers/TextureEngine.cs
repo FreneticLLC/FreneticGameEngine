@@ -161,17 +161,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Gets the texture object for a specific texture name.
         /// </summary>
         /// <param name="texturename">The name of the texture.</param>
-        /// <param name="twidth">The texture width, if any.</param>
         /// <returns>A valid texture object.</returns>
-        public Texture GetTexture(string texturename, int twidth = 0)
+        public Texture GetTexture(string texturename)
         {
             texturename = FileHandler.CleanFileName(texturename);
             if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
             {
                 return foundTexture;
             }
-            Texture Loaded = LoadTexture(texturename, twidth);
-            if (Loaded == null && twidth == 0)
+            Texture Loaded = LoadTexture(texturename, 0);
+            if (Loaded == null)
             {
                 Loaded = new Texture()
                 {
@@ -184,15 +183,28 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     Height = White.Height,
                 };
             }
-            if (Loaded == null)
-            {
-                Loaded = LoadTexture("white", twidth);
-                Loaded.Name = texturename;
-                Loaded.LoadedProperly = false;
-            }
             LoadedTextures.Add(texturename, Loaded);
             OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(Loaded));
             return Loaded;
+        }
+
+        /// <summary>
+        /// Gets the a bitmap object for a texture by name.
+        /// </summary>
+        /// <param name="texturename">The name of the texture.</param>
+        /// <param name="twidth">The texture width, if any.</param>
+        /// <returns>A valid bitmap object, or null.</returns>
+        public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth)
+        {
+            texturename = FileHandler.CleanFileName(texturename);
+            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
+            {
+                if (foundTexture.Width == twidth && foundTexture.Height == twidth)
+                {
+                    return foundTexture.SaveToBMP();
+                }
+            }
+            return LoadBitmapForTexture(texturename, twidth, out _);
         }
 
         /// <summary>
@@ -221,13 +233,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Loads a texture from file.
+        /// Loads a texture's bitmap from file.
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
         /// <param name="twidth">The texture width, if any.</param>
-        /// <returns>The loaded texture, or null if it does not exist.</returns>
-        // Shut up the CodeAnalysis (It doesn't like the BMP variable handling below).
-        public Texture LoadTexture(string filename, int twidth = 0)
+        /// <param name="pf">The pakked file used for loading.</param>
+        /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
+        public Bitmap LoadBitmapForTexture(string filename, int twidth, out PakkedFile pf)
         {
             try
             {
@@ -237,43 +249,71 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
                         TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
                         "' does not exist.");
+                    pf = null;
                     return null;
                 }
-                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png", out PakkedFile pf));
-                if (twidth <= 0 && !AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
+                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png", out pf));
+#if DEBUG
+                if (bmp.Width <= 0 || bmp.Height <= 0)
                 {
-                    int wid = GetNextPOTValue(bmp.Width);
-                    int hei = GetNextPOTValue(bmp.Height);
-                    Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
-                    bmp.Dispose();
-                    bmp = bmp_fixed;
+                    SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
+                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': Bitmap loading failed!");
+                    return null;
                 }
-                Texture texture = new Texture()
+#endif
+                if (twidth <= 0)
                 {
-                    Engine = this,
-                    Name = filename,
-                    FileRef = pf
-                };
-                if (twidth <= 0 || (bmp.Width == twidth && bmp.Height == twidth))
+                    if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
+                    {
+                        int wid = GetNextPOTValue(bmp.Width);
+                        int hei = GetNextPOTValue(bmp.Height);
+                        Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
+                        bmp.Dispose();
+                        return bmp_fixed;
+                    }
+                    return bmp;
+                }
+                else if (bmp.Width == twidth && bmp.Height == twidth)
                 {
-                    TextureFromBitMap(texture, bmp);
+                    return bmp;
                 }
                 else
                 {
                     Bitmap bmp2 = new Bitmap(bmp, new Size(twidth, twidth));
-                    TextureFromBitMap(texture, bmp2);
-                    bmp2.Dispose();
+                    bmp.Dispose();
+                    return bmp2;
                 }
-                bmp.Dispose();
-                texture.LoadedProperly = true;
-                return texture;
             }
             catch (Exception ex)
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
                     TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
+                pf = null;
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Loads a texture from file.
+        /// </summary>
+        /// <param name="filename">The name of the file to use.</param>
+        /// <param name="twidth">The texture width, if any.</param>
+        /// <returns>The loaded texture, or null if it does not exist.</returns>
+        public Texture LoadTexture(string filename, int twidth = 0)
+        {
+            Texture texture = new Texture()
+            {
+                Engine = this,
+                Name = filename
+            };
+            Bitmap bmp = LoadBitmapForTexture(filename, twidth, out texture.FileRef);
+            if (bmp == null)
+            {
+                return null;
+            }
+            TextureFromBitMap(texture, bmp);
+            texture.LoadedProperly = true;
+            return texture;
         }
 
         private void TextureFromBitMap(Texture texture, Bitmap bmp)
@@ -333,15 +373,20 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         "' does not exist.");
                     return;
                 }
-                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png"));
-                if (bmp.Width != twidth || bmp.Height != twidth)
+                using (Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png")))
                 {
-                    Bitmap bmp2 = ResizeTexture(bmp, twidth);
-                    bmp.Dispose();
-                    bmp = bmp2;
+                    if (bmp.Width != twidth || bmp.Height != twidth)
+                    {
+                        using (Bitmap bmp2 = ResizeTexture(bmp, twidth))
+                        {
+                            LockBitmapToTexture(bmp2, depth);
+                        }
+                    }
+                    else
+                    {
+                        LockBitmapToTexture(bmp, depth);
+                    }
                 }
-                LockBitmapToTexture(bmp, depth);
-                bmp.Dispose();
             }
             catch (Exception ex)
             {
@@ -369,13 +414,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GL.GenTextures(1, out texture.Original_InternalID);
             texture.Internal_Texture = texture.Original_InternalID;
             texture.Bind();
-            Bitmap bmp = new Bitmap(2, 2);
-            bmp.SetPixel(0, 0, c);
-            bmp.SetPixel(0, 1, c);
-            bmp.SetPixel(1, 0, c);
-            bmp.SetPixel(1, 1, c);
-            LockBitmapToTexture(bmp, false);
-            bmp.Dispose();
+            using (Bitmap bmp = new Bitmap(2, 2))
+            {
+                bmp.SetPixel(0, 0, c);
+                bmp.SetPixel(0, 1, c);
+                bmp.SetPixel(1, 0, c);
+                bmp.SetPixel(1, 1, c);
+                LockBitmapToTexture(bmp, false);
+            }
             texture.LoadedProperly = true;
             return texture;
         }
@@ -389,6 +435,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
+            GL.Flush();
             bmp.UnlockBits(bmp_data);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, linear ? (int)TextureMinFilter.Linear : (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, linear ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
@@ -406,6 +453,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
+            GL.Flush();
             bmp.UnlockBits(bmp_data);
         }
 
