@@ -24,140 +24,150 @@ namespace FreneticGameGraphics
     public static class SystemExtensions
     {
         /// <summary>
-        /// Converts a Core quaternion to an OpenTK quaternion.
+        /// Converts a Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/> to an OpenTK <see cref="OpenTK.Quaternion"/>.
         /// </summary>
-        /// <param name="q">The Core quaternion.</param>
-        /// <returns>The OpenTK quaternion.</returns>
-        public static OpenTK.Quaternion ToOpenTK(this FreneticGameCore.MathHelpers.Quaternion q)
+        /// <param name="quat">The Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/>.</param>
+        /// <returns>The OpenTK <see cref="OpenTK.Quaternion"/>.</returns>
+        public static OpenTK.Quaternion ToOpenTK(this FreneticGameCore.MathHelpers.Quaternion quat)
         {
-            return new OpenTK.Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+            return new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
         }
 
         /// <summary>
-        /// Converts a Core quaternion to an OpenTK quaternion D.
+        /// Converts a Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/> to an OpenTK <see cref="Quaterniond"/>.
         /// </summary>
-        /// <param name="q">The Core quaternion.</param>
-        /// <returns>The OpenTK quaternion D.</returns>
-        public static Quaterniond ToOpenTKDoubles(this FreneticGameCore.MathHelpers.Quaternion q)
+        /// <param name="quat">The Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/>.</param>
+        /// <returns>The OpenTK <see cref="Quaterniond"/>.</returns>
+        public static Quaterniond ToOpenTKDoubles(this FreneticGameCore.MathHelpers.Quaternion quat)
         {
-            return new Quaterniond(q.X, q.Y, q.Z, q.W);
+            return new Quaterniond(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts a BEPU quaternion to an OpenTK quaternion.
+        /// Converts a BEPU <see cref="BEPUutilities.Quaternion"/> to an OpenTK <see cref="OpenTK.Quaternion"/>.
         /// </summary>
-        /// <param name="q">The BEPU quaternion.</param>
-        /// <returns>The OpenTK quaternion.</returns>
-        public static OpenTK.Quaternion ToOpenTK(this BEPUutilities.Quaternion q)
+        /// <param name="quat">The BEPU <see cref="BEPUutilities.Quaternion"/>.</param>
+        /// <returns>The OpenTK <see cref="OpenTK.Quaternion"/>.</returns>
+        public static OpenTK.Quaternion ToOpenTK(this BEPUutilities.Quaternion quat)
         {
-            return new OpenTK.Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+            return new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
         }
 
         /// <summary>
-        /// Converts an OpenTK quaternion to a Core quaternion.
+        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to a Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/>.
         /// </summary>
-        /// <param name="q">The OpenTK quaternion.</param>
-        /// <returns>The Core quaternion.</returns>
-        public static FreneticGameCore.MathHelpers.Quaternion ToCore(this OpenTK.Quaternion q)
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <returns>The Core <see cref="FreneticGameCore.MathHelpers.Quaternion"/>.</returns>
+        public static FreneticGameCore.MathHelpers.Quaternion ToCore(this OpenTK.Quaternion quat)
         {
-            return new FreneticGameCore.MathHelpers.Quaternion(q.X, q.Y, q.Z, q.W);
+            return new FreneticGameCore.MathHelpers.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts an OpenTK quaternion to a BEPU quaternion.
+        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to a BEPU <see cref="BEPUutilities.Quaternion"/>.
         /// </summary>
-        /// <param name="q">The OpenTK quaternion.</param>
-        /// <returns>The BEPU quaternion.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Quaternion q)
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <returns>The BEPU <see cref="BEPUutilities.Quaternion"/>.</returns>
+        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Quaternion quat)
         {
-            return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
+            return new BEPUutilities.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts a float quaternion to doubles.
+        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to an OpenTK <see cref="Quaterniond"/>.
         /// </summary>
-        /// <param name="q">Float quaternion.</param>
-        /// <returns>Double quaternion.</returns>
-        public static Quaterniond ToDoubles(this OpenTK.Quaternion q)
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <returns>The OpenTK <see cref="Quaterniond"/>.</returns>
+        public static Quaterniond ToDoubles(this OpenTK.Quaternion quat)
         {
-            return new Quaterniond(q.X, q.Y, q.Z, q.W);
-        }
-        
-        /// <summary>
-        /// Converts an OpenTK Vector3 to an OpenTK Vector3D.
-        /// </summary>
-        /// <param name="l">The Vector3.</param>
-        /// <returns>The OpenTK Vector3D.</returns>
-        public static Vector3d ToOpenTK3D(this Vector3 l)
-        {
-            return new Vector3d(l.X, l.Y, l.Z);
+            return new Quaterniond(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts a location to an OpenTK Vector3D.
+        /// Converts an OpenTK <see cref="Vector3"/> to an OpenTK <see cref="Vector3d"/>.
         /// </summary>
-        /// <param name="l">The location.</param>
-        /// <returns>The OpenTK Vector3D.</returns>
-        public static Vector3d ToOpenTK3D(this Location l)
+        /// <param name="vec">The OpenTK <see cref="Vector3"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector3d"/>.</returns>
+        public static Vector3d ToDoubles(this Vector3 vec)
         {
-            return new Vector3d(l.X, l.Y, l.Z);
+            return new Vector3d(vec.X, vec.Y, vec.Z);
         }
 
         /// <summary>
-        /// Converts a Color3F to an OpenTK Vector3.
+        /// Converts a <see cref="Location"/> to an OpenTK <see cref="Vector3d"/>.
         /// </summary>
-        /// <param name="l">The color.</param>
-        /// <returns>The OpenTK Vector3.</returns>
-        public static Vector3 ToOpenTK(this Color3F l)
+        /// <param name="loc">The <see cref="Location"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector3d"/>.</returns>
+        public static Vector3d ToOpenTK3D(this Location loc)
         {
-            return new Vector3(l.R, l.G, l.B);
+            return new Vector3d(loc.X, loc.Y, loc.Z);
         }
 
         /// <summary>
-        /// Converts a BEPU Vector3 to an OpenTK Vector3.
+        /// Converts a <see cref="Color3F"/> to an OpenTK <see cref="Vector3"/> as R,G,B.
         /// </summary>
-        /// <param name="l">The BEPU Vector.</param>
-        /// <returns>The OpenTK Vector3.</returns>
-        public static Vector3 ToOpenTK(this BEPUutilities.Vector3 l)
+        /// <param name="color">The <see cref="Color3F"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector3"/>.</returns>
+        public static Vector3 ToOpenTK(this Color3F color)
         {
-            return new Vector3((float)l.X, (float)l.Y, (float)l.Z);
+            return new Vector3(color.R, color.G, color.B);
         }
 
         /// <summary>
-        /// Converts a location to an OpenTK Vector3.
+        /// Converts a <see cref="Color3F"/> to an OpenTK <see cref="Vector3"/> as R,G,B,A.
         /// </summary>
-        /// <param name="l">The location.</param>
-        /// <returns>The OpenTK Vector3.</returns>
-        public static Vector3 ToOpenTK(this Location l)
+        /// <param name="color">The <see cref="Color4F"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector4"/> as R,G,B,A.</returns>
+        public static Vector4 ToOpenTK(this Color4F color)
         {
-            return new Vector3((float)l.X, (float)l.Y, (float)l.Z);
+            return new Vector4(color.R, color.G, color.B, color.A);
         }
 
         /// <summary>
-        /// Converts an OpenTK Vector3D to a location.
+        /// Converts a BEPU <see cref="BEPUutilities.Vector3"/> to an OpenTK <see cref="Vector3"/>.
         /// </summary>
-        /// <param name="l">The OpenTK Vector3D.</param>
-        /// <returns>The location.</returns>
-        public static Location ToLocation(this Vector3d l)
+        /// <param name="vec">The BEPU <see cref="BEPUutilities.Vector3"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector3"/>.</returns>
+        public static Vector3 ToOpenTK(this BEPUutilities.Vector3 vec)
         {
-            return new Location(l.X, l.Y, l.Z);
+            return new Vector3((float)vec.X, (float)vec.Y, (float)vec.Z);
         }
 
         /// <summary>
-        /// Converts an OpenTK Vector3 to a location.
+        /// Converts a <see cref="Location"/> to an OpenTK <see cref="Vector3"/>.
         /// </summary>
-        /// <param name="l">The OpenTK Vector3.</param>
-        /// <returns>The location.</returns>
-        public static Location ToLocation(this Vector3 l)
+        /// <param name="loc">The <see cref="Location"/>.</param>
+        /// <returns>The OpenTK <see cref="Vector3"/>.</returns>
+        public static Vector3 ToOpenTK(this Location loc)
         {
-            return new Location(l.X, l.Y, l.Z);
+            return new Vector3((float)loc.X, (float)loc.Y, (float)loc.Z);
         }
 
         /// <summary>
-        /// Converts a OpenTK Matrix4 to an OpenTK Matrix4 (Doubles).
+        /// Converts an OpenTK Vector3D to a <see cref="Location"/>.
         /// </summary>
-        /// <param name="mat">The input matrix.</param>
-        /// <returns>The output matrix.</returns>
+        /// <param name="vec">The OpenTK Vector3D.</param>
+        /// <returns>The <see cref="Location"/>.</returns>
+        public static Location ToLocation(this Vector3d vec)
+        {
+            return new Location(vec.X, vec.Y, vec.Z);
+        }
+
+        /// <summary>
+        /// Converts an OpenTK <see cref="Vector3"/> to a <see cref="Location"/>.
+        /// </summary>
+        /// <param name="loc">The OpenTK <see cref="Vector3"/>.</param>
+        /// <returns>The <see cref="Location"/>.</returns>
+        public static Location ToLocation(this Vector3 loc)
+        {
+            return new Location(loc.X, loc.Y, loc.Z);
+        }
+
+        /// <summary>
+        /// Converts a OpenTK <see cref="Matrix4"/> to an OpenTK <see cref="Matrix4d"/>.
+        /// </summary>
+        /// <param name="mat">The input <see cref="Matrix4"/>.</param>
+        /// <returns>The output <see cref="Matrix4d"/>.</returns>
         public static Matrix4d ConvertToD(this Matrix4 mat)
         {
             return new Matrix4d(mat.M11, mat.M12, mat.M13, mat.M14, mat.M21, mat.M22, mat.M23,
@@ -165,10 +175,10 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
-        /// Converts a BEPU Matrix4 to an OpenTK Matrix4 (Doubles).
+        /// Converts a BEPU <see cref="BEPUutilities.Matrix"/> to an OpenTK <see cref="Matrix4"/>.
         /// </summary>
-        /// <param name="mat">The input matrix.</param>
-        /// <returns>The output matrix.</returns>
+        /// <param name="mat">The input <see cref="BEPUutilities.Matrix"/>.</param>
+        /// <returns>The output <see cref="Matrix4"/>.</returns>
         public static Matrix4 Convert(this BEPUutilities.Matrix mat)
         {
             return new Matrix4((float)mat.M11, (float)mat.M12, (float)mat.M13, (float)mat.M14, (float)mat.M21, (float)mat.M22, (float)mat.M23,
@@ -176,10 +186,10 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
-        /// Converts a BEPU Matrix4 to an OpenTK Matrix4 (Doubles).
+        /// Converts a BEPU <see cref="BEPUutilities.Matrix"/> to an OpenTK <see cref="Matrix4d"/>.
         /// </summary>
-        /// <param name="mat">The input matrix.</param>
-        /// <returns>The output matrix.</returns>
+        /// <param name="mat">The input <see cref="BEPUutilities.Matrix"/>.</param>
+        /// <returns>The output <see cref="Matrix4d"/>.</returns>
         public static Matrix4d ConvertD(this BEPUutilities.Matrix mat)
         {
             return new Matrix4d(mat.M11, mat.M12, mat.M13, mat.M14, mat.M21, mat.M22, mat.M23,
@@ -187,10 +197,10 @@ namespace FreneticGameGraphics
         }
 
         /// <summary>
-        /// Converts an OpenTK Matrix4 to a BEPU Matrix4 (Doubles).
+        /// Converts an OpenTK <see cref="Matrix4d"/> to a BEPU <see cref="BEPUutilities.Matrix"/>.
         /// </summary>
-        /// <param name="mat">The input matrix.</param>
-        /// <returns>The output matrix.</returns>
+        /// <param name="mat">The input <see cref="Matrix4d"/>.</param>
+        /// <returns>The output <see cref="BEPUutilities.Matrix"/>.</returns>
         public static BEPUutilities.Matrix ConvertD(this Matrix4d mat)
         {
             return new BEPUutilities.Matrix(mat.M11, mat.M12, mat.M13, mat.M14, mat.M21, mat.M22, mat.M23,

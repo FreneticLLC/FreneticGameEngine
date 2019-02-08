@@ -106,6 +106,15 @@ namespace FreneticGameCore.MathHelpers
         }
 
         /// <summary>
+        /// Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.
+        /// </summary>
+        /// <returns>The location value.</returns>
+        public Location ToLocation()
+        {
+            return new Location(R, G, B);
+        }
+
+        /// <summary>
         /// Returns a 12-byte set representation of this color.
         /// Inverts <see cref="FromBytes(byte[], int)"/>.
         /// </summary>
