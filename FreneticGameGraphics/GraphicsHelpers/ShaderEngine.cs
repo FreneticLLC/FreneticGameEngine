@@ -237,6 +237,44 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Processes "#define" lines in a shader.
+        /// </summary>
+        /// <param name="str">The shader text.</param>
+        /// <param name="defValues">The define-value map.</param>
+        /// <returns>The processed shader text.</returns>
+        public string PatchDefs(string str, Dictionary<string, string> defValues)
+        {
+            if (!str.Contains("#define"))
+            {
+                return str;
+            }
+            StringBuilder fsb = new StringBuilder(str.Length + defValues.Count);
+            string[] dat = str.Replace("\r", "").Split('\n');
+            for (int i = 0; i < dat.Length; i++)
+            {
+                if (dat[i].StartsWith("#define "))
+                {
+                    string defined = dat[i].Substring("#define ".Length);
+                    string name = defined.BeforeAndAfter(" ", out string origValue);
+                    if (defValues.TryGetValue(name, out string newValue))
+                    {
+                        fsb.Append("#define ").Append(name).Append(" ").Append(newValue);
+                    }
+                    else
+                    {
+                        fsb.Append(dat[i]);
+                    }
+                }
+                else
+                {
+                    fsb.Append(dat[i]);
+                }
+                fsb.Append('\n');
+            }
+            return fsb.ToString();
+        }
+
+        /// <summary>
         /// Modifies the shader code string to include any external shaders.
         /// </summary>
         /// <param name="str">The shader code.</param>
@@ -309,6 +347,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("Shader - Compute - Compile");
             return program;
         }
+        private Dictionary<string, string> reusableDefValues = new Dictionary<string, string>(128);
 
         /// <summary>
         /// Compiles a VertexShader and FragmentShader to a usable shader program.
@@ -320,16 +359,21 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The internal OpenGL program ID.</returns>
         public int CompileToProgram(string VS, string FS, string[] vars, string geom)
         {
-            for (int i = 0; i < vars.Length; i++)
+            if (vars.Length > 0)
             {
-                if (vars[i].Length > 0)
+                reusableDefValues.Clear();
+                for (int i = 0; i < vars.Length; i++)
                 {
-                    VS = VS.Replace("#define " + vars[i] + " 0", "#define " + vars[i] + " 1");
-                    FS = FS.Replace("#define " + vars[i] + " 0", "#define " + vars[i] + " 1");
-                    if (geom != null)
+                    if (vars[i].Length > 0)
                     {
-                        geom = geom.Replace("#define " + vars[i] + " 0", "#define " + vars[i] + " 1");
+                        reusableDefValues.Add(vars[i], "1");
                     }
+                }
+                VS = PatchDefs(VS, reusableDefValues);
+                FS = PatchDefs(VS, reusableDefValues);
+                if (geom != null)
+                {
+                    geom = PatchDefs(geom, reusableDefValues);
                 }
             }
             int gObj = -1;
