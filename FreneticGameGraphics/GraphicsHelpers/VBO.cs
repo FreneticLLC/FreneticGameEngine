@@ -658,17 +658,26 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Renders the VBO fully, without handling textures at all.
+        /// </summary>
+        public void RenderWithoutTextures()
+        {
+            GL.BindVertexArray(_VAO);
+            GL.DrawElements(PrimitiveType.Triangles, vC, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            GL.BindVertexArray(0);
+        }
+
+        /// <summary>
         /// Render the VBO fully.
         /// </summary>
-        /// <param name="texture">Whether to use the textures.</param>
         /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
-        public void Render(bool texture, bool fixafter = true)
+        public void Render(bool fixafter)
         {
             if (!generated)
             {
                 return;
             }
-            if (texture && Tex != null)
+            if (Tex != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
                 if (Tex_Reflectivity != null)
@@ -700,10 +709,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 GL.ActiveTexture(TextureUnit.Texture0);
                 Tex.Bind();
             }
-            GL.BindVertexArray(_VAO);
-            GL.DrawElements(PrimitiveType.Triangles, vC, DrawElementsType.UnsignedInt, IntPtr.Zero);
-            GL.BindVertexArray(0);
-            if (fixafter && texture && Tex != null)
+            RenderWithoutTextures();
+            if (fixafter && Tex != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
                 Tex.Engine.Black.Bind();
