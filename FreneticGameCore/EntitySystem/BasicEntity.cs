@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FreneticGameCore.Files;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.CoreSystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -79,12 +80,12 @@ namespace FreneticGameCore.EntitySystem
         /// <summary>
         /// Fired when this entity is spawned into a world.
         /// </summary>
-        public FreneticEvent<EntitySpawnEventArgs> OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>();
+        public FreneticEvent<EntitySpawnEventArgs> OnSpawnEvent;
 
         /// <summary>
         /// Fired when this entity is despawned out of a world.
         /// </summary>
-        public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>();
+        public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent;
 
         /// <summary>
         /// Rotates the entity around a normalized axis by an angle, relative to its current orientation (based on <see cref="LastKnownOrientation"/>).
@@ -173,6 +174,9 @@ namespace FreneticGameCore.EntitySystem
             Ticks = _ticks;
             OnPositionChanged += SetLKP;
             OnOrientationChanged += SetLKO;
+            OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>(Engine.Schedule.EventHelper);
+            OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>(Engine.Schedule.EventHelper);
+
         }
 
         /// <summary>
@@ -283,14 +287,14 @@ namespace FreneticGameCore.EntitySystem
     /// <summary>
     /// Represents the arguments to an entity spawn event.
     /// </summary>
-    public class EntitySpawnEventArgs : EventArgs
+    public class EntitySpawnEventArgs : FreneticEventArgs
     {
     }
 
     /// <summary>
     /// Represents the arguments to an entity de-spawn event.
     /// </summary>
-    public class EntityDespawnEventArgs : EventArgs
+    public class EntityDespawnEventArgs : FreneticEventArgs
     {
     }
 }

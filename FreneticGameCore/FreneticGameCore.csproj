@@ -84,7 +84,6 @@
     <Compile Include="EntitySystem\PhysicsHelpers\EntityBoxShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityCharacterShape.cs" />
     <Compile Include="EntitySystem\PhysicsHelpers\EntityShapeHelper.cs" />
-    <Compile Include="CoreSystems\FreneticEvent.cs" />
     <Compile Include="MathHelpers\Frustum.cs" />
     <Compile Include="EntitySystem\EntityPhysicsProperty.cs" />
     <Compile Include="CoreSystems\LanguageEngine.cs" />

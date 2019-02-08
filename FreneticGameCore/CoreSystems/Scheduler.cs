@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FreneticGameCore.UtilitySystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.CoreSystems
 {
@@ -26,6 +27,58 @@ namespace FreneticGameCore.CoreSystems
         /// TODO: Could be a ConcurrentQueue? Probably should be, for that matter!
         /// </summary>
         public LockedLinkedList<SyncScheduleItem> Tasks = new LockedLinkedList<SyncScheduleItem>();
+
+        /// <summary>
+        /// A helper class to help with interactions with <see cref="FreneticEventHelper"/>.
+        /// </summary>
+        public class SchedulerEventHelper : FreneticEventHelper
+        {
+            /// <summary>
+            /// The scheduler object.
+            /// </summary>
+            public Scheduler Schedule;
+
+            /// <summary>
+            /// Start an asynchronous action.
+            /// </summary>
+            /// <param name="act">The relevant action.</param>
+            public override void StartAsync(Action act)
+            {
+                Schedule.StartAsyncTask(act);
+            }
+
+            /// <summary>
+            /// Schedules a synchronous action.
+            /// </summary>
+            /// <param name="act">The relevant action.</param>
+            public override void ScheduleSync(Action act)
+            {
+                Schedule.ScheduleSyncTask(act);
+            }
+
+            /// <summary>
+            /// Schedules a synchronous action.
+            /// </summary>
+            /// <param name="act">The relevant action.</param>
+            /// <param name="delay">The delay before starting.</param>
+            public override void ScheduleSync(Action act, double delay)
+            {
+                Schedule.ScheduleSyncTask(act, delay);
+            }
+        }
+
+        /// <summary>
+        /// The event helper for this scheduler.
+        /// </summary>
+        public SchedulerEventHelper EventHelper;
+
+        /// <summary>
+        /// Constructs the scheduler.
+        /// </summary>
+        public Scheduler()
+        {
+            EventHelper = new SchedulerEventHelper() { Schedule = this };
+        }
 
         /// <summary>
         /// Gets a simple string representation of this scheduler.

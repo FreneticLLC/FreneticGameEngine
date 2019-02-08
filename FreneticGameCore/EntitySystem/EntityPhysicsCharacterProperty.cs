@@ -18,6 +18,7 @@ using BEPUutilities.DataStructures;
 using BEPUphysics.NarrowPhaseSystems.Pairs;
 using BEPUphysics.Materials;
 using FreneticGameCore.CoreSystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.EntitySystem
 {
@@ -55,7 +56,7 @@ namespace FreneticGameCore.EntitySystem
         /// Post-spawn handling.
         /// </summary>
         /// <param name="e">The event.</param>
-        public void SpawnHandle(FreneticEventArgs<EntitySpawnEventArgs> e)
+        public void SpawnHandle(EntitySpawnEventArgs e)
         {
             Character = PhysEnt.OriginalObject as CharacterController;
             if (double.IsNaN(StandardGroundForce))

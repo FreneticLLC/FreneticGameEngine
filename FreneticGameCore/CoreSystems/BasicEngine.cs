@@ -252,7 +252,7 @@ namespace FreneticGameCore.CoreSystems
                             bep.OnSpawn();
                         }
                     }
-                    ce.OnSpawnEvent?.Fire(Schedule, new EntitySpawnEventArgs());
+                    ce.OnSpawnEvent?.Fire(new EntitySpawnEventArgs());
                 }
                 finally
                 {
@@ -319,7 +319,7 @@ namespace FreneticGameCore.CoreSystems
                         bep.OnDespawn();
                     }
                 }
-                ent.OnDespawnEvent?.Fire(Schedule, new EntityDespawnEventArgs());
+                ent.OnDespawnEvent?.Fire(new EntityDespawnEventArgs());
                 RemoveEntity(ent);
                 ent.IsSpawned = false;
             }
