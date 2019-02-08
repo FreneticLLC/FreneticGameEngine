@@ -370,7 +370,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     }
                 }
                 VS = PatchDefs(VS, reusableDefValues);
-                FS = PatchDefs(VS, reusableDefValues);
+                FS = PatchDefs(FS, reusableDefValues);
                 if (geom != null)
                 {
                     geom = PatchDefs(geom, reusableDefValues);

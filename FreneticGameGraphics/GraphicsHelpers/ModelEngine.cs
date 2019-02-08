@@ -421,6 +421,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             Name = _name;
             Meshes = new List<ModelMesh>();
+            MeshMap = new Dictionary<string, ModelMesh>();
         }
 
         /// <summary>

@@ -709,6 +709,23 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, empty vertices!");
                 return;
             }
+#if DEBUG
+            if (vecs.Length != norms.Length || vecs.Length != texs.Length || vecs.Length != tangs.Length)
+            {
+                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, main vertex attribute counts not aligned!");
+                return;
+            }
+            if (cols != null && vecs.Length != cols.Length)
+            {
+                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, vertex color attribute count not aligned!");
+                return;
+            }
+            if (Internal.HasBones && (vecs.Length != ids.Length || vecs.Length != weights.Length || vecs.Length != ids2.Length || vecs.Length != weights2.Length))
+            {
+                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, vertex bone attribute counts not aligned!");
+                return;
+            }
+#endif
             Internal.LastVRAM = 0;
             // Vertex buffer
             GL.GenBuffers(1, out Internal.VertexVBO);
