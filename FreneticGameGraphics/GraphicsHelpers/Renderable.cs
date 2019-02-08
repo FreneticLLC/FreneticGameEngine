@@ -261,14 +261,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     Indices.Add((uint)Indices.Count);
                     AddEmptyBoneInfo();
                 }
-                float aX = (tc.xflip ? 1 : 0) + tc.xshift;
-                float aY = (tc.yflip ? 1 : 0) + tc.yshift;
-                float bX = (tc.xflip ? 0 : 1) * tc.xscale + tc.xshift;
-                float bY = (tc.yflip ? 1 : 0) + tc.yshift;
-                float cX = (tc.xflip ? 0 : 1) * tc.xscale + tc.xshift;
-                float cY = (tc.yflip ? 0 : 1) * tc.yscale + tc.yshift;
-                float dX = (tc.xflip ? 1 : 0) + tc.xshift;
-                float dY = (tc.yflip ? 0 : 1) * tc.yscale + tc.yshift;
+                float aX = (tc.XFlip ? 1 : 0) + tc.XShift;
+                float aY = (tc.YFlip ? 1 : 0) + tc.YShift;
+                float bX = (tc.XFlip ? 0 : 1) * tc.XScale + tc.XShift;
+                float bY = (tc.YFlip ? 1 : 0) + tc.YShift;
+                float cX = (tc.XFlip ? 0 : 1) * tc.XScale + tc.XShift;
+                float cY = (tc.YFlip ? 0 : 1) * tc.YScale + tc.YShift;
+                float dX = (tc.XFlip ? 1 : 0) + tc.XShift;
+                float dY = (tc.YFlip ? 0 : 1) * tc.YScale + tc.YShift;
                 float zero = offs ? -0.5f : -1; // Sssh
                 float one = offs ? 0.5f : 1;
                 if (normal.Z == 1)
@@ -894,43 +894,43 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public TextureCoordinates()
         {
-            xscale = 1;
-            yscale = 1;
-            xshift = 0;
-            yshift = 0;
-            xflip = false;
-            yflip = false;
+            XScale = 1;
+            YScale = 1;
+            XShift = 0;
+            YShift = 0;
+            XFlip = false;
+            YFlip = false;
         }
 
         /// <summary>
         /// The X-Scale.
         /// </summary>
-        public float xscale;
+        public float XScale;
 
         /// <summary>
         /// The Y-Scale.
         /// </summary>
-        public float yscale;
+        public float YScale;
 
         /// <summary>
         /// The X-Shift.
         /// </summary>
-        public float xshift;
+        public float XShift;
 
         /// <summary>
         /// The Y-Shift.
         /// </summary>
-        public float yshift;
+        public float YShift;
 
         /// <summary>
         /// The X-flip option.
         /// </summary>
-        public bool xflip;
+        public bool XFlip;
 
         /// <summary>
         /// The Y-flip option.
         /// </summary>
-        public bool yflip;
+        public bool YFlip;
 
         /// <summary>
         /// Gets a quick string form of the Texture Coordinates.
@@ -938,7 +938,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The string form.</returns>
         public override string ToString()
         {
-            return xscale + "/" + yscale + "/" + xshift + "/" + yshift + "/" + (xflip ? "t" : "f") + "/" + (yflip ? "t" : "f");
+            return XScale + "/" + YScale + "/" + XShift + "/" + YShift + "/" + (XFlip ? "t" : "f") + "/" + (YFlip ? "t" : "f");
         }
 
         /// <summary>
@@ -950,12 +950,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             TextureCoordinates tc = new TextureCoordinates();
             string[] data = str.SplitFast('/');
-            tc.xscale = (float)StringConversionHelper.StringToFloat(data[0]);
-            tc.yscale = (float)StringConversionHelper.StringToFloat(data[1]);
-            tc.xshift = (float)StringConversionHelper.StringToFloat(data[2]);
-            tc.yshift = (float)StringConversionHelper.StringToFloat(data[3]);
-            tc.xflip = data[4] == "t";
-            tc.yflip = data[5] == "t";
+            tc.XScale = StringConversionHelper.StringToFloat(data[0]);
+            tc.YScale = StringConversionHelper.StringToFloat(data[1]);
+            tc.XShift = StringConversionHelper.StringToFloat(data[2]);
+            tc.YShift = StringConversionHelper.StringToFloat(data[3]);
+            tc.XFlip = data[4] == "t";
+            tc.YFlip = data[5] == "t";
             return tc;
         }
     }
