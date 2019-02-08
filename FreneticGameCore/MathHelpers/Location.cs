@@ -246,6 +246,36 @@ namespace FreneticGameCore.MathHelpers
         }
 
         /// <summary>
+        /// A copy of this <see cref="Location"/> with a different X coordinate value.
+        /// </summary>
+        /// <param name="_x">The new X coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithX(double _x)
+        {
+            return new Location(_x, Y, Z);
+        }
+
+        /// <summary>
+        /// A copy of this <see cref="Location"/> with a different Y coordinate value.
+        /// </summary>
+        /// <param name="_y">The new Y coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithY(double _y)
+        {
+            return new Location(X, _y, Z);
+        }
+
+        /// <summary>
+        /// A copy of this <see cref="Location"/> with a different Z coordinate value.
+        /// </summary>
+        /// <param name="_z">The new Z coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithZ(double _z)
+        {
+            return new Location(X, Y, _z);
+        }
+
+        /// <summary>
         /// Returns the flat (X/Y) linear distance of the vector location to another vector location, squared for efficiency.
         /// </summary>
         /// <returns>The squared distance.</returns>

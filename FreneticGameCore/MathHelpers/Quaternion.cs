@@ -316,7 +316,7 @@ namespace FreneticGameCore.MathHelpers
         /// Creates a Quaternion from an axis and an angle around the axis.
         /// </summary>
         /// <param name="axis">The axis.</param>
-        /// <param name="angle">The angle.</param>
+        /// <param name="angle">The angle (in radians).</param>
         /// <returns>The resultant Quaternion.</returns>
         public static Quaternion FromAxisAngle(Location axis, double angle)
         {
