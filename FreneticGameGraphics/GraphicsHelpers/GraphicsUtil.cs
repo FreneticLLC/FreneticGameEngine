@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using FreneticGameCore;
 using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
@@ -29,6 +30,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// Checks errors when debug is enabled.
         /// </summary>
         /// <param name="loc">The source calling location.</param>
+        [Conditional("DEBUG")]
         public static void CheckError(string loc)
         {
 #if DEBUG

@@ -41,69 +41,46 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// A square.
         /// </summary>
-        public VBO Square;
+        public Renderable Square;
 
         /// <summary>
         /// A line.
         /// </summary>
-        VBO Line;
+        Renderable Line;
         /// <summary>
         /// A box.
         /// </summary>
-        VBO Box;
+        Renderable Box;
 
         /// <summary>
         /// Generates a square.
         /// </summary>
         void GenerateSquareVBO()
         {
-            Vector3[] vecs = new Vector3[6];
-            uint[] inds = new uint[6];
-            Vector3[] norms = new Vector3[6];
-            Vector3[] texs = new Vector3[6];
-            Vector4[] cols = new Vector4[6];
-            Vector4[] BoneIDs = new Vector4[6];
-            Vector4[] BoneWeights = new Vector4[6];
-            Vector4[] BoneIDs2 = new Vector4[6];
-            Vector4[] BoneWeights2 = new Vector4[6];
-            Vector3[] tangs = new Vector3[6];
+            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            builder.Prepare(6, 6);
+            builder.Tangents = new Vector3[6];
             for (uint n = 0; n < 6; n++)
             {
-                inds[n] = n;
-                tangs[n] = new Vector3(1, 0, 0);
-                norms[n] = new Vector3(0, 0, 1);
-                cols[n] = new Vector4(1, 1, 1, 1);
-                BoneIDs[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights[n] = new Vector4(0, 0, 0, 0);
-                BoneIDs2[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights2[n] = new Vector4(0, 0, 0, 0);
+                builder.Indices[n] = n;
+                builder.Tangents[n] = new Vector3(1, 0, 0);
+                builder.Normals[n] = new Vector3(0, 0, 1);
+                builder.Colors[n] = new Vector4(1, 1, 1, 1);
+                builder.ZeroBoneInfo(n);
             }
-            vecs[0] = new Vector3(1, 0, 0);
-            texs[0] = new Vector3(1, 0, 0);
-            vecs[1] = new Vector3(1, 1, 0);
-            texs[1] = new Vector3(1, 1, 0);
-            vecs[2] = new Vector3(0, 1, 0);
-            texs[2] = new Vector3(0, 1, 0);
-            vecs[3] = new Vector3(1, 0, 0);
-            texs[3] = new Vector3(1, 0, 0);
-            vecs[4] = new Vector3(0, 1, 0);
-            texs[4] = new Vector3(0, 1, 0);
-            vecs[5] = new Vector3(0, 0, 0);
-            texs[5] = new Vector3(0, 0, 0);
-            Square = new VBO()
-            {
-                Vertices = vecs.ToList(),
-                Indices = inds.ToList(),
-                Normals = norms.ToList(),
-                Tangents = tangs.ToList(),
-                TexCoords = texs.ToList(),
-                Colors = cols.ToList(),
-                BoneIDs = BoneIDs.ToList(),
-                BoneWeights = BoneWeights.ToList(),
-                BoneIDs2 = BoneIDs2.ToList(),
-                BoneWeights2 = BoneWeights2.ToList()
-            };
-            Square.GenerateVBO();
+            builder.Vertices[0] = new Vector3(1, 0, 0);
+            builder.TexCoords[0] = new Vector3(1, 0, 0);
+            builder.Vertices[1] = new Vector3(1, 1, 0);
+            builder.TexCoords[1] = new Vector3(1, 1, 0);
+            builder.Vertices[2] = new Vector3(0, 1, 0);
+            builder.TexCoords[2] = new Vector3(0, 1, 0);
+            builder.Vertices[3] = new Vector3(1, 0, 0);
+            builder.TexCoords[3] = new Vector3(1, 0, 0);
+            builder.Vertices[4] = new Vector3(0, 1, 0);
+            builder.TexCoords[4] = new Vector3(0, 1, 0);
+            builder.Vertices[5] = new Vector3(0, 0, 0);
+            builder.TexCoords[5] = new Vector3(0, 0, 0);
+            Square = builder.Generate();
         }
 
         /// <summary>
@@ -111,54 +88,22 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         void GenerateLineVBO()
         {
-            Vector3[] vecs = new Vector3[2];
-            uint[] inds = new uint[2];
-            Vector3[] norms = new Vector3[2];
-            Vector3[] texs = new Vector3[2];
-            Vector4[] cols = new Vector4[2];
-            Vector3[] tangs = new Vector3[2];
-            for (uint u = 0; u < 2; u++)
+            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            builder.Prepare(2, 2);
+            builder.Tangents = new Vector3[2];
+            for (uint n = 0; n < 2; n++)
             {
-                inds[u] = u;
-                tangs[u] = new Vector3(1f, 0f, 0f);
+                builder.Indices[n] = n;
+                builder.Tangents[n] = new Vector3(1f, 0f, 0f);
+                builder.Normals[n] = new Vector3(0, 0, 1);
+                builder.Colors[n] = new Vector4(1, 1, 1, 1);
+                builder.ZeroBoneInfo(n);
             }
-            for (int n = 0; n < 2; n++)
-            {
-                norms[n] = new Vector3(0, 0, 1);
-            }
-            for (int c = 0; c < 2; c++)
-            {
-                cols[c] = new Vector4(1, 1, 1, 1);
-            }
-            Vector4[] BoneIDs = new Vector4[2];
-            Vector4[] BoneWeights = new Vector4[2];
-            Vector4[] BoneIDs2 = new Vector4[2];
-            Vector4[] BoneWeights2 = new Vector4[2];
-            for (int n = 0; n < 2; n++)
-            {
-                BoneIDs[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights[n] = new Vector4(0, 0, 0, 0);
-                BoneIDs2[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights2[n] = new Vector4(0, 0, 0, 0);
-            }
-            vecs[0] = new Vector3(0, 0, 0);
-            texs[0] = new Vector3(0, 0, 0);
-            vecs[1] = new Vector3(1, 0, 0);
-            texs[1] = new Vector3(1, 0, 0);
-            Line = new VBO()
-            {
-                Vertices = vecs.ToList(),
-                Indices = inds.ToList(),
-                Normals = norms.ToList(),
-                Tangents = tangs.ToList(),
-                TexCoords = texs.ToList(),
-                Colors = cols.ToList(),
-                BoneIDs = BoneIDs.ToList(),
-                BoneWeights = BoneWeights.ToList(),
-                BoneIDs2 = BoneIDs2.ToList(),
-                BoneWeights2 = BoneWeights2.ToList()
-            };
-            Line.GenerateVBO();
+            builder.Vertices[0] = new Vector3(0, 0, 0);
+            builder.TexCoords[0] = new Vector3(0, 0, 0);
+            builder.Vertices[1] = new Vector3(1, 0, 0);
+            builder.TexCoords[1] = new Vector3(1, 0, 0);
+            Line = builder.Generate();
         }
 
         /// <summary>
@@ -166,81 +111,46 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         void GenerateBoxVBO()
         {
+            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            builder.Prepare(24, 24);
+            builder.Tangents = new Vector3[24];
             // TODO: Optimize?
-            Vector3[] vecs = new Vector3[24];
-            uint[] inds = new uint[24];
-            Vector3[] norms = new Vector3[24];
-            Vector3[] texs = new Vector3[24];
-            Vector4[] cols = new Vector4[24];
-            Vector3[] tangs = new Vector3[24];
-            for (uint u = 0; u < 24; u++)
+            for (uint n = 0; n < 24; n++)
             {
-                inds[u] = u;
-                tangs[u] = new Vector3(1f, 0f, 0f);
-            }
-            for (int t = 0; t < 24; t++)
-            {
-                texs[t] = new Vector3(0, 0, 0);
-            }
-            for (int n = 0; n < 24; n++)
-            {
-                norms[n] = new Vector3(0, 0, 1); // TODO: Accurate normals somehow? Do lines even have normals?
-            }
-            for (int c = 0; c < 24; c++)
-            {
-                cols[c] = new Vector4(1, 1, 1, 1);
-            }
-            Vector4[] BoneIDs = new Vector4[24];
-            Vector4[] BoneWeights = new Vector4[24];
-            Vector4[] BoneIDs2 = new Vector4[24];
-            Vector4[] BoneWeights2 = new Vector4[24];
-            for (int n = 0; n < 24; n++)
-            {
-                BoneIDs[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights[n] = new Vector4(0, 0, 0, 0);
-                BoneIDs2[n] = new Vector4(0, 0, 0, 0);
-                BoneWeights2[n] = new Vector4(0, 0, 0, 0);
+                builder.Indices[n] = n;
+                builder.Tangents[n] = new Vector3(1f, 0f, 0f);
+                builder.TexCoords[n] = new Vector3(0, 0, 0);
+                builder.Normals[n] = new Vector3(0, 0, 1); // TODO: Accurate normals somehow? Do lines even have normals?
+                builder.Colors[n] = new Vector4(1, 1, 1, 1);
+                builder.ZeroBoneInfo(n);
             }
             int i = 0;
-            int zero = -1; // Ssh.
-            vecs[i] = new Vector3(zero, zero, zero); i++;
-            vecs[i] = new Vector3(1, zero, zero); i++;
-            vecs[i] = new Vector3(1, zero, zero); i++;
-            vecs[i] = new Vector3(1, 1, zero); i++;
-            vecs[i] = new Vector3(1, 1, zero); i++;
-            vecs[i] = new Vector3(zero, 1, zero); i++;
-            vecs[i] = new Vector3(zero, 1, zero); i++;
-            vecs[i] = new Vector3(zero, zero, zero); i++;
-            vecs[i] = new Vector3(zero, zero, 1); i++;
-            vecs[i] = new Vector3(1, zero, 1); i++;
-            vecs[i] = new Vector3(1, zero, 1); i++;
-            vecs[i] = new Vector3(1, 1, 1); i++;
-            vecs[i] = new Vector3(1, 1, 1); i++;
-            vecs[i] = new Vector3(zero, 1, 1); i++;
-            vecs[i] = new Vector3(zero, 1, 1); i++;
-            vecs[i] = new Vector3(zero, zero, 1); i++;
-            vecs[i] = new Vector3(zero, zero, zero); i++;
-            vecs[i] = new Vector3(zero, zero, 1); i++;
-            vecs[i] = new Vector3(1, zero, zero); i++;
-            vecs[i] = new Vector3(1, zero, 1); i++;
-            vecs[i] = new Vector3(1, 1, zero); i++;
-            vecs[i] = new Vector3(1, 1, 1); i++;
-            vecs[i] = new Vector3(zero, 1, zero); i++;
-            vecs[i] = new Vector3(zero, 1, 1); i++;
-            Box = new VBO()
-            {
-                Vertices = vecs.ToList(),
-                Indices = inds.ToList(),
-                Normals = norms.ToList(),
-                Tangents = tangs.ToList(),
-                TexCoords = texs.ToList(),
-                Colors = cols.ToList(),
-                BoneIDs = BoneIDs.ToList(),
-                BoneWeights = BoneWeights.ToList(),
-                BoneIDs2 = BoneIDs2.ToList(),
-                BoneWeights2 = BoneWeights2.ToList()
-            };
-            Box.GenerateVBO();
+            const int lowValue = -1;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(1, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(1, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, lowValue, 1); i++;
+            builder.Vertices[i] = new Vector3(1, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(1, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, 1); i++;
+            Box = builder.Generate();
         }
 
         /// <summary>
@@ -307,7 +217,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());
             view.SetMatrix(2, mat); // TODO: Client reference!
             GraphicsUtil.CheckError("RenderLineBox: SetMatrix");
-            GL.BindVertexArray(Box._VAO);
+            GL.BindVertexArray(Box.Internal.VAO);
             GraphicsUtil.CheckError("RenderLineBox: Bind VAO");
             GL.DrawElements(PrimitiveType.Lines, 24, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GraphicsUtil.CheckError("RenderLineBox: Pass");
@@ -330,7 +240,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
                 * Matrix4d.CreateTranslation(start.ToOpenTK3D());
             view.SetMatrix(2, mat);
-            GL.BindVertexArray(Line._VAO);
+            GL.BindVertexArray(Line.Internal.VAO);
             GL.DrawElements(PrimitiveType.Lines, 2, DrawElementsType.UnsignedInt, IntPtr.Zero);
         }
 
@@ -436,7 +346,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void RenderRectangle3D(Matrix4 mat)
         {
             GL.UniformMatrix4(2, false, ref mat);
-            GL.BindVertexArray(Square._VAO);
+            GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
         }
@@ -453,7 +363,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             Matrix4 mat = Matrix4.CreateScale(xmax - xmin, ymax - ymin, 1) * (rot != null && rot.HasValue ? rot.Value : Matrix4.Identity) * Matrix4.CreateTranslation(xmin, ymin, 0);
             GL.UniformMatrix4(2, false, ref mat);
-            GL.BindVertexArray(Square._VAO);
+            GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
         }
@@ -472,7 +382,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             Matrix4 mat = Matrix4.CreateScale(xmax - xmin, ymax - ymin, 1) * Matrix4.CreateTranslation(-cx, -cy, 0) * rot * Matrix4.CreateTranslation(xmin + cx, ymin + cy, 0);
             GL.UniformMatrix4(2, false, ref mat);
-            GL.BindVertexArray(Square._VAO);
+            GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
         }
@@ -498,7 +408,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             m2.Transpose();
             mat *= m2;
             view.SetMatrix(2, mat);
-            GL.BindVertexArray(Square._VAO);
+            GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
             /*
@@ -549,7 +459,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             m2.Transpose();
             mat *= m2;
             view.SetMatrix(2, mat);
-            GL.BindVertexArray(Square._VAO);
+            GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
         }

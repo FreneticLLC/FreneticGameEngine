@@ -91,26 +91,26 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 ModelMax = new BEPUutilities.Vector3(1, 1, 1)
             };
             ModelMesh mm = new ModelMesh("cube");
-            mm.vbo.Prepare();
+            Renderable.ListBuilder builder = new Renderable.ListBuilder();
+            builder.Prepare();
             TextureCoordinates tc = new TextureCoordinates();
-            mm.vbo.AddSide(Location.UnitX, tc, offs: true);
-            mm.vbo.AddSide(Location.UnitY, tc, offs: true);
-            mm.vbo.AddSide(Location.UnitZ, tc, offs: true);
-            mm.vbo.AddSide(-Location.UnitX, tc, offs: true);
-            mm.vbo.AddSide(-Location.UnitY, tc, offs: true);
-            mm.vbo.AddSide(-Location.UnitZ, tc, offs: true);
+            builder.AddSide(Location.UnitX, tc, offs: true);
+            builder.AddSide(Location.UnitY, tc, offs: true);
+            builder.AddSide(Location.UnitZ, tc, offs: true);
+            builder.AddSide(-Location.UnitX, tc, offs: true);
+            builder.AddSide(-Location.UnitY, tc, offs: true);
+            builder.AddSide(-Location.UnitZ, tc, offs: true);
             m.Original = new Model3D();
             Model3DMesh m3m = new Model3DMesh()
             {
                 Name = "cube"
             };
-            m3m.Indices = new List<int>(mm.vbo.Indices.ConvertAll((u) => (int)u));
-            m3m.Vertices = new List<BEPUutilities.Vector3>(mm.vbo.Vertices.ConvertAll((o) => o.ToLocation().ToBVector()));
-            m3m.TexCoords = new List<BEPUutilities.Vector2>(mm.vbo.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y)));
-            m3m.Normals = new List<BEPUutilities.Vector3>(mm.vbo.Normals.ConvertAll((o) => o.ToLocation().ToBVector()));
+            m3m.Indices = builder.Indices.ConvertAll((u) => (int)u);
+            m3m.Vertices = builder.Vertices.ConvertAll((o) => o.ToLocation().ToBVector());
+            m3m.TexCoords = builder.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y));
+            m3m.Normals = builder.Normals.ConvertAll((o) => o.ToLocation().ToBVector());
             m.Original.Meshes = new List<Model3DMesh>() { m3m };
-            mm.vbo.GenerateVBO();
-            mm.vbo.CleanLists();
+            mm.vbo.GenerateVBO(builder);
             m.AddMesh(mm);
             return m;
         }
@@ -249,7 +249,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     continue;
                 }
                 ModelMesh modmesh = new ModelMesh(mesh.Name);
-                VBO vbo = modmesh.vbo;
+                Renderable vbo = modmesh.vbo;
                 bool hastc = mesh.TexCoords.Count == mesh.Vertices.Count;
                 bool hasn = mesh.Normals.Count == mesh.Vertices.Count;
                 if (!hasn)
@@ -260,35 +260,32 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 {
                     SysConsole.Output(OutputType.WARNING, "Mesh has no texcoords! (" + name + ")");
                 }
-                vbo.verts = new Vector3[mesh.Vertices.Count];
-                vbo.texts = new Vector3[mesh.Vertices.Count];
-                vbo.normals = new Vector3[mesh.Vertices.Count];
-                vbo.v4_colors = new Vector4[mesh.Vertices.Count];
+                Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+                builder.Prepare(mesh.Vertices.Count, mesh.Indices.Count);
                 for (int i = 0; i < mesh.Vertices.Count; i++)
                 {
-                    vbo.verts[i] = mesh.Vertices[i].ToOpenTK();
+                    builder.Vertices[i] = mesh.Vertices[i].ToOpenTK();
                     if (!hastc)
                     {
-                        vbo.texts[i] = new Vector3(0, 0, 0);
+                        builder.TexCoords[i] = new Vector3(0, 0, 0);
                     }
                     else
                     {
-                        vbo.texts[i] = new Vector3((float)mesh.TexCoords[i].X, 1 - (float)mesh.TexCoords[i].Y, 0);
+                        builder.TexCoords[i] = new Vector3((float)mesh.TexCoords[i].X, 1 - (float)mesh.TexCoords[i].Y, 0);
                     }
                     if (!hasn)
                     {
-                        vbo.normals[i] = new Vector3(0f, 0f, 1f);
+                        builder.Normals[i] = new Vector3(0f, 0f, 1f);
                     }
                     else
                     {
-                        vbo.normals[i] = mesh.Normals[i].ToOpenTK();
+                        builder.Normals[i] = mesh.Normals[i].ToOpenTK();
                     }
-                    vbo.v4_colors[i] = new Vector4(1, 1, 1, 1); // TODO: From the mesh?
+                    builder.Colors[i] = new Vector4(1, 1, 1, 1); // TODO: From the mesh?
                 }
-                vbo.indices = new uint[mesh.Indices.Count];
                 for (int i = 0; i < mesh.Indices.Count; i++)
                 {
-                    vbo.indices[i] = (uint)mesh.Indices[i];
+                    builder.Indices[i] = (uint)mesh.Indices[i];
                 }
                 int bc = mesh.Bones.Count;
                 if (bc > 200)
@@ -296,11 +293,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     SysConsole.Output(OutputType.WARNING, "Mesh has " + bc + " bones! (" + name + ")");
                     bc = 200;
                 }
-                vbo.pre_boneids = new Vector4[modmesh.vbo.Vertices.Count];
-                vbo.pre_boneweights = new Vector4[modmesh.vbo.Vertices.Count];
-                vbo.pre_boneids2 = new Vector4[modmesh.vbo.Vertices.Count];
-                vbo.pre_boneweights2 = new Vector4[modmesh.vbo.Vertices.Count];
-                int[] pos = new int[modmesh.vbo.Vertices.Count];
+                int[] pos = new int[builder.Vertices.Length];
                 for (int i = 0; i < bc; i++)
                 {
                     for (int x = 0; x < mesh.Bones[i].Weights.Count; x++)
@@ -311,22 +304,21 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         if (spot > 7)
                         {
                             //SysConsole.Output(OutputType.WARNING, "Too many bones influencing " + vw.VertexID + "!");
-                            ForceSet(vbo.pre_boneweights, IDa, 3, modmesh.vbo.pre_boneweights[IDa][3] + Weighta);
+                            ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
                         }
                         else if (spot > 3)
                         {
-                            ForceSet(vbo.pre_boneids2, IDa, spot - 4, i);
-                            ForceSet(vbo.pre_boneweights2, IDa, spot - 4, Weighta);
+                            ForceSet(builder.BoneIDs2, IDa, spot - 4, i);
+                            ForceSet(builder.BoneWeights2, IDa, spot - 4, Weighta);
                         }
                         else
                         {
-                            ForceSet(vbo.pre_boneids, IDa, spot, i);
-                            ForceSet(vbo.pre_boneweights, IDa, spot, Weighta);
+                            ForceSet(builder.BoneIDs, IDa, spot, i);
+                            ForceSet(builder.BoneWeights, IDa, spot, Weighta);
                         }
                     }
                 }
-                vbo.GenerateVBO();
-                vbo.CleanLists();
+                vbo.GenerateVBO(builder);
                 model.AddMesh(modmesh);
             }
             model.RootNode = new ModelNode() { Parent = null, Name = scene.RootNode.Name.ToLowerFast() };
@@ -962,7 +954,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Name = Name.Substring(0, Name.Length - ".001".Length);
             }
             Faces = new List<ModelFace>();
-            vbo = new VBO();
+            vbo = new Renderable();
         }
 
         /// <summary>
@@ -973,7 +965,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The VBO for this mesh.
         /// </summary>
-        public VBO vbo;
+        public Renderable vbo;
 
         /// <summary>
         /// Destroys the backing VBO.
