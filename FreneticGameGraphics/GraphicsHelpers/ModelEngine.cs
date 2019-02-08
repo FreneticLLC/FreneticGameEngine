@@ -32,9 +32,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
     {
         /// <summary>
         /// All currently loaded models.
-        /// TODO: Dictionary!
         /// </summary>
-        public List<Model> LoadedModels;
+        public Dictionary<string, Model> LoadedModels;
 
         /// <summary>
         /// Internal model helper from the core.
@@ -71,9 +70,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
             TheClient = tclient;
             AnimEngine = engine;
             Handler = new ModelHandler();
-            LoadedModels = new List<Model>();
+            LoadedModels = new Dictionary<string, Model>(128);
             Cube = GenerateCube();
-            LoadedModels.Add(Cube);
+            LoadedModels.Add("cube", Cube);
             Cylinder = GetModel("cylinder");
             Sphere = GetModel("sphere");
         }
@@ -162,53 +161,42 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Locker for loading models.
-        /// </summary>
-        Object Locker = new Object();
-
-        /// <summary>
         /// Gets the model object for a specific model name.
         /// </summary>
         /// <param name="modelname">The name of the model.</param>
         /// <returns>A valid model object.</returns>
         public Model GetModel(string modelname)
         {
-            lock (Locker)
+            modelname = FileHandler.CleanFileName(modelname);
+            if (LoadedModels.TryGetValue(modelname, out Model existingModel))
             {
-                modelname = FileHandler.CleanFileName(modelname);
-                for (int i = 0; i < LoadedModels.Count; i++)
-                {
-                    if (LoadedModels[i].Name == modelname)
-                    {
-                        return LoadedModels[i];
-                    }
-                }
-                Model Loaded = null;
-                try
-                {
-                    Loaded = LoadModel(modelname);
-                }
-                catch (Exception ex)
-                {
-                    SysConsole.Output(OutputType.ERROR, ex.ToString());
-                }
-                if (Loaded == null)
-                {
-                    if (norecurs)
-                    {
-                        Loaded = new Model(modelname) { Engine = this, Root = Matrix4.Identity, Meshes = new List<ModelMesh>(), RootNode = null };
-                    }
-                    else
-                    {
-                        norecurs = true;
-                        Model m = GetModel("cube");
-                        norecurs = false;
-                        Loaded = new Model(modelname) { Engine = this, Root = m.Root, RootNode = m.RootNode, Meshes = m.Meshes, Original = m.Original };
-                    }
-                }
-                LoadedModels.Add(Loaded);
-                return Loaded;
+                return existingModel;
             }
+            Model Loaded = null;
+            try
+            {
+                Loaded = LoadModel(modelname);
+            }
+            catch (Exception ex)
+            {
+                SysConsole.Output(OutputType.ERROR, ex.ToString());
+            }
+            if (Loaded == null)
+            {
+                if (norecurs)
+                {
+                    Loaded = new Model(modelname) { Engine = this, Root = Matrix4.Identity, Meshes = new List<ModelMesh>(), RootNode = null };
+                }
+                else
+                {
+                    norecurs = true;
+                    Model m = GetModel("cube");
+                    norecurs = false;
+                    Loaded = new Model(modelname) { Engine = this, Root = m.Root, RootNode = m.RootNode, Meshes = m.Meshes, Original = m.Original };
+                }
+            }
+            LoadedModels.Add(modelname, Loaded);
+            return Loaded;
         }
 
         /// <summary>
