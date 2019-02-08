@@ -111,7 +111,6 @@ namespace FreneticGameGraphics.GraphicsHelpers
             m3m.Normals = new List<BEPUutilities.Vector3>(mm.vbo.Normals.ConvertAll((o) => o.ToLocation().ToBVector()));
             m.Original.Meshes = new List<Model3DMesh>() { m3m };
             mm.vbo.GenerateVBO();
-            mm.VBOGenned = true;
             m.Meshes.Add(mm);
             return m;
         }
@@ -962,20 +961,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void GenerateVBO()
         {
             vbo.GenerateVBO();
-            VBOGenned = true;
         }
-
-        /// <summary>
-        /// Whether the VBO is generated.
-        /// </summary>
-        public bool VBOGenned = false;
-
+        
         /// <summary>
         /// Renders the mesh.
         /// </summary>
         public void Draw()
         {
-            if (!VBOGenned)
+            if (!vbo.generated)
             {
                 GenerateVBO();
             }
