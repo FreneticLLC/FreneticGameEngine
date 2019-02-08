@@ -30,7 +30,12 @@ namespace FreneticGameCore.StackNoteSystem
         /// <returns>The string output.</returns>
         public override string ToString()
         {
-            return string.Join("\n -> ", Notes);
+            StringBuilder sb = new StringBuilder(Notes.Count * 50);
+            foreach (StackNote note in Notes)
+            {
+                sb.Append(" -> " + note + "\n");
+            }
+            return sb.ToString();
         }
 
         /// <summary>
