@@ -18,7 +18,6 @@ using FreneticGameCore;
 using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
 using FreneticGameCore.Files;
-using System.Diagnostics.CodeAnalysis;
 using FreneticGameCore.ConsoleHelpers;
 
 namespace FreneticGameGraphics.GraphicsHelpers
@@ -56,9 +55,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
 
         /// <summary>
         /// A full list of currently loaded textures.
-        /// TODO: List->Dictionary?
         /// </summary>
-        public List<Texture> LoadedTextures = null;
+        public Dictionary<string, Texture> LoadedTextures;
 
         /// <summary>
         /// A default white texture.
@@ -105,16 +103,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
             EmptyBitmap = new Bitmap(1, 1);
             GenericGraphicsObject = Graphics.FromImage(EmptyBitmap);
             // Reset texture list
-            LoadedTextures = new List<Texture>();
+            LoadedTextures = new Dictionary<string, Texture>(256);
             // Pregenerate a few needed textures
             White = GenerateForColor(Color.White, "white");
-            LoadedTextures.Add(White);
+            LoadedTextures.Add("white", White);
             Black = GenerateForColor(Color.Black, "black");
-            LoadedTextures.Add(Black);
+            LoadedTextures.Add("black", Black);
             Clear = GenerateForColor(Color.Transparent, "clear");
-            LoadedTextures.Add(Clear);
+            LoadedTextures.Add("clear", Clear);
             NormalDef = GenerateForColor(Color.FromArgb(255, 127, 127, 255), "normal_def");
-            LoadedTextures.Add(NormalDef);
+            LoadedTextures.Add("normal_def", NormalDef);
         }
 
         /// <summary>
@@ -122,11 +120,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public void Empty()
         {
-            for (int i = 0; i < LoadedTextures.Count; i++)
+            foreach (Texture texture in LoadedTextures.Values)
             {
-                LoadedTextures[i].Destroy();
-                LoadedTextures[i].Internal_Texture = -1;
-                LoadedTextures[i].Original_InternalID = -1;
+                texture.Destroy();
+                texture.Internal_Texture = -1;
+                texture.Original_InternalID = -1;
             }
             LoadedTextures.Clear();
         }
@@ -152,12 +150,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The texture, if it exists.</returns>
         public Texture GetExistingTexture(string texturename)
         {
-            for (int i = 0; i < LoadedTextures.Count; i++)
+            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
             {
-                if (LoadedTextures[i].Name == texturename)
-                {
-                    return LoadedTextures[i];
-                }
+                return foundTexture;
             }
             return null;
         }
@@ -171,12 +166,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public Texture GetTexture(string texturename, int twidth = 0)
         {
             texturename = FileHandler.CleanFileName(texturename);
-            for (int i = 0; i < LoadedTextures.Count; i++)
+            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
             {
-                if (LoadedTextures[i].Name == texturename && (twidth == 0 || LoadedTextures[i].Width == twidth))
-                {
-                    return LoadedTextures[i];
-                }
+                return foundTexture;
             }
             Texture Loaded = LoadTexture(texturename, twidth);
             if (Loaded == null && twidth == 0)
@@ -198,7 +190,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Loaded.Name = texturename;
                 Loaded.LoadedProperly = false;
             }
-            LoadedTextures.Add(Loaded);
+            LoadedTextures.Add(texturename, Loaded);
             OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(Loaded));
             return Loaded;
         }
@@ -235,7 +227,6 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="twidth">The texture width, if any.</param>
         /// <returns>The loaded texture, or null if it does not exist.</returns>
         // Shut up the CodeAnalysis (It doesn't like the BMP variable handling below).
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public Texture LoadTexture(string filename, int twidth = 0)
         {
             try
@@ -257,21 +248,20 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     bmp.Dispose();
                     bmp = bmp_fixed;
                 }
-                Bitmap bmp2 = twidth <= 0 ? bmp : new Bitmap(bmp, new Size(twidth, twidth));
                 Texture texture = new Texture()
                 {
                     Engine = this,
                     Name = filename,
-                    Width = bmp2.Width,
-                    Height = bmp2.Height,
-                    FileRef =  pf
+                    FileRef = pf
                 };
-                GL.GenTextures(1, out texture.Original_InternalID);
-                texture.Internal_Texture = texture.Original_InternalID;
-                texture.Bind();
-                LockBitmapToTexture(bmp2, DefaultLinear);
-                if (bmp2 != bmp)
+                if (twidth <= 0 || (bmp.Width == twidth && bmp.Height == twidth))
                 {
+                    TextureFromBitMap(texture, bmp);
+                }
+                else
+                {
+                    Bitmap bmp2 = new Bitmap(bmp, new Size(twidth, twidth));
+                    TextureFromBitMap(texture, bmp2);
                     bmp2.Dispose();
                 }
                 bmp.Dispose();
@@ -284,6 +274,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
                 return null;
             }
+        }
+
+        private void TextureFromBitMap(Texture texture, Bitmap bmp)
+        {
+            texture.Width = bmp.Width;
+            texture.Height = bmp.Height;
+            GL.GenTextures(1, out texture.Original_InternalID);
+            texture.Internal_Texture = texture.Original_InternalID;
+            texture.Bind();
+            LockBitmapToTexture(bmp, DefaultLinear);
         }
 
         /// <summary>
@@ -498,7 +498,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public void Remove()
         {
             Destroy();
-            Engine.LoadedTextures.Remove(this);
+            if (Engine.LoadedTextures.TryGetValue(Name, out Texture text) && text == this)
+            {
+                Engine.LoadedTextures.Remove(Name);
+            }
         }
 
         /// <summary>
