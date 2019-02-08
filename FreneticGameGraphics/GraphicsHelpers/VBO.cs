@@ -153,6 +153,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
             tangents = null;
             texts = null;
             v4_colors = null;
+            pre_boneids = null;
+            pre_boneids2 = null;
+            pre_boneweights = null;
+            pre_boneweights2 = null;
         }
 
         /// <summary>
@@ -362,10 +366,25 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public uint[] indices = null;
 
-        Vector3[] normals = null;
-        Vector3[] texts = null;
-        Vector3[] tangents = null;
-        Vector4[] v4_colors = null;
+        /// <summary>
+        /// The normals.
+        /// </summary>
+        public Vector3[] normals = null;
+
+        /// <summary>
+        /// The texture coordinates.
+        /// </summary>
+        public Vector3[] texts = null;
+
+        /// <summary>
+        /// The tangents.
+        /// </summary>
+        public Vector3[] tangents = null;
+
+        /// <summary>
+        /// The colors.
+        /// </summary>
+        public Vector4[] v4_colors = null;
 
         /// <summary>
         /// What buffer mode to use.
@@ -445,6 +464,27 @@ namespace FreneticGameGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Bone IDs.
+        /// </summary>
+        public Vector4[] pre_boneids = null;
+
+        /// <summary>
+        /// Bone weights.
+        /// </summary>
+        public Vector4[] pre_boneweights = null;
+
+
+        /// <summary>
+        /// Bone IDs, set 2.
+        /// </summary>
+        public Vector4[] pre_boneids2 = null;
+
+        /// <summary>
+        /// Bone weights, set 2.
+        /// </summary>
+        public Vector4[] pre_boneweights2 = null;
+
+        /// <summary>
         /// Generate the VBO to the GPU.
         /// </summary>
         public void GenerateVBO()
@@ -472,25 +512,16 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Vector4[] cols = Colors != null ? Colors.ToArray() : v4_colors;
             vC = inds.Length;
             Vector4[] ids = null;
-            if (BoneIDs != null)
-            {
-                ids = BoneIDs.ToArray();
-                bones = true;
-            }
             Vector4[] weights = null;
-            if (BoneWeights != null)
-            {
-                weights = BoneWeights.ToArray();
-            }
             Vector4[] ids2 = null;
-            if (BoneIDs2 != null)
-            {
-                ids2 = BoneIDs2.ToArray();
-            }
             Vector4[] weights2 = null;
-            if (BoneWeights2 != null)
+            if (BoneIDs != null || pre_boneids != null)
             {
-                weights2 = BoneWeights2.ToArray();
+                bones = true;
+                ids = BoneIDs != null ? pre_boneids : BoneIDs.ToArray();
+                weights = BoneWeights != null ? pre_boneweights : BoneWeights.ToArray();
+                ids2 = BoneIDs2 != null ? pre_boneids2 : BoneIDs2.ToArray();
+                weights2 = BoneWeights2 != null ? pre_boneweights2 : BoneWeights2.ToArray();
             }
             // Vertex buffer
             GL.GenBuffers(1, out _VertexVBO);
