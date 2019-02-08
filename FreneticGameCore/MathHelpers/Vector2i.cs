@@ -11,13 +11,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using BEPUutilities;
 
 namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents a 2D vector of integers.
+    /// Occupies 8 bytes, calculated as 4 * 2, as it has 2 fields (X, Y) each occupying 4 bytes (an integer).
     /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     public struct Vector2i : IEquatable<Vector2i>
     {
         /// <summary>
@@ -39,11 +43,13 @@ namespace FreneticGameCore.MathHelpers
         /// <summary>
         /// The x coordinate.
         /// </summary>
+        [FieldOffset(0)]
         public int X;
 
         /// <summary>
         /// The y coordinate.
         /// </summary>
+        [FieldOffset(4)]
         public int Y;
 
         /// <summary>

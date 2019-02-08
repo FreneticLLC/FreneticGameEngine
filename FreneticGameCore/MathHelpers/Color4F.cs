@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 
@@ -18,7 +20,9 @@ namespace FreneticGameCore.MathHelpers
 {
     /// <summary>
     /// Represents a 4-piece floating point color.
+    /// Occupies 16 bytes, calculated as 4 * 4, as it has 4 fields (R, G, B, A) each occupying 4 bytes (a float).
     /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     public struct Color4F
     {
         /// <summary>
@@ -78,21 +82,25 @@ namespace FreneticGameCore.MathHelpers
         /// <summary>
         /// The red component.
         /// </summary>
+        [FieldOffset(0)]
         public float R;
 
         /// <summary>
         /// The green component.
         /// </summary>
+        [FieldOffset(4)]
         public float G;
 
         /// <summary>
         /// The blue component.
         /// </summary>
+        [FieldOffset(8)]
         public float B;
 
         /// <summary>
         /// The alpha component.
         /// </summary>
+        [FieldOffset(12)]
         public float A;
 
         /// <summary>
