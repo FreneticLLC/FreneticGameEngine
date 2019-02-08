@@ -33,6 +33,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public Dictionary<string, Shader> LoadedShaders;
 
         /// <summary>
+        /// A cache of shader file text (post-includes).
+        /// </summary>
+        public Dictionary<string, string> ShaderFilesCache;
+
+        /// <summary>
         /// A common shader that multiplies colors.
         /// </summary>
         public Shader ColorMultShader;
@@ -54,6 +59,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             // Reset shader list
             LoadedShaders = new Dictionary<string, Shader>(128);
+            ShaderFilesCache = new Dictionary<string, string>(256);
             // Pregenerate a few needed shader
             ColorMultShader = GetShader("color_mult");
             if (File.Exists("shaders/color_mult2d.vs"))
@@ -89,6 +95,32 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 shader.Destroy();
             }
             LoadedShaders.Clear();
+            ShaderFilesCache.Clear();
+        }
+
+        /// <summary>
+        /// Gets the text of a shader file, automatically handling the file cache.
+        /// </summary>
+        /// <param name="filename">The name of the shader file.</param>
+        /// <returns></returns>
+        public string GetShaderFileText(string filename)
+        {
+            filename = FileHandler.CleanFileName(filename.Trim());
+            if (!File.Exists("shaders/" + filename))
+            {
+                throw new Exception("File " + filename + " does not exist, but was included by a shader!");
+            }
+            if (ShaderFilesCache.TryGetValue(filename, out string filedata))
+            {
+                return filedata;
+            }
+            if (ShaderFilesCache.Count > 128) // TODO: Configurable?
+            {
+                ShaderFilesCache.Clear();
+            }
+            string newData = Includes(File.ReadAllText("shaders/" + filename).Replace("\r\n", "\n").Replace("\r", ""));
+            ShaderFilesCache[filename] = newData;
+            return newData;
         }
 
         /// <summary>
@@ -156,8 +188,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                         "' does not exist.");
                     return null;
                 }
-                string VS = File.ReadAllText("shaders/" + filename + ".vs");
-                string FS = File.ReadAllText("shaders/" + filename + ".fs");
+                string VS = GetShaderFileText(filename + ".vs");
+                string FS = GetShaderFileText(filename + ".fs");
                 string GS = null;
                 if (geom != null)
                 {
@@ -169,7 +201,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                             "' does not exist.");
                         return null;
                     }
-                    GS = File.ReadAllText("shaders/" + geom + ".geom");
+                    GS = GetShaderFileText(geom + ".geom");
                 }
                 return CreateShader(VS, FS, oname, vars, GS);
             }
@@ -215,19 +247,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 return str;
             }
-            StringBuilder fsb = new StringBuilder();
+            StringBuilder fsb = new StringBuilder(str.Length * 2);
             string[] dat = str.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
                 if (dat[i].StartsWith("#include "))
                 {
-                    string name = "shaders/" + dat[i].Substring("#include ".Length);
-                    name = FileHandler.CleanFileName(name.Trim());
-                    if (!File.Exists(name))
-                    {
-                        throw new Exception("File " + name + " does not exist, but was included by a shader!");
-                    }
-                    string included = File.ReadAllText(name);
+                    string name = dat[i].Substring("#include ".Length);
+                    string included = GetShaderFileText(name);
                     fsb.Append(included);
                 }
                 else
@@ -239,6 +266,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
             return fsb.ToString();
         }
 
+        const string FILE_START = "#version 430 core\n";
+
         /// <summary>
         /// Compiles a compute shader by name to a shader.
         /// </summary>
@@ -248,9 +277,17 @@ namespace FreneticGameGraphics.GraphicsHelpers
         public int CompileCompute(string fname, string specialadder = "")
         {
             fname = FileHandler.CleanFileName(fname.Trim());
-            string ftxt = Includes(File.ReadAllText("shaders/" + fname + ".comp").Replace("\r\n", "\n").Replace("\r", ""));
-            string bf = ftxt.BeforeAndAfter("#version 430 core\n", out string af);
-            ftxt = bf + "#version 430 core\n" + specialadder + af;
+            string ftxt = GetShaderFileText(fname + ".comp");
+            int index = ftxt.IndexOf(FILE_START);
+            if (index < 0)
+            {
+                index = 0;
+            }
+            else
+            {
+                index += FILE_START.Length;
+            }
+            ftxt = ftxt.Insert(index, specialadder);
             int shd = GL.CreateShader(ShaderType.ComputeShader);
             GL.ShaderSource(shd, ftxt);
             GL.CompileShader(shd);
@@ -296,11 +333,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 }
             }
             int gObj = -1;
-            VS = Includes(VS);
-            FS = Includes(FS);
             if (geom != null)
             {
-                geom = Includes(geom);
                 gObj = GL.CreateShader(ShaderType.GeometryShader);
                 GL.ShaderSource(gObj, geom);
                 GL.CompileShader(gObj);
