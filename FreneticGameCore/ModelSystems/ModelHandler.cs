@@ -53,58 +53,58 @@ namespace FreneticGameCore.ModelSystems
             Matrix matA = ReadMat(dr);
             mod.MatrixA = matA;
             int meshCount = dr.ReadInt();
-            mod.Meshes = new List<Model3DMesh>(meshCount);
+            mod.Meshes = new Model3DMesh[meshCount];
             for (int m = 0; m < meshCount; m++)
             {
                 Model3DMesh mesh = new Model3DMesh();
-                mod.Meshes.Add(mesh);
+                mod.Meshes[m] = mesh;
                 mesh.Name = dr.ReadFullString();
                 int vertexCount = dr.ReadInt();
-                mesh.Vertices = new List<Vector3>(vertexCount);
+                mesh.Vertices = new Vector3[vertexCount];
                 for (int v = 0; v < vertexCount; v++)
                 {
                     double f1 = dr.ReadFloat();
                     double f2 = dr.ReadFloat();
                     double f3 = dr.ReadFloat();
-                    mesh.Vertices.Add(new Vector3(f1, f2, f3));
+                    mesh.Vertices[v] = new Vector3(f1, f2, f3);
                 }
                 int indiceCount = dr.ReadInt() * 3;
-                mesh.Indices = new List<int>(indiceCount);
+                mesh.Indices = new uint[indiceCount];
                 for (int i = 0; i < indiceCount; i++)
                 {
-                    mesh.Indices.Add(dr.ReadInt());
+                    mesh.Indices[i] = dr.ReadUInt();
                 }
                 int tcCount = dr.ReadInt();
-                mesh.TexCoords = new List<Vector2>(tcCount);
+                mesh.TexCoords = new Vector2[tcCount];
                 for (int t = 0; t < tcCount; t++)
                 {
                     double f1 = dr.ReadFloat();
                     double f2 = dr.ReadFloat();
-                    mesh.TexCoords.Add(new Vector2(f1, f2));
+                    mesh.TexCoords[t] = new Vector2(f1, f2);
                 }
                 int normCount = dr.ReadInt();
-                mesh.Normals = new List<Vector3>(normCount);
+                mesh.Normals = new Vector3[normCount];
                 for (int n = 0; n < normCount; n++)
                 {
                     double f1 = dr.ReadFloat();
                     double f2 = dr.ReadFloat();
                     double f3 = dr.ReadFloat();
-                    mesh.Normals.Add(new Vector3(f1, f2, f3));
+                    mesh.Normals[n] = new Vector3(f1, f2, f3);
                 }
                 int boneCount = dr.ReadInt();
-                mesh.Bones = new List<Model3DBone>(boneCount);
+                mesh.Bones = new Model3DBone[boneCount];
                 for (int b = 0; b < boneCount; b++)
                 {
                     Model3DBone bone = new Model3DBone();
-                    mesh.Bones.Add(bone);
+                    mesh.Bones[b] = bone;
                     bone.Name = dr.ReadFullString();
                     int weights = dr.ReadInt();
-                    bone.IDs = new List<int>(weights);
-                    bone.Weights = new List<double>(weights);
+                    bone.IDs = new int[weights];
+                    bone.Weights = new double[weights];
                     for (int w = 0; w < weights; w++)
                     {
-                        bone.IDs.Add(dr.ReadInt());
-                        bone.Weights.Add(dr.ReadFloat());
+                        bone.IDs[w] = dr.ReadInt();
+                        bone.Weights[w] = dr.ReadFloat();
                     }
                     bone.MatrixA = ReadMat(dr);
                 }
@@ -126,10 +126,10 @@ namespace FreneticGameCore.ModelSystems
             n.Name = nname;
             n.MatrixA = ReadMat(dr);
             int cCount = dr.ReadInt();
-            n.Children = new List<Model3DNode>(cCount);
+            n.Children = new Model3DNode[cCount];
             for (int i = 0; i < cCount; i++)
             {
-                n.Children.Add(ReadSingleNode(n, dr));
+                n.Children[i] = ReadSingleNode(n, dr);
             }
             return n;
         }
@@ -162,21 +162,35 @@ namespace FreneticGameCore.ModelSystems
         }
 
         /// <summary>
-        /// Gets all vertices in a model.
+        /// Iterates over all COLLISION ENABLED vertices of a model (if "collision" is used).
         /// </summary>
         /// <param name="input">The model.</param>
-        /// <returns>The vertices.</returns>
-        public List<Vector3> GetVertices(Model3D input)
+        /// <returns>The collision vertices.</returns>
+        public IEnumerable<Vector3[]> IterateCollisionVertices(Model3D input)
         {
-            List<Vector3> vertices = new List<Vector3>(input.Meshes.Count * 100);
             foreach (Model3DMesh mesh in input.Meshes)
             {
-                for (int i = 0; i < mesh.Vertices.Count; i++)
+                if (mesh.Name.ToLowerFast().Contains("collision"))
                 {
-                    vertices.Add(mesh.Vertices[i]);
+                    yield return mesh.Vertices;
                 }
             }
-            return vertices;
+        }
+
+        /// <summary>
+        /// Iterates over all COLLISION ENABLED vertices of a model (if "collision" isn't used).
+        /// </summary>
+        /// <param name="input">The model.</param>
+        /// <returns>The collision vertices.</returns>
+        public IEnumerable<Vector3[]> IteratePossibleCollisionVertices(Model3D input)
+        {
+            foreach (Model3DMesh mesh in input.Meshes)
+            {
+                if (!mesh.Name.ToLowerFast().Contains("nocollide"))
+                {
+                    yield return mesh.Vertices;
+                }
+            }
         }
 
         /// <summary>
@@ -184,29 +198,30 @@ namespace FreneticGameCore.ModelSystems
         /// </summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
-        public List<Vector3> GetCollisionVertices(Model3D input)
+        public Vector3[] GetCollisionVertices(Model3D input)
         {
-            List<Vector3> vertices = new List<Vector3>(input.Meshes.Count * 100);
-            bool colOnly = false;
-            foreach (Model3DMesh mesh in input.Meshes)
+            int count = 0;
+            bool colOnly = true;
+            foreach (Vector3[] vertices in IterateCollisionVertices(input))
             {
-                if (mesh.Name.ToLowerFast().Contains("collision"))
+                count += vertices.Length;
+            }
+            if (count == 0)
+            {
+                colOnly = false;
+                foreach (Vector3[] vertices in IteratePossibleCollisionVertices(input))
                 {
-                    colOnly = true;
-                    break;
+                    count += vertices.Length;
                 }
             }
-            foreach (Model3DMesh mesh in input.Meshes)
+            Vector3[] resultVertices = new Vector3[count];
+            count = 0;
+            foreach (Vector3[] vertices in (colOnly ? IterateCollisionVertices(input) : IteratePossibleCollisionVertices(input)))
             {
-                if ((!colOnly || mesh.Name.ToLowerFast().Contains("collision")) && !mesh.Name.ToLowerFast().Contains("nocollide"))
-                {
-                    for (int i = 0; i < mesh.Indices.Count; i++)
-                    {
-                        vertices.Add(mesh.Vertices[mesh.Indices[i]]);
-                    }
-                }
+                vertices.CopyTo(resultVertices, count);
+                count += vertices.Length;
             }
-            return vertices;
+            return resultVertices;
         }
 
         /// <summary>
@@ -217,14 +232,14 @@ namespace FreneticGameCore.ModelSystems
         /// <returns>The BEPU mesh.</returns>
         public MobileMeshShape MeshToBepu(Model3D input, out int verts)
         {
-            List<Vector3> vertices = GetCollisionVertices(input);
-            List<int> indices = new List<int>(vertices.Count);
-            for (int i = 0; i < vertices.Count; i++)
+            Vector3[] vertices = GetCollisionVertices(input);
+            int[] indices = new int[vertices.Length];
+            for (int i = 0; i < indices.Length; i++)
             {
-                indices.Add(indices.Count);
+                indices[i] = i;
             }
-            verts = vertices.Count;
-            return new MobileMeshShape(vertices.ToArray(), indices.ToArray(), AffineTransform.Identity, MobileMeshSolidity.DoubleSided);
+            verts = vertices.Length;
+            return new MobileMeshShape(vertices, indices, AffineTransform.Identity, MobileMeshSolidity.DoubleSided);
         }
 
         /// <summary>
@@ -236,7 +251,7 @@ namespace FreneticGameCore.ModelSystems
         /// <returns>The BEPU mesh.</returns>
         public ConvexHullShape MeshToBepuConvex(Model3D input, out int verts, out Vector3 center)
         {
-            List<Vector3> vertices = GetCollisionVertices(input);
+            List<Vector3> vertices = new List<Vector3>(GetCollisionVertices(input));
             ConvexHullHelper.RemoveRedundantPoints(vertices);
             verts = vertices.Count;
             return new ConvexHullShape(vertices, out center);

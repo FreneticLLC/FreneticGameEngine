@@ -105,12 +105,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 Name = "cube"
             };
-            m3m.Indices = builder.Indices.ConvertAll((u) => (int)u);
-            m3m.Vertices = builder.Vertices.ConvertAll((o) => o.ToLocation().ToBVector());
-            m3m.TexCoords = builder.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y));
-            m3m.Normals = builder.Normals.ConvertAll((o) => o.ToLocation().ToBVector());
-            m.Original.Meshes = new List<Model3DMesh>() { m3m };
-            mm.vbo.GenerateVBO(builder);
+            m3m.Indices = builder.Indices.ToArray();
+            m3m.Vertices = builder.Vertices.ConvertAll((o) => o.ToLocation().ToBVector()).ToArray();
+            m3m.TexCoords = builder.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y)).ToArray();
+            m3m.Normals = builder.Normals.ConvertAll((o) => o.ToLocation().ToBVector()).ToArray();
+            m.Original.Meshes = new Model3DMesh[] { m3m };
+            mm.BaseRenderable.GenerateVBO(builder);
             m.AddMesh(mm);
             return m;
         }
@@ -121,13 +121,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="time">The new noted time.</param>
         public void Update(double time)
         {
-            cTime = time;
+            CurrentTime = time;
         }
 
         /// <summary>
         /// Current known time.
         /// </summary>
-        public double cTime = 0;
+        public double CurrentTime = 0;
 
         /// <summary>
         /// Loads a model by name.
@@ -184,28 +184,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
             }
             if (Loaded == null)
             {
-                if (norecurs)
-                {
-                    Loaded = new Model(modelname) { Engine = this, Root = Matrix4.Identity, Meshes = new List<ModelMesh>(), RootNode = null };
-                    Loaded.AutoMapMeshes();
-                }
-                else
-                {
-                    norecurs = true;
-                    Model m = Cube;
-                    norecurs = false;
-                    Loaded = new Model(modelname) { Engine = this, Root = m.Root, RootNode = m.RootNode, Meshes = m.Meshes, MeshMap = m.MeshMap, Original = m.Original };
-                }
+                Loaded = new Model(modelname) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
             }
             LoadedModels.Add(modelname, Loaded);
             return Loaded;
         }
-
-        /// <summary>
-        /// Helper to prevent recursion.
-        /// </summary>
-        bool norecurs = false;
-
+        
         /// <summary>
         /// Backing animation engine.
         /// </summary>
@@ -232,7 +216,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The model.</returns>
         public Model FromScene(Model3D scene, string name, AnimationEngine engine)
         {
-            if (scene.Meshes.Count == 0)
+            if (scene.Meshes.Length == 0)
             {
                 throw new Exception("Scene has no meshes! (" + name + ")");
             }
@@ -240,7 +224,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 Engine = this,
                 Original = scene,
-                Root = Convert(scene.MatrixA)
+                Root = scene.MatrixA.Convert()
             };
             foreach (Model3DMesh mesh in scene.Meshes)
             {
@@ -249,9 +233,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     continue;
                 }
                 ModelMesh modmesh = new ModelMesh(mesh.Name);
-                Renderable vbo = modmesh.vbo;
-                bool hastc = mesh.TexCoords.Count == mesh.Vertices.Count;
-                bool hasn = mesh.Normals.Count == mesh.Vertices.Count;
+                Renderable vbo = modmesh.BaseRenderable;
+                bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
+                bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
                 if (!hasn)
                 {
                     SysConsole.Output(OutputType.WARNING, "Mesh has no normals! (" + name + ")");
@@ -261,8 +245,8 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     SysConsole.Output(OutputType.WARNING, "Mesh has no texcoords! (" + name + ")");
                 }
                 Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
-                builder.Prepare(mesh.Vertices.Count, mesh.Indices.Count);
-                for (int i = 0; i < mesh.Vertices.Count; i++)
+                builder.Prepare(mesh.Vertices.Length, mesh.Indices.Length);
+                for (int i = 0; i < mesh.Vertices.Length; i++)
                 {
                     builder.Vertices[i] = mesh.Vertices[i].ToOpenTK();
                     if (!hastc)
@@ -283,11 +267,11 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     }
                     builder.Colors[i] = new Vector4(1, 1, 1, 1); // TODO: From the mesh?
                 }
-                for (int i = 0; i < mesh.Indices.Count; i++)
+                for (int i = 0; i < mesh.Indices.Length; i++)
                 {
                     builder.Indices[i] = (uint)mesh.Indices[i];
                 }
-                int bc = mesh.Bones.Count;
+                int bc = mesh.Bones.Length;
                 if (bc > 200)
                 {
                     SysConsole.Output(OutputType.WARNING, "Mesh has " + bc + " bones! (" + name + ")");
@@ -296,7 +280,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 int[] pos = new int[builder.Vertices.Length];
                 for (int i = 0; i < bc; i++)
                 {
-                    for (int x = 0; x < mesh.Bones[i].Weights.Count; x++)
+                    for (int x = 0; x < mesh.Bones[i].Weights.Length; x++)
                     {
                         int IDa = mesh.Bones[i].IDs[x];
                         float Weighta = (float)mesh.Bones[i].Weights[x];
@@ -326,7 +310,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             PopulateChildren(model.RootNode, scene.RootNode, model, engine, allNodes);
             for (int i = 0; i < model.Meshes.Count; i++)
             {
-                for (int x = 0; x < scene.Meshes[i].Bones.Count; x++)
+                for (int x = 0; x < scene.Meshes[i].Bones.Length; x++)
                 {
                     ModelNode nodet = null;
                     string nl = scene.Meshes[i].Bones[x].Name.ToLowerFast();
@@ -338,22 +322,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
                             break;
                         }
                     }
-                    ModelBone mb = new ModelBone() { Offset = Convert(scene.Meshes[i].Bones[x].MatrixA) };
+                    ModelBone mb = new ModelBone() { Offset = scene.Meshes[i].Bones[x].MatrixA.Convert() };
                     nodet.Bones.Add(mb);
                     model.Meshes[i].Bones.Add(mb);
                 }
             }
             return model;
-        }
-
-        /// <summary>
-        /// Converts a BEPU matrix to OpenTK.
-        /// </summary>
-        /// <param name="mat">The matrix.</param>
-        /// <returns>The matrix.</returns>
-        Matrix4 Convert(BEPUutilities.Matrix mat)
-        {
-            return mat.Convert();
         }
 
         /// <summary>
@@ -379,7 +353,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 node.Mode = 1;
             }
-            for (int i = 0; i < orin.Children.Count; i++)
+            for (int i = 0; i < orin.Children.Length; i++)
             {
                 ModelNode child = new ModelNode() { Parent = node, Name = orin.Children[i].Name.ToLowerFast() };
                 PopulateChildren(child, orin.Children[i], model, engine, allNodes);
@@ -754,7 +728,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="torsoanim">Torso animation.</param>
         public void Draw(double aTimeHead = 0, SingleAnimation headanim = null, double aTimeTorso = 0, SingleAnimation torsoanim = null, double aTimeLegs = 0, SingleAnimation legsanim = null, bool forceBones = false)
         {
-            LastDrawTime = Engine.cTime;
+            LastDrawTime = Engine.CurrentTime;
             hAnim = headanim;
             tAnim = torsoanim;
             lAnim = legsanim;
@@ -820,19 +794,19 @@ namespace FreneticGameGraphics.GraphicsHelpers
                                 {
                                     if (typer == "specular")
                                     {
-                                        Meshes[i].vbo.Tex_Specular = tex;
+                                        Meshes[i].BaseRenderable.Tex_Specular = tex;
                                     }
                                     else if (typer == "reflectivity")
                                     {
-                                        Meshes[i].vbo.Tex_Reflectivity = tex;
+                                        Meshes[i].BaseRenderable.Tex_Reflectivity = tex;
                                     }
                                     else if (typer == "normal")
                                     {
-                                        Meshes[i].vbo.Tex_Normal = tex;
+                                        Meshes[i].BaseRenderable.Tex_Normal = tex;
                                     }
                                     else if (typer == "")
                                     {
-                                        Meshes[i].vbo.Tex = tex;
+                                        Meshes[i].BaseRenderable.Tex = tex;
                                     }
                                     else
                                     {
@@ -875,7 +849,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             long ret = 0;
             foreach (ModelMesh mesh in Meshes)
             {
-                ret += mesh.vbo.GetVRAMUsage();
+                ret += mesh.BaseRenderable.GetVRAMUsage();
             }
             return ret;
         }
@@ -955,7 +929,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Name = Name.Substring(0, Name.Length - ".001".Length);
             }
             Faces = new List<ModelFace>();
-            vbo = new Renderable();
+            BaseRenderable = new Renderable();
         }
 
         /// <summary>
@@ -966,14 +940,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The VBO for this mesh.
         /// </summary>
-        public Renderable vbo;
+        public Renderable BaseRenderable;
 
         /// <summary>
-        /// Destroys the backing VBO.
+        /// Destroys the backing <see cref="Renderable"/>.
         /// </summary>
-        public void DestroyVBO()
+        public void Destroy()
         {
-            vbo.Destroy();
+            BaseRenderable.Destroy();
         }
         
         /// <summary>
@@ -981,7 +955,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public void Draw()
         {
-            vbo.Render(true);
+            BaseRenderable.Render(true);
         }
     }
 

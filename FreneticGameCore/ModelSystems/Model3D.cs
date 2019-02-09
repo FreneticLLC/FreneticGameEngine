@@ -23,7 +23,7 @@ namespace FreneticGameCore.ModelSystems
         /// <summary>
         /// The meshes that compose this model.
         /// </summary>
-        public List<Model3DMesh> Meshes;
+        public Model3DMesh[] Meshes;
 
         /// <summary>
         /// The root bone node of the model.
@@ -41,30 +41,32 @@ namespace FreneticGameCore.ModelSystems
     /// </summary>
     public class Model3DMesh
     {
+        // TODO: Remove dependence on BEPU, use FGE types for Vector3 and Matrix.
+
         /// <summary>
         /// The vertices on this mesh.
         /// </summary>
-        public List<Vector3> Vertices;
+        public Vector3[] Vertices;
 
         /// <summary>
         /// The indices on this mesh.
         /// </summary>
-        public List<int> Indices;
+        public uint[] Indices;
 
         /// <summary>
         /// The normal vectors on this mesh.
         /// </summary>
-        public List<Vector3> Normals;
+        public Vector3[] Normals;
 
         /// <summary>
         /// The texture coordinates on this mesh.
         /// </summary>
-        public List<Vector2> TexCoords;
+        public Vector2[] TexCoords;
 
         /// <summary>
         /// The bones on this mesh.
         /// </summary>
-        public List<Model3DBone> Bones;
+        public Model3DBone[] Bones;
 
         /// <summary>
         /// The name of this mesh.
@@ -85,12 +87,12 @@ namespace FreneticGameCore.ModelSystems
         /// <summary>
         /// The vertex IDs of this bone.
         /// </summary>
-        public List<int> IDs;
+        public int[] IDs;
 
         /// <summary>
         /// The vertex weights on this bone.
         /// </summary>
-        public List<double> Weights;
+        public double[] Weights;
 
         /// <summary>
         /// The default matrix of this bone.
@@ -121,6 +123,6 @@ namespace FreneticGameCore.ModelSystems
         /// <summary>
         /// All children of this node.
         /// </summary>
-        public List<Model3DNode> Children;
+        public Model3DNode[] Children;
     }
 }

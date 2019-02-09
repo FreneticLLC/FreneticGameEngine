@@ -839,6 +839,10 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         public void RenderWithoutTextures()
         {
+            if (!Generated)
+            {
+                return;
+            }
             GL.BindVertexArray(Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, Internal.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
@@ -850,10 +854,6 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
         public void Render(bool fixafter)
         {
-            if (!Generated)
-            {
-                return;
-            }
             if (Tex != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
