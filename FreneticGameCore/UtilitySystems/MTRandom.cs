@@ -21,35 +21,46 @@ namespace FreneticGameCore.UtilitySystems
     public class MTRandom
     {
         /// <summary>
-        /// The default or reference buffer size.
+        /// Holder for internal data for <see cref="MTRandom"/> instances.
         /// </summary>
-        private const ulong REF_BUF_SIZE = 624;
+        public struct InternalData
+        {
+            /// <summary>
+            /// The default or reference buffer size.
+            /// </summary>
+            public const ulong REF_BUF_SIZE = 624;
+
+            /// <summary>
+            /// A lower integer bit mask.
+            /// </summary>
+            public const ulong LOWER_MASK = 0x7FFFFFFF;
+
+            /// <summary>
+            /// A higher integer bit mask.
+            /// </summary>
+            public const ulong UPPER_MASK = ~LOWER_MASK;
+
+            /// <summary>
+            /// The current buffer.
+            /// </summary>
+            public ulong[] Buffer;
+
+            /// <summary>
+            /// The current index in the buffer.
+            /// </summary>
+            public ulong BufferIndex;
+        }
 
         /// <summary>
-        /// A lower integer bit mask.
+        /// Internal data for this random instance.
         /// </summary>
-        private const ulong lower_mask = 0x7FFFFFFF;
+        public InternalData Internal;
 
         /// <summary>
-        /// A higher integer bit mask.
-        /// </summary>
-        private const ulong upper_mask = ~lower_mask;
-
-        /// <summary>
-        /// The current buffer.
-        /// </summary>
-        private ulong[] mt;
-
-        /// <summary>
-        /// The current index in the buffer.
-        /// </summary>
-        private ulong index;
-
-        /// <summary>
-        /// Constructs the MT Random with a current-time-based seed, and a default buffer size.
+        /// Constructs the MT Random with a current-time-based seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).
         /// </summary>
         public MTRandom()
-            : this(REF_BUF_SIZE, (ulong)DateTime.UtcNow.ToBinary())
+            : this(InternalData.REF_BUF_SIZE, (ulong)DateTime.UtcNow.ToBinary())
         {
         }
 
@@ -58,23 +69,23 @@ namespace FreneticGameCore.UtilitySystems
         /// </summary>
         /// <param name="seed">The seed.</param>
         public MTRandom(ulong seed)
-            : this(REF_BUF_SIZE, seed)
+            : this(InternalData.REF_BUF_SIZE, seed)
         {
         }
 
         /// <summary>
         /// Constructs the MT Random with a specific seed and specific buffer size, and a default buffer size.
         /// </summary>
-        /// <param name="n">The buffer size.</param>
+        /// <param name="bufferSize">The buffer size.</param>
         /// <param name="seed">The seed.</param>
-        public MTRandom(ulong n, ulong seed)
+        public MTRandom(ulong bufferSize, ulong seed)
         {
-            mt = new ulong[n];
-            index = n;
-            mt[0] = seed;
-            for (ulong i = 1; i < n; i++)
+            Internal.Buffer = new ulong[bufferSize];
+            Internal.BufferIndex = bufferSize;
+            Internal.Buffer[0] = seed;
+            for (ulong i = 1; i < bufferSize; i++)
             {
-                mt[i] = (6364136223846793005UL * (mt[i - 1] ^ (mt[i - 1] >> 62)) + i);
+                Internal.Buffer[i] = 6364136223846793005UL * (Internal.Buffer[i - 1] ^ (Internal.Buffer[i - 1] >> 62)) + i;
             }
         }
 
@@ -83,22 +94,21 @@ namespace FreneticGameCore.UtilitySystems
         /// </summary>
         public int Next()
         {
-            return (int)(NextUL() & lower_mask);
+            return (int)(NextUL() & InternalData.LOWER_MASK);
         }
 
         /// <summary>
-        /// Gets a random integer from 0 up to a cap.
+        /// Gets a random integer from 0 (inclusive) up to a cap (exclusive).
         /// </summary>
-        public int Next(int cap) // TODO: define Inclusive/exclusive
+        public int Next(int cap)
         {
-            // TODO: Maybe just a modulo?
-            return (int)(Next() * (cap / (double)int.MaxValue)); // TODO: Sanity!
+            return Next() % cap;
         }
 
         /// <summary>
-        /// Gets a random integer between two bounds.
+        /// Gets a random integer from a min (inclusive) up to a max (exclusive).
         /// </summary>
-        public int Next(int min, int max) // TODO: define Inclusive/exclusive
+        public int Next(int min, int max)
         {
             return Next(max - min) + min;
         }
@@ -109,6 +119,14 @@ namespace FreneticGameCore.UtilitySystems
         public double NextDouble()
         {
             return NextUL() / ((double)ulong.MaxValue);
+        }
+
+        /// <summary>
+        /// Gets a random float, between 0 and 1.
+        /// </summary>
+        public float NextFloat()
+        {
+            return NextUL() / ((float)ulong.MaxValue);
         }
 
         /// <summary>
@@ -135,12 +153,12 @@ namespace FreneticGameCore.UtilitySystems
         /// </summary>
         public ulong NextUL()
         {
-            ulong n = (ulong)mt.LongLength;
-            if (index >= n)
+            ulong n = (ulong)Internal.Buffer.LongLength;
+            if (Internal.BufferIndex >= n)
             {
                 for (ulong i = 0; i < n; i++)
                 {
-                    ulong x = (mt[i] & upper_mask) + (mt[(i + 1) % n] & lower_mask);
+                    ulong x = (Internal.Buffer[i] & InternalData.UPPER_MASK) + (Internal.Buffer[(i + 1) % n] & InternalData.LOWER_MASK);
                     ulong xA = x >> 1;
 
                     if (x % 2 != 0)
@@ -148,13 +166,11 @@ namespace FreneticGameCore.UtilitySystems
                         xA = xA ^ 0xB5026F5AA96619E9UL;
                     }
 
-                    mt[i] = mt[(i + 156) % n] ^ xA;
+                    Internal.Buffer[i] = Internal.Buffer[(i + 156) % n] ^ xA;
                 }
-
-                index = 0;
+                Internal.BufferIndex = 0;
             }
-
-            ulong y = mt[index++];
+            ulong y = Internal.Buffer[Internal.BufferIndex++];
             y = y ^ ((y >> 29) & 0x5555555555555555UL);
             y = y ^ ((y << 17) & 0x71D67FFFEDA60000UL);
             y = y ^ ((y << 37) & 0xFFF7EEE000000000UL);
