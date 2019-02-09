@@ -65,7 +65,7 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
-        /// Constructs the MT Random with a specific seed.
+        /// Constructs the MT Random with a specific seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).
         /// </summary>
         /// <param name="seed">The seed.</param>
         public MTRandom(ulong seed)
@@ -139,6 +139,15 @@ namespace FreneticGameCore.UtilitySystems
         }
 
         /// <summary>
+        /// Gets a random float, between 0 and cap.
+        /// </summary>
+        /// <param name="cap">The upper limit.</param>
+        public float NextFloat(float cap)
+        {
+            return NextUL() * (cap / ulong.MaxValue);
+        }
+
+        /// <summary>
         /// Gets a random double, between two bounds.
         /// </summary>
         /// <param name="min">The lower limit.</param>
@@ -146,6 +155,61 @@ namespace FreneticGameCore.UtilitySystems
         public double NextDouble(double min, double cap)
         {
             return (NextUL() * ((cap - min) / ulong.MaxValue)) + min;
+        }
+
+        /// <summary>
+        /// Gets a random float, between two bounds.
+        /// </summary>
+        /// <param name="min">The lower limit.</param>
+        /// <param name="cap">The upper limit.</param>
+        public float NextFloat(float min, float cap)
+        {
+            return (NextUL() * ((cap - min) / ulong.MaxValue)) + min;
+        }
+
+        /// <summary>
+        /// Gets a random entry from a list.
+        /// The list must not be empty.
+        /// </summary>
+        /// <typeparam name="T">The object type in the list.</typeparam>
+        /// <param name="list">The list of values.</param>
+        /// <exception cref="InvalidOperationException">When the input list is empty.</exception>
+        /// <returns>A random entry of type <typeparamref name="T"/>.</returns>
+        public T NextElement<T>(IList<T> list)
+        {
+            if (list.Count == 0)
+            {
+                throw new InvalidOperationException("List is empty.");
+            }
+            return list[Next(list.Count)];
+        }
+
+        /// <summary>
+        /// Gets a random entry from an enumerable.
+        /// Returns a default value if the enumerable is empty.
+        /// <para>This is a special optimized method for LINQ-like enumerables. For known-size lists, <see cref="NextElement{T}(IList{T})"/> is preferable.</para>
+        /// </summary>
+        /// <typeparam name="T">The object type in the enumerable.</typeparam>
+        /// <param name="enumerable">The dynamically generated enumerable of values.</param>
+        /// <exception cref="InvalidOperationException">When the input enumerable is empty.</exception>
+        /// <returns>A random element.</returns>
+        public T NextElement<T>(IEnumerable<T> enumerable)
+        {
+            int count = 0;
+            T result = default;
+            foreach (T element in enumerable)
+            {
+                count++;
+                if (Next(count) == 0)
+                {
+                    result = element;
+                }
+            }
+            if (count == 0)
+            {
+                throw new InvalidOperationException("Enumerable is empty.");
+            }
+            return result;
         }
 
         /// <summary>
@@ -160,12 +224,10 @@ namespace FreneticGameCore.UtilitySystems
                 {
                     ulong x = (Internal.Buffer[i] & InternalData.UPPER_MASK) + (Internal.Buffer[(i + 1) % n] & InternalData.LOWER_MASK);
                     ulong xA = x >> 1;
-
                     if (x % 2 != 0)
                     {
                         xA = xA ^ 0xB5026F5AA96619E9UL;
                     }
-
                     Internal.Buffer[i] = Internal.Buffer[(i + 156) % n] ^ xA;
                 }
                 Internal.BufferIndex = 0;
