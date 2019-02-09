@@ -104,9 +104,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
             public bool HasBones;
 
             /// <summary>
-            /// The number of vertices in this <see cref="Renderable"/>.
+            /// The number of indices in this <see cref="Renderable"/>.
             /// </summary>
-            public int VertexCount;
+            public int IndexCount;
 
             /// <summary>
             /// What buffer mode to use.
@@ -726,6 +726,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 return;
             }
 #endif
+            Internal.IndexCount = inds.Length;
             Internal.LastVRAM = 0;
             // Vertex buffer
             GL.GenBuffers(1, out Internal.VertexVBO);
@@ -844,7 +845,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 return;
             }
             GL.BindVertexArray(Internal.VAO);
-            GL.DrawElements(PrimitiveType.Triangles, Internal.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.Triangles, Internal.IndexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             GL.BindVertexArray(0);
         }
 
