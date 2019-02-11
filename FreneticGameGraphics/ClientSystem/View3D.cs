@@ -108,7 +108,7 @@ namespace FreneticGameGraphics.ClientSystem
         public int Height;
 
         /// <summary>
-        /// Whether the system is rendering lightinge ffects.
+        /// Whether the system is rendering lighting effects.
         /// </summary>
         public bool RenderLights = false;
 
