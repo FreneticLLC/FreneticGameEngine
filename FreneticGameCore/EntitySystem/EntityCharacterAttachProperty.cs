@@ -83,23 +83,50 @@ namespace FreneticGameCore.EntitySystem
         }
 
         /// <summary>
+        /// Gets the relative quaternion for this attachment.
+        /// </summary>
+        /// <param name="viewDir">The stand-in view direction.</param>
+        /// <param name="downDir">The stand-in down direction.</param>
+        /// <returns>The relative quaternion.</returns>
+        public MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
+        {
+            // TODO: Less complicated option?!
+            Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, viewDir, -downDir);
+            return BEPUutilities.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
+        }
+
+        /// <summary>
+        /// Gets the accurate location for this attachment.
+        /// </summary>
+        /// <param name="basePos">The base entity position of the character.</param>
+        /// <param name="downDir">The stand-in down direction.</param>
+        /// <returns>The accurate position.</returns>
+        public Location GetAccuratePosition(Location basePos, Location downDir)
+        {
+            return basePos + downDir * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+        }
+
+        /// <summary>
         /// Set relative offset, based on an entity's offsets from the default positioning.
         /// </summary>
         /// <param name="relPos">The relative position.</param>
         /// <param name="relQuat">The relative quaternion.</param>
         public void SetRelativeForEntity(Location relPos, MathHelpers.Quaternion relQuat)
         {
-            // TODO: Less cheating! This can be resolved mathematically!
-            Vector3 viewDir = Character.ViewDirection;
-            Vector3 downDir = Character.Down;
-            Character.Down = -Vector3.UnitZ;
-            Character.ViewDirection = Vector3.UnitY;
-            Entity.SetPosition(GetAccuratePosition(AttachedTo.LastKnownPosition) + relPos);
+            Entity.SetPosition(GetAccuratePosition(AttachedTo.LastKnownPosition, -Location.UnitZ) + relPos);
             Entity.SetOrientation(relQuat);
-            SetRelativeToCurrent();
-            Character.Down = downDir;
-            Character.ViewDirection = viewDir;
+            SetRelativeToCurrent(Vector3.UnitY, -Location.UnitZ);
             Tick();
+        }
+
+        /// <summary>
+        /// Set the relative offset to the current relative locations and orientation.
+        /// </summary>
+        /// <param name="viewDir">The stand-in view direction.</param>
+        /// <param name="downDir">The stand-in down direction.</param>
+        public void SetRelativeToCurrent(Vector3 viewDir, Location downDir)
+        {
+            SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToBVector()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
         }
 
         /// <summary>
