@@ -1765,7 +1765,7 @@ namespace FreneticGameGraphics.ClientSystem
                 bool redraw = GetAndResetShouldMajorUpdates();
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
-                Engine.Shaders3D.s_shadow = Engine.Shaders3D.s_shadow.Bind();
+                Engine.Shaders3D.Deferred.s_shadow = Engine.Shaders3D.Deferred.s_shadow.Bind();
                 ViewPatchFive?.Invoke();
                 RenderingShadows = true;
                 ShadowsOnly = true;
@@ -1831,26 +1831,26 @@ namespace FreneticGameGraphics.ClientSystem
                                     GraphicsUtil.CheckError("Pre-Prerender - Shadows - " + i);
                                     CameraPos = Lights[i].InternalLights[x].eye.ToLocation() - campos;
                                     ViewPatchSix?.Invoke(i, x);
-                                    Engine.Shaders3D.s_shadow_grass = Engine.Shaders3D.s_shadow_grass.Bind();
+                                    Engine.Shaders3D.Deferred.s_shadow_grass = Engine.Shaders3D.Deferred.s_shadow_grass.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
                                     GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);
                                     Lights[i].InternalLights[x].SetProj(this);
                                     GraphicsUtil.CheckError("Pre-Prerender2 - Shadows - " + i);
-                                    Engine.Shaders3D.s_shadow_parts = Engine.Shaders3D.s_shadow_parts.Bind();
+                                    Engine.Shaders3D.Deferred.s_shadow_parts = Engine.Shaders3D.Deferred.s_shadow_parts.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
                                     GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);
                                     GL.Uniform3(7, CameraPos.ToOpenTK());
                                     Lights[i].InternalLights[x].SetProj(this);
-                                    Engine.Shaders3D.s_shadow_nobones = Engine.Shaders3D.s_shadow_nobones.Bind();
+                                    Engine.Shaders3D.Deferred.s_shadow_nobones = Engine.Shaders3D.Deferred.s_shadow_nobones.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GraphicsUtil.CheckError("Pre-Prerender2.5 - Shadows - " + i);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
                                     GL.Uniform1(4, Lights[i].InternalLights[x].transp ? 1.0f : 0.0f);
                                     TranspShadows = Lights[i].InternalLights[x].transp;
                                     Lights[i].InternalLights[x].SetProj(this);
-                                    Engine.Shaders3D.s_shadow = Engine.Shaders3D.s_shadow.Bind();
+                                    Engine.Shaders3D.Deferred.s_shadow = Engine.Shaders3D.Deferred.s_shadow.Bind();
                                     SetMatrix(2, Matrix4d.Identity);
                                     GraphicsUtil.CheckError("Pre-Prerender3 - Shadows - " + i);
                                     GL.Uniform1(5, (Lights[i].InternalLights[x] is LightOrtho) ? 1.0f : 0.0f);
@@ -1937,17 +1937,17 @@ namespace FreneticGameGraphics.ClientSystem
             Stopwatch timer = new Stopwatch();
             timer.Start();
             OSetViewport();
-            Engine.Shaders3D.s_fbodecal = Engine.Shaders3D.s_fbodecal.Bind();
+            Engine.Shaders3D.Deferred.s_fbodecal = Engine.Shaders3D.Deferred.s_fbodecal.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
             ViewPatchSeven?.Invoke();
-            Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
+            Engine.Shaders3D.Deferred.s_fbot = Engine.Shaders3D.Deferred.s_fbot.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
-            Engine.Shaders3D.s_fbo = Engine.Shaders3D.s_fbo.Bind();
+            Engine.Shaders3D.Deferred.s_fbo = Engine.Shaders3D.Deferred.s_fbo.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
@@ -1971,9 +1971,9 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchEight?.Invoke();
-                Engine.Shaders3D.s_fbot = Engine.Shaders3D.s_fbot.Bind();
+                Engine.Shaders3D.Deferred.s_fbot = Engine.Shaders3D.Deferred.s_fbot.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_fbo = Engine.Shaders3D.s_fbo.Bind();
+                Engine.Shaders3D.Deferred.s_fbo = Engine.Shaders3D.Deferred.s_fbo.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
@@ -2009,7 +2009,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public void RenderPass_Decals()
         {
-            Engine.Shaders3D.s_fbodecal = Engine.Shaders3D.s_fbodecal.Bind();
+            Engine.Shaders3D.Deferred.s_fbodecal = Engine.Shaders3D.Deferred.s_fbodecal.Bind();
             RS4P.Unbind(this);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_decal);
             GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
@@ -2061,7 +2061,7 @@ namespace FreneticGameGraphics.ClientSystem
         {
             FBOid = FBOID.REFRACT;
             ViewPatchNine?.Invoke();
-            Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
+            Engine.Shaders3D.Deferred.s_fbo_refract = Engine.Shaders3D.Deferred.s_fbo_refract.Bind();
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -2075,7 +2075,7 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchTen?.Invoke();
-                Engine.Shaders3D.s_fbo_refract = Engine.Shaders3D.s_fbo_refract.Bind();
+                Engine.Shaders3D.Deferred.s_fbo_refract = Engine.Shaders3D.Deferred.s_fbo_refract.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
@@ -2116,11 +2116,11 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Engine.Deferred_SSAO)
                 {
-                    Engine.Shaders3D.s_shadowadder_ssao = Engine.Shaders3D.s_shadowadder_ssao.Bind();
+                    Engine.Shaders3D.Deferred.s_shadowadder_ssao = Engine.Shaders3D.Deferred.s_shadowadder_ssao.Bind();
                 }
                 else
                 {
-                    Engine.Shaders3D.s_shadowadder = Engine.Shaders3D.s_shadowadder.Bind();
+                    Engine.Shaders3D.Deferred.s_shadowadder = Engine.Shaders3D.Deferred.s_shadowadder.Bind();
                 }
                 GL.Uniform1(3, ShadowBlur);
             }
@@ -2128,11 +2128,11 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Engine.Deferred_SSAO)
                 {
-                    Engine.Shaders3D.s_lightadder_ssao = Engine.Shaders3D.s_lightadder_ssao.Bind();
+                    Engine.Shaders3D.Deferred.s_lightadder_ssao = Engine.Shaders3D.Deferred.s_lightadder_ssao.Bind();
                 }
                 else
                 {
-                    Engine.Shaders3D.s_lightadder = Engine.Shaders3D.s_lightadder.Bind();
+                    Engine.Shaders3D.Deferred.s_lightadder = Engine.Shaders3D.Deferred.s_lightadder.Bind();
                 }
             }
             GL.ActiveTexture(TextureUnit.Texture1);
@@ -2296,7 +2296,7 @@ namespace FreneticGameGraphics.ClientSystem
         {
             if (Engine.Deferred_Lights && Engine.Deferred_HDR)
             {
-                Engine.Shaders3D.s_hdrpass.Bind();
+                Engine.Shaders3D.Deferred.s_hdrpass.Bind();
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.Disable(EnableCap.CullFace);
                 GL.Disable(EnableCap.DepthTest);
@@ -2334,17 +2334,17 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Engine.Deferred_Toonify)
                 {
-                    Engine.Shaders3D.s_finalgodray_lights_toonify = Engine.Shaders3D.s_finalgodray_lights_toonify.Bind();
+                    Engine.Shaders3D.Deferred.s_finalgodray_lights_toonify = Engine.Shaders3D.Deferred.s_finalgodray_lights_toonify.Bind();
                 }
                 else
                 {
                     if (Engine.Deferred_MotionBlur)
                     {
-                        Engine.Shaders3D.s_finalgodray_lights_motblur = Engine.Shaders3D.s_finalgodray_lights_motblur.Bind();
+                        Engine.Shaders3D.Deferred.s_finalgodray_lights_motblur = Engine.Shaders3D.Deferred.s_finalgodray_lights_motblur.Bind();
                     }
                     else
                     {
-                        Engine.Shaders3D.s_finalgodray_lights = Engine.Shaders3D.s_finalgodray_lights.Bind();
+                        Engine.Shaders3D.Deferred.s_finalgodray_lights = Engine.Shaders3D.Deferred.s_finalgodray_lights.Bind();
                     }
                 }
             }
@@ -2352,11 +2352,11 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Engine.Deferred_Toonify)
                 {
-                    Engine.Shaders3D.s_finalgodray_toonify = Engine.Shaders3D.s_finalgodray_toonify.Bind();
+                    Engine.Shaders3D.Deferred.s_finalgodray_toonify = Engine.Shaders3D.Deferred.s_finalgodray_toonify.Bind();
                 }
                 else
                 {
-                    Engine.Shaders3D.s_finalgodray = Engine.Shaders3D.s_finalgodray.Bind();
+                    Engine.Shaders3D.Deferred.s_finalgodray = Engine.Shaders3D.Deferred.s_finalgodray.Bind();
                 }
             }
             BufferDontTouch = true;
@@ -2460,12 +2460,12 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh_ll = Engine.Shaders3D.Deferred.s_transponlylitsh_ll.Bind();
                         FBOid = FBOID.TRANSP_SHADOWS_LL;
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh = Engine.Shaders3D.Deferred.s_transponlylitsh.Bind();
                         FBOid = FBOID.TRANSP_SHADOWS;
                     }
                 }
@@ -2473,12 +2473,12 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit_ll = Engine.Shaders3D.Deferred.s_transponlylit_ll.Bind();
                         FBOid = FBOID.TRANSP_LIT_LL;
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit = Engine.Shaders3D.Deferred.s_transponlylit.Bind();
                         FBOid = FBOID.TRANSP_LIT;
                     }
                 }
@@ -2487,12 +2487,12 @@ namespace FreneticGameGraphics.ClientSystem
             {
                 if (Engine.AllowLL)
                 {
-                    Engine.Shaders3D.s_transponly_ll = Engine.Shaders3D.s_transponly_ll.Bind();
+                    Engine.Shaders3D.Deferred.s_transponly_ll = Engine.Shaders3D.Deferred.s_transponly_ll.Bind();
                     FBOid = FBOID.TRANSP_LL;
                 }
                 else
                 {
-                    Engine.Shaders3D.s_transponly = Engine.Shaders3D.s_transponly.Bind();
+                    Engine.Shaders3D.Deferred.s_transponly = Engine.Shaders3D.Deferred.s_transponly.Bind();
                     FBOid = FBOID.TRANSP_UNLIT;
                 }
             }
@@ -2532,12 +2532,12 @@ namespace FreneticGameGraphics.ClientSystem
                     {
                         if (Engine.AllowLL)
                         {
-                            Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                            Engine.Shaders3D.Deferred.s_transponlylitsh_ll = Engine.Shaders3D.Deferred.s_transponlylitsh_ll.Bind();
                             FBOid = FBOID.TRANSP_SHADOWS_LL;
                         }
                         else
                         {
-                            Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                            Engine.Shaders3D.Deferred.s_transponlylitsh = Engine.Shaders3D.Deferred.s_transponlylitsh.Bind();
                             FBOid = FBOID.TRANSP_SHADOWS;
                         }
                     }
@@ -2545,12 +2545,12 @@ namespace FreneticGameGraphics.ClientSystem
                     {
                         if (Engine.AllowLL)
                         {
-                            Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                            Engine.Shaders3D.Deferred.s_transponlylit_ll = Engine.Shaders3D.Deferred.s_transponlylit_ll.Bind();
                             FBOid = FBOID.TRANSP_LIT_LL;
                         }
                         else
                         {
-                            Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                            Engine.Shaders3D.Deferred.s_transponlylit = Engine.Shaders3D.Deferred.s_transponlylit.Bind();
                             FBOid = FBOID.TRANSP_LIT;
                         }
                     }
@@ -2559,12 +2559,12 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponly_ll = Engine.Shaders3D.s_transponly_ll.Bind();
+                        Engine.Shaders3D.Deferred.s_transponly_ll = Engine.Shaders3D.Deferred.s_transponly_ll.Bind();
                         FBOid = FBOID.TRANSP_LL;
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponly = Engine.Shaders3D.s_transponly.Bind();
+                        Engine.Shaders3D.Deferred.s_transponly = Engine.Shaders3D.Deferred.s_transponly.Bind();
                         FBOid = FBOID.TRANSP_UNLIT;
                     }
                 }
@@ -2616,7 +2616,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, fbo_godray_texture2);
-                Engine.Shaders3D.s_godray = Engine.Shaders3D.s_godray.Bind();
+                Engine.Shaders3D.Deferred.s_godray = Engine.Shaders3D.Deferred.s_godray.Bind();
                 GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
                 GL.UniformMatrix4(2, false, ref IdentityMatrix);
                 GL.Uniform1(6, MainEXP * Engine.Exposure);
@@ -2652,7 +2652,7 @@ namespace FreneticGameGraphics.ClientSystem
                 // TODO: Merge transp-to-screen and GR pass?
                 //GL.Enable(EnableCap.DepthTest);
                 GL.BindTexture(TextureTarget.Texture2D, transp_fbo_texture);
-                Engine.Shaders3D.s_transpadder = Engine.Shaders3D.s_transpadder.Bind();
+                Engine.Shaders3D.Deferred.s_transpadder = Engine.Shaders3D.Deferred.s_transpadder.Bind();
                 GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
                 GL.UniformMatrix4(2, false, ref IdentityMatrix);
                 GL.Uniform1(3, (float)lightc);
@@ -2688,7 +2688,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.BindTexture(TextureTarget.TextureBuffer, TransTexs[3]);
                 GL.BindImageTexture(7, TransTexs[3], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
                 GL.ActiveTexture(TextureUnit.Texture0);
-                Engine.Shaders3D.s_ll_clearer.Bind();
+                Engine.Shaders3D.Deferred.s_ll_clearer.Bind();
                 GL.Uniform2(4, new Vector2(Width, Height));
                 Matrix4 flatProj = Matrix4.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
                 GL.UniformMatrix4(1, false, ref flatProj);
@@ -2706,7 +2706,7 @@ namespace FreneticGameGraphics.ClientSystem
                 //GL.UniformMatrix4(1, false, ref combined);
                 RenderTranspInt(ref lightc, frustumToUse);
                 GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-                Engine.Shaders3D.s_ll_fpass.Bind();
+                Engine.Shaders3D.Deferred.s_ll_fpass.Bind();
                 GL.Uniform2(4, new Vector2(Width, Height));
                 GL.UniformMatrix4(1, false, ref flatProj);
                 GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -2787,22 +2787,22 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylitsh_ll_particles = Engine.Shaders3D.s_transponlylitsh_ll_particles.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh_ll_particles = Engine.Shaders3D.Deferred.s_transponlylitsh_ll_particles.Bind();
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylitsh_particles = Engine.Shaders3D.s_transponlylitsh_particles.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh_particles = Engine.Shaders3D.Deferred.s_transponlylitsh_particles.Bind();
                     }
                 }
                 else
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylit_ll_particles = Engine.Shaders3D.s_transponlylit_ll_particles.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit_ll_particles = Engine.Shaders3D.Deferred.s_transponlylit_ll_particles.Bind();
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylit_particles = Engine.Shaders3D.s_transponlylit_particles.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit_particles = Engine.Shaders3D.Deferred.s_transponlylit_particles.Bind();
                     }
                 }
                 GraphicsUtil.CheckError("PreRenderTranspLights - 1.5");
@@ -2822,22 +2822,22 @@ namespace FreneticGameGraphics.ClientSystem
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylitsh_ll = Engine.Shaders3D.s_transponlylitsh_ll.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh_ll = Engine.Shaders3D.Deferred.s_transponlylitsh_ll.Bind();
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylitsh = Engine.Shaders3D.s_transponlylitsh.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylitsh = Engine.Shaders3D.Deferred.s_transponlylitsh.Bind();
                     }
                 }
                 else
                 {
                     if (Engine.AllowLL)
                     {
-                        Engine.Shaders3D.s_transponlylit_ll = Engine.Shaders3D.s_transponlylit_ll.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit_ll = Engine.Shaders3D.Deferred.s_transponlylit_ll.Bind();
                     }
                     else
                     {
-                        Engine.Shaders3D.s_transponlylit = Engine.Shaders3D.s_transponlylit.Bind();
+                        Engine.Shaders3D.Deferred.s_transponlylit = Engine.Shaders3D.Deferred.s_transponlylit.Bind();
                     }
                 }
                 GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -2864,7 +2864,7 @@ namespace FreneticGameGraphics.ClientSystem
                     matabc[0, 3] = (float)Width;
                     matabc[1, 3] = (float)Height;
                     ViewPatchFourteen?.Invoke(matabc);
-                    Engine.Shaders3D.s_transponly_ll.Bind();
+                    Engine.Shaders3D.Deferred.s_transponly_ll.Bind();
                     //GL.UniformMatrix4(1, false, ref combined);
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
                     GL.UniformMatrix4(9, false, ref matabc);
@@ -2872,7 +2872,7 @@ namespace FreneticGameGraphics.ClientSystem
                 else
                 {
                     ViewPatchFifteen?.Invoke();
-                    Engine.Shaders3D.s_transponly.Bind();
+                    Engine.Shaders3D.Deferred.s_transponly.Bind();
                     //GL.UniformMatrix4(1, false, ref combined);
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
                 }
