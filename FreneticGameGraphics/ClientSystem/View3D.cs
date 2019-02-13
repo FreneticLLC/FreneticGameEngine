@@ -853,6 +853,8 @@ namespace FreneticGameGraphics.ClientSystem
             }
         }
 
+        private Stopwatch Render_Timer = new Stopwatch();
+
         /// <summary>
         /// Renders the entire 3D viewport.
         /// </summary>
@@ -882,8 +884,8 @@ namespace FreneticGameGraphics.ClientSystem
                     EndNF(pfbo);
                     return;
                 }
-                Stopwatch timer = new Stopwatch();
-                timer.Start();
+                Render_Timer.Reset();
+                Render_Timer.Start();
                 if (Engine.Deferred_Shadows)
                 {
                     RenderPass_Shadows();
@@ -896,8 +898,8 @@ namespace FreneticGameGraphics.ClientSystem
                 FinalHDRGrab();
                 GraphicsUtil.CheckError("Render - HDR");
                 PForward = CameraForward + CameraPos;
-                timer.Stop();
-                TotalTime = (double)timer.ElapsedMilliseconds / 1000f;
+                Render_Timer.Stop();
+                TotalTime = (double)Render_Timer.ElapsedMilliseconds / 1000f;
                 if (TotalTime > TotalSpikeTime)
                 {
                     TotalSpikeTime = TotalTime;
@@ -1755,6 +1757,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public Func<bool> GetAndResetShouldMajorUpdates = () => true;
 
+        private Stopwatch Shadows_Timer = new Stopwatch();
+
         /// <summary>
         /// Calculate shadow maps for the later (lighting) render passes.
         /// </summary>
@@ -1763,8 +1767,8 @@ namespace FreneticGameGraphics.ClientSystem
             if (ShouldRedrawShadows() && ShadowingAllowed)
             {
                 bool redraw = GetAndResetShouldMajorUpdates();
-                Stopwatch timer = new Stopwatch();
-                timer.Start();
+                Shadows_Timer.Reset();
+                Shadows_Timer.Start();
                 Engine.Shaders3D.Deferred.ShadowPass_Basic = Engine.Shaders3D.Deferred.ShadowPass_Basic.Bind();
                 ViewPatchFive?.Invoke();
                 RenderingShadows = true;
@@ -1919,8 +1923,8 @@ namespace FreneticGameGraphics.ClientSystem
                 CameraPos = campos;
                 RenderingShadows = false;
                 ShadowsOnly = false;
-                timer.Stop();
-                ShadowTime = (double)timer.ElapsedMilliseconds / 1000f;
+                Shadows_Timer.Stop();
+                ShadowTime = (double)Shadows_Timer.ElapsedMilliseconds / 1000f;
                 if (ShadowTime > ShadowSpikeTime)
                 {
                     ShadowSpikeTime = ShadowTime;
@@ -1929,13 +1933,16 @@ namespace FreneticGameGraphics.ClientSystem
                 GraphicsUtil.CheckError("AfterShadows");
             }
         }
+
+        private Stopwatch GBuffer_Timer = new Stopwatch();
+
         /// <summary>
         /// Generate the G-Buffer ("FBO") for lighting and final passes.
         /// </summary>
         public void RenderPass_GBuffer()
         {
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
+            GBuffer_Timer.Reset();
+            GBuffer_Timer.Start();
             OSetViewport();
             Engine.Shaders3D.Deferred.GBuffer_Decals = Engine.Shaders3D.Deferred.GBuffer_Decals.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
@@ -1995,8 +2002,8 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("AfterFBO");
             RenderPass_Decals();
             RenderPass_RefractionBuffer();
-            timer.Stop();
-            FBOTime = (double)timer.ElapsedMilliseconds / 1000f;
+            GBuffer_Timer.Stop();
+            FBOTime = (double)GBuffer_Timer.ElapsedMilliseconds / 1000f;
             if (FBOTime > FBOSpikeTime)
             {
                 FBOSpikeTime = FBOTime;
@@ -2102,13 +2109,15 @@ namespace FreneticGameGraphics.ClientSystem
             FBOid = FBOID.NONE;
         }
 
+        private Stopwatch Lights_Timer = new Stopwatch();
+
         /// <summary>
         /// Light source addition render passes.
         /// </summary>
         public void RenderPass_Lights()
         {
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
+            GBuffer_Timer.Reset();
+            GBuffer_Timer.Start();
             BindFramebuffer(FramebufferTarget.Framebuffer, fbo_main);
             DrawBuffer(DrawBufferMode.ColorAttachment0);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.0f, 0.0f, 0.0f, RenderClearAlpha });
@@ -2279,13 +2288,12 @@ namespace FreneticGameGraphics.ClientSystem
             RenderPass_LightsToBase();
             int lightc = RenderPass_Transparents();
             RenderPass_Bloom(lightc);
-            timer.Stop();
-            LightsTime = (double)timer.ElapsedMilliseconds / 1000f;
+            GBuffer_Timer.Stop();
+            LightsTime = (double)GBuffer_Timer.ElapsedMilliseconds / 1000f;
             if (LightsTime > LightsSpikeTime)
             {
                 LightsSpikeTime = LightsTime;
             }
-            timer.Reset();
             GraphicsUtil.CheckError("AtEnd");
         }
 
