@@ -104,7 +104,7 @@ namespace FreneticGameGraphics.ClientSystem.EntitySystem
             context.Engine.Rendering.SetColor(Color, context.Engine.MainView);
             Matrix4d mat = Matrix4d.Scale(Scale.ToOpenTK3D()) * Matrix4d.CreateFromQuaternion(RenderOrientation.ToOpenTKDoubles()) * Matrix4d.CreateTranslation(RenderAt.ToOpenTK3D());
             context.Engine.MainView.SetMatrix(ShaderLocations.Common.WORLD, mat);
-            EntityModel.Draw();
+            EntityModel.Draw(context);
             foreach (EnableCap ec in DisabledCaps)
             {
                 GL.Enable(ec);

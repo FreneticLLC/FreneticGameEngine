@@ -23,6 +23,7 @@ using System.Globalization;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using FreneticGameGraphics.ClientSystem;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -54,7 +55,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// The lower font system.
         /// </summary>
         public GLFontEngine GLFonts;
-
+        
         /// <summary>
         /// The general font used for all normal purposes.
         /// </summary>
@@ -630,16 +631,6 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 }
             };
             TextVBO cVBO = new TextVBO(Engine.GLFonts);
-            Action configme = () =>
-            {
-                Engine.GLFonts.Shaders.TextCleanerShader.Bind();
-                Matrix4 ortho = Engine.GetOrtho();
-                GL.UniformMatrix4(1, false, ref ortho);
-                //Matrix4 ident = Matrix4.Identity;
-                //GL.UniformMatrix4(2, false, ref ident);
-                Vector3 col = new Vector3(1, 1, 1);
-                GL.Uniform3(3, ref col);
-            };
             if (lines.Length <= 1)
             {
                 render(lines[0], (float)Position.Y, cVBO);
@@ -692,7 +683,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     pos += vbos[i].Vecs.Count;
                 }
             }
-            configme();
+            Engine.GLFonts.Shaders.TextCleanerShader.Bind();
+            Matrix4 ortho = Engine.GetOrtho();
+            GL.UniformMatrix4(1, false, ref ortho);
+            //Matrix4 ident = Matrix4.Identity;
+            //GL.UniformMatrix4(2, false, ref ident);
+            Vector3 col = new Vector3(1, 1, 1);
+            GL.Uniform3(3, ref col);
             cVBO.Build();
             cVBO.Render();
             if (Engine.FixTo == null)

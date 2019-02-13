@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using FreneticGameGraphics.GraphicsHelpers;
 
 namespace FreneticGameGraphics.ClientSystem
 {
@@ -24,5 +25,48 @@ namespace FreneticGameGraphics.ClientSystem
         /// The relevant owning game engine (3D).
         /// </summary>
         public GameEngine3D Engine;
+
+        /// <summary>
+        /// How many <see cref="Model"/>s have been rendered this frame in this context.
+        /// </summary>
+        public int ModelsRendered = 0;
+
+        /// <summary>
+        /// How many <see cref="Renderable"/>s have been rendered this frame in this context.
+        /// </summary>
+        public int ObjectsRendered = 0;
+
+        /// <summary>
+        /// How many particles have been rendered this frame in this context.
+        /// </summary>
+        public int ParticlesRendered = 0;
+
+        /// <summary>
+        /// How many decals have been rendered this frame in this context.
+        /// </summary>
+        public int DecalsRendered = 0;
+
+        /// <summary>
+        /// How many sprites (like grass) have been rendered this frame in this context.
+        /// </summary>
+        public int SpritesRendered = 0;
+
+        /// <summary>
+        /// How many vertices have been rendered this frame in this context.
+        /// </summary>
+        public int VerticesRendered = 0;
+
+        /// <summary>
+        /// Resets the counters.
+        /// </summary>
+        public void ResetCounters()
+        {
+            ModelsRendered = 0;
+            ObjectsRendered = 0;
+            ParticlesRendered = 0;
+            DecalsRendered = 0;
+            SpritesRendered = 0;
+            VerticesRendered = 0;
+        }
     }
 }

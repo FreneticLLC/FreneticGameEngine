@@ -247,11 +247,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Render a cylinder between two points.
         /// </summary>
+        /// <param name="context">The sourcing render context.</param>
         /// <param name="start">The initial point.</param>
         /// <param name="end">The ending point.</param>
         /// <param name="width">The width of the cylinder.</param>
         /// <param name="view">The relevant view.</param>
-        public void RenderCylinder(Location start, Location end, float width, View3D view)
+        public void RenderCylinder(RenderContext context, Location start, Location end, float width, View3D view)
         {
             float len = (float)(end - start).Length();
             Location vecang = MathUtilities.VectorToAngles(start - end);
@@ -262,7 +263,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
                  * Matrix4d.CreateTranslation(start.ToOpenTK3D());
             view.SetMatrix(2, mat);
-            Models.Cylinder.Draw(); // TODO: Models reference in constructor - or client reference?
+            Models.Cylinder.Draw(context);
         }
 
         /// <summary>

@@ -304,6 +304,8 @@ namespace FreneticGameGraphics.ClientSystem
         /// </summary>
         public override void RenderSingleFrame()
         {
+            // Prep
+            MainContext.ResetCounters();
             // Audio handling
             Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
             // Setup requirements

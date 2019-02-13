@@ -719,6 +719,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Draws the model.
         /// </summary>
+        /// <param name="context">The sourcing render context.</param>
         /// <param name="aTimeHead">Animation time, head.</param>
         /// <param name="aTimeLegs">Animation time, legs.</param>
         /// <param name="aTimeTorso">Aniamtion time, torso.</param>
@@ -726,7 +727,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <param name="headanim">Head animation.</param>
         /// <param name="legsanim">Legs animation.</param>
         /// <param name="torsoanim">Torso animation.</param>
-        public void Draw(double aTimeHead = 0, SingleAnimation headanim = null, double aTimeTorso = 0, SingleAnimation torsoanim = null, double aTimeLegs = 0, SingleAnimation legsanim = null, bool forceBones = false)
+        public void Draw(RenderContext context, double aTimeHead = 0, SingleAnimation headanim = null, double aTimeTorso = 0, SingleAnimation torsoanim = null, double aTimeLegs = 0, SingleAnimation legsanim = null, bool forceBones = false)
         {
             LastDrawTime = Engine.CurrentTime;
             hAnim = headanim;
@@ -753,7 +754,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     }
                     SetBones(mats);
                 }
-                Meshes[i].Draw();
+                Meshes[i].Draw(context);
             }
         }
 
@@ -949,13 +950,15 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             BaseRenderable.Destroy();
         }
-        
+
         /// <summary>
         /// Renders the mesh.
         /// </summary>
-        public void Draw()
+        /// <param name="context">The sourcing render context.</param>
+        public void Draw(RenderContext context)
         {
-            BaseRenderable.Render(true);
+            context.ModelsRendered++;
+            BaseRenderable.Render(context, true);
         }
     }
 

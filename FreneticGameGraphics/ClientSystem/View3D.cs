@@ -316,7 +316,7 @@ namespace FreneticGameGraphics.ClientSystem
         public bool LLActive = false;
 
         /// <summary>
-        /// Currently know transparente textures.
+        /// Currently known transparent textures.
         /// </summary>
         int[] TransTexs = new int[4];
 

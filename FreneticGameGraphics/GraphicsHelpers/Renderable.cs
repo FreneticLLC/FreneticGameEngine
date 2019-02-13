@@ -20,6 +20,7 @@ using FreneticGameCore.MathHelpers;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using FreneticGameGraphics.ClientSystem;
 
 namespace FreneticGameGraphics.GraphicsHelpers
 {
@@ -838,11 +839,17 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Renders the VBO fully, without handling textures at all.
         /// </summary>
-        public void RenderWithoutTextures()
+        /// <param name="context">The sourcing render context.</param>
+        public void RenderWithoutTextures(RenderContext context)
         {
             if (!Generated)
             {
                 return;
+            }
+            if (context != null)
+            {
+                context.ObjectsRendered++;
+                context.VerticesRendered += Internal.IndexCount;
             }
             GL.BindVertexArray(Internal.VAO);
             GL.DrawElements(PrimitiveType.Triangles, Internal.IndexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
@@ -852,8 +859,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// Render the VBO fully.
         /// </summary>
+        /// <param name="context">The sourcing render context.</param>
         /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
-        public void Render(bool fixafter)
+        public void Render(RenderContext context, bool fixafter)
         {
             if (Tex != null)
             {
@@ -887,7 +895,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 GL.ActiveTexture(TextureUnit.Texture0);
                 Tex.Bind();
             }
-            RenderWithoutTextures();
+            RenderWithoutTextures(context);
             if (fixafter && Tex != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
