@@ -1400,7 +1400,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_SOLID;
             Vector3 maxLit = Engine.SunAdjustBackupLight.Xyz;
-            Engine.Shaders3D.s_forw_particles.Bind();
+            Engine.Shaders3D.Forward.s_forw_particles.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.3");
             GL.Uniform4(4, new Vector4(Width, Height, Engine.ZNear, Engine.ZFar()));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.4");
@@ -1419,7 +1419,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
                 CheckError("Render/Fast - Uniforms 2");
             }*/
-            Engine.Shaders3D.s_forw_grass.Bind();
+            Engine.Shaders3D.Forward.s_forw_grass.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.2");
             if (Engine.Forward_Lights)
             {
@@ -1428,7 +1428,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
             }
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.5");
-            Engine.Shaders3D.s_forwdecal.Bind();
+            Engine.Shaders3D.Forward.s_forwdecal.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.6");
             if (Engine.Forward_Lights)
             {
@@ -1455,7 +1455,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.9");
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            Engine.Shaders3D.s_forwt.Bind();
+            Engine.Shaders3D.Forward.s_forwt.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.1");
@@ -1471,7 +1471,7 @@ namespace FreneticGameGraphics.ClientSystem
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.6");
             Engine.Rendering.SetColor(Color4.White, this);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.7");
-            Engine.Shaders3D.s_forwt_nofog.Bind();
+            Engine.Shaders3D.Forward.s_forwt_nofog.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.8");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1480,7 +1480,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Uniform1(13, fogDist);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            Engine.Shaders3D.s_forwt_obj.Bind();
+            Engine.Shaders3D.Forward.s_forwt_obj.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
@@ -1490,7 +1490,7 @@ namespace FreneticGameGraphics.ClientSystem
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
             ViewPatchOne?.Invoke(shadowmat_dat, light_dat, fogDist, maxLit, c);
-            Engine.Shaders3D.s_forw_nobones.Bind();
+            Engine.Shaders3D.Forward.s_forw_nobones.Bind();
             if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
@@ -1518,7 +1518,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.Uniform3(11, maxLit);
             }
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.58");
-            Engine.Shaders3D.s_forw.Bind();
+            Engine.Shaders3D.Forward.s_forw.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.59");
             if (Engine.Forward_Lights)
             {
@@ -1549,21 +1549,21 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchTwo?.Invoke();
-                Engine.Shaders3D.s_forw_particles.Bind();
+                Engine.Shaders3D.Forward.s_forw_particles.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forw_grass.Bind();
+                Engine.Shaders3D.Forward.s_forw_grass.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forwdecal.Bind();
+                Engine.Shaders3D.Forward.s_forwdecal.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forwt_nofog.Bind();
+                Engine.Shaders3D.Forward.s_forwt_nofog.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forwt_obj.Bind();
+                Engine.Shaders3D.Forward.s_forwt_obj.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forwt.Bind();
+                Engine.Shaders3D.Forward.s_forwt.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forw_nobones.Bind();
+                Engine.Shaders3D.Forward.s_forw_nobones.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forw = Engine.Shaders3D.s_forw.Bind();
+                Engine.Shaders3D.Forward.s_forw = Engine.Shaders3D.Forward.s_forw.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
@@ -1594,7 +1594,7 @@ namespace FreneticGameGraphics.ClientSystem
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
                 if (Engine.ForwardReflections)
                 {
-                    Engine.Shaders3D.s_post_fast = Engine.Shaders3D.s_post_fast.Bind();
+                    Engine.Shaders3D.Forward.s_post_fast = Engine.Shaders3D.Forward.s_post_fast.Bind();
                     GL.UniformMatrix4(1, false, ref SimpleOrthoMatrix);
                     GL.UniformMatrix4(2, false, ref IdentityMatrix);
                     GL.UniformMatrix4(6, false, ref PrimaryMatrix);
@@ -1633,7 +1633,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             if (Engine.DisplayDecals)
             {
-                Engine.Shaders3D.s_forwdecal = Engine.Shaders3D.s_forwdecal.Bind();
+                Engine.Shaders3D.Forward.s_forwdecal = Engine.Shaders3D.Forward.s_forwdecal.Bind();
                 GL.ActiveTexture(TextureUnit.Texture4);
                 GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
                 GL.ActiveTexture(TextureUnit.Texture0);
@@ -1659,7 +1659,7 @@ namespace FreneticGameGraphics.ClientSystem
                 else
                 {
                     FBOid = FBOID.FORWARD_EXTRAS;
-                    Engine.Shaders3D.s_forwdecal = Engine.Shaders3D.s_forwdecal.Bind();
+                    Engine.Shaders3D.Forward.s_forwdecal = Engine.Shaders3D.Forward.s_forwdecal.Bind();
                     DecalRender?.Invoke(this);
                     GraphicsUtil.CheckError("Render/Fast - Decals");
                 }
@@ -1667,7 +1667,7 @@ namespace FreneticGameGraphics.ClientSystem
             GL.ActiveTexture(TextureUnit.Texture0);
             FBOid = FBOID.FORWARD_TRANSP;
             ViewPatchThree?.Invoke(fogDist, shadowmat_dat, light_dat, c);
-            Engine.Shaders3D.s_forw_trans_nobones.Bind();
+            Engine.Shaders3D.Forward.s_forw_trans_nobones.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
@@ -1681,7 +1681,7 @@ namespace FreneticGameGraphics.ClientSystem
             }
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, this);
-            Engine.Shaders3D.s_forw_trans.Bind();
+            Engine.Shaders3D.Forward.s_forw_trans.Bind();
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
@@ -1705,9 +1705,9 @@ namespace FreneticGameGraphics.ClientSystem
                 Viewport(0, 0, Width / 2, Height);
                 CameraPos = cameraBasePos - cameraAdjust;
                 ViewPatchFour?.Invoke();
-                Engine.Shaders3D.s_forw_trans_nobones.Bind();
+                Engine.Shaders3D.Forward.s_forw_trans_nobones.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
-                Engine.Shaders3D.s_forw_trans = Engine.Shaders3D.s_forw_trans.Bind();
+                Engine.Shaders3D.Forward.s_forw_trans = Engine.Shaders3D.Forward.s_forw_trans.Bind();
                 GL.UniformMatrix4(1, false, ref PrimaryMatrix_OffsetFor3D);
                 Matrix4 orig = PrimaryMatrix;
                 PrimaryMatrix = PrimaryMatrix_OffsetFor3D;
