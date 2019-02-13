@@ -31,25 +31,25 @@ namespace FreneticGameGraphics.ClientSystem
         public void LoadAll(ShaderEngine Shaders, bool AllowLL, bool forNorm, bool forLight, bool forShad)
         {
             string def = Shaders.MCM_GOOD_GRAPHICS ? "#MCM_GOOD_GRAPHICS" : "#";
-            Deferred.s_shadow = Shaders.GetShader("shadow" + def);
-            Deferred.s_shadow_nobones = Shaders.GetShader("shadow" + def + ",MCM_NO_BONES");
-            Deferred.s_fbo = Shaders.GetShader("fbo" + def);
-            Deferred.s_fbot = Shaders.GetShader("fbo" + def + ",MCM_TRANSP_ALLOWED");
-            Deferred.s_fbo_refract = Shaders.GetShader("fbo" + def + ",MCM_REFRACT");
-            Deferred.s_shadowadder = Shaders.GetShader("lightadder" + def + ",MCM_SHADOWS");
-            Deferred.s_lightadder = Shaders.GetShader("lightadder" + def);
-            Deferred.s_shadowadder_ssao = Shaders.GetShader("lightadder" + def + ",MCM_SHADOWS,MCM_SSAO");
-            Deferred.s_lightadder_ssao = Shaders.GetShader("lightadder" + def + ",MCM_SSAO");
-            Deferred.s_transponly = Shaders.GetShader("transponly" + def);
-            Deferred.s_transponlylit = Shaders.GetShader("transponly" + def + ",MCM_LIT");
-            Deferred.s_transponlylitsh = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS");
-            Deferred.s_godray = Shaders.GetShader("godray" + def);
-            Deferred.s_transpadder = Shaders.GetShader("transpadder" + def);
-            Deferred.s_finalgodray = Shaders.GetShader("finalgodray" + def);
-            Deferred.s_finalgodray_toonify = Shaders.GetShader("finalgodray" + def + ",MCM_TOONIFY");
-            Deferred.s_finalgodray_lights = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS");
-            Deferred.s_finalgodray_lights_toonify = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS,MCM_TOONIFY");
-            Deferred.s_finalgodray_lights_motblur = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS,MCM_MOTBLUR");
+            Deferred.ShadowPass_Basic = Shaders.GetShader("shadow" + def);
+            Deferred.ShadowPass_NoBones = Shaders.GetShader("shadow" + def + ",MCM_NO_BONES");
+            Deferred.GBufferSolid = Shaders.GetShader("fbo" + def);
+            Deferred.GBuffer_AllTransparencies = Shaders.GetShader("fbo" + def + ",MCM_TRANSP_ALLOWED");
+            Deferred.GBuffer_Refraction = Shaders.GetShader("fbo" + def + ",MCM_REFRACT");
+            Deferred.ShadowAdderPass = Shaders.GetShader("lightadder" + def + ",MCM_SHADOWS");
+            Deferred.LightAdderPass = Shaders.GetShader("lightadder" + def);
+            Deferred.ShadowAdderPass_SSAO = Shaders.GetShader("lightadder" + def + ",MCM_SHADOWS,MCM_SSAO");
+            Deferred.LightAdderPass_SSAO = Shaders.GetShader("lightadder" + def + ",MCM_SSAO");
+            Deferred.Transparents = Shaders.GetShader("transponly" + def);
+            Deferred.Transparents_Lights = Shaders.GetShader("transponly" + def + ",MCM_LIT");
+            Deferred.Transparents_Lights_Shadows = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS");
+            Deferred.Godrays = Shaders.GetShader("godray" + def);
+            Deferred.TransparentAdderPass = Shaders.GetShader("transpadder" + def);
+            Deferred.FinalPass_Basic = Shaders.GetShader("finalgodray" + def);
+            Deferred.FinalPass_Toonify = Shaders.GetShader("finalgodray" + def + ",MCM_TOONIFY");
+            Deferred.FinalPass_Lights = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS");
+            Deferred.FinalPass_Lights_Toonify = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS,MCM_TOONIFY");
+            Deferred.FinalPass_Lights_MotionBlur = Shaders.GetShader("finalgodray" + def + ",MCM_LIGHTS,MCM_MOTBLUR");
             string forw_extra = (forNorm ? ",MCM_NORMALS" : "")
                 + (forLight ? ",MCM_LIGHTS" : "")
                 + (forShad ? ",MCM_SHADOWS" : "");
@@ -59,32 +59,32 @@ namespace FreneticGameGraphics.ClientSystem
             Forward.BasicTransparent_NoBones = Shaders.GetShader("forward" + def + ",MCM_TRANSP,MCM_NO_BONES" + forw_extra);
             if (AllowLL)
             {
-                Deferred.s_transponly_ll = Shaders.GetShader("transponly" + def + ",MCM_LL");
-                Deferred.s_transponlylit_ll = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_LL");
-                Deferred.s_transponlylitsh_ll = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_LL");
-                Deferred.s_ll_clearer = Shaders.GetShader("clearer" + def);
-                Deferred.s_ll_fpass = Shaders.GetShader("fpass" + def);
+                Deferred.Transparents_LL = Shaders.GetShader("transponly" + def + ",MCM_LL");
+                Deferred.Transparents_Lights_LL = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_LL");
+                Deferred.Transparents_Lights_Shadows_LL = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_LL");
+                Deferred.LLClearerPass = Shaders.GetShader("clearer" + def);
+                Deferred.LLFinalPass = Shaders.GetShader("fpass" + def);
             }
-            Deferred.s_hdrpass = Shaders.GetShader("hdrpass" + def);
+            Deferred.HDRPass = Shaders.GetShader("hdrpass" + def);
             Forward.PostProcess = Shaders.GetShader("postfast" + def);
             Forward.Grass = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_GEOM_THREED_TEXTURE" + forw_extra + "?grass");
-            Deferred.s_fbo_grass = Shaders.GetShader("fbo" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_GEOM_THREED_TEXTURE?grass");
-            Deferred.s_shadow_grass = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_IS_A_SHADOW,MCM_GEOM_THREED_TEXTURE?grass");
-            Deferred.s_shadow_parts = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH,MCM_IS_A_SHADOW?particles");
+            Deferred.GBuffer_Grass = Shaders.GetShader("fbo" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_GEOM_THREED_TEXTURE?grass");
+            Deferred.ShadowPass_Grass = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_IS_A_SHADOW,MCM_GEOM_THREED_TEXTURE?grass");
+            Deferred.ShadowPass_Particles = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH,MCM_IS_A_SHADOW?particles");
             Forward.Particles = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH" + forw_extra + "?particles");
-            Deferred.s_fbodecal = Shaders.GetShader("fbo" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE,MCM_PRETTY?decal");
+            Deferred.GBuffer_Decals = Shaders.GetShader("fbo" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE,MCM_PRETTY?decal");
             Forward.Decals = Shaders.GetShader("forward" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE" + forw_extra + "?decal");
             Forward.AllTransparencies_NoFog = Shaders.GetShader("forward" + def + ",MCM_NO_ALPHA_CAP,MCM_BRIGHT,MCM_NO_BONES" + forw_extra);
             Forward.AllTransparencies_Objects = Shaders.GetShader("forward" + def + ",MCM_NO_BONES" + forw_extra);
             Forward.AllTransparencies_Sky = Shaders.GetShader("forward" + def + ",MCM_NO_ALPHA_CAP,MCM_BRIGHT,MCM_NO_BONES,MCM_SKY_FOG" + forw_extra);
-            Deferred.s_transponly_particles = Shaders.GetShader("transponly" + def + ",MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
-            Deferred.s_transponlylit_particles = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
-            Deferred.s_transponlylitsh_particles = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+            Deferred.Transparents_Particles = Shaders.GetShader("transponly" + def + ",MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+            Deferred.Transparents_Particles_Lights = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+            Deferred.Transparents_Particles_Lights_Shadows = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
             if (AllowLL)
             {
-                Deferred.s_transponly_ll_particles = Shaders.GetShader("transponly" + def + ",MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
-                Deferred.s_transponlylit_ll_particles = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
-                Deferred.s_transponlylitsh_ll_particles = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+                Deferred.Transparents_Particles_LL = Shaders.GetShader("transponly" + def + ",MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+                Deferred.Transparents_Particles_Lights_LL = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
+                Deferred.Transparents_Particles_Lights_Shadows_LL = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_LL,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
             }
         }
 
@@ -162,178 +162,178 @@ namespace FreneticGameGraphics.ClientSystem
             /// <summary>
             /// The Shadow Pass shader.
             /// </summary>
-            public Shader s_shadow;
+            public Shader ShadowPass_Basic;
 
             /// <summary>
             /// The Shadow Pass shader, with bones off.
             /// </summary>
-            public Shader s_shadow_nobones;
+            public Shader ShadowPass_NoBones;
 
             /// <summary>
             /// The Shadow Pass shader, for grass.
             /// </summary>
-            public Shader s_shadow_grass;
+            public Shader ShadowPass_Grass;
 
             /// <summary>
             /// The Shadow Pass shader, for particles.
             /// </summary>
-            public Shader s_shadow_parts;
+            public Shader ShadowPass_Particles;
 
             /// <summary>
             /// The final write + godrays shader.
             /// </summary>
-            public Shader s_finalgodray;
+            public Shader FinalPass_Basic;
 
             /// <summary>
             /// The final write + godrays shader, with lights on.
             /// </summary>
-            public Shader s_finalgodray_lights;
+            public Shader FinalPass_Lights;
 
             /// <summary>
             /// The final write + godrays shader, with toonify on.
             /// </summary>
-            public Shader s_finalgodray_toonify;
+            public Shader FinalPass_Toonify;
 
             /// <summary>
             /// The final write + godrays shader, with lights and toonify on.
             /// </summary>
-            public Shader s_finalgodray_lights_toonify;
+            public Shader FinalPass_Lights_Toonify;
 
             /// <summary>
             /// The final write + godrays shader, with lights and motion blur on.
             /// </summary>
-            public Shader s_finalgodray_lights_motblur;
+            public Shader FinalPass_Lights_MotionBlur;
 
             /// <summary>
             /// The G-Buffer FBO shader.
             /// </summary>
-            public Shader s_fbo;
+            public Shader GBufferSolid;
 
             /// <summary>
             /// The G-Buffer FBO shader, for alltransparents (Skybox mainly).
             /// </summary>
-            public Shader s_fbot;
+            public Shader GBuffer_AllTransparencies;
 
             /// <summary>
             /// The shader used for grass-sprites in deferred rendering mode.
             /// </summary>
-            public Shader s_fbo_grass;
+            public Shader GBuffer_Grass;
 
             /// <summary>
             /// The G-Buffer FBO shader, for the refraction pass.
             /// </summary>
-            public Shader s_fbo_refract;
+            public Shader GBuffer_Refraction;
 
             /// <summary>
             /// The shader that adds shadowed lights to a scene.
             /// </summary>
-            public Shader s_shadowadder;
+            public Shader ShadowAdderPass;
 
             /// <summary>
             /// The shader that adds lights to a scene.
             /// </summary>
-            public Shader s_lightadder;
+            public Shader LightAdderPass;
 
             /// <summary>
             /// The shader that adds shadowed lights to a scene, with SSAO.
             /// </summary>
-            public Shader s_shadowadder_ssao;
+            public Shader ShadowAdderPass_SSAO;
 
             /// <summary>
             /// The shader that adds lights to a scene, with SSAO.
             /// </summary>
-            public Shader s_lightadder_ssao;
+            public Shader LightAdderPass_SSAO;
 
             /// <summary>
             /// The shader used only for transparent data.
             /// </summary>
-            public Shader s_transponly;
+            public Shader Transparents;
 
             /// <summary>
             /// The shader used only for transparent data with lighting.
             /// </summary>
-            public Shader s_transponlylit;
+            public Shader Transparents_Lights;
 
             /// <summary>
             /// The shader used only for transparent data with shadowed lighting.
             /// </summary>
-            public Shader s_transponlylitsh;
+            public Shader Transparents_Lights_Shadows;
 
             /// <summary>
             /// The shader used for calculating godrays.
             /// </summary>
-            public Shader s_godray;
+            public Shader Godrays;
 
             /// <summary>
             /// The shader used as the final step of adding transparent data to the scene.
             /// TODO: Optimize this away.
             /// </summary>
-            public Shader s_transpadder;
+            public Shader TransparentAdderPass;
 
             /// <summary>
             /// The shader used for transparent data (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponly_ll;
+            public Shader Transparents_LL;
 
             /// <summary>
             /// The shader used for lit transparent data (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponlylit_ll;
+            public Shader Transparents_Lights_LL;
 
             /// <summary>
             /// The shader used for shadowed lit transparent data (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponlylitsh_ll;
+            public Shader Transparents_Lights_Shadows_LL;
 
             /// <summary>
             /// The shader used to clear LL data.
             /// </summary>
-            public Shader s_ll_clearer;
+            public Shader LLClearerPass;
 
             /// <summary>
             /// The shader used to finally apply LL data.
             /// </summary>
-            public Shader s_ll_fpass;
+            public Shader LLFinalPass;
 
             /// <summary>
             /// The shader used to assist in HDR calculation acceleration.
             /// </summary>
-            public Shader s_hdrpass;
+            public Shader HDRPass;
 
             /// <summary>
             /// The shader used only for transparent particles.
             /// </summary>
-            public Shader s_transponly_particles;
+            public Shader Transparents_Particles;
 
             /// <summary>
             /// The shader used only for transparent particles with lighting.
             /// </summary>
-            public Shader s_transponlylit_particles;
+            public Shader Transparents_Particles_Lights;
 
             /// <summary>
             /// The shader used only for transparent particles with shadowed lighting.
             /// </summary>
-            public Shader s_transponlylitsh_particles;
+            public Shader Transparents_Particles_Lights_Shadows;
 
             /// <summary>
             /// The shader used for transparent particles (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponly_ll_particles;
+            public Shader Transparents_Particles_LL;
 
             /// <summary>
             /// The shader used for lit transparent particles (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponlylit_ll_particles;
+            public Shader Transparents_Particles_Lights_LL;
 
             /// <summary>
             /// The shader used for shadowed lit transparent particles (LinkedList Transparency version).
             /// </summary>
-            public Shader s_transponlylitsh_ll_particles;
+            public Shader Transparents_Particles_Lights_Shadows_LL;
 
             /// <summary>
             /// The shader used for decal rendering in deferred rendering mode.
             /// </summary>
-            public Shader s_fbodecal;
+            public Shader GBuffer_Decals;
         }
 
         /// <summary>
