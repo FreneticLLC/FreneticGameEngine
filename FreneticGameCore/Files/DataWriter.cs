@@ -28,7 +28,7 @@ namespace FreneticGameCore.Files
         /// </summary>
         public DataStream Internal;
 
-        private byte[] HelperBytes = new byte[32];
+        private readonly byte[] HelperBytes = new byte[32];
 
         /// <summary>
         /// Constructs the data writer.

@@ -28,7 +28,7 @@ namespace FreneticGameCore.Files
         /// </summary>
         public DataStream Internal;
 
-        private byte[] HelperBytes = new byte[32];
+        private readonly byte[] HelperBytes = new byte[32];
 
         /// <summary>
         /// Constructs the data reader.
@@ -167,10 +167,11 @@ namespace FreneticGameCore.Files
             float yaw = yawS * (360f / ushort.MaxValue);
             float pitch = pitchS * (180f / ushort.MaxValue);
             pitch -= 90f;
-            Location loc = new Location();
-            loc.Yaw = yaw;
-            loc.Pitch = pitch;
-            return loc;
+            return new Location
+            {
+                Yaw = yaw,
+                Pitch = pitch
+            };
         }
 
         /// <summary>
