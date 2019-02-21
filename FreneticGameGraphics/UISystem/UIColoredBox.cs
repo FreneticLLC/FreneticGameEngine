@@ -67,18 +67,15 @@ namespace FreneticGameGraphics.UISystem
             {
                 view.Rendering.SetColor(Color);
                 engine.Textures.White.Bind();
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                view.Rendering.SetColor(Vector4.One);
             }
-            if (GetTexture != null)
+            else if (GetTexture != null)
             {
                 view.Rendering.SetColor(Vector4.One);
                 GL.BindTexture(TextureTarget.Texture2D, GetTexture());
             }
             else
             {
-                view.Rendering.SetColor(Vector4.One);
-                engine.Textures.White.Bind();
+                return;
             }
             if (Flip)
             {
@@ -88,6 +85,7 @@ namespace FreneticGameGraphics.UISystem
             {
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
+            view.Rendering.SetColor(Vector4.One);
             engine.Textures.White.Bind();
         }
     }
