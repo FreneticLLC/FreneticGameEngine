@@ -66,16 +66,18 @@ namespace FreneticGameGraphics.UISystem
             if (Color.W > 0.0f)
             {
                 view.Rendering.SetColor(Color);
-                engine.Textures.White.Bind();
             }
-            else if (GetTexture != null)
+            else
             {
                 view.Rendering.SetColor(Vector4.One);
+            }
+            if (GetTexture != null)
+            {
                 GL.BindTexture(TextureTarget.Texture2D, GetTexture());
             }
             else
             {
-                return;
+                engine.Textures.White.Bind();
             }
             if (Flip)
             {
