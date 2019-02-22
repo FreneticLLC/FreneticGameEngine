@@ -326,7 +326,7 @@ namespace FreneticGameCore.FileSystems
         }
         #endregion
 
-        #region File reading
+        #region File exist checks
         /// <summary>
         /// Returns whether a folder exists by the given name.
         /// </summary>
@@ -430,7 +430,9 @@ namespace FreneticGameCore.FileSystems
             filename = CleanFileName(filename);
             return File.Exists(Internal.SavesFolder + "/" + filename);
         }
+        #endregion
 
+        #region File reading
         /// <summary>
         /// Reads the data in a file, returning the full data as a byte array.
         /// </summary>
@@ -461,13 +463,7 @@ namespace FreneticGameCore.FileSystems
             throw new FileNotFoundException("File not found", filename);
         }
 
-        /// <summary>
-        /// Tries to read the data in a file, returning whether the read was successful (and if so, outputting the full data as a byte array).
-        /// </summary>
-        /// <param name="filename">The name of the file.</param>
-        /// <param name="data">The data in the file, if found.</param>
-        /// <returns>Whether the file was found.</returns>
-        public bool TryReadFileData(string filename, out byte[] data)
+        private bool TryReadFileDataSingle(string filename, out byte[] data)
         {
             filename = CleanFileName(filename);
             if (Internal.Files.TryGetValue(filename, out FFPFile packagedFile))
@@ -489,6 +485,26 @@ namespace FreneticGameCore.FileSystems
                 }
             }
             data = null;
+            return false;
+        }
+        
+        /// <summary>
+        /// Tries to read the data in a file, returning whether the read was successful (and if so, outputting the full data as a byte array).
+        /// </summary>
+        /// <param name="filename">The name of the file.</param>
+        /// <param name="data">The data in the file, if found.</param>
+        /// <returns>Whether the file was found.</returns>
+        public bool TryReadFileData(string filename, out byte[] data)
+        {
+            if (TryReadFileDataSingle(filename, out data))
+            {
+                return true;
+            }
+            else if (TryReadFileDataSingle(filename + "~2", out data))
+            {
+                return true;
+            }
+            // Note: ~1 are likely corrupted, so ignore them.
             return false;
         }
 
@@ -622,7 +638,13 @@ namespace FreneticGameCore.FileSystems
         {
             filename = CleanFileName(filename);
             Internal.SavedFiles.Add(filename);
-            File.WriteAllBytes(Internal.SavesFolder + "/" + filename, data);
+            string fullPath = Internal.SavesFolder + "/" + filename;
+            string directoryName = Path.GetDirectoryName(fullPath);
+            if (!Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+            File.WriteAllBytes(fullPath, data);
         }
 
         /// <summary>
@@ -633,6 +655,47 @@ namespace FreneticGameCore.FileSystems
         public void WriteFileText(string filename, string text)
         {
             WriteFileData(filename, StringConversionHelper.UTF8Encoding.GetBytes(text));
+        }
+
+        /// <summary>
+        /// Writes a file to disk with the given filename containing the given data, using journalling mode.
+        /// This is a special helper to avoid unreadable files if the system crashes during a write.
+        /// Note that all file reads check for journalling files.
+        /// </summary>
+        /// <param name="filename">The name of the file.</param>
+        /// <param name="data">The file's raw data.</param>
+        public void WriteFileDataJournalling(string filename, byte[] data)
+        {
+            filename = CleanFileName(filename);
+            Internal.SavedFiles.Add(filename);
+            string fullPath = Internal.SavesFolder + "/" + filename;
+            string directoryName = Path.GetDirectoryName(fullPath);
+            if (!Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+            File.WriteAllBytes(fullPath + "~1", data);
+            if (File.Exists(fullPath))
+            {
+                File.Move(fullPath, fullPath + "~2");
+            }
+            File.Move(fullPath + "~1", fullPath);
+            if (File.Exists(fullPath + "~2"))
+            {
+                File.Delete(fullPath + "~2");
+            }
+        }
+
+        /// <summary>
+        /// Writes a file to disk with the given filename containing the given text, using journalling mode.
+        /// This is a special helper to avoid unreadable files if the system crashes during a write.
+        /// Note that all file reads check for journalling files.
+        /// </summary>
+        /// <param name="filename">The name of the file.</param>
+        /// <param name="text">The file's text.</param>
+        public void WriteFileTextJournalling(string filename, string text)
+        {
+            WriteFileDataJournalling(filename, StringConversionHelper.UTF8Encoding.GetBytes(text));
         }
         #endregion
     }
