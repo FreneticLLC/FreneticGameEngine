@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileSystems\FileEngine.cs" />
+    <Compile Include="FileSystems\FileUtilities.cs" />
     <Compile Include="MathHelpers\MathUtilities.cs" />
     <Compile Include="ModelSystems\AnimationEngine.cs" />
     <Compile Include="CoreSystems\BasicEngine.cs" />

@@ -164,7 +164,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>A valid texture object.</returns>
         public Texture GetTexture(string texturename)
         {
-            texturename = FileHandler.CleanFileName(texturename);
+            texturename = FileEngine.CleanFileName(texturename);
             if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
             {
                 return foundTexture;
@@ -196,7 +196,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>A valid bitmap object, or null.</returns>
         public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth)
         {
-            texturename = FileHandler.CleanFileName(texturename);
+            texturename = FileEngine.CleanFileName(texturename);
             if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
             {
                 if (foundTexture.Width == twidth && foundTexture.Height == twidth)
@@ -243,7 +243,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             try
             {
-                filename = FileHandler.CleanFileName(filename);
+                filename = FileEngine.CleanFileName(filename);
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
@@ -365,7 +365,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             try
             {
                 // TODO: store!
-                filename = FileHandler.CleanFileName(filename);
+                filename = FileEngine.CleanFileName(filename);
                 if (!Files.Exists("textures/" + filename + ".png"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +

@@ -46,7 +46,7 @@ namespace FreneticGameCore.ModelSystems
             }
             byte[] dat_filt = new byte[data.Length - "FMD001".Length];
             Array.ConstrainedCopy(data, "FMD001".Length, dat_filt, 0, dat_filt.Length);
-            dat_filt = FileHandler.UnGZip(dat_filt);
+            dat_filt = FileUtilities.UnGZip(dat_filt);
             DataStream ds = new DataStream(dat_filt);
             DataReader dr = new DataReader(ds);
             Model3D mod = new Model3D();

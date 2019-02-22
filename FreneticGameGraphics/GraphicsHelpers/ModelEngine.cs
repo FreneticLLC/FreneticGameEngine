@@ -138,7 +138,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             try
             {
-                filename = FileHandler.CleanFileName(filename);
+                filename = FileEngine.CleanFileName(filename);
                 if (!TheClient.Files.Exists("models/" + filename + ".vmd"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
@@ -168,7 +168,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>A valid model object.</returns>
         public Model GetModel(string modelname)
         {
-            modelname = FileHandler.CleanFileName(modelname);
+            modelname = FileEngine.CleanFileName(modelname);
             if (LoadedModels.TryGetValue(modelname, out Model existingModel))
             {
                 return existingModel;

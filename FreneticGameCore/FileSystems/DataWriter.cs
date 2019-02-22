@@ -253,7 +253,7 @@ namespace FreneticGameCore.FileSystems
         /// <param name="str">The data.</param>
         public void WriteFullStringVar(string str)
         {
-            byte[] data = FileHandler.DefaultEncoding.GetBytes(str);
+            byte[] data = StringConversionHelper.UTF8Encoding.GetBytes(str);
             WriteVarInt(data.Length);
             WriteBytes(data);
         }
@@ -274,7 +274,7 @@ namespace FreneticGameCore.FileSystems
         /// <param name="str">The data.</param>
         public void WriteFullString(string str)
         {
-            byte[] data = FileHandler.DefaultEncoding.GetBytes(str);
+            byte[] data = StringConversionHelper.UTF8Encoding.GetBytes(str);
             WriteInt(data.Length);
             WriteBytes(data);
         }

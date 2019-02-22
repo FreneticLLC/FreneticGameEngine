@@ -16,6 +16,7 @@ using System.Net.Sockets;
 using FreneticGameCore.FileSystems;
 using FreneticGameCore.UtilitySystems;
 using FreneticGameCore.CoreSystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticGameCore.NetworkSystem
 {
@@ -44,9 +45,9 @@ namespace FreneticGameCore.NetworkSystem
         /// </summary>
         public DataStream ReadData = new DataStream();
 
-        private byte[] OneByteHolder = new byte[1];
+        private readonly byte[] OneByteHolder = new byte[1];
 
-        private byte[] KiloByteHolder = new byte[1024];
+        private readonly byte[] KiloByteHolder = new byte[1024];
 
         /// <summary>
         /// Any information used for the connection period.
@@ -141,7 +142,7 @@ namespace FreneticGameCore.NetworkSystem
                         }
                         if (OneByteHolder[0] == 0)
                         {
-                            string str = FileHandler.DefaultEncoding.GetString(ReadData.ToArray());
+                            string str = StringConversionHelper.UTF8Encoding.GetString(ReadData.ToArray());
                             if (!str.StartsWith(HEADER))
                             {
                                 throw new Exception("Connection refused: Not a game engine proper connection.");

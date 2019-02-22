@@ -264,9 +264,9 @@ namespace FreneticGameCore.FileSystems
             if (length <= 32)
             {
                 ReadBytes(HelperBytes, 0, length);
-                return FileHandler.DefaultEncoding.GetString(HelperBytes, 0, length);
+                return StringConversionHelper.UTF8Encoding.GetString(HelperBytes, 0, length);
             }
-            return FileHandler.DefaultEncoding.GetString(ReadBytes(length), 0, length);
+            return StringConversionHelper.UTF8Encoding.GetString(ReadBytes(length), 0, length);
         }
 
         /// <summary>

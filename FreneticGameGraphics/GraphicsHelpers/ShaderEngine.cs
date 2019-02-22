@@ -105,7 +105,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns></returns>
         public string GetShaderFileText(string filename)
         {
-            filename = FileHandler.CleanFileName(filename.Trim());
+            filename = FileEngine.CleanFileName(filename.Trim());
             if (!File.Exists("shaders/" + filename))
             {
                 throw new Exception("File " + filename + " does not exist, but was included by a shader!");
@@ -173,7 +173,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 {
                     vars = dat1[1].SplitFast(',');
                 }
-                filename = FileHandler.CleanFileName(dat1[0]);
+                filename = FileEngine.CleanFileName(dat1[0]);
                 if (!File.Exists("shaders/" + filename + ".vs"))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load vertex shader, file '" +
@@ -193,7 +193,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 string GS = null;
                 if (geom != null)
                 {
-                    geom = FileHandler.CleanFileName(geom);
+                    geom = FileEngine.CleanFileName(geom);
                     if (!File.Exists("shaders/" + geom + ".geom"))
                     {
                         SysConsole.Output(OutputType.WARNING, "Cannot load geomry shader, file '" +
@@ -314,7 +314,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <returns>The shader program.</returns>
         public int CompileCompute(string fname, string specialadder = "")
         {
-            fname = FileHandler.CleanFileName(fname.Trim());
+            fname = FileEngine.CleanFileName(fname.Trim());
             string ftxt = GetShaderFileText(fname + ".comp");
             int index = ftxt.IndexOf(FILE_START);
             if (index < 0)

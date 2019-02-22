@@ -242,7 +242,7 @@ namespace FreneticGameCore.CoreSystems
             else
             {
                 string toOut = bcolor + text.Replace("^B", bcolor);
-                byte[] t = FileHandler.DefaultEncoding.GetBytes(toOut);
+                byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(toOut);
                 StringBuilder outp = new StringBuilder(t.Length);
                 for (int i = 0; i < t.Length; i++)
                 {
