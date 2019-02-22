@@ -17,7 +17,7 @@ using LZ4;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.CoreSystems;
 
-namespace FreneticGameCore.Files
+namespace FreneticGameCore.FileSystems
 {
     /// <summary>
     /// Handles the file system cleanly.

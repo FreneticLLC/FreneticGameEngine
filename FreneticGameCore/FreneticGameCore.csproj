@@ -61,7 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Files\FileEngine.cs" />
+    <Compile Include="FileSystems\FileEngine.cs" />
     <Compile Include="MathHelpers\MathUtilities.cs" />
     <Compile Include="ModelSystems\AnimationEngine.cs" />
     <Compile Include="CoreSystems\BasicEngine.cs" />
@@ -98,11 +98,11 @@
     <Compile Include="PhysicsSystem\BepuUtilities.cs" />
     <Compile Include="PhysicsSystem\PhysicsSpace.cs" />
     <Compile Include="MathHelpers\Plane.cs" />
-    <Compile Include="Files\DataReader.cs" />
-    <Compile Include="Files\DataStream.cs" />
-    <Compile Include="Files\DataWriter.cs" />
-    <Compile Include="Files\FileHandler.cs" />
-    <Compile Include="Files\UnknownFileException.cs" />
+    <Compile Include="FileSystems\DataReader.cs" />
+    <Compile Include="FileSystems\DataStream.cs" />
+    <Compile Include="FileSystems\DataWriter.cs" />
+    <Compile Include="FileSystems\FileHandler.cs" />
+    <Compile Include="FileSystems\UnknownFileException.cs" />
     <Compile Include="MathHelpers\Location.cs" />
     <Compile Include="UtilitySystems\LockedLinkedList.cs" />
     <Compile Include="UtilitySystems\MTRandom.cs" />

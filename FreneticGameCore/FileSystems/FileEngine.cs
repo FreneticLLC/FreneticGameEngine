@@ -17,7 +17,7 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticFilePackage;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FreneticGameCore.Files
+namespace FreneticGameCore.FileSystems
 {
     /// <summary>
     /// Primary handler for files within the Frenetic Game Engine.
@@ -508,7 +508,9 @@ namespace FreneticGameCore.Files
             data = null;
             return false;
         }
+        #endregion
 
+        #region File listing
         private IEnumerable<IEnumerable<string>> EnumerateFileSets(string folder, bool deep)
         {
             folder = CleanFileName(folder);

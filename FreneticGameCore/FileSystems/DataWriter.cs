@@ -16,7 +16,7 @@ using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 using FreneticGameCore.MathHelpers;
 
-namespace FreneticGameCore.Files
+namespace FreneticGameCore.FileSystems
 {
     /// <summary>
     /// Helper for writing data to a stream.

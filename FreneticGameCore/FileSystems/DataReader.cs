@@ -16,7 +16,7 @@ using FreneticGameCore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 using FreneticGameCore.MathHelpers;
 
-namespace FreneticGameCore.Files
+namespace FreneticGameCore.FileSystems
 {
     /// <summary>
     /// Helper to read data from a stream.

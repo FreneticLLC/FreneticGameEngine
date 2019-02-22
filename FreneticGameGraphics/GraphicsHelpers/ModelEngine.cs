@@ -17,7 +17,7 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticGameCore;
 using FreneticGameCore.CoreSystems;
 using FreneticGameCore.MathHelpers;
-using FreneticGameCore.Files;
+using FreneticGameCore.FileSystems;
 using FreneticGameGraphics.ClientSystem;
 using FreneticGameCore.ConsoleHelpers;
 using FreneticUtilities.FreneticExtensions;

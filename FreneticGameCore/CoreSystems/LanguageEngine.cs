@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticDataSyntax;
-using FreneticGameCore.Files;
+using FreneticGameCore.FileSystems;
 using FreneticUtilities.FreneticExtensions;
 using FreneticGameCore.UtilitySystems;
 
