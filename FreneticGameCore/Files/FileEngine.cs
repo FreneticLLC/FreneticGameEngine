@@ -509,58 +509,102 @@ namespace FreneticGameCore.Files
             return false;
         }
 
-        /// <summary>
-        /// Returns a list of all files within a folder path - does not search within subfolders, does not include folders in return value.
-        /// </summary>
-        /// <param name="folder">The folder path.</param>
-        /// <returns>A list of all contained files.</returns>
-        /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
-        public string[] ListFiles(string folder)
+        private IEnumerable<IEnumerable<string>> EnumerateFileSets(string folder, bool deep)
         {
             folder = CleanFileName(folder);
-            List<string> files = new List<string>();
             if (Internal.RootFolder.TryGetSubFolder(folder, out FFPFolder subfolder))
             {
-                files.AddRange(subfolder.EnumerateFiles());
+                yield return subfolder.EnumerateFiles();
             }
             if (Directory.Exists(Internal.SavesFolder + "/" + folder))
             {
-                files.AddRange(Directory.EnumerateFiles(Internal.SavesFolder + "/" + folder));
+                string fullPath = Path.GetFullPath(Internal.SavesFolder + "/" + folder);
+                yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
             }
             foreach (string rawFolder in Internal.RawFolders)
             {
                 if (Directory.Exists(rawFolder + "/" + folder))
                 {
-                    files.AddRange(Directory.EnumerateFiles(rawFolder + "/" + folder));
+                    string fullPath = Path.GetFullPath(rawFolder + "/" + folder);
+                    yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                }
+            }
+            if (deep)
+            {
+                foreach (string subFolder in ListFolders(folder))
+                {
+                    foreach (IEnumerable<string> files in EnumerateFileSets(folder + "/" + subFolder, true))
+                    {
+                        yield return files.Select(s => subFolder + "/" + s);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of all filesh - does not include folders in return value.
+        /// Does not necessarily preserve any given order.
+        /// Returns only the file name, not full paths. If deep is specified, will only include the path starting folder name.
+        /// </summary>
+        /// <param name="folder">The folder path.</param>
+        /// <param name="extension">The file extension to search for, or null. For example, ListFiles("path/", "txt") will include "example.txt" but exclude "example.png".</param>
+        /// <param name="deep">Whether to search in subfolders.</param>
+        /// <returns>A list of all contained files.</returns>
+        /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
+        public string[] ListFiles(string folder, string extension, bool deep = false)
+        {
+            HashSet<string> files = new HashSet<string>();
+            string fullExtension = extension == null ? null : "." + extension;
+            foreach (IEnumerable<string> fileSet in EnumerateFileSets(folder, deep))
+            {
+                if (fullExtension != null)
+                {
+                    files.UnionWith(fileSet.Where(f => f.EndsWith(fullExtension)));
+                }
+                else
+                {
+                    files.UnionWith(fileSet);
                 }
             }
             return files.ToArray();
         }
 
+        private IEnumerable<IEnumerable<string>> EnumerateFolderSets(string folder)
+        {
+            folder = CleanFileName(folder);
+            if (Internal.RootFolder.TryGetSubFolder(folder, out FFPFolder subfolder))
+            {
+                yield return subfolder.EnumerateFolders();
+            }
+            if (Directory.Exists(Internal.SavesFolder + "/" + folder))
+            {
+                string fullPath = Path.GetFullPath(Internal.SavesFolder + "/" + folder);
+                yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+            }
+            foreach (string rawFolder in Internal.RawFolders)
+            {
+                if (Directory.Exists(rawFolder + "/" + folder))
+                {
+                    string fullPath = Path.GetFullPath(rawFolder + "/" + folder);
+                    yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                }
+            }
+        }
+
         /// <summary>
         /// Returns a list of all folders within a folder path - does not search within subfolders, does not include files in return value.
+        /// Does not necessarily preserve any given order.
+        /// Returns only the folder name, not full paths.
         /// </summary>
         /// <param name="folder">The folder path.</param>
         /// <returns>A list of all contained folders.</returns>
         /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
         public string[] ListFolders(string folder)
         {
-            folder = CleanFileName(folder);
-            List<string> folders = new List<string>();
-            if (Internal.RootFolder.TryGetSubFolder(folder, out FFPFolder subfolder))
+            HashSet<string> folders = new HashSet<string>();
+            foreach (IEnumerable<string> folderSet in EnumerateFolderSets(folder))
             {
-                folders.AddRange(subfolder.EnumerateFolders());
-            }
-            if (Directory.Exists(Internal.SavesFolder + "/" + folder))
-            {
-                folders.AddRange(Directory.EnumerateDirectories(Internal.SavesFolder + "/" + folder));
-            }
-            foreach (string rawFolder in Internal.RawFolders)
-            {
-                if (Directory.Exists(rawFolder + "/" + folder))
-                {
-                    folders.AddRange(Directory.EnumerateDirectories(rawFolder + "/" + folder));
-                }
+                folders.UnionWith(folderSet);
             }
             return folders.ToArray();
         }
