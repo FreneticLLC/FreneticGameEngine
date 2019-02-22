@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -91,12 +92,12 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The relevant game client.
         /// </summary>
-        public FileHandler Files;
+        public FileEngine Files;
 
         /// <summary>
         /// Starts or restarts the texture system.
         /// </summary>
-        public void InitTextureSystem(FileHandler files)
+        public void InitTextureSystem(FileEngine files)
         {
             Files = files;
             // Create a generic graphics object for later use
@@ -204,7 +205,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                     return foundTexture.SaveToBMP();
                 }
             }
-            return LoadBitmapForTexture(texturename, twidth, out _);
+            return LoadBitmapForTexture(texturename, twidth);
         }
 
         /// <summary>
@@ -237,22 +238,20 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
         /// <param name="twidth">The texture width, if any.</param>
-        /// <param name="pf">The pakked file used for loading.</param>
         /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
-        public Bitmap LoadBitmapForTexture(string filename, int twidth, out PakkedFile pf)
+        public Bitmap LoadBitmapForTexture(string filename, int twidth)
         {
             try
             {
                 filename = FileEngine.CleanFileName(filename);
-                if (!Files.Exists("textures/" + filename + ".png"))
+                if (!Files.TryReadFileData("textures/" + filename + ".png", out byte[] textureFile))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
                         TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
                         "' does not exist.");
-                    pf = null;
                     return null;
                 }
-                Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png", out pf));
+                Bitmap bmp = new Bitmap(new MemoryStream(textureFile));
 #if DEBUG
                 if (bmp.Width <= 0 || bmp.Height <= 0)
                 {
@@ -288,7 +287,6 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
                     TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
-                pf = null;
                 return null;
             }
         }
@@ -306,7 +304,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 Engine = this,
                 Name = filename
             };
-            Bitmap bmp = LoadBitmapForTexture(filename, twidth, out texture.FileRef);
+            Bitmap bmp = LoadBitmapForTexture(filename, twidth);
             if (bmp == null)
             {
                 return null;
@@ -366,14 +364,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 // TODO: store!
                 filename = FileEngine.CleanFileName(filename);
-                if (!Files.Exists("textures/" + filename + ".png"))
+                if (!Files.TryReadFileData("textures/" + filename + ".png", out byte[] textureData))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
                         TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
                         "' does not exist.");
                     return;
                 }
-                using (Bitmap bmp = new Bitmap(Files.ReadToStream("textures/" + filename + ".png")))
+                using (Bitmap bmp = new Bitmap(new MemoryStream(textureData)))
                 {
                     if (bmp.Width != twidth || bmp.Height != twidth)
                     {
@@ -523,12 +521,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// The height of the texture.
         /// </summary>
         public int Height;
-
-        /// <summary>
-        /// The file that was used to load this texture. Can be null for manually-generated textures.
-        /// </summary>
-        public PakkedFile FileRef;
-
+        
         /// <summary>
         /// Removes the texture from OpenGL.
         /// </summary>

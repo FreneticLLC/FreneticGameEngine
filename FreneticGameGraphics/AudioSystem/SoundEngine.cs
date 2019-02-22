@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using FreneticGameGraphics.AudioSystem.EnforcerSystem;
 using OpenTK;
@@ -478,7 +479,7 @@ namespace FreneticGameGraphics.AudioSystem
             {
                 throw new ArgumentException("Must be between 0 and 1", "volume");
             }
-            Action playSound = () =>
+            void playSound()
             {
                 if (sfx.Clip == null && sfx.Internal < 0)
                 {
@@ -522,7 +523,7 @@ namespace FreneticGameGraphics.AudioSystem
                 //SysConsole.Output(OutputType.DEBUG, "Audio / sucess");
                 PlayingNow.Add(actsfx);
                 callback?.Invoke(actsfx);
-            };
+            }
             lock (sfx)
             {
                 if (sfx.Clip == null && sfx.Internal == -1)
@@ -546,7 +547,7 @@ namespace FreneticGameGraphics.AudioSystem
         /// <returns>The sound played.</returns>
         public ActiveSound PlaySimpleInternal(SoundEffect sfx, bool loop)
         {
-            Func<ActiveSound> playSound = () =>
+            ActiveSound playSound()
             {
                 ActiveSound actsfx = new ActiveSound(sfx)
                 {
@@ -559,7 +560,7 @@ namespace FreneticGameGraphics.AudioSystem
                 actsfx.Create();
                 actsfx.Play();
                 return actsfx;
-            };
+            }
             lock (sfx)
             {
                 if (sfx.Internal == -1)
@@ -625,7 +626,7 @@ namespace FreneticGameGraphics.AudioSystem
             try
             {
                 string newname = "sounds/" + name + ".ogg";
-                if (!Client.Client.Files.Exists(newname))
+                if (!Client.Client.Files.FileExists(newname))
                 {
                     //SysConsole.Output(OutputType.DEBUG, "Audio / nullsource");
                     return null;
@@ -640,8 +641,7 @@ namespace FreneticGameGraphics.AudioSystem
                 {
                     try
                     {
-                        SoundEffect ts = LoadVorbisSound(Client.Client.Files.ReadToStream(newname, out PakkedFile fref), name);
-                        ts.FileRef = fref;
+                        SoundEffect ts = LoadVorbisSound(new MemoryStream(Client.Client.Files.ReadFileData(newname)), name);
                         lock (tsfx)
                         {
                             tsfx.Internal = ts.Internal;

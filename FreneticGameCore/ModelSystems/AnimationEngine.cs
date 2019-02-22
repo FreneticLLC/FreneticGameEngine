@@ -75,7 +75,7 @@ namespace FreneticGameCore.ModelSystems
         /// <param name="name">The name.</param>
         /// <param name="Files">The file system.</param>
         /// <returns>The animation.</returns>
-        public SingleAnimation GetAnimation(string name, FileHandler Files)
+        public SingleAnimation GetAnimation(string name, FileEngine Files)
         {
             string namelow = name.ToLowerFast();
             if (Animations.TryGetValue(namelow, out SingleAnimation sa))
@@ -103,12 +103,12 @@ namespace FreneticGameCore.ModelSystems
         /// <param name="name">The name.</param>
         /// <param name="Files">The file system.</param>
         /// <returns>The animation.</returns>
-        SingleAnimation LoadAnimation(string name, FileHandler Files)
+        SingleAnimation LoadAnimation(string name, FileEngine Files)
         {
-            if (Files.Exists("animations/" + name + ".anim"))
+            if (Files.TryReadFileText("animations/" + name + ".anim", out string fileText))
             {
                 SingleAnimation created = new SingleAnimation() { Name = name };
-                string[] data = Files.ReadText("animations/" + name + ".anim").SplitFast('\n');
+                string[] data = fileText.SplitFast('\n');
                 int entr = 0;
                 for (int i = 0; i < data.Length; i++)
                 {

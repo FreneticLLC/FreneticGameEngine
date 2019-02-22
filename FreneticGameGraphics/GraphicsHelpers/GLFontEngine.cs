@@ -153,13 +153,13 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// The backing file system.
         /// </summary>
-        public FileHandler Files;
+        public FileEngine Files;
 
         /// <summary>
         /// Prepares the font system.
         /// </summary>
         /// <param name="files">The backing file system.</param>
-        public void Init(FileHandler files)
+        public void Init(FileEngine files)
         {
             Files = files;
             if (Fonts != null)
@@ -246,9 +246,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
         {
             textfile = "";
             string[] datas;
-            if (Files.Exists("info/characters.dat"))
+            if (Files.TryReadFileText("info/characters.dat", out string charsFile))
             {
-                datas = Files.ReadText("info/characters.dat").Replace("\r", "").SplitFast('\n');
+                datas = charsFile.Replace("\r", "").SplitFast('\n');
             }
             else
             {
@@ -540,7 +540,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
         /// <summary>
         /// ASCII range symbol rectangle locations.
         /// </summary>
-        private RectangleF[] ASCIILocs = new RectangleF[128];
+        private readonly RectangleF[] ASCIILocs = new RectangleF[128];
 
         /// <summary>
         /// Gets the location of a symbol.
@@ -668,7 +668,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             {
                 return false;
             }
-            return Engine.Files.Exists("textures/emoji/" + str + ".png");
+            return Engine.Files.FileExists("textures/emoji/" + str + ".png");
         }
 
         /// <summary>

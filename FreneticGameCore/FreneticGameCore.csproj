@@ -102,8 +102,6 @@
     <Compile Include="FileSystems\DataReader.cs" />
     <Compile Include="FileSystems\DataStream.cs" />
     <Compile Include="FileSystems\DataWriter.cs" />
-    <Compile Include="FileSystems\FileHandler.cs" />
-    <Compile Include="FileSystems\UnknownFileException.cs" />
     <Compile Include="MathHelpers\Location.cs" />
     <Compile Include="UtilitySystems\LockedLinkedList.cs" />
     <Compile Include="UtilitySystems\MTRandom.cs" />

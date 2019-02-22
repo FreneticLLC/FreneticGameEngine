@@ -126,6 +126,10 @@ namespace FreneticGameCore.FileSystems
         /// <summary>
         /// Initializes the file engine, with the given data/ and mods/ folder paths.
         /// <para>
+        /// An example of a sufficient call is: Init("data", "mods", "saves");
+        /// Or: Init("data", "mods", "data");
+        /// </para>
+        /// <para>
         /// The data folder path should be where basic engine data is stored, including packages of core data, and raw data directly within the folder.
         /// This means there are paths of the form "(data)/textures/example.png"
         /// </para>
@@ -569,7 +573,7 @@ namespace FreneticGameCore.FileSystems
         /// <param name="deep">Whether to search in subfolders.</param>
         /// <returns>A list of all contained files.</returns>
         /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
-        public string[] ListFiles(string folder, string extension, bool deep = false)
+        public string[] ListFiles(string folder, string extension = null, bool deep = false)
         {
             HashSet<string> files = new HashSet<string>();
             string fullExtension = extension == null ? null : "." + extension;

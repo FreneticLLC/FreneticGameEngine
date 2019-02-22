@@ -45,10 +45,5 @@ namespace FreneticGameGraphics.AudioSystem
         /// The internal enforcer clip, if one is relevant.
         /// </summary>
         public LiveAudioClip Clip;
-
-        /// <summary>
-        /// The file that was used to load this sound. Can be null for manually-generated textures.
-        /// </summary>
-        public PakkedFile FileRef;
     }
 }

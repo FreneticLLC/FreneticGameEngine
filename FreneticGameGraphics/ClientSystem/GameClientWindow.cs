@@ -157,6 +157,21 @@ namespace FreneticGameGraphics.ClientSystem
         public AnimationEngine Animations;
 
         /// <summary>
+        /// The name of the data folder. By default, "data".
+        /// </summary>
+        public string Folder_Data = "data";
+
+        /// <summary>
+        /// The name of the mods folder. By default, "mods".
+        /// </summary>
+        public string Folder_Mods = "mods";
+
+        /// <summary>
+        /// The name of the saves folder. By default, "saves".
+        /// </summary>
+        public string Folder_Saves = "saves";
+
+        /// <summary>
         /// Monitors on-window mouse movement.
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -300,8 +315,8 @@ namespace FreneticGameGraphics.ClientSystem
             GL.Disable(EnableCap.CullFace);
             GraphicsUtil.CheckError("GEB - Initial");
             SysConsole.Output(OutputType.INIT, "GameClient loading file helpers...");
-            Files = new FileHandler();
-            Files.Init();
+            Files = new FileEngine();
+            Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
             SysConsole.Output(OutputType.INIT, "GameClient loading shader helpers...");
             Shaders = new ShaderEngine();
             Shaders.InitShaderSystem();
@@ -362,9 +377,9 @@ namespace FreneticGameGraphics.ClientSystem
         /// The color to blank the screen to every frame.
         /// Defaults to cyan (0:1:1:1).
         /// </summary>
-        public float[] ScreenClearColor = new float[] { 0, 1, 1, 1 };
+        public readonly float[] ScreenClearColor = new float[] { 0, 1, 1, 1 };
 
-        private float[] DepthClear = new float[] { 1 };
+        private readonly float[] DepthClear = new float[] { 1 };
 
         /// <summary>
         /// Renders a single frame of the game, and also ticks.
@@ -454,7 +469,7 @@ namespace FreneticGameGraphics.ClientSystem
         /// <summary>
         /// Helper for files.
         /// </summary>
-        public FileHandler Files;
+        public FileEngine Files;
 
         /// <summary>
         /// Helper for internal GL font data in the system.

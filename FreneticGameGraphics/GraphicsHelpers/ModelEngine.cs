@@ -139,19 +139,14 @@ namespace FreneticGameGraphics.GraphicsHelpers
             try
             {
                 filename = FileEngine.CleanFileName(filename);
-                if (!TheClient.Files.Exists("models/" + filename + ".vmd"))
+                if (!TheClient.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
                         TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
                         "' does not exist.");
                     return null;
                 }
-                Model m = FromBytes(filename, TheClient.Files.ReadBytes("models/" + filename + ".vmd", out PakkedFile fref));
-                if (m != null)
-                {
-                    m.FileRef = fref;
-                }
-                return m;
+                return FromBytes(filename, bits);
             }
             catch (Exception ex)
             {
@@ -397,12 +392,7 @@ namespace FreneticGameGraphics.GraphicsHelpers
             Meshes = new List<ModelMesh>();
             MeshMap = new Dictionary<string, ModelMesh>();
         }
-
-        /// <summary>
-        /// The file that was used to load this model. Can be null for manually-generated textures.
-        /// </summary>
-        public PakkedFile FileRef;
-
+        
         /// <summary>
         /// The root transform.
         /// </summary>
@@ -774,9 +764,9 @@ namespace FreneticGameGraphics.GraphicsHelpers
                 return;
             }
             Skinned = true;
-            if (Engine.TheClient.Files.Exists("models/" + Name + ".skin"))
+            if (Engine.TheClient.Files.TryReadFileText("models/" + Name + ".skin", out string fileText))
             {
-                string[] data = Engine.TheClient.Files.ReadText("models/" + Name + ".skin").SplitFast('\n');
+                string[] data = fileText.SplitFast('\n');
                 int c = 0;
                 foreach (string datum in data)
                 {

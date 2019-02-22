@@ -73,7 +73,7 @@ namespace FreneticGameCore.CoreSystems
         /// <param name="lang">The language to enforce for this read, if any.</param>
         /// <param name="confs">The custom configuration set to use, if any.</param>
         /// <returns></returns>
-        public FDSSection GetLangDoc(string id, FileHandler Files, string lang = null, Dictionary<string, FDSSection> confs = null)
+        public FDSSection GetLangDoc(string id, FileEngine Files, string lang = null, Dictionary<string, FDSSection> confs = null)
         {
             if (lang == null)
             {
@@ -89,11 +89,10 @@ namespace FreneticGameCore.CoreSystems
                 return doc;
             }
             string path = "info/text/" + idlow + "_" + lang + ".fds";
-            if (Files.Exists(path))
+            if (Files.TryReadFileText(path, out string dat))
             {
                 try
                 {
-                    string dat = Files.ReadText(path);
                     doc = new FDSSection(dat);
                     LanguageDocuments[idlow] = doc;
                     return doc;
@@ -151,7 +150,7 @@ namespace FreneticGameCore.CoreSystems
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text list.</returns>
-        public List<string> GetTextListDefault(FileHandler Files, params string[] pathAndVars)
+        public List<string> GetTextListDefault(FileEngine Files, params string[] pathAndVars)
         {
             if (pathAndVars.Length < 2)
             {
@@ -182,7 +181,7 @@ namespace FreneticGameCore.CoreSystems
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text.</returns>
-        public string GetTextDefault(FileHandler Files, params string[] pathAndVars)
+        public string GetTextDefault(FileEngine Files, params string[] pathAndVars)
         {
             if (pathAndVars.Length < 2)
             {
@@ -213,7 +212,7 @@ namespace FreneticGameCore.CoreSystems
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text list.</returns>
-        public List<string> GetTextList(FileHandler Files, params string[] pathAndVars)
+        public List<string> GetTextList(FileEngine Files, params string[] pathAndVars)
         {
             if (pathAndVars.Length < 2)
             {
@@ -253,7 +252,7 @@ namespace FreneticGameCore.CoreSystems
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text.</returns>
-        public string GetText(FileHandler Files, params string[] pathAndVars)
+        public string GetText(FileEngine Files, params string[] pathAndVars)
         {
             if (pathAndVars.Length < 2)
             {
