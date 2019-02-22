@@ -209,6 +209,10 @@ namespace FreneticGameCore.FileSystems
         public void AddPackagesFromFolder(string folder)
         {
             folder = Path.GetFullPath(folder);
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
             foreach (string file in Directory.EnumerateFiles(folder, PACKAGE_SEARCH_PATTERN))
             {
                 AddPackageFile(file);
@@ -263,6 +267,10 @@ namespace FreneticGameCore.FileSystems
         public void AddRawDataSubfoldersFrom(string folder)
         {
             folder = Path.GetFullPath(folder);
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
             Internal.RawFolders.UnionWith(Directory.EnumerateDirectories(folder));
         }
 
