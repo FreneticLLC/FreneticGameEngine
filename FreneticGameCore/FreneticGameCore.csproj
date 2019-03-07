@@ -132,16 +132,11 @@
     <Content Include="FGE_Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreneticScript\FreneticScript\FreneticScript.csproj">
-      <Project>{0672dd5f-6f33-4853-bd6e-8716d3abc7ad}</Project>
-      <Name>FreneticScript</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FreneticScript\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
-      <Project>{7cc90111-81a0-48eb-bbad-8ae0598c5add}</Project>
+    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
+      <Project>{97a8ec5c-0448-4017-8b16-7b6a33a15797}</Project>
       <Name>FreneticUtilities</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="data\info\text\core_en_us.fds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
