@@ -146,7 +146,7 @@
       <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>
       <Name>FreneticGameCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
+    <ProjectReference Include="$(SolutionDir)FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
       <Project>{97a8ec5c-0448-4017-8b16-7b6a33a15797}</Project>
       <Name>FreneticUtilities</Name>
     </ProjectReference>

@@ -132,7 +132,7 @@
     <Content Include="FGE_Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
+    <ProjectReference Include="$(SolutionDir)FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
       <Project>{97a8ec5c-0448-4017-8b16-7b6a33a15797}</Project>
       <Name>FreneticUtilities</Name>
     </ProjectReference>
