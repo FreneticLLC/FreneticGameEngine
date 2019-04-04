@@ -38,6 +38,18 @@ namespace FreneticGameCore.MathHelpers
         }
 
         /// <summary>
+        /// Construct the vec3i.
+        /// </summary>
+        /// <param name="xy">X and Y coordinaate.</param>
+        /// <param name="z">Z coordinate.</param>
+        public Vector3i(Vector2i xy, int z)
+        {
+            X = xy.X;
+            Y = xy.Y;
+            Z = z;
+        }
+
+        /// <summary>
         /// The zero vector.
         /// </summary>
         public static readonly Vector3i Zero = new Vector3i(0, 0, 0);
@@ -178,6 +190,22 @@ namespace FreneticGameCore.MathHelpers
         public static Vector3i operator *(Vector3i one, int two)
         {
             return new Vector3i(one.X * two, one.Y * two, one.Z * two);
+        }
+
+        /// <summary>
+        /// Gets or set the XY 2D component of this <see cref="Vector3i"/>.
+        /// </summary>
+        public Vector2i XY
+        {
+            get
+            {
+                return new Vector2i(X, Y);
+            }
+            set
+            {
+                X = value.X;
+                Y = value.Y;
+            }
         }
     }
 }
