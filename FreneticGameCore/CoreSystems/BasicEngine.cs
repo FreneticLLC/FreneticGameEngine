@@ -206,7 +206,7 @@ namespace FreneticGameCore.CoreSystems
         {
             foreach (T ent in EntityList)
             {
-                if (ent.TryGetProperty(out Property retme))
+                if (ent.TryGetProperty(t, out Property retme))
                 {
                     return retme;
                 }
