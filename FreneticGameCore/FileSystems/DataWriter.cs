@@ -238,6 +238,17 @@ namespace FreneticGameCore.FileSystems
         }
 
         /// <summary>
+        /// Writes a partial set of bytes directly to the stream.
+        /// </summary>
+        /// <param name="bits">They bytes.</param>
+        /// <param name="start">Starting index.</param>
+        /// <param name="len">Length in bytes to write.</param>
+        public void WritePartialBytes(byte[] bits, int start, int len)
+        {
+            Internal.Write(bits, start, len);
+        }
+
+        /// <summary>
         /// Write a "full set" of bytes to the stream: prefixing the bytes with a var int length indicator.
         /// </summary>
         /// <param name="data">The data.</param>

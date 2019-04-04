@@ -37,6 +37,23 @@ namespace FreneticGameCore.FileSystems
                 return memstream.ToArray();
             }
         }
+        /// <summary>
+        /// Compresses a byte array using LZ4.
+        /// </summary>
+        /// <param name="input">Non-compressed data.</param>
+        /// <param name="start">Starting index.</param>
+        /// <param name="length">Length to compress.</param>
+        /// <returns>Compressed data.</returns>
+        public static byte[] CompressPartial(byte[] input, int start, int length)
+        {
+            MemoryStream memstream = new MemoryStream();
+            using (LZ4Stream lzstream = new LZ4Stream(memstream, LZ4StreamMode.Compress))
+            {
+                lzstream.Write(input, start, length);
+                lzstream.Flush();
+                return memstream.ToArray();
+            }
+        }
 
         /// <summary>
         /// Decompresses a byte array using LZ4.
