@@ -66,8 +66,13 @@ namespace FreneticGameCore.PhysicsSystem
         /// <summary>
         /// Construct the physics space.
         /// </summary>
-        public PhysicsSpace()
+        /// <param name="construct">Set false to disable constructing the internal space.</param>
+        public PhysicsSpace(bool construct = true)
         {
+            if (!construct)
+            {
+                return;
+            }
             ParallelLooper pl = new ParallelLooper();
             for (int i = 0; i < Environment.ProcessorCount * 2; i++)
             {
