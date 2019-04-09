@@ -14,7 +14,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Globalization;
 
-namespace FreneticGameEngineWelcomer
+namespace FGEWelcomer
 {
     static class Program
     {

@@ -2,7 +2,7 @@
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameEngineWelcomer", "FreneticGameEngineWelcomer\FreneticGameEngineWelcomer.csproj", "{47D11750-7958-427D-960F-5FC96D50FDBA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGEWelcomer", "FGEWelcomer\FGEWelcomer.csproj", "{47D11750-7958-427D-960F-5FC96D50FDBA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameCore", "FreneticGameCore\FreneticGameCore.csproj", "{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}"
 EndProject

@@ -6,7 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-namespace FreneticGameEngineWelcomer
+namespace FGEWelcomer
 {
     partial class WelcomerForm
     {
