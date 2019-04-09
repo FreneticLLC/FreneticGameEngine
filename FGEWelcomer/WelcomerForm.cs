@@ -336,8 +336,8 @@ namespace FGEWelcomer
             "csogg.dll", "csvorbis.dll",
             "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",
             "FGECore.dll", "FGECore.pdb", "FGECore.xml",
-            "FreneticGameGraphics.dll", "FreneticGameGraphics.pdb", "FreneticGameGraphics.xml",
-            "FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
+            "FGEGraphics.dll", "FGEGraphics.pdb", "FGEGraphics.xml",
+            //"FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
             "LZ4.dll",
             "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml",
             "openvr_api.dll", "openvr_api.pdb"

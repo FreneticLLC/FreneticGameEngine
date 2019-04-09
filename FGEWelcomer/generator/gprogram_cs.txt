@@ -26,7 +26,7 @@ namespace {{{name}}}
      * 
      * - Set up a git repo for the project
      * 
-     * - Replace the FreneticGame{Core|Graphics} and related references with a git submodule
+     * - Replace the FGE{Core|Graphics} and related references with a git submodule
      * of the engine via GitHub, and keep add them as local projects to the solution.
      * 
      * - READ ANY ALL (OFFICIAL) DOCUMENTATION ON THE ENGINE THAT YOU CAN FIND.

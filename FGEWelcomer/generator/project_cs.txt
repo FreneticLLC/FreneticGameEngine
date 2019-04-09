@@ -50,11 +50,8 @@
     <Reference Include="FreneticGameCore">
       <HintPath>.\FGECore.dll</HintPath>
     </Reference>
-    <Reference Include="FreneticGameGraphics">
-      <HintPath>.\FreneticGameGraphics.dll</HintPath>
-    </Reference>
-    <Reference Include="FreneticScript">
-      <HintPath>.\FreneticScript.dll</HintPath>
+    <Reference Include="FGEGraphics">
+      <HintPath>.\FGEGraphics.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
       <HintPath>.\LZ4.dll</HintPath>

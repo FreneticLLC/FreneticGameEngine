@@ -82,8 +82,6 @@ namespace {{{name}}}.MainGame
             // Spawn a big box.
             Engine.SpawnEntity(new EntitySimple3DRenderableModelProperty()
             {
-                // Set its position (where it is in the world)
-                RenderAt = new Location(-5, 0, -10),
                 // Make it a box (cube) model
                 EntityModel = Engine.Models.Cube,
                 // Set its scale (how big it is)
@@ -92,12 +90,12 @@ namespace {{{name}}}.MainGame
                 Color = new Color4F(1f, 0.5f, 0.5f, 1f),
                 // Give it a plain white texture
                 DiffuseTexture = Engine.Textures.White
-            });
+            })
+            // Set its position (where it is in the world)
+            .SetPosition(new Location(-5, 0, -10));
             // Spawn a small box.
             Engine.SpawnEntity(new EntitySimple3DRenderableModelProperty()
             {
-                // Set its position (where it is in the world)
-                RenderAt = new Location(-5, 0, -5),
                 // Make it a box (cube) model
                 EntityModel = Engine.Models.Cube,
                 // Set its scale (how big it is)
@@ -106,7 +104,9 @@ namespace {{{name}}}.MainGame
                 Color = Color4F.White,
                 // Give it a plain white texture
                 DiffuseTexture = Engine.Textures.White
-            });
+            })
+            // Set its position (where it is in the world)
+            .SetPosition(new Location(-5, 0, -5));
             // Spawn a light
             Engine.SpawnEntity(new EntityPointLight3DProperty()
             {
