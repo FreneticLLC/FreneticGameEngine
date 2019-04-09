@@ -13,11 +13,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FreneticGameCore")]
+[assembly: AssemblyTitle("FGECore")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Frenetic LLC")]
-[assembly: AssemblyProduct("FreneticGameCore")]
+[assembly: AssemblyProduct("FGECore")]
 [assembly: AssemblyCopyright("Copyright © Frenetic LLC 2017-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
