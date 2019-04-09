@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
-using FreneticGameCore;
-using FreneticGameCore.CoreSystems;
-using FreneticGameCore.MathHelpers;
-using FreneticGameGraphics.ClientSystem;
-using FreneticGameGraphics.ClientSystem.EntitySystem;
+using FGECore;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
+using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.EntitySystem;
 
 namespace {{{name}}}.MainGame
 {

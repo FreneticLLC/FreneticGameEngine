@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using FreneticGameCore;
-using FreneticGameCore.CoreSystems;
-using FreneticGameCore.MathHelpers;
+using FGECore;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using {{{name}}}.MainGame;
 
 namespace {{{name}}}

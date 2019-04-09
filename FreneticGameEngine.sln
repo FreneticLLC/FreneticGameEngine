@@ -4,9 +4,9 @@ VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGEWelcomer", "FGEWelcomer\FGEWelcomer.csproj", "{47D11750-7958-427D-960F-5FC96D50FDBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameCore", "FreneticGameCore\FreneticGameCore.csproj", "{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGECore", "FGECore\FGECore.csproj", "{C608FD6D-FB74-4A0B-AFFE-D24AC7DEB3E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticGameGraphics", "FreneticGameGraphics\FreneticGameGraphics.csproj", "{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGEGraphics", "FGEGraphics\FGEGraphics.csproj", "{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGETests", "FGETests\FGETests.csproj", "{BC791A53-E852-4E99-90F9-4E9CF3138C14}"
 EndProject

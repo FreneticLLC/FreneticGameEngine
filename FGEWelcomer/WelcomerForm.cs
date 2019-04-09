@@ -335,7 +335,7 @@ namespace FGEWelcomer
             "BEPUutilities.dll", "BEPUutilities.pdb", "BEPUutilities.xml",
             "csogg.dll", "csvorbis.dll",
             "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",
-            "FreneticGameCore.dll", "FreneticGameCore.pdb", "FreneticGameCore.xml",
+            "FGECore.dll", "FGECore.pdb", "FGECore.xml",
             "FreneticGameGraphics.dll", "FreneticGameGraphics.pdb", "FreneticGameGraphics.xml",
             "FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
             "LZ4.dll",

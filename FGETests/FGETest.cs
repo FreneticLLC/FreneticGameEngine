@@ -10,9 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using FreneticGameCore;
-using FreneticGameCore.CoreSystems;
-using FreneticGameCore.MathHelpers;
+using FGECore;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 
 namespace FGETests
 {
