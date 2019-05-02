@@ -21,16 +21,13 @@ layout (binding = 3) uniform sampler2D depthtex; // Depth G-Buffer Texture
 layout (binding = 4) uniform sampler2D lighttex; // Lighting value from light passes
 layout (binding = 5) uniform sampler2D renderhinttex; // Rendering hint data (y = blur)
 layout (binding = 6) uniform sampler2D renderhint2tex; // More rendering hint data (Refract normal, or reflection value)
-layout (binding = 7) uniform sampler2D hdrtex; // HDR pass output.
-
-const float SPREAD = 4.0;
 
 layout (location = 0) in vec2 f_texcoord; // The input texture coordinate (from the VS data).
 
 // ...
 layout (location = 8) uniform vec3 cameraTargetPos = vec3(0.0, 0.0, 0.0); // What position the camera is targeting in the world (ray traced).
 layout (location = 9) uniform float cameraTargetDepth = 0.01; // How far away the camera target position is from the camera. (Useful for DOF effects). // TODO: ???
-layout (location = 10) uniform float hdrOldExp = 1.0; // The previous frame's HDR exposure.
+layout (location = 10) uniform float hdrExposure = 1.0; // The frame's HDR exposure value.
 layout (location = 11) uniform float frameDelta = 0.05; // The current frame's delta. // TODO: ???
 // ...
 layout (location = 16) uniform float fogDist = 1.0 / 100000.0; // The distance fog should be around.
@@ -103,31 +100,6 @@ vec3 desaturate(in vec3 c) // Desaturates color to be closer to the specified de
 	return c * (1.0 - desaturationAmount) + desaturationColor * dot(c, vec3(1.0)) * desaturationAmount; // Roughly equivalent to a mix call. (Mix doesn't work well on all cards for some reason.)
 }
 
-vec2 getHDRValue()
-{
-	float tc = 0.0;
-	for (float x = 0; x < SPREAD; x++)
-	{
-		for (float y = 0; y < SPREAD; y++)
-		{
-			tc = max(tc, texture(hdrtex, vec2(x, y)).x);
-		}
-	}
-	float exp = 1.0 / max(min(tc, 3.0), 0.33);
-	float flare = 3.0 + exp * 4.0;
-	float stepUp = frameDelta * 0.05;
-	float stepDown = stepUp * 5.0;
-	if (exp > hdrOldExp + stepUp)
-	{
-		exp = hdrOldExp + stepUp;
-	}
-	else if (exp < hdrOldExp - stepDown)
-	{
-		exp = hdrOldExp - stepDown;
-	}
-	return vec2(exp, flare);
-}
-
 vec4 getColorInt(in vec2 pos, in float exposure) // Grab the color of a pixel, after lighting. Regularized.
 {
 #if MCM_LIGHTS
@@ -182,9 +154,8 @@ vec4 getColor(in vec2 pos, in float exposure, in float mblen) // Grab the color 
 
 void main() // The central entry point of the shader. Handles everything!
 {
-	vec2 hdr_data = getHDRValue(); // Grab HDR values.
 	float mblen = dot(mot_blur, mot_blur) <= 0.0001 ? 0.0001 : length(mot_blur);
-	vec4 light_color = vec4(getColor(f_texcoord, hdr_data.x, mblen).xyz, 1.0); // Grab the basic color of our pixel.
+	vec4 light_color = vec4(getColor(f_texcoord, hdrExposure, mblen).xyz, 1.0); // Grab the basic color of our pixel.
 	// This section applies toonify if it is enabled generally.
 #if MCM_TOONIFY
 	// TODO: Toonify option per pixel: block paint?
@@ -192,7 +163,7 @@ void main() // The central entry point of the shader. Handles everything!
     vHSV.x = nearestLevel(vHSV.x, 0);
     vHSV.y = nearestLevel(vHSV.y, 1);
     vHSV.z = nearestLevel(vHSV.z, 2);
-    float edg = IsEdge(f_texcoord, hdr_data.x, mblen);
+    float edg = IsEdge(f_texcoord, hdrExposure, mblen);
     vec3 vRGB = (edg >= edge_thres) ? vec3(0.0, 0.0, 0.0) : HSVtoRGB(vHSV.x, vHSV.y, vHSV.z);
     light_color = vec4(vRGB.x, vRGB.y, vRGB.z, light_color.w);
 	// TODO: Maybe just return here?
@@ -217,7 +188,7 @@ void main() // The central entry point of the shader. Handles everything!
 	{
 		vec3 viewDir = texture(positiontex, f_texcoord).xyz - eye_position;
 		vec3 refr = refract(normalize(viewDir), normalize(renderhint2), 0.75);
-		vec4 refrCol = getColor(f_texcoord + refr.xy * 0.1, hdr_data.x, mblen);
+		vec4 refrCol = getColor(f_texcoord + refr.xy * 0.1, hdrExposure, mblen);
 		// TODO: Maybe apply a dynamic mixing value here, rather than static 0.5?
 		light_color = light_color * 0.5 + refrCol * 0.5; // Color is half base value, and half refracted value.
 	}
@@ -241,7 +212,7 @@ void main() // The central entry point of the shader. Handles everything!
 	// HDR/bloom is available to all!
 	vec3 basecol = texture(lighttex, f_texcoord).xyz * HDR_Div; // The base pixel color is our current pixel's color, without regularization.
 	float val = max(max(basecol.x, basecol.y), basecol.z); // The brightest component of the base pixel color.
-	float mod = min(max(val - hdr_data.y, 0.0), 1.0);
+	float mod = min(max(val - hdrExposure * 4.0 + 3.0, 0.0), 1.0);
 	bloom = vec4(basecol, mod * mod);
 #else
 	bloom = vec4(0.0);

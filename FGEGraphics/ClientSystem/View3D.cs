@@ -2278,17 +2278,6 @@ namespace FGEGraphics.ClientSystem
                 GraphicsUtil.CheckError("AfterLighting");
                 RenderPass_HDR();
             }
-            else
-            {
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, hdrtex);
-                float[] data = new float[HDR_SPREAD * HDR_SPREAD];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    data[i] = 1f;
-                }
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, HDR_SPREAD, HDR_SPREAD, 0, PixelFormat.Red, PixelType.Float, data);
-            }
             GraphicsUtil.CheckError("AfterAllLightCode");
             RenderPass_LightsToBase();
             int lightc = RenderPass_Transparents();
@@ -2322,18 +2311,7 @@ namespace FGEGraphics.ClientSystem
                 GL.Uniform2(4, new Vector2(Width, Height));
                 Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
                 StandardBlend();
-                GraphicsUtil.CheckError("AfterHDRRead");
-            }
-            else
-            {
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, hdrtex);
-                float[] data = new float[HDR_SPREAD * HDR_SPREAD];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    data[i] = 1f;
-                }
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, HDR_SPREAD, HDR_SPREAD, 0, PixelFormat.Red, PixelType.Float, data);
+                GraphicsUtil.CheckError("AfterHDRPass");
             }
         }
 
@@ -2408,8 +2386,6 @@ namespace FGEGraphics.ClientSystem
             GL.BindTexture(TextureTarget.Texture2D, RS4P.DepthTexture);
             GL.ActiveTexture(TextureUnit.Texture4);
             GL.BindTexture(TextureTarget.Texture2D, fbo_texture);
-            GL.ActiveTexture(TextureUnit.Texture7);
-            GL.BindTexture(TextureTarget.Texture2D, hdrtex);
             GL.ActiveTexture(TextureUnit.Texture6);
             GL.BindTexture(TextureTarget.Texture2D, RS4P.Rh2Texture);
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -2916,7 +2892,7 @@ namespace FGEGraphics.ClientSystem
                 float stepUp = (float)Engine.Delta * 0.05f;
                 float stepDown = stepUp * 5.0f;
                 float relative = Math.Abs(MainEXP - exp);
-                float modder = 3f * relative;
+                float modder = relative * 3f;
                 stepUp *= modder;
                 stepDown *= modder;
                 if (exp > MainEXP + stepUp)
