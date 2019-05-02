@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,9 +25,8 @@ namespace FGECore.CoreSystems
     {
         /// <summary>
         /// Current set of tasks.
-        /// TODO: Could be a ConcurrentQueue? Probably should be, for that matter!
         /// </summary>
-        public LockedLinkedList<SyncScheduleItem> Tasks = new LockedLinkedList<SyncScheduleItem>();
+        public ConcurrentQueue<SyncScheduleItem> Tasks = new ConcurrentQueue<SyncScheduleItem>();
 
         /// <summary>
         /// A helper class to help with interactions with <see cref="FreneticEventHelper"/>.
@@ -109,9 +109,11 @@ namespace FGECore.CoreSystems
         public SyncScheduleItem ScheduleSyncTask(Action act, double delay = 0)
         {
             SyncScheduleItem item = new SyncScheduleItem() { MyAction = act, Time = delay, OwningEngine = this };
-            Tasks.AddAtEnd(item);
+            Tasks.Enqueue(item);
             return item;
         }
+
+        private static readonly SyncScheduleItem END_ITEM = new SyncScheduleItem();
 
         /// <summary>
         /// Ran every frame to cause all sync tasks to be processed.
@@ -119,18 +121,22 @@ namespace FGECore.CoreSystems
         /// <param name="time">The delta time.</param>
         public void RunAllSyncTasks(double time)
         {
-            LockedLinkedList<SyncScheduleItem>.Node node = Tasks.First;
-            while (node != null)
+            Tasks.Enqueue(END_ITEM);
+            while (Tasks.TryDequeue(out SyncScheduleItem item))
             {
-                node.Data.Time -= time;
-                if (node.Data.Time > 0)
+                if (item == END_ITEM)
                 {
-                    node = node.Next;
+                    return;
+                }
+                item.Time -= time;
+                if (item.Time > 0)
+                {
+                    Tasks.Enqueue(item); // TODO: Is this sane for effic?
                     continue;
                 }
                 try
                 {
-                    node.Data.MyAction.Invoke();
+                    item.MyAction.Invoke();
                 }
                 catch (Exception ex)
                 {
@@ -140,9 +146,6 @@ namespace FGECore.CoreSystems
                     }
                     SysConsole.Output("Handling sync task", ex);
                 }
-                LockedLinkedList<SyncScheduleItem>.Node torem = node;
-                node = node.Next;
-                Tasks.Remove(torem);
             }
         }
 
