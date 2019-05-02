@@ -876,6 +876,8 @@ namespace FGEGraphics.ClientSystem
                         CurrentFBO = NF_FBO;
                     }
                 }
+                FinalHDRGrab();
+                GraphicsUtil.CheckError("Render - HDR");
                 RenderPass_Setup();
                 GraphicsUtil.CheckError("Render - Setup");
                 if (FastOnly)
@@ -901,8 +903,6 @@ namespace FGEGraphics.ClientSystem
                 GraphicsUtil.CheckError("Render - Buffer");
                 RenderPass_Lights();
                 GraphicsUtil.CheckError("Render - Lights");
-                FinalHDRGrab();
-                GraphicsUtil.CheckError("Render - HDR");
                 PForward = CameraPos + CameraForward;
                 Render_Timer.Stop();
                 TotalTime = (double)Render_Timer.ElapsedMilliseconds / 1000f;
@@ -2509,10 +2509,12 @@ namespace FGEGraphics.ClientSystem
                     FBOid = FBOID.TRANSP_UNLIT;
                 }
             }
+            GraphicsUtil.CheckError("PreTransp - 0");
             GL.UniformMatrix4(1, false, ref PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref IdentityMatrix);
             GL.Uniform1(4, DesaturationAmount);
             GL.DepthMask(false);
+            GraphicsUtil.CheckError("PreTransp - 1");
             if (Engine.AllowLL || !Engine.Deferred_BrightTransp)
             {
                 StandardBlend();
@@ -2521,6 +2523,7 @@ namespace FGEGraphics.ClientSystem
             {
                 TranspBlend();
             }
+            GraphicsUtil.CheckError("PreTransp - 2");
             BindFramebuffer(FramebufferTarget.Framebuffer, transp_fbo_main);
             DrawBuffer(DrawBufferMode.ColorAttachment0);
             BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)RS4P.fbo);
@@ -2528,7 +2531,7 @@ namespace FGEGraphics.ClientSystem
             BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
             int lightc = 0;
-            GraphicsUtil.CheckError("PreTransp");
+            GraphicsUtil.CheckError("PreTransp - 3");
             // TODO: VR Patch!
             if (Engine.Render3DView || Engine.Client.VR != null)
             {
