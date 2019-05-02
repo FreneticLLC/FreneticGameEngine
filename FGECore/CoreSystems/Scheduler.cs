@@ -29,6 +29,17 @@ namespace FGECore.CoreSystems
         public ConcurrentQueue<SyncScheduleItem> Tasks = new ConcurrentQueue<SyncScheduleItem>();
 
         /// <summary>
+        /// Removes all pending items from the scheduler.
+        /// </summary>
+        public void Clear()
+        {
+            while (Tasks.TryDequeue(out _))
+            {
+                // Do nothing.
+            }
+        }
+
+        /// <summary>
         /// A helper class to help with interactions with <see cref="FreneticEventHelper"/>.
         /// </summary>
         public class SchedulerEventHelper : FreneticEventHelper
@@ -233,7 +244,7 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// Locker to prevent thread issues.
         /// </summary>
-        Object Locker = new Object();
+        readonly Object Locker = new Object();
 
         /// <summary>
         /// Whether the item has been started.
