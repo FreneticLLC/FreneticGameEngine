@@ -47,7 +47,7 @@
     <Reference Include="FreneticUtilities">
       <HintPath>.\FreneticUtilities.dll</HintPath>
     </Reference>
-    <Reference Include="FreneticGameCore">
+    <Reference Include="FGECore">
       <HintPath>.\FGECore.dll</HintPath>
     </Reference>
     <Reference Include="FGEGraphics">

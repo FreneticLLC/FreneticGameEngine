@@ -422,7 +422,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// The format to render strings under.
         /// </summary>
-        static StringFormat sf;
+        readonly static StringFormat sf;
 
         /// <summary>
         /// Prepares static helpers.
@@ -557,7 +557,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 return rect;
             }
-            return CharacterLocations["?"];
+            return ASCIILocs['?'];
         }
 
         /// <summary>
