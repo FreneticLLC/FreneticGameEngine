@@ -44,13 +44,17 @@ namespace FGEWelcomer
             /// </summary>
             TOPBAR = 2,
             /// <summary>
-            /// The 'new project' button is under the mouse.
+            /// The 'new project 3d static' button is under the mouse.
             /// </summary>
-            NEW_BUTTON = 3,
+            NEW_BUTTON_3D_STATIC = 3,
             /// <summary>
             /// The 'new project (2D)' button is under the mouse.
             /// </summary>
-            NEW_BUTTON_2D = 4
+            NEW_BUTTON_2D = 4,
+            /// <summary>
+            /// The 'new project 3d git' button is under the mouse.
+            /// </summary>
+            NEW_BUTTON_3D_GIT = 5
         }
 
         /// <summary>
@@ -249,12 +253,30 @@ namespace FGEWelcomer
             Directory.GetParent(f_out).Create();
             File.WriteAllText(f_out, inp);
         }
+
+        /// <summary>
+        /// Runs a git command automatically.
+        /// </summary>
+        /// <param name="folder">The folder to run it in.</param>
+        /// <param name="gitExe">The git executable.</param>
+        /// <param name="args">The git command arguments.</param>
+        public void RunGitCommand(string folder, string gitExe, string args)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = gitExe,
+                WorkingDirectory = folder,
+                Arguments = args
+            };
+            Process.Start(psi).WaitForExit();
+        }
         
         /// <summary>
         /// Creates a game project.
         /// </summary>
         /// <param name="threed">Whether it should be 3D.</param>
-        public void CreateGame(bool threed)
+        /// <param name="submodule">Whether it should be backed by a submodule (if not, use static dll files).</param>
+        public void CreateGame(bool threed, bool submodule)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog()
             {
@@ -276,6 +298,26 @@ namespace FGEWelcomer
                 MessageBox.Show(this, "Invalid directory (not empty).", "Error");
                 return;
             }
+            string gitExe = null;
+            if (submodule)
+            {
+                using (OpenFileDialog ofd = new OpenFileDialog())
+                {
+                    ofd.InitialDirectory = "C:/";
+                    ofd.Filter = "Git Executable File (*.exe)|*.exe";
+                    ofd.FilterIndex = 1;
+                    ofd.RestoreDirectory = true;
+                    ofd.Multiselect = false;
+                    ofd.Title = "Please select your git executable";
+                    DialogResult result = ofd.ShowDialog(this);
+                    if (result != DialogResult.OK)
+                    {
+                        MessageBox.Show(this, "Need a git executable for submodule backing.", "Generation failed.");
+                        return;
+                    }
+                    gitExe = ofd.FileName;
+                }
+            }
             string pfname = folder.TrimEnd('/', '\\');
             int ind = pfname.LastIndexOfAny(new char[] { '/', '\\' });
             string proj_name = pfname.Substring(ind + 1);
@@ -284,9 +326,7 @@ namespace FGEWelcomer
             strs.Add(new KeyValuePair<string, string>("name", proj_name));
             strs.Add(new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()));
             strs.Add(new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()));
-            CopyOverText("project_solution", folder + "/" + proj_name + ".sln", strs);
             CopyOverText("app_conf", baseFolder + "App.config", strs);
-            CopyOverText("project_cs", baseFolder + proj_name + ".csproj", strs);
             CopyOverText("gprogram_cs", baseFolder + "GameProgram.cs", strs);
             CopyOverText("gitignore", folder + "/.gitignore", strs);
             CopyOverText("fge_legal", folder + "/FGE-LEGAL.md", strs);
@@ -300,12 +340,26 @@ namespace FGEWelcomer
             {
                 CopyOverText("game_cs_2d", baseFolder + "MainGame/Game.cs", strs);
             }
-            foreach (string f in FILES)
+            if (submodule)
             {
-                File.Copy("./" + f, baseFolder + f);
+                CopyOverText("project_cs_submodule", baseFolder + proj_name + ".csproj", strs);
+                CopyOverText("project_solution_submodule", folder + "/" + proj_name + ".sln", strs);
+                RunGitCommand(folder, gitExe, "init");
+                RunGitCommand(folder, gitExe, "submodule add https://github.com/FreneticLLC/FreneticGameEngine");
+                RunGitCommand(folder, gitExe, "submodule add https://github.com/FreneticLLC/FreneticUtilities");
+                RunGitCommand(folder, gitExe, "submodule update --init --recursive");
             }
-            CopyDirectoryAndChildren("shaders", baseFolder + "bin/Debug/shaders/");
-            CopyDirectoryAndChildren("data", baseFolder + "bin/Debug/data/");
+            else
+            {
+                CopyOverText("project_cs", baseFolder + proj_name + ".csproj", strs);
+                CopyOverText("project_solution", folder + "/" + proj_name + ".sln", strs);
+                foreach (string f in FILES)
+                {
+                    File.Copy("./" + f, baseFolder + f);
+                }
+                CopyDirectoryAndChildren("shaders", baseFolder + "bin/Debug/shaders/");
+                CopyDirectoryAndChildren("data", baseFolder + "bin/Debug/data/");
+            }
             Process.Start(folder + "/" + proj_name + ".sln");
             MessageBox.Show(this, "Created! Launching your editor... if it doesn't open, navigate to the folder and open the SLN file!", "Success");
         }
@@ -358,13 +412,17 @@ namespace FGEWelcomer
             {
                 Close();
             }
-            else if (Clicked == MouseOver.NEW_BUTTON && Hovered == MouseOver.NEW_BUTTON)
+            else if (Clicked == MouseOver.NEW_BUTTON_3D_STATIC && Hovered == MouseOver.NEW_BUTTON_3D_STATIC)
             {
-                CreateGame(true);
+                CreateGame(true, false);
             }
             else if (Clicked == MouseOver.NEW_BUTTON_2D && Hovered == MouseOver.NEW_BUTTON_2D)
             {
-                CreateGame(false);
+                CreateGame(false, false);
+            }
+            else if (Clicked == MouseOver.NEW_BUTTON_3D_GIT && Hovered == MouseOver.NEW_BUTTON_3D_GIT)
+            {
+                CreateGame(true, true);
             }
             Clicked = MouseOver.NONE;
             Dragging = false;
@@ -386,13 +444,17 @@ namespace FGEWelcomer
             {
                 Clicked = MouseOver.EXIT;
             }
-            else if (Hovered == MouseOver.NEW_BUTTON)
+            else if (Hovered == MouseOver.NEW_BUTTON_3D_STATIC)
             {
-                Clicked = MouseOver.NEW_BUTTON;
+                Clicked = MouseOver.NEW_BUTTON_3D_STATIC;
             }
             else if (Hovered == MouseOver.NEW_BUTTON_2D)
             {
                 Clicked = MouseOver.NEW_BUTTON_2D;
+            }
+            else if (Hovered == MouseOver.NEW_BUTTON_3D_GIT)
+            {
+                Clicked = MouseOver.NEW_BUTTON_3D_GIT;
             }
             else if (Hovered == MouseOver.TOPBAR)
             {
@@ -418,13 +480,17 @@ namespace FGEWelcomer
             {
                 Hovered = MouseOver.EXIT;
             }
-            else if (e.X >= 2 && e.X <= 234 + 2 && e.Y >= 38 && e.Y <= 38 + 25)
+            else if (NEWBUTTON_RECTANGLE_3D_STATIC.Contains(e.X, e.Y))
             {
-                Hovered = MouseOver.NEW_BUTTON;
+                Hovered = MouseOver.NEW_BUTTON_3D_STATIC;
             }
-            else if (e.X >= 2 + 234 + 5 && e.X <= 234 + 5 + 234 + 2 && e.Y >= 38 && e.Y <= 38 + 25)
+            else if (NEWBUTTON_RECTANGLE_2D.Contains(e.X, e.Y))
             {
                 Hovered = MouseOver.NEW_BUTTON_2D;
+            }
+            else if (NEWBUTTON_RECTANGLE_3D_GIT.Contains(e.X, e.Y))
+            {
+                Hovered = MouseOver.NEW_BUTTON_3D_GIT;
             }
             else if (e.Y < 34)
             {
@@ -443,14 +509,34 @@ namespace FGEWelcomer
         public const string TOPBAR_TEXT = "Welcome | Frenetic Game Engine";
 
         /// <summary>
-        /// The 'create new game project (3D)' message text.
+        /// The 'create new game project (3D - Static)' message text.
         /// </summary>
-        public const string NEWBUTTON_TEXT = "Create New Game Project (3D)";
+        public const string NEWBUTTON_TEXT_3D_STATIC = "Create New Game Project (3D - Static Backed)";
+
+        /// <summary>
+        /// The 'create new game project (3D - Static)' message rectangle.
+        /// </summary>
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_STATIC = new Rectangle(2, 38, 400, 25);
 
         /// <summary>
         /// The 'create new game project (2D)' message text.
         /// </summary>
         public const string NEWBUTTON_TEXT_2D = "Create New Game Project (2D)";
+
+        /// <summary>
+        /// The 'create new game project (2D)' message rectangle.
+        /// </summary>
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_2D = new Rectangle(2 + 400 + 5, 38, 234, 25);
+
+        /// <summary>
+        /// The 'create new game project (3D - Submodule Backed)' message text.
+        /// </summary>
+        public const string NEWBUTTON_TEXT_3D_GIT = "Create New Game Project (3D - Submodule Backed)";
+
+        /// <summary>
+        /// The 'create new game project (3D - Submodule Backed)' message rectangle.
+        /// </summary>
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_GIT = new Rectangle(2, 38 + 25 + 5, 400, 25);
 
         /// <summary>
         /// Handles redrawing the form.
@@ -471,28 +557,39 @@ namespace FGEWelcomer
             e.Graphics.DrawRectangle(new Pen(WelcomerIconOutlineColor), new Rectangle(0, 0, 33, 33));
             e.Graphics.DrawLine(new Pen(WelcomerIconOutlineColor), new Point(0, 33), new Point(e.ClipRectangle.Width, 33));
             e.Graphics.DrawIcon(WelcomerIcon, new Rectangle(1, 1, 32, 32));
-            // Draw the new button
-            if (Hovered == MouseOver.NEW_BUTTON)
+            // Draw the new button 3D Static
+            if (Hovered == MouseOver.NEW_BUTTON_3D_STATIC)
             {
-                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), new RectangleF(2, 38, 234, 25));
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), NEWBUTTON_RECTANGLE_3D_STATIC);
             }
             else
             {
-                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), new RectangleF(2, 38, 234, 25));
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), NEWBUTTON_RECTANGLE_3D_STATIC);
             }
-            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), new Rectangle(2, 38, 234, 25));
-            e.Graphics.DrawString(NEWBUTTON_TEXT, NewButtonFont, Brushes.Black, new PointF(5, 40));
+            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), NEWBUTTON_RECTANGLE_3D_STATIC);
+            e.Graphics.DrawString(NEWBUTTON_TEXT_3D_STATIC, NewButtonFont, Brushes.Black, new PointF(5, 40));
             // Draw the new button 2D
             if (Hovered == MouseOver.NEW_BUTTON_2D)
             {
-                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), new RectangleF(2 + 234 + 5, 38, 234, 25));
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), NEWBUTTON_RECTANGLE_2D);
             }
             else
             {
-                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), new RectangleF(2 + 234 + 5, 38, 234, 25));
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), NEWBUTTON_RECTANGLE_2D);
             }
-            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), new Rectangle(2 + 234 + 5, 38, 234, 25));
-            e.Graphics.DrawString(NEWBUTTON_TEXT_2D, NewButtonFont, Brushes.Black, new PointF(5 + 5 + 234, 40));
+            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), NEWBUTTON_RECTANGLE_2D);
+            e.Graphics.DrawString(NEWBUTTON_TEXT_2D, NewButtonFont, Brushes.Black, new PointF(5 + 5 + 400, 40));
+            // Draw the new button 3D Git
+            if (Hovered == MouseOver.NEW_BUTTON_3D_GIT)
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButtonOver), NEWBUTTON_RECTANGLE_3D_GIT);
+            }
+            else
+            {
+                e.Graphics.FillRectangle(new SolidBrush(WelcomerNewButton), NEWBUTTON_RECTANGLE_3D_GIT);
+            }
+            e.Graphics.DrawRectangle(new Pen(WelcomerNewButtonOutline), NEWBUTTON_RECTANGLE_3D_GIT);
+            e.Graphics.DrawString(NEWBUTTON_TEXT_3D_GIT, NewButtonFont, Brushes.Black, new PointF(5, 40 + 25 + 5));
             // Drop the exit icon and backdrop
             if (Hovered == MouseOver.EXIT)
             {
