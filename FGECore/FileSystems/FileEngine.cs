@@ -643,6 +643,7 @@ namespace FGECore.FileSystems
         #region File writing
         /// <summary>
         /// Writes a file to disk with the given filename containing the given data.
+        /// This does not use journalling mode, and should be avoided. Use <see cref="WriteFileDataJournalling(string, byte[])"/> instead.
         /// </summary>
         /// <param name="filename">The name of the file.</param>
         /// <param name="data">The file's raw data.</param>
@@ -661,6 +662,7 @@ namespace FGECore.FileSystems
 
         /// <summary>
         /// Writes a file to disk with the given filename containing the given text.
+        /// This does not use journalling mode, and should be avoided. Use <see cref="WriteFileTextJournalling(string, string)"/> instead.
         /// </summary>
         /// <param name="filename">The name of the file.</param>
         /// <param name="text">The file's text.</param>
