@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FGECore.FileSystems;
 using System.IO;
 using FGECore.StackNoteSystem;
@@ -22,6 +23,7 @@ namespace FGECore.CoreSystems
 {
     /// <summary>
     /// A helper wrapper for the System Console.
+    /// TODO: Make this not be purely static based!
     /// </summary>
     public class SysConsole
     {
@@ -79,6 +81,24 @@ namespace FGECore.CoreSystems
         public static bool AllowCursor = true;
 
         /// <summary>
+        /// Generates a standard log file name.
+        /// Uses a format of "/logs/(year)/(month)/(day)_(hour)_(min)_(procid).log"
+        /// </summary>
+        /// <returns>The generated log file name.</returns>
+        public static string GenerateLogFileName()
+        {
+            DateTime DT = DateTime.Now;
+            string logfolder = Environment.CurrentDirectory + "/logs/" + DT.Year.ToString().PadLeft(4, '0') + "/" + DT.Month.ToString().PadLeft(2, '0') + "/";
+            return logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Process.GetCurrentProcess().Id + ".log";
+        }
+
+        /// <summary>
+        /// The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.
+        // TODO: Configuration option to change the log file name (with a disable option that routes to a null). With options to put a value like logs/%year%/%month%/%day%.log
+        /// </summary>
+        public static string LogFileName = GenerateLogFileName();
+
+        /// <summary>
         /// Prepares the system console.
         /// </summary>
         public static void Init()
@@ -90,15 +110,11 @@ namespace FGECore.CoreSystems
             WriteLock = new Object();
             ConsoleOutputCanceller = new CancellationTokenSource();
             ConsoleOutputThread = new Thread(new ParameterizedThreadStart(ConsoleLoop));
-            //Program.ThreadsToClose.Add(ConsoleOutputThread);
             ConsoleOutputThread.Start(ConsoleOutputCanceller);
             try
             {
-                DateTime DT = DateTime.Now;
-                string logfolder = Environment.CurrentDirectory + "/logs/" + DT.Year.ToString().PadLeft(4, '0') + "/" + DT.Month.ToString().PadLeft(2, '0') + "/";
-                string logfile = logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Process.GetCurrentProcess().Id + ".log";
-                Directory.CreateDirectory(logfolder);
-                FSOUT = File.OpenWrite(logfile);
+                Directory.CreateDirectory(Path.GetDirectoryName(LogFileName));
+                FSOUT = File.OpenWrite(LogFileName);
             }
             catch (Exception ex)
             {
@@ -132,10 +148,6 @@ namespace FGECore.CoreSystems
                 }
                 if (twaiting.Count > 0)
                 {
-                    // TODO: Log file control! Option to change file name or disable entirely...
-                    // Also options to put a value like logs/%yyyy%/%mm%/%dd%.log
-                    // TODO: Handle less terribly. Particular multiple-games-running logging
-                    // FileHandler.AppendText("console.log", twaiting);
                     lock (WriteLock)
                     {
                         foreach (KeyValuePair<string, string> message in twaiting)
@@ -162,23 +174,45 @@ namespace FGECore.CoreSystems
             Console.Title = Title;
         }
 
-        // [System.Runtime.InteropServices.DllImport("user32.dll")]
-        // static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#if !LINUX
+        // Used for HideConsole() and ShowConsole(), exclusively on Windows.
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        const int SW_HIDE = 0;
+        const int SW_SHOW = 5;
+        static IntPtr ConsoleHandle;
+#endif
 
         /// <summary>
         /// Hides the system console from view.
+        /// Only functions on Windows.
         /// </summary>
         public static void HideConsole()
         {
-            // TODO ShowWindow(Program.ConsoleHandle, 0);
+#if !LINUX
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                ShowWindow(ConsoleHandle, SW_HIDE);
+            }
+#endif
         }
 
         /// <summary>
         /// Shows (un-hides) the system console.
+        /// Only functions on Windows.
         /// </summary>
         public static void ShowConsole()
         {
-            // TODO ShowWindow(Program.ConsoleHandle, 1);
+#if !LINUX
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (ConsoleHandle == null)
+                {
+                    ConsoleHandle = Process.GetCurrentProcess().MainWindowHandle;
+                }
+                ShowWindow(ConsoleHandle, SW_SHOW);
+            }
+#endif
         }
 
         /// <summary>

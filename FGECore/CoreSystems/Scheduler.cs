@@ -142,7 +142,7 @@ namespace FGECore.CoreSystems
                 item.Time -= time;
                 if (item.Time > 0)
                 {
-                    Tasks.Enqueue(item); // TODO: Is this sane for effic?
+                    Tasks.Enqueue(item);
                     continue;
                 }
                 try

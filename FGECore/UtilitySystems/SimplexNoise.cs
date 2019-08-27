@@ -187,7 +187,7 @@ namespace FGECore.UtilitySystems
 
             // Add contributions from each corner to get the final noise value.
             // The result is scaled to return values in the interval [-1,1].
-            return 45.1f * (n0 + n1 + n2); // TODO: The scale factor is preliminary! // mcmonkey - improve scaling factor from 40.0
+            return 45.1f * (n0 + n1 + n2); // The scale factor is preliminary! // mcmonkey - improve scaling factor from 40.0
         }
 
 
@@ -298,7 +298,7 @@ namespace FGECore.UtilitySystems
 
             // Add contributions from each corner to get the final noise value.
             // The result is scaled to stay just inside [-1,1]
-            return 32.4f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary! // mcmonkey - improve scaling factor from 32.0
+            return 32.4f * (n0 + n1 + n2 + n3); // The scale factor is preliminary! // mcmonkey - improve scaling factor from 32.0
         }
 
         private static byte[] perm = new byte[512] { 151,160,137,91,90,15,
