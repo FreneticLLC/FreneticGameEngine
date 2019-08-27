@@ -29,6 +29,22 @@ namespace FGECore.CoreSystems
         public PhysicsSpace<T, T2> PhysicsWorld;
 
         /// <summary>
+        /// The instance that owns this engine.
+        /// </summary>
+        public GameInstance<T, T2> OwningInstance;
+
+        /// <summary>
+        /// Gets the scheduler from the backing GameInstance.
+        /// </summary>
+        public Scheduler Schedule
+        {
+            get
+            {
+                return OwningInstance.Schedule;
+            }
+        }
+
+        /// <summary>
         /// Random helper object.
         /// </summary>
         public MTRandom RandomHelper = new MTRandom();
@@ -56,11 +72,6 @@ namespace FGECore.CoreSystems
         /// How long the game has run (seconds).
         /// </summary>
         public double GlobalTickTime = 1.0;
-
-        /// <summary>
-        /// The general purpose scheduler.
-        /// </summary>
-        public Scheduler Schedule = new Scheduler();
 
         /// <summary>
         /// All entities currently on this server, if EIDs are used.
@@ -334,15 +345,6 @@ namespace FGECore.CoreSystems
         /// </summary>
         public void Tick()
         {
-            try
-            {
-                StackNoteHelper.Push("BasicEngine - Tick Scheduler", Schedule);
-                Schedule.RunAllSyncTasks(Delta);
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
             try
             {
                 StackNoteHelper.Push("BasicEngine - Update Physics", PhysicsWorld);

@@ -85,14 +85,14 @@ namespace FGEGraphics.ClientSystem
             {
                 CurrentEngine = new GameEngine3D()
                 {
-                    Client = this
+                    OwningInstance = this
                 };
             }
             else
             {
                 CurrentEngine = new GameEngine2D()
                 {
-                    Client = this
+                    OwningInstance = this
                 };
             }
         }

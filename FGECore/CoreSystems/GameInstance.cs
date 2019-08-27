@@ -56,7 +56,6 @@ namespace FGECore.CoreSystems
         public void InstanceInit()
         {
             SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
-            Files = new FileEngine();
             Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
         }
 
@@ -78,14 +77,14 @@ namespace FGECore.CoreSystems
         public Object TickLock = new Object();
 
         /// <summary>
-        /// The scheduling system for this server.
+        /// The scheduling system for this game instance.
         /// </summary>
         public Scheduler Schedule = new Scheduler();
 
         /// <summary>
         /// Helper for files.
         /// </summary>
-        public FileEngine Files;
+        public FileEngine Files = new FileEngine();
 
         /// <summary>
         /// The source object for this instance. Set to any tag style constant reference you find most helpful to keep!
@@ -93,13 +92,30 @@ namespace FGECore.CoreSystems
         public Object Source;
 
         /// <summary>
-        /// Does some pre-tick processing. Calling <see cref="Tick"/> after.
+        /// Does some pre-tick processing. Call <see cref="Tick"/> after.
         /// </summary>
         /// <param name="delta">How much time has passed since the last tick.</param>
         public void PreTick(double delta)
         {
             Delta = delta;
             GlobalTickTime += delta;
+            TickScheduler();
+        }
+
+        /// <summary>
+        /// Ticks the instance's scheduler.
+        /// </summary>
+        public void TickScheduler()
+        {
+            try
+            {
+                StackNoteHelper.Push("GameInstance - Tick Scheduler", Schedule);
+                Schedule.RunAllSyncTasks(Delta);
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -112,7 +128,6 @@ namespace FGECore.CoreSystems
             try
             {
                 StackNoteHelper.Push("GameInstance tick sequence - Tick", this);
-                Schedule.RunAllSyncTasks(Delta);
                 foreach (T2 engine in Engines)
                 {
                     engine.Delta = Delta;

@@ -66,7 +66,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// The backing game client.
         /// </summary>
-        public GameClientWindow Client;
+        public GameClientWindow Client => OwningInstance as GameClientWindow;
 
         /// <summary>
         /// Whether to use audio 'enforce' mode.
