@@ -58,6 +58,7 @@ namespace FGECore.CoreSystems
             SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
             Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
             AssetStreaming = new AssetStreamingEngine(Files, Schedule);
+            AssetStreaming.Init();
         }
 
         /// <summary>

@@ -90,16 +90,31 @@ namespace FGEGraphics.GraphicsHelpers
         public Graphics GenericGraphicsObject = null;
 
         /// <summary>
-        /// The relevant game client.
+        /// The relevant file helper.
         /// </summary>
         public FileEngine Files;
 
         /// <summary>
+        /// The relevant asset streaming helper.
+        /// </summary>
+        public AssetStreamingEngine AssetStreaming;
+
+        /// <summary>
+        /// The relevant scheduler.
+        /// </summary>
+        public Scheduler Schedule;
+
+        /// <summary>
         /// Starts or restarts the texture system.
         /// </summary>
-        public void InitTextureSystem(FileEngine files)
+        /// <param name="files">The relevant file helper.</param>
+        /// <param name="assetStreaming">The relevant asset streaming helper.</param>
+        /// <param name="schedule">The relevant scheduler.</param>
+        public void InitTextureSystem(FileEngine files, AssetStreamingEngine assetStreaming, Scheduler schedule)
         {
             Files = files;
+            AssetStreaming = assetStreaming;
+            Schedule = schedule;
             // Create a generic graphics object for later use
             EmptyBitmap = new Bitmap(1, 1);
             GenericGraphicsObject = Graphics.FromImage(EmptyBitmap);
@@ -161,32 +176,100 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Gets the texture object for a specific texture name.
         /// </summary>
-        /// <param name="texturename">The name of the texture.</param>
+        /// <param name="textureName">The name of the texture.</param>
         /// <returns>A valid texture object.</returns>
-        public Texture GetTexture(string texturename)
+        public Texture GetTexture(string textureName)
         {
-            texturename = FileEngine.CleanFileName(texturename);
-            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
+            textureName = FileEngine.CleanFileName(textureName);
+            if (LoadedTextures.TryGetValue(textureName, out Texture foundTexture))
             {
                 return foundTexture;
             }
-            Texture Loaded = LoadTexture(texturename, 0);
-            if (Loaded == null)
+            Texture loaded = DynamicLoadTexture(textureName);
+            LoadedTextures.Add(textureName, loaded);
+            OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(loaded));
+            return loaded;
+        }
+
+        /// <summary>
+        /// Dynamically loads a texture (returns a temporary copy of 'White', then fills it in when possible).
+        /// </summary>
+        /// <param name="textureName">The texture name to load.</param>
+        /// <returns>The texture object.</returns>
+        public Texture DynamicLoadTexture(string textureName)
+        {
+            textureName = FileEngine.CleanFileName(textureName);
+            Texture texture = new Texture()
             {
-                Loaded = new Texture()
+                Engine = this,
+                Name = textureName,
+                Original_InternalID = White.Original_InternalID,
+                Internal_Texture = White.Internal_Texture,
+                LoadedProperly = false,
+                Width = White.Width,
+                Height = White.Height
+            };
+            void processLoad(byte[] data)
+            {
+                Bitmap bmp = BitmapForBytes(data);
+                Schedule.ScheduleSyncTask(() =>
                 {
-                    Engine = this,
-                    Name = texturename,
-                    Internal_Texture = White.Original_InternalID,
-                    Original_InternalID = White.Original_InternalID,
-                    LoadedProperly = false,
-                    Width = White.Width,
-                    Height = White.Height,
-                };
+                    TextureFromBitMap(texture, bmp);
+                    texture.LoadedProperly = true;
+                    bmp.Dispose();
+                });
             }
-            LoadedTextures.Add(texturename, Loaded);
-            OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(Loaded));
-            return Loaded;
+            void fileMissing()
+            {
+                SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
+                texture.LoadedProperly = false;
+            }
+            void handleError(string message)
+            {
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Error}': {message}");
+                texture.LoadedProperly = false;
+            }
+            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
+            return texture;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Bitmap"/> for some data, with size correction.
+        /// </summary>
+        /// <param name="data">The raw file data.</param>
+        /// <param name="textureWidth">The texture width (or 0 for any-valid).</param>
+        /// <returns>The bitmap.</returns>
+        public Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
+        {
+            Bitmap bmp = new Bitmap(new MemoryStream(data));
+#if DEBUG
+            if (bmp.Width <= 0 || bmp.Height <= 0)
+            {
+                throw new Exception("Failed to load texture: bitmap loading failed (bad output size)!");
+            }
+#endif
+            if (textureWidth <= 0)
+            {
+                if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
+                {
+                    int wid = GetNextPOTValue(bmp.Width);
+                    int hei = GetNextPOTValue(bmp.Height);
+                    Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
+                    bmp.Dispose();
+                    return bmp_fixed;
+                }
+                return bmp;
+            }
+            else if (bmp.Width == textureWidth && bmp.Height == textureWidth)
+            {
+                return bmp;
+            }
+            else
+            {
+                Bitmap bmp2 = new Bitmap(bmp, new Size(textureWidth, textureWidth));
+                bmp.Dispose();
+                return bmp2;
+            }
         }
 
         /// <summary>
@@ -198,7 +281,7 @@ namespace FGEGraphics.GraphicsHelpers
         public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth)
         {
             texturename = FileEngine.CleanFileName(texturename);
-            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture))
+            if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture) && foundTexture.LoadedProperly)
             {
                 if (foundTexture.Width == twidth && foundTexture.Height == twidth)
                 {
@@ -244,49 +327,16 @@ namespace FGEGraphics.GraphicsHelpers
             try
             {
                 filename = FileEngine.CleanFileName(filename);
-                if (!Files.TryReadFileData("textures/" + filename + ".png", out byte[] textureFile))
+                if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureFile))
                 {
-                    SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
-                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
-                        "' does not exist.");
+                    SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                     return null;
                 }
-                Bitmap bmp = new Bitmap(new MemoryStream(textureFile));
-#if DEBUG
-                if (bmp.Width <= 0 || bmp.Height <= 0)
-                {
-                    SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
-                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': Bitmap loading failed!");
-                    return null;
-                }
-#endif
-                if (twidth <= 0)
-                {
-                    if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
-                    {
-                        int wid = GetNextPOTValue(bmp.Width);
-                        int hei = GetNextPOTValue(bmp.Height);
-                        Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
-                        bmp.Dispose();
-                        return bmp_fixed;
-                    }
-                    return bmp;
-                }
-                else if (bmp.Width == twidth && bmp.Height == twidth)
-                {
-                    return bmp;
-                }
-                else
-                {
-                    Bitmap bmp2 = new Bitmap(bmp, new Size(twidth, twidth));
-                    bmp.Dispose();
-                    return bmp2;
-                }
+                return BitmapForBytes(textureFile, twidth);
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
-                    TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex.ToString()}");
                 return null;
             }
         }
@@ -304,14 +354,16 @@ namespace FGEGraphics.GraphicsHelpers
                 Engine = this,
                 Name = filename
             };
-            Bitmap bmp = LoadBitmapForTexture(filename, twidth);
-            if (bmp == null)
+            using (Bitmap bmp = LoadBitmapForTexture(filename, twidth))
             {
-                return null;
+                if (bmp == null)
+                {
+                    return null;
+                }
+                TextureFromBitMap(texture, bmp);
+                texture.LoadedProperly = true;
+                return texture;
             }
-            TextureFromBitMap(texture, bmp);
-            texture.LoadedProperly = true;
-            return texture;
         }
 
         private void TextureFromBitMap(Texture texture, Bitmap bmp)
@@ -322,34 +374,6 @@ namespace FGEGraphics.GraphicsHelpers
             texture.Internal_Texture = texture.Original_InternalID;
             texture.Bind();
             LockBitmapToTexture(bmp, DefaultLinear);
-        }
-
-        /// <summary>
-        /// Gets the ID number for a texture, loading it uniquely (won't be in the main engine!).
-        /// </summary>
-        /// <param name="name">The name of the texture.</param>
-        /// <param name="twidth">The texture width, if needed.</param>
-        /// <returns>The texture ID.</returns>
-        public int GetTextureID(string name, int twidth = 0)
-        {
-            return (LoadTexture(name, twidth) ?? LoadTexture("white", twidth)).Original_InternalID;
-        }
-        
-        /// <summary>
-        /// Resizes an image texture.
-        /// </summary>
-        /// <param name="input">The input.</param>
-        /// <param name="twidth">The new texture width.</param>
-        /// <returns>The output.</returns>
-        public Bitmap ResizeTexture(Bitmap input, int twidth)
-        {
-            Bitmap tr = new Bitmap(twidth, twidth);
-            using (Graphics g = Graphics.FromImage(tr))
-            {
-                g.DrawImage(input, new Rectangle(0, 0, twidth, twidth), new Rectangle(0, 0, input.Width - 1, input.Height - 1), GraphicsUnit.Pixel); // TODO: how did -1 end up required here?
-                g.Flush();
-            }
-            return tr;
         }
 
         /// <summary>
@@ -364,32 +388,19 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 // TODO: store!
                 filename = FileEngine.CleanFileName(filename);
-                if (!Files.TryReadFileData("textures/" + filename + ".png", out byte[] textureData))
+                if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureData))
                 {
-                    SysConsole.Output(OutputType.WARNING, "Cannot load texture, file '" +
-                        TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Base +
-                        "' does not exist.");
+                    SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                     return;
                 }
-                using (Bitmap bmp = new Bitmap(new MemoryStream(textureData)))
+                using (Bitmap bmp = BitmapForBytes(textureData, twidth))
                 {
-                    if (bmp.Width != twidth || bmp.Height != twidth)
-                    {
-                        using (Bitmap bmp2 = ResizeTexture(bmp, twidth))
-                        {
-                            LockBitmapToTexture(bmp2, depth);
-                        }
-                    }
-                    else
-                    {
-                        LockBitmapToTexture(bmp, depth);
-                    }
+                    LockBitmapToTexture(bmp, depth);
                 }
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to load texture from filename '" +
-                    TextStyle.Standout + "textures/" + filename + ".png" + TextStyle.Error + "': " + ex.ToString());
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex.ToString()}");
                 return;
             }
         }
@@ -527,7 +538,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// </summary>
         public void Destroy()
         {
-            if (Original_InternalID > -1 && GL.IsTexture(Original_InternalID))
+            if (LoadedProperly && Original_InternalID > -1 && GL.IsTexture(Original_InternalID))
             {
                 GL.DeleteTexture(Original_InternalID);
             }
@@ -578,6 +589,7 @@ namespace FGEGraphics.GraphicsHelpers
                 Texture temp = Engine.GetTexture(Name);
                 Original_InternalID = temp.Original_InternalID;
                 Internal_Texture = Original_InternalID;
+                LoadedProperly = false;
                 if (RemappedTo != null)
                 {
                     RemappedTo.CheckValid();

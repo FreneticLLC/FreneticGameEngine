@@ -286,7 +286,7 @@ namespace FGEGraphics.ClientSystem
             Shaders.InitShaderSystem();
             SysConsole.Output(OutputType.INIT, "GameClient loading texture helpers...");
             Textures = new TextureEngine();
-            Textures.InitTextureSystem(Files);
+            Textures.InitTextureSystem(Files, AssetStreaming, Schedule);
             GraphicsUtil.CheckError("GEB - Textures");
             SysConsole.Output(OutputType.INIT, "GameClient loading font helpers...");
             GLFonts = new GLFontEngine(Textures, Shaders);

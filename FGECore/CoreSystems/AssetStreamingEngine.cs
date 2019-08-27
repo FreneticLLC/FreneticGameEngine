@@ -31,11 +31,13 @@ namespace FGECore.CoreSystems
 
         /// <summary>
         /// All currently waiting asset streaming goals.
+        /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
         /// </summary>
         public ConcurrentQueue<StreamGoal> Goals = new ConcurrentQueue<StreamGoal>();
 
         /// <summary>
         /// Reset event for when the files thread has more goals to process.
+        /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
         /// </summary>
         public AutoResetEvent GoalWaitingReset = new AutoResetEvent(false);
 
@@ -84,6 +86,11 @@ namespace FGECore.CoreSystems
             public Action<string> OnError = null;
 
             /// <summary>
+            /// Action to call if the file is not present. If unset, will become an error message.
+            /// </summary>
+            public Action OnFileMissing = null;
+
+            /// <summary>
             /// Called to process the file data once loaded. MUST be set.
             /// </summary>
             public Action<byte[]> ProcessData;
@@ -93,6 +100,28 @@ namespace FGECore.CoreSystems
             /// Defaults to false.
             /// </summary>
             public bool ShouldSyncToMainThread = false;
+
+            /// <summary>
+            /// Handles a file-missing situation.
+            /// </summary>
+            public void HandleFileMissing()
+            {
+                try
+                {
+                    if (OnFileMissing != null)
+                    {
+                        OnFileMissing();
+                    }
+                    else
+                    {
+                        HandleError("File '" + FileName + "' not found.");
+                    }
+                }
+                catch (Exception ex2)
+                {
+                    SysConsole.Output(OutputType.ERROR, "Exception in asset streaming error handler: " + ex2 + "\nCaused by: File not found.");
+                }
+            }
 
             /// <summary>
             /// Handles an error message.
@@ -142,7 +171,7 @@ namespace FGECore.CoreSystems
             {
                 if (!Files.TryReadFileData(goal.FileName, out byte[] data))
                 {
-                    goal.HandleError("File '" + goal.FileName + "' doesn't exist.");
+                    goal.HandleFileMissing();
                     return;
                 }
                 void CallProcData()
@@ -170,18 +199,21 @@ namespace FGECore.CoreSystems
         /// <param name="fileName">The name of the file to load.</param>
         /// <param name="processOnMainThread">Whether to sync the process result call to the main thread (if not, runs async).</param>
         /// <param name="processAction">Called to process the file data once loaded.</param>
+        /// <param name="onFileMissing">(Optional) called to handle a file-missing situation.</param>
         /// <param name="onError">(Optional) called to handle an error message. If unset, errors go to the <see cref="SysConsole"/>.</param>
         /// <returns>The created <see cref="StreamGoal"/>.</returns>
-        public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action<string> onError = null)
+        public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null)
         {
             StreamGoal goal = new StreamGoal()
             {
                 FileName = fileName,
                 ShouldSyncToMainThread = processOnMainThread,
                 ProcessData = processAction,
+                OnFileMissing = onFileMissing,
                 OnError = onError
             };
             Goals.Enqueue(goal);
+            GoalWaitingReset.Set();
             return goal;
         }
     }
