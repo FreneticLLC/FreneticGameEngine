@@ -45,7 +45,7 @@ namespace FGEGraphics.UISystem
                 IsSubEngine = true,
                 SubSize = new Vector2i(Position.Width, Position.Height)
             };
-            SubEngine.Client = pos.View.Client;
+            SubEngine.OwningInstance = pos.View.Client;
             if (alphaBack)
             {
                 SubEngine.MainView.ClearColor = new float[] { 0f, 0f, 0f, 0f };
@@ -57,7 +57,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         protected override void Init()
         {
-            SubEngine.Client = Client;
+            SubEngine.OwningInstance = Client;
             SubEngine.Load();
         }
 

@@ -57,6 +57,7 @@ namespace FGECore.CoreSystems
         {
             SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
             Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
+            AssetStreaming = new AssetStreamingEngine(Files, Schedule);
         }
 
         /// <summary>
@@ -90,6 +91,11 @@ namespace FGECore.CoreSystems
         /// The source object for this instance. Set to any tag style constant reference you find most helpful to keep!
         /// </summary>
         public Object Source;
+
+        /// <summary>
+        /// Helper for streaming assets.
+        /// </summary>
+        public AssetStreamingEngine AssetStreaming;
 
         /// <summary>
         /// Does some pre-tick processing. Call <see cref="Tick"/> after.
