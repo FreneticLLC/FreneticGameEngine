@@ -22,19 +22,15 @@ using FGECore.FileSystems;
 using FGEGraphics.GraphicsHelpers;
 using FGECore.StackNoteSystem;
 using FGECore.ModelSystems;
+using FGEGraphics.ClientSystem.EntitySystem;
 
 namespace FGEGraphics.ClientSystem
 {
     /// <summary>
     /// Represents a game client window for a game.
     /// </summary>
-    public class GameClientWindow : IDisposable
+    public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDisposable
     {
-        /// <summary>
-        /// A scheduler for the general game client.
-        /// </summary>
-        public Scheduler Schedule = new Scheduler();
-
         /// <summary>
         /// The primary window for the game.
         /// </summary>
@@ -102,11 +98,6 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>
-        /// Whether to process the default engine.
-        /// </summary>
-        public bool ProcessMainEngine = true;
-
-        /// <summary>
         /// The X-coordinate of the mouse in screen coordinates.
         /// </summary>
         public int MouseX;
@@ -115,16 +106,6 @@ namespace FGEGraphics.ClientSystem
         /// The Y-coordinate of the mouse in screen coordinates.
         /// </summary>
         public int MouseY;
-
-        /// <summary>
-        /// Current frame delta (seconds).
-        /// </summary>
-        public double Delta;
-
-        /// <summary>
-        /// How long the game has run (seconds).
-        /// </summary>
-        public double GlobalTickTime = 1.0;
 
         /// <summary>
         /// The current mouse state for this tick.
@@ -155,21 +136,6 @@ namespace FGEGraphics.ClientSystem
         /// The 3D animation helper.
         /// </summary>
         public AnimationEngine Animations;
-
-        /// <summary>
-        /// The name of the data folder. By default, "data".
-        /// </summary>
-        public string Folder_Data = "data";
-
-        /// <summary>
-        /// The name of the mods folder. By default, "mods".
-        /// </summary>
-        public string Folder_Mods = "mods";
-
-        /// <summary>
-        /// The name of the saves folder. By default, "saves".
-        /// </summary>
-        public string Folder_Saves = "saves";
 
         /// <summary>
         /// Monitors on-window mouse movement.
@@ -314,9 +280,7 @@ namespace FGEGraphics.ClientSystem
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
             GraphicsUtil.CheckError("GEB - Initial");
-            SysConsole.Output(OutputType.INIT, "GameClient loading file helpers...");
-            Files = new FileEngine();
-            Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
+            InstanceInit();
             SysConsole.Output(OutputType.INIT, "GameClient loading shader helpers...");
             Shaders = new ShaderEngine();
             Shaders.InitShaderSystem();
@@ -336,11 +300,11 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("GEB - Fonts");
             SysConsole.Output(OutputType.INIT, "GameClient loading 2D/UI render helper...");
             MainUI = new ViewUI2D(this);
-            SysConsole.Output(OutputType.INIT, "GameEngine loading model engine...");
+            SysConsole.Output(OutputType.INIT, "GameClient loading model engine...");
             Animations = new AnimationEngine();
             Models = new ModelEngine();
             Models.Init(Animations, this);
-            SysConsole.Output(OutputType.INIT, "GameEngine loading render helper...");
+            SysConsole.Output(OutputType.INIT, "GameClient loading render helper...");
             Rendering3D = new Renderer(Textures, Shaders, Models);
             Rendering3D.Init();
             Rendering2D = new Renderer2D(Textures, Shaders);
@@ -392,13 +356,15 @@ namespace FGEGraphics.ClientSystem
             {
                 StackNoteHelper.Push("GameClientWindow - Render and tick frame", this);
                 // First step: check delta
-                Delta = e.Time;
-                CurrentEngine.Delta = Delta;
                 if (e.Time <= 0.0)
                 {
                     return;
                 }
-                GlobalTickTime += Delta;
+                // Mouse handling
+                PreviousMouse = CurrentMouse;
+                CurrentMouse = Mouse.GetState();
+                // Standard pre-tick
+                PreTick(e.Time);
                 ErrorCode ec = GL.GetError();
                 while (ec != ErrorCode.NoError)
                 {
@@ -415,11 +381,8 @@ namespace FGEGraphics.ClientSystem
                 Models.Update(GlobalTickTime);
                 GraphicsUtil.CheckError("GameClient - PostModelUpdate");
                 // Third step: general game rendering
-                if (ProcessMainEngine)
-                {
-                    CurrentEngine.RenderSingleFrame();
-                    GraphicsUtil.CheckError("GameClient - PostMainEngine");
-                }
+                CurrentEngine.RenderSingleFrame();
+                GraphicsUtil.CheckError("GameClient - PostMainEngine");
                 // Add the UI Layer too
                 MainUI.Draw();
                 GraphicsUtil.CheckError("GameClient - PostUI");
@@ -429,13 +392,8 @@ namespace FGEGraphics.ClientSystem
                 GL.UseProgram(0);
                 // Semi-final step: Tick logic!
                 GraphicsUtil.CheckError("GameClient - PreTick");
-                // Pre-tick.
-                ClientEngineTick();
-                // Primary entity tick
-                if (ProcessMainEngine)
-                {
-                    CurrentEngine.Tick();
-                }
+                // Main instance tick.
+                Tick();
                 // Primary UI tick
                 MainUI.Tick();
                 GraphicsUtil.CheckError("GameClient - PostTick");
@@ -450,26 +408,9 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>
-        /// Ticks the client engine.
-        /// </summary>
-        public void ClientEngineTick()
-        {
-            // Scheduler
-            Schedule.RunAllSyncTasks(Delta);
-            // Mouse handling
-            PreviousMouse = CurrentMouse;
-            CurrentMouse = Mouse.GetState();
-        }
-
-        /// <summary>
         /// The shader system.
         /// </summary>
         public ShaderEngine Shaders;
-
-        /// <summary>
-        /// Helper for files.
-        /// </summary>
-        public FileEngine Files;
 
         /// <summary>
         /// Helper for internal GL font data in the system.

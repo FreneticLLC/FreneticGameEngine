@@ -60,6 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreSystems\AssetStreamingEngine.cs" />
+    <Compile Include="CoreSystems\GameInstance.cs" />
     <Compile Include="FileSystems\FileEngine.cs" />
     <Compile Include="FileSystems\FileUtilities.cs" />
     <Compile Include="MathHelpers\MathUtilities.cs" />

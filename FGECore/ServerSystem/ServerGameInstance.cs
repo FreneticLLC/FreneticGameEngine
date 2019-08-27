@@ -15,30 +15,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using FGECore.StackNoteSystem;
 using FGECore.CoreSystems;
+using FGECore.ServerSystem.EntitySystem;
 
 namespace FGECore.ServerSystem
 {
     /// <summary>
     /// An instance of a server game.
     /// </summary>
-    public class ServerGameInstance
+    public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
     {
-        /// <summary>
-        /// Any and all engines running in this instance on the main level.
-        /// </summary>
-        public List<ServerEngine> Engines = new List<ServerEngine>();
-
-        /// <summary>
-        /// Gets the "default" engine: the first in the <see cref="Engines"/> list!
-        /// </summary>
-        public ServerEngine DefaultEngine
-        {
-            get
-            {
-                return Engines[0];
-            }
-        }
-
         /// <summary>
         /// Constructs the server game instance.
         /// </summary>
@@ -57,12 +42,7 @@ namespace FGECore.ServerSystem
         }
 
         /// <summary>
-        /// How much time has passed since the instance first loaded.
-        /// </summary>
-        public double GlobalTickTime = 1;
-
-        /// <summary>
-        /// Used to calculate the <see cref="Delta"/> value.
+        /// Used to calculate the <see cref="GameInstance{T, T2}.Delta"/> value.
         /// </summary>
         private Stopwatch DeltaCounter;
 
@@ -83,35 +63,9 @@ namespace FGECore.ServerSystem
         public double Target_FPS = 30;
 
         /// <summary>
-        /// The current delta timing for the instance tick.
-        /// Represents the amount of time passed since the last tick.
-        /// </summary>
-        public double Delta = 0;
-
-        /// <summary>
-        /// Whether the instance is marked for shutdown as soon as possible.
-        /// </summary>
-        bool NeedShutdown = false;
-
-        /// <summary>
-        /// Lock this object to prevent collision with the instance tick.
-        /// </summary>
-        public Object TickLock = new Object();
-
-        /// <summary>
         /// The current tick rate of the server.
         /// </summary>
         public int TPS = 0;
-
-        /// <summary>
-        /// The scheduling system for this server.
-        /// </summary>
-        public Scheduler Schedule = new Scheduler();
-
-        /// <summary>
-        /// The source object for this instance. Set to any tag style constant reference you find most helpful to keep!
-        /// </summary>
-        public Object Source;
 
         /// <summary>
         /// Starts and runs the entire server game instance.
@@ -120,14 +74,14 @@ namespace FGECore.ServerSystem
         public void StartAndRun()
         {
             // Tick
-            double TARGETFPS = 30.0;
+            double TARGETFPS;
             Stopwatch Counter = new Stopwatch();
             DeltaCounter = new Stopwatch();
             DeltaCounter.Start();
             TotalDelta = 0;
-            double CurrentDelta = 0.0;
+            double CurrentDelta;
             TargetDelta = 0.0;
-            int targettime = 0;
+            int targettime;
             try
             {
                 StackNoteHelper.Push("ServerGameInstance main loop - StartAndRun", this);
@@ -156,7 +110,7 @@ namespace FGECore.ServerSystem
                     while (TotalDelta > tdelt * 3)
                     {
                         // Lagging - cheat to catch up!
-                        tdelt *= 2; // TODO: Handle even harder tick loss
+                        tdelt *= 2;
                     }
                     // As long as there's more delta built up than delta wanted, tick
                     while (TotalDelta > tdelt)
@@ -167,7 +121,8 @@ namespace FGECore.ServerSystem
                         }
                         lock (TickLock)
                         {
-                            Tick(tdelt);
+                            PreTick(tdelt);
+                            Tick();
                         }
                         TotalDelta -= tdelt;
                     }
@@ -190,37 +145,6 @@ namespace FGECore.ServerSystem
             catch (Exception ex)
             {
                 SysConsole.Output("Server crash", ex);
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
-        }
-
-        /// <summary>
-        /// TPS Counter.
-        /// </summary>
-        private int tpsc = 0;
-
-        /// <summary>
-        /// Ticks the server and all engines.
-        /// Called automatically by the standard run thread.
-        /// </summary>
-        /// <param name="delta">How much time has passed since the last tick.</param>
-        public void Tick(double delta)
-        {
-            try
-            {
-                StackNoteHelper.Push("ServerGameInstance tick sequence - Tick", this);
-                tpsc++;
-                Delta = delta;
-                GlobalTickTime += delta;
-                Schedule.RunAllSyncTasks(delta);
-                foreach (ServerEngine engine in Engines)
-                {
-                    engine.Delta = delta;
-                    engine.Tick();
-                }
             }
             finally
             {
