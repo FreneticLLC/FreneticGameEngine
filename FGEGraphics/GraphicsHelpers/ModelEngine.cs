@@ -184,7 +184,52 @@ namespace FGEGraphics.GraphicsHelpers
             LoadedModels.Add(modelname, Loaded);
             return Loaded;
         }
-        
+
+        /// <summary>
+        /// Dynamically loads a model (returns a temporary copy of 'Cube', then fills it in when possible).
+        /// </summary>
+        /// <param name="modelName">The model name to load.</param>
+        /// <returns>The model object.</returns>
+        public Model DynamicLoadModel(string modelName)
+        {
+            modelName = FileEngine.CleanFileName(modelName);
+            Model model = new Model(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+            void processLoad(byte[] data)
+            {
+                Model3D scene = Handler.LoadModel(data);
+                List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
+                Model mod = FromSceneNoGenerate(scene, modelName, builders);
+                TheClient.Schedule.ScheduleSyncTask(() =>
+                {
+                    foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
+                    {
+                        builder.Key.BaseRenderable.GenerateVBO(builder.Value);
+                    }
+                    model.Meshes = mod.Meshes;
+                    model.MeshMap = mod.MeshMap;
+                    model.Original = mod.Original;
+                    model.Root = mod.Root;
+                    model.RootNode = mod.RootNode;
+                    model.LODHelper = null;
+                    model.LODBox = default;
+                    model.ModelMin = new BEPUutilities.Vector3(-1, -1, -1);
+                    model.ModelMax = new BEPUutilities.Vector3(1, 1, 1);
+                    model.ModelBoundsSet = false;
+                    model.IsLoaded = true;
+                });
+            }
+            void fileMissing()
+            {
+                SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
+            }
+            void handleError(string message)
+            {
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Error}': {message}");
+            }
+            TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
+            return model;
+        }
+
         /// <summary>
         /// Backing animation engine.
         /// </summary>
@@ -199,7 +244,7 @@ namespace FGEGraphics.GraphicsHelpers
         public Model FromBytes(string name, byte[] data)
         {
             Model3D scene = Handler.LoadModel(data);
-            return FromScene(scene, name, AnimEngine);
+            return FromScene(scene, name);
         }
 
         /// <summary>
@@ -207,20 +252,38 @@ namespace FGEGraphics.GraphicsHelpers
         /// </summary>
         /// <param name="scene">The backing model.</param>
         /// <param name="name">The name to use.</param>
-        /// <param name="engine">The animation engine.</param>
         /// <returns>The model.</returns>
-        public Model FromScene(Model3D scene, string name, AnimationEngine engine)
+        public Model FromScene(Model3D scene, string name)
         {
-            if (scene.Meshes.Length == 0)
+            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
+            Model mod = FromSceneNoGenerate(scene, name, builders);
+            foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
             {
-                throw new Exception("Scene has no meshes! (" + name + ")");
+                builder.Key.BaseRenderable.GenerateVBO(builder.Value);
             }
+            mod.IsLoaded = true;
+            return mod;
+        }
+
+        /// <summary>
+        /// Converts a core Scene to a renderable model, without running the VBO generate step.
+        /// </summary>
+        /// <param name="scene">The backing model.</param>
+        /// <param name="name">The name to use.</param>
+        /// <param name="vboBuilders">The VBO builders for output.</param>
+        /// <returns>The model.</returns>
+        public Model FromSceneNoGenerate(Model3D scene, string name, List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> vboBuilders)
+        {
             Model model = new Model(name)
             {
                 Engine = this,
                 Original = scene,
                 Root = scene.MatrixA.Convert()
             };
+            if (scene.Meshes.Length == 0)
+            {
+                throw new Exception("Scene has no meshes! (" + name + ")");
+            }
             foreach (Model3DMesh mesh in scene.Meshes)
             {
                 if (mesh.Name.ToLowerFast().Contains("collision") || mesh.Name.ToLowerFast().Contains("norender"))
@@ -228,7 +291,6 @@ namespace FGEGraphics.GraphicsHelpers
                     continue;
                 }
                 ModelMesh modmesh = new ModelMesh(mesh.Name);
-                Renderable vbo = modmesh.BaseRenderable;
                 bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
                 bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
                 if (!hasn)
@@ -297,12 +359,12 @@ namespace FGEGraphics.GraphicsHelpers
                         }
                     }
                 }
-                vbo.GenerateVBO(builder);
+                vboBuilders.Add(new KeyValuePair<ModelMesh, Renderable.ArrayBuilder>(modmesh, builder));
                 model.AddMesh(modmesh);
             }
             model.RootNode = new ModelNode() { Parent = null, Name = scene.RootNode.Name.ToLowerFast() };
             List<ModelNode> allNodes = new List<ModelNode>();
-            PopulateChildren(model.RootNode, scene.RootNode, model, engine, allNodes);
+            PopulateChildren(model.RootNode, scene.RootNode, model, AnimEngine, allNodes);
             for (int i = 0; i < model.Meshes.Count; i++)
             {
                 for (int x = 0; x < scene.Meshes[i].Bones.Length; x++)
@@ -442,6 +504,11 @@ namespace FGEGraphics.GraphicsHelpers
         /// The maximum model bound.
         /// </summary>
         public BEPUutilities.Vector3 ModelMax;
+
+        /// <summary>
+        /// Whether the model is loaded yet.
+        /// </summary>
+        public bool IsLoaded = false;
 
         /// <summary>
         /// Adds a mesh to this model.
