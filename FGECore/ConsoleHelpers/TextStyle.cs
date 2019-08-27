@@ -59,5 +59,17 @@ namespace FGECore.ConsoleHelpers
         public static string Importantinfo = "^r^3";
         /// <summary>Base coloring style, default (SysConsole) value: ^B</summary>
         public static string Base = "^B";
+
+        /// <summary>
+        /// Applies a base color to the string.
+        /// That is, replaces <see cref="Base"/> with the input color (and a reset for any existing colors).
+        /// </summary>
+        /// <param name="text">The input text.</param>
+        /// <param name="color">The new base color to use.</param>
+        /// <returns>The fixed string.</returns>
+        public static string ApplyBaseColor(this string text, string color)
+        {
+            return text.Replace(Base, "^r^7" + color);
+        }
     }
 }

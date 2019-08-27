@@ -24,6 +24,7 @@ using FreneticUtilities.FreneticExtensions;
 using FGECore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 using FGEGraphics.ClientSystem;
+using FGECore.ConsoleHelpers;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -245,25 +246,25 @@ namespace FGEGraphics.GraphicsHelpers
             Color.FromArgb(64, 64, 64),   // 20 // ) // DarkGray
             Color.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
         };
-        private static Point[] ShadowPoints = new Point[] {
+        private readonly static Point[] ShadowPoints = new Point[] {
             new Point(0, 1),
             new Point(1, 0),
             new Point(1, 1),
         };
-        private static Point[] BetterShadowPoints = new Point[] {
+        private readonly static Point[] BetterShadowPoints = new Point[] {
             new Point(0, 2),
             new Point(1, 2),
             new Point(2, 0),
             new Point(2, 1),
             new Point(2, 2),
         };
-        private static Point[] EmphasisPoints = new Point[] {
+        private readonly static Point[] EmphasisPoints = new Point[] {
             new Point(0, -1),
             new Point(0, 1),
             new Point(1, 0),
             new Point(-1, 0),
         };
-        private static Point[] BetterEmphasisPoints = new Point[] {
+        private readonly static Point[] BetterEmphasisPoints = new Point[] {
             new Point(-1, -1),
             new Point(-1, 1),
             new Point(1, -1),
@@ -302,10 +303,9 @@ namespace FGEGraphics.GraphicsHelpers
                 r_depth--;
                 return;
             }
-            Text = Text.Replace("^B", bcolor);
+            Text = Text.ApplyBaseColor(bcolor);
             string[] lines = Text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
-            Action<string, float, TextVBO> render;
-            render = (line, Y, vbo) =>
+            void render(string line, float Y, TextVBO vbo)
             {
                 int color = _color;
                 bool bold = _bold;
@@ -359,15 +359,15 @@ namespace FGEGraphics.GraphicsHelpers
                             float width = font.MeasureString(drawme);
                             if (highlight)
                             {
-                                DrawRectangle(X, Y, width, font_default.Height, font, ColorFor(hcolor, htrans), vbo);
+                                DrawRectangle(X, Y, width, font_default.Height, ColorFor(hcolor, htrans), vbo);
                             }
                             if (underline)
                             {
-                                DrawRectangle(X, Y + ((float)font.Height * 4f / 5f), width, 2, font, ColorFor(ucolor, utrans), vbo);
+                                DrawRectangle(X, Y + ((float)font.Height * 4f / 5f), width, 2, ColorFor(ucolor, utrans), vbo);
                             }
                             if (overline)
                             {
-                                DrawRectangle(X, Y + 2f, width, 2, font, ColorFor(ocolor, otrans), vbo);
+                                DrawRectangle(X, Y + 2f, width, 2, ColorFor(ocolor, otrans), vbo);
                             }
                             if (extrashadow)
                             {
@@ -401,7 +401,7 @@ namespace FGEGraphics.GraphicsHelpers
                             RenderBaseText(vbo, X, Y, drawme, font, color, trans, flip, pseudo, random, jello, obfu, ccolor);
                             if (strike)
                             {
-                                DrawRectangle(X, Y + (font.Height / 2), width, 2, font, ColorFor(scolor, strans), vbo);
+                                DrawRectangle(X, Y + (font.Height / 2), width, 2, ColorFor(scolor, strans), vbo);
                             }
                             X += width;
                         }
@@ -484,9 +484,9 @@ namespace FGEGraphics.GraphicsHelpers
                                         if (highl)
                                         {
                                             float widt = font_default.MeasureString(ttext);
-                                            DrawRectangle(X, Y, widt, font_default.Height, font_default, Color.Black, vbo);
+                                            DrawRectangle(X, Y, widt, font_default.Height, Color.Black, vbo);
                                             RenderBaseText(vbo, X, Y, ttext, font_default, 5);
-                                            DrawRectangle(X, Y + ((float)font_default.Height * 4f / 5f), widt, 2, font_default, Color.Blue, vbo);
+                                            DrawRectangle(X, Y + ((float)font_default.Height * 4f / 5f), widt, 2, Color.Blue, vbo);
                                             X += widt;
                                         }
                                         else
@@ -629,7 +629,8 @@ namespace FGEGraphics.GraphicsHelpers
                         }
                     }
                 }
-            };
+            }
+
             TextVBO cVBO = new TextVBO(Engine.GLFonts);
             if (lines.Length <= 1)
             {
@@ -853,7 +854,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>the X-width of the text.</returns>
         public float MeasureFancyText(string line, string bcolor = "^r^7", bool pushStr = false)
         {
-            return MeasureFancyText(line, out List<KeyValuePair<string, Rectangle2F>> links, bcolor, pushStr: pushStr);
+            return MeasureFancyText(line, out List<KeyValuePair<string, Rectangle2F>> _, bcolor, pushStr: pushStr);
         }
 
         /// <summary>
@@ -920,7 +921,7 @@ namespace FGEGraphics.GraphicsHelpers
                 font = font_default;
             }
             int start = 0;
-            line = line.Replace("^q", "\"").Replace("^B", bcolor); // TODO: Effic?
+            line = line.Replace("^q", "\"").ApplyBaseColor(bcolor); // TODO: Effic of replace usage? And of per-line replaces?
             for (int x = 0; x < line.Length; x++)
             {
                 if ((line[x] == '^' && x + 1 < line.Length && (IsColorSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
@@ -1103,9 +1104,8 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
         /// <param name="c">The color to use.</param>
-        /// <param name="font">The font to render with.</param>
         /// <param name="vbo">The VBO to render with.</param>
-        public void DrawRectangle(float X, float Y, float width, float height, GLFont font, Color c, TextVBO vbo)
+        public void DrawRectangle(float X, float Y, float width, float height, Color c, TextVBO vbo)
         {
             vbo.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight,
                 new Vector4((float)c.R / 255f, (float)c.G / 255f, (float)c.B / 255f, (float)c.A / 255f));

@@ -17,6 +17,7 @@ using FGECore.FileSystems;
 using System.IO;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
+using FGECore.ConsoleHelpers;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.CoreSystems
@@ -262,7 +263,7 @@ namespace FGECore.CoreSystems
 
         static void WriteInternal(string text, string bcolor)
         {
-            text = text.Replace("^B", bcolor);
+            text = bcolor + text.ApplyBaseColor(bcolor);
             if (FSOUT != null)
             {
                 byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
@@ -275,8 +276,7 @@ namespace FGECore.CoreSystems
             }
             else
             {
-                string toOut = bcolor + text.Replace("^B", bcolor);
-                byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(toOut);
+                byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(text);
                 StringBuilder outp = new StringBuilder(t.Length);
                 for (int i = 0; i < t.Length; i++)
                 {
