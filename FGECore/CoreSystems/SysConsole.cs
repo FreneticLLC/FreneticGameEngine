@@ -30,7 +30,7 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// All currently waiting messages.
         /// </summary>
-        static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
+        readonly static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
 
         /// <summary>
         /// Locker for the console.
@@ -94,8 +94,8 @@ namespace FGECore.CoreSystems
 
         /// <summary>
         /// The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.
-        // TODO: Configuration option to change the log file name (with a disable option that routes to a null). With options to put a value like logs/%year%/%month%/%day%.log
         /// </summary>
+        // TODO: Configuration option to change the log file name (with a disable option that routes to a null). With options to put a value like logs/%year%/%month%/%day%.log
         public static string LogFileName = GenerateLogFileName();
 
         /// <summary>
