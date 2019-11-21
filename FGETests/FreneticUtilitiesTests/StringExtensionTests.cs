@@ -39,12 +39,12 @@ namespace FGETests.FreneticUtilitiesTests
         [Test]
         public static void CapitalizationTests()
         {
-            Assert.AreEqual("WOW".ToLowerFast(), "wow", "ToLowerFast 'WOW' isn't right");
-            Assert.AreEqual("BIG long TEXT!".ToLowerFast(), "big long text!", "ToLowerFast 'BIG long TEXT!' isn't right");
+            Assert.AreEqual("wow", "WOW".ToLowerFast(), "ToLowerFast 'WOW' isn't right");
+            Assert.AreEqual("big long text!", "BIG long TEXT!".ToLowerFast(), "ToLowerFast 'BIG long TEXT!' isn't right");
             Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
             Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
-            Assert.AreEqual("wow".ToUpperFast(), "WOW", "ToUpperFast 'wow' isn't right");
-            Assert.AreEqual("big long text!".ToUpperFast(), "BIG LONG TEXT!", "ToUpperFast 'big long text!' isn't right");
+            Assert.AreEqual("WOW", "wow".ToUpperFast(), "ToUpperFast 'wow' isn't right");
+            Assert.AreEqual("BIG LONG TEXT!", "big long text!".ToUpperFast(), "ToUpperFast 'big long text!' isn't right");
             Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
             Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
             Assert.That("LOTS OF UPPER CHARACTERS 123!".IsAllUpperFast(), "IsAllUpperFast isn't right");
@@ -57,10 +57,10 @@ namespace FGETests.FreneticUtilitiesTests
         [Test]
         public static void BeforeTests()
         {
-            Assert.AreEqual("OneTwoThree".Before("Two"), "One", "Before 'OneTwoThree' isn't right");
-            Assert.AreEqual("OneTwoThreeTwo".Before("Two"), "One", "Before 'OneTwoThreeTwo' isn't right");
-            Assert.AreEqual("OneTwoThree".BeforeLast("Two"), "One", "BeforeLast 'OneTwoThree' isn't right");
-            Assert.AreEqual("OneTwoThreeTwo".BeforeLast("Two"), "OneTwoThree", "BeforeLast 'OneTwoThreeTwo' isn't right");
+            Assert.AreEqual("One", "OneTwoThree".Before("Two"), "Before 'OneTwoThree' isn't right");
+            Assert.AreEqual("One", "OneTwoThreeTwo".Before("Two"), "Before 'OneTwoThreeTwo' isn't right");
+            Assert.AreEqual("One", "OneTwoThree".BeforeLast("Two"), "BeforeLast 'OneTwoThree' isn't right");
+            Assert.AreEqual("OneTwoThree", "OneTwoThreeTwo".BeforeLast("Two"), "BeforeLast 'OneTwoThreeTwo' isn't right");
         }
 
         /// <summary>
@@ -69,10 +69,10 @@ namespace FGETests.FreneticUtilitiesTests
         [Test]
         public static void AfterTests()
         {
-            Assert.AreEqual("OneTwoThree".After("Two"), "Three", "After 'OneTwoThree' isn't right");
-            Assert.AreEqual("OneTwoThreeTwo".After("Two"), "ThreeTwo", "After 'OneTwoThreeTwo' isn't right");
-            Assert.AreEqual("OneTwoThree".AfterLast("Two"), "Three", "AfterLast 'OneTwoThree' isn't right");
-            Assert.AreEqual("OneTwoThreeTwoFour".AfterLast("Two"), "Four", "AfterLast 'OneTwoThreeTwoFour' isn't right");
+            Assert.AreEqual("Three", "OneTwoThree".After("Two"), "After 'OneTwoThree' isn't right");
+            Assert.AreEqual("ThreeTwo", "OneTwoThreeTwo".After("Two"), "After 'OneTwoThreeTwo' isn't right");
+            Assert.AreEqual("Three", "OneTwoThree".AfterLast("Two"), "AfterLast 'OneTwoThree' isn't right");
+            Assert.AreEqual("Four", "OneTwoThreeTwoFour".AfterLast("Two"), "AfterLast 'OneTwoThreeTwoFour' isn't right");
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace FGETests.FreneticUtilitiesTests
         [Test]
         public static void CountTest()
         {
-            Assert.AreEqual("CA BC132C 23C".CountCharacter('C'), 4, "CountCharacter broke");
+            Assert.AreEqual(4, "CA BC132C 23C".CountCharacter('C'), "CountCharacter broke");
         }
 
         /// <summary>

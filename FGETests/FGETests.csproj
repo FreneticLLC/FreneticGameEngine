@@ -90,6 +90,7 @@
   <ItemGroup>
     <Compile Include="FreneticUtilitiesTests\FDSReparsingTest.cs" />
     <Compile Include="FGECoreProgramTest.cs" />
+    <Compile Include="FreneticUtilitiesTests\StreamExtensionTests.cs" />
     <Compile Include="FreneticUtilitiesTests\StringExtensionTests.cs" />
     <Compile Include="GeneralSystemTest.cs" />
     <Compile Include="FGETest.cs" />
