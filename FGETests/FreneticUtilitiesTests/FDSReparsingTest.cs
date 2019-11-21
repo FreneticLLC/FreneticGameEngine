@@ -16,13 +16,13 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FGETests
+namespace FGETests.FreneticUtilitiesTests
 {
     /// <summary>
     /// Tests expectations of the Frenetic Data Syntax.
     /// </summary>
     [TestFixture]
-    class FDSCoreExpectations : FGETest
+    class FDSReparsingTest : FGETest
     {
         /// <summary>
         /// Prepares the basics.

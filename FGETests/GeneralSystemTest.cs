@@ -21,10 +21,10 @@ using FreneticUtilities.FreneticToolkit;
 namespace FGETests
 {
     /// <summary>
-    /// Tests general expectations of the C# language.
+    /// Tests general expectations of the C# language and the system running it.
     /// </summary>
     [TestFixture]
-    public class GeneralExpectations : FGETest
+    public class GeneralSystemTest : FGETest
     {
         /// <summary>
         /// Prepares the basics.

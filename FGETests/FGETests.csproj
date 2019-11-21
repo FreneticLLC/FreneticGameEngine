@@ -88,9 +88,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FDSCoreExpectations.cs" />
-    <Compile Include="FGECoreProgramExpectations.cs" />
-    <Compile Include="GeneralExpectations.cs" />
+    <Compile Include="FreneticUtilitiesTests\FDSReparsingTest.cs" />
+    <Compile Include="FGECoreProgramTest.cs" />
+    <Compile Include="GeneralSystemTest.cs" />
     <Compile Include="FGETest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
