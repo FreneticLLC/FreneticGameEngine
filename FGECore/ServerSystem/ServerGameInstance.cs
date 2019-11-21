@@ -31,8 +31,11 @@ namespace FGECore.ServerSystem
         {
             try
             {
-                StackNoteHelper.Push("ServerGameInstance construction, preparating of default engine", this);
-                Engines.Add(new ServerEngine());
+                StackNoteHelper.Push("ServerGameInstance construction, preparation of default engine", this);
+                Engines.Add(new ServerEngine()
+                {
+                    OwningInstance = this
+                });
                 DefaultEngine.LoadBasic();
             }
             finally
