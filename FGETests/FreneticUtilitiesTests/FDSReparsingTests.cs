@@ -22,7 +22,7 @@ namespace FGETests.FreneticUtilitiesTests
     /// Tests expectations of the Frenetic Data Syntax.
     /// </summary>
     [TestFixture]
-    class FDSReparsingTest : FGETest
+    class FDSReparsingTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.

@@ -24,7 +24,7 @@ namespace FGETests
     /// Tests general expectations of the C# language and the system running it.
     /// </summary>
     [TestFixture]
-    public class GeneralSystemTest : FGETest
+    public class GeneralSystemTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.

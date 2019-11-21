@@ -13,6 +13,7 @@ using System.Text;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using NUnit.Framework;
 
 namespace FGETests
 {
@@ -27,6 +28,17 @@ namespace FGETests
         public static void Setup()
         {
             Program.PreInit(new FGETestProgram());
+        }
+
+        /// <summary>
+        /// Asserts that two normal-range doubles are approximately equal (down to 4 decimal places).
+        /// </summary>
+        /// <param name="expected">The expected value.</param>
+        /// <param name="actual">The actual value.</param>
+        /// <param name="message">The message to display if they aren't roughly equal.</param>
+        public static void AssertAreRoughlyEqual(double expected, double actual, string message)
+        {
+            Assert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
         }
     }
 	
