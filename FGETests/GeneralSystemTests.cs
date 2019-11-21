@@ -46,31 +46,52 @@ namespace FGETests
         }
 
         /// <summary>
-        /// Confirms that number bit encoding is correct.
+        /// Confirms that bit endianness is correct.
         /// </summary>
         [Test]
-        public static void TestBits()
+        public static void TestEndianness()
         {
             if (!BitConverter.IsLittleEndian)
             {
                 Assert.Fail("BitConverter identifies this system as big endian, which is not currently supported by the engine!");
             }
-            else
-            {
-                byte[] bI = PrimitiveConversionHelper.Int32ToBytes(1 + 512);
-                Assert.That(bI.Length == 4, "Bit length (int->bytes)");
-                Assert.That(bI[0] == 1, "Bit contents (int->bytes)[0]");
-                Assert.That(bI[1] == 2, "Bit contents (int->bytes)[1]");
-                Assert.That(bI[2] == 0, "Bit contents (int->bytes)[2]");
-                Assert.That(bI[3] == 0, "Bit contents (int->bytes)[3]");
-                byte[] bF = PrimitiveConversionHelper.Float32ToBytes(127.125f);
-                Assert.That(bF.Length == 4, "Bit length (float->bytes)");
-                Assert.That(bF[0] == 0, "Bit contents (float->bytes)[0]");
-                Assert.That(bF[1] == 64, "Bit contents (float->bytes)[1]");
-                Assert.That(bF[2] == 254, "Bit contents (float->bytes)[2]");
-                Assert.That(bF[3] == 66, "Bit contents (float->bytes)[3]");
-                Assert.That(PrimitiveConversionHelper.BytesToDouble64(PrimitiveConversionHelper.Double64ToBytes(1.73e5)) == 1.73e5, "Double parseback validity");
-            }
+        }
+
+        /// <summary>
+        /// Confirms that integer bit encoding is correct.
+        /// </summary>
+        [Test]
+        public static void TestIntBits()
+        {
+            byte[] bI = PrimitiveConversionHelper.Int32ToBytes(1 + 512);
+            Assert.That(bI.Length == 4, "Bit length (int->bytes)");
+            Assert.That(bI[0] == 1, "Bit contents (int->bytes)[0]");
+            Assert.That(bI[1] == 2, "Bit contents (int->bytes)[1]");
+            Assert.That(bI[2] == 0, "Bit contents (int->bytes)[2]");
+            Assert.That(bI[3] == 0, "Bit contents (int->bytes)[3]");
+        }
+
+        /// <summary>
+        /// Confirms that floating point bit encoding is correct.
+        /// </summary>
+        [Test]
+        public static void TestFloatBits()
+        {
+            byte[] bF = PrimitiveConversionHelper.Float32ToBytes(127.125f);
+            Assert.That(bF.Length == 4, "Bit length (float->bytes)");
+            Assert.That(bF[0] == 0, "Bit contents (float->bytes)[0]");
+            Assert.That(bF[1] == 64, "Bit contents (float->bytes)[1]");
+            Assert.That(bF[2] == 254, "Bit contents (float->bytes)[2]");
+            Assert.That(bF[3] == 66, "Bit contents (float->bytes)[3]");
+        }
+
+        /// <summary>
+        /// Confirms that double parseback is correct.
+        /// </summary>
+        [Test]
+        public static void TestDoubleParseback()
+        {
+            Assert.That(PrimitiveConversionHelper.BytesToDouble64(PrimitiveConversionHelper.Double64ToBytes(1.73e5)) == 1.73e5, "Double parseback validity");
         }
     }
 }

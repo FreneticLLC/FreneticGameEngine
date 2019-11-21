@@ -25,15 +25,6 @@ namespace FGETests.FreneticUtilitiesTests
     class FDSReparsingTests : FGETest
     {
         /// <summary>
-        /// Prepares the basics.
-        /// </summary>
-        [OneTimeSetUp]
-        public static void PreInit()
-        {
-            Setup();
-        }
-
-        /// <summary>
         /// The primary test file.
         /// </summary>
         public const string TEST_FILE =
@@ -56,23 +47,59 @@ namespace FGETests.FreneticUtilitiesTests
             ;
 
         /// <summary>
-        /// Confirm that FDS parses a file correctly.
+        /// Prepares the basics.
+        /// </summary>
+        [OneTimeSetUp]
+        public static void PreInit()
+        {
+            Setup();
+            TestSection = new FDSSection(TEST_FILE);
+        }
+
+        public static FDSSection TestSection;
+
+        /// <summary>
+        /// Confirm that the FDS section parsed has the correct set of keys.
         /// </summary>
         [Test]
-        public static void TestReadInValid()
+        public static void TestKeyPresence()
         {
-            FDSSection test_section = new FDSSection(TEST_FILE);
-            Assert.That(test_section.HasKey("my root section 1"), "Key exists!");
-            Assert.That(!test_section.HasKey("my root section"), "Key shouldn't exist!");
-            Assert.AreEqual(test_section.GetInt("my root section 1.my_sub_section.my numeric key"), 3, "Key == 3!");
-            Assert.AreEqual(test_section.GetDouble("my root section 1.my_sub_section.my decimal key"), 3.14159, "Key == 3.14159!");
-            Assert.AreEqual(test_section.GetString("my root section 1.my other section.my string key"), "alpha", "Key == alpha!");
-            Assert.AreEqual(StringConversionHelper.UTF8Encoding.GetString(test_section.GetData("my second root section.my binary key").Internal as byte[]),
+            Assert.That(TestSection.HasKey("my root section 1"), "Key exists!");
+            Assert.That(!TestSection.HasKey("my root section"), "Key shouldn't exist!");
+        }
+
+        /// <summary>
+        /// Confirm that the FDS section parsed has the proper object types where they should be.
+        /// </summary>
+        [Test]
+        public static void TestExpectedObjects()
+        {
+            Assert.AreEqual(3, TestSection.GetInt("my root section 1.my_sub_section.my numeric key"), "Key == 3!");
+            Assert.AreEqual(3.14159, TestSection.GetDouble("my root section 1.my_sub_section.my decimal key"), "Key == 3.14159!");
+            Assert.AreEqual("alpha", TestSection.GetString("my root section 1.my other section.my string key"), "Key == alpha!");
+            Assert.AreEqual(StringConversionHelper.UTF8Encoding.GetString(TestSection.GetData("my second root section.my binary key").Internal as byte[]),
                 "Hello world, and all who inhabit it!", "Key string from binary check!");
-           List<string> list = test_section.GetStringList("my second root section.my list key");
-            Assert.AreEqual(list[0], "1", "Key->List yields 1!");
-            Assert.AreEqual(list[1], "two", "Key->List yields two!");
-            Assert.That(test_section.GetData("my root section 1").PrecedingComments[0].Trim() == "MyTestFile.fds", "Root comment!");
+        }
+
+        /// <summary>
+        /// Confirm that the FDS section parsed has the proper list values.
+        /// </summary>
+        [Test]
+        public static void TestList()
+        {
+            List<string> list = TestSection.GetStringList("my second root section.my list key");
+            Assert.AreEqual(2, list.Count, "Key->List count");
+            Assert.AreEqual("1", list[0], "Key->List[0] yields 1!");
+            Assert.AreEqual("two", list[1], "Key->List[1] yields two!");
+        }
+
+        /// <summary>
+        /// Confirm that the FDS section parsed has the proper comments.
+        /// </summary>
+        [Test]
+        public static void TestComments()
+        {
+            Assert.AreEqual("MyTestFile.fds", TestSection.GetData("my root section 1").PrecedingComments[0].Trim(), "Root comment!");
         }
     }
 }
