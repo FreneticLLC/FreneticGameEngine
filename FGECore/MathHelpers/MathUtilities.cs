@@ -101,7 +101,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns a one-length vector of the Yaw/Pitch angle input in degrees
+        /// Returns a one-length vector of the Yaw/Pitch angle input in degrees.
         /// </summary>
         /// <param name="yaw">The yaw angle, in radians.</param>
         /// <param name="pitch">The pitch angle, in radians.</param>
@@ -112,10 +112,10 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Rotates a vector by a certain yaw.
+        /// Rotates a vector by a certain yaw (in radians).
         /// </summary>
         /// <param name="vec">The original vector.</param>
-        /// <param name="yaw">The yaw to rotate by.</param>
+        /// <param name="yaw">The yaw to rotate by (in radians).</param>
         /// <returns>The rotated vector.</returns>
         public static Location RotateVector(Location vec, double yaw)
         {
@@ -125,11 +125,11 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Rotates a vector by a certain yaw and pitch.
+        /// Rotates a vector by a certain yaw and pitch (in radians).
         /// </summary>
         /// <param name="vec">The original vector.</param>
-        /// <param name="yaw">The yaw to rotate by.</param>
-        /// <param name="pitch">The pitch to rotate by.</param>
+        /// <param name="yaw">The yaw to rotate by (in radians).</param>
+        /// <param name="pitch">The pitch to rotate by (in radians).</param>
         /// <returns>The rotated vector.</returns>
         public static Location RotateVector(Location vec, double yaw, double pitch)
         {
