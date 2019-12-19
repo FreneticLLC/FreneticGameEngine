@@ -89,7 +89,11 @@ namespace FGECore.MathHelpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object other)
         {
-            return Equals((Vector3i)other);
+            if (!(other is Vector3i vecForm))
+            {
+                return false;
+            }
+            return Equals(vecForm);
         }
 
         /// <summary>
@@ -108,13 +112,13 @@ namespace FGECore.MathHelpers
         /// </summary>
         /// <returns>The float vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 ToVector3()
+        public Vector3 ToBVector()
         {
             return new Vector3(X, Y, Z);
         }
 
         /// <summary>
-        /// Converts this vector a floating point Location.
+        /// Converts this vector a floating point <see cref="Location"/>.
         /// </summary>
         /// <returns>The Location.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

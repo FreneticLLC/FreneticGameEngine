@@ -27,7 +27,7 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// Construct the vec2i.
         /// </summary>
-        /// <param name="x">X coordinaate.</param>
+        /// <param name="x">X coordinate.</param>
         /// <param name="y">Y coordinate.</param>
         public Vector2i(int x, int y)
         {
@@ -68,7 +68,11 @@ namespace FGECore.MathHelpers
         /// <returns>Whether they are equal.</returns>
         public override bool Equals(object other)
         {
-            return Equals((Vector2i)other);
+            if (!(other is Vector2i vecForm))
+            {
+                return false;
+            }
+            return Equals(vecForm);
         }
 
         /// <summary>

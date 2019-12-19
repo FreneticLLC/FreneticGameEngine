@@ -544,8 +544,11 @@ namespace FGECore.MathHelpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            Location tobj = (Location)obj;
-            return tobj.X == X && tobj.Y == Y && tobj.Z == Z;
+            if (!(obj is Location locationForm))
+            {
+                return false;
+            }
+            return Equals(locationForm);
         }
 
         /// <summary>
