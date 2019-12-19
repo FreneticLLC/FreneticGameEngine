@@ -15,7 +15,7 @@ FGE is not a **Game**. You cannot play it out of the box. It does not do much ju
 
 -----
 
-This project is in development. It is not feature-complete yet. It is as well under a strict license currently.
+This project is in development. It is not feature-complete yet.
 [Contact us](https://freneticllc.com/Home/Contact) if you're interested in using this project at this time.
 
 -----

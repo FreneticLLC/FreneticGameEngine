@@ -23,7 +23,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
     /// Tests expectations of <see cref="StreamExtensions"/>.
     /// </summary>
     [TestFixture]
-    class StreamExtensionTests : FGETest
+    public class StreamExtensionTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.

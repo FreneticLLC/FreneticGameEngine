@@ -22,7 +22,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
     /// Tests expectations of <see cref="StringExtensions"/>.
     /// </summary>
     [TestFixture]
-    class StringExtensionTests : FGETest
+    public class StringExtensionTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.

@@ -23,7 +23,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
     /// Tests expectations of <see cref="EnumerableExtensions"/>.
     /// </summary>
     [TestFixture]
-    class EnumerableExtensionTests : FGETest
+    public class EnumerableExtensionTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.

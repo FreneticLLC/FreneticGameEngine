@@ -22,7 +22,7 @@ namespace FGETests.FreneticUtilitiesTests
     /// Tests expectations of the Frenetic Data Syntax.
     /// </summary>
     [TestFixture]
-    class FDSReparsingTests : FGETest
+    public class FDSReparsingTests : FGETest
     {
         /// <summary>
         /// The primary test file.
@@ -56,6 +56,9 @@ namespace FGETests.FreneticUtilitiesTests
             TestSection = new FDSSection(TEST_FILE);
         }
 
+        /// <summary>
+        /// <see cref="FDSSection"/> of <see cref="TEST_FILE"/> for the following tests to use.
+        /// </summary>
         public static FDSSection TestSection;
 
         /// <summary>

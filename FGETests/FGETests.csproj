@@ -40,6 +40,7 @@
     <LangVersion>latest</LangVersion>
     <NoWarn>
     </NoWarn>
+    <DocumentationFile>bin\Release\FGETests.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -94,6 +95,7 @@
     <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\OtherExtensionTests.cs" />
     <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\StreamExtensionTests.cs" />
     <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\StringExtensionTests.cs" />
+    <Compile Include="FreneticUtilitiesTests\FreneticToolkitTests\AsciiMatcherTests.cs" />
     <Compile Include="GeneralSystemTests.cs" />
     <Compile Include="FGETest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
