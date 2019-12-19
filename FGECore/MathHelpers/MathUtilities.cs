@@ -29,12 +29,11 @@ namespace FGECore.MathHelpers
         /// <returns>The result, greater than or equal to the value.</returns>
         public static int NextPowerOfTwo(int x)
         {
-            int mod = 1;
-            for (int i = 1; i < 31; i++)
+            for (int mod = 1; mod < 31; mod++)
             {
-                if ((1 << mod) <= x)
+                if ((1 << mod) > x)
                 {
-                    return 1 << mod;
+                    return 1 << (mod - 1);
                 }
             }
             // Number too massive!
