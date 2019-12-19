@@ -16,7 +16,7 @@ using FreneticUtilities.FreneticExtensions;
 namespace FGECore.MathHelpers
 {
     /// <summary>
-    /// Represents a triangle in 3D space.
+    /// Represents a plane in 3D space, using a triangle representation.
     /// </summary>
     public class Plane
     {
@@ -28,22 +28,22 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// The first corner.
         /// </summary>
-        public Location vec1;
+        public Location Vertex1;
 
         /// <summary>
         /// The second corner.
         /// </summary>
-        public Location vec2;
+        public Location Vertex2;
 
         /// <summary>
         /// The third corner.
         /// </summary>
-        public Location vec3;
+        public Location Vertex3;
 
         /// <summary>
         /// The distance from the origin.
         /// </summary>
-        public double D;
+        public double NormalDistance;
 
         /// <summary>
         /// Constructs a plane, calculating a normal.
@@ -53,11 +53,11 @@ namespace FGECore.MathHelpers
         /// <param name="v3">Vertex three.</param>
         public Plane(Location v1, Location v2, Location v3)
         {
-            vec1 = v1;
-            vec2 = v2;
-            vec3 = v3;
+            Vertex1 = v1;
+            Vertex2 = v2;
+            Vertex3 = v3;
             Normal = (v2 - v1).CrossProduct(v3 - v1).Normalize();
-            D = -(Normal.Dot(vec1));
+            NormalDistance = -(Normal.Dot(Vertex1));
         }
 
         /// <summary>
@@ -69,11 +69,11 @@ namespace FGECore.MathHelpers
         /// <param name="_normal">The precalculated normal.</param>
         public Plane(Location v1, Location v2, Location v3, Location _normal)
         {
-            vec1 = v1;
-            vec2 = v2;
-            vec3 = v3;
+            Vertex1 = v1;
+            Vertex2 = v2;
+            Vertex3 = v3;
             Normal = _normal;
-            D = -(Normal.Dot(vec1));
+            NormalDistance = -(Normal.Dot(Vertex1));
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace FGECore.MathHelpers
         {
             double fact = 1 / _normal.Length();
             Normal = _normal * fact;
-            D = _d * fact;
+            NormalDistance = _d * fact;
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace FGECore.MathHelpers
             Location ba = end - start;
             double nDotA = Normal.Dot(start);
             double nDotBA = Normal.Dot(ba);
-            double t = -(nDotA + D) / (nDotBA);
+            double t = -(nDotA + NormalDistance) / (nDotBA);
             if (t < 0) // || t > 1
             {
                 return Location.NaN;
@@ -113,7 +113,7 @@ namespace FGECore.MathHelpers
         /// <returns></returns>
         public Plane FlipNormal()
         {
-            return new Plane(vec3, vec2, vec1, -Normal);
+            return new Plane(Vertex3, Vertex2, Vertex1, -Normal);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace FGECore.MathHelpers
         /// <returns>The distance.</returns>
         public double Distance(Location point)
         {
-            return Normal.Dot(point) + D;
+            return Normal.Dot(point) + NormalDistance;
         }
 
         /// <summary>
@@ -132,48 +132,50 @@ namespace FGECore.MathHelpers
         /// If it returns -1, the box is below the plane.
         /// If it returns 0, the box intersections with the plane.
         /// </summary>
-        /// <param name="Mins">The mins of the box.</param>
-        /// <param name="Maxs">The maxes of the box.</param>
+        /// <param name="mins">The mins of the box.</param>
+        /// <param name="maxes">The maxes of the box.</param>
         /// <returns>-1, 0, or 1.</returns>
-        public int SignToPlane(Location Mins, Location Maxs)
+        public int SignToPlane(Location mins, Location maxes)
         {
             Location[] locs = new Location[8];
-            locs[0] = new Location(Mins.X, Mins.Y, Mins.Z);
-            locs[1] = new Location(Mins.X, Mins.Y, Maxs.Z);
-            locs[2] = new Location(Mins.X, Maxs.Y, Mins.Z);
-            locs[3] = new Location(Mins.X, Maxs.Y, Maxs.Z);
-            locs[4] = new Location(Maxs.X, Mins.Y, Mins.Z);
-            locs[5] = new Location(Maxs.X, Mins.Y, Maxs.Z);
-            locs[6] = new Location(Maxs.X, Maxs.Y, Mins.Z);
-            locs[7] = new Location(Maxs.X, Maxs.Y, Maxs.Z);
-            int psign = Math.Sign(Distance(locs[0]));
+            locs[0] = new Location(mins.X, mins.Y, mins.Z);
+            locs[1] = new Location(mins.X, mins.Y, maxes.Z);
+            locs[2] = new Location(mins.X, maxes.Y, mins.Z);
+            locs[3] = new Location(mins.X, maxes.Y, maxes.Z);
+            locs[4] = new Location(maxes.X, mins.Y, mins.Z);
+            locs[5] = new Location(maxes.X, mins.Y, maxes.Z);
+            locs[6] = new Location(maxes.X, maxes.Y, mins.Z);
+            locs[7] = new Location(maxes.X, maxes.Y, maxes.Z);
+            int pSign = Math.Sign(Distance(locs[0]));
             for (int i = 1; i < locs.Length; i++)
             {
-                if (Math.Sign(Distance(locs[i])) != psign)
+                if (Math.Sign(Distance(locs[i])) != pSign)
                 {
                     return 0;
                 }
             }
-            return psign;
+            return pSign;
         }
 
         /// <summary>
-        /// Converts the plane to a simple string form.
+        /// Converts the plane to a simple string form of [(X, Y, Z)/(X, Y, Z)/(X, Y, Z)]
+        /// Inverts <see cref="FromString(string)"/>.
         /// </summary>
         /// <returns>The plane string.</returns>
         public override string ToString()
         {
-            return "[" + vec1.ToString() + "/" + vec2.ToString() + "/" + vec3.ToString() + "]";
+            return "[" + Vertex1.ToString() + "/" + Vertex2.ToString() + "/" + Vertex3.ToString() + "]";
         }
 
         /// <summary>
         /// Converts a string to a plane.
+        /// Inverts <see cref="ToString"/>.
         /// </summary>
         /// <param name="input">The plane string.</param>
         /// <returns>A plane.</returns>
         public static Plane FromString(string input)
         {
-            string[] data = input.Replace("[", "").Replace("]", "").Replace(" ", "").SplitFast('/');
+            string[] data = input.Replace('[', ' ').Replace(']', ' ').Replace(" ", "").SplitFast('/');
             if (data.Length < 3)
             {
                 return null;

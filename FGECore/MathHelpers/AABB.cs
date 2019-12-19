@@ -43,7 +43,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Converts the AABB to a string.
+        /// Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)
         /// </summary>
         /// <returns>The string.</returns>
         public override string ToString()
@@ -61,23 +61,23 @@ namespace FGECore.MathHelpers
             {
                 Min.X = pos.X;
             }
+            else if (pos.X > Max.X)
+            {
+                Max.X = pos.X;
+            }
             if (pos.Y < Min.Y)
             {
                 Min.Y = pos.Y;
+            }
+            else if (pos.Y > Max.Y)
+            {
+                Max.Y = pos.Y;
             }
             if (pos.Z < Min.Z)
             {
                 Min.Z = pos.Z;
             }
-            if (pos.X > Max.X)
-            {
-                Max.X = pos.X;
-            }
-            if (pos.Y > Max.Y)
-            {
-                Max.Y = pos.Y;
-            }
-            if (pos.Z > Max.Z)
+            else if (pos.Z > Max.Z)
             {
                 Max.Z = pos.Z;
             }

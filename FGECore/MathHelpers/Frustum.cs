@@ -16,8 +16,8 @@ namespace FGECore.MathHelpers
 {
     /// <summary>
     /// Represents a 3D Frustum.
-    /// Can be used to represent the area a camera can see.
-    /// Can be used for high-speed culling of visible objects.
+    /// <para>Can be used to represent the area a camera can see.</para>
+    /// <para>Can be used for high-speed culling of visible objects.</para>
     /// </summary>
     public class Frustum
     {
@@ -66,7 +66,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns whether an AABB is contained by the Frustum.
+        /// Returns a boolean indicating whether an AABB is contained by the Frustum.
         /// </summary>
         /// <param name="min">The lower coord of the AABB.</param>
         /// <param name="max">The higher coord of the AABB.</param>
@@ -160,8 +160,10 @@ namespace FGECore.MathHelpers
                     return Bottom;
                 case 4:
                     return Left;
-                default: // NOTE: No error for invalid input to accelerate processing. NEED speed here!
+                case 5:
                     return Right;
+                default:
+                    throw new InvalidOperationException($"GetFor({i}) is invalid: input must be between 0 and 5, inclusive.");
             }
         }
 
@@ -172,18 +174,15 @@ namespace FGECore.MathHelpers
         /// <returns>Whether it's contained.</returns>
         public bool Contains(Location point)
         {
-            if (TryPoint(point, Far) > 0) { return false; }
-            if (TryPoint(point, Near) > 0) { return false; }
-            if (TryPoint(point, Top) > 0) { return false; }
-            if (TryPoint(point, Bottom) > 0) { return false; }
-            if (TryPoint(point, Left) > 0) { return false; }
-            if (TryPoint(point, Right) > 0) { return false; }
+            double TryPoint(Plane plane)
+            {
+                return point.X * plane.Normal.X + point.Y * plane.Normal.Y + point.Z * plane.Normal.Z + plane.NormalDistance;
+            }
+            if (TryPoint(Far) > 0 || TryPoint(Near) > 0 || TryPoint(Top) > 0 || TryPoint(Bottom) > 0 || TryPoint(Left) > 0 || TryPoint(Right) > 0)
+            {
+                return false;
+            }
             return true;
-        }
-
-        double TryPoint(Location point, Plane plane)
-        {
-            return point.X * plane.Normal.X + point.Y * plane.Normal.Y + point.Z * plane.Normal.Z + plane.D;
         }
     }
 }
