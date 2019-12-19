@@ -875,7 +875,7 @@ namespace FGECore.MathHelpers
         }
         #endregion
 
-#warning FIXME BELOW:
+        #region BEPU interop
         /// <summary>
         /// Constructs a Location from a BEPUPhysics Vector3 structure, perfectly replicating it.
         /// </summary>
@@ -895,25 +895,6 @@ namespace FGECore.MathHelpers
         {
             return new BEPUutilities.Vector3(X, Y, Z);
         }
-
-        /// <summary>
-        /// Gets the location of the block this location is within. (Round-down all values).
-        /// </summary>
-        /// <returns>The block location.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location GetBlockLocation()
-        {
-            return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
-        }
-
-        /// <summary>
-        /// Gets the location of the next block corner up from this location. (Round-up all values).
-        /// </summary>
-        /// <returns>The block location.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location GetUpperBlockBorder()
-        {
-            return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
-        }
+        #endregion
     }
 }
