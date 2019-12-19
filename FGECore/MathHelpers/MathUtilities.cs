@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace FGECore.MathHelpers
 {
@@ -29,15 +30,22 @@ namespace FGECore.MathHelpers
         /// <returns>The result, greater than or equal to the value.</returns>
         public static int NextPowerOfTwo(int x)
         {
-            for (int mod = 1; mod < 31; mod++)
+            Debug.Assert(x > 0, $"For NextPowerOfTwo, X must be > 0, but was {x}");
+            // Spread the Most Significant Bit all the way down
+            // so eg "00100100" becomes "11111100"
+            int spreadMSB = x | (x >> 1);
+            spreadMSB |= spreadMSB >> 2;
+            spreadMSB |= spreadMSB >> 4;
+            spreadMSB |= spreadMSB >> 8;
+            spreadMSB |= spreadMSB >> 16;
+            // Full value minus the downshift of it = *only* the MSB
+            int onlyMSB = spreadMSB - (spreadMSB >> 1);
+            // Exactly on MSB = return that, otherwise we're greater so grow by one.
+            if (x == onlyMSB)
             {
-                if ((1 << mod) > x)
-                {
-                    return 1 << (mod - 1);
-                }
+                return onlyMSB;
             }
-            // Number too massive!
-            return x;
+            return onlyMSB << 1;
         }
 
         /// <summary>
