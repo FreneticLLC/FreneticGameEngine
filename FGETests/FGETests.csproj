@@ -90,10 +90,10 @@
   <ItemGroup>
     <Compile Include="FreneticUtilitiesTests\FDSReparsingTests.cs" />
     <Compile Include="FGECoreProgramTests.cs" />
-    <Compile Include="FreneticUtilitiesTests\EnumerableExtensionTests.cs" />
-    <Compile Include="FreneticUtilitiesTests\OtherExtensionTests.cs" />
-    <Compile Include="FreneticUtilitiesTests\StreamExtensionTests.cs" />
-    <Compile Include="FreneticUtilitiesTests\StringExtensionTests.cs" />
+    <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\EnumerableExtensionTests.cs" />
+    <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\OtherExtensionTests.cs" />
+    <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\StreamExtensionTests.cs" />
+    <Compile Include="FreneticUtilitiesTests\FreneticExtensionsTests\StringExtensionTests.cs" />
     <Compile Include="GeneralSystemTests.cs" />
     <Compile Include="FGETest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

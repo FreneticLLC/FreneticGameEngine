@@ -17,13 +17,13 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FGETests.FreneticUtilitiesTests
+namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
 {
     /// <summary>
-    /// Tests expectations of <see cref="OtherExtensions"/>.
+    /// Tests expectations of <see cref="StreamExtensions"/>.
     /// </summary>
     [TestFixture]
-    class OtherExtensionTests : FGETest
+    class StreamExtensionTests : FGETest
     {
         /// <summary>
         /// Prepares the basics.
@@ -35,18 +35,21 @@ namespace FGETests.FreneticUtilitiesTests
         }
 
         /// <summary>
-        /// Tests "NextGaussian".
-        /// Note: this test can/should fail if the underlying implementation of <see cref="Random"/> changes.
+        /// Tests "AllLinesOfText"
         /// </summary>
         [Test]
-        public static void NextGaussian()
+        public static void AllLinesOfTextTest()
         {
-            Random random = new Random(12345);
-            AssertAreRoughlyEqual(0.992784877525018, random.NextGaussian(), "Gaussian first try failed");
-            AssertAreRoughlyEqual(-0.0499612497007243, random.NextGaussian(), "Gaussian second try failed");
-            AssertAreRoughlyEqual(-0.594917629112312, random.NextGaussian(), "Gaussian third try failed");
-            AssertAreRoughlyEqual(-1.88807372437318, random.NextGaussian(), "Gaussian fourth try failed");
-            AssertAreRoughlyEqual(-0.0618950052147339, random.NextGaussian(), "Gaussian fifth try failed");
+            string input = "Wow\nThis\nIs a big ol'\nlist of text\nyep";
+            string[] splitInput = input.Split('\n');
+            Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+            IEnumerable<string> result = stream.AllLinesOfText();
+            int i = 0;
+            foreach (string str in result)
+            {
+                Assert.AreEqual(splitInput[i++], str, $"Stream AllLinesOfText broke at line {i}");
+            }
+            Assert.AreEqual(5, i, "Stream AllLinesOfText length wrong");
         }
     }
 }

@@ -17,7 +17,7 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticToolkit;
 
-namespace FGETests.FreneticUtilitiesTests
+namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
 {
     /// <summary>
     /// Tests expectations of <see cref="EnumerableExtensions"/>.
