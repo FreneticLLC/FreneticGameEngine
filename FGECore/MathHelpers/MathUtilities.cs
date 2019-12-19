@@ -89,7 +89,7 @@ namespace FGECore.MathHelpers
         public const double PI180 = Math.PI / 180.0;
 
         /// <summary>
-        /// Returns a one-length vector of the Yaw/Pitch angle input.
+        /// Returns a one-length vector of the Yaw/Pitch angle input (in radians).
         /// </summary>
         /// <param name="yaw">The yaw angle, in radians.</param>
         /// <param name="pitch">The pitch angle, in radians.</param>
@@ -106,40 +106,9 @@ namespace FGECore.MathHelpers
         /// <param name="yaw">The yaw angle, in radians.</param>
         /// <param name="pitch">The pitch angle, in radians.</param>
         /// <returns>.</returns>
-        public static Location ForwardVector_Deg(double yaw, double pitch)
+        public static Location ForwardVectorDegrees(double yaw, double pitch)
         {
             return ForwardVector(yaw * PI180, pitch * PI180);
-        }
-
-        /// <summary>
-        /// Rotates a vector by a certain yaw (in radians).
-        /// </summary>
-        /// <param name="vec">The original vector.</param>
-        /// <param name="yaw">The yaw to rotate by (in radians).</param>
-        /// <returns>The rotated vector.</returns>
-        public static Location RotateVector(Location vec, double yaw)
-        {
-            double cos = Math.Cos(yaw);
-            double sin = Math.Sin(yaw);
-            return new Location((vec.X * cos) - (vec.Y * sin), (vec.X * sin) + (vec.Y * cos), vec.Z);
-        }
-
-        /// <summary>
-        /// Rotates a vector by a certain yaw and pitch (in radians).
-        /// </summary>
-        /// <param name="vec">The original vector.</param>
-        /// <param name="yaw">The yaw to rotate by (in radians).</param>
-        /// <param name="pitch">The pitch to rotate by (in radians).</param>
-        /// <returns>The rotated vector.</returns>
-        public static Location RotateVector(Location vec, double yaw, double pitch)
-        {
-            double cosyaw = Math.Cos(yaw);
-            double cospitch = Math.Cos(pitch);
-            double sinyaw = Math.Sin(yaw);
-            double sinpitch = Math.Sin(pitch);
-            double bX = vec.Z * sinpitch + vec.X * cospitch;
-            double bZ = vec.Z * cospitch - vec.X * sinpitch;
-            return new Location(bX * cosyaw - vec.Y * sinyaw, bX * sinyaw + vec.Y * cosyaw, bZ);
         }
 
         /// <summary>
@@ -165,10 +134,10 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Converts a forward vector to yaw/pitch angles.
+        /// Converts a forward vector to yaw/pitch angles, in degrees.
         /// </summary>
         /// <param name="input">The forward vector.</param>
-        /// <returns>The yaw/pitch angle vector.</returns>
+        /// <returns>The yaw/pitch angle vector (in degrees).</returns>
         public static Location VectorToAngles(Location input)
         {
             if (input.X == 0 && input.Y == 0)

@@ -16,16 +16,18 @@ using System.Runtime.CompilerServices;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using System.Diagnostics;
 
 namespace FGECore.MathHelpers
 {
     /// <summary>
     /// Represents a 3D location, using 3 double-precision floating-point coordinates.
-    /// Occupies 24 bytes, calculated as 8 * 3, as it has 3 fields (X, Y, Z) each occupying 8 bytes (a double).
+    /// <para>Occupies 24 bytes, calculated as 8 * 3, as it has 3 fields (X, Y, Z) each occupying 8 bytes (a double).</para>
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
     public struct Location : IEquatable<Location>
     {
+        #region static reference fields
         /// <summary>
         /// A Location of (0, 0, 0).
         /// </summary>
@@ -57,6 +59,13 @@ namespace FGECore.MathHelpers
         public static readonly Location NaN = new Location(double.NaN, double.NaN, double.NaN);
 
         /// <summary>
+        /// A location of (Infinity, Infinity, Infinity).
+        /// </summary>
+        public static readonly Location Infinity = new Location(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+        #endregion
+
+        #region fields
+        /// <summary>
         /// The X coordinate of this location.
         /// </summary>
         [FieldOffset(0)]
@@ -73,9 +82,11 @@ namespace FGECore.MathHelpers
         /// </summary>
         [FieldOffset(16)]
         public double Z;
+        #endregion
 
+        #region coordinate accessors
         /// <summary>
-        /// Returns X as a float.
+        /// Returns <see cref="X"/> as a <see cref="float"/>.
         /// </summary>
         public float XF
         {
@@ -86,7 +97,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns Y as a float.
+        /// Returns <see cref="Y"/> as a <see cref="float"/>.
         /// </summary>
         public float YF
         {
@@ -97,7 +108,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns Z as a float.
+        /// Returns <see cref="Z"/> as a <see cref="float"/>.
         /// </summary>
         public float ZF
         {
@@ -109,7 +120,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// If this location is an angle set, returns the Yaw value of this angle set.
-        /// Equivalent to Z.
+        /// Equivalent to <see cref="Z"/>.
         /// </summary>
         public double Yaw
         {
@@ -125,7 +136,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// If this location is an angle set, returns the Pitch value of this angle set.
-        /// Equivalent to Y.
+        /// Equivalent to <see cref="Y"/>.
         /// </summary>
         public double Pitch
         {
@@ -141,7 +152,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// If this location is an angle set, returns the Roll value of this angle set.
-        /// Equivalent to X.
+        /// Equivalent to <see cref="X"/>.
         /// </summary>
         public double Roll
         {
@@ -157,7 +168,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Gets or sets a coordinate from this Location.
-        /// This is a slow operation.
+        /// This is a slow operation and should be avoided.
         /// X = 0, Y = 1, Z = 2.
         /// </summary>
         public double this[int index]
@@ -194,7 +205,9 @@ namespace FGECore.MathHelpers
                 }
             }
         }
+        #endregion
 
+        #region constructors
         /// <summary>
         /// Constructs a Location, with all coordinates individually specified.
         /// </summary>
@@ -216,16 +229,6 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Constructs a Location from a BEPUPhysics Vector3 structure, perfectly replicating it.
-        /// </summary>
-        public Location(BEPUutilities.Vector3 vec)
-        {
-            X = vec.X;
-            Y = vec.Y;
-            Z = vec.Z;
-        }
-
-        /// <summary>
         /// Constructs a Location, with all coordinates individually specified.
         /// </summary>
         public Location(float _X, float _Y, float _Z)
@@ -244,37 +247,9 @@ namespace FGECore.MathHelpers
             Y = _Point;
             Z = _Point;
         }
+        #endregion
 
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different X coordinate value.
-        /// </summary>
-        /// <param name="_x">The new X coordinate.</param>
-        /// <returns>The updated location.</returns>
-        public Location WithX(double _x)
-        {
-            return new Location(_x, Y, Z);
-        }
-
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different Y coordinate value.
-        /// </summary>
-        /// <param name="_y">The new Y coordinate.</param>
-        /// <returns>The updated location.</returns>
-        public Location WithY(double _y)
-        {
-            return new Location(X, _y, Z);
-        }
-
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different Z coordinate value.
-        /// </summary>
-        /// <param name="_z">The new Z coordinate.</param>
-        /// <returns>The updated location.</returns>
-        public Location WithZ(double _z)
-        {
-            return new Location(X, Y, _z);
-        }
-
+        #region vector math
         /// <summary>
         /// Returns the flat (X/Y) linear distance of the vector location to another vector location, squared for efficiency.
         /// </summary>
@@ -289,6 +264,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Returns the full linear distance of the vector location to another vector location, squared for efficiency.
+        /// <para>If squaring is undesirable, use <see cref="Distance(in Location)"/>.</para>
         /// </summary>
         /// <returns>The squared distance.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -301,7 +277,8 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns the full linear distance of the vector location to another vector location, which goes through a square-root operation (inefficient).
+        /// Returns the full linear distance of the Location vector to another Location vector, which goes through a square-root operation (inefficient).
+        /// <para>Where possible, prefer <see cref="DistanceSquared(in Location)"/>.</para>
         /// </summary>
         /// <returns>The square-rooted distance.</returns>
         public double Distance(in Location two)
@@ -314,12 +291,13 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Caps the location to a specific maximum length, returning the result.
-        /// <para>Negative numbers will cause issues!</para>
+        /// <para>Input length should always be greater than zero.</para>
         /// </summary>
         /// <param name="len">New max length.</param>
         /// <returns>Same or shortened Location vector.</returns>
-        public Location CappedToLength(double len)
+        public Location WithMaxmimumLength(double len)
         {
+            Debug.Assert(len >= 0, $"Length input to WithMaxmimumLength should be greater than 0, but was {len}");
             double lsq = LengthSquared();
             if (lsq > len * len)
             {
@@ -331,20 +309,23 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// Sets a minimum length for this Location vector.
         /// Meaning, if the vector has a lower length than the input value, the vector will extend to the given length exactly.
-        /// Zero locations will result in an X-Positive vector.
+        /// <para>Zero locations will result in the default value scaled to the minimum (should be a unit vector).</para>
+        /// <para>Input length should always be greater than zero.</para>
         /// </summary>
         /// <param name="len">Minimum length.</param>
+        /// <param name="defaultValue">The default value to use instead of zero.</param>
         /// <returns>The new Location vector.</returns>
-        public Location MinimumLengthXP(double len)
+        public Location WithMinimumLength(double len, Location defaultValue)
         {
-            double lsq = LengthSquared();
-            if (lsq < len * len)
+            Debug.Assert(len >= 0, $"Length input to WithMinimumLength should be greater than 0, but was {len}");
+            double lenSquared = LengthSquared();
+            if (lenSquared < len * len)
             {
-                if (lsq == 0)
+                if (lenSquared == 0)
                 {
-                    return UnitX;
+                    return defaultValue * len;
                 }
-                return this * (len / Math.Sqrt(lsq));
+                return this * (len / Math.Sqrt(lenSquared));
             }
             return this;
         }
@@ -352,28 +333,20 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// Sets a minimum length for this Location vector.
         /// Meaning, if the vector has a lower length than the input value, the vector will extend to the given length exactly.
-        /// Zero locations will result in Zero output.
+        /// <para>Input of <see cref="Zero"/> will result in output of <see cref="Zero"/>.</para>
+        /// <para>Input length should always be greater than zero.</para>
         /// </summary>
         /// <param name="len">Minimum length.</param>
         /// <returns>The new Location vector.</returns>
-        public Location MinimumLength(double len)
+        public Location WithMinimumLength(double len)
         {
-            double lsq = LengthSquared();
-            if (lsq < len * len)
-            {
-                if (lsq == 0)
-                {
-                    return Zero;
-                }
-                return this * (len / Math.Sqrt(lsq));
-            }
-            return this;
+            return WithMinimumLength(len, Zero);
         }
 
         /// <summary>
         /// Sets the length of a location.
-        /// This will return Zero if the Location vector is Zero.
-        /// Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length, or zero.
+        /// <para>This will return <see cref="Zero"/> if the Location vector is <see cref="Zero"/>.</para>
+        /// <para>Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length, or zero.</para>
         /// </summary>
         /// <param name="len">The new length.</param>
         /// <returns>The Location with a length, or XP vector with the length.</returns>
@@ -384,14 +357,15 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Sets the length of a location.
-        /// This will return an X-Positive directional vector if the Location vector is Zero.
-        /// Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length.
+        /// <para>This will return a vector of the specified default value (scaled to the length) if the Location vector is <see cref="Zero"/>.</para>
+        /// <para>Negative input length values will invert the vector, and produce a resultant length matching the absolute value of the input length, or zero.</para>
         /// </summary>
         /// <param name="len">The new length.</param>
-        /// <returns>The Location with a length, or zero.</returns>
-        public Location SetLengthXP(double len)
+        /// <param name="defaultValue">The default value to rescale. Must be already a Unit vector.</param>
+        /// <returns>The Location with a length, or XP vector with the length.</returns>
+        public Location SetLength(double len, Location defaultValue)
         {
-            return NormalizeOrXP() * len;
+            return Normalize(defaultValue) * len;
         }
 
         /// <summary>
@@ -414,26 +388,6 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns whether the location is NaN.
-        /// </summary>
-        /// <returns>whether the location is NaN.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsNaN()
-        {
-            return double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
-        }
-
-        /// <summary>
-        /// Returns whether the location is infinite.
-        /// </summary>
-        /// <returns>whether the location is infinite.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsInfinite()
-        {
-            return double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
-        }
-
-        /// <summary>
         /// Returns the dot product of this and another location.
         /// </summary>
         /// <param name="two">The second location.</param>
@@ -445,51 +399,17 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns the location as a string in the form: (X, Y, Z)
-        /// Inverts .FromString()
-        /// </summary>
-        /// <returns>The location string.</returns>
-        public override string ToString()
-        {
-            return "(" + X + ", " + Y + ", " + Z + ")";
-        }
-
-        /// <summary>
-        /// The number format for <see cref="ToBasicString"/>.
-        /// </summary>
-        public const string BasicFormat = "0.00";
-
-        /// <summary>
-        /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
-        /// Inverts .FromString()
-        /// </summary>
-        /// <returns>The basic location string.</returns>
-        public string ToBasicString()
-        {
-            return "(" + X.ToString(BasicFormat) + ", " + Y.ToString(BasicFormat) + ", " + Z.ToString(BasicFormat) + ")";
-        }
-
-        /// <summary>
-        /// Returns the location as a string in the form: X, Y, Z
-        /// Inverts .FromString()
-        /// </summary>
-        /// <returns>The location string.</returns>
-        public string ToSimpleString()
-        {
-            return X + ", " + Y + ", " + Z;
-        }
-
-        /// <summary>
         /// Returns a normal form of this location.
-        /// Zeroes become X-Positive vector.
+        /// <para>Input of <see cref="Zero"/> will become the default vector instead.</para>
         /// </summary>
+        /// <param name="defaultValue">The default value to use. Should be already a unit vector.</param>
         /// <returns>A valid normal location.</returns>
-        public Location NormalizeOrXP()
+        public Location Normalize(Location defaultValue)
         {
             double len = Length();
             if (len == 0.0)
             {
-                return UnitX;
+                return defaultValue;
             }
             len = 1.0 / len;
             return new Location(X * len, Y * len, Z * len);
@@ -497,6 +417,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Returns a normal form of this location.
+        /// <para>Input of <see cref="Zero"/> will output <see cref="Zero"/>.</para>
         /// </summary>
         /// <returns>A valid normal location.</returns>
         public Location Normalize()
@@ -543,30 +464,64 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Converts the Location to a simple byte[] representation.
-        /// Contains 24 bytes.
-        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
+        /// Rotates this vector by a certain yaw (in radians).
         /// </summary>
-        /// <returns>The bytes.</returns>
-        public byte[] ToDoubleBytes()
+        /// <param name="yaw">The yaw to rotate by (in radians).</param>
+        /// <returns>The rotated vector.</returns>
+        public Location Rotate(double yaw)
         {
-            byte[] toret = new byte[24];
-            ToDoubleBytes(toret, 0);
-            return toret;
+            double cos = Math.Cos(yaw);
+            double sin = Math.Sin(yaw);
+            return new Location((X * cos) - (Y * sin), (X * sin) + (Y * cos), Z);
         }
 
         /// <summary>
-        /// Copies the Location into a byte array.
-        /// Copies 24 bytes.
-        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
+        /// Rotates this vector by a certain yaw and pitch (in radians).
         /// </summary>
-        /// <param name="outputBytes">The output byte array.</param>
-        /// <param name="offset">The starting offset in the output array.</param>
-        public void ToDoubleBytes(byte[] outputBytes, int offset)
+        /// <param name="yaw">The yaw to rotate by (in radians).</param>
+        /// <param name="pitch">The pitch to rotate by (in radians).</param>
+        /// <returns>The rotated vector.</returns>
+        public Location Rotate(double yaw, double pitch)
         {
-            PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset + 0);
-            PrimitiveConversionHelper.Double64ToBytes(Y, outputBytes, offset + 8);
-            PrimitiveConversionHelper.Double64ToBytes(Z, outputBytes, offset + (8 + 8));
+            double cosyaw = Math.Cos(yaw);
+            double cospitch = Math.Cos(pitch);
+            double sinyaw = Math.Sin(yaw);
+            double sinpitch = Math.Sin(pitch);
+            double bX = Z * sinpitch + X * cospitch;
+            double bZ = Z * cospitch - X * sinpitch;
+            return new Location(bX * cosyaw - Y * sinyaw, bX * sinyaw + Y * cosyaw, bZ);
+        }
+        #endregion
+
+        #region utilities
+        /// <summary>
+        /// A copy of this <see cref="Location"/> with a different <see cref="X"/> coordinate value.
+        /// </summary>
+        /// <param name="_x">The new X coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithX(double _x)
+        {
+            return new Location(_x, Y, Z);
+        }
+
+        /// <summary>
+        /// A copy of this <see cref="Location"/> with a different <see cref="Y"/> coordinate value.
+        /// </summary>
+        /// <param name="_y">The new Y coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithY(double _y)
+        {
+            return new Location(X, _y, Z);
+        }
+
+        /// <summary>
+        /// A copy of this <see cref="Location"/> with a different <see cref="Z"/> coordinate value.
+        /// </summary>
+        /// <param name="_z">The new Z coordinate.</param>
+        /// <returns>The updated location.</returns>
+        public Location WithZ(double _z)
+        {
+            return new Location(X, Y, _z);
         }
 
         /// <summary>
@@ -578,7 +533,9 @@ namespace FGECore.MathHelpers
         {
             return new Location(X, Y, Z);
         }
+        #endregion
 
+        #region basic equality
         /// <summary>
         /// Returns whether this location matches any given generic object.
         /// </summary>
@@ -603,6 +560,37 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
+        /// Gets a quick generic hash code for the location data.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns whether the location is NaN.
+        /// </summary>
+        /// <returns>whether the location is NaN.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNaN()
+        {
+            return double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
+        }
+
+        /// <summary>
+        /// Returns whether the location is infinite.
+        /// </summary>
+        /// <returns>whether the location is infinite.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsInfinite()
+        {
+            return double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
+        }
+        #endregion
+
+        #region operators
+        /// <summary>
         /// Returns whether two locations are equal.
         /// </summary>
         /// <param name="v1">The first location.</param>
@@ -622,15 +610,6 @@ namespace FGECore.MathHelpers
         public static bool operator !=(in Location v1, in Location v2)
         {
             return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
-        }
-
-        /// <summary>
-        /// Gets a quick generic hash code for the location data.
-        /// </summary>
-        /// <returns>The hash code.</returns>
-        public override int GetHashCode()
-        {
-            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
         }
 
         /// <summary>
@@ -743,6 +722,43 @@ namespace FGECore.MathHelpers
             double sc = 1.0 / scale;
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
         }
+        #endregion
+
+        #region serialization
+        /// <summary>
+        /// Returns the location as a string in the form: X, Y, Z
+        /// Inverts <see cref="FromString(string)"/>.
+        /// </summary>
+        /// <returns>The location string.</returns>
+        public string ToSimpleString()
+        {
+            return X + ", " + Y + ", " + Z;
+        }
+
+        /// <summary>
+        /// Returns the location as a string in the form: (X, Y, Z)
+        /// Inverts <see cref="FromString(string)"/>.
+        /// </summary>
+        /// <returns>The location string.</returns>
+        public override string ToString()
+        {
+            return "(" + X + ", " + Y + ", " + Z + ")";
+        }
+
+        /// <summary>
+        /// The number format for <see cref="ToBasicString"/>.
+        /// </summary>
+        public const string BasicFormat = "0.00";
+
+        /// <summary>
+        /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
+        /// Inverts <see cref="FromString(string)"/>.
+        /// </summary>
+        /// <returns>The basic location string.</returns>
+        public string ToBasicString()
+        {
+            return "(" + X.ToString(BasicFormat) + ", " + Y.ToString(BasicFormat) + ", " + Z.ToString(BasicFormat) + ")";
+        }
 
         /// <summary>
         /// Converts a string representation of a location to a Location object.
@@ -778,44 +794,46 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Converts the Location to a BEPUPhysics Vector3.
+        /// Converts the Location to a simple byte[] representation.
+        /// Contains 24 bytes.
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
-        /// <returns>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BEPUutilities.Vector3 ToBVector()
+        /// <returns>The bytes.</returns>
+        public byte[] ToDoubleBytes()
         {
-            return new BEPUutilities.Vector3(X, Y, Z);
+            byte[] toret = new byte[24];
+            ToDoubleBytes(toret, 0);
+            return toret;
         }
 
         /// <summary>
-        /// Gets the location of the block this location is within. (Round-down all values).
+        /// Copies the Location into a byte array.
+        /// Copies 24 bytes.
+        /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
         /// </summary>
-        /// <returns>The block location.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location GetBlockLocation()
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
+        public void ToDoubleBytes(byte[] outputBytes, int offset)
         {
-            return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
+            PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset + 0);
+            PrimitiveConversionHelper.Double64ToBytes(Y, outputBytes, offset + 8);
+            PrimitiveConversionHelper.Double64ToBytes(Z, outputBytes, offset + (8 + 8));
         }
+        #endregion
 
+        #region conversion
         /// <summary>
         /// Converts the Location to an integer vector.
+        /// This will truncate decimal values.
         /// </summary>
         /// <returns>The integer vector.</returns>
         public Vector3i ToVec3i()
         {
             return new Vector3i((int)X, (int)Y, (int)Z);
         }
+        #endregion
 
-        /// <summary>
-        /// Gets the location of the next block corner up from this location. (Round-up all values).
-        /// </summary>
-        /// <returns>The block location.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Location GetUpperBlockBorder()
-        {
-            return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
-        }
-
+        #region min/max
         /// <summary>
         /// Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(double, double)"/> to each coordinate.
         /// </summary>
@@ -838,6 +856,7 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Returns the biggest coordinate in this location (biggest of X, Y, or Z).
+        /// Essentially, applies <see cref="Math.Max(double, double)"/> to the 3 coordinate values.
         /// </summary>
         /// <returns>The biggest coordinate.</returns>
         public double BiggestValue()
@@ -847,11 +866,54 @@ namespace FGECore.MathHelpers
 
         /// <summary>
         /// Returns the smallest coordinate in this location (samallest of X, Y, or Z).
+        /// Essentially, applies <see cref="Math.Min(double, double)"/> to the 3 coordinate values.
         /// </summary>
         /// <returns>The smallest coordinate.</returns>
         public double SmallestValue()
         {
             return Math.Min(Math.Min(X, Y), Z);
+        }
+        #endregion
+
+#warning FIXME BELOW:
+        /// <summary>
+        /// Constructs a Location from a BEPUPhysics Vector3 structure, perfectly replicating it.
+        /// </summary>
+        public Location(BEPUutilities.Vector3 vec)
+        {
+            X = vec.X;
+            Y = vec.Y;
+            Z = vec.Z;
+        }
+
+        /// <summary>
+        /// Converts the Location to a BEPUPhysics Vector3.
+        /// </summary>
+        /// <returns>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public BEPUutilities.Vector3 ToBVector()
+        {
+            return new BEPUutilities.Vector3(X, Y, Z);
+        }
+
+        /// <summary>
+        /// Gets the location of the block this location is within. (Round-down all values).
+        /// </summary>
+        /// <returns>The block location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Location GetBlockLocation()
+        {
+            return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
+        }
+
+        /// <summary>
+        /// Gets the location of the next block corner up from this location. (Round-up all values).
+        /// </summary>
+        /// <returns>The block location.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Location GetUpperBlockBorder()
+        {
+            return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
         }
     }
 }
