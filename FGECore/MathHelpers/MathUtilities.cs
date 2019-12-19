@@ -80,7 +80,7 @@ namespace FGECore.MathHelpers
         /// <returns>Whether it's close.</returns>
         public static bool IsCloseTo(double one, double target, double amount)
         {
-            return one > target ? one - amount < target : one + amount > target;
+            return Math.Abs(one - target) < amount;
         }
 
         /// <summary>
