@@ -213,7 +213,6 @@ namespace FGEGraphics.GraphicsHelpers
             font_bolditalichalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
         }
 
-
         /// <summary>
         /// The default color of text.
         /// </summary>
@@ -222,7 +221,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// All colors used by the different font set options.
         /// </summary>
-        public static readonly Color[] colors = new Color[] {
+        public static readonly Color[] COLORS = new Color[] {
             Color.FromArgb(0, 0, 0),      // 0  // 0 // Black
             Color.FromArgb(255, 0, 0),    // 1  // 1 // Red
             Color.FromArgb(0, 255, 0),    // 2  // 2 // Green
@@ -246,6 +245,7 @@ namespace FGEGraphics.GraphicsHelpers
             Color.FromArgb(64, 64, 64),   // 20 // ) // DarkGray
             Color.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
         };
+
         private readonly static Point[] ShadowPoints = new Point[] {
             new Point(0, 1),
             new Point(1, 0),
@@ -276,6 +276,11 @@ namespace FGEGraphics.GraphicsHelpers
         };
 
         /// <summary>
+        /// Represents the 'base' custom color, ie one that will be recognized as ignorable (in favor of the standard color code).
+        /// </summary>
+        private static readonly Color BaseCustomColor = Color.FromArgb(0, 0, 0, 0);
+
+        /// <summary>
         /// Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText
         /// </summary>
         /// <param name="color">The color number.</param>
@@ -283,28 +288,69 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>A correctly formed color object.</returns>
         public static Color ColorFor(int color, int trans)
         {
-            return Color.FromArgb(trans, colors[color].R, colors[color].G, colors[color].B);
+            return Color.FromArgb(trans, COLORS[color].R, COLORS[color].G, COLORS[color].B);
         }
 
         /// <summary>
-        /// Fully renders colorful/fancy text (unless the text is not marked as fancy, or fancy rendering is disabled).
-        /// Specify: The text to render, where to render it, etc.
+        /// Fully renders fancy text.
+        /// <para>Consider using <see cref="SplitAppropriately(string, int)"/> to split the input for a maximum width.</para>
+        /// <para>Fancy text is normal text with special color and format markings, in the form of a caret symbol '^' followed by a case-sensitive single character indicating the format or color to apply.</para>
+        /// <para>Includes the following format codes:</para>
+        /// <para> 0-9: simple color, refer to <see cref="COLORS"/>. The shift variant of these keys, as found on a US-QWERTY keyboard, apply a darker variant of the same color, with the exception of '^' which is instead represented by '-'.</para>
+        /// <para>b: Toggles bold.</para>
+        /// <para>i: Toggles italic.</para>
+        /// <para>u: Toggles underlining. Preserves color at time of usage for the underline.</para>
+        /// <para>s: Toggles strike-through. Preserves color at time of usage for the strike-through line.</para>
+        /// <para>O: Toggles overlining. Preserves color at time of usage for the overline.</para>
+        /// <para>h: Toggles highlighting. Preserves color at time of usage for the highlight.</para>
+        /// <para>e: Toggles 'emphasis'. This is a colored glow around the text, making it extremely visible. Preserves color at time of usage for the emphasis. Take care of what color you apply to the emphasis vs. the text being emphasized, only some combinations look good.</para>
+        /// <para>t,T,o: Changes transparency level. 't' is 50%, 'T' is 25% (VERY transparent). 'o' is opaque.</para>
+        /// <para>S: Toggles super-script (text that's smaller and higher).</para>
+        /// <para>l: Toggles sub-script ('lower' text. Similar to super-script, but lower rather than higher).</para>
+        /// <para>d: Toggles drop-shadowing.</para>
+        /// <para>j: Toggles 'jelly' mode. Text in this mode appears to slightly shake in place.</para>
+        /// <para>U: Toggles 'unreadable' mode. Text in this mode will randomly shift through characters, becoming impossible to read.</para>
+        /// <para>R: Toggles randomly changing color mode, AKA Rainbow mode.</para>
+        /// <para>p: Toggles 'pseudo-random' color mode. Similar to rainbow mode, but colors are randomly chosen once per-character, and then do not change (using a pseudo-random algorithm seeded from the text input).</para>
+        /// <para>f: Toggles flipped-text.</para>
+        /// <para>B: Applies the base color/format.</para>
+        /// <para>r: Resets the basic format to none.</para>
+        /// <para>n: No-op. Useful to break codes. A simple way to prevent users from entering format codes into text that will be rendered this way, is <code>text = text.Replace("^", "^^n");</code></para>
+        /// <para>[: This is a special meta-symbol that indicates a longer input follows, of the format: ^[x=y].
+        /// The 'x' input, for the sake of this method, can be 'color' (set a custom RGB color) or 'lang' (read text from a language file),
+        /// however other portions of the engine may apply other options (like 'hover' or 'click').</para>
         /// </summary>
-        public void DrawColoredText(string Text, Location Position, int MaxY = int.MaxValue, float transmod = 1, bool extrashadow = false, string bcolor = "^r^7",
+        /// <param name="text">The text to render.</param>
+        /// <param name="position">The position on screen to render at.</param>
+        /// <param name="maxY">Optional: The maximum Y value to keep drawing at (to prevent text from going past the end of a text-area).</param>
+        /// <param name="transmod">Optional: Transparency modifier, from 0 to 1 (1 is opaque, lower is more transparent).</param>
+        /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
+        /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
+        public void DrawColoredText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
+        {
+            DrawColoredText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
+        }
+
+        /// <summary>
+        /// Internal call to handle fancy-text rendering, with direct parameters for all key settings.
+        /// Generally not meant to be called from external code.
+        /// Generally, prefer <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.
+        /// </summary>
+        public void DrawColoredText_InternalDetail(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7",
             int _color = DefaultColor, bool _bold = false, bool _italic = false, bool _underline = false, bool _strike = false, bool _overline = false, bool _highlight = false, bool _emphasis = false,
-            int _ucolor = DefaultColor, int _scolor = DefaultColor, int _ocolor = DefaultColor, int _hcolor = DefaultColor, int _ecolor = DefaultColor,
-            bool _super = false, bool _sub = false, bool _flip = false, bool _pseudo = false, bool _jello = false, bool _obfu = false, bool _random = false, bool _shadow = false, GLFont _font = null)
+            int _underlineColor = DefaultColor, int _strikeColor = DefaultColor, int _overlineColor = DefaultColor, int _highlightColor = DefaultColor, int _emphasisColor = DefaultColor,
+            bool _superScript = false, bool _subScript = false, bool _flip = false, bool _pseudoRandom = false, bool _jello = false, bool _unreadable = false, bool _random = false, bool _shadow = false, GLFont _font = null)
         {
             GraphicsUtil.CheckError("Render FontSet - Pre");
             r_depth++;
-            if (r_depth >= 100 && Text != "{{Recursion error}}")
+            if (r_depth >= 100 && text != "{{Recursion error}}")
             {
-                DrawColoredText("{{Recursion error}}", Position);
+                DrawColoredText("{{Recursion error}}", position);
                 r_depth--;
                 return;
             }
-            Text = Text.ApplyBaseColor(bcolor);
-            string[] lines = Text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
+            text = text.ApplyBaseColor(baseColor);
+            string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
             void render(string line, float Y, TextVBO vbo)
             {
                 int color = _color;
@@ -315,29 +361,28 @@ namespace FGEGraphics.GraphicsHelpers
                 bool overline = _overline;
                 bool highlight = _highlight;
                 bool emphasis = _emphasis;
-                int ucolor = _ucolor;
-                int scolor = _scolor;
-                int ocolor = _ocolor;
-                int hcolor = _hcolor;
-                int ecolor = _ecolor;
-                bool super = _super;
-                bool sub = _sub;
+                int underlineColor = _underlineColor;
+                int strikeColor = _strikeColor;
+                int overlineColor = _overlineColor;
+                int highlightColor = _highlightColor;
+                int emphasisColor = _emphasisColor;
+                bool superScript = _superScript;
+                bool subScript = _subScript;
                 bool flip = _flip;
-                bool pseudo = _pseudo;
+                bool pseudoRandom = _pseudoRandom;
                 bool jello = _jello;
-                bool obfu = _obfu;
+                bool unreadable = _unreadable;
                 bool random = _random;
                 bool shadow = _shadow;
                 GLFont font = _font;
-                int trans = (int)(255 * transmod);
-                int otrans = (int)(255 * transmod);
-                int etrans = (int)(255 * transmod);
-                int htrans = (int)(255 * transmod);
-                int strans = (int)(255 * transmod);
-                int utrans = (int)(255 * transmod);
-                float X = (float)Position.X;
-                Color bccolor = Color.FromArgb(0, 0, 0, 0);
-                Color ccolor = bccolor;
+                int transparency = (int)(255 * transmod);
+                int overlineTransparency = (int)(255 * transmod);
+                int emphasisTransparency = (int)(255 * transmod);
+                int highlightTransparency = (int)(255 * transmod);
+                int strikeTransparency = (int)(255 * transmod);
+                int underlineTransparency = (int)(255 * transmod);
+                float X = (float)position.X;
+                Color customColor = BaseCustomColor;
                 if (font == null)
                 {
                     font = font_default;
@@ -354,54 +399,54 @@ namespace FGEGraphics.GraphicsHelpers
                         string drawme = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
                         start = x + 2;
                         x++;
-                        if (drawme.Length > 0 && Y >= -font.Height && Y - (sub ? font.Height : 0) <= MaxY)
+                        if (drawme.Length > 0 && Y >= -font.Height && Y - (subScript ? font.Height : 0) <= maxY)
                         {
                             float width = font.MeasureString(drawme);
                             if (highlight)
                             {
-                                DrawRectangle(X, Y, width, font_default.Height, ColorFor(hcolor, htrans), vbo);
+                                DrawRectangle(X, Y, width, font_default.Height, ColorFor(highlightColor, highlightTransparency), vbo);
                             }
                             if (underline)
                             {
-                                DrawRectangle(X, Y + ((float)font.Height * 4f / 5f), width, 2, ColorFor(ucolor, utrans), vbo);
+                                DrawRectangle(X, Y + ((float)font.Height * 4f / 5f), width, 2, ColorFor(underlineColor, underlineTransparency), vbo);
                             }
                             if (overline)
                             {
-                                DrawRectangle(X, Y + 2f, width, 2, ColorFor(ocolor, otrans), vbo);
+                                DrawRectangle(X, Y + 2f, width, 2, ColorFor(overlineColor, overlineTransparency), vbo);
                             }
-                            if (extrashadow)
+                            if (extraShadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, trans / 2, flip);
+                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 2, flip);
                                 }
                             }
                             if (shadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, trans / 2, flip);
+                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 2, flip);
                                 }
                                 foreach (Point point in BetterShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, trans / 4, flip);
+                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 4, flip);
                                 }
                             }
                             if (emphasis)
                             {
                                 foreach (Point point in EmphasisPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, ecolor, etrans, flip);
+                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, emphasisColor, emphasisTransparency, flip);
                                 }
                                 foreach (Point point in BetterEmphasisPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, ecolor, etrans, flip);
+                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, emphasisColor, emphasisTransparency, flip);
                                 }
                             }
-                            RenderBaseText(vbo, X, Y, drawme, font, color, trans, flip, pseudo, random, jello, obfu, ccolor);
+                            RenderBaseText(vbo, X, Y, drawme, font, color, transparency, flip, pseudoRandom, random, jello, unreadable, customColor);
                             if (strike)
                             {
-                                DrawRectangle(X, Y + (font.Height / 2), width, 2, ColorFor(scolor, strans), vbo);
+                                DrawRectangle(X, Y + (font.Height / 2), width, 2, ColorFor(strikeColor, strikeTransparency), vbo);
                             }
                             X += width;
                         }
@@ -457,7 +502,7 @@ namespace FGEGraphics.GraphicsHelpers
                                                     int g = StringConversionHelper.StringToInt(coldat[1]);
                                                     int b = StringConversionHelper.StringToInt(coldat[2]);
                                                     int a = StringConversionHelper.StringToInt(coldat[3]);
-                                                    ccolor = Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
+                                                    customColor = Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
                                                     ttext = "";
                                                     highl = false;
                                                 }
@@ -492,40 +537,40 @@ namespace FGEGraphics.GraphicsHelpers
                                         else
                                         {
                                             float widt = MeasureFancyText(ttext);
-                                            DrawColoredText(ttext, new Location(X, Y, 0), MaxY, transmod, extrashadow, bcolor,
-                                                color, bold, italic, underline, strike, overline, highlight, emphasis, ucolor, scolor, ocolor, hcolor, ecolor, super,
-                                                sub, flip, pseudo, jello, obfu, random, shadow, font);
+                                            DrawColoredText_InternalDetail(ttext, new Location(X, Y, 0), maxY, transmod, extraShadow, baseColor,
+                                                color, bold, italic, underline, strike, overline, highlight, emphasis, underlineColor, strikeColor, overlineColor, highlightColor, emphasisColor, superScript,
+                                                subScript, flip, pseudoRandom, jello, unreadable, random, shadow, font);
                                             X += widt;
                                         }
                                         start = x + 1;
                                     }
                                     break;
-                                case '1': color = 1; ccolor = bccolor; break;
-                                case '!': color = 11; ccolor = bccolor; break;
-                                case '2': color = 2; ccolor = bccolor; break;
-                                case '@': color = 12; ccolor = bccolor; break;
-                                case '3': color = 3; ccolor = bccolor; break;
-                                case '#': color = 13; ccolor = bccolor; break;
-                                case '4': color = 4; ccolor = bccolor; break;
-                                case '$': color = 14; ccolor = bccolor; break;
-                                case '5': color = 5; ccolor = bccolor; break;
-                                case '%': color = 15; ccolor = bccolor; break;
-                                case '6': color = 6; ccolor = bccolor; break;
-                                case '-': color = 16; ccolor = bccolor; break;
-                                case '7': color = 7; ccolor = bccolor; break;
-                                case '&': color = 17; ccolor = bccolor; break;
-                                case '8': color = 8; ccolor = bccolor; break;
-                                case '*': color = 18; ccolor = bccolor; break;
-                                case '9': color = 9; ccolor = bccolor; break;
-                                case '(': color = 19; ccolor = bccolor; break;
-                                case '0': color = 0; ccolor = bccolor; break;
-                                case ')': color = 20; ccolor = bccolor; break;
-                                case 'a': color = 10; ccolor = bccolor; break;
-                                case 'A': color = 21; ccolor = bccolor; break;
+                                case '1': color = 1; customColor = BaseCustomColor; break;
+                                case '!': color = 11; customColor = BaseCustomColor; break;
+                                case '2': color = 2; customColor = BaseCustomColor; break;
+                                case '@': color = 12; customColor = BaseCustomColor; break;
+                                case '3': color = 3; customColor = BaseCustomColor; break;
+                                case '#': color = 13; customColor = BaseCustomColor; break;
+                                case '4': color = 4; customColor = BaseCustomColor; break;
+                                case '$': color = 14; customColor = BaseCustomColor; break;
+                                case '5': color = 5; customColor = BaseCustomColor; break;
+                                case '%': color = 15; customColor = BaseCustomColor; break;
+                                case '6': color = 6; customColor = BaseCustomColor; break;
+                                case '-': color = 16; customColor = BaseCustomColor; break;
+                                case '7': color = 7; customColor = BaseCustomColor; break;
+                                case '&': color = 17; customColor = BaseCustomColor; break;
+                                case '8': color = 8; customColor = BaseCustomColor; break;
+                                case '*': color = 18; customColor = BaseCustomColor; break;
+                                case '9': color = 9; customColor = BaseCustomColor; break;
+                                case '(': color = 19; customColor = BaseCustomColor; break;
+                                case '0': color = 0; customColor = BaseCustomColor; break;
+                                case ')': color = 20; customColor = BaseCustomColor; break;
+                                case 'a': color = 10; customColor = BaseCustomColor; break;
+                                case 'A': color = 21; customColor = BaseCustomColor; break;
                                 case 'i':
                                     {
                                         italic = true;
-                                        GLFont nfont = (super || sub) ? (bold ? font_bolditalichalf : font_italichalf) :
+                                        GLFont nfont = (superScript || subScript) ? (bold ? font_bolditalichalf : font_italichalf) :
                                             (bold ? font_bolditalic : font_italic);
                                         if (nfont != font)
                                         {
@@ -536,7 +581,7 @@ namespace FGEGraphics.GraphicsHelpers
                                 case 'b':
                                     {
                                         bold = true;
-                                        GLFont nfont = (super || sub) ? (italic ? font_bolditalichalf : font_boldhalf) :
+                                        GLFont nfont = (superScript || subScript) ? (italic ? font_bolditalichalf : font_boldhalf) :
                                             (italic ? font_bolditalic : font_bold);
                                         if (nfont != font)
                                         {
@@ -544,20 +589,20 @@ namespace FGEGraphics.GraphicsHelpers
                                         }
                                     }
                                     break;
-                                case 'u': utrans = trans; underline = true; ucolor = color; break;
-                                case 's': strans = trans; strike = true; scolor = color; break;
-                                case 'h': htrans = trans; highlight = true; hcolor = color; break;
-                                case 'e': etrans = trans; emphasis = true; ecolor = color; break;
-                                case 'O': otrans = trans; overline = true; ocolor = color; break;
-                                case 't': trans = (int)(128 * transmod); break;
-                                case 'T': trans = (int)(64 * transmod); break;
-                                case 'o': trans = (int)(255 * transmod); break;
+                                case 'u': underlineTransparency = transparency; underline = true; underlineColor = color; break;
+                                case 's': strikeTransparency = transparency; strike = true; strikeColor = color; break;
+                                case 'h': highlightTransparency = transparency; highlight = true; highlightColor = color; break;
+                                case 'e': emphasisTransparency = transparency; emphasis = true; emphasisColor = color; break;
+                                case 'O': overlineTransparency = transparency; overline = true; overlineColor = color; break;
+                                case 't': transparency = (int)(128 * transmod); break;
+                                case 'T': transparency = (int)(64 * transmod); break;
+                                case 'o': transparency = (int)(255 * transmod); break;
                                 case 'S':
-                                    if (!super)
+                                    if (!superScript)
                                     {
-                                        if (sub)
+                                        if (subScript)
                                         {
-                                            sub = false;
+                                            subScript = false;
                                             Y -= font.Height / 2;
                                         }
                                         GLFont nfont = bold && italic ? font_bolditalichalf : bold ? font_boldhalf :
@@ -567,14 +612,14 @@ namespace FGEGraphics.GraphicsHelpers
                                             font = nfont;
                                         }
                                     }
-                                    super = true;
+                                    superScript = true;
                                     break;
                                 case 'l':
-                                    if (!sub)
+                                    if (!subScript)
                                     {
-                                        if (super)
+                                        if (superScript)
                                         {
-                                            super = false;
+                                            superScript = false;
                                         }
                                         Y += font_default.Height / 2;
                                         GLFont nfont = bold && italic ? font_bolditalichalf : bold ? font_boldhalf :
@@ -584,13 +629,13 @@ namespace FGEGraphics.GraphicsHelpers
                                             font = nfont;
                                         }
                                     }
-                                    sub = true;
+                                    subScript = true;
                                     break;
                                 case 'd': shadow = true; break;
                                 case 'j': jello = true; break;
-                                case 'k': obfu = true; break;
+                                case 'U': unreadable = true; break;
                                 case 'R': random = true; break;
-                                case 'p': pseudo = true; break;
+                                case 'p': pseudoRandom = true; break;
                                 case 'f': flip = true; break;
                                 case 'n':
                                     break;
@@ -601,17 +646,17 @@ namespace FGEGraphics.GraphicsHelpers
                                         {
                                             font = nfont;
                                         }
-                                        if (sub)
+                                        if (subScript)
                                         {
                                             Y -= font_default.Height / 2;
                                         }
-                                        sub = false;
-                                        super = false;
+                                        subScript = false;
+                                        superScript = false;
                                         flip = false;
                                         random = false;
-                                        pseudo = false;
+                                        pseudoRandom = false;
                                         jello = false;
-                                        obfu = false;
+                                        unreadable = false;
                                         shadow = false;
                                         bold = false;
                                         italic = false;
@@ -619,7 +664,7 @@ namespace FGEGraphics.GraphicsHelpers
                                         strike = false;
                                         emphasis = false;
                                         highlight = false;
-                                        trans = (int)(255 * transmod);
+                                        transparency = (int)(255 * transmod);
                                         overline = false;
                                         break;
                                     }
@@ -634,11 +679,11 @@ namespace FGEGraphics.GraphicsHelpers
             TextVBO cVBO = new TextVBO(Engine.GLFonts);
             if (lines.Length <= 1)
             {
-                render(lines[0], (float)Position.Y, cVBO);
+                render(lines[0], (float)position.Y, cVBO);
             }
             else
             {
-                float Y = (float)Position.Y;
+                float Y = (float)position.Y;
                 List<Task> tasks = AsyncText ? new List<Task>(lines.Length) : null;
                 List<TextVBO> vbos = new List<TextVBO>(lines.Length);
                 string tcol = "";
@@ -750,6 +795,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Semi-internal rendering of text strings.
+        /// <para>Generally, external code should use <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.</para>
         /// </summary>
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="X">The X location to render at.</param>
@@ -762,13 +808,13 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="pseudo">Whether to use pseudo-random color.</param>
         /// <param name="random">Whether to use real-random color.</param>
         /// <param name="jello">Whether to use a jello effect.</param>
-        /// <param name="obfu">Whether to randomize letters.</param>
-        /// <param name="ccolor">The current color.</param>
+        /// <param name="unreadable">Whether to randomize letters.</param>
+        /// <param name="currentColor">The current color.</param>
         /// <returns>The length of the rendered text in pixels.</returns>
         public float RenderBaseText(TextVBO vbo, float X, float Y, string text, GLFont font, int color,
-            int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool obfu = false, Color ccolor = default)
+            int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool unreadable = false, Color currentColor = default)
         {
-            if (obfu || pseudo || random || jello)
+            if (unreadable || pseudo || random || jello)
             {
                 float nX = 0;
                 foreach (string txt in font.SeparateEmojiAndSpecialChars(text))
@@ -786,13 +832,13 @@ namespace FGEGraphics.GraphicsHelpers
                     }
                     else if (pseudo)
                     {
-                        tcol = ColorFor((chr[0] % (colors.Length - 1)) + 1, trans);
+                        tcol = ColorFor((chr[0] % (COLORS.Length - 1)) + 1, trans);
                     }
-                    else if (ccolor.A > 0)
+                    else if (currentColor.A > 0)
                     {
-                        tcol = ccolor;
+                        tcol = currentColor;
                     }
-                    if (obfu)
+                    if (unreadable)
                     {
                         chr = ((char)Engine.RandomHelper.Next(33, 126)).ToString();
                     }
@@ -818,7 +864,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
             else
             {
-                Color tcol = ccolor.A > 0 ? ccolor : ColorFor(color, trans);
+                Color tcol = currentColor.A > 0 ? currentColor : ColorFor(color, trans);
                 return font.DrawString(text, X, Y, new Vector4((float)tcol.R / 255f, (float)tcol.G / 255f, (float)tcol.B / 255f, (float)tcol.A / 255f), vbo, flip);
             }
         }
@@ -903,7 +949,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="italic">Whether it is italic.</param>
         /// <param name="sub">Whether it is half-size.</param>
         /// <param name="font">The font to start with.</param>
-        /// <param name="pushStr">Whether to push text to the underlying engine.</param>
+        /// <param name="pushStr">Whether to push text to the underlying engine (ie, to make sure the underlying characters are recognizable and valid).</param>
         /// <returns>The width.</returns>
         public float MeasureFancyText(string line, out List<KeyValuePair<string, Rectangle2F>> links, string bcolor = "^r^7", bool bold = false, bool italic = false, bool sub = false, GLFont font = null, bool pushStr = false)
         {
@@ -1112,27 +1158,19 @@ namespace FGEGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText.
-        /// Does not return true for '[' as that is not a formatter but a long-block format adjuster.
+        /// Matcher object to recognize color codes.
         /// </summary>
-        /// <param name="c"><paramref name="c"/>The character to check.</param>
+        public static AsciiMatcher COLOR_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTU" + "!@#$%&*()-");
+
+        /// <summary>
+        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.
+        /// <para>Does not return true for '[' as that is not a formatter but a long-block format adjuster.</para>
+        /// </summary>
+        /// <param name="c">The character to check.</param>
         /// <returns>whether the character is a valid color symbol.</returns>
         public static bool IsColorSymbol(char c)
         {
-            return ((c >= '0' && c <= '9') /* 0123456789 */ ||
-                    (c >= 'a' && c <= 'b') /* ab */ ||
-                    (c >= 'd' && c <= 'f') /* def */ ||
-                    (c >= 'h' && c <= 'l') /* hijkl */ ||
-                    (c >= 'n' && c <= 'u') /* nopqrstu */ ||
-                    (c >= 'R' && c <= 'T') /* RST */ ||
-                    (c >= '#' && c <= '&') /* #$%& */ || // 35 - 38
-                    (c >= '(' && c <= '*') /* ()* */ || // 40 - 42
-                    (c == 'A') ||
-                    (c == 'O') ||
-                    (c == '-') || // 45
-                    (c == '!') || // 33
-                    (c == '@')    // 64
-                   );
+            return COLOR_CODES_MATCHER.IsMatch(c);
         }
     }
 
