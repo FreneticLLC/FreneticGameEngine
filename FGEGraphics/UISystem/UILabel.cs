@@ -129,7 +129,7 @@ namespace FGEGraphics.UISystem
                 view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 view.Rendering.SetColor(Vector4.One);
             }
-            TextFont.DrawColoredText(tex, new Location(bx, by, 0), bcolor: BColor);
+            TextFont.DrawFancyText(tex, new Location(bx, by, 0), baseColor: BColor);
         }
     }
 }

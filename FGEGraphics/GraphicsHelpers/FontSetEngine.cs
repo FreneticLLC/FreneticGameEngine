@@ -25,6 +25,7 @@ using FGECore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
 using FGEGraphics.ClientSystem;
 using FGECore.ConsoleHelpers;
+using MathHelper = FreneticUtilities.FreneticToolkit.MathHelper;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -314,8 +315,9 @@ namespace FGEGraphics.GraphicsHelpers
         /// <para>p: Toggles 'pseudo-random' color mode. Similar to rainbow mode, but colors are randomly chosen once per-character, and then do not change (using a pseudo-random algorithm seeded from the text input).</para>
         /// <para>f: Toggles flipped-text.</para>
         /// <para>B: Applies the base color/format.</para>
+        /// <para>q: A Simply gets replaced by a quote symbol. May be useful for some escaping environments.</para>
         /// <para>r: Resets the basic format to none.</para>
-        /// <para>n: No-op. Useful to break codes. A simple way to prevent users from entering format codes into text that will be rendered this way, is <code>text = text.Replace("^", "^^n");</code></para>
+        /// <para>n: No-op. Useful to break codes. A simple way to prevent users from entering format codes into text that will be rendered this way, is <code>text = text.Replace("^", "^^n");</code>. This is the methodology used by <see cref="EscapeFancyText(string)"/>.</para>
         /// <para>[: This is a special meta-symbol that indicates a longer input follows, of the format: ^[x=y].
         /// The 'x' input, for the sake of this method, can be 'color' (set a custom RGB color) or 'lang' (read text from a language file),
         /// however other portions of the engine may apply other options (like 'hover' or 'click').</para>
@@ -326,17 +328,17 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="transmod">Optional: Transparency modifier, from 0 to 1 (1 is opaque, lower is more transparent).</param>
         /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
         /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
-        public void DrawColoredText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
+        public void DrawFancyText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
         {
-            DrawColoredText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
+            DrawFancyText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
         }
 
         /// <summary>
         /// Internal call to handle fancy-text rendering, with direct parameters for all key settings.
         /// Generally not meant to be called from external code.
-        /// Generally, prefer <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.
+        /// Generally, prefer <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.
         /// </summary>
-        public void DrawColoredText_InternalDetail(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7",
+        public void DrawFancyText_InternalDetail(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7",
             int _color = DefaultColor, bool _bold = false, bool _italic = false, bool _underline = false, bool _strike = false, bool _overline = false, bool _highlight = false, bool _emphasis = false,
             int _underlineColor = DefaultColor, int _strikeColor = DefaultColor, int _overlineColor = DefaultColor, int _highlightColor = DefaultColor, int _emphasisColor = DefaultColor,
             bool _superScript = false, bool _subScript = false, bool _flip = false, bool _pseudoRandom = false, bool _jello = false, bool _unreadable = false, bool _random = false, bool _shadow = false, GLFont _font = null)
@@ -345,7 +347,7 @@ namespace FGEGraphics.GraphicsHelpers
             r_depth++;
             if (r_depth >= 100 && text != "{{Recursion error}}")
             {
-                DrawColoredText("{{Recursion error}}", position);
+                DrawFancyText("{{Recursion error}}", position);
                 r_depth--;
                 return;
             }
@@ -394,7 +396,7 @@ namespace FGEGraphics.GraphicsHelpers
                 int start = 0;
                 for (int x = 0; x < line.Length; x++)
                 {
-                    if ((line[x] == '^' && x + 1 < line.Length && (IsColorSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
+                    if ((line[x] == '^' && x + 1 < line.Length && (IsFormatSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
                     {
                         string drawme = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
                         start = x + 2;
@@ -537,7 +539,7 @@ namespace FGEGraphics.GraphicsHelpers
                                         else
                                         {
                                             float widt = MeasureFancyText(ttext);
-                                            DrawColoredText_InternalDetail(ttext, new Location(X, Y, 0), maxY, transmod, extraShadow, baseColor,
+                                            DrawFancyText_InternalDetail(ttext, new Location(X, Y, 0), maxY, transmod, extraShadow, baseColor,
                                                 color, bold, italic, underline, strike, overline, highlight, emphasis, underlineColor, strikeColor, overlineColor, highlightColor, emphasisColor, superScript,
                                                 subScript, flip, pseudoRandom, jello, unreadable, random, shadow, font);
                                             X += widt;
@@ -704,7 +706,7 @@ namespace FGEGraphics.GraphicsHelpers
                         {
                             render(tcc + line, ty, tvbo);
                         }
-                        tcol += GrabAllColors(line);
+                        tcol += GrabAllFormats(line);
                     }
                     Y += font_default.Height;
                 }
@@ -762,21 +764,20 @@ namespace FGEGraphics.GraphicsHelpers
         public TaskFactory TFactory = new TaskFactory();
 
         /// <summary>
-        /// Grabs a string containing only colors from the string containing text.
+        /// Grabs a string containing only formats/colors from the string containing text.
         /// </summary>
         /// <param name="input">The input string.</param>
         /// <returns>The color set.</returns>
-        public string GrabAllColors(string input)
+        public string GrabAllFormats(string input)
         {
             StringBuilder res = new StringBuilder();
             int cap = input.Length - 1;
             for (int i = 0; i < cap; i++)
             {
-                if (input[i] == '^' && IsColorSymbol(input[i + 1]))
+                if (input[i] == '^' && IsFormatSymbol(input[i + 1]))
                 {
                     res.Append("^" + input[i + 1]);
                 }
-                // TODO: Strip away [ ... ] text colors!
             }
             return res.ToString();
         }
@@ -795,7 +796,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Semi-internal rendering of text strings.
-        /// <para>Generally, external code should use <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.</para>
+        /// <para>Generally, external code should use <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.</para>
         /// </summary>
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="X">The X location to render at.</param>
@@ -970,7 +971,7 @@ namespace FGEGraphics.GraphicsHelpers
             line = line.Replace("^q", "\"").ApplyBaseColor(bcolor); // TODO: Effic of replace usage? And of per-line replaces?
             for (int x = 0; x < line.Length; x++)
             {
-                if ((line[x] == '^' && x + 1 < line.Length && (IsColorSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
+                if ((line[x] == '^' && x + 1 < line.Length && (IsFormatSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
                 {
                     string drawme = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
                     start = x + 2;
@@ -1105,41 +1106,52 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>The split string.</returns>
         public string SplitAppropriately(string text, int maxX)
         {
-            StringBuilder sb = new StringBuilder(text.Length + 50);
-            int start = 0;
-            for (int i = 0; i < text.Length; i++)
+            StringBuilder resultBuilder = new StringBuilder(text.Length + 50);
+            string[] lines = text.Split('\n');
+            foreach (string fullLine in lines)
             {
-                if (text[i] == '\n')
+                while (true)
                 {
-                    start = i;
-                }
-                else if (MeasureFancyText(text.Substring(start, i - start)) > maxX) // TODO: Don't remeasure every time, only measure the added bits... may require a fair bit of work, be warned!
-                {
-                    int x = i;
-                    bool safe = false;
-                    while (x >= start + 10)
+                    string line = fullLine;
+                    float width = MeasureFancyText(line);
+                    if (width <= maxX)
                     {
-                        if (text[x] == ' ')
+                        resultBuilder.Append(line).Append('\n');
+                        break;
+                    }
+                    float expectedSegments = width / maxX;
+                    int expectedCharacterCount = (int)(line.Length / expectedSegments);
+                    float subWidth = MeasureFancyText(line.Substring(0, expectedCharacterCount));
+                    int target = expectedCharacterCount;
+                    if (subWidth <= maxX)
+                    {
+                        for (int i = expectedCharacterCount; i < line.Length; i++)
                         {
-                            safe = x != i;
-                            break;
+                            if (MeasureFancyText(line.Substring(0, i)) > maxX)
+                            {
+                                target = i - 1;
+                                break;
+                            }
                         }
-                        x--;
                     }
-                    if (safe)
+                    else // width > maxX
                     {
-                        sb[x] = '\n';
-                        start = x;
+                        for (int i = expectedCharacterCount; i >= 0; i--)
+                        {
+                            if (MeasureFancyText(line.Substring(0, i)) <= maxX)
+                            {
+                                target = i;
+                                break;
+                            }
+                        }
                     }
-                    else
-                    {
-                        sb.Insert(i, '\n');
-                        start = i;
-                    }
+                    int lastSpace = MathHelper.Clamp(line.IndexOf(' '), 1, target);
+                    resultBuilder.Append(line, 0, lastSpace);
+                    line = line.Substring(lastSpace + 1);
                 }
-                sb.Append(text[i]);
             }
-            return sb.ToString();
+            resultBuilder.Length -= 1; // Trim off the final newline.
+            return resultBuilder.ToString();
         }
 
         /// <summary>
@@ -1158,19 +1170,19 @@ namespace FGEGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// Matcher object to recognize color codes.
+        /// Matcher object to recognize color/format codes.
         /// </summary>
-        public static AsciiMatcher COLOR_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTU" + "!@#$%&*()-");
+        public static AsciiMatcher FORMAT_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTU" + "!@#$%&*()-");
 
         /// <summary>
-        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by <see cref="DrawColoredText(string, Location, int, float, bool, string)"/>.
+        /// Used to identify if an input character is a valid color/format symbol (generally the character that follows a '^'), for use by <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.
         /// <para>Does not return true for '[' as that is not a formatter but a long-block format adjuster.</para>
         /// </summary>
         /// <param name="c">The character to check.</param>
         /// <returns>whether the character is a valid color symbol.</returns>
-        public static bool IsColorSymbol(char c)
+        public static bool IsFormatSymbol(char c)
         {
-            return COLOR_CODES_MATCHER.IsMatch(c);
+            return FORMAT_CODES_MATCHER.IsMatch(c);
         }
     }
 

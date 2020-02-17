@@ -160,12 +160,12 @@ namespace FGEGraphics.UISystem
                 Icon.Bind();
                 view.Rendering.SetColor(IconColor);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                TextFont.DrawColoredText(tt, new Location(x + TextFont.font_default.Height, y, 0), int.MaxValue, 1, false, BColor);
+                TextFont.DrawFancyText(tt, new Location(x + TextFont.font_default.Height, y, 0), int.MaxValue, 1, false, BColor);
                 view.Rendering.SetColor(OpenTK.Vector4.One);
             }
             else
             {
-                TextFont.DrawColoredText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0), bcolor: BColor);
+                TextFont.DrawFancyText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0), baseColor: BColor);
             }
         }
     }
