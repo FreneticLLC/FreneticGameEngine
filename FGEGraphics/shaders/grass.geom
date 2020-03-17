@@ -97,7 +97,7 @@ void main()
 	float snoisey = snoise(pos.xyz + wnd * 2.0);
 	float snoisey2 = snoise(pos.xyz - wnd * 2.0);
 	vec3 this_grass = normalize(vec3(snoisey, snoisey2, -5.0));
-	fi.color = vec4(f[0].color.xyz * dot(pos_norm, vec3(0.0, 0.0, -1.0)) * 0.5 + 0.5, 1.0) * f[0].color;
+	fi.color = vec4(f[0].color.xyz * dot(pos_norm, vec3(0.0, 0.0, -1.0)) * 0.5 + 0.5, 1.0);
 	// First Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0), nr, this_grass));
 	fi.texcoord = vec3(0.0, 1.0, tid);
