@@ -15,6 +15,7 @@ layout (location = 5) uniform float should_sqrt = 0.0;
 layout (location = 6) uniform float time = 0.0;
 layout (location = 7) uniform vec3 wind = vec3(0.0);
 layout (location = 8) uniform float render_distance_limit = 50.0 * 50.0;
+layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 
 in struct vox_out
 {
@@ -96,7 +97,7 @@ void main()
 	float tid = f[0].texcoord.y;
 	float snoisey = snoise(pos.xyz + wnd * 2.0);
 	float snoisey2 = snoise(pos.xyz - wnd * 2.0);
-	vec3 this_grass = normalize(vec3(snoisey, snoisey2, -5.0));
+	vec3 this_grass = normalize(vec3(snoisey, snoisey2, -5.0) - sunlightDir * 3.0);
 	fi.color = vec4(f[0].color.xyz * dot(pos_norm, vec3(0.0, 0.0, -1.0)) * 0.5 + 0.5, 1.0);
 	// First Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0), nr, this_grass));
