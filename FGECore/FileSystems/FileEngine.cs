@@ -572,7 +572,7 @@ namespace FGECore.FileSystems
         }
 
         /// <summary>
-        /// Returns a list of all filesh - does not include folders in return value.
+        /// Returns a list of all files - does not include folders in return value.
         /// Does not necessarily preserve any given order.
         /// Returns only the file name, not full paths. If deep is specified, will only include the path starting folder name.
         /// </summary>
