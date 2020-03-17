@@ -242,25 +242,34 @@ void main() // Let's put all code in main, why not...
 	// float unused = light_data[3][3];
 	vec4 f_spos = shadow_matrix * vec4(position, 1.0); // Calculate the position of the light relative to the view.
 	f_spos /= f_spos.w; // Standard perspective divide.
-	vec3 light_path = light_pos - position; // What path a light ray has to travel down in theory to get from the source to the current pixel.
-	float light_length = length(light_path); // How far the light is from this pixel.
-	float d = light_length / light_radius; // How far the pixel is from the end of the light.
-	float atten = clamp(1.0 - (d * d), 0.0, 1.0); // How weak the light is here, based purely on distance so far.
-	if (is_point == 0 && light_type >= 0.5) // If this is a conical (spot light)...
-	{
-		atten *= 1.0 - (f_spos.x * f_spos.x + f_spos.y * f_spos.y); // Weaken the light based on how far towards the edge of the cone/circle it is. Bright in the center, dark in the corners.
-	}
-	if (atten <= 0.0) // If light is really weak...
-	{
-		continue; // Forget this light, move on already!
-	}
+	vec3 light_path = light_pos; // What path a light ray has to travel down in theory to get from the source to the current pixel.
+	float atten = 1.0;
+	float light_length = 1.0;
 	if (should_sqrt >= 0.5) // If inverse square trick is enabled (generally this will be 1.0 or 0.0)
 	{
-		light_path = light_pos;
-		light_length = 1.0;
 		f_spos.x = sign(f_spos.x) * fix_sqr(1.0 - abs(f_spos.x)); // Inverse square the relative position while preserving the sign. Shadow creation buffer also did this.
 		f_spos.y = sign(f_spos.y) * fix_sqr(1.0 - abs(f_spos.y)); // This section means that coordinates near the center of the light view will have more pixels per area available than coordinates far from the center.
 	}
+	else
+	{
+		light_path -= position;
+		light_length = length(light_path); // How far the light is from this pixel.
+		float d = light_length / light_radius; // How far the pixel is from the end of the light.
+		float atten = clamp(1.0 - (d * d), 0.0, 1.0); // How weak the light is here, based purely on distance so far.
+		if (is_point == 0 && light_type >= 0.5) // If this is a conical (spot light)...
+		{
+			atten *= 1.0 - (f_spos.x * f_spos.x + f_spos.y * f_spos.y); // Weaken the light based on how far towards the edge of the cone/circle it is. Bright in the center, dark in the corners.
+		}
+		if (atten <= 0.0) // If light is really weak...
+		{
+			continue; // Forget this light, move on already!
+		}
+	}
+#if MCM_SHADOWS
+	float depth = 1.0;
+#else // Shadows
+	const float depth = 1.0; // If shadows are off, depth is a constant 1.0!
+#endif // Else - Shadows
 	vec3 fs;
 	if (is_point == 0)
 	{
@@ -270,19 +279,20 @@ void main() // Let's put all code in main, why not...
 			|| fs.y < 0.0 || fs.y > 1.0
 			|| fs.z < 0.0 || fs.z > 1.0) // If any coordinate is outside view range...
 		{
+#if MCM_SHADOWS
+			if (light_type >= 0.5)
+			{
+				continue;
+			}
+#else // Shadows
 			continue; // We can't light it! Discard straight away!
+#endif // Else - Shadows
 		}
-	}
-	else
-	{
-		fs = f_spos.xyz;
-	}
+		else
+		{
 	// This block only runs if shadows are enabled.
 #if MCM_SHADOWS
-	float depth = 1.0;
-	if (is_point == 0)
-	{
-	depth = 0;
+	depth = 0.0;
 	// Pretty quality (soft) shadows require a quality graphics card.
 #if MCM_GOOD_GRAPHICS
 	// This area is some calculus-ish stuff based upon NVidia sample code (naturally, it seems to run poorly on AMD cards. Good area to recode/optimize!)
@@ -320,10 +330,13 @@ void main() // Let's put all code in main, why not...
 	{
 		continue; // If we're a fully shadowed pixel, don't add any light!
 	}
+#endif // Shadows
 	}
-#else // Shadows
-	const float depth = 1.0; // If shadows are off, depth is a constant 1.0!
-#endif // Else - Shadows
+	}
+	else
+	{
+		fs = f_spos.xyz;
+	}
 	vec3 L = light_path / light_length; // Get the light's movement direction as a vector
 	vec3 diffuse = max(dot(N, -L), 0.0) * vec3(diffuse_albedo) * HDR_Mod; // Find out how much diffuse light to apply
 	vec3 specular = vec3(pow(max(dot(reflect(L, N), normalize(position - eye_pos)), 0.0), 200.0) * specular_albedo * renderhint.x) * HDR_Mod; // Find out how much specular light to apply.
