@@ -15,6 +15,7 @@ layout (location = 5) uniform float should_sqrt = 0.0;
 // ...
 layout (location = 7) uniform vec3 camPos = vec3(0.0);
 #endif
+layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 
 in struct vox_out
 {
@@ -71,9 +72,8 @@ vec4 final_fix(in vec4 pos)
 	return pos;
 }
 
-vec4 qfix(in vec4 pos, in vec3 right, in vec3 pos_norm)
+vec4 qfix(in vec4 pos)
 {
-	fi.tbn = transpose(mat3(right, cross(right, pos_norm), pos_norm)); // TODO: Neccessity of transpose()?
 #if MCM_PRETTY
 	fi.position = pos;
 	vec4 npos = proj_matrix * pos;
@@ -102,6 +102,7 @@ void main()
 	float tid = f[0].texcoord.y;
 	vec3 right = cross(up, pos_norm);
 	fi.color = f[0].color;
+	fi.tbn = transpose(mat3(vec3(0.0), vec3(0.0), sunlightDir));
 #if MCM_FADE_DEPTH
 	fi.size = 1.0 / scale;
 #endif
@@ -118,19 +119,19 @@ void main()
 	vec3 right_n = (rot_mat * vec4(right, 1.0)).xyz;
 	vec3 up_n = (rot_mat * vec4(up, 1.0)).xyz;
 	// First Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right_n + up_n) * scale, 1.0), right_n, pos_norm));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right_n + up_n) * scale, 1.0)));
 	fi.texcoord = vec3(0.0, 1.0, tid);
 	EmitVertex();
 	// Second Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right_n - up_n) * scale, 1.0), right_n, pos_norm));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right_n - up_n) * scale, 1.0)));
 	fi.texcoord = vec3(1.0, 1.0, tid);
 	EmitVertex();
 	// Third Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right_n - up_n) * scale, 1.0), right_n, pos_norm));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right_n - up_n) * scale, 1.0)));
 	fi.texcoord = vec3(0.0, 0.0, tid);
 	EmitVertex();
 	// Forth Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right_n + up_n) * scale, 1.0), right_n, pos_norm));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right_n + up_n) * scale, 1.0)));
 	fi.texcoord = vec3(1.0, 0.0, tid);
 	EmitVertex();
 	EndPrimitive();

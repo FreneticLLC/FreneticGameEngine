@@ -119,9 +119,9 @@ void main()
 	fcolor = vec4(0.0);
 #if MCM_GEOM_ACTIVE
 	vec3 norms = vec3(0.0, 0.0, 1.0);
-#else
+#else // geom active
 	vec3 norms = texture(normal_tex, f.texcoord).xyz * 2.0 - 1.0;
-#endif
+#endif // else - geom active
 	int count = int(lights_used_helper[0][0]);
 	for (int i = 0; i < count; i++)
 	{
@@ -167,14 +167,17 @@ void main()
 		x_spos.x = sign(x_spos.x) * sqrt(abs(x_spos.x));
 		x_spos.y = sign(x_spos.y) * sqrt(abs(x_spos.y));
 	}
-	vec4 fs = x_spos / x_spos.w / 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
+	vec4 fs = x_spos / x_spos.w * 0.5 + vec4(0.5, 0.5, 0.5, 0.0);
 	fs.w = 1.0;
 	if (fs.x < 0.0 || fs.x > 1.0
 		|| fs.y < 0.0 || fs.y > 1.0
 		|| fs.z < 0.0 || fs.z > 1.0)
 	{
+		if (light_type >= 0.5)
+		{
+			continue;
+		}
 		//fcolor += vec4(0.0, 0.0, 0.0, color.w);
-		continue;
 	}
 #if MCM_GOOD_GRAPHICS
 	vec2 dz_duv;
@@ -232,10 +235,10 @@ void main()
 #endif // else-shadows
 	}
 #endif // lit
-	float dist = linearizeDepth(gl_FragCoord.z);
 #if MCM_GOOD_GRAPHICS
 	fcolor.xyz = desaturate(fcolor.xyz);
 #endif
+	float dist = linearizeDepth(gl_FragCoord.z);
 	vec4 fogCol = lights_used_helper[3];
 	float fogMod = dist * exp(fogCol.w) * fogCol.w;
 	float fmz = min(fogMod, 1.0);
