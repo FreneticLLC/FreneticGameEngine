@@ -189,15 +189,18 @@ float ssao_color(in vec3 position, in vec3 normal, vec3 difcol)
 	vec3 bitangent = cross(normal, tangent);
 	mat3 tbn = mat3(tangent, bitangent, normal);
 	float occlusion = 0.0;
-	for (int i = 0; i < 64; i++) {
-		vec3 vsample = tbn * kernel[i];
-		vsample = vsample * ssao_radius + position;
-		vec4 offset = ssao_projection * vec4(vsample, 1.0);
-		offset.xyz /= offset.w;
-		offset.xyz = offset.xyz * 0.5 + 0.5;
-		float sampleDepth = linearizeDepth(texture(depthtex, offset.xy).x);
-		float rangeCheck = abs(pos_zm - sampleDepth) < ssao_radius ? 1.0 : 0.0;
-		occlusion += (sampleDepth <= linearizeDepth(offset.z) ? 1.0 : 0.0) * rangeCheck;
+	if (pos_zm < 0.99)
+	{
+		for (int i = 0; i < 64; i++) {
+			vec3 vsample = tbn * kernel[i];
+			vsample = vsample * ssao_radius + position;
+			vec4 offset = ssao_projection * vec4(vsample, 1.0);
+			offset.xyz /= offset.w;
+			offset.xyz = offset.xyz * 0.5 + 0.5;
+			float sampleDepth = linearizeDepth(texture(depthtex, offset.xy).x);
+			float rangeCheck = abs(pos_zm - sampleDepth) < ssao_radius ? 1.0 : 0.0;
+			occlusion += (sampleDepth <= linearizeDepth(offset.z) ? 1.0 : 0.0) * rangeCheck;
+		}
 	}
 	return 1.0 - (occlusion * (0.5 / 64.0));
 }
