@@ -15,6 +15,7 @@ layout (location = 5) uniform float should_sqrt = 0.0;
 // ...
 layout (location = 7) uniform vec3 camPos = vec3(0.0);
 #endif
+layout (location = 6) uniform float time = 0.0;
 layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 
 in struct vox_out
@@ -107,7 +108,7 @@ void main()
 	fi.size = 1.0 / scale;
 #endif
 	// TODO: Drop angle based logic. There's almost certainly a more stable and better optimized method to do this.
-	float angle = (scale * 5.0) * (float(int(tid) % 2) * 2.0) - 1.0;
+	float angle = (time) * (float(int(tid) % 2) * 2.0) - 1.0;
 	float c = cos(angle);
 	float s = sin(angle);
 	float C = 1.0 - c;
