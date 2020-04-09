@@ -48,9 +48,8 @@ out struct vox_fout
 
 #include glnoise.inc
 
-vec4 qfix(in vec4 pos, in vec3 right, in vec3 pos_norm)
+vec4 qfix(in vec4 pos)
 {
-	fi.tbn = transpose(mat3(right, cross(right, pos_norm), pos_norm)); // TODO: Neccessity of transpose()?
 #if MCM_PRETTY
 	fi.position = pos;
 #else
@@ -91,36 +90,33 @@ void main()
 	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
 	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
 	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.3;
-	vec3 nr = -right * (1.0 / 0.3);
 	vec3 pos_norm = normalize(pos.xyz + wnd);
 	float scale = f[0].texcoord.x * 0.5;
 	float tid = f[0].texcoord.y;
-	float snoisey = snoise(pos.xyz + wnd * 2.0);
-	float snoisey2 = snoise(pos.xyz - wnd * 2.0);
-	vec3 this_grass = normalize(vec3(snoisey, snoisey2, -5.0) - sunlightDir * 3.0);
 	fi.color = vec4(f[0].color.xyz * dot(pos_norm, vec3(0.0, 0.0, -1.0)) * 0.5 + 0.5, 1.0);
+	fi.tbn = transpose(mat3(vec3(0.0), vec3(0.0), sunlightDir));
 	// First Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0)));
 	fi.texcoord = vec3(0.0, 1.0, tid);
 	EmitVertex();
 	// Second Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right) * scale, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right) * scale, 1.0)));
 	fi.texcoord = vec3(1.0, 1.0, tid);
 	EmitVertex();
 	// Third Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 2.0) * scale + wnd, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 2.0) * scale + wnd, 1.0)));
 	fi.texcoord = vec3(0.0, 0.5, tid);
 	EmitVertex();
 	// Forth Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 2.0) * scale + wnd, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 2.0) * scale + wnd, 1.0)));
 	fi.texcoord = vec3(1.0, 0.5, tid);
 	EmitVertex();
 	// Fifth Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 4.0) * scale + wnd * 2.0, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 4.0) * scale + wnd * 2.0, 1.0)));
 	fi.texcoord = vec3(0.0, 0.0, tid);
 	EmitVertex();
 	// Sixth Vertex
-	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 4.0) * scale + wnd * 2.0, 1.0), nr, this_grass));
+	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 4.0) * scale + wnd * 2.0, 1.0)));
 	fi.texcoord = vec3(1.0, 0.0, tid);
 	EmitVertex();
 	EndPrimitive();
