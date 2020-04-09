@@ -28,6 +28,7 @@ namespace FGEGraphics.GraphicsHelpers
 {
     /// <summary>
     /// Handles rendering of fonts.
+    /// Most users should not interact with this directly. Instead, use <see cref="FontSetEngine"/>.
     /// </summary>
     public class GLFontEngine : IDisposable
     {
@@ -279,6 +280,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets the font matching the specified settings.
+        /// If the relevant Font exists but is not yet loaded, will load it from file.
         /// </summary>
         /// <param name="name">The name of the font.</param>
         /// <param name="bold">Whether it's bold.</param>
@@ -306,6 +308,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Loads a font matching the specified settings.
+        /// <para>Note: Most users should not use this method. Instead, use <see cref="GetFont(string, bool, bool, int)"/>.</para>
         /// </summary>
         /// <param name="name">The name of the font.</param>
         /// <param name="bold">Whether it's bold.</param>

@@ -130,7 +130,8 @@ namespace FGEGraphics.GraphicsHelpers
         public double CurrentTime = 0;
 
         /// <summary>
-        /// Loads a model by name.
+        /// Loads a model from file by name.
+        /// <para>Note: Most users should not use this method. Instead, use <see cref="GetModel(string)"/>.</para>
         /// </summary>
         /// <param name="filename">The name.</param>
         /// <returns>The model.</returns>
@@ -158,6 +159,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets the model object for a specific model name.
+        /// If the relevant model exists but is not yet loaded, will load it from file.
         /// </summary>
         /// <param name="modelname">The name of the model.</param>
         /// <returns>A valid model object.</returns>

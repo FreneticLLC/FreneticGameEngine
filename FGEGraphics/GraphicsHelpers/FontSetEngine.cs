@@ -109,6 +109,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets a font by a specified name.
+        /// If the relevant FontSet exists but is not yet loaded, will load it from file.
         /// </summary>
         /// <param name="fontname">The name of the font.</param>
         /// <param name="fontsize">The size of the font.</param>

@@ -130,6 +130,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets the shader object for a specific shader name.
+        /// If the relevant shader exists but is not yet loaded, will load it from file.
         /// </summary>
         /// <param name="shadername">The name of the shader.</param>
         /// <returns>A valid shader object.</returns>
@@ -157,6 +158,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Loads a shader from file.
+        /// <para>Note: Most users should not use this method. Instead, use <see cref="GetShader(string)"/>.</para>
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
         /// <returns>The loaded shader, or null if it does not exist.</returns>
@@ -255,7 +257,7 @@ namespace FGEGraphics.GraphicsHelpers
                 if (dat[i].StartsWith("#define "))
                 {
                     string defined = dat[i].Substring("#define ".Length);
-                    string name = defined.BeforeAndAfter(" ", out string origValue);
+                    string name = defined.Before(" ");
                     if (defValues.TryGetValue(name, out string newValue))
                     {
                         fsb.Append("#define ").Append(name).Append(" ").Append(newValue);
@@ -347,7 +349,8 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("Shader - Compute - Compile");
             return program;
         }
-        private Dictionary<string, string> reusableDefValues = new Dictionary<string, string>(128);
+
+        private readonly Dictionary<string, string> ReusableDefValues = new Dictionary<string, string>(128);
 
         /// <summary>
         /// Compiles a VertexShader and FragmentShader to a usable shader program.
@@ -361,19 +364,19 @@ namespace FGEGraphics.GraphicsHelpers
         {
             if (vars.Length > 0)
             {
-                reusableDefValues.Clear();
+                ReusableDefValues.Clear();
                 for (int i = 0; i < vars.Length; i++)
                 {
                     if (vars[i].Length > 0)
                     {
-                        reusableDefValues.Add(vars[i], "1");
+                        ReusableDefValues.Add(vars[i], "1");
                     }
                 }
-                VS = PatchDefs(VS, reusableDefValues);
-                FS = PatchDefs(FS, reusableDefValues);
+                VS = PatchDefs(VS, ReusableDefValues);
+                FS = PatchDefs(FS, ReusableDefValues);
                 if (geom != null)
                 {
-                    geom = PatchDefs(geom, reusableDefValues);
+                    geom = PatchDefs(geom, ReusableDefValues);
                 }
             }
             int gObj = -1;

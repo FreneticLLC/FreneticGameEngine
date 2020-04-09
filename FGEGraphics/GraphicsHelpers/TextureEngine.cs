@@ -161,6 +161,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets a texture that already exists by name.
+        /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture(string)"/>.</para>
         /// </summary>
         /// <param name="texturename">The name of the texture.</param>
         /// <returns>The texture, if it exists.</returns>
@@ -175,6 +176,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Gets the texture object for a specific texture name.
+        /// If the relevant texture exists but is not yet loaded, will load it from file.
         /// </summary>
         /// <param name="textureName">The name of the texture.</param>
         /// <returns>A valid texture object.</returns>
@@ -343,6 +345,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         /// <summary>
         /// Loads a texture from file.
+        /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture(string)"/>.</para>
         /// </summary>
         /// <param name="filename">The name of the file to use.</param>
         /// <param name="twidth">The texture width, if any.</param>
