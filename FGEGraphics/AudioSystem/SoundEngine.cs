@@ -472,7 +472,6 @@ namespace FGEGraphics.AudioSystem
             }
             if (volume == 0)
             {
-                SysConsole.Output(OutputType.DEBUG, "Audio / volume");
                 return;
             }
             if (volume <= 0 || volume > 1)
