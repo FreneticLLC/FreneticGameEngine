@@ -300,6 +300,18 @@ namespace FGEGraphics.GraphicsHelpers
         }
 
         /// <summary>
+        /// Set the minimum light to 0.0, indicating that fog is disabled but minimum light is also disabled.
+        /// </summary>
+        /// <param name="view">Relevant view.</param>
+        public void SetSpecialFoglessLight(View3D view)
+        {
+            if (view.RenderLights && !view.RenderingShadows)
+            {
+                GL.Uniform1(16, 0.0f);
+            }
+        }
+
+        /// <summary>
         /// Set the minimum light.
         /// </summary>
         /// <param name="min">Minimum light.</param>
@@ -308,7 +320,7 @@ namespace FGEGraphics.GraphicsHelpers
         {
             if (view.RenderLights && !view.RenderingShadows)
             {
-                GL.Uniform1(16, min);
+                GL.Uniform1(16, Math.Max(min, 0.01f));
             }
         }
 
