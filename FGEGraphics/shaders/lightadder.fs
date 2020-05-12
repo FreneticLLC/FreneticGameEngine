@@ -282,14 +282,10 @@ void main() // Let's put all code in main, why not...
 			|| fs.y < 0.0 || fs.y > 1.0
 			|| fs.z < 0.0 || fs.z > 1.0) // If any coordinate is outside view range...
 		{
-#if MCM_SHADOWS
 			if (light_type >= 0.5)
 			{
 				continue;
 			}
-#else // Shadows
-			continue; // We can't light it! Discard straight away!
-#endif // Else - Shadows
 		}
 		else
 		{
