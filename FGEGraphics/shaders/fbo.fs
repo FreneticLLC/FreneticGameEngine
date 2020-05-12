@@ -107,7 +107,7 @@ void main()
 #if MCM_TRANSP_ALLOWED
 	if (write_hints > 0.5)
 	{
-		renderhint = vec4(specular_strength, 0.0 /* TODO: ??? */, minimum_light, 1.0);
+		renderhint = vec4(specular_strength, 0.0 /* TODO: Blur */, minimum_light, 1.0);
 		renderhint2 = vec4(0.0, reflection_amt, 0.0, 1.0);
 	}
 	else
@@ -116,7 +116,7 @@ void main()
 		renderhint2 = vec4(0.0);
 	}
 #else // MCM_TRANSP_ALLOWED
-	renderhint = vec4(specular_strength, 0.0 /* TODO: ??? */, minimum_light, 1.0);
+	renderhint = vec4(specular_strength, 0.0 /* TODO: Blur */, minimum_light, 1.0);
 	renderhint2 = vec4(0.0, reflection_amt, 0.0, 1.0);
 #endif // else - MCM_TRANSP_ALLOWED
 #if MCM_INVERSE_FADE
