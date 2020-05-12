@@ -182,6 +182,9 @@
     <None Include="shaders\shadow.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="shaders\ssao.inc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="shaders\transpadder.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
