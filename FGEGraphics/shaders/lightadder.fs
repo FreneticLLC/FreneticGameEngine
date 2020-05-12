@@ -289,48 +289,48 @@ void main() // Let's put all code in main, why not...
 		}
 		else
 		{
-	// This block only runs if shadows are enabled.
+			// This block only runs if shadows are enabled.
 #if MCM_SHADOWS
-	depth = 0.0;
-	// Pretty quality (soft) shadows require a quality graphics card.
+			depth = 0.0;
+			// Pretty quality (soft) shadows require a quality graphics card.
 #if MCM_GOOD_GRAPHICS
-	// This area is some calculus-ish stuff based upon NVidia sample code (naturally, it seems to run poorly on AMD cards. Good area to recode/optimize!)
-	// It's used to take the shadow map coordinates, and gets a safe Z-modifier value (See below).
-	vec3 duvdist_dx = dFdx(fs);
-	vec3 duvdist_dy = dFdy(fs);
-	vec2 dz_duv = vec2(duvdist_dy.y * duvdist_dx.z - duvdist_dx.y * duvdist_dy.z, duvdist_dx.x * duvdist_dy.z - duvdist_dy.x * duvdist_dx.z);
-	float tlen = (duvdist_dx.x * duvdist_dy.y) - (duvdist_dx.y * duvdist_dy.x);
-	dz_duv /= tlen;
-	float oneoverdj = 1.0 / depth_jump;
-	float jump = tex_size * depth_jump;
-	float depth_count = 0;
-	// Loop over an area quite near the pixel on the shadow map, but still covering multiple pixels of the shadow map.
-	for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
-	{
-		for (float y = -oneoverdj * 2; y < oneoverdj * 2 + 1; y++)
-		{
-			float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 1000.0; // Use the calculus magic from before to get a safe Z-modifier.
-			if (offz > -0.000001) // (Potentially removable?) It MUST be negative, and below a certain threshold. If it's not...
+			// This area is some calculus-ish stuff based upon NVidia sample code (naturally, it seems to run poorly on AMD cards. Good area to recode/optimize!)
+			// It's used to take the shadow map coordinates, and gets a safe Z-modifier value (See below).
+			vec3 duvdist_dx = dFdx(fs);
+			vec3 duvdist_dy = dFdy(fs);
+			vec2 dz_duv = vec2(duvdist_dy.y * duvdist_dx.z - duvdist_dx.y * duvdist_dy.z, duvdist_dx.x * duvdist_dy.z - duvdist_dy.x * duvdist_dx.z);
+			float tlen = (duvdist_dx.x * duvdist_dy.y) - (duvdist_dx.y * duvdist_dy.x);
+			dz_duv /= tlen;
+			float oneoverdj = 1.0 / depth_jump;
+			float jump = tex_size * depth_jump;
+			float depth_count = 0;
+			// Loop over an area quite near the pixel on the shadow map, but still covering multiple pixels of the shadow map.
+			for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
 			{
-				offz = -0.000001; // Force it to the threshold value to reduce errors.
+				for (float y = -oneoverdj * 2; y < oneoverdj * 2 + 1; y++)
+				{
+					float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 1000.0; // Use the calculus magic from before to get a safe Z-modifier.
+					if (offz > -0.000001) // (Potentially removable?) It MUST be negative, and below a certain threshold. If it's not...
+					{
+						offz = -0.000001; // Force it to the threshold value to reduce errors.
+					}
+					//offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
+					float rd = texture(shadowtex, vec3(fs.x + x * jump, fs.y + y * jump, float(i))).r; // Calculate the depth of the pixel.
+					depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
+					depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.
+				}
 			}
-			//offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
-			float rd = texture(shadowtex, vec3(fs.x + x * jump, fs.y + y * jump, float(i))).r; // Calculate the depth of the pixel.
-			depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
-			depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.
-		}
-	}
-	depth = depth / depth_count; // Average up the 0 and 1 light values to produce gray near the edges of shadows. Soft shadows, hooray!
+			depth = depth / depth_count; // Average up the 0 and 1 light values to produce gray near the edges of shadows. Soft shadows, hooray!
 #else // Good Graphics
-	float rd = texture(shadowtex, vec3(fs.x, fs.y, float(i))).r; // Calculate the depth of the pixel.
-	float depth = (rd >= (fs.z - 0.001) ? 1.0 : 0.0); // If we have a bad graphics card, just quickly get a 0 or 1 depth value. This will be pixelated (hard) shadows!
+			float rd = texture(shadowtex, vec3(fs.x, fs.y, float(i))).r; // Calculate the depth of the pixel.
+			float depth = (rd >= (fs.z - 0.001) ? 1.0 : 0.0); // If we have a bad graphics card, just quickly get a 0 or 1 depth value. This will be pixelated (hard) shadows!
 #endif // Else - Good Graphics
-	if (depth <= 0.0)
-	{
-		continue; // If we're a fully shadowed pixel, don't add any light!
-	}
+			if (depth <= 0.0)
+			{
+				continue; // If we're a fully shadowed pixel, don't add any light!
+			}
 #endif // Shadows
-	}
+		}
 	}
 	else
 	{
