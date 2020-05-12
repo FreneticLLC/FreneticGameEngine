@@ -170,11 +170,12 @@ void main() // The central entry point of the shader. Handles everything!
 #endif
 	// Fancy effects are only available to quality graphics cards. Cut out quick if one's not available.
 #if MCM_GOOD_GRAPHICS
-	vec3 renderhint = texture(renderhinttex, f_texcoord).xyz;
+	vec4 renderhintFull = texture(renderhinttex, f_texcoord);
+	vec3 renderhint = renderhintFull.xyz;
 	vec3 renderhint2 = texture(renderhint2tex, f_texcoord).xyz;
 	vec3 pos = texture(positiontex, f_texcoord).xyz;
 	float dist = linearizeDepth(texture(depthtex, f_texcoord).x); // This is useful for both fog and reflection, so grab it here.
-	if (renderhint.z < 0.99 || fogCol.w > 1.0)
+	if (renderhintFull.w < 0.1 && (renderhint.z < 0.99 || fogCol.w > 1.0)) // Fog applies when not fullbright and renderhint holds any value (it holds no value for parts of the skybox).
 	{
 		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);
 		float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
