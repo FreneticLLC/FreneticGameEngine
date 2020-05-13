@@ -36,12 +36,12 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// Locker for the console.
         /// </summary>
-        static Object ConsoleLock;
+        static LockObject ConsoleLock;
 
         /// <summary>
         /// Locker for writing.
         /// </summary>
-        static Object WriteLock;
+        static LockObject WriteLock;
 
         /// <summary>
         /// The thread being used for console output.
@@ -107,8 +107,8 @@ namespace FGECore.CoreSystems
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Preparing console...");
-            ConsoleLock = new Object();
-            WriteLock = new Object();
+            ConsoleLock = new LockObject();
+            WriteLock = new LockObject();
             ConsoleOutputCanceller = new CancellationTokenSource();
             ConsoleOutputThread = new Thread(new ParameterizedThreadStart(ConsoleLoop));
             ConsoleOutputThread.Start(ConsoleOutputCanceller);

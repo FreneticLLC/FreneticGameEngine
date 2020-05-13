@@ -244,7 +244,7 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// Locker to prevent thread issues.
         /// </summary>
-        readonly Object Locker = new Object();
+        readonly LockObject Locker = new LockObject();
 
         /// <summary>
         /// Whether the item has been started.

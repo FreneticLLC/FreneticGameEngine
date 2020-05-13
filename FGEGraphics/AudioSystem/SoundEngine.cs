@@ -378,7 +378,7 @@ namespace FGEGraphics.AudioSystem
         /// <summary>
         /// Effect names to remove.
         /// </summary>
-        List<string> ToRemove = new List<string>();
+        readonly List<string> ToRemove = new List<string>();
 
         /// <summary>
         /// Runs a full clean-up pass.

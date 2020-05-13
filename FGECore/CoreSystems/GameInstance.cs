@@ -1,4 +1,12 @@
-﻿using System;
+﻿//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+// See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
+// If neither of these are available, assume that neither you nor anyone other than the copyright holder
+// hold any right or permission to use this software until such time as the official license is identified.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +14,7 @@ using System.Threading.Tasks;
 using FGECore.StackNoteSystem;
 using FGECore.EntitySystem;
 using FGECore.FileSystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.CoreSystems
 {
@@ -76,7 +85,7 @@ namespace FGECore.CoreSystems
         /// Lock this object to prevent collision with the instance tick.
         /// Only lock on this if the scheduler does not fit your needs. (Consider requesting new scheduler features if that is the case!)
         /// </summary>
-        public Object TickLock = new Object();
+        public LockObject TickLock = new LockObject();
 
         /// <summary>
         /// The scheduling system for this game instance.

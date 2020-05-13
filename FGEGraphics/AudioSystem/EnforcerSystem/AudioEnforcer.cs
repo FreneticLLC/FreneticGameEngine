@@ -11,15 +11,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using System.Threading;
+using System.Diagnostics;
 using OpenTK;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
-using System.Diagnostics;
+using FGECore;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGEGraphics.AudioSystem.EnforcerSystem
 {
@@ -96,7 +97,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// <summary>
         /// Locker for interaction with the enforcer.
         /// </summary>
-        public Object Locker = new Object();
+        public LockObject Locker = new LockObject();
 
         /// <summary>
         /// Relevant OpenAL audio context.
@@ -176,7 +177,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// <summary>
         /// Current level (of audio) locker.
         /// </summary>
-        public Object CLelLock = new Object();
+        public LockObject CLelLock = new LockObject();
 
         /// <summary>
         /// Current audio levels. Use <see cref="CLelLock"/>.
