@@ -21,6 +21,7 @@ using FGECore.MathHelpers;
 using FGECore.FileSystems;
 using FGEGraphics.LightingSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
 using System.Threading;
 using FGECore.StackNoteSystem;
 using FGEGraphics.ClientSystem.EntitySystem;

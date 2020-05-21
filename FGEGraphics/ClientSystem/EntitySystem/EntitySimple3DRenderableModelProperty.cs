@@ -12,11 +12,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.GraphicsHelpers;
-using FGECore;
-using FGECore.CoreSystems;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.Models;
 using FGECore.MathHelpers;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.ClientSystem.EntitySystem

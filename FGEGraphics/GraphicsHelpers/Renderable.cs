@@ -14,13 +14,13 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FreneticUtilities.FreneticExtensions;
-using FGECore.UtilitySystems;
-using FreneticUtilities.FreneticToolkit;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.GraphicsHelpers
 {

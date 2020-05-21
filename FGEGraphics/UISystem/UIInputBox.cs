@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -70,7 +71,7 @@ namespace FGEGraphics.UISystem
         /// <param name="fonts">The font to use.</param>
         /// <param name="pos">The position of the element.</param>
         public UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos)
-            : base(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.font_default.Height) : pos)
+            : base(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.FontDefault.Height) : pos)
         {
             Text = text;
             Info = info;
@@ -280,15 +281,15 @@ namespace FGEGraphics.UISystem
             int w = LastAbsoluteSize.X;
             engine.Textures.White.Bind();
             view.Rendering.SetColor(Color);
-            view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.font_default.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.FontDefault.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             GL.Enable(EnableCap.ScissorTest);
-            GL.Scissor(x, engine.Window.Height - (y + (int)Fonts.font_default.Height), w, (int)Fonts.font_default.Height);
+            GL.Scissor(x, engine.Window.Height - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
             if (Selected)
             {
                 float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
                 float textw2 = Fonts.MeasureFancyText(typed.Substring(0, MaxCursor + cmax));
                 view.Rendering.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-                view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.font_default.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+                view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
             view.Rendering.SetColor(Color4.White);
             Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

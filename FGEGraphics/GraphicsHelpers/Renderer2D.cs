@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGECore;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -193,7 +193,7 @@ namespace FGEGraphics.GraphicsHelpers
         public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null)
         {
             Vector2 scaler = new Vector2(xmax - xmin, ymax - ymin);
-            Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
+            //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
             Vector2 adder = new Vector2(xmin, ymin);
             Vector2 tscaler = rc.Scaler * scaler;
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));

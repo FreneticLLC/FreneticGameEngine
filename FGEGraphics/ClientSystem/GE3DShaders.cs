@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
 
 namespace FGEGraphics.ClientSystem
 {

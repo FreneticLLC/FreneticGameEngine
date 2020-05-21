@@ -12,19 +12,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
-using FGECore;
 using FGECore.CoreSystems;
-using FGECore.MathHelpers;
-using FGECore.FileSystems;
-using FGEGraphics.GraphicsHelpers;
-using FGECore.EntitySystem;
-using FGEGraphics.ClientSystem.EntitySystem;
-using FGEGraphics.UISystem;
-using FGEGraphics.AudioSystem;
 using FGECore.StackNoteSystem;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.Models;
+using FGEGraphics.ClientSystem.EntitySystem;
+using FGEGraphics.AudioSystem;
 
 namespace FGEGraphics.ClientSystem
 {

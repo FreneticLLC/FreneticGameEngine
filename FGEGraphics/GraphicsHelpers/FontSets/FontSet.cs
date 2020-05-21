@@ -1,4 +1,4 @@
-//
+﻿//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -10,128 +10,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 using System.Threading.Tasks;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGECore;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
-using FGECore.FileSystems;
-using System.Drawing;
-using System.Globalization;
 using FreneticUtilities.FreneticExtensions;
-using FGECore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
-using FGEGraphics.ClientSystem;
+using FGECore.MathHelpers;
+using FGECore.UtilitySystems;
 using FGECore.ConsoleHelpers;
+
 using MathHelper = FreneticUtilities.FreneticToolkit.MathHelper;
 
-namespace FGEGraphics.GraphicsHelpers
+namespace FGEGraphics.GraphicsHelpers.FontSets
 {
-    /// <summary>
-    /// Handles pretty-rendered fonts.
-    /// </summary>
-    public class FontSetEngine
-    {
-        /// <summary>
-        /// Constructs the font set engine without initializing it.
-        /// </summary>
-        /// <param name="fengine">The font engine.</param>
-        public FontSetEngine(GLFontEngine fengine)
-        {
-            GLFonts = fengine;
-        }
-
-        /// <summary>
-        /// Shader to revert to after rendering some text.
-        /// </summary>
-        public Shader FixTo;
-
-        /// <summary>
-        /// Random helper object.
-        /// </summary>
-        public MTRandom RandomHelper = new MTRandom();
-
-        /// <summary>
-        /// The lower font system.
-        /// </summary>
-        public GLFontEngine GLFonts;
-        
-        /// <summary>
-        /// The general font used for all normal purposes.
-        /// </summary>
-        public FontSet Standard;
-
-        /// <summary>
-        /// The general font for slightly bigger text rendering.
-        /// </summary>
-        public FontSet SlightlyBigger;
-
-        /// <summary>
-        /// A list of all currently loaded font sets.
-        /// </summary>
-        public List<FontSet> Fonts = new List<FontSet>();
-
-        /// <summary>
-        /// Helper function to get a language data.
-        /// </summary>
-        public Func<string[], string> GetLanguageHelper;
-
-        /// <summary>
-        /// Helper function to get the current orthographic matrix.
-        /// </summary>
-        public Func<Matrix4> GetOrtho;
-
-        /// <summary>
-        /// Helper function to get the current global tick time.
-        /// </summary>
-        public Func<double> GetGlobalTickTime;
-
-        /// <summary>
-        /// Prepares the FontSet system.
-        /// </summary>
-        /// <param name="getlanghelp">The helper function to get a language data.</param>
-        /// <param name="orthobase">The helper function to get the current orthographic matrix.</param>
-        /// <param name="ticktime">The helper function to get the current global tick time.</param>
-        public void Init(Func<string[], string> getlanghelp, Func<Matrix4> orthobase, Func<double> ticktime)
-        {
-            GetLanguageHelper = getlanghelp;
-            GetOrtho = orthobase;
-            GetGlobalTickTime = ticktime;
-            Standard = new FontSet("standard", this);
-            Standard.Load(GLFonts.Standard.Name, GLFonts.Standard.Size);
-            Fonts.Add(Standard);
-            SlightlyBigger = new FontSet("slightlybigger", this);
-            SlightlyBigger.Load(GLFonts.Standard.Name, GLFonts.Standard.Size + 5);
-            Fonts.Add(SlightlyBigger);
-        }
-
-        /// <summary>
-        /// Gets a font by a specified name.
-        /// If the relevant FontSet exists but is not yet loaded, will load it from file.
-        /// </summary>
-        /// <param name="fontname">The name of the font.</param>
-        /// <param name="fontsize">The size of the font.</param>
-        /// <returns>The specified font.</returns>
-        public FontSet GetFont(string fontname, int fontsize)
-        {
-            string namelow = fontname.ToLowerFast();
-            for (int i = 0; i < Fonts.Count; i++)
-            {
-                if (Fonts[i].font_default.Size == fontsize && Fonts[i].Name == namelow)
-                {
-                    return Fonts[i];
-                }
-            }
-            FontSet toret = new FontSet(fontname, this);
-            toret.Load(fontname, fontsize);
-            Fonts.Add(toret);
-            return toret;
-        }
-
-    }
-
     /// <summary>
     /// Contains various GLFonts needed to render fancy text.
     /// </summary>
@@ -145,42 +37,42 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Default font.
         /// </summary>
-        public GLFont font_default;
+        public GLFont FontDefault;
 
         /// <summary>
         /// Bold font.
         /// </summary>
-        public GLFont font_bold;
+        public GLFont FontBold;
 
         /// <summary>
         /// Italic font.
         /// </summary>
-        public GLFont font_italic;
+        public GLFont FontItalic;
 
         /// <summary>
         /// Bold+Italic font.
         /// </summary>
-        public GLFont font_bolditalic;
+        public GLFont FontBoldItalic;
 
         /// <summary>
         /// Half-size font.
         /// </summary>
-        public GLFont font_half;
+        public GLFont FontHalf;
 
         /// <summary>
         /// Half-size bold font.
         /// </summary>
-        public GLFont font_boldhalf;
+        public GLFont FontBoldHalf;
 
         /// <summary>
         /// Half-size italic font.
         /// </summary>
-        public GLFont font_italichalf;
+        public GLFont FontItalicHalf;
 
         /// <summary>
         /// Half-size bold+italic font.
         /// </summary>
-        public GLFont font_bolditalichalf;
+        public GLFont FontBoldItalicHalf;
 
         /// <summary>
         /// Name of the font set.
@@ -205,14 +97,14 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="fontsize">The size of the font.</param>
         public void Load(string fontname, int fontsize)
         {
-            font_default = Engine.GLFonts.GetFont(fontname, false, false, fontsize);
-            font_bold = Engine.GLFonts.GetFont(fontname, true, false, fontsize);
-            font_italic = Engine.GLFonts.GetFont(fontname, false, true, fontsize);
-            font_bolditalic = Engine.GLFonts.GetFont(fontname, true, true, fontsize);
-            font_half = Engine.GLFonts.GetFont(fontname, false, false, fontsize / 2);
-            font_boldhalf = Engine.GLFonts.GetFont(fontname, true, false, fontsize / 2);
-            font_italichalf = Engine.GLFonts.GetFont(fontname, false, true, fontsize / 2);
-            font_bolditalichalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
+            FontDefault = Engine.GLFonts.GetFont(fontname, false, false, fontsize);
+            FontBold = Engine.GLFonts.GetFont(fontname, true, false, fontsize);
+            FontItalic = Engine.GLFonts.GetFont(fontname, false, true, fontsize);
+            FontBoldItalic = Engine.GLFonts.GetFont(fontname, true, true, fontsize);
+            FontHalf = Engine.GLFonts.GetFont(fontname, false, false, fontsize / 2);
+            FontBoldHalf = Engine.GLFonts.GetFont(fontname, true, false, fontsize / 2);
+            FontItalicHalf = Engine.GLFonts.GetFont(fontname, false, true, fontsize / 2);
+            FontBoldItalicHalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
         }
 
         /// <summary>
@@ -388,7 +280,7 @@ namespace FGEGraphics.GraphicsHelpers
                 Color customColor = BaseCustomColor;
                 if (font == null)
                 {
-                    font = font_default;
+                    font = FontDefault;
                 }
                 int capa = line.Length * 8;
                 vbo.Vecs.Capacity = capa;
@@ -407,7 +299,7 @@ namespace FGEGraphics.GraphicsHelpers
                             float width = font.MeasureString(drawme);
                             if (highlight)
                             {
-                                DrawRectangle(X, Y, width, font_default.Height, ColorFor(highlightColor, highlightTransparency), vbo);
+                                DrawRectangle(X, Y, width, FontDefault.Height, ColorFor(highlightColor, highlightTransparency), vbo);
                             }
                             if (underline)
                             {
@@ -531,10 +423,10 @@ namespace FGEGraphics.GraphicsHelpers
                                         }
                                         if (highl)
                                         {
-                                            float widt = font_default.MeasureString(ttext);
-                                            DrawRectangle(X, Y, widt, font_default.Height, Color.Black, vbo);
-                                            RenderBaseText(vbo, X, Y, ttext, font_default, 5);
-                                            DrawRectangle(X, Y + ((float)font_default.Height * 4f / 5f), widt, 2, Color.Blue, vbo);
+                                            float widt = FontDefault.MeasureString(ttext);
+                                            DrawRectangle(X, Y, widt, FontDefault.Height, Color.Black, vbo);
+                                            RenderBaseText(vbo, X, Y, ttext, FontDefault, 5);
+                                            DrawRectangle(X, Y + ((float)FontDefault.Height * 4f / 5f), widt, 2, Color.Blue, vbo);
                                             X += widt;
                                         }
                                         else
@@ -573,8 +465,8 @@ namespace FGEGraphics.GraphicsHelpers
                                 case 'i':
                                     {
                                         italic = true;
-                                        GLFont nfont = (superScript || subScript) ? (bold ? font_bolditalichalf : font_italichalf) :
-                                            (bold ? font_bolditalic : font_italic);
+                                        GLFont nfont = (superScript || subScript) ? (bold ? FontBoldItalicHalf : FontItalicHalf) :
+                                            (bold ? FontBoldItalic : FontItalic);
                                         if (nfont != font)
                                         {
                                             font = nfont;
@@ -584,8 +476,8 @@ namespace FGEGraphics.GraphicsHelpers
                                 case 'b':
                                     {
                                         bold = true;
-                                        GLFont nfont = (superScript || subScript) ? (italic ? font_bolditalichalf : font_boldhalf) :
-                                            (italic ? font_bolditalic : font_bold);
+                                        GLFont nfont = (superScript || subScript) ? (italic ? FontBoldItalicHalf : FontBoldHalf) :
+                                            (italic ? FontBoldItalic : FontBold);
                                         if (nfont != font)
                                         {
                                             font = nfont;
@@ -608,8 +500,8 @@ namespace FGEGraphics.GraphicsHelpers
                                             subScript = false;
                                             Y -= font.Height / 2;
                                         }
-                                        GLFont nfont = bold && italic ? font_bolditalichalf : bold ? font_boldhalf :
-                                            italic ? font_italichalf : font_half;
+                                        GLFont nfont = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
+                                            italic ? FontItalicHalf : FontHalf;
                                         if (nfont != font)
                                         {
                                             font = nfont;
@@ -624,9 +516,9 @@ namespace FGEGraphics.GraphicsHelpers
                                         {
                                             superScript = false;
                                         }
-                                        Y += font_default.Height / 2;
-                                        GLFont nfont = bold && italic ? font_bolditalichalf : bold ? font_boldhalf :
-                                            italic ? font_italichalf : font_half;
+                                        Y += FontDefault.Height / 2;
+                                        GLFont nfont = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
+                                            italic ? FontItalicHalf : FontHalf;
                                         if (nfont != font)
                                         {
                                             font = nfont;
@@ -644,14 +536,14 @@ namespace FGEGraphics.GraphicsHelpers
                                     break;
                                 case 'r':
                                     {
-                                        GLFont nfont = font_default;
+                                        GLFont nfont = FontDefault;
                                         if (nfont != font)
                                         {
                                             font = nfont;
                                         }
                                         if (subScript)
                                         {
-                                            Y -= font_default.Height / 2;
+                                            Y -= FontDefault.Height / 2;
                                         }
                                         subScript = false;
                                         superScript = false;
@@ -709,7 +601,7 @@ namespace FGEGraphics.GraphicsHelpers
                         }
                         tcol += GrabAllFormats(line);
                     }
-                    Y += font_default.Height;
+                    Y += FontDefault.Height;
                 }
                 int len = 0;
                 for (int i = 0; i < vbos.Count; i++)
@@ -741,13 +633,13 @@ namespace FGEGraphics.GraphicsHelpers
             GL.Uniform3(3, ref col);
             cVBO.Build();
             cVBO.Render();
-            if (Engine.FixTo == null)
+            if (Engine.FixToShader == null)
             {
                 Engine.GLFonts.Shaders.ColorMultShader.Bind();
             }
             else
             {
-                Engine.FixTo.Bind();
+                Engine.FixToShader.Bind();
             }
             r_depth--;
             cVBO.Destroy();
@@ -889,7 +781,7 @@ namespace FGEGraphics.GraphicsHelpers
                     len = newlen;
                 }
             }
-            return new Location(len, data.Length * font_default.Height, 0);
+            return new Location(len, data.Length * FontDefault.Height, 0);
         }
 
         /// <summary>
@@ -966,7 +858,7 @@ namespace FGEGraphics.GraphicsHelpers
             float MeasWidth = 0;
             if (font == null)
             {
-                font = font_default;
+                font = FontDefault;
             }
             int start = 0;
             line = line.Replace("^q", "\"").ApplyBaseColor(bcolor); // TODO: Effic of replace usage? And of per-line replaces?
@@ -1052,41 +944,41 @@ namespace FGEGraphics.GraphicsHelpers
                                     {
                                         if (pushStr)
                                         {
-                                            font_default.RecognizeCharacters(ttext);
+                                            FontDefault.RecognizeCharacters(ttext);
                                         }
-                                        float widt = font_default.MeasureString(ttext);
-                                        tlinks.Add(new KeyValuePair<string, Rectangle2F>(sb.ToString().Before("|"), new Rectangle2F() { X = MeasWidth, Y = 0, Width = widt, Height = font_default.Height }));
+                                        float widt = FontDefault.MeasureString(ttext);
+                                        tlinks.Add(new KeyValuePair<string, Rectangle2F>(sb.ToString().Before("|"), new Rectangle2F() { X = MeasWidth, Y = 0, Width = widt, Height = FontDefault.Height }));
                                         MeasWidth += widt;
                                     }
                                     else
                                     {
-                                        float widt = MeasureFancyText(ttext, out List<KeyValuePair<string, Rectangle2F>> ttlinks, bcolor, bold, italic, sub, font);
+                                        float widt = MeasureFancyText(ttext, out _, bcolor, bold, italic, sub, font);
                                         MeasWidth += widt;
                                     }
                                     start = x + 1;
                                 }
                                 break;
                             case 'r':
-                                font = font_default;
+                                font = FontDefault;
                                 bold = false;
                                 sub = false;
                                 italic = false;
                                 break;
                             case 'S':
                             case 'l':
-                                font = bold && italic ? font_bolditalichalf : bold ? font_boldhalf :
-                                    italic ? font_italichalf : font_half;
+                                font = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
+                                    italic ? FontItalicHalf : FontHalf;
                                 sub = true;
                                 break;
                             case 'i':
                                 italic = true;
-                                font = (sub) ? (bold ? font_bolditalichalf : font_italichalf) :
-                                    (bold ? font_bolditalic : font_italic);
+                                font = (sub) ? (bold ? FontBoldItalicHalf : FontItalicHalf) :
+                                    (bold ? FontBoldItalic : FontItalic);
                                 break;
                             case 'b':
                                 bold = true;
-                                font = (sub) ? (italic ? font_bolditalichalf : font_boldhalf) :
-                                    (italic ? font_bolditalic : font_bold);
+                                font = (sub) ? (italic ? FontBoldItalicHalf : FontBoldHalf) :
+                                    (italic ? FontBoldItalic : FontBold);
                                 break;
                             default:
                                 break;
@@ -1148,7 +1040,7 @@ namespace FGEGraphics.GraphicsHelpers
                     }
                     int lastSpace = MathHelper.Clamp(line.IndexOf(' '), 1, target);
                     resultBuilder.Append(line, 0, lastSpace);
-                    line = line.Substring(lastSpace + 1);
+                    //line = line.Substring(lastSpace + 1);
                 }
             }
             resultBuilder.Length -= 1; // Trim off the final newline.
@@ -1185,31 +1077,5 @@ namespace FGEGraphics.GraphicsHelpers
         {
             return FORMAT_CODES_MATCHER.IsMatch(c);
         }
-    }
-
-    /// <summary>
-    /// Represents a float-based rectangle.
-    /// </summary>
-    public class Rectangle2F
-    {
-        /// <summary>
-        /// X coordinate.
-        /// </summary>
-        public float X;
-
-        /// <summary>
-        /// Y coordinate.
-        /// </summary>
-        public float Y;
-
-        /// <summary>
-        /// The width.
-        /// </summary>
-        public float Width;
-
-        /// <summary>
-        /// The height.
-        /// </summary>
-        public float Height;
     }
 }

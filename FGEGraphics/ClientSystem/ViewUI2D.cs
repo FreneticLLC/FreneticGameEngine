@@ -19,6 +19,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.UISystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
 
 namespace FGEGraphics.ClientSystem
 {
@@ -134,8 +135,8 @@ namespace FGEGraphics.ClientSystem
             GL.Uniform2(2, ref UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
-            Shader s = Client.FontSets.FixTo;
-            Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
+            Shader s = Client.FontSets.FixToShader;
+            Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
             LastRenderedSet.Clear();
             CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
@@ -145,7 +146,7 @@ namespace FGEGraphics.ClientSystem
                 elem.Render(this, Client.Delta);
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
-            Client.FontSets.FixTo = s;
+            Client.FontSets.FixToShader = s;
         }
 
         /// <summary>

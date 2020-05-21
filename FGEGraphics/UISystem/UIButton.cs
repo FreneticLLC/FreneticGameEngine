@@ -16,6 +16,8 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
 
 namespace FGEGraphics.UISystem
@@ -28,7 +30,7 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// The name of the texture for this button.
         /// </summary>
-        private string tName;
+        private readonly string TextureName;
 
         /// <summary>
         /// The text to display on this button.
@@ -81,7 +83,7 @@ namespace FGEGraphics.UISystem
         public UIButton(string buttontexname, string buttontext, FontSet font, Action clicked, UIPositionHelper pos)
             : base(pos)
         {
-            tName = buttontexname;
+            TextureName = buttontexname;
             Text = buttontext;
             TextFont = font;
             ClickedTask = clicked;
@@ -93,9 +95,9 @@ namespace FGEGraphics.UISystem
         protected override void Init()
         {
             TextureEngine Textures = Engine.Textures;
-            Tex_None = Textures.GetTexture(tName + "_none");
-            Tex_Hover = Textures.GetTexture(tName + "_hover");
-            Tex_Click = Textures.GetTexture(tName + "_click");
+            Tex_None = Textures.GetTexture(TextureName + "_none");
+            Tex_Hover = Textures.GetTexture(TextureName + "_hover");
+            Tex_Click = Textures.GetTexture(TextureName + "_click");
         }
 
         /// <summary>
@@ -161,7 +163,7 @@ namespace FGEGraphics.UISystem
             float height = LastAbsoluteSize.Y;
             view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             float len = TextFont.MeasureFancyText(Text);
-            float hei = TextFont.font_default.Height;
+            float hei = TextFont.FontDefault.Height;
             TextFont.DrawFancyText(Text, new Location(x + width / 2 - len / 2, y + height / 2 - hei / 2, 0));
         }
     }

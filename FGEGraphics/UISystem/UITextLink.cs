@@ -16,6 +16,8 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
 
 namespace FGEGraphics.UISystem
@@ -95,8 +97,8 @@ namespace FGEGraphics.UISystem
             TextHover = btexthover;
             TextClick = btextclick;
             TextFont = font;
-            Position.ConstantWidth((int)(font.MeasureFancyText(Text, BColor) + (Icon == null ? 0 : font.font_default.Height)));
-            Position.ConstantHeight((int)TextFont.font_default.Height);
+            Position.ConstantWidth((int)(font.MeasureFancyText(Text, BColor) + (Icon == null ? 0 : font.FontDefault.Height)));
+            Position.ConstantHeight((int)TextFont.FontDefault.Height);
         }
 
         /// <summary>
@@ -159,8 +161,8 @@ namespace FGEGraphics.UISystem
                 float y = LastAbsolutePosition.Y;
                 Icon.Bind();
                 view.Rendering.SetColor(IconColor);
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.font_default.Height, y + TextFont.font_default.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                TextFont.DrawFancyText(tt, new Location(x + TextFont.font_default.Height, y, 0), int.MaxValue, 1, false, BColor);
+                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+                TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0), int.MaxValue, 1, false, BColor);
                 view.Rendering.SetColor(OpenTK.Vector4.One);
             }
             else

@@ -20,7 +20,7 @@ using OpenTK.Graphics.OpenGL4;
 using FGECore.ConsoleHelpers;
 using FreneticUtilities.FreneticExtensions;
 
-namespace FGEGraphics.GraphicsHelpers
+namespace FGEGraphics.GraphicsHelpers.Shaders
 {
     /// <summary>
     /// The primary engine for shaders.
@@ -431,124 +431,6 @@ namespace FGEGraphics.GraphicsHelpers
             }
             GraphicsUtil.CheckError("Shader - Compile");
             return Program;
-        }
-    }
-
-    /// <summary>
-    /// Wraps an OpenGL shader.
-    /// </summary>
-    public class Shader
-    {
-        /// <summary>
-        /// Constructs an empty shader.
-        /// </summary>
-        public Shader()
-        {
-            NewVersion = this;
-        }
-
-        /// <summary>
-        /// The shader engine that owns this shader.
-        /// </summary>
-        public ShaderEngine Engine;
-
-        /// <summary>
-        /// The name of the shader
-        /// </summary>
-        public string Name;
-
-        /// <summary>
-        /// The shader this shader was remapped to.
-        /// </summary>
-        public Shader RemappedTo;
-
-        /// <summary>
-        /// The internal OpenGL ID for the shader program.
-        /// </summary>
-        public int Internal_Program;
-
-        /// <summary>
-        /// The original OpenGL ID that formed this shader program.
-        /// </summary>
-        public int Original_Program;
-
-        /// <summary>
-        /// All variables on this shader.
-        /// </summary>
-        public string[] Vars;
-
-        /// <summary>
-        /// Whether the shader loaded properly.
-        /// </summary>
-        public bool LoadedProperly = false;
-
-        /// <summary>
-        /// Destroys the OpenGL program that this shader wraps.
-        /// </summary>
-        public void Destroy()
-        {
-            if (Original_Program > -1 && GL.IsProgram(Original_Program))
-            {
-                GL.DeleteProgram(Original_Program);
-                Original_Program = -1;
-            }
-        }
-
-        /// <summary>
-        /// Removes the shader from the system.
-        /// </summary>
-        public void Remove()
-        {
-            Destroy();
-            if (Engine.LoadedShaders.TryGetValue(Name, out Shader shad) && shad == this)
-            {
-                Engine.LoadedShaders.Remove(Name);
-            }
-        }
-
-        /// <summary>
-        /// The tick time this shader was last bound.
-        /// </summary>
-        public double LastBindTime = 0;
-
-        /// <summary>
-        /// A new version of the shader, that replaces this one.
-        /// </summary>
-        private Shader NewVersion = null;
-
-        /// <summary>
-        /// Checks if the shader is valid, and replaces it if needed.
-        /// </summary>
-        public void CheckValid()
-        {
-            if (Internal_Program == -1)
-            {
-                Shader temp = Engine.GetShader(Name);
-                Original_Program = temp.Original_Program;
-                Internal_Program = Original_Program;
-                RemappedTo = temp;
-                NewVersion = temp;
-            }
-            else if (RemappedTo != null)
-            {
-                RemappedTo.CheckValid();
-                Internal_Program = RemappedTo.Original_Program;
-            }
-        }
-
-        /// <summary>
-        /// Binds this shader to OpenGL.
-        /// </summary>
-        public Shader Bind()
-        {
-            if (NewVersion != this)
-            {
-                return NewVersion.Bind();
-            }
-            LastBindTime = Engine.cTime;
-            CheckValid();
-            GL.UseProgram(Internal_Program);
-            return NewVersion;
         }
     }
 }

@@ -65,6 +65,7 @@
     <Compile Include="FileSystems\FileEngine.cs" />
     <Compile Include="FileSystems\FileUtilities.cs" />
     <Compile Include="MathHelpers\MathUtilities.cs" />
+    <Compile Include="MathHelpers\Rectangle2F.cs" />
     <Compile Include="ModelSystems\AnimationEngine.cs" />
     <Compile Include="CoreSystems\BasicEngine.cs" />
     <Compile Include="PhysicsSystem\CollisionUtil.cs" />

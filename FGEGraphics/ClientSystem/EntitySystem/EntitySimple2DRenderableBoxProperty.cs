@@ -16,6 +16,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

@@ -21,7 +21,7 @@ using FGECore.MathHelpers;
 using FGECore.FileSystems;
 using FGECore.ConsoleHelpers;
 
-namespace FGEGraphics.GraphicsHelpers
+namespace FGEGraphics.GraphicsHelpers.Textures
 {
     /// <summary>
     /// The primary engine for textures.
@@ -139,8 +139,8 @@ namespace FGEGraphics.GraphicsHelpers
             foreach (Texture texture in LoadedTextures.Values)
             {
                 texture.Destroy();
-                texture.Internal_Texture = -1;
-                texture.Original_InternalID = -1;
+                texture.InternalTexture = -1;
+                texture.OriginalInternalID = -1;
             }
             LoadedTextures.Clear();
         }
@@ -205,8 +205,8 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 Engine = this,
                 Name = textureName,
-                Original_InternalID = White.Original_InternalID,
-                Internal_Texture = White.Internal_Texture,
+                OriginalInternalID = White.OriginalInternalID,
+                InternalTexture = White.InternalTexture,
                 LoadedProperly = false,
                 Width = White.Width,
                 Height = White.Height
@@ -338,7 +338,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex.ToString()}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex}");
                 return null;
             }
         }
@@ -357,24 +357,22 @@ namespace FGEGraphics.GraphicsHelpers
                 Engine = this,
                 Name = filename
             };
-            using (Bitmap bmp = LoadBitmapForTexture(filename, twidth))
+            using Bitmap bmp = LoadBitmapForTexture(filename, twidth);
+            if (bmp == null)
             {
-                if (bmp == null)
-                {
-                    return null;
-                }
-                TextureFromBitMap(texture, bmp);
-                texture.LoadedProperly = true;
-                return texture;
+                return null;
             }
+            TextureFromBitMap(texture, bmp);
+            texture.LoadedProperly = true;
+            return texture;
         }
 
         private void TextureFromBitMap(Texture texture, Bitmap bmp)
         {
             texture.Width = bmp.Width;
             texture.Height = bmp.Height;
-            GL.GenTextures(1, out texture.Original_InternalID);
-            texture.Internal_Texture = texture.Original_InternalID;
+            GL.GenTextures(1, out texture.OriginalInternalID);
+            texture.InternalTexture = texture.OriginalInternalID;
             texture.Bind();
             LockBitmapToTexture(bmp, DefaultLinear);
         }
@@ -396,14 +394,12 @@ namespace FGEGraphics.GraphicsHelpers
                     SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                     return;
                 }
-                using (Bitmap bmp = BitmapForBytes(textureData, twidth))
-                {
-                    LockBitmapToTexture(bmp, depth);
-                }
+                using Bitmap bmp = BitmapForBytes(textureData, twidth);
+                LockBitmapToTexture(bmp, depth);
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex.ToString()}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex}");
                 return;
             }
         }
@@ -423,8 +419,8 @@ namespace FGEGraphics.GraphicsHelpers
                 Width = 2,
                 Height = 2
             };
-            GL.GenTextures(1, out texture.Original_InternalID);
-            texture.Internal_Texture = texture.Original_InternalID;
+            GL.GenTextures(1, out texture.OriginalInternalID);
+            texture.InternalTexture = texture.OriginalInternalID;
             texture.Bind();
             using (Bitmap bmp = new Bitmap(2, 2))
             {
@@ -467,157 +463,6 @@ namespace FGEGraphics.GraphicsHelpers
             GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
             GL.Flush();
             bmp.UnlockBits(bmp_data);
-        }
-
-    }
-
-    /// <summary>
-    /// Event arguments for a texture being loaded.
-    /// </summary>
-    public class TextureLoadedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Constructs a texture loaded event argument set.
-        /// </summary>
-        /// <param name="t">The texture that was loaded.</param>
-        public TextureLoadedEventArgs(Texture t)
-        {
-            Tex = t;
-        }
-
-        /// <summary>
-        /// The texture that was loaded.
-        /// </summary>
-        public Texture Tex;
-    }
-
-    /// <summary>
-    /// Wraps an OpenGL texture.
-    /// </summary>
-    public class Texture
-    {
-        /// <summary>
-        /// The texture engine that owns this texture.
-        /// </summary>
-        public TextureEngine Engine;
-
-        /// <summary>
-        /// The full name of the texture.
-        /// </summary>
-        public string Name;
-
-        /// <summary>
-        /// The texture that this texture was remapped to, if any.
-        /// </summary>
-        public Texture RemappedTo;
-
-        /// <summary>
-        /// The internal OpenGL texture ID.
-        /// </summary>
-        public int Internal_Texture = 0;
-
-        /// <summary>
-        /// The original OpenGL texture ID that formed this texture.
-        /// </summary>
-        public int Original_InternalID = 0;
-
-        /// <summary>
-        /// Whether the texture loaded properly.
-        /// </summary>
-        public bool LoadedProperly = false;
-
-        /// <summary>
-        /// The width of the texture.
-        /// </summary>
-        public int Width;
-
-        /// <summary>
-        /// The height of the texture.
-        /// </summary>
-        public int Height;
-        
-        /// <summary>
-        /// Removes the texture from OpenGL.
-        /// </summary>
-        public void Destroy()
-        {
-            if (LoadedProperly && Original_InternalID > -1 && GL.IsTexture(Original_InternalID))
-            {
-                GL.DeleteTexture(Original_InternalID);
-            }
-        }
-
-        /// <summary>
-        /// Removes the texture from the system.
-        /// </summary>
-        public void Remove()
-        {
-            Destroy();
-            if (Engine.LoadedTextures.TryGetValue(Name, out Texture text) && text == this)
-            {
-                Engine.LoadedTextures.Remove(Name);
-            }
-        }
-
-        /// <summary>
-        /// Saves the texture to a bitmap.
-        /// </summary>
-        /// <param name="flip">Whether to flip the Y.</param>
-        public Bitmap SaveToBMP(bool flip = false)
-        {
-            GL.BindTexture(TextureTarget.Texture2D, Original_InternalID);
-            Bitmap bmp = new Bitmap(Width, Height);
-            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-            bmp.UnlockBits(data);
-            if (flip)
-            {
-                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            }
-            return bmp;
-        }
-
-        /// <summary>
-        /// The tick time this texture was last bound.
-        /// </summary>
-        public double LastBindTime = 0;
-
-        /// <summary>
-        /// Checks if the texture is valid, and replaces it if needed.
-        /// </summary>
-        public void CheckValid()
-        {
-            if (Internal_Texture == -1)
-            {
-                Texture temp = Engine.GetTexture(Name);
-                Original_InternalID = temp.Original_InternalID;
-                Internal_Texture = Original_InternalID;
-                LoadedProperly = false;
-                if (RemappedTo != null)
-                {
-                    RemappedTo.CheckValid();
-                    Internal_Texture = RemappedTo.Original_InternalID;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Binds this texture to OpenGL.
-        /// </summary>
-        public void Bind()
-        {
-            LastBindTime = Engine.cTime;
-            CheckValid();
-            GL.BindTexture(TextureTarget.Texture2D, Internal_Texture);
-        }
-        
-        /// <summary>
-        /// Gets the name of the texture.
-        /// </summary>
-        /// <returns>The name.</returns>
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }

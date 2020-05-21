@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 
 namespace FGEGraphics.UISystem

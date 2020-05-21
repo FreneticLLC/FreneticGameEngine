@@ -15,13 +15,15 @@ using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGECore.FileSystems;
-using FGEGraphics.GraphicsHelpers;
 using FGECore.StackNoteSystem;
 using FGECore.ModelSystems;
+using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.ClientSystem.EntitySystem;
 
 namespace FGEGraphics.ClientSystem
@@ -293,7 +295,7 @@ namespace FGEGraphics.ClientSystem
             GLFonts.Init(Files);
             FontSets = new FontSetEngine(GLFonts)
             {
-                FixTo = Shaders.ColorMult2DShader
+                FixToShader = Shaders.ColorMult2DShader
             };
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);

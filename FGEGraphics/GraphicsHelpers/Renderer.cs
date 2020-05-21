@@ -14,11 +14,12 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
-using FGECore.UtilitySystems;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.Models;
 
 namespace FGEGraphics.GraphicsHelpers
 {
