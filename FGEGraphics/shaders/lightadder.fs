@@ -189,5 +189,5 @@ void main() // Let's put all code in main, why not...
 		aff += atten;
 	}
 	res_color += (ambient + vec3(renderhint.z)) * HDR_Mod * diffuset.xyz; // Add ambient light.
-	color = vec4(res_color * ssao_mod, diffuset.w + aff + renderhint.z); // I don't know why this alpha value became necessary.
+	color = vec4(res_color * ssao_mod, diffuset.w);
 }
