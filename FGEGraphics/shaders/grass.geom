@@ -89,7 +89,7 @@ void main()
 	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
 	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
 	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
-	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.3;
+	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.5;
 	vec3 pos_norm = normalize(pos.xyz + wnd);
 	float scale = f[0].texcoord.x * 0.5;
 	float tid = f[0].texcoord.y;
