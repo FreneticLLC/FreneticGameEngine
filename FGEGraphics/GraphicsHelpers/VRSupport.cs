@@ -93,8 +93,8 @@ namespace FGEGraphics.GraphicsHelpers
                 throw new Exception("Failed to start VR: Invalid render target size!");
             }
             w *= 2;
-            TheClient.Engine3D.MainView.Generate(TheClient.Engine3D, (int)w, (int)h);
-            TheClient.Engine3D.MainView.GenerateFBO();
+            TheClient.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
+            TheClient.Engine3D.MainView.GenerationHelper.GenerateFBO();
             StringBuilder val = new StringBuilder(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
@@ -268,7 +268,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(TheClient.Engine3D.MainView.CurrentFBOTexture)
+                handle = new IntPtr(TheClient.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t bounds = new VRTextureBounds_t()
             {
@@ -286,7 +286,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(TheClient.Engine3D.MainView.CurrentFBOTexture)
+                handle = new IntPtr(TheClient.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t rbounds = new VRTextureBounds_t()
             {
@@ -503,7 +503,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
             GL.BindTexture(TextureTarget.Texture2D, 0);
             tclient.Engine3D.Rendering.SetColor(Color4.White, tclient.Engine3D.MainView);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, tclient.Engine3D.MainView.cFBO);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, tclient.Engine3D.MainView.Internal.LastBoundFramebuffer);
             GL.Enable(EnableCap.CullFace);
             tclient.Engine3D.MainView.FixVP();
         }

@@ -320,7 +320,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 return;
             }
             Vector3 wid = (LODBox.Max - LODBox.Min).ToOpenTK();
-            Vector3 vpos = (pos - view.RenderRelative).ToOpenTK() + new Vector3(0f, 0f, wid.Z * 0.5f);
+            Vector3 vpos = (pos - view.State.RenderRelative).ToOpenTK() + new Vector3(0f, 0f, wid.Z * 0.5f);
             Vector3 offs = new Vector3(-0.5f, -0.5f, 0f);
             Matrix4 off1 = Matrix4.CreateTranslation(offs);
             //Matrix4 off2 = Matrix4.CreateTranslation(-offs);

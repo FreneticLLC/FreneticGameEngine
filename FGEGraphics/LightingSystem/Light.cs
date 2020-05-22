@@ -25,17 +25,17 @@ namespace FGEGraphics.LightingSystem
         /// <summary>
         /// The light's position.
         /// </summary>
-        public Vector3d eye;
+        public Vector3d EyePosition;
 
         /// <summary>
         /// The light's target.
         /// </summary>
-        public Vector3d target;
+        public Vector3d TargetPosition;
 
         /// <summary>
         /// The light's up vector.
         /// </summary>
-        public Vector3 up = Vector3.UnitZ;
+        public Vector3 UpVector = Vector3.UnitZ;
 
         /// <summary>
         /// The light's field-of-view.
@@ -45,12 +45,12 @@ namespace FGEGraphics.LightingSystem
         /// <summary>
         /// The maximum range (Effective distance) of the light.
         /// </summary>
-        public float maxrange;
+        public float MaxRange;
 
         /// <summary>
         /// The color of the light.
         /// </summary>
-        public Vector3 color;
+        public Vector3 Color;
 
         /// <summary>
         /// Whether this light needs an update.
@@ -60,7 +60,7 @@ namespace FGEGraphics.LightingSystem
         /// <summary>
         /// Whether transparents cast shadows.
         /// </summary>
-        public bool transp = false;
+        public bool TransparentShadows = false;
 
         /// <summary>
         /// Whether anything casts shadows.
@@ -77,11 +77,11 @@ namespace FGEGraphics.LightingSystem
         /// <param name="col">Color.</param>
         public void Create(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
         {
-            eye = pos;
-            target = targ;
+            EyePosition = pos;
+            TargetPosition = targ;
             FOV = fov;
-            maxrange = max_range;
-            color = col;
+            MaxRange = max_range;
+            Color = col;
         }
 
         /// <summary>
@@ -108,11 +108,11 @@ namespace FGEGraphics.LightingSystem
         /// <returns>The relevant matrix.</returns>
         public virtual Matrix4 GetMatrix(View3D view)
         {
-            Vector3d c = view.RenderRelative.ToOpenTK3D();
-            Vector3d e = eye - c;
-            Vector3d d = target - c;
-            return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), up) *
-                Matrix4.CreatePerspectiveFieldOfView(FOV * (float)Math.PI / 180f, 1, 0.1f, maxrange);
+            Vector3d c = view.State.RenderRelative.ToOpenTK3D();
+            Vector3d e = EyePosition - c;
+            Vector3d d = TargetPosition - c;
+            return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), UpVector) *
+                Matrix4.CreatePerspectiveFieldOfView(FOV * (float)Math.PI / 180f, 1, 0.1f, MaxRange);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace FGEGraphics.UISystem
             SubEngine.OwningInstance = pos.View.Client;
             if (alphaBack)
             {
-                SubEngine.MainView.ClearColor = new float[] { 0f, 0f, 0f, 0f };
+                SubEngine.MainView.Config.ClearColor = new float[] { 0f, 0f, 0f, 0f };
             }
         }
 
@@ -66,7 +66,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         protected override void Destroy()
         {
-            SubEngine.MainView.Destroy();
+            SubEngine.MainView.GenerationHelper.Destroy();
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace FGEGraphics.UISystem
             int y = LastAbsolutePosition.Y;
             int w = LastAbsoluteSize.X;
             int h = LastAbsoluteSize.Y;
-            GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.CurrentFBOTexture);
+            GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
             view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         }
     }

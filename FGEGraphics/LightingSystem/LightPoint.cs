@@ -35,11 +35,11 @@ namespace FGEGraphics.LightingSystem
         /// <param name="col">Color.</param>
         public void Setup(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
         {
-            eye = pos;
-            target = targ;
+            EyePosition = pos;
+            TargetPosition = targ;
             FOV = fov;
-            maxrange = max_range;
-            color = col;
+            MaxRange = max_range;
+            Color = col;
         }
     }
 }

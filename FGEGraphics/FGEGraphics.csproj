@@ -96,7 +96,17 @@
     <Compile Include="ClientSystem\GameEngineBase.cs" />
     <Compile Include="ClientSystem\GE3DShaders.cs" />
     <Compile Include="ClientSystem\ShaderLocations.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\FBOID.cs" />
     <Compile Include="ClientSystem\ViewRenderSystem\View3D.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DConfiguration.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DCoreDataSet.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DDeferredRenderer.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DForwardRenderer.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DGenerationHelper.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DInternalData.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DPatches.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DState.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3DStats.cs" />
     <Compile Include="ClientSystem\ViewUI2D.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GraphicsHelpers\DecalInfo.cs" />

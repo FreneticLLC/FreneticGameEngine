@@ -70,9 +70,9 @@ namespace FGEGraphics.ClientSystem
         public bool Deferred_Shadows = true;
 
         /// <summary>
-        /// Whether to enable deferred mode HDR.
+        /// Whether to enable deferred mode Dynamic Exposure.
         /// </summary>
-        public bool Deferred_HDR = true;
+        public bool Deferred_DynamicExposure = true;
 
         /// <summary>
         /// Whether deferred mode should use SSAO effects.
@@ -175,14 +175,22 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// The main 3D view.
         /// </summary>
-        public View3D MainView = new View3D();
+        public View3D MainView;
+
+        /// <summary>
+        /// Constructs the <see cref="GameEngine3D"/>.
+        /// </summary>
+        public GameEngine3D()
+        {
+            MainView = new View3D(this);
+        }
 
         /// <summary>
         /// Reloads relevant 3D screen buffers.
         /// </summary>
         public override void ReloadScreenBuffers()
         {
-            MainView.Generate(this, Window.Width, Window.Height);
+            MainView.GenerationHelper.Generate(Window.Width, Window.Height);
         }
 
         /// <summary>
@@ -216,16 +224,16 @@ namespace FGEGraphics.ClientSystem
             {
                 SubSize = new Vector2i(Window.Width, Window.Height);
             }
-            MainView.Width = SubSize.X;
-            MainView.Height = SubSize.Y;
+            MainView.Config.Width = SubSize.X;
+            MainView.Config.Height = SubSize.Y;
             if (IsSubEngine)
             {
-                MainView.GenerateFBO();
+                MainView.GenerationHelper.GenerateFBO();
             }
-            MainView.Generate(this, SubSize.X, SubSize.Y);
-            MainView.Render3D = Render3D;
-            MainView.PostFirstRender = ReverseEntities;
-            MainView.CameraUp = () => MainCamera.Up;
+            MainView.GenerationHelper.Generate(SubSize.X, SubSize.Y);
+            MainView.Config.Render3D = Render3D;
+            MainView.Config.PostFirstRender = ReverseEntities;
+            MainView.Config.CameraUp = () => MainCamera.Up;
             AudioCamera = MainCamera;
             ZFar = () => MainCamera.ZFar;
             GraphicsUtil.CheckError("PostLoad - Post");
@@ -236,7 +244,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public void SortEntities()
         {
-            Location pos = MainView.RenderRelative;
+            Location pos = MainView.State.RenderRelative;
             EntityList = EntityList.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
         }
 
@@ -264,7 +272,7 @@ namespace FGEGraphics.ClientSystem
                 foreach (ClientEntity ce in EntityList)
                 {
                     // TODO: layering logic of some form instead of this overly basic stuff.
-                    if (ShouldRender(ce.Renderer, view.RenderingShadows))
+                    if (ShouldRender(ce.Renderer, view.State.RenderingShadows))
                     {
                         try
                         {
@@ -313,8 +321,8 @@ namespace FGEGraphics.ClientSystem
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
             // Set camera to view
-            MainView.CameraPos = MainCamera.Position;
-            MainView.ForwardVec = MainCamera.Direction;
+            MainView.Config.CameraPos = MainCamera.Position;
+            MainView.Config.ForwardVec = MainCamera.Direction;
             ZNear = MainCamera.ZNear;
             // Sort entities to prep render
             SortEntities();

@@ -275,7 +275,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="view">The relevant view.</param>
         public void SetColor(Vector4 col, View3D view)
         {
-            if (!view.RenderingShadows)
+            if (!view.State.RenderingShadows)
             {
                 GL.Uniform4(3, ref col);
             }
@@ -307,7 +307,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="view">Relevant view.</param>
         public void SetSpecialFoglessLight(View3D view)
         {
-            if (view.RenderLights && !view.RenderingShadows)
+            if (view.State.RenderLights && !view.State.RenderingShadows)
             {
                 GL.Uniform1(16, 0.0f);
             }
@@ -320,7 +320,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="view">Relevant view.</param>
         public void SetMinimumLight(float min, View3D view)
         {
-            if (view.RenderLights && !view.RenderingShadows)
+            if (view.State.RenderLights && !view.State.RenderingShadows)
             {
                 GL.Uniform1(16, Math.Max(min, 0.01f));
             }

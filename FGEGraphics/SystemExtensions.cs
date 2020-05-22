@@ -206,5 +206,16 @@ namespace FGEGraphics
             return new BEPUutilities.Matrix(mat.M11, mat.M12, mat.M13, mat.M14, mat.M21, mat.M22, mat.M23,
                 mat.M24, mat.M31, mat.M32, mat.M33, mat.M34, mat.M41, mat.M42, mat.M43, mat.M44);
         }
+
+        /// <summary>
+        /// Converts an OpenTK <see cref="Matrix4"/> to a BEPU <see cref="BEPUutilities.Matrix"/>.
+        /// </summary>
+        /// <param name="mat">The input <see cref="Matrix4"/>.</param>
+        /// <returns>The output <see cref="BEPUutilities.Matrix"/>.</returns>
+        public static BEPUutilities.Matrix ConvertD(this Matrix4 mat)
+        {
+            return new BEPUutilities.Matrix(mat.M11, mat.M12, mat.M13, mat.M14, mat.M21, mat.M22, mat.M23,
+                mat.M24, mat.M31, mat.M32, mat.M33, mat.M34, mat.M41, mat.M42, mat.M43, mat.M44);
+        }
     }
 }

@@ -104,8 +104,8 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine3D eng)
             {
-                InternalLight = new SkyLight(LightPosition, Radius, LightColor, Direction, Size, false, Engine3D.MainView.ShadowTexSize());
-                eng.MainView.Lights.Add(InternalLight);
+                InternalLight = new SkyLight(LightPosition, Radius, LightColor, Direction, Size, false, Engine3D.MainView.Config.ShadowTexSize());
+                eng.MainView.Config.Lights.Add(InternalLight);
                 Entity.OnPositionChanged += FixPosition;
                 Entity.OnTick += Tick;
             }
@@ -122,7 +122,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine3D eng)
             {
-                eng.MainView.Lights.Remove(InternalLight);
+                eng.MainView.Config.Lights.Remove(InternalLight);
                 InternalLight.Destroy();
                 InternalLight = null;
                 Entity.OnPositionChanged -= FixPosition;

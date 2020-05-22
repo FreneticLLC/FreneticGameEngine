@@ -84,13 +84,13 @@ namespace FGEGraphics.LightingSystem
             InternalLights.Add(new LightOrtho());
             if (dir.Z >= 0.99 || dir.Z <= -0.99)
             {
-                InternalLights[0].up = new Vector3(0, 1, 0);
+                InternalLights[0].UpVector = new Vector3(0, 1, 0);
             }
             else
             {
-                InternalLights[0].up = new Vector3(0, 0, 1);
+                InternalLights[0].UpVector = new Vector3(0, 0, 1);
             }
-            InternalLights[0].transp = transp;
+            InternalLights[0].TransparentShadows = transp;
             Direction = dir;
             InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color.ToOpenTK());
             MaxDistance = radius;
@@ -135,8 +135,8 @@ namespace FGEGraphics.LightingSystem
         {
             EyePos = pos;
             InternalLights[0].NeedsUpdate = true;
-            InternalLights[0].eye = EyePos.ToOpenTK3D();
-            InternalLights[0].target = (EyePos + Direction).ToOpenTK3D();
+            InternalLights[0].EyePosition = EyePos.ToOpenTK3D();
+            InternalLights[0].TargetPosition = (EyePos + Direction).ToOpenTK3D();
         }
     }
 }

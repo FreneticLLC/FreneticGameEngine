@@ -70,8 +70,8 @@ namespace FGEGraphics.LightingSystem
                 li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color.ToOpenTK());
                 InternalLights.Add(li);
             }
-            InternalLights[4].up = new Vector3(0, 1, 0);
-            InternalLights[5].up = new Vector3(0, 1, 0);
+            InternalLights[4].UpVector = new Vector3(0, 1, 0);
+            InternalLights[5].UpVector = new Vector3(0, 1, 0);
             Reposition(EyePos);
             MaxDistance = radius;
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -94,14 +94,14 @@ namespace FGEGraphics.LightingSystem
             for (int i = 0; i < 6; i++)
             {
                 InternalLights[i].NeedsUpdate = true;
-                InternalLights[i].eye = EyePos.ToOpenTK3D();
+                InternalLights[i].EyePosition = EyePos.ToOpenTK3D();
             }
-            InternalLights[0].target = (EyePos + new Location(1, 0, 0)).ToOpenTK3D();
-            InternalLights[1].target = (EyePos + new Location(-1, 0, 0)).ToOpenTK3D();
-            InternalLights[2].target = (EyePos + new Location(0, 1, 0)).ToOpenTK3D();
-            InternalLights[3].target = (EyePos + new Location(0, -1, 0)).ToOpenTK3D();
-            InternalLights[4].target = (EyePos + new Location(0, 0, 1)).ToOpenTK3D();
-            InternalLights[5].target = (EyePos + new Location(0, 0, -1)).ToOpenTK3D();
+            InternalLights[0].TargetPosition = (EyePos + new Location(1, 0, 0)).ToOpenTK3D();
+            InternalLights[1].TargetPosition = (EyePos + new Location(-1, 0, 0)).ToOpenTK3D();
+            InternalLights[2].TargetPosition = (EyePos + new Location(0, 1, 0)).ToOpenTK3D();
+            InternalLights[3].TargetPosition = (EyePos + new Location(0, -1, 0)).ToOpenTK3D();
+            InternalLights[4].TargetPosition = (EyePos + new Location(0, 0, 1)).ToOpenTK3D();
+            InternalLights[5].TargetPosition = (EyePos + new Location(0, 0, -1)).ToOpenTK3D();
         }
     }
 }

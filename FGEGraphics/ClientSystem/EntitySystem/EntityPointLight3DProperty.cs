@@ -72,7 +72,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             if (Entity.Engine is GameEngine3D eng)
             {
                 InternalLight = new PointLight(LightPosition, LightStrength, LightColor);
-                eng.MainView.Lights.Add(InternalLight);
+                eng.MainView.Config.Lights.Add(InternalLight);
                 Entity.OnPositionChanged += FixPosition;
             }
             else
@@ -88,7 +88,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
             if (Entity.Engine is GameEngine3D eng)
             {
-                eng.MainView.Lights.Remove(InternalLight);
+                eng.MainView.Config.Lights.Remove(InternalLight);
                 InternalLight.Destroy();
                 InternalLight = null;
                 Entity.OnPositionChanged -= FixPosition;

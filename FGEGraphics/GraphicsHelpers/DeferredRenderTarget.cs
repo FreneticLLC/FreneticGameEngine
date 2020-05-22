@@ -169,7 +169,7 @@ namespace FGEGraphics.GraphicsHelpers
         public void Bind(View3D view)
         {
             IsBound = true;
-            view.BufferDontTouch = true;
+            view.State.BufferDontTouch = true;
             view.BindFramebuffer(FramebufferTarget.Framebuffer, (int)fbo);
             view.Viewport(0, 0, Width, Height);
             GL.DrawBuffers(6, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
@@ -218,9 +218,9 @@ namespace FGEGraphics.GraphicsHelpers
         {
             IsBound = false;
             view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            view.Viewport(0, 0, view.Width, view.Height);
+            view.Viewport(0, 0, view.Config.Width, view.Config.Height);
             GL.DrawBuffer(DrawBufferMode.Back);
-            view.BufferDontTouch = false;
+            view.State.BufferDontTouch = false;
         }
     }
 }

@@ -28,10 +28,10 @@ namespace FGEGraphics.LightingSystem
         /// <returns>The relevant matrix.</returns>
         public override Matrix4 GetMatrix(View3D view)
         {
-            Vector3d c = view.RenderRelative.ToOpenTK3D();
-            Vector3d e = eye - c;
-            Vector3d d = target - c;
-            return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), up) * Matrix4.CreateOrthographicOffCenter(-FOV * 0.5f, FOV * 0.5f, -FOV * 0.5f, FOV * 0.5f, 1, maxrange);
+            Vector3d c = view.State.RenderRelative.ToOpenTK3D();
+            Vector3d e = EyePosition - c;
+            Vector3d d = TargetPosition - c;
+            return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), UpVector) * Matrix4.CreateOrthographicOffCenter(-FOV * 0.5f, FOV * 0.5f, -FOV * 0.5f, FOV * 0.5f, 1, MaxRange);
         }
     }
 }
