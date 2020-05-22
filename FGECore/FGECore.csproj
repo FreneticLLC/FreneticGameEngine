@@ -105,6 +105,10 @@
     <Compile Include="FileSystems\DataStream.cs" />
     <Compile Include="FileSystems\DataWriter.cs" />
     <Compile Include="MathHelpers\Location.cs" />
+    <Compile Include="PropertySystem\Property.cs" />
+    <Compile Include="PropertySystem\PropertyAttributes.cs" />
+    <Compile Include="PropertySystem\PropertyHelper.cs" />
+    <Compile Include="PropertySystem\PropertySaverLoader.cs" />
     <Compile Include="UtilitySystems\MTRandom.cs" />
     <Compile Include="UtilitySystems\PriorityQueue.cs" />
     <Compile Include="CoreSystems\Program.cs" />
