@@ -71,6 +71,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GenerationHelper = View.GenerationHelper;
             Statistics = View.Statistics;
             State = View.State;
+            Config = View.Config;
             Internal = View.Internal;
         }
     }
