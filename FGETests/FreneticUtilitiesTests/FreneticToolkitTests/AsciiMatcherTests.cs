@@ -65,6 +65,17 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
         }
 
         /// <summary>
+        /// Tests "ContainsAnyMatch".
+        /// </summary>
+        [Test]
+        public static void ContainsAnyMatchTest()
+        {
+            Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars), $"ContainsAnyMatch failed.");
+            Assert.That(!ReferenceMatcher.ContainsAnyMatch(ReferenceNonMatchedChars), $"!ContainsAnyMatch failed.");
+            Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars + ReferenceNonMatchedChars), $"ContainsAnyMatch failed.");
+        }
+
+        /// <summary>
         /// Tests "IsOnlyMatches".
         /// </summary>
         [Test]
