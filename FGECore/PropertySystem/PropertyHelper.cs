@@ -28,27 +28,91 @@ namespace FGECore.PropertySystem
         /// </summary>
         public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = new ConditionalWeakTable<Type, PropertyHelper>();
 
-        private static long CPropID = 1;
+        /// <summary>
+        /// Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.
+        /// </summary>
+        public static class Internal
+        {
+            /// <summary>
+            /// The ID of the last generated property ID.
+            /// </summary>
+            public static long CPropID = 1;
+
+            /// <summary>
+            /// A premade, reusable, empty array of <see cref="object"/>s.
+            /// </summary>
+            public static readonly object[] NoObjects = new object[0];
+        }
+
+        /// <summary>
+        /// Represents a field with a specific numeric priority.
+        /// </summary>
+        public class PrioritizedField
+        {
+            /// <summary>
+            /// The priority of the field.
+            /// </summary>
+            public double Priority;
+
+            /// <summary>
+            /// The field itself.
+            /// </summary>
+            public FieldInfo Field;
+
+            /// <summary>
+            /// Initialize the <see cref="PrioritizedField"/>.
+            /// </summary>
+            public PrioritizedField(double _priority, FieldInfo _field)
+            {
+                Priority = _priority;
+                Field = _field;
+            }
+        }
+
+        /// <summary>
+        /// Represents a C# property with a specific numeric priority.
+        /// </summary>
+        public class PrioritizedSharpProperty
+        {
+            /// <summary>
+            /// The priority of the field.
+            /// </summary>
+            public double Priority;
+
+            /// <summary>
+            /// The C# property itself.
+            /// </summary>
+            public PropertyInfo SharpProperty;
+
+            /// <summary>
+            /// Initialize the <see cref="PrioritizedSharpProperty"/>.
+            /// </summary>
+            public PrioritizedSharpProperty(double _priority, PropertyInfo _property)
+            {
+                Priority = _priority;
+                SharpProperty = _property;
+            }
+        }
 
         /// <summary>
         /// Ensures a type is handled by the system, and returns the helper for the type.
         /// </summary>
-        /// <param name="t">The type.</param>
+        /// <param name="propType">The type.</param>
         /// <returns>The helper for the type.</returns>
-        public static PropertyHelper EnsureHandled(Type t)
+        public static PropertyHelper EnsureHandled(Type propType)
         {
-            if (PropertiesHelper.TryGetValue(t, out PropertyHelper helper))
+            if (PropertiesHelper.TryGetValue(propType, out PropertyHelper helper))
             {
                 return helper;
             }
-            if (t.IsValueType) // TODO: Remove need for this check!!!
+            if (propType.IsValueType) // TODO: Remove need for this check!!!
             {
                 return EnsureHandled(typeof(object));
             }
-            CPropID++;
-            List<KeyValuePair<double, FieldInfo>> fdbg = new List<KeyValuePair<double, FieldInfo>>();
-            List<KeyValuePair<double, FieldInfo>> fautosave = new List<KeyValuePair<double, FieldInfo>>();
-            FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            Internal.CPropID++;
+            List<PrioritizedField> fieldsDebuggable = new List<PrioritizedField>();
+            List<PrioritizedField> fieldsAutoSaveable = new List<PrioritizedField>();
+            FieldInfo[] fields = propType.GetFields(BindingFlags.Public | BindingFlags.Instance);
             for (int i = 0; i < fields.Length; i++)
             {
                 // Just in case!
@@ -65,108 +129,109 @@ namespace FGECore.PropertySystem
                 PropertyDebuggable dbgable = fields[i].GetCustomAttribute<PropertyDebuggable>();
                 if (dbgable != null)
                 {
-                    fdbg.Add(new KeyValuePair<double, FieldInfo>(prio, fields[i]));
+                    fieldsDebuggable.Add(new PrioritizedField(prio, fields[i]));
                 }
                 PropertyAutoSavable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSavable>();
                 if (autosaveable != null)
                 {
-                    fautosave.Add(new KeyValuePair<double, FieldInfo>(prio, fields[i]));
+                    fieldsAutoSaveable.Add(new PrioritizedField(prio, fields[i]));
                 }
             }
-            List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> fdbgm = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
-            List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>> fsavm = new List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>>();
-            List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> fvalm = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
-            PropertyInfo[] props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            for (int i = 0; i < props.Length; i++)
+            List<PrioritizedSharpProperty> getterPropertiesDebuggable = new List<PrioritizedSharpProperty>();
+            List<PrioritizedSharpProperty> getterSetterPropertiesSaveable = new List<PrioritizedSharpProperty>();
+            List<PrioritizedSharpProperty> validityTestProperties = new List<PrioritizedSharpProperty>();
+            PropertyInfo[] sharpProperties = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo sharpProperty in sharpProperties)
             {
-                if (!props[i].CanRead)
+                if (!sharpProperty.CanRead)
                 {
                     continue;
                 }
-                PropertyPriority propPrio = props[i].GetCustomAttribute<PropertyPriority>();
+                PropertyPriority propPrio = sharpProperty.GetCustomAttribute<PropertyPriority>();
                 double prio = 0;
                 if (propPrio != null)
                 {
                     prio = propPrio.Priority;
                 }
-                PropertyDebuggable dbgable = props[i].GetCustomAttribute<PropertyDebuggable>();
+                PropertyDebuggable dbgable = sharpProperty.GetCustomAttribute<PropertyDebuggable>();
                 if (dbgable != null)
                 {
-                    fdbgm.Add(new KeyValuePair<double, KeyValuePair<string, MethodInfo>>(prio, new KeyValuePair<string, MethodInfo>(props[i].Name, props[i].GetMethod)));
+                    getterPropertiesDebuggable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
                 }
-                PropertyAutoSavable savable = props[i].GetCustomAttribute<PropertyAutoSavable>();
-                if (props[i].CanWrite && savable != null)
+                PropertyAutoSavable savable = sharpProperty.GetCustomAttribute<PropertyAutoSavable>();
+                if (sharpProperty.CanWrite && savable != null)
                 {
-                    fsavm.Add(new KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>(prio, new KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>(props[i].Name, new KeyValuePair<MethodInfo, MethodInfo>(props[i].GetMethod, props[i].SetMethod))));
+                    getterSetterPropertiesSaveable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
                 }
-                PropertyRequiredBool validifier = props[i].GetCustomAttribute<PropertyRequiredBool>();
-                if (validifier != null && props[i].GetMethod.ReturnType == typeof(bool))
+                PropertyRequiredBool validifier = sharpProperty.GetCustomAttribute<PropertyRequiredBool>();
+                if (validifier != null && sharpProperty.GetMethod.ReturnType == typeof(bool))
                 {
-                    fvalm.Add(new KeyValuePair<double, KeyValuePair<string, MethodInfo>>(prio, new KeyValuePair<string, MethodInfo>(props[i].Name, props[i].GetMethod)));
+                    validityTestProperties.Add(new PrioritizedSharpProperty(prio, sharpProperty));
                 }
             }
-            fdbg = fdbg.OrderBy((k) => k.Key).ToList();
-            fautosave = fautosave.OrderBy((k) => k.Key).ToList();
-            fdbgm = fdbgm.OrderBy((k) => k.Key).ToList();
-            fsavm = fsavm.OrderBy((k) => k.Key).ToList();
-            fvalm = fvalm.OrderBy((k) => k.Key).ToList();
-            string tid = "__FGE_Property_" + CPropID + "__" + t.Name + "__";
-            AssemblyName asmn = new AssemblyName(tid);
-            AssemblyBuilder asmb = AppDomain.CurrentDomain.DefineDynamicAssembly(asmn, AssemblyBuilderAccess.RunAndSave);
-            ModuleBuilder modb = asmb.DefineDynamicModule(tid);
-            TypeBuilder typeb_c = modb.DefineType(tid + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
-            MethodBuilder methodb_c = typeb_c.DefineMethod("GetDebuggableInfoOutputTyped", MethodAttributes.Public | MethodAttributes.Virtual);
-            GenericTypeParameterBuilder mbc_a = methodb_c.DefineGenericParameters("T")[0];
-            mbc_a.SetGenericParameterAttributes(GenericParameterAttributes.None);
-            methodb_c.SetParameters(mbc_a, typeof(Dictionary<string, string>));
-            methodb_c.SetReturnType(typeof(void));
-            ILGenerator ilgen = methodb_c.GetILGenerator();
-            Label next = default;
-            for (int i = 0; i < fvalm.Count; i++)
+            fieldsDebuggable = fieldsDebuggable.OrderBy((k) => k.Priority).ToList();
+            fieldsAutoSaveable = fieldsAutoSaveable.OrderBy((k) => k.Priority).ToList();
+            getterPropertiesDebuggable = getterPropertiesDebuggable.OrderBy((k) => k.Priority).ToList();
+            getterSetterPropertiesSaveable = getterSetterPropertiesSaveable.OrderBy((k) => k.Priority).ToList();
+            validityTestProperties = validityTestProperties.OrderBy((k) => k.Priority).ToList();
+            string newTypeID = $"__FGE_Property_{Internal.CPropID}__{propType.Name} __";
+            AssemblyName asmName = new AssemblyName(newTypeID);
+            AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(newTypeID);
+            TypeBuilder generatedType = moduleBuilder.DefineType(newTypeID + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
+            MethodBuilder debugTypedMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutputTyped", MethodAttributes.Public | MethodAttributes.Virtual);
+            GenericTypeParameterBuilder debugTypedGenericParam = debugTypedMethodBuilder.DefineGenericParameters("T")[0];
+            debugTypedGenericParam.SetGenericParameterAttributes(GenericParameterAttributes.None);
+            debugTypedMethodBuilder.SetParameters(debugTypedGenericParam, typeof(Dictionary<string, string>));
+            debugTypedMethodBuilder.SetReturnType(typeof(void));
+            ILGenerator ilgen = debugTypedMethodBuilder.GetILGenerator();
+            Label nextLabel = default;
+            for (int i = 0; i < validityTestProperties.Count; i++)
             {
                 if (i > 0)
                 {
-                    ilgen.MarkLabel(next);
+                    ilgen.MarkLabel(nextLabel);
                 }
-                next = ilgen.DefineLabel();
+                nextLabel = ilgen.DefineLabel();
                 ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
                 //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-                ilgen.Emit(OpCodes.Call, fdbgm[i].Value.Value); // Call the method and load the method's return value (always a bool).
-                ilgen.Emit(OpCodes.Brtrue, next); // if b is false:
+                ilgen.Emit(OpCodes.Call, validityTestProperties[i].SharpProperty.GetMethod); // Call the method and load the method's return value (always a bool).
+                ilgen.Emit(OpCodes.Brtrue, nextLabel); // if b is false:
                 ilgen.Emit(OpCodes.Ret); // Return NOW!
             }
-            if (fvalm.Count > 0)
+            if (validityTestProperties.Count > 0)
             {
-                ilgen.MarkLabel(next);
+                ilgen.MarkLabel(nextLabel);
             }
-            for (int i = 0; i < fdbg.Count; i++)
+            foreach (PrioritizedField prioFIeld in fieldsDebuggable)
             {
-                bool isClass = fdbg[i].Value.FieldType.IsClass;
-                PropertyHelper pht = EnsureHandled(fdbg[i].Value.FieldType);
-                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterMethodsDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
+                FieldInfo field = prioFIeld.Field;
+                bool isClass = field.FieldType.IsClass;
+                PropertyHelper pht = EnsureHandled(field.FieldType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
                 ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
                 if (is_handlable)
                 {
-                    ilgen.Emit(OpCodes.Ldstr, fdbg[i].Value.FieldType.FullName + "(" + fdbg[i].Value.Name + ")"); // Load the field name and full type as a string.
+                    ilgen.Emit(OpCodes.Ldstr, field.FieldType.FullName + "(" + field.Name + ")"); // Load the field name and full type as a string.
                 }
                 else
                 {
-                    ilgen.Emit(OpCodes.Ldstr, fdbg[i].Value.FieldType.Name + "(" + fdbg[i].Value.Name + ")"); // Load the field name and type as a string.
+                    ilgen.Emit(OpCodes.Ldstr, field.FieldType.Name + "(" + field.Name + ")"); // Load the field name and type as a string.
                 }
                 ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
                 //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-                ilgen.Emit(OpCodes.Ldfld, fdbg[i].Value); // Load the field's value.
+                ilgen.Emit(OpCodes.Ldfld, field); // Load the field's value.
                 if (isClass) // If a class
                 {
                     if (is_handlable)
                     {
                         // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
-                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
                     }
                     else
                     {
                         // CODE: vals.Add("FType(fname)", Stringify(p.fname));
-                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
                     }
                 }
                 else // if a struct
@@ -174,46 +239,47 @@ namespace FGECore.PropertySystem
                     if (is_handlable)
                     {
                         // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
-                        MethodInfo structy = Method_PropertyHelper_StringifyDebuggableStruct.MakeGenericMethod(fdbg[i].Value.FieldType);
+                        MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(field.FieldType);
                         ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
                     }
                     else
                     {
                         // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
-                        MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbg[i].Value.FieldType);
+                        MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(field.FieldType);
                         ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
                     }
                 }
-                ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
+                ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
-            for (int i = 0; i < fdbgm.Count; i++)
+            foreach (PrioritizedSharpProperty prioSharpProperty in getterPropertiesDebuggable)
             {
-                bool isClass = fdbgm[i].Value.Value.ReturnType.IsClass;
-                PropertyHelper pht = EnsureHandled(fdbgm[i].Value.Value.ReturnType);
-                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterMethodsDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
+                PropertyInfo sharpProperty = prioSharpProperty.SharpProperty;
+                bool isClass = sharpProperty.GetMethod.ReturnType.IsClass;
+                PropertyHelper pht = EnsureHandled(sharpProperty.GetMethod.ReturnType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
                 ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
                 if (is_handlable)
                 {
-                    ilgen.Emit(OpCodes.Ldstr, fdbgm[i].Value.Value.ReturnType.FullName + "(" + fdbgm[i].Value.Key + ")"); // Load the field name and full return type as a string.
+                    ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.FullName + "(" + sharpProperty.Name + ")"); // Load the field name and full return type as a string.
                 }
                 else
                 {
-                    ilgen.Emit(OpCodes.Ldstr, fdbgm[i].Value.Value.ReturnType.Name + "(" + fdbgm[i].Value.Key + ")"); // Load the method name and return type as a string.
+                    ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.Name + "(" + sharpProperty.Name + ")"); // Load the method name and return type as a string.
                 }
                 ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
-                //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-                ilgen.Emit(OpCodes.Call, fdbgm[i].Value.Value); // Call the method and load the method's return value.
+                //ilgen.Emit(OpCodes.Castclass, propType); // Cast 'p' to the correct property type. // TODO: Necessity?
+                ilgen.Emit(OpCodes.Call, sharpProperty.GetMethod); // Call the method and load the method's return value.
                 if (isClass) // If a class
                 {
                     if (is_handlable)
                     {
                         // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
-                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_StringifyDebuggable); // Convert the field's value to a string.
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
                     }
                     else
                     {
                         // CODE: vals.Add("FType(fname)", Stringify(p.fname));
-                        ilgen.Emit(OpCodes.Call, Method_PropertyHelper_Stringify); // Convert the field's value to a string.
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
                     }
                 }
                 else // if a struct
@@ -221,209 +287,229 @@ namespace FGECore.PropertySystem
                     if (is_handlable)
                     {
                         // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
-                        MethodInfo structy = Method_PropertyHelper_StringifyDebuggableStruct.MakeGenericMethod(fdbgm[i].Value.Value.ReturnType);
+                        MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
                         ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
                     }
                     else
                     {
                         // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
-                        MethodInfo structy = Method_PropertyHelper_StringifyStruct.MakeGenericMethod(fdbgm[i].Value.Value.ReturnType);
+                        MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
                         ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
                     }
                 }
-                ilgen.Emit(OpCodes.Call, Method_DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
+                ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
             ilgen.Emit(OpCodes.Ret);
-            typeb_c.DefineMethodOverride(methodb_c, Method_PropertyHelper_GetDebuggableInfoOutputTyped);
+            generatedType.DefineMethodOverride(debugTypedMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutputTyped);
             // Create a helper method that automatically type-casts.
-            MethodBuilder methodb_c2 = typeb_c.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Object), typeof(Dictionary<string, string>) });
-            ILGenerator ilgen2 = methodb_c2.GetILGenerator();
+            MethodBuilder debugOutMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Object), typeof(Dictionary<string, string>) });
+            ILGenerator ilgen2 = debugOutMethodBuilder.GetILGenerator();
             ilgen2.Emit(OpCodes.Ldarg_0);
             ilgen2.Emit(OpCodes.Ldarg_1);
             ilgen2.Emit(OpCodes.Ldarg_2);
-            MethodInfo mxi = methodb_c.MakeGenericMethod(t);
+            MethodInfo mxi = debugTypedMethodBuilder.MakeGenericMethod(propType);
             ilgen2.Emit(OpCodes.Call, mxi);
             ilgen2.Emit(OpCodes.Ret);
-            typeb_c.DefineMethodOverride(methodb_c2, Method_PropertyHelper_GetDebuggableInfoOutput);
-            Type res = typeb_c.CreateType();
-            PropertyHelper ph = Activator.CreateInstance(res) as PropertyHelper;
-            ph.PropertyType = t;
-            ph.FieldsDebuggable.AddRange(fdbg);
-            ph.FieldsAutoSaveable.AddRange(fautosave);
-            ph.GetterMethodsDebuggable.AddRange(fdbgm);
-            ph.GetterSetterSaveable.AddRange(fsavm);
-            PropertiesHelper.Add(t, ph);
-            return ph;
+            generatedType.DefineMethodOverride(debugOutMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutput);
+            Type res = generatedType.CreateType();
+            PropertyHelper propHolder = Activator.CreateInstance(res) as PropertyHelper;
+            propHolder.PropertyType = propType;
+            propHolder.FieldsDebuggable.AddRange(fieldsDebuggable);
+            propHolder.FieldsAutoSaveable.AddRange(fieldsAutoSaveable);
+            propHolder.GetterPropertiesDebuggable.AddRange(getterPropertiesDebuggable);
+            propHolder.GetterSetterSaveable.AddRange(getterSetterPropertiesSaveable);
+            propHolder.ValidityTestGetterProperties.AddRange(validityTestProperties);
+            PropertiesHelper.Add(propType, propHolder);
+            return propHolder;
         }
 
         /// <summary>
         /// Saves the property's data to a DataWriter, appending its generated strings to a string list and lookup table.
         /// <para>Is not a compiled method (Meaning, this method is reflection-driven)!</para>
         /// </summary>
-        /// <param name="p">The object to get the data from.</param>
-        /// <param name="dw">Data writer to use.</param>
+        /// <param name="propertyObject">The object to get the data from.</param>
+        /// <param name="outputWriter">Data writer to use.</param>
         /// <param name="strs">Strings to reference.</param>
         /// <param name="strMap">The string lookup table.</param>
-        public void SaveNC(Object p, DataWriter dw, List<string> strs, Dictionary<string, int> strMap)
+        /// <returns>True if saved successfully, false if saving was not allowed.</returns>
+        public bool SaveNC(object propertyObject, DataWriter outputWriter, List<string> strs, Dictionary<string, int> strMap)
         {
-            dw.WriteVarInt(FieldsAutoSaveable.Count);
-            foreach (KeyValuePair<double, FieldInfo> saveme in FieldsAutoSaveable)
+            foreach (PrioritizedSharpProperty testMe in ValidityTestGetterProperties)
             {
-                if (!strMap.TryGetValue(saveme.Value.Name, out int id))
+                if (!((bool)testMe.SharpProperty.GetMethod.Invoke(propertyObject, Internal.NoObjects)))
+                {
+                    return false;
+                }
+            }
+            outputWriter.WriteVarInt(FieldsAutoSaveable.Count);
+            foreach (PrioritizedField saveme in FieldsAutoSaveable)
+            {
+                if (!strMap.TryGetValue(saveme.Field.Name, out int id))
                 {
                     id = strs.Count;
-                    strs.Add(saveme.Value.Name);
-                    strMap[saveme.Value.Name] = id;
+                    strs.Add(saveme.Field.Name);
+                    strMap[saveme.Field.Name] = id;
                 }
-                dw.WriteVarInt(id);
-                PropertyHelper ph = EnsureHandled(saveme.Value.FieldType);
-                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterMethodsDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
+                outputWriter.WriteVarInt(id);
+                PropertyHelper ph = EnsureHandled(saveme.Field.FieldType);
+                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterPropertiesDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
                 {
-                    ph.SaveNC(saveme.Value.GetValue(p), dw, strs, strMap);
+                    ph.SaveNC(saveme.Field.GetValue(propertyObject), outputWriter, strs, strMap);
                 }
-                else if (PropertyHolder.TypeSavers.TryGetValue(saveme.Value.FieldType, out PropertySaverLoader psl))
+                else if (PropertySaveSystem.TypeSavers.TryGetValue(saveme.Field.FieldType, out PropertySaverLoader psl))
                 {
-                    dw.WriteFullBytesVar(psl.Saver(saveme.Value.GetValue(p)));
+                    outputWriter.WriteFullBytesVar(psl.Saver(saveme.Field.GetValue(propertyObject)));
                 }
             }
-            dw.WriteVarInt(GetterSetterSaveable.Count);
-            foreach (KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>> saveme in GetterSetterSaveable)
+            outputWriter.WriteVarInt(GetterSetterSaveable.Count);
+            foreach (PrioritizedSharpProperty saveme in GetterSetterSaveable)
             {
-                if (!strMap.TryGetValue(saveme.Value.Key, out int id))
+                if (!strMap.TryGetValue(saveme.SharpProperty.Name, out int id))
                 {
                     id = strs.Count;
-                    strs.Add(saveme.Value.Key);
-                    strMap[saveme.Value.Key] = id;
+                    strs.Add(saveme.SharpProperty.Name);
+                    strMap[saveme.SharpProperty.Name] = id;
                 }
-                dw.WriteVarInt(id);
-                PropertyHelper ph = EnsureHandled(saveme.Value.Value.Key.ReturnType);
-                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterMethodsDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
+                outputWriter.WriteVarInt(id);
+                PropertyHelper ph = EnsureHandled(saveme.SharpProperty.GetMethod.ReturnType);
+                if (ph != null && (ph.FieldsAutoSaveable.Count > 0 || ph.FieldsDebuggable.Count > 0 || ph.GetterPropertiesDebuggable.Count > 0 || ph.GetterSetterSaveable.Count > 0))
                 {
-                    ph.SaveNC(saveme.Value.Value.Key.Invoke(p, NoObjects), dw, strs, strMap);
+                    ph.SaveNC(saveme.SharpProperty.GetMethod.Invoke(propertyObject, Internal.NoObjects), outputWriter, strs, strMap);
                 }
-                else if (PropertyHolder.TypeSavers.TryGetValue(saveme.Value.Value.Key.ReturnType, out PropertySaverLoader psl))
+                else if (PropertySaveSystem.TypeSavers.TryGetValue(saveme.SharpProperty.GetMethod.ReturnType, out PropertySaverLoader psl))
                 {
-                    dw.WriteFullBytesVar(psl.Saver(saveme.Value.Value.Key.Invoke(p, NoObjects)));
+                    outputWriter.WriteFullBytesVar(psl.Saver(saveme.SharpProperty.GetMethod.Invoke(propertyObject, Internal.NoObjects)));
                 }
             }
-        }
-
-        private static readonly Object[] NoObjects = new object[0];
-
-        /// <summary>
-        /// The <see cref="Object.ToString"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_Object_ToString = typeof(Object).GetMethod("ToString", new Type[0]);
-
-        /// <summary>
-        /// The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod("Add", new Type[] { typeof(string), typeof(string) });
-
-        /// <summary>
-        /// The <see cref="GetDebuggableInfoOutput"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod("GetDebuggableInfoOutput");
-
-        /// <summary>
-        /// The <see cref="GetDebuggableInfoOutputTyped"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_GetDebuggableInfoOutputTyped = typeof(PropertyHelper).GetMethod("GetDebuggableInfoOutputTyped");
-
-        /// <summary>
-        /// The <see cref="StringifyDebuggable"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_StringifyDebuggable = typeof(PropertyHelper).GetMethod("StringifyDebuggable");
-
-        /// <summary>
-        /// The <see cref="StringifyDebuggableStruct"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_StringifyDebuggableStruct = typeof(PropertyHelper).GetMethod("StringifyDebuggableStruct");
-
-        /// <summary>
-        /// The <see cref="Stringify"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_Stringify = typeof(PropertyHelper).GetMethod("Stringify");
-
-        /// <summary>
-        /// The <see cref="StringifyStruct"/> method.
-        /// </summary>
-        public static readonly MethodInfo Method_PropertyHelper_StringifyStruct = typeof(PropertyHelper).GetMethod("StringifyStruct");
-
-        /// <summary>
-        /// Safely converts a debuggable object to a string.
-        /// </summary>
-        /// <param name="a">The object.</param>
-        /// <returns>The string.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string StringifyDebuggable(Object a)
-        {
-            if (a == null)
-            {
-                return "null";
-            }
-            PropertyHelper ph = EnsureHandled(a.GetType());
-            Dictionary<string, string> outp = new Dictionary<string, string>();
-            ph.GetDebuggableInfoOutputTyped(a, outp);
-            StringBuilder outpstr = new StringBuilder();
-            outpstr.Append("{");
-            foreach (KeyValuePair<string, string> oss in outp)
-            {
-                outpstr.Append(oss.Key + ": " + oss.Value + ", ");
-            }
-            if (outpstr.Length > 1)
-            {
-                outpstr.Length -= 2;
-            }
-            outpstr.Append("}");
-            return outpstr.ToString();
+            return true;
         }
 
         /// <summary>
-        /// Safely converts a debuggable struct to a string.
+        /// A class containing reflected method references, for code generation usage.
         /// </summary>
-        /// <param name="a">The object.</param>
-        /// <returns>The string.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string StringifyDebuggableStruct<T>(T a) where T : struct
+        public static class ReflectedMethods
         {
-            PropertyHelper ph = EnsureHandled(typeof(T));
-            Dictionary<string, string> outp = new Dictionary<string, string>();
-            ph.GetDebuggableInfoOutputTyped(a, outp);
-            StringBuilder outpstr = new StringBuilder();
-            outpstr.Append("{");
-            foreach (KeyValuePair<string, string> oss in outp)
-            {
-                outpstr.Append(oss.Key + ": " + oss.Value + ", ");
-            }
-            if (outpstr.Length > 1)
-            {
-                outpstr.Length -= 2;
-            }
-            outpstr.Append("}");
-            return outpstr.ToString();
+            /// <summary>
+            /// The <see cref="object.ToString"/> method.
+            /// </summary>
+            public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), new Type[0]);
+
+            /// <summary>
+            /// The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.
+            /// </summary>
+            public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), new Type[] { typeof(string), typeof(string) });
+
+            /// <summary>
+            /// The <see cref="GetDebuggableInfoOutput"/> method.
+            /// </summary>
+            public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutput));
+
+            /// <summary>
+            /// The <see cref="GetDebuggableInfoOutputTyped"/> method.
+            /// </summary>
+            public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutputTyped = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutputTyped));
+
+            /// <summary>
+            /// The <see cref="GeneratedCodeHelperMethods.StringifyDebuggable"/> method.
+            /// </summary>
+            public static readonly MethodInfo StringifyDebuggable = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyDebuggable));
+
+            /// <summary>
+            /// The <see cref="GeneratedCodeHelperMethods.StringifyDebuggableStruct"/> method.
+            /// </summary>
+            public static readonly MethodInfo StringifyDebuggableStruct = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyDebuggableStruct));
+
+            /// <summary>
+            /// The <see cref="GeneratedCodeHelperMethods.Stringify"/> method.
+            /// </summary>
+            public static readonly MethodInfo Stringify = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.Stringify));
+
+            /// <summary>
+            /// The <see cref="GeneratedCodeHelperMethods.StringifyStruct"/> method.
+            /// </summary>
+            public static readonly MethodInfo StringifyStruct = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyStruct));
         }
 
         /// <summary>
-        /// Safely converts a struct to a string.
+        /// A class with a few methods to help the generated code work.
         /// </summary>
-        /// <param name="a">The struct.</param>
-        /// <returns>The string.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string StringifyStruct<T>(T a) where T : struct
+        public static class GeneratedCodeHelperMethods
         {
-            return a.ToString();
-        }
+            /// <summary>
+            /// Safely converts a debuggable object to a string.
+            /// </summary>
+            /// <param name="propObj">The object.</param>
+            /// <returns>The string.</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static string StringifyDebuggable(object propObj)
+            {
+                if (propObj == null)
+                {
+                    return "null";
+                }
+                PropertyHelper propHelper = EnsureHandled(propObj.GetType());
+                Dictionary<string, string> debugInfo = new Dictionary<string, string>();
+                propHelper.GetDebuggableInfoOutputTyped(propObj, debugInfo);
+                StringBuilder output = new StringBuilder();
+                output.Append("{");
+                foreach (KeyValuePair<string, string> infoVal in debugInfo)
+                {
+                    output.Append(infoVal.Key).Append(": ").Append(infoVal.Value).Append(", ");
+                }
+                if (output.Length > 1)
+                {
+                    output.Length -= 2;
+                }
+                output.Append("}");
+                return output.ToString();
+            }
 
-        /// <summary>
-        /// Safely converts an object to a string.
-        /// </summary>
-        /// <param name="a">The object.</param>
-        /// <returns>The string, or "null".</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Stringify(Object a)
-        {
-            return a?.ToString() ?? "null";
+            /// <summary>
+            /// Safely converts a debuggable struct to a string.
+            /// </summary>
+            /// <param name="propObj">The object.</param>
+            /// <returns>The string.</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static string StringifyDebuggableStruct<T>(T propObj) where T : struct
+            {
+                PropertyHelper propHelper = EnsureHandled(typeof(T));
+                Dictionary<string, string> debugInfo = new Dictionary<string, string>();
+                propHelper.GetDebuggableInfoOutputTyped(propObj, debugInfo);
+                StringBuilder output = new StringBuilder();
+                output.Append("{");
+                foreach (KeyValuePair<string, string> infoVal in debugInfo)
+                {
+                    output.Append(infoVal.Key).Append(": ").Append(infoVal.Value).Append(", ");
+                }
+                if (output.Length > 1)
+                {
+                    output.Length -= 2;
+                }
+                output.Append("}");
+                return output.ToString();
+            }
+
+            /// <summary>
+            /// Safely converts a struct to a string.
+            /// </summary>
+            /// <param name="structInst">The struct.</param>
+            /// <returns>The string.</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static string StringifyStruct<T>(T structInst) where T : struct
+            {
+                return structInst.ToString();
+            }
+
+            /// <summary>
+            /// Safely converts an object to a string.
+            /// </summary>
+            /// <param name="obj">The object.</param>
+            /// <returns>The string, or "null".</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static string Stringify(object obj)
+            {
+                return obj?.ToString() ?? "null";
+            }
         }
 
         // TODO: Auto read-to and assign-from a MapTag in FS wherever possible!
@@ -432,17 +518,17 @@ namespace FGECore.PropertySystem
         /// Call this method to get debuggable information output added to a string dictionary.
         /// This method's implementation is dynamically generated.
         /// </summary>
-        /// <param name="p">The property.</param>
+        /// <param name="property">The property.</param>
         /// <param name="vals">The string dictionary.</param>
-        public abstract void GetDebuggableInfoOutput(Object p, Dictionary<string, string> vals);
+        public abstract void GetDebuggableInfoOutput(Object property, Dictionary<string, string> vals);
 
         /// <summary>
         /// Call this method to get debuggable information output added to a string dictionary.
         /// This method's implementation is dynamically generated.
         /// </summary>
-        /// <param name="p">The property.</param>
+        /// <param name="property">The property.</param>
         /// <param name="vals">The string dictionary.</param>
-        public abstract void GetDebuggableInfoOutputTyped<T>(T p, Dictionary<string, string> vals);
+        public abstract void GetDebuggableInfoOutputTyped<T>(T property, Dictionary<string, string> vals);
 
         /// <summary>
         /// The type of the property to monitor.
@@ -452,26 +538,26 @@ namespace FGECore.PropertySystem
         /// <summary>
         /// A list of all getter methods that are debuggable.
         /// </summary>
-        public readonly List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> GetterMethodsDebuggable = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
+        public readonly List<PrioritizedSharpProperty> GetterPropertiesDebuggable = new List<PrioritizedSharpProperty>();
 
         /// <summary>
         /// A list of all getter/setter method pairs that are autao-saveable.
         /// </summary>
-        public readonly List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>> GetterSetterSaveable = new List<KeyValuePair<double, KeyValuePair<string, KeyValuePair<MethodInfo, MethodInfo>>>>();
+        public readonly List<PrioritizedSharpProperty> GetterSetterSaveable = new List<PrioritizedSharpProperty>();
 
         /// <summary>
         /// A list of all fields that are debuggable.
         /// </summary>
-        public readonly List<KeyValuePair<double, FieldInfo>> FieldsDebuggable = new List<KeyValuePair<double, FieldInfo>>();
+        public readonly List<PrioritizedField> FieldsDebuggable = new List<PrioritizedField>();
 
         /// <summary>
         /// A list of all fields that are auto-saveable.
         /// </summary>
-        public readonly List<KeyValuePair<double, FieldInfo>> FieldsAutoSaveable = new List<KeyValuePair<double, FieldInfo>>();
+        public readonly List<PrioritizedField> FieldsAutoSaveable = new List<PrioritizedField>();
 
         /// <summary>
         /// A list of all "validity check" getter methods.
         /// </summary>
-        public readonly List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>> GetterMethodValidity = new List<KeyValuePair<double, KeyValuePair<string, MethodInfo>>>();
+        public readonly List<PrioritizedSharpProperty> ValidityTestGetterProperties = new List<PrioritizedSharpProperty>();
     }
 }

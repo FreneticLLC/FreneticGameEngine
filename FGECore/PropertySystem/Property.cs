@@ -102,7 +102,7 @@ namespace FGECore.PropertySystem
         /// <returns>The property string.</returns>
         public override string ToString()
         {
-            return "Property<" + GetPropertyName() + ">";
+            return $"Property<{GetPropertyName()}>";
         }
     }
 }
