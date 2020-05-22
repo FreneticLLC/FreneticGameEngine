@@ -181,7 +181,7 @@ namespace FGEGraphics.GraphicsHelpers
             Matrix4 resp = new Matrix4(tmat.m0, tmat.m1, tmat.m2, tmat.m3, tmat.m4, tmat.m5, tmat.m6, tmat.m7, tmat.m8, tmat.m9, tmat.m10, tmat.m11, 0, 0, 0, 1);
             resp.Transpose();
             resp = resp.ClearTranslation() * Matrix4.CreateTranslation(resp.ExtractTranslation() * VRScale);
-            resp = resp * Matrix4.CreateRotationX((float)(Math.PI * 0.5));
+            resp *= Matrix4.CreateRotationX((float)(Math.PI * 0.5));
             VRController res = new VRController()
             {
                 Position = resp,
@@ -250,7 +250,7 @@ namespace FGEGraphics.GraphicsHelpers
                 headMat = new Matrix4(tmat.m0, tmat.m1, tmat.m2, tmat.m3, tmat.m4, tmat.m5, tmat.m6, tmat.m7, tmat.m8, tmat.m9, tmat.m10, tmat.m11, 0, 0, 0, 1);
                 headMat.Transpose();
                 HeadMatRot = headMat * Matrix4.CreateRotationX((float)(Math.PI * 0.5));
-                headMat = headMat * Matrix4.CreateRotationX((float)(Math.PI * 0.5));
+                headMat *= Matrix4.CreateRotationX((float)(Math.PI * 0.5));
                 headMat = headMat.ClearTranslation() * Matrix4.CreateTranslation(headMat.ExtractTranslation() * VRScale);
                 headMat.Invert();
             }

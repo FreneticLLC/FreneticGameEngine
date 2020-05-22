@@ -300,7 +300,7 @@ namespace OggDecoder
                                                     val = -32768;
                                                     clipflag = true;
                                                 }
-                                                if (val < 0) val = val | 0x8000;
+                                                if (val < 0) val |= 0x8000;
                                                 convbuffer[ptr] = (byte)(val);
                                                 convbuffer[ptr + 1] = (byte)((uint)val >> 8);
                                                 ptr += 2 * (vi.channels);

@@ -150,7 +150,7 @@ namespace FGEGraphics.GraphicsHelpers
             builder.Vertices[i] = new Vector3(1, 1, lowValue); i++;
             builder.Vertices[i] = new Vector3(1, 1, 1); i++;
             builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
-            builder.Vertices[i] = new Vector3(lowValue, 1, 1); i++;
+            builder.Vertices[i] = new Vector3(lowValue, 1, 1);
             Box = builder.Generate();
         }
 

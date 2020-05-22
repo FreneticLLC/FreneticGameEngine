@@ -28,7 +28,7 @@ namespace FGEGraphics.LightingSystem
         /// <summary>
         /// Radius of the light.
         /// </summary>
-        float Radius;
+        public float Radius;
 
         /// <summary>
         /// Color of the light.

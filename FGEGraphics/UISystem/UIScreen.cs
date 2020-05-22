@@ -32,7 +32,7 @@ namespace FGEGraphics.UISystem
         /// A reference to the relevant client backing this screen.
         /// Get this using <see cref="Client"/>.
         /// </summary>
-        private GameClientWindow _Client;
+        private readonly GameClientWindow InternalClient;
 
         /// <summary>
         /// Gets the client game engine this screen is associated with.
@@ -41,7 +41,7 @@ namespace FGEGraphics.UISystem
         {
             get
             {
-                return _Client.CurrentEngine;
+                return InternalClient.CurrentEngine;
             }
         }
 
@@ -52,7 +52,7 @@ namespace FGEGraphics.UISystem
         {
             get
             {
-                return _Client;
+                return InternalClient;
             }
         }
         
@@ -80,7 +80,7 @@ namespace FGEGraphics.UISystem
         /// <param name="pos">The position of the element.</param>
         public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
         {
-            _Client = client;
+            InternalClient = client;
         }
 
         /// <summary>

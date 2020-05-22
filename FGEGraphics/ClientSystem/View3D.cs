@@ -415,7 +415,7 @@ namespace FGEGraphics.ClientSystem
                 GraphicsUtil.CheckError("Load - View3D - Light - Deletes - 4");
             }
             GraphicsUtil.CheckError("Load - View3D - Light - Deletes");
-            RS4P = new RenderSurface4Part(Width, Height, Engine.Rendering, this);
+            RS4P = new DeferredRenderTarget(Width, Height, Engine.Rendering, this);
             // FBO
             fbo_texture = GL.GenTexture();
             fbo_main = GL.GenFramebuffer();
@@ -556,7 +556,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// An RS4P used in some locations.
         /// </summary>
-        public RenderSurface4Part RS4P;
+        public DeferredRenderTarget RS4P;
 
         /// <summary>
         /// The camera frustum.

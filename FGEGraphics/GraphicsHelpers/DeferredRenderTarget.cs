@@ -22,9 +22,9 @@ using FGEGraphics.ClientSystem;
 namespace FGEGraphics.GraphicsHelpers
 {
     /// <summary>
-    /// A 4-component rendering surface (currently actually holds 5 components + depth).
+    /// A rendering surface for deferred rendering logic (currently holds 5 RGBA components + depth).
     /// </summary>
-    public class RenderSurface4Part
+    public class DeferredRenderTarget
     {
         /// <summary>
         /// The width.
@@ -77,13 +77,13 @@ namespace FGEGraphics.GraphicsHelpers
         public Renderer Rendering;
 
         /// <summary>
-        /// Constructs the RS4P.
+        /// Constructs the <see cref="DeferredRenderTarget"/>.
         /// </summary>
         /// <param name="_width">Texture width.</param>
         /// <param name="_height">Texture height.</param>
         /// <param name="rendering">Render helper.</param>
         /// <param name="view">View system.</param>
-        public RenderSurface4Part(int _width, int _height, Renderer rendering, View3D view)
+        public DeferredRenderTarget(int _width, int _height, Renderer rendering, View3D view)
         {
             Rendering = rendering;
             Width = _width;
@@ -184,21 +184,35 @@ namespace FGEGraphics.GraphicsHelpers
             GL.Enable(EnableCap.Texture2D);
         }
 
-        static float[] Zeroes = new float[] { 0f, 0f, 0f, 0f };
-        static float[] One = new float[] { 1f };
+        /// <summary>
+        /// Internal data useful to <see cref="DeferredRenderTarget"/>.
+        /// </summary>
+        public static class Internal
+        {
+            /// <summary>
+            /// Premade array of 4 zeroes, for <see cref="Clear"/>.
+            /// </summary>
+            public static float[] Zeroes = new float[] { 0f, 0f, 0f, 0f };
+
+            /// <summary>
+            /// Premade array of 1 one, for <see cref="Clear"/>.
+            /// </summary>
+            public static float[] One = new float[] { 1f };
+        }
+
 
         /// <summary>
         /// Clears the RS4P Buffers.
         /// </summary>
         public void Clear()
         {
-            GL.ClearBuffer(ClearBuffer.Color, 0, Zeroes);
-            GL.ClearBuffer(ClearBuffer.Depth, 0, One);
-            GL.ClearBuffer(ClearBuffer.Color, 1, Zeroes);
-            GL.ClearBuffer(ClearBuffer.Color, 2, Zeroes);
-            GL.ClearBuffer(ClearBuffer.Color, 3, Zeroes);
-            GL.ClearBuffer(ClearBuffer.Color, 4, Zeroes);
-            GL.ClearBuffer(ClearBuffer.Color, 5, Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 0, Internal.Zeroes);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, Internal.One);
+            GL.ClearBuffer(ClearBuffer.Color, 1, Internal.Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 2, Internal.Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 3, Internal.Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 4, Internal.Zeroes);
+            GL.ClearBuffer(ClearBuffer.Color, 5, Internal.Zeroes);
         }
 
         /// <summary>

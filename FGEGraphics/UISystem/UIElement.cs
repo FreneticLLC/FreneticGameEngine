@@ -16,6 +16,7 @@ using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using FGECore.MathHelpers;
 using OpenTK.Input;
+using System.Security.Policy;
 
 namespace FGEGraphics.UISystem
 {
@@ -113,7 +114,7 @@ namespace FGEGraphics.UISystem
             }
             if (!Children.Contains(child))
             {
-                ToAdd.Add(child);
+                Internal.ToAdd.Add(child);
             }
             else
             {
@@ -129,14 +130,14 @@ namespace FGEGraphics.UISystem
         {
             if (Children.Contains(child))
             {
-                if (!ToRemove.Contains(child))
+                if (!Internal.ToRemove.Contains(child))
                 {
-                    ToRemove.Add(child);
+                    Internal.ToRemove.Add(child);
                 }
             }
-            else if (ToAdd.Contains(child))
+            else if (Internal.ToAdd.Contains(child))
             {
-                ToAdd.Remove(child);
+                Internal.ToAdd.Remove(child);
             }
             else
             {
@@ -162,7 +163,7 @@ namespace FGEGraphics.UISystem
         /// <returns></returns>
         public bool HasChild(UIElement element)
         {
-            return Children.Contains(element) && !ToRemove.Contains(element);
+            return Children.Contains(element) && !Internal.ToRemove.Contains(element);
         }
         
         /// <summary>
@@ -200,21 +201,36 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>
-        /// Elements queued to be added as children.
+        /// Data internal to a <see cref="UIElement"/> instance.
         /// </summary>
-        private List<UIElement> ToAdd = new List<UIElement>();
+        public struct InternalData
+        {
+            /// <summary>
+            /// Elements queued to be added as children.
+            /// </summary>
+            public List<UIElement> ToAdd;
+
+            /// <summary>
+            /// Elements queued to be removed as children.
+            /// </summary>
+            public List<UIElement> ToRemove;
+        }
 
         /// <summary>
-        /// Elements queued to be removed as children.
+        /// Data internal to a <see cref="UIElement"/> instance.
         /// </summary>
-        private List<UIElement> ToRemove = new List<UIElement>();
+        public InternalData Internal = new InternalData()
+        {
+            ToAdd = new List<UIElement>(),
+            ToRemove = new List<UIElement>()
+        };
 
         /// <summary>
         /// Adds and removes any queued children.
         /// </summary>
         public void CheckChildren()
         {
-            foreach (UIElement element in ToAdd)
+            foreach (UIElement element in Internal.ToAdd)
             {
                 if (!Children.Contains(element))
                 {
@@ -227,7 +243,7 @@ namespace FGEGraphics.UISystem
                     throw new Exception("Failed to add a child!");
                 }
             }
-            foreach (UIElement element in ToRemove)
+            foreach (UIElement element in Internal.ToRemove)
             {
                 if (Children.Remove(element))
                 {
@@ -239,8 +255,8 @@ namespace FGEGraphics.UISystem
                     throw new Exception("Failed to remove a child!");
                 }
             }
-            ToAdd.Clear();
-            ToRemove.Clear();
+            Internal.ToAdd.Clear();
+            Internal.ToRemove.Clear();
         }
 
         /// <summary>
@@ -283,7 +299,7 @@ namespace FGEGraphics.UISystem
                     if (!element.HoverInternal)
                     {
                         element.HoverInternal = true;
-                        element.MouseEnter(mX, mY);
+                        element.MouseEnter();
                     }
                     if (mDown && !pDown)
                     {
@@ -297,7 +313,7 @@ namespace FGEGraphics.UISystem
                 else if (element.HoverInternal)
                 {
                     element.HoverInternal = false;
-                    element.MouseLeave(mX, mY);
+                    element.MouseLeave();
                     if (mDown && !pDown)
                     {
                         element.MouseLeftDownOutside(mX, mY);
@@ -326,7 +342,7 @@ namespace FGEGraphics.UISystem
         /// <param name="lastRot">The last rotation made in the render chain.</param>
         public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
         {
-            if (Parent == null || !Parent.ToRemove.Contains(this))
+            if (Parent == null || !Parent.Internal.ToRemove.Contains(this))
             {
                 int x;
                 int y;
@@ -388,26 +404,6 @@ namespace FGEGraphics.UISystem
             {
                 element.UpdatePositions(output, delta, xoff, yoff, lastRot);
             }
-        }
-
-        /// <summary>
-        /// Fires <see cref="MouseEnter()"/>.
-        /// </summary>
-        /// <param name="x">The X position of the mouse.</param>
-        /// <param name="y">The Y position of the mouse.</param>
-        public void MouseEnter(int x, int y)
-        {
-            MouseEnter();
-        }
-
-        /// <summary>
-        /// Fires <see cref="MouseLeave()"/>.
-        /// </summary>
-        /// <param name="x">The X position of the mouse.</param>
-        /// <param name="y">The Y position of the mouse.</param>
-        public void MouseLeave(int x, int y)
-        {
-            MouseLeave();
         }
 
         /// <summary>

@@ -606,13 +606,12 @@ namespace FGEGraphics.AudioSystem
         /// <returns>AL format.</returns>
         ALFormat GetSoundFormat(int channels, int bits)
         {
-            switch (channels)
+            return channels switch
             {
-                case 1:
-                    return bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
-                default: // 2
-                    return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
-            }
+                1 => bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16,
+                // 2
+                _ => bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16,
+            };
         }
 
         /// <summary>
@@ -727,9 +726,9 @@ namespace FGEGraphics.AudioSystem
                     {
                         // TODO: Sanity?
                         clip.Data[i] = data[i + 1];
-                        clip.Data[i + 1] = (byte)0;
+                        clip.Data[i + 1] = 0;
                     }
-                    data = clip.Data;
+                    //data = clip.Data;
                 }
                 /*long pblast = 0;
                 for (int i = 0; i < clip.Data.Length; i++)

@@ -26,12 +26,12 @@ namespace FGEGraphics.LightingSystem
         /// <summary>
         /// The range of the light.
         /// </summary>
-        float Radius;
+        public float Radius;
 
         /// <summary>
         /// Color of the light.
         /// </summary>
-        Location Color;
+        public Location Color;
 
         /// <summary>
         /// Direction of the light.

@@ -35,12 +35,12 @@ namespace FGEGraphics.UISystem
             GetY = y;
         }
 
-        private static Func<UIElement, int> LEFT_X = (element) => 0;
-        private static Func<UIElement, int> CENTER_X = (element) => (int)(element.Parent.Position.Width / 2 - element.Position.Width / 2);
-        private static Func<UIElement, int> RIGHT_X = (element) => (int)(element.Parent.Position.Width - element.Position.Width);
-        private static Func<UIElement, int> TOP_Y = (element) => 0;
-        private static Func<UIElement, int> CENTER_Y = (element) => (int)(element.Parent.Position.Height / 2 - element.Position.Height / 2);
-        private static Func<UIElement, int> BOTTOM_Y = (element) => (int)(element.Parent.Position.Height - element.Position.Height);
+        private static readonly Func<UIElement, int> LEFT_X = (element) => 0;
+        private static readonly Func<UIElement, int> CENTER_X = (element) => (int)(element.Parent.Position.Width / 2 - element.Position.Width / 2);
+        private static readonly Func<UIElement, int> RIGHT_X = (element) => (int)(element.Parent.Position.Width - element.Position.Width);
+        private static readonly Func<UIElement, int> TOP_Y = (element) => 0;
+        private static readonly Func<UIElement, int> CENTER_Y = (element) => (int)(element.Parent.Position.Height / 2 - element.Position.Height / 2);
+        private static readonly Func<UIElement, int> BOTTOM_Y = (element) => (int)(element.Parent.Position.Height - element.Position.Height);
 
         /// <summary>
         /// Top left UI Anchor. See <see cref="UIAnchor"/>.
