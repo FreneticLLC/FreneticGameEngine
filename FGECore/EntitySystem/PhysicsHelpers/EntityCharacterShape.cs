@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 using BEPUphysics.Character;
 using BEPUphysics.CollisionShapes;
 using FGECore.MathHelpers;
-using FGECore.CoreSystems;
+using FGECore.PropertySystem;
+
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
     /// <summary>

@@ -109,7 +109,7 @@
     <Compile Include="UtilitySystems\PriorityQueue.cs" />
     <Compile Include="CoreSystems\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CoreSystems\PropertyHolder.cs" />
+    <Compile Include="PropertySystem\PropertyHolder.cs" />
     <Compile Include="MathHelpers\Quaternion.cs" />
     <Compile Include="CoreSystems\Scheduler.cs" />
     <Compile Include="ServerSystem\EntitySystem\ServerEntity.cs" />

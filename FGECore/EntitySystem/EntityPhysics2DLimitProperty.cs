@@ -12,14 +12,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BEPUutilities;
-using BEPUphysics;
-using BEPUphysics.Constraints;
-using BEPUphysics.Constraints.SingleEntity;
-using BEPUphysics.Constraints.SolverGroups;
-using BEPUphysics.Constraints.TwoEntity;
 using BEPUphysics.Constraints.TwoEntity.Joints;
 using FGECore.CoreSystems;
-using FreneticUtilities.FreneticToolkit;
+using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem
 {

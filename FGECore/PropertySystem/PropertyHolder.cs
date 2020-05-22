@@ -22,7 +22,7 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.PhysicsSystem;
 using FGECore.MathHelpers;
 
-namespace FGECore.CoreSystems
+namespace FGECore.PropertySystem
 {
     /// <summary>
     /// Represents a helper to save or load an object.

@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BEPUphysics.Character;
 using FGECore.MathHelpers;
-using FGECore.CoreSystems;
+using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem
 {

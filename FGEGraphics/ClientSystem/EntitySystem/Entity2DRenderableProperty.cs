@@ -11,10 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using FGECore;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
+using FGECore.PropertySystem;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

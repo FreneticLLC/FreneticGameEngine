@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
 using FGECore.CoreSystems;
+using FGECore.PropertySystem;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.EntitySystem

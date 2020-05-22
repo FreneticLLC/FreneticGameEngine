@@ -11,14 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
-using BEPUphysics;
 using BEPUphysics.Character;
 using BEPUutilities.DataStructures;
 using BEPUphysics.NarrowPhaseSystems.Pairs;
-using BEPUphysics.Materials;
 using FGECore.CoreSystems;
-using FreneticUtilities.FreneticToolkit;
+using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem
 {

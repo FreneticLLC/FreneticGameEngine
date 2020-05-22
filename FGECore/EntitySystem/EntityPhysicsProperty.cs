@@ -15,13 +15,11 @@ using BEPUphysics;
 using BEPUutilities;
 using BEPUphysics.Character;
 using BEPUphysics.Entities;
-using BEPUphysics.CollisionShapes;
 using FGECore.EntitySystem.PhysicsHelpers;
-using FGECore.NetworkSystem;
-using FGECore.UtilitySystems;
 using FGECore.PhysicsSystem;
 using FGECore.MathHelpers;
 using FGECore.CoreSystems;
+using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem
 {

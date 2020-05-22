@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using BEPUphysics.CollisionShapes;
 using BEPUphysics.CollisionShapes.ConvexShapes;
 using BEPUutilities;
-using FGECore.CoreSystems;
+using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {

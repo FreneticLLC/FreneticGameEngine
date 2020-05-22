@@ -11,13 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.EntitySystem;
+using FGECore.PropertySystem;
 using FGEGraphics.LightingSystem;
-using OpenTK;
-using OpenTK.Graphics;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

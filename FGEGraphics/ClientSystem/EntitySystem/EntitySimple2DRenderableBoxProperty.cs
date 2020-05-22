@@ -12,10 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
-using FGECore;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGEGraphics.GraphicsHelpers;
+using FGECore.PropertySystem;
 using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.ClientSystem.EntitySystem

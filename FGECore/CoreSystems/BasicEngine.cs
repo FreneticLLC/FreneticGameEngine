@@ -15,6 +15,7 @@ using FGECore.EntitySystem;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
 using FGECore.PhysicsSystem;
+using FGECore.PropertySystem;
 
 namespace FGECore.CoreSystems
 {
