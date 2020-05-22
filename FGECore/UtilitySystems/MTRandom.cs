@@ -226,17 +226,17 @@ namespace FGECore.UtilitySystems
                     ulong xA = x >> 1;
                     if (x % 2 != 0)
                     {
-                        xA = xA ^ 0xB5026F5AA96619E9UL;
+                        xA ^= 0xB5026F5AA96619E9UL;
                     }
                     Internal.Buffer[i] = Internal.Buffer[(i + 156) % n] ^ xA;
                 }
                 Internal.BufferIndex = 0;
             }
             ulong y = Internal.Buffer[Internal.BufferIndex++];
-            y = y ^ ((y >> 29) & 0x5555555555555555UL);
-            y = y ^ ((y << 17) & 0x71D67FFFEDA60000UL);
-            y = y ^ ((y << 37) & 0xFFF7EEE000000000UL);
-            y = y ^ (y >> 43);
+            y ^= ((y >> 29) & 0x5555555555555555UL);
+            y ^= ((y << 17) & 0x71D67FFFEDA60000UL);
+            y ^= ((y << 37) & 0xFFF7EEE000000000UL);
+            y ^= (y >> 43);
             return y;
         }
     }

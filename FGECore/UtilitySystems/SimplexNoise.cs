@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace FGECore.UtilitySystems
 {
-    // mcmonkey - NOTE TO READERS: This class was found elsewhere. Can't locate a link to it.
+    // mcmonkey - NOTE TO READERS: This class was found elsewhere. Possibly originally located at https://code.google.com/archive/p/simplexnoise/
     // mcmonkey - Original header is below, though I removed some unicode from the name to avoid file errors.
 
     // mcmonkey - ORIGINAL HEADER BEGIN
@@ -82,6 +82,7 @@ namespace FGECore.UtilitySystems
     }
 
     // mcmonkey - Below code changed from float to double.
+    // mcmonkey - additional, empty doc comments were removed, and doc summaries received added periods.
 
     /// <summary>
     /// Implementation of the Perlin simplex noise, an improved Perlin noise algorithm.
@@ -90,10 +91,8 @@ namespace FGECore.UtilitySystems
     public class SimplexNoiseInternal // mcmonkey - class rename
     {
         /// <summary>
-        /// 1D simplex noise
+        /// 1D simplex noise.
         /// </summary>
-        /// <param name="x">.</param>
-        /// <returns>.</returns>
         public static double Generate(double x)
         {
             long i0 = FastFloor(x);
@@ -116,11 +115,8 @@ namespace FGECore.UtilitySystems
         }
 
         /// <summary>
-        /// 2D simplex noise
+        /// 2D simplex noise.
         /// </summary>
-        /// <param name="x">.</param>
-        /// <param name="y">.</param>
-        /// <returns>.</returns>
         public static double Generate(double x, double y)
         {
             const double F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
@@ -192,12 +188,8 @@ namespace FGECore.UtilitySystems
 
 
         /// <summary>
-        /// 3D simplex noise
+        /// 3D simplex noise.
         /// </summary>
-        /// <param name="x">.</param>
-        /// <param name="y">.</param>
-        /// <param name="z">.</param>
-        /// <returns>.</returns>
         public static double Generate(double x, double y, double z)
         {
             // Simple skewing factors for the 3D case
@@ -301,7 +293,7 @@ namespace FGECore.UtilitySystems
             return 32.4f * (n0 + n1 + n2 + n3); // The scale factor is preliminary! // mcmonkey - improve scaling factor from 32.0
         }
 
-        private static byte[] perm = new byte[512] { 151,160,137,91,90,15,
+        private static readonly byte[] perm = new byte[512] { 151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
               88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -364,13 +356,13 @@ namespace FGECore.UtilitySystems
             return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v);
         }
 
-        private static double Grad(long hash, double x, double y, double z, double t) // mcmonkey - Name fix
+        /*private static double Grad(long hash, double x, double y, double z, double t) // mcmonkey - Name fix
         {
             long h = hash & 31;      // Convert low 5 bits of hash code into 32 simple
             double u = h < 24 ? x : y; // gradient directions, and compute dot product.
             double v = h < 16 ? y : z;
             double w = h < 8 ? z : t;
             return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v) + ((h & 4) != 0 ? -w : w);
-        }
+        }*/ // mcmonkey - commented out due to being unused
     }
 }

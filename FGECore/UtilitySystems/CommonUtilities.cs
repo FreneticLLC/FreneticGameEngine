@@ -64,6 +64,7 @@ namespace FGECore.UtilitySystems
 
         /// <summary>
         /// Checks an exception for rethrow necessity.
+        /// <para>This in theory should not be needed as <see cref="ThreadAbortException"/> shouldn't be miscaught, but in practice it seems to sometimes happen.</para>
         /// </summary>
         /// <param name="ex">The exception to check.</param>
         public static void CheckException(Exception ex)
@@ -90,15 +91,21 @@ namespace FGECore.UtilitySystems
             return toret.ToString();
         }
 
-        /// <summary>
-        /// Valid ASCII symbols for a plaintext alphanumeric username.
-        /// </summary>
-        public static AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(
-            "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "_");
+        private const string AlphabetChars = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         /// <summary>
-        /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII.
-        /// Also enforces length between 4 and 15 symbols, inclusive.
+        /// Alphabetical character matcher (a-z, A-Z).
+        /// </summary>
+        public static readonly AsciiMatcher AlphabetMatcher = new AsciiMatcher(AlphabetChars);
+
+        /// <summary>
+        /// Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).
+        /// </summary>
+        public static readonly AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(AlphabetChars + "0123456789" + "_");
+
+        /// <summary>
+        /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII (a-z, A-Z, 0-9, _).
+        /// Also enforces length between 3 and 15 symbols, inclusive.
         /// </summary>
         /// <param name="str">The username to validate.</param>
         /// <returns>Whether the username is valid.</returns>
@@ -108,26 +115,26 @@ namespace FGECore.UtilitySystems
             {
                 return false;
             }
-            // Length = 4-15
-            if (str.Length < 4 || str.Length > 15)
+            // Length = 3-15
+            if (str.Length < 3 || str.Length > 15)
             {
                 return false;
             }
             // Starts A-Z
-            if (!(str[0] >= 'a' && str[0] <= 'z') && !(str[0] >= 'A' && str[0] <= 'Z'))
+            if (!AlphabetMatcher.IsMatch(str[0]))
             {
                 return false;
             }
-            // All symbols are A-Z, 0-9, _
+            // All symbols are a-z, A-Z, 0-9, _
             return UsernameValidationMatcher.IsOnlyMatches(str);
         }
 
         /// <summary>
-        /// Formats a long with "123,456" style notation.
+        /// Formats a <see cref="long"/> with comma-separated thousands ("123,456" style notation).
         /// </summary>
         /// <param name="input">The number.</param>
         /// <returns>The formatted string.</returns>
-        public static string FormatNumber(long input)
+        public static string FormatThousands(long input)
         {
             // TODO: Better method here.
             string basinp = input.ToString();

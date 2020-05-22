@@ -28,7 +28,7 @@ namespace FGECore.StackNoteSystem
         /// <summary>
         /// A related object, if any.
         /// </summary>
-        public Object Related;
+        public object Related;
 
         /// <summary>
         /// Gets a string output for this stack note.

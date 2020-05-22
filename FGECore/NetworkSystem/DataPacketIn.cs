@@ -23,7 +23,7 @@ namespace FGECore.NetworkSystem
         /// <summary>
         /// The source object. Generally, the connection object is held by this.
         /// </summary>
-        public abstract Object Source { get; }
+        public abstract object Source { get; }
 
         /// <summary>
         /// Process and run the data input.
@@ -52,7 +52,7 @@ namespace FGECore.NetworkSystem
         /// <summary>
         /// Gets the source. Prefer <see cref="Connection"/>.
         /// </summary>
-        public override Object Source
+        public override object Source
         {
             get
             {

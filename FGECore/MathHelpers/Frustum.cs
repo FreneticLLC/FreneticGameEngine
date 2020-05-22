@@ -148,23 +148,16 @@ namespace FGECore.MathHelpers
         /// </summary>
         public Plane GetFor(int i)
         {
-            switch (i)
+            return i switch
             {
-                case 0:
-                    return Far;
-                case 1:
-                    return Near;
-                case 2:
-                    return Top;
-                case 3:
-                    return Bottom;
-                case 4:
-                    return Left;
-                case 5:
-                    return Right;
-                default:
-                    throw new InvalidOperationException($"GetFor({i}) is invalid: input must be between 0 and 5, inclusive.");
-            }
+                0 => Far,
+                1 => Near,
+                2 => Top,
+                3 => Bottom,
+                4 => Left,
+                5 => Right,
+                _ => throw new InvalidOperationException($"GetFor({i}) is invalid: input must be between 0 and 5, inclusive."),
+            };
         }
 
         /// <summary>

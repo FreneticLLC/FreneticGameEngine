@@ -45,10 +45,10 @@ namespace FGECore.StackNoteSystem
         /// Pushes a new entry to the current note stack.
         /// </summary>
         /// <param name="note">The note.</param>
-        /// <param name="rel">A related object, if any.</param>
-        public static void Push(string note, Object rel)
+        /// <param name="relatedObj">A related object, if any.</param>
+        public static void Push(string note, object relatedObj)
         {
-            Notes.Push(note, rel);
+            Notes.Push(note, relatedObj);
         }
 
         /// <summary>
