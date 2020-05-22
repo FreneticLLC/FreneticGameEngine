@@ -204,12 +204,12 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// All currently held properties on this object.
         /// </summary>
-        private Dictionary<Type, Property> HeldProperties = new Dictionary<Type, Property>();
+        private readonly Dictionary<Type, Property> HeldProperties = new Dictionary<Type, Property>();
 
         /// <summary>
         /// All currently held interfaces on this object.
         /// </summary>
-        private Dictionary<Type, List<Object>> HeldInterfaces = new Dictionary<Type, List<Object>>();
+        private readonly Dictionary<Type, List<Object>> HeldInterfaces = new Dictionary<Type, List<Object>>();
 
         /// <summary>
         /// Special helper: Default empty list for some returns.
@@ -837,7 +837,7 @@ namespace FGECore.CoreSystems
             methodb_c.SetParameters(mbc_a, typeof(Dictionary<string, string>));
             methodb_c.SetReturnType(typeof(void));
             ILGenerator ilgen = methodb_c.GetILGenerator();
-            Label next = default(Label);
+            Label next = default;
             for (int i = 0; i < fvalm.Count; i++)
             {
                 if (i > 0)

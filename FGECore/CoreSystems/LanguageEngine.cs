@@ -84,7 +84,7 @@ namespace FGECore.CoreSystems
                 confs = LanguageDocuments;
             }
             string idlow = id.ToLowerFast();
-            if (LanguageDocuments.TryGetValue(idlow, out FDSSection doc))
+            if (confs.TryGetValue(idlow, out FDSSection doc))
             {
                 return doc;
             }
@@ -94,7 +94,7 @@ namespace FGECore.CoreSystems
                 try
                 {
                     doc = new FDSSection(dat);
-                    LanguageDocuments[idlow] = doc;
+                    confs[idlow] = doc;
                     return doc;
                 }
                 catch (Exception ex)
@@ -103,7 +103,7 @@ namespace FGECore.CoreSystems
                     SysConsole.Output("Reading language documents", ex);
                 }
             }
-            LanguageDocuments[idlow] = null;
+            confs[idlow] = null;
             return null;
         }
 
@@ -159,10 +159,9 @@ namespace FGECore.CoreSystems
             string category = pathAndVars[0].ToLowerFast();
             string defPath = pathAndVars[1].ToLowerFast();
             FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-            List<string> str = null;
             if (langen != null)
             {
-                str = langen.GetStringList(defPath);
+                List<string> str = langen.GetStringList(defPath);
                 if (str != null)
                 {
                     return HandleList(str, pathAndVars);
@@ -190,10 +189,9 @@ namespace FGECore.CoreSystems
             string category = pathAndVars[0].ToLowerFast();
             string defPath = pathAndVars[1].ToLowerFast();
             FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-            string str = null;
             if (langen != null)
             {
-                str = langen.GetString(defPath, null);
+                string str = langen.GetString(defPath, null);
                 if (str != null)
                 {
                     return Handle(str, pathAndVars);
@@ -222,10 +220,9 @@ namespace FGECore.CoreSystems
             string defPath = pathAndVars[1].ToLowerFast();
             FDSSection lang = GetLangDoc(category, Files);
             FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-            List<string> str = null;
             if (lang != null)
             {
-                str = lang.GetStringList(defPath);
+                List<string> str = lang.GetStringList(defPath);
                 if (str != null)
                 {
                     return HandleList(str, pathAndVars);
@@ -233,7 +230,7 @@ namespace FGECore.CoreSystems
             }
             if (langen != null)
             {
-                str = langen.GetStringList(defPath);
+                List<string> str = langen.GetStringList(defPath);
                 if (str != null)
                 {
                     return HandleList(str, pathAndVars);
@@ -262,10 +259,9 @@ namespace FGECore.CoreSystems
             string defPath = pathAndVars[1].ToLowerFast();
             FDSSection lang = GetLangDoc(category, Files);
             FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-            string str = null;
             if (lang != null)
             {
-                str = lang.GetString(defPath, null);
+                string str = lang.GetString(defPath, null);
                 if (str != null)
                 {
                     return Handle(str, pathAndVars);
@@ -273,7 +269,7 @@ namespace FGECore.CoreSystems
             }
             if (langen != null)
             {
-                str = langen.GetString(defPath, null);
+                string str = langen.GetString(defPath, null);
                 if (str != null)
                 {
                     return Handle(str, pathAndVars);
