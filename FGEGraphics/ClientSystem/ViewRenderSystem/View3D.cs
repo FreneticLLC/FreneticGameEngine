@@ -23,7 +23,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.LightingSystem;
 using FGECore.UtilitySystems;
 
-namespace FGEGraphics.ClientSystem
+namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {
     /// <summary>
     /// Represents a 3D view port.

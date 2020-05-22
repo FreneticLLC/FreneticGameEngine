@@ -96,7 +96,7 @@
     <Compile Include="ClientSystem\GameEngineBase.cs" />
     <Compile Include="ClientSystem\GE3DShaders.cs" />
     <Compile Include="ClientSystem\ShaderLocations.cs" />
-    <Compile Include="ClientSystem\View3D.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\View3D.cs" />
     <Compile Include="ClientSystem\ViewUI2D.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GraphicsHelpers\DecalInfo.cs" />
@@ -112,7 +112,7 @@
     <Compile Include="GraphicsHelpers\Models\ModelMesh.cs" />
     <Compile Include="GraphicsHelpers\Models\ModelNode.cs" />
     <Compile Include="GraphicsHelpers\Renderer.cs" />
-    <Compile Include="GraphicsHelpers\RenderSurface4Part.cs" />
+    <Compile Include="GraphicsHelpers\DeferredRenderTarget.cs" />
     <Compile Include="GraphicsHelpers\Shaders\Shader.cs" />
     <Compile Include="GraphicsHelpers\Textures\Texture.cs" />
     <Compile Include="GraphicsHelpers\Textures\TextureLoadedEventArgs.cs" />

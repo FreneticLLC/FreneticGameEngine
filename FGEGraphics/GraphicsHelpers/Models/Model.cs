@@ -18,6 +18,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.ModelSystems;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.GraphicsHelpers.Models

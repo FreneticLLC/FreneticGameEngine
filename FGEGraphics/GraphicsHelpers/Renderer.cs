@@ -17,6 +17,7 @@ using OpenTK.Graphics.OpenGL4;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.Models;

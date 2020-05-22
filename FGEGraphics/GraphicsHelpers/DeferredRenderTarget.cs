@@ -11,13 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.GraphicsHelpers
 {
