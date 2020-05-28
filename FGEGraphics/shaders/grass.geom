@@ -5,7 +5,7 @@
 #define MCM_IS_A_SHADOW 0
 
 layout (points) in;
-layout (triangle_strip, max_vertices = 6) out;
+layout (triangle_strip, max_vertices = 30) out;
 
 layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 // ...
@@ -76,25 +76,8 @@ vec4 final_fix(in vec4 pos)
 	return pos;
 }
 
-void main()
+void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in float tid, in vec3 wnd)
 {
-	vec3 pos = gl_in[0].gl_Position.xyz;
-	float chance = snoise2(pos);
-	chance *= chance;
-	if (dot(pos.xy, pos.xy) * chance > render_distance_limit)
-	{
-		return;
-	}
-	float snz = snoise((pos + vec3(time, time, 0.0)) * 0.2);
-	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
-	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
-	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
-	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.5;
-	vec3 pos_norm = normalize(pos.xyz + wnd);
-	float scale = f[0].texcoord.x * 0.5;
-	float tid = f[0].texcoord.y;
-	fi.color = vec4(f[0].color.xyz * 0.5 + 0.5, 1.0);
-	fi.tbn = mat3(vec3(0.0), vec3(0.0), sunlightDir);
 	// First Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0)));
 	fi.texcoord = vec3(0.0, 1.0, tid);
@@ -120,4 +103,37 @@ void main()
 	fi.texcoord = vec3(1.0, 0.0, tid);
 	EmitVertex();
 	EndPrimitive();
+}
+
+void main()
+{
+	vec3 pos = gl_in[0].gl_Position.xyz;
+	float chance = snoise2(pos);
+	float distSq = dot(pos.xy, pos.xy);
+	chance *= chance;
+	if (distSq * chance > render_distance_limit)
+	{
+		return;
+	}
+	float snz = snoise((pos + vec3(time, time, 0.0)) * 0.2);
+	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
+	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
+	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
+	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.5;
+	vec3 pos_norm = normalize(pos.xyz + wnd);
+	float scale = f[0].texcoord.x * 0.5;
+	float tid = f[0].texcoord.y;
+	fi.color = vec4(f[0].color.xyz * 0.5 + 0.5, 1.0);
+	fi.tbn = mat3(vec3(0.0), vec3(0.0), sunlightDir);
+	emitGrassStalk(scale, right, up, pos, tid, wnd);
+	if (distSq < 6 * 6)
+	{
+		const float OFFS = 0.15;
+		float adaptedScale = scale * (1.0 - (distSq / (6 * 6))) * 0.7;
+		vec3 adaptedWind = wnd * adaptedScale;
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, OFFS, 0.0), tid, adaptedWind);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, -OFFS, 0.0), tid, adaptedWind);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, OFFS, 0.0), tid, adaptedWind);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, -OFFS, 0.0), tid, adaptedWind);
+	}
 }
