@@ -115,11 +115,12 @@ void main()
 	{
 		return;
 	}
+	float widthMultiplier = sqrt(distSq / (render_distance_limit * 0.2)) * 0.5 + 0.5;
 	float snz = snoise((pos + vec3(time, time, 0.0)) * 0.2);
 	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
-	vec3 wnd = wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished);
+	vec3 wnd = (wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished)) / max(widthMultiplier, 1.0);
 	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
-	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * 0.5;
+	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * widthMultiplier;
 	vec3 pos_norm = normalize(pos.xyz + wnd);
 	float scale = f[0].texcoord.x * 0.5;
 	float tid = f[0].texcoord.y;
