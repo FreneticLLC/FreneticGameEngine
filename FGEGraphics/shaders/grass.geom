@@ -93,8 +93,8 @@ void main()
 	vec3 pos_norm = normalize(pos.xyz + wnd);
 	float scale = f[0].texcoord.x * 0.5;
 	float tid = f[0].texcoord.y;
-	fi.color = vec4(f[0].color.xyz * dot(pos_norm, vec3(0.0, 0.0, -1.0)) * 0.5 + 0.5, 1.0);
-	fi.tbn = transpose(mat3(vec3(0.0), vec3(0.0), sunlightDir));
+	fi.color = vec4(f[0].color.xyz * 0.5 + 0.5, 1.0);
+	fi.tbn = mat3(vec3(0.0), vec3(0.0), sunlightDir);
 	// First Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0)));
 	fi.texcoord = vec3(0.0, 1.0, tid);
