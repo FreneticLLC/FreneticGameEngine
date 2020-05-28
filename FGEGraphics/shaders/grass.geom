@@ -76,7 +76,7 @@ vec4 final_fix(in vec4 pos)
 	return pos;
 }
 
-void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in float tid, in vec3 wnd)
+void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in float tid, in vec3 wnd, in float tcmultiplier)
 {
 	// First Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right) * scale, 1.0)));
@@ -84,7 +84,7 @@ void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in f
 	EmitVertex();
 	// Second Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right) * scale, 1.0)));
-	fi.texcoord = vec3(1.0, 1.0, tid);
+	fi.texcoord = vec3(tcmultiplier, 1.0, tid);
 	EmitVertex();
 	// Third Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 2.0) * scale + wnd, 1.0)));
@@ -92,7 +92,7 @@ void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in f
 	EmitVertex();
 	// Forth Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 2.0) * scale + wnd, 1.0)));
-	fi.texcoord = vec3(1.0, 0.5, tid);
+	fi.texcoord = vec3(tcmultiplier, 0.5, tid);
 	EmitVertex();
 	// Fifth Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos - (right - up * 4.0) * scale + wnd * 2.0, 1.0)));
@@ -100,7 +100,7 @@ void emitGrassStalk(in float scale, in vec3 right, in vec3 up, in vec3 pos, in f
 	EmitVertex();
 	// Sixth Vertex
 	gl_Position = final_fix(proj_matrix * qfix(vec4(pos + (right + up * 4.0) * scale + wnd * 2.0, 1.0)));
-	fi.texcoord = vec3(1.0, 0.0, tid);
+	fi.texcoord = vec3(tcmultiplier, 0.0, tid);
 	EmitVertex();
 	EndPrimitive();
 }
@@ -115,10 +115,10 @@ void main()
 	{
 		return;
 	}
-	float widthMultiplier = sqrt(distSq / (render_distance_limit * 0.2)) * 0.5 + 0.5;
+	float widthMultiplier = max(sqrt(distSq / (render_distance_limit * 0.2)) * 0.5 + 0.5, 1.0);
 	float snz = snoise((pos + vec3(time, time, 0.0)) * 0.2);
 	float timeSinceSquished = log(min(60.0, max(0.0, f[0].texcoord.z - time)) + 1.0) * (1.0 / log(60.0));
-	vec3 wnd = (wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished)) / max(widthMultiplier, 1.0);
+	vec3 wnd = (wind * snz * (1.0 - timeSinceSquished) + vec3(timeSinceSquished, 0.0, -timeSinceSquished)) / widthMultiplier;
 	vec3 up = vec3(timeSinceSquished, 0.0, 1.0 - timeSinceSquished);
 	vec3 right = cross(up, normalize(vec3(pos.x, pos.y, 0.0))) * widthMultiplier;
 	vec3 pos_norm = normalize(pos.xyz + wnd);
@@ -126,15 +126,15 @@ void main()
 	float tid = f[0].texcoord.y;
 	fi.color = vec4(f[0].color.xyz * 0.5 + 0.5, 1.0);
 	fi.tbn = mat3(vec3(0.0), vec3(0.0), sunlightDir);
-	emitGrassStalk(scale, right, up, pos, tid, wnd);
+	emitGrassStalk(scale, right, up, pos, tid, wnd, widthMultiplier);
 	if (distSq < 6 * 6)
 	{
 		const float OFFS = 0.15;
 		float adaptedScale = scale * (1.0 - (distSq / (6 * 6))) * 0.7;
 		vec3 adaptedWind = wnd * adaptedScale;
-		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, OFFS, 0.0), tid, adaptedWind);
-		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, -OFFS, 0.0), tid, adaptedWind);
-		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, OFFS, 0.0), tid, adaptedWind);
-		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, -OFFS, 0.0), tid, adaptedWind);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, OFFS, 0.0), tid, adaptedWind, 1.0);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(OFFS, -OFFS, 0.0), tid, adaptedWind, 1.0);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, OFFS, 0.0), tid, adaptedWind, 1.0);
+		emitGrassStalk(adaptedScale, right, up, pos + vec3(-OFFS, -OFFS, 0.0), tid, adaptedWind, 1.0);
 	}
 }
