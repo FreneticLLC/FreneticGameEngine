@@ -266,7 +266,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Enable(EnableCap.DepthTest);
             State.RenderTextures = true;
             GL.ClearBuffer(ClearBuffer.Color, 0, Config.ClearColor);
-            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1.0f });
+            GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.DEPTH_CLEAR);
             State.CameraBasePos = Config.CameraPos;
             State.CameraAdjust = -camforward.CrossProduct(camup) * 0.25;
             if (Engine.Client.VR != null)

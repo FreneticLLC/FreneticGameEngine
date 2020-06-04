@@ -34,6 +34,12 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public static Matrix4 IdentityMatrix = Matrix4.Identity;
 
         /// <summary>
+        /// The depth clear float array (a float array with one value: 1.0f).
+        /// This is, naturally, for input to "GL.ClearBuffer(ClearBuffer.DEPTH, bufId, DEPTH_CLEAR);"
+        /// </summary>
+        public static readonly float[] DEPTH_CLEAR = new float[] { 1.0f };
+
+        /// <summary>
         /// LL needed info.
         /// </summary>
         public const int LL_AB_SIZE = 8 * 1024 * 1024; // TODO: Tweak me!
