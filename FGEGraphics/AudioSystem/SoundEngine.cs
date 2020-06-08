@@ -623,7 +623,7 @@ namespace FGEGraphics.AudioSystem
         {
             try
             {
-                string newname = "sounds/" + name + ".ogg";
+                string newname = $"sounds/{name}.ogg";
                 if (!Client.Client.Files.FileExists(newname))
                 {
                     //SysConsole.Output(OutputType.DEBUG, "Audio / nullsource");
@@ -659,7 +659,7 @@ namespace FGEGraphics.AudioSystem
                     }
                     catch (Exception ex)
                     {
-                        SysConsole.Output("loading audio", ex);
+                        SysConsole.Output($"loading audio file '{name}'", ex);
                     }
                 });
                 //SysConsole.Output(OutputType.DEBUG, "Audio / valid: " + tsfx);
@@ -667,7 +667,7 @@ namespace FGEGraphics.AudioSystem
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Reading sound file '" + name + "': " + ex.ToString());
+                SysConsole.Output(OutputType.ERROR, $"Reading sound file '{name}': {ex}");
                 return null;
             }
         }
