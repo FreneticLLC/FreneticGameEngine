@@ -176,15 +176,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
                 CheckError("Render/Fast - Uniforms 2");
             }*/
-            Shaders.Forward.Grass.Bind();
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 2.2");
-            if (Engine.Forward_Lights)
-            {
-                GL.Uniform1(15, (float)c);
-                GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-                GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
-            }
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 2.5");
             Shaders.Forward.Decals.Bind();
             GraphicsUtil.CheckError("Render/Fast - Uniforms 2.6");
             if (Engine.Forward_Lights)
@@ -307,8 +298,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
                 Patches.VRSolidPatch?.Invoke();
                 Shaders.Forward.Particles.Bind();
-                GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
-                Shaders.Forward.Grass.Bind();
                 GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
                 Shaders.Forward.Decals.Bind();
                 GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);

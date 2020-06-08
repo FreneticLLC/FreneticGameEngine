@@ -106,12 +106,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                     GraphicsUtil.CheckError("Pre-Prerender - Shadows");
                                     Config.CameraPos = subLight.EyePosition.ToLocation() - campos;
                                     Patches.ShadowLightPatch?.Invoke(light, subLight);
-                                    Shaders.Deferred.ShadowPass_Grass = Shaders.Deferred.ShadowPass_Grass.Bind();
-                                    View.SetMatrix(2, Matrix4d.Identity);
-                                    GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);
-                                    GL.Uniform1(4, subLight.TransparentShadows ? 1.0f : 0.0f);
-                                    subLight.SetProj(View);
-                                    GraphicsUtil.CheckError("Pre-Prerender2 - Shadows");
                                     Shaders.Deferred.ShadowPass_Particles = Shaders.Deferred.ShadowPass_Particles.Bind();
                                     View.SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);

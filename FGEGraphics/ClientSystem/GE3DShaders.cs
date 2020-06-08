@@ -68,9 +68,6 @@ namespace FGEGraphics.ClientSystem
             }
             Deferred.HDRPass = Shaders.GetShader("hdrpass" + def);
             Forward.PostProcess = Shaders.GetShader("postfast" + def);
-            Forward.Grass = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_GEOM_THREED_TEXTURE" + forw_extra + "?grass");
-            Deferred.GBuffer_Grass = Shaders.GetShader("fbo" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_GEOM_THREED_TEXTURE?grass");
-            Deferred.ShadowPass_Grass = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_IS_A_SHADOW,MCM_GEOM_THREED_TEXTURE?grass");
             Deferred.ShadowPass_Particles = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH,MCM_IS_A_SHADOW?particles");
             Forward.Particles = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH" + forw_extra + "?particles");
             Deferred.GBuffer_Decals = Shaders.GetShader("fbo" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE,MCM_PRETTY?decal");
@@ -120,11 +117,6 @@ namespace FGEGraphics.ClientSystem
             public Shader BasicTransparent_NoBones;
 
             /// <summary>
-            /// The shader used for grass-sprites in forward rendering mode.
-            /// </summary>
-            public Shader Grass;
-
-            /// <summary>
             /// The shader used for particles in forward rendering mode.
             /// </summary>
             public Shader Particles;
@@ -171,11 +163,6 @@ namespace FGEGraphics.ClientSystem
             public Shader ShadowPass_NoBones;
 
             /// <summary>
-            /// The Shadow Pass shader, for grass.
-            /// </summary>
-            public Shader ShadowPass_Grass;
-
-            /// <summary>
             /// The Shadow Pass shader, for particles.
             /// </summary>
             public Shader ShadowPass_Particles;
@@ -214,11 +201,6 @@ namespace FGEGraphics.ClientSystem
             /// The G-Buffer FBO shader, for alltransparents (Skybox mainly).
             /// </summary>
             public Shader GBuffer_AllTransparencies;
-
-            /// <summary>
-            /// The shader used for grass-sprites in deferred rendering mode.
-            /// </summary>
-            public Shader GBuffer_Grass;
 
             /// <summary>
             /// The G-Buffer FBO shader, for the refraction pass.

@@ -228,9 +228,6 @@
     <None Include="shaders\godray.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\grass.geom">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="shaders\hdrpass.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -310,9 +307,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="shaders\glnoise.inc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="shaders\grass_swing.comp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="shaders\postfast.vs">
