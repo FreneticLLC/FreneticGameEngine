@@ -8,7 +8,7 @@
 
 #version 430 core
 
-#define MCM_TRANSP_ALLOWED 0
+#define MCM_SKYBOX 0
 #define MCM_REFRACT 0
 #define MCM_GEOM_ACTIVE 0
 #define MCM_INVERSE_FADE 0
@@ -35,9 +35,9 @@ layout (location = 4) uniform vec4 screen_size = vec4(1024, 1024, 0.1, 1000.0);
 layout (location = 9) uniform float refract_eta = 0.0;
 // ...
 layout (location = 16) uniform float minimum_light = 0.0;
-#if MCM_TRANSP_ALLOWED
+#if MCM_SKYBOX
 layout (location = 17) uniform float write_hints = 1.0;
-#endif // MCM_TRANSP_ALLOWED
+#endif // MCM_SKYBOX
 
 in struct vox_fout
 {
@@ -86,17 +86,17 @@ void main()
 #endif // MCM_REFRACT
 #if MCM_NO_ALPHA_CAP
 #else // MCM_NO_ALPHA_CAP
-#if MCM_TRANSP_ALLOWED
+#if MCM_SKYBOX
 	if (col.w * fi.color.w < 0.01)
 	{
 		discard;
 	}
-#else // MCM_TRANSP_ALLOWED
+#else // MCM_SKYBOX
 	if (col.w * fi.color.w < 0.99)
 	{
 		discard;
 	}
-#endif // else - MCM_TRANSP_ALLOWED
+#endif // else - MCM_SKYBOX
 #endif // else - MCM_NO_ALPHA_CAP
 	float specular_strength = texture(spec, fi.texcoord).r;
 	float reflection_amt = texture(refl, fi.texcoord).r;
@@ -104,7 +104,7 @@ void main()
 	color = col * fi.color;
 	position = vec4(fi.position.xyz, 1.0);
 	normal = vec4(normalize(fi.tbn * norms), 1.0);
-#if MCM_TRANSP_ALLOWED
+#if MCM_SKYBOX
 	if (write_hints > 0.5)
 	{
 		renderhint = vec4(specular_strength, 0.0 /* TODO: Blur */, minimum_light, 1.0);
@@ -115,10 +115,10 @@ void main()
 		renderhint = vec4(0.0);
 		renderhint2 = vec4(0.0);
 	}
-#else // MCM_TRANSP_ALLOWED
+#else // MCM_SKYBOX
 	renderhint = vec4(specular_strength, 0.0 /* TODO: Blur */, minimum_light, 1.0);
 	renderhint2 = vec4(0.0, reflection_amt, 0.0, 1.0);
-#endif // else - MCM_TRANSP_ALLOWED
+#endif // else - MCM_SKYBOX
 #if MCM_INVERSE_FADE
 	float dist = linearizeDepth(gl_FragCoord.z);
 	vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;

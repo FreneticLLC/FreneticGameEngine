@@ -35,7 +35,7 @@ namespace FGEGraphics.ClientSystem
             Deferred.ShadowPass_Basic = Shaders.GetShader("shadow" + def);
             Deferred.ShadowPass_NoBones = Shaders.GetShader("shadow" + def + ",MCM_NO_BONES");
             Deferred.GBufferSolid = Shaders.GetShader("fbo" + def);
-            Deferred.GBuffer_AllTransparencies = Shaders.GetShader("fbo" + def + ",MCM_TRANSP_ALLOWED");
+            Deferred.GBuffer_SkyBox = Shaders.GetShader("fbo" + def + ",MCM_SKYBOX");
             Deferred.GBuffer_Refraction = Shaders.GetShader("fbo" + def + ",MCM_REFRACT");
             Deferred.ShadowAdderPass = Shaders.GetShader("lightadder" + def + ",MCM_SHADOWS");
             Deferred.LightAdderPass = Shaders.GetShader("lightadder" + def);
@@ -200,7 +200,7 @@ namespace FGEGraphics.ClientSystem
             /// <summary>
             /// The G-Buffer FBO shader, for alltransparents (Skybox mainly).
             /// </summary>
-            public Shader GBuffer_AllTransparencies;
+            public Shader GBuffer_SkyBox;
 
             /// <summary>
             /// The G-Buffer FBO shader, for the refraction pass.

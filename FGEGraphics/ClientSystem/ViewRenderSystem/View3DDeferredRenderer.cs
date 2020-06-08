@@ -212,7 +212,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform4(4, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
             Patches.PreFBOPatch?.Invoke();
-            Shaders.Deferred.GBuffer_AllTransparencies = Shaders.Deferred.GBuffer_AllTransparencies.Bind();
+            Shaders.Deferred.GBuffer_SkyBox = Shaders.Deferred.GBuffer_SkyBox.Bind();
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
@@ -241,7 +241,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 View.Viewport(0, 0, Config.Width / 2, Config.Height);
                 Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
                 Patches.VRFBOPatch?.Invoke();
-                Shaders.Deferred.GBuffer_AllTransparencies = Shaders.Deferred.GBuffer_AllTransparencies.Bind();
+                Shaders.Deferred.GBuffer_SkyBox = Shaders.Deferred.GBuffer_SkyBox.Bind();
                 GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
                 Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
                 GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
