@@ -216,6 +216,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GL.Uniform4(18, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
             Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);

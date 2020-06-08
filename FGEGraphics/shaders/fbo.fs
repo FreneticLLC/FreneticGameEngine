@@ -37,6 +37,7 @@ layout (location = 9) uniform float refract_eta = 0.0;
 layout (location = 16) uniform float minimum_light = 0.0;
 #if MCM_SKYBOX
 layout (location = 17) uniform float write_hints = 1.0;
+layout (location = 18) uniform vec4 fogCol = vec4(0.0);
 #endif // MCM_SKYBOX
 
 in struct vox_fout
@@ -68,6 +69,10 @@ float linearizeDepth(in float rinput) // Convert standard depth (stretched) to a
 void main()
 {
 	vec4 col = texture(s, fi.texcoord);
+#if MCM_SKYBOX
+	float fmza = 1.0 - max(min((fi.position.z - 1000.0) / 2000.0, 1.0), 0.0);
+	col.xyz = min(col.xyz * (1.0 - fmza) + fogCol.xyz * fmza, vec3(1.0));
+#endif // MCM_SKYBOX
 #if MCM_REFRACT
 	if (refract_eta > 0.01)
 	{
