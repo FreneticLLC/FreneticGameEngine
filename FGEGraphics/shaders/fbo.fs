@@ -70,7 +70,8 @@ void main()
 {
 	vec4 col = texture(s, fi.texcoord);
 #if MCM_SKYBOX
-	float fmza = 1.0 - max(min((fi.position.z - 1000.0) / 2000.0, 1.0), 0.0);
+	float angleNormalizedZ = normalize(fi.position.xyz).z * 5000.0;
+	float fmza = 1.0 - max(min((angleNormalizedZ - 1000.0) / 2000.0, 1.0), 0.0);
 	col.xyz = min(col.xyz * (1.0 - fmza) + fogCol.xyz * fmza, vec3(1.0));
 #endif // MCM_SKYBOX
 #if MCM_REFRACT
