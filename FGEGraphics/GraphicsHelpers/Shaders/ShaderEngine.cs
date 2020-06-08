@@ -335,7 +335,8 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             GL.GetShader(shd, ShaderParameter.CompileStatus, out int SHD_Status);
             if (SHD_Status != 1)
             {
-                throw new Exception("Error creating ComputeShader. Error status: " + SHD_Status + ", info: " + SHD_Info);
+                File.WriteAllText($"temp_shd_{fname}.txt", ftxt);
+                throw new Exception($"Error creating ComputeShader '{fname}'. Error status: {SHD_Status}, info: {SHD_Info}");
             }
             int program = GL.CreateProgram();
             GL.AttachShader(program, shd);
@@ -343,7 +344,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             string str = GL.GetProgramInfoLog(program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, "Linked shader with message: '" + str + "'" + " -- FOR -- " + ftxt);
+                SysConsole.Output(OutputType.INFO, $"Linked shader '{fname}' with message: '{str}' -- FOR -- {ftxt}");
             }
             GL.DeleteShader(shd);
             GraphicsUtil.CheckError("Shader - Compute - Compile");
