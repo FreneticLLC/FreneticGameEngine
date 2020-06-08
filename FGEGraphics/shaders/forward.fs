@@ -314,9 +314,6 @@ void main()
 	dotted = dotted <= 0.0 ? 0.0 : sqrt(dotted);
 	color.xyz *= min(max(dotted * maximum_light, max(0.2, minimum_light)), 1.0) * 0.75;
 #endif // else - MCM_LIGHTS
-	applyFog();
-#if MCM_TRANSP
-#endif // MCM_TRANSP
 #endif // else - MCM_BRIGHT
 	applyFog();
 #if MCM_INVERSE_FADE
