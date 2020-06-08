@@ -1,3 +1,11 @@
+//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+// See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
+// If neither of these are available, assume that neither you nor anyone other than the copyright holder
+// hold any right or permission to use this software until such time as the official license is identified.
+//
+
 #define FXAA_SPAN_MAX 8.0
 #define FXAA_REDUCE_MUL (1.0 / 8.0)
 #define FXAA_REDUCE_MIN (1.0 / 128.0)
