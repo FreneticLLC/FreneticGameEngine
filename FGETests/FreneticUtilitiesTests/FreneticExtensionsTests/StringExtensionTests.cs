@@ -34,7 +34,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         }
 
         /// <summary>
-        /// Tests "ToLowerFast", "IsAllLowerFast", "ToUpperFast", and "IsAllUpperFast"
+        /// Tests "ToLowerFast", "IsAllLowerFast", "ToUpperFast", "IsAllUpperFast", and "EqualsIgnoreCaseFast".
         /// </summary>
         [Test]
         public static void CapitalizationTests()
@@ -49,6 +49,11 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
             Assert.That("LOTS OF UPPER CHARACTERS 123!".IsAllUpperFast(), "IsAllUpperFast isn't right");
             Assert.That(!"A FEW lower CHARACTERS 123!".IsAllUpperFast(), "!IsAllUpperFast isn't right");
+            Assert.That("wow".EqualsIgnoreCaseFast("wow"), "EqualsIgnoreCaseFast isn't right");
+            Assert.That("wow".EqualsIgnoreCaseFast("WOW"), "EqualsIgnoreCaseFast isn't right");
+            Assert.That("wow123hello".EqualsIgnoreCaseFast("WOW123hello"), "EqualsIgnoreCaseFast isn't right");
+            Assert.That(!"wow123hello".EqualsIgnoreCaseFast("lol123nopeo"), "!EqualsIgnoreCaseFast isn't right");
+            Assert.That(!"wow123hello".EqualsIgnoreCaseFast("WOW123hellothere"), "!EqualsIgnoreCaseFast isn't right");
         }
 
         /// <summary>
