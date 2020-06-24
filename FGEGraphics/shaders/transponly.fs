@@ -224,8 +224,11 @@ void main()
 		|| fs.y < 0.0 || fs.y > 1.0
 		|| fs.z < 0.0 || fs.z > 1.0)
 	{
-		fcolor += vec4(0.0, 0.0, 0.0, color.w);
-		continue;
+		if (light_type >= 0.5)
+		{
+			continue;
+		}
+		//fcolor += vec4(0.0, 0.0, 0.0, color.w);
 	}
 	vec3 L = light_path / light_length;
 	vec4 diffuse = vec4(max(dot(N, -L), 0.0) * diffuse_albedo, 1.0);
