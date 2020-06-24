@@ -147,6 +147,10 @@ void main() // Let's put all code in main, why not...
 				vec2 dz_duv = vec2(duvdist_dy.y * duvdist_dx.z - duvdist_dx.y * duvdist_dy.z, duvdist_dx.x * duvdist_dy.z - duvdist_dy.x * duvdist_dx.z);
 				float tlen = (duvdist_dx.x * duvdist_dy.y) - (duvdist_dx.y * duvdist_dy.x);
 				dz_duv /= tlen;
+				if (isnan(dz_duv.x) || isnan(dz_duv.y))
+				{
+					dz_duv = vec2(1.0, 1.0);
+				}
 				float oneoverdj = 1.0 / depth_jump;
 				float jump = tex_size * depth_jump;
 				float depth_count = 0;
