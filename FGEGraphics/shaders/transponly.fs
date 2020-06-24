@@ -138,7 +138,7 @@ void main()
 	float lightc = light_details[2][3];
 	if (minimum_light > 0.99)
 	{
-		fcolor += vec4(color.xyz / lightc, color.w);
+		fcolor.xyz += color.xyz / lightc;
 		continue;
 	}
 	vec4 bambient = vec4(minimum_light, minimum_light, minimum_light, 0.0) / lightc;
@@ -213,10 +213,9 @@ void main()
 	float depth = (rd >= (fs.z - 0.001) ? 1.0 : 0.0);
 #endif // else-good graphics
 	vec3 L = light_path / light_length;
-	vec4 diffuse = vec4(max(dot(N, -L), 0.0) * diffuse_albedo, 1.0);
 	vec3 specular = vec3(pow(max(dot(reflect(L, N), normalize(f.position.xyz - eye_pos)), 0.0), /* renderhint.y * 1000.0 */ 128.0) * specular_albedo * /* renderhint.x */ 0.0);
-	fcolor += vec4((bambient * color + (vec4(depth, depth, depth, 1.0) * atten * (diffuse * vec4(light_color, 1.0)) * color) +
-		(vec4(min(specular, 1.0), 0.0) * vec4(light_color, 1.0) * atten * depth)).xyz, color.w);
+	fcolor.xyz += (bambient * color + (vec4(depth, depth, depth, 1.0) * atten * vec4(diffuse_albedo * light_color, 1.0) * color) +
+		(vec4(min(specular, 1.0), 0.0) * vec4(light_color, 1.0) * atten * depth)).xyz;
 #else // shadows
 	vec4 fs = x_spos / x_spos.w / 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
 	fs.w = 1.0;
@@ -231,10 +230,9 @@ void main()
 		//fcolor += vec4(0.0, 0.0, 0.0, color.w);
 	}
 	vec3 L = light_path / light_length;
-	vec4 diffuse = vec4(max(dot(N, -L), 0.0) * diffuse_albedo, 1.0);
 	vec3 specular = vec3(pow(max(dot(reflect(L, N), normalize(f.position.xyz - eye_pos)), 0.0), /* renderhint.y * 1000.0 */ 128.0) * specular_albedo * /* renderhint.x */ 0.0);
-	fcolor += vec4((bambient * color + (vec4(1.0) * atten * (diffuse * vec4(light_color, 1.0)) * color) +
-		(vec4(min(specular, 1.0), 0.0) * vec4(light_color, 1.0) * atten)).xyz, color.w);
+	fcolor.xyz += (bambient * color + (vec4(atten) * vec4(diffuse_albedo * light_color, 1.0) * color) +
+		(vec4(min(specular, 1.0), 0.0) * vec4(light_color, 1.0) * atten)).xyz;
 #endif // else-shadows
 	}
 #endif // lit
