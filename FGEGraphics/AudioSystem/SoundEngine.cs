@@ -21,8 +21,9 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.FileSystems;
-using OggDecoder;
+using NVorbis;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGEGraphics.AudioSystem
 {
@@ -688,15 +689,46 @@ namespace FGEGraphics.AudioSystem
         */
 
         /// <summary>
-        /// Loads a VOrbis sound.
+        /// Loads a sound effect from a .OGG stream.
         /// </summary>
-        /// <param name="stream">The stream.</param>
+        /// <param name="stream">The data stream.</param>
         /// <param name="name">The name.</param>
         /// <returns>The sound effect.</returns>
-        public SoundEffect LoadVorbisSound(System.IO.Stream stream, string name)
+        public SoundEffect LoadVorbisSound(Stream stream, string name)
         {
-            OggDecodeStream oggds = new OggDecodeStream(stream);
-            return LoadSound(new DataStream(oggds.decodedStream.ToArray()), name);
+            using VorbisReader oggReader = new VorbisReader(stream);
+            SoundEffect sfx = new SoundEffect()
+            {
+                Name = name,
+                LastUse = Client.GlobalTickTime
+            };
+            int sampleCount = (int)oggReader.TotalSamples;
+            // TODO: re-usable buffer for opti reasons?
+            float[] sampleBuffer = new float[sampleCount];
+            int readSamples = oggReader.ReadSamples(sampleBuffer, 0, sampleCount);
+            byte[] data = new byte[sampleCount * 2];
+            PrimitiveConversionHelper.Int32ByteUnion intConverter = default;
+            for (int i = 0; i < sampleCount; i++)
+            {
+                intConverter.Int32Value = (int)(sampleBuffer[i] * short.MaxValue);
+                data[i * 2] = intConverter.Bytes.Byte0Value;
+                data[i * 2 + 1] = intConverter.Bytes.Byte1Value;
+            }
+            if (AudioInternal != null)
+            {
+                LiveAudioClip clip = new LiveAudioClip()
+                {
+                    Data = data
+                };
+                clip.Channels = (byte)oggReader.Channels;
+                sfx.Clip = clip;
+            }
+            else
+            {
+                sfx.Internal = AL.GenBuffer();
+                AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, data.Length, oggReader.SampleRate);
+            }
+            return sfx;
         }
 
         /// <summary>
