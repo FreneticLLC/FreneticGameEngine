@@ -10,11 +10,15 @@
 
 #define MCM_GEOM_ACTIVE 0
 #define MCM_INVERSE_FADE 0
-#define MCM_GEOM_THREED_TEXTURE 0
+#define MCM_GEOM_FOURD_TEXTURE 0
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+#if MCM_GEOM_FOURD_TEXTURE
+layout (location = 2) in vec4 texcoords;
+#else
 layout (location = 2) in vec3 texcoords;
+#endif
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec4 color;
 layout (location = 5) in vec4 Weights;
@@ -29,8 +33,8 @@ out struct vox_fout
 #endif
 {
 	vec4 position;
-#if MCM_GEOM_THREED_TEXTURE
-	vec3 texcoord;
+#if MCM_GEOM_FOURD_TEXTURE
+	vec4 texcoord;
 #else
 	vec2 texcoord;
 #endif
@@ -74,7 +78,7 @@ void main()
 	pos1 = vec4(position, 1.0);
 	norm1 = vec4(normal, 1.0);
 	f.tbn = (mat3(vec3(0.0), vec3(0.0), normal)); // TODO: Improve for decals?!
-#if MCM_GEOM_THREED_TEXTURE
+#if MCM_GEOM_FOURD_TEXTURE
 	f.texcoord = texcoords;
 #else
 	f.texcoord = texcoords.xy;

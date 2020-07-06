@@ -12,7 +12,7 @@
 #define MCM_INVERSE_FADE 0
 #define MCM_NO_BONES 0
 #define MCM_TH 0
-#define MCM_GEOM_THREED_TEXTURE 0
+#define MCM_GEOM_FOURD_TEXTURE 0
 
 layout (location = 0) in vec4 position;
 layout (location = 1) in vec4 normal;
@@ -38,8 +38,8 @@ out struct vox_fout
 #else
 	vec3 pos;
 #endif
-#if MCM_GEOM_THREED_TEXTURE
-	vec3 texcoord;
+#if MCM_GEOM_FOURD_TEXTURE
+	vec4 texcoord;
 #else
 	vec2 texcoord;
 #endif
@@ -77,8 +77,8 @@ void main()
 	mv_mat_simple[3][1] = 0.0;
 	mv_mat_simple[3][2] = 0.0;
 #if MCM_GEOM_ACTIVE
-#if MCM_GEOM_THREED_TEXTURE
-	f.texcoord = texcoords.xyz;
+#if MCM_GEOM_FOURD_TEXTURE
+	f.texcoord = texcoords;
 #else
 	f.texcoord = texcoords.xy;
 #endif
