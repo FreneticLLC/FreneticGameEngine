@@ -219,7 +219,7 @@ namespace FGEGraphics.AudioSystem
                     return;
                 }
             }
-            bool sel = Client.QuietOnDeselect ? selected : true;
+            bool sel = !Client.QuietOnDeselect || selected;
             Selected = sel;
             /*if (DeafenTime > 0.0)
             {
@@ -607,13 +607,20 @@ namespace FGEGraphics.AudioSystem
         /// <returns>AL format.</returns>
         ALFormat GetSoundFormat(int channels, int bits)
         {
-            return channels switch
+            if (channels == 1)
             {
-                1 => bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16,
-                // 2
-                _ => bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16,
-            };
+                return bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
+            }
+            else // 2
+            {
+                return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
+            }
         }
+
+        /// <summary>
+        /// Lock object to guarantee no simultaneous file reads.
+        /// </summary>
+        public LockObject SoundFileLocker = new LockObject();
 
         /// <summary>
         /// Load a sound effect.
@@ -640,7 +647,12 @@ namespace FGEGraphics.AudioSystem
                 {
                     try
                     {
-                        SoundEffect ts = LoadVorbisSound(new MemoryStream(Client.Client.Files.ReadFileData(newname)), name);
+                        byte[] rawData;
+                        lock (SoundFileLocker)
+                        {
+                            rawData = Client.Client.Files.ReadFileData(newname);
+                        }
+                        SoundEffect ts = LoadVorbisSound(new MemoryStream(rawData), name);
                         lock (tsfx)
                         {
                             tsfx.Internal = ts.Internal;
@@ -732,19 +744,19 @@ namespace FGEGraphics.AudioSystem
         }
 
         /// <summary>
-        /// Loads a sound effect from a stream.
+        /// Loads a sound effect from a .WAV stream.
         /// </summary>
         /// <param name="stream">The data stream.</param>
         /// <param name="name">The name.</param>
         /// <returns>The sound effect.</returns>
-        public SoundEffect LoadSound(DataStream stream, string name)
+        public SoundEffect LoadWaveSound(DataStream stream, string name)
         {
             SoundEffect sfx = new SoundEffect()
             {
                 Name = name,
                 LastUse = Client.GlobalTickTime
             };
-            byte[] data = LoadWAVE(stream, out int channels, out int bits, out int rate);
+            byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out int rate);
             if (AudioInternal != null)
             {
                 LiveAudioClip clip = new LiveAudioClip()
@@ -789,7 +801,7 @@ namespace FGEGraphics.AudioSystem
         /// <param name="bits">Bit count output.</param>
         /// <param name="rate">Rate output.</param>
         /// <returns>The wave data.</returns>
-        public byte[] LoadWAVE(DataStream stream, out int channels, out int bits, out int rate)
+        public byte[] ProcessWAVEData(DataStream stream, out int channels, out int bits, out int rate)
         {
             DataReader dr = new DataReader(stream);
             string signature = dr.ReadString(4);
