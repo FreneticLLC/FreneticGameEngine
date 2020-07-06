@@ -13,6 +13,14 @@ FGE is a **Game Engine**. It is the powerhouse behind a game. It takes all the d
 
 FGE is not a **Game**. You cannot play it out of the box. It does not do much just ran empty. For FGE to do anything, you (or any developer) must first create the *content* of the game. This means that everything from artwork to gameplay mechanics must be added by you or a game developer.
 
+### Used Libraries
+
+- FreneticUtilities - https://github.com/FreneticLLC/FreneticUtilities
+- BEPUphysicsv1 (update to v2 pending) - https://github.com/bepu/bepuphysics1
+- OpenTK - https://github.com/opentk/opentk/
+- OpenVR - https://github.com/ValveSoftware/openvr
+- NVorbis - https://github.com/NVorbis/NVorbis
+
 -----
 
 This project is in development. It is not feature-complete yet.
