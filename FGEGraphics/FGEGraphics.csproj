@@ -45,11 +45,6 @@
     <Reference Include="BEPUutilities">
       <HintPath>..\FGECore\BEPUutilities.dll</HintPath>
     </Reference>
-    <Reference Include="csogg">
-      <HintPath>.\csogg.dll</HintPath>
-    </Reference>
-    <Reference Include="csvorbis">
-      <HintPath>.\csvorbis.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -72,7 +67,6 @@
     <Compile Include="AudioSystem\EnforcerSystem\AudioState.cs" />
     <Compile Include="AudioSystem\EnforcerSystem\LiveAudioClip.cs" />
     <Compile Include="AudioSystem\EnforcerSystem\LiveAudioInstance.cs" />
-    <Compile Include="AudioSystem\OggDecodeStream.cs" />
     <Compile Include="AudioSystem\SoundEffect.cs" />
     <Compile Include="AudioSystem\SoundEngine.cs" />
     <Compile Include="AudioSystem\TextToSpeech.cs" />
