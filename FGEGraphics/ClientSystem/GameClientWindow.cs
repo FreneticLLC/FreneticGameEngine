@@ -285,7 +285,7 @@ namespace FGEGraphics.ClientSystem
             InstanceInit();
             SysConsole.Output(OutputType.INIT, "GameClient loading shader helpers...");
             Shaders = new ShaderEngine();
-            Shaders.InitShaderSystem();
+            Shaders.InitShaderSystem(Files);
             SysConsole.Output(OutputType.INIT, "GameClient loading texture helpers...");
             Textures = new TextureEngine();
             Textures.InitTextureSystem(Files, AssetStreaming, Schedule);

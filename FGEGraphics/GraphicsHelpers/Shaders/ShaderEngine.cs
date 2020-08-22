@@ -51,18 +51,25 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// A common shader that removes black color.
         /// </summary>
         public Shader TextCleanerShader;
-        
+
+        /// <summary>
+        /// The backing file engine.
+        /// </summary>
+        public FileEngine Files;
+
         /// <summary>
         /// Starts or restarts the shader system.
         /// </summary>
-        public void InitShaderSystem()
+        /// <param name="files">The backing file engine.</param>
+        public void InitShaderSystem(FileEngine files)
         {
+            Files = files;
             // Reset shader list
             LoadedShaders = new Dictionary<string, Shader>(128);
             ShaderFilesCache = new Dictionary<string, string>(256);
             // Pregenerate a few needed shader
             ColorMultShader = GetShader("color_mult");
-            if (File.Exists("shaders/color_mult2d.vs"))
+            if (Files.FileExists("shaders/color_mult2d.vs"))
             {
                 ColorMult2DShader = GetShader("color_mult2d");
             }
@@ -99,28 +106,30 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         }
 
         /// <summary>
-        /// Gets the text of a shader file, automatically handling the file cache.
+        /// Tries to get the text of a shader file, automatically handling the file cache.
         /// </summary>
         /// <param name="filename">The name of the shader file.</param>
-        /// <returns></returns>
-        public string GetShaderFileText(string filename)
+        /// <param name="text">The text gotten (or null if none).</param>
+        /// <returns>True if successful, false if file does not exist.</returns>
+        public bool TryGetShaderFileText(string filename, out string text)
         {
             filename = FileEngine.CleanFileName(filename.Trim());
-            if (!File.Exists("shaders/" + filename))
+            if (ShaderFilesCache.TryGetValue(filename, out text))
             {
-                throw new Exception("File " + filename + " does not exist, but was included by a shader!");
+                return true;
             }
-            if (ShaderFilesCache.TryGetValue(filename, out string filedata))
+            if (!Files.TryReadFileText(filename, out string newData))
             {
-                return filedata;
+                return false;
             }
             if (ShaderFilesCache.Count > 128) // TODO: Configurable?
             {
                 ShaderFilesCache.Clear();
             }
-            string newData = Includes(File.ReadAllText("shaders/" + filename).Replace("\r\n", "\n").Replace("\r", ""));
+            newData = Includes(filename, newData.Replace("\r\n", "\n").Replace("\r", ""));
             ShaderFilesCache[filename] = newData;
-            return newData;
+            text = newData;
+            return true;
         }
 
         /// <summary>
@@ -166,51 +175,43 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         {
             try
             {
-                string oname = filename;
-                string[] datg = filename.SplitFast('?', 1);
-                string geom = datg.Length > 1 ? datg[1] : null;
-                string[] dat1 = datg[0].SplitFast('#', 1);
+                string originalName = filename;
+                string[] shaderVariables = filename.SplitFast('?', 1); // TODO: Less ridiculous system
+                string geomFilename = shaderVariables.Length > 1 ? shaderVariables[1] : null;
+                string[] dat1 = shaderVariables[0].SplitFast('#', 1);
                 string[] vars = new string[0];
                 if (dat1.Length == 2)
                 {
                     vars = dat1[1].SplitFast(',');
                 }
                 filename = FileEngine.CleanFileName(dat1[0]);
-                if (!File.Exists("shaders/" + filename + ".vs"))
+                filename = $"shaders/{filename}";
+                if (!TryGetShaderFileText(filename + ".vs", out string VS))
                 {
-                    SysConsole.Output(OutputType.WARNING, "Cannot load vertex shader, file '" +
-                        TextStyle.Standout + "shaders/" + filename + ".vs" + TextStyle.Base +
-                        "' does not exist.");
+                    SysConsole.Output(OutputType.WARNING, $"Cannot load vertex shader, file '{TextStyle.Standout}{filename}.vs{TextStyle.Base}' does not exist.");
                     return null;
                 }
-                if (!File.Exists("shaders/" + filename + ".fs"))
+                if (!TryGetShaderFileText(filename + ".fs", out string FS))
                 {
-                    SysConsole.Output(OutputType.WARNING, "Cannot load fragment shader, file '" +
-                        TextStyle.Standout + "shaders/" + filename + ".fs" + TextStyle.Base +
-                        "' does not exist.");
+                    SysConsole.Output(OutputType.WARNING, $"Cannot load fragment shader, file '{TextStyle.Standout}{filename}.fs{TextStyle.Base}' does not exist.");
                     return null;
                 }
-                string VS = GetShaderFileText(filename + ".vs");
-                string FS = GetShaderFileText(filename + ".fs");
                 string GS = null;
-                if (geom != null)
+                if (geomFilename != null)
                 {
-                    geom = FileEngine.CleanFileName(geom);
-                    if (!File.Exists("shaders/" + geom + ".geom"))
+                    geomFilename = FileEngine.CleanFileName(geomFilename);
+                    geomFilename = $"shaders/{geomFilename}.geom";
+                    if (!TryGetShaderFileText(geomFilename, out GS))
                     {
-                        SysConsole.Output(OutputType.WARNING, "Cannot load geomry shader, file '" +
-                            TextStyle.Standout + "shaders/" + geom + ".geom" + TextStyle.Base +
-                            "' does not exist.");
+                        SysConsole.Output(OutputType.WARNING, $"Cannot load geometry shader, file '{TextStyle.Standout}{geomFilename}{TextStyle.Base}' does not exist.");
                         return null;
                     }
-                    GS = GetShaderFileText(geom + ".geom");
                 }
-                return CreateShader(VS, FS, oname, vars, GS);
+                return CreateShader(VS, FS, originalName, vars, GS);
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to load shader from filename '" +
-                    TextStyle.Standout + "shaders/" + filename + ".fs or .vs" + TextStyle.Base + "': " + ex.ToString());
+                SysConsole.Output(OutputType.ERROR, $"Failed to load shader from filename '{TextStyle.Standout}{filename}.fs or .vs{TextStyle.Base}': {ex}");
                 return null;
             }
         }
@@ -241,17 +242,17 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// <summary>
         /// Processes "#define" lines in a shader.
         /// </summary>
-        /// <param name="str">The shader text.</param>
+        /// <param name="originalText">The shader text.</param>
         /// <param name="defValues">The define-value map.</param>
         /// <returns>The processed shader text.</returns>
-        public string PatchDefs(string str, Dictionary<string, string> defValues)
+        public string PatchDefs(string originalText, Dictionary<string, string> defValues)
         {
-            if (!str.Contains("#define"))
+            if (!originalText.Contains("#define"))
             {
-                return str;
+                return originalText;
             }
-            StringBuilder fsb = new StringBuilder(str.Length + defValues.Count);
-            string[] dat = str.Replace("\r", "").Split('\n');
+            StringBuilder fullFileText = new StringBuilder(originalText.Length + defValues.Count);
+            string[] dat = originalText.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
                 if (dat[i].StartsWith("#define "))
@@ -260,50 +261,55 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
                     string name = defined.Before(" ");
                     if (defValues.TryGetValue(name, out string newValue))
                     {
-                        fsb.Append("#define ").Append(name).Append(" ").Append(newValue);
+                        fullFileText.Append("#define ").Append(name).Append(" ").Append(newValue);
                     }
                     else
                     {
-                        fsb.Append(dat[i]);
+                        fullFileText.Append(dat[i]);
                     }
                 }
                 else
                 {
-                    fsb.Append(dat[i]);
+                    fullFileText.Append(dat[i]);
                 }
-                fsb.Append('\n');
+                fullFileText.Append('\n');
             }
-            return fsb.ToString();
+            return fullFileText.ToString();
         }
 
         /// <summary>
         /// Modifies the shader code string to include any external shaders.
         /// </summary>
+        /// <param name="filename">The name of the shader file processing includes.</param>
         /// <param name="str">The shader code.</param>
         /// <returns>The include-modified shader code.</returns>
-        public string Includes(string str)
+        public string Includes(string filename, string str)
         {
             if (!str.Contains("#include"))
             {
                 return str;
             }
-            StringBuilder fsb = new StringBuilder(str.Length * 2);
+            StringBuilder fullFileText = new StringBuilder(str.Length * 2);
             string[] dat = str.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
                 if (dat[i].StartsWith("#include "))
                 {
-                    string name = dat[i].Substring("#include ".Length);
-                    string included = GetShaderFileText(name);
-                    fsb.Append(included);
+                    string includeFilename = dat[i].Substring("#include ".Length);
+                    includeFilename = $"shaders/{includeFilename}";
+                    if (!TryGetShaderFileText(includeFilename, out string included))
+                    {
+                        throw new Exception($"File '{includeFilename}' does not exist, but was included by shader '{filename}'!");
+                    }
+                    fullFileText.Append(included);
                 }
                 else
                 {
-                    fsb.Append(dat[i]);
+                    fullFileText.Append(dat[i]);
                 }
-                fsb.Append('\n');
+                fullFileText.Append('\n');
             }
-            return fsb.ToString();
+            return fullFileText.ToString();
         }
 
         const string FILE_START = "#version 430 core\n";
@@ -311,14 +317,18 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// <summary>
         /// Compiles a compute shader by name to a shader.
         /// </summary>
-        /// <param name="fname">The file name.</param>
+        /// <param name="fileName">The file name.</param>
         /// <param name="specialadder">Special additions (EG defines)</param>
         /// <returns>The shader program.</returns>
-        public int CompileCompute(string fname, string specialadder = "")
+        public int CompileCompute(string fileName, string specialadder = "")
         {
-            fname = FileEngine.CleanFileName(fname.Trim());
-            string ftxt = GetShaderFileText(fname + ".comp");
-            int index = ftxt.IndexOf(FILE_START);
+            fileName = FileEngine.CleanFileName(fileName.Trim());
+            fileName = $"shaders/{fileName}.comp";
+            if (!TryGetShaderFileText(fileName, out string fileText))
+            {
+                throw new Exception($"Compute shader file '{fileName}' does not exist.");
+            }
+            int index = fileText.IndexOf(FILE_START);
             if (index < 0)
             {
                 index = 0;
@@ -327,26 +337,28 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 index += FILE_START.Length;
             }
-            ftxt = ftxt.Insert(index, specialadder);
-            int shd = GL.CreateShader(ShaderType.ComputeShader);
-            GL.ShaderSource(shd, ftxt);
-            GL.CompileShader(shd);
-            string SHD_Info = GL.GetShaderInfoLog(shd);
-            GL.GetShader(shd, ShaderParameter.CompileStatus, out int SHD_Status);
+            fileText = fileText.Insert(index, specialadder);
+            int shaderObject = GL.CreateShader(ShaderType.ComputeShader);
+            GL.ShaderSource(shaderObject, fileText);
+            GL.CompileShader(shaderObject);
+            string SHD_Info = GL.GetShaderInfoLog(shaderObject);
+            GL.GetShader(shaderObject, ShaderParameter.CompileStatus, out int SHD_Status);
             if (SHD_Status != 1)
             {
-                File.WriteAllText($"temp_shd_{fname}.txt", ftxt);
-                throw new Exception($"Error creating ComputeShader '{fname}'. Error status: {SHD_Status}, info: {SHD_Info}");
+#if DEBUG
+                File.WriteAllText($"temp_shd_{fileName}.txt", fileText);
+#endif
+                throw new Exception($"Error creating ComputeShader '{fileName}'. Error status: {SHD_Status}, info: {SHD_Info}");
             }
             int program = GL.CreateProgram();
-            GL.AttachShader(program, shd);
+            GL.AttachShader(program, shaderObject);
             GL.LinkProgram(program);
             string str = GL.GetProgramInfoLog(program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, $"Linked shader '{fname}' with message: '{str}' -- FOR -- {ftxt}");
+                SysConsole.Output(OutputType.INFO, $"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
             }
-            GL.DeleteShader(shd);
+            GL.DeleteShader(shaderObject);
             GraphicsUtil.CheckError("Shader - Compute - Compile");
             return program;
         }
@@ -359,9 +371,9 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// <param name="VS">The input VertexShader code.</param>
         /// <param name="FS">The input FragmentShader code.</param>
         /// <param name="vars">All variables to include.</param>
-        /// <param name="geom">The input GeometryShader code, if any.</param>
+        /// <param name="GS">The input GeometryShader code, if any.</param>
         /// <returns>The internal OpenGL program ID.</returns>
-        public int CompileToProgram(string VS, string FS, string[] vars, string geom)
+        public int CompileToProgram(string VS, string FS, string[] vars, string GS)
         {
             if (vars.Length > 0)
             {
@@ -375,22 +387,22 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
                 }
                 VS = PatchDefs(VS, ReusableDefValues);
                 FS = PatchDefs(FS, ReusableDefValues);
-                if (geom != null)
+                if (GS != null)
                 {
-                    geom = PatchDefs(geom, ReusableDefValues);
+                    GS = PatchDefs(GS, ReusableDefValues);
                 }
             }
-            int gObj = -1;
-            if (geom != null)
+            int geomObject = -1;
+            if (GS != null)
             {
-                gObj = GL.CreateShader(ShaderType.GeometryShader);
-                GL.ShaderSource(gObj, geom);
-                GL.CompileShader(gObj);
-                string GS_Info = GL.GetShaderInfoLog(gObj);
-                GL.GetShader(gObj, ShaderParameter.CompileStatus, out int GS_Status);
+                geomObject = GL.CreateShader(ShaderType.GeometryShader);
+                GL.ShaderSource(geomObject, GS);
+                GL.CompileShader(geomObject);
+                string GS_Info = GL.GetShaderInfoLog(geomObject);
+                GL.GetShader(geomObject, ShaderParameter.CompileStatus, out int GS_Status);
                 if (GS_Status != 1)
                 {
-                    throw new Exception("Error creating GeometryShader. Error status: " + GS_Status + ", info: " + GS_Info);
+                    throw new Exception($"Error creating GeometryShader. Error status: {GS_Status}, info: {GS_Info}");
                 }
             }
             int VertexObject = GL.CreateShader(ShaderType.VertexShader);
@@ -400,7 +412,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             GL.GetShader(VertexObject, ShaderParameter.CompileStatus, out int VS_Status);
             if (VS_Status != 1)
             {
-                throw new Exception("Error creating VertexShader. Error status: " + VS_Status + ", info: " + VS_Info);
+                throw new Exception($"Error creating VertexShader. Error status: {VS_Status}, info: {VS_Info}");
             }
             int FragmentObject = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(FragmentObject, FS);
@@ -409,26 +421,26 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             GL.GetShader(FragmentObject, ShaderParameter.CompileStatus, out int FS_Status);
             if (FS_Status != 1)
             {
-                throw new Exception("Error creating FragmentShader. Error status: " + FS_Status + ", info: " + FS_Info);
+                throw new Exception($"Error creating FragmentShader. Error status: {FS_Status}, info: {FS_Info}");
             }
             int Program = GL.CreateProgram();
             GL.AttachShader(Program, FragmentObject);
             GL.AttachShader(Program, VertexObject);
-            if (geom != null)
+            if (GS != null)
             {
-                GL.AttachShader(Program, gObj);
+                GL.AttachShader(Program, geomObject);
             }
             GL.LinkProgram(Program);
             string str = GL.GetProgramInfoLog(Program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, "Linked shader with message: '" + str + "'" + " -- FOR: variables: " + string.Join(",", vars));
+                SysConsole.Output(OutputType.INFO, $"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
             }
             GL.DeleteShader(FragmentObject);
             GL.DeleteShader(VertexObject);
-            if (geom != null)
+            if (GS != null)
             {
-                GL.DeleteShader(gObj);
+                GL.DeleteShader(geomObject);
             }
             GraphicsUtil.CheckError("Shader - Compile");
             return Program;

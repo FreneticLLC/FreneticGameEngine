@@ -185,148 +185,148 @@
     <Content Include="FGE_Icon.ico" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="shaders\clearer.fs">
+    <None Include="data\shaders\clearer.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\fbo.fs">
+    <None Include="data\shaders\fbo.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\finalgodray.fs">
+    <None Include="data\shaders\finalgodray.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\fpass.fs">
+    <None Include="data\shaders\fpass.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\godray.fs">
+    <None Include="data\shaders\godray.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\hdrpass.fs">
+    <None Include="data\shaders\hdrpass.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\include_fxaa.inc">
+    <None Include="data\shaders\include_fxaa.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\include_toonify.inc">
+    <None Include="data\shaders\include_toonify.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightadder.fs">
+    <None Include="data\shaders\lightadder.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\shadow.fs">
+    <None Include="data\shaders\shadow.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\ssao.inc">
+    <None Include="data\shaders\ssao.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\transpadder.fs">
+    <None Include="data\shaders\transpadder.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\transponly.fs">
+    <None Include="data\shaders\transponly.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\clearer.vs">
+    <None Include="data\shaders\clearer.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\decal.geom">
+    <None Include="data\shaders\decal.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\fbo.vs">
+    <None Include="data\shaders\fbo.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\finalgodray.vs">
+    <None Include="data\shaders\finalgodray.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\fpass.vs">
+    <None Include="data\shaders\fpass.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\godray.vs">
+    <None Include="data\shaders\godray.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\hdrpass.vs">
+    <None Include="data\shaders\hdrpass.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightadder.vs">
+    <None Include="data\shaders\lightadder.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\particles.geom">
+    <None Include="data\shaders\particles.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\shadow.vs">
+    <None Include="data\shaders\shadow.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\text_cleaner.fs">
+    <None Include="data\shaders\text_cleaner.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightmap2d.fs">
+    <None Include="data\shaders\lightmap2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\combine2d.fs">
+    <None Include="data\shaders\combine2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\color_mult2d.fs">
+    <None Include="data\shaders\color_mult2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\color_mult.fs">
+    <None Include="data\shaders\color_mult.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\addlighttoscene2d.fs">
+    <None Include="data\shaders\addlighttoscene2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\addlighttoscene2d.vs">
+    <None Include="data\shaders\addlighttoscene2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\color_mult.vs">
+    <None Include="data\shaders\color_mult.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\color_mult2d.vs">
+    <None Include="data\shaders\color_mult2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\combine2d.vs">
+    <None Include="data\shaders\combine2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightmap2d.vs">
+    <None Include="data\shaders\lightmap2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\text.geom">
+    <None Include="data\shaders\text.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\text_cleaner.vs">
+    <None Include="data\shaders\text_cleaner.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\transpadder.vs">
+    <None Include="data\shaders\transpadder.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\transponly.vs">
+    <None Include="data\shaders\transponly.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightmap1d_2d.vs">
+    <None Include="data\shaders\lightmap1d_2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\lightmap1d_2d.fs">
+    <None Include="data\shaders\lightmap1d_2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\forward.fs">
+    <None Include="data\shaders\forward.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\forward.vs">
+    <None Include="data\shaders\forward.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\applylights1d_2d.vs">
+    <None Include="data\shaders\applylights1d_2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\applylights1d_2d.fs">
+    <None Include="data\shaders\applylights1d_2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\line_densen.geom">
+    <None Include="data\shaders\line_densen.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\glnoise.inc">
+    <None Include="data\shaders\glnoise.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\postfast.vs">
+    <None Include="data\shaders\postfast.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="shaders\postfast.fs">
+    <None Include="data\shaders\postfast.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="data\fonts\sourcecodepro.ttf">
