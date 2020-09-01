@@ -77,7 +77,7 @@ void main() // Let's put all code in main, why not...
 #endif
 	vec3 N = -normal;
 	// Loop over lights
-	int count = renderhint.z >= 1.0 ? 0 : int(lights_used);
+	int count = renderhint.z >= 1.0 && renderhint.z <= 2.0 ? 0 : int(lights_used);
 	for (int i = 0; i < count; i++)
 	{
 		mat4 light_data = light_data_array[i];
@@ -205,6 +205,6 @@ void main() // Let's put all code in main, why not...
 		res_color += (vec3(depth, depth, depth) * atten * (diffuse * light_color) * diffuset.xyz) + (min(specular, 1.0) * light_color * atten * depth); // Put it all together now.
 		aff += atten;
 	}
-	res_color += (ambient + vec3(renderhint.z)) * HDR_Mod * diffuset.xyz; // Add ambient light.
+	res_color += (ambient + vec3(renderhint.z > 2.0 ? (renderhint.z - 2.0) : renderhint.z)) * HDR_Mod * diffuset.xyz; // Add ambient light.
 	color = vec4(res_color * ssao_mod, diffuset.w);
 }
