@@ -61,6 +61,11 @@ void main() // Let's put all code in main, why not...
 	vec3 position = texture(positiontex, f.texcoord).xyz;
 	vec3 renderhint = texture(renderhinttex, f.texcoord).xyz;
 	vec4 diffuset = texture(diffusetex, f.texcoord);
+	int doAlwaysLight = dot(normal, normal) < 0.01 ? 1 : 0;
+	if (doAlwaysLight == 1)
+	{
+		normal = vec3(0.0, 0.0, 1.0);
+	}
 #if MCM_SSAO
 	float ssao_mod = 1.0;
 	if (renderhint.z < 1.0)
@@ -187,7 +192,15 @@ void main() // Let's put all code in main, why not...
 			fs = f_spos.xyz;
 		}
 		vec3 L = light_path / light_length; // Get the light's movement direction as a vector
-		vec3 diffuse = max(dot(N, -L), 0.0) * vec3(diffuse_albedo) * HDR_Mod; // Find out how much diffuse light to apply
+		vec3 diffuse;
+		if (doAlwaysLight == 1)
+		{
+			diffuse = vec3(diffuse_albedo) * HDR_Mod;
+		}
+		else
+		{
+			diffuse = max(dot(N, -L), 0.0) * vec3(diffuse_albedo) * HDR_Mod; // Find out how much diffuse light to apply
+		}
 		vec3 specular = vec3(pow(max(dot(reflect(L, N), normalize(position - eye_pos)), 0.0), 200.0) * specular_albedo * renderhint.x) * HDR_Mod; // Find out how much specular light to apply.
 		res_color += (vec3(depth, depth, depth) * atten * (diffuse * light_color) * diffuset.xyz) + (min(specular, 1.0) * light_color * atten * depth); // Put it all together now.
 		aff += atten;

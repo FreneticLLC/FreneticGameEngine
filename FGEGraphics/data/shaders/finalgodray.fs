@@ -193,7 +193,7 @@ void main() // The central entry point of the shader. Handles everything!
 		// TODO: Maybe apply a dynamic mixing value here, rather than static 0.5?
 		light_color = light_color * 0.5 + refrCol * 0.5; // Color is half base value, and half refracted value.
 	}
-	else if (renderhint2.y > 0.01) // Apply (screen-space) reflection if set. This is set by having a renderhint2 blue value greater than zero but less than one.
+	else if (renderhint2.y > 0.01) // Apply (screen-space) reflection if set. This is set by having a renderhint2 green value greater than zero but less than one.
 	{
 		vec4 norm = texture(normaltex, f_texcoord);
 		vec3 normal = normalize(norm.xyz);

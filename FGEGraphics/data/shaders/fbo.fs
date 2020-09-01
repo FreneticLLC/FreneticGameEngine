@@ -13,6 +13,7 @@
 #define MCM_GEOM_ACTIVE 0
 #define MCM_INVERSE_FADE 0
 #define MCM_NO_ALPHA_CAP 0
+#define MCM_NO_LIGHT_ANGLE 0
 
 #if MCM_GEOM_ACTIVE
 layout (binding = 0) uniform sampler2DArray s;
@@ -110,7 +111,11 @@ void main()
 	vec3 norms = texture(normal_tex, fi.texcoord).xyz * 2.0 - vec3(1.0);
 	color = col * fi.color;
 	position = vec4(fi.position.xyz, 1.0);
+#if MCM_NO_LIGHT_ANGLE
+	normal = vec4(0.0, 0.0, 0.0, 1.0);
+#else // MCM_NO_LIGHT_ANGLE
 	normal = vec4(normalize(fi.tbn * norms), 1.0);
+#endif // else - MCM_NO_LIGHT_ANGLE
 #if MCM_SKYBOX
 	if (write_hints > 0.5)
 	{

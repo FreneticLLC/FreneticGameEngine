@@ -78,6 +78,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
 
         /// <summary>
         /// whether "good graphics" should be enabled for all shaders.
+        /// TODO: Autoset this value (should be false for old intel graphics or similar).
         /// </summary>
         public bool MCM_GOOD_GRAPHICS = true;
 
