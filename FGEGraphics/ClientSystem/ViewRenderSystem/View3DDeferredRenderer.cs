@@ -981,43 +981,43 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                         lightc += light.InternalLights.Count;
                     }
                 }
-                int c = 0;
-                float[] l_dats1 = new float[View3DInternalData.LIGHTS_MAX * 16];
-                float[] s_mats = new float[View3DInternalData.LIGHTS_MAX * 16];
+                int lightCount = 0;
+                float[] lightData = new float[View3DInternalData.LIGHTS_MAX * 16];
+                float[] shadowMatrices = new float[View3DInternalData.LIGHTS_MAX * 16];
                 foreach (LightObject light in Config.Lights)
                 {
                     if (light is SkyLight || frustumToUse == null || frustumToUse.ContainsSphere(light.EyePos, light.MaxDistance))
                     {
                         foreach (Light subLight in light.InternalLights)
                         {
-                            Matrix4 lmat = subLight.GetMatrix(View);
+                            Matrix4 lightProjMatrix = subLight.GetMatrix(View);
                             float maxrange = (subLight is LightOrtho) ? View3DInternalData.LIGHT_MAXIUM_RADIUS : subLight.MaxRange;
-                            Matrix4 matxyz = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
-                            matxyz[0, 0] = maxrange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : maxrange;
-                            matxyz[0, 1] = (float)(light.EyePos.X - State.RenderRelative.X);
-                            matxyz[0, 2] = (float)(light.EyePos.Y - State.RenderRelative.Y);
-                            matxyz[0, 3] = (float)(light.EyePos.Z - State.RenderRelative.Z);
-                            matxyz[1, 0] = subLight.Color.X;
-                            matxyz[1, 1] = subLight.Color.Y;
-                            matxyz[1, 2] = subLight.Color.Z;
-                            matxyz[1, 3] = (light is SpotLight) ? 1f : 0f;
-                            matxyz[2, 0] = (subLight is LightOrtho) ? 1f : 0f;
-                            matxyz[2, 1] = 1f / Config.ShadowTexSize();
-                            matxyz[2, 2] = State.CurrentExposure * Engine.Exposure;
-                            matxyz[2, 3] = (float)lightc; // TODO: Move view to a generic
-                            matxyz[3, 0] = (float)Config.Ambient.X; // TODO: Remove ambient
-                            matxyz[3, 1] = (float)Config.Ambient.Y;
-                            matxyz[3, 2] = (float)Config.Ambient.Z;
+                            Matrix4 lightDataMatrix = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+                            lightDataMatrix[0, 0] = maxrange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : maxrange;
+                            lightDataMatrix[0, 1] = (float)(light.EyePos.X - State.RenderRelative.X);
+                            lightDataMatrix[0, 2] = (float)(light.EyePos.Y - State.RenderRelative.Y);
+                            lightDataMatrix[0, 3] = (float)(light.EyePos.Z - State.RenderRelative.Z);
+                            lightDataMatrix[1, 0] = subLight.Color.X;
+                            lightDataMatrix[1, 1] = subLight.Color.Y;
+                            lightDataMatrix[1, 2] = subLight.Color.Z;
+                            lightDataMatrix[1, 3] = (light is SpotLight) ? 1f : 0f;
+                            lightDataMatrix[2, 0] = (subLight is LightOrtho) ? 1f : 0f;
+                            lightDataMatrix[2, 1] = 1f / Config.ShadowTexSize();
+                            lightDataMatrix[2, 2] = State.CurrentExposure * Engine.Exposure;
+                            lightDataMatrix[2, 3] = (float)lightc; // TODO: Move view to a generic
+                            lightDataMatrix[3, 0] = (float)Config.Ambient.X; // TODO: Remove ambient
+                            lightDataMatrix[3, 1] = (float)Config.Ambient.Y;
+                            lightDataMatrix[3, 2] = (float)Config.Ambient.Z;
                             for (int mx = 0; mx < 4; mx++)
                             {
                                 for (int my = 0; my < 4; my++)
                                 {
-                                    s_mats[c * 16 + mx * 4 + my] = lmat[mx, my];
-                                    l_dats1[c * 16 + mx * 4 + my] = matxyz[mx, my];
+                                    shadowMatrices[lightCount * 16 + mx * 4 + my] = lightProjMatrix[mx, my];
+                                    lightData[lightCount * 16 + mx * 4 + my] = lightDataMatrix[mx, my];
                                 }
                             }
-                            c++;
-                            if (c >= View3DInternalData.LIGHTS_MAX)
+                            lightCount++;
+                            if (lightCount >= View3DInternalData.LIGHTS_MAX)
                             {
                                 goto lights_apply;
                             }
@@ -1026,6 +1026,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 }
             lights_apply:
                 GraphicsUtil.CheckError("PreRenderTranspLights");
+                Matrix4 dataMatrix = new Matrix4(lightCount, Engine.ZNear, Engine.ZFar(), Config.Width, Config.Height, 0, 0, 0, 0, 0, 0, 0, (float)Config.FogCol.X, (float)Config.FogCol.Y, (float)Config.FogCol.Z, Config.FogAlpha);
                 if (Engine.Deferred_Shadows)
                 {
                     if (Engine.AllowLL)
@@ -1036,30 +1037,19 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                     {
                         Shaders.Deferred.Transparents_Particles_Lights_Shadows = Shaders.Deferred.Transparents_Particles_Lights_Shadows.Bind();
                     }
+                    ConfigureParticleLightsShader(dataMatrix, lightData, shadowMatrices);
+                }
+                if (Engine.AllowLL)
+                {
+                    Shaders.Deferred.Transparents_Particles_Lights_LL = Shaders.Deferred.Transparents_Particles_Lights_LL.Bind();
                 }
                 else
                 {
-                    if (Engine.AllowLL)
-                    {
-                        Shaders.Deferred.Transparents_Particles_Lights_LL = Shaders.Deferred.Transparents_Particles_Lights_LL.Bind();
-                    }
-                    else
-                    {
-                        Shaders.Deferred.Transparents_Particles_Lights = Shaders.Deferred.Transparents_Particles_Lights.Bind();
-                    }
+                    Shaders.Deferred.Transparents_Particles_Lights = Shaders.Deferred.Transparents_Particles_Lights.Bind();
                 }
                 GraphicsUtil.CheckError("PreRenderTranspLights - 1.5");
-                Matrix4 mat_lhelp = new Matrix4(c, Engine.ZNear, Engine.ZFar(), Config.Width, Config.Height, 0, 0, 0, 0, 0, 0, 0, (float)Config.FogCol.X, (float)Config.FogCol.Y, (float)Config.FogCol.Z, Config.FogAlpha);
-                GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-                GL.Uniform1(4, Config.DesaturationAmount);
-                //GL.Uniform1(7, (float)TheClient.GlobalTickTimeLocal);
-                GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
-                GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
-                GL.UniformMatrix4(9, false, ref mat_lhelp);
-                GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, s_mats);
-                GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, l_dats1);
-                GraphicsUtil.CheckError("PreRenderTranspLights - 2");
-                Patches.TransparentLightPatch?.Invoke(mat_lhelp, s_mats, l_dats1);
+                ConfigureParticleLightsShader(dataMatrix, lightData, shadowMatrices);
+                Patches.TransparentLightPatch?.Invoke(dataMatrix, shadowMatrices, lightData);
                 GraphicsUtil.CheckError("PreRenderTranspLights - 3");
                 if (Engine.Deferred_Shadows)
                 {
@@ -1085,9 +1075,9 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 }
                 GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
                 GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
-                GL.UniformMatrix4(9, false, ref mat_lhelp);
-                GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, s_mats);
-                GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, l_dats1);
+                GL.UniformMatrix4(9, false, ref dataMatrix);
+                GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
+                GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
                 GL.ActiveTexture(TextureUnit.Texture4);
                 GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
                 GL.ActiveTexture(TextureUnit.Texture0);
@@ -1121,6 +1111,25 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 }
                 Config.Render3D(View);
             }
+        }
+
+        /// <summary>
+        /// Configures uniform variable data for a Particle Lights shader.
+        /// </summary>
+        /// <param name="dataMatrix">Matrix hacked to store data about current frame.</param>
+        /// <param name="lightData">Array of data for each light.</param>
+        /// <param name="shadowMatrices">Matrices of shadow perspectives.</param>
+        public void ConfigureParticleLightsShader(Matrix4 dataMatrix, float[] lightData, float[] shadowMatrices)
+        {
+            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform1(4, Config.DesaturationAmount);
+            //GL.Uniform1(7, (float)TheClient.GlobalTickTimeLocal);
+            GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
+            GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
+            GL.UniformMatrix4(9, false, ref dataMatrix);
+            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
+            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
+            GraphicsUtil.CheckError("PreRenderTranspLights - 2");
         }
 
         /// <summary>
