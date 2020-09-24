@@ -1129,6 +1129,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
             GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
             GL.UniformMatrix4(9, false, ref dataMatrix);
+            GL.Uniform3(14, State.CameraRelativePosition);
             GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
             GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
             GraphicsUtil.CheckError("PreRenderTranspLights - 2");
