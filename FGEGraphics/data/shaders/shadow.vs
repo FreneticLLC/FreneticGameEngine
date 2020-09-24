@@ -68,6 +68,11 @@ out struct vox_fout
 
 #define f fi
 
+vec3 unused_nonsense() // Prevent shader compiler from claiming variables are unused (Even if they /are/ unused!)
+{
+	return cameraPos;
+}
+
 float fix_sqr(in float inTemp)
 {
 	return 1.0 - (inTemp * inTemp);

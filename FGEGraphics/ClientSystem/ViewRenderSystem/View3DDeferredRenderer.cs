@@ -110,7 +110,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                     View.SetMatrix(2, Matrix4d.Identity);
                                     GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);
                                     GL.Uniform1(4, subLight.TransparentShadows ? 1.0f : 0.0f);
-                                    GL.Uniform3(7, Config.CameraPos.ToOpenTK());
+                                    GL.Uniform3(14, State.CameraRelativePosition);
                                     subLight.SetProj(View);
                                     Shaders.Deferred.ShadowPass_NoBones = Shaders.Deferred.ShadowPass_NoBones.Bind();
                                     View.SetMatrix(2, Matrix4d.Identity);
@@ -741,6 +741,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(4, Config.DesaturationAmount);
+            GL.Uniform3(14, State.CameraRelativePosition);
             GL.DepthMask(false);
             GraphicsUtil.CheckError("PreTransp - 1");
             if (Engine.AllowLL || !Engine.Deferred_BrightTransp)
