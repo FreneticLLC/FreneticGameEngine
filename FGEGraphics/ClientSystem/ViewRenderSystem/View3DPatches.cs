@@ -86,7 +86,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Executable view patch.
         /// </summary>
-        public Action PreTransparentPatch;
+        public Action<float> PreTransparentPatch;
 
         /// <summary>
         /// Executable view patch.

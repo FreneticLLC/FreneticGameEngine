@@ -48,6 +48,7 @@ layout (location = 4) uniform float desaturationAmount = 1.0;
 layout (location = 8) uniform vec2 u_screensize = vec2(1024, 1024);
 layout (location = 9) uniform mat4 lights_used_helper;
 // ...
+layout (location = 13) uniform float fogDist = 1.0 / 100000.0; // The distance fog should be around.
 layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 // ...
 layout (location = 16) uniform float minimum_light;
@@ -241,18 +242,20 @@ void main()
 #if MCM_GOOD_GRAPHICS
 	fcolor.xyz = desaturate(fcolor.xyz);
 #endif
+#if MCM_FADE_DEPTH // particles
 	float dist = linearizeDepth(gl_FragCoord.z);
-	vec4 fogCol = lights_used_helper[3];
-	float fogMod = dist * exp(fogCol.w) * fogCol.w;
-	float fmz = min(fogMod, 1.0);
-	// TODO: apply fog to things that aren't clouds only!
-	//fcolor.xyz = fcolor.xyz * (1.0 - fmz) + fogCol.xyz * fmz + vec3(fogMod - fmz);
-	fcolor = vec4(fcolor.xyz, tcolor.w * f.color.w);
-#if MCM_FADE_DEPTH
 	vec2 fc_xy = gl_FragCoord.xy / vec2(lights_used_helper[0][3], lights_used_helper[1][0]);
 	float depthval = linearizeDepth(texture(depth_tex, fc_xy).x);
 	fcolor.w *= min(max((depthval - dist) * fi.size * 0.5 * (lights_used_helper[0][2] - lights_used_helper[0][1]), 0.0), 1.0);
-#endif
+#else // MCM_FADE_DEPTH
+	vec4 fogCol = lights_used_helper[3];
+	vec3 relPos = f.position.xyz - cameraPos;
+	float fog_distance = pow(dot(relPos, relPos) * fogDist, 0.6);
+	float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
+	float fmz = min(fogMod, 1.0);
+	fcolor.xyz = fcolor.xyz * (1.0 - fmz) + fogCol.xyz * fmz + vec3(fogMod - fmz);
+	fcolor = vec4(fcolor.xyz, tcolor.w * f.color.w);
+#endif // else - MCM_FADE_DEPTH
 #if MCM_LL
 	uint page = 0;
 	uint frag = 0;

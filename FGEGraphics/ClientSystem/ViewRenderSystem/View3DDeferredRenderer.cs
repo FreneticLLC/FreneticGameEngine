@@ -694,7 +694,9 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public int RenderPass_Transparents()
         {
-            Patches.PreTransparentPatch?.Invoke();
+            float fogDist = 1.0f / Engine.FogMaxDist();
+            fogDist *= fogDist;
+            Patches.PreTransparentPatch?.Invoke(fogDist);
             if (Engine.Deferred_TransparentLights)
             {
                 if (Engine.Deferred_Shadows)
@@ -741,6 +743,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(4, Config.DesaturationAmount);
+            GL.Uniform1(13, fogDist);
             GL.Uniform3(14, State.CameraRelativePosition);
             GL.DepthMask(false);
             GraphicsUtil.CheckError("PreTransp - 1");
