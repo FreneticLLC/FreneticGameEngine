@@ -179,7 +179,8 @@ void main() // The central entry point of the shader. Handles everything!
 	float dist = linearizeDepth(texture(depthtex, f_texcoord).x); // This is useful for both fog and reflection, so grab it here.
 	if ((renderhint.z < 0.99 && renderhint.z > 0.001) || fogCol.w > 1.0)
 	{
-		float fog_distance = pow(dot(pos, pos) * fogDist, 0.6);
+		vec3 relPos = pos - cameraPos;
+		float fog_distance = pow(dot(relPos, relPos) * fogDist, 0.6);
 		float fogMod = min(fog_distance * exp(fogCol.w) * fogCol.w, 1.5);
 		float fmz = min(fogMod, 1.0);
 #if MCM_SPECIAL_FOG

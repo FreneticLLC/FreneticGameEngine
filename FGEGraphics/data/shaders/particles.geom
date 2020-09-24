@@ -20,8 +20,6 @@ layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 // ...
 #if MCM_IS_A_SHADOW
 layout (location = 5) uniform float should_sqrt = 0.0;
-// ...
-layout (location = 7) uniform vec3 camPos = vec3(0.0);
 #endif
 layout (location = 6) uniform float time = 0.0;
 layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
@@ -102,11 +100,7 @@ vec4 qfix(in vec4 pos)
 void main()
 {
 	vec3 pos = gl_in[0].gl_Position.xyz;
-#if MCM_IS_A_SHADOW
-	vec3 pos_norm = normalize(pos.xyz - camPos);
-#else
-	vec3 pos_norm = normalize(pos.xyz);
-#endif
+	vec3 pos_norm = normalize(pos.xyz - cameraPos);
 	vec3 UPPER = pos_norm.z > 0.8 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
 	vec3 up = normalize(UPPER - (dot(UPPER, pos_norm)) * pos_norm);
 	float scale = f[0].texcoord.x * 0.5;

@@ -617,6 +617,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             float fogDist = 1.0f / Engine.FogMaxDist();
             fogDist *= fogDist;
             Vector2 zfar_rel = new Vector2(Engine.ZNear, Engine.ZFar());
+            GL.Uniform3(14, State.CameraRelativePosition);
             GL.Uniform1(16, fogDist);
             GL.Uniform2(17, ref zfar_rel);
             GL.Uniform4(18, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
