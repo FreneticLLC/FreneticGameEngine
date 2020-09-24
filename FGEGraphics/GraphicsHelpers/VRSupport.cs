@@ -117,13 +117,14 @@ namespace FGEGraphics.GraphicsHelpers
         /// Gets the eye view point (boolean to specify left or right).
         /// </summary>
         /// <param name="lefteye">Left or right.</param>
+        /// <param name="cameraCenter">The camera center position to be relative to.</param>
         /// <returns>The eye view point matrix.</returns>
-        public Matrix4 Eye(bool lefteye)
+        public Matrix4 Eye(bool lefteye, Vector3 cameraCenter)
         {
             HmdMatrix34_t temp = VR.GetEyeToHeadTransform(lefteye ? EVREye.Eye_Left : EVREye.Eye_Right);
             Matrix4 eye = new Matrix4(temp.m0, temp.m1, temp.m2, temp.m3, temp.m4, temp.m5, temp.m6, temp.m7, temp.m8, temp.m9, temp.m10, temp.m11, 0, 0, 0, 1);
             eye.Transpose();
-            eye = eye.ClearTranslation() * Matrix4.CreateTranslation(eye.ExtractTranslation() * VRScale);
+            eye = eye.ClearTranslation() * Matrix4.CreateTranslation(eye.ExtractTranslation() * VRScale + cameraCenter);
             return headMat * eye;
         }
 

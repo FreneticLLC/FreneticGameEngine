@@ -256,10 +256,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public void RenderPass_Setup()
         {
-            FGECore.MathHelpers.Quaternion cammod = Config.CameraModifier();
-            Location camup = cammod.Transform(Config.CameraUp());
-            Location camforward = cammod.Transform(Config.ForwardVec);
-            State.CameraForward = camforward;
+            FGECore.MathHelpers.Quaternion cameraRotationModifier = Config.CameraModifier();
+            Location cameraUpVector = cameraRotationModifier.Transform(Config.CameraUp());
+            Location cameraForwardVector = cameraRotationModifier.Transform(Config.ForwardVec);
+            State.CameraForward = cameraForwardVector;
             BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
             DrawBuffer(Internal.CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
             StandardBlend();
@@ -268,24 +268,25 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.ClearBuffer(ClearBuffer.Color, 0, Config.ClearColor);
             GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.DEPTH_CLEAR);
             State.CameraBasePos = Config.CameraPos;
-            State.CameraAdjust = -camforward.CrossProduct(camup) * 0.25;
+            State.CameraAdjust = -cameraForwardVector.CrossProduct(cameraUpVector) * 0.25;
             if (Engine.Client.VR != null)
             {
                 //cameraAdjust = -cameraAdjust;
                 State.CameraAdjust = Location.Zero;
             }
-            State.RenderRelative = Config.CameraPos;
+            State.RenderRelative = Location.Zero;// Config.CameraPos;
             SetViewportTracked();
-            Config.CameraTarget = Config.CameraPos + camforward;
+            Config.CameraTarget = Config.CameraPos + cameraForwardVector;
             State.OffsetWorld = Matrix4d.CreateTranslation((-State.RenderRelative).ToOpenTK3D());
             Matrix4d outviewD;
+            State.CameraRelativePosition = (State.CameraBasePos - State.RenderRelative).ToOpenTK();
             if (Engine.Client.VR != null)
             {
                 Matrix4 proj = Engine.Client.VR.GetProjection(true, Engine.ZNear, Engine.ZFar());
-                Matrix4 view = Engine.Client.VR.Eye(true);
+                Matrix4 view = Engine.Client.VR.Eye(true, State.CameraRelativePosition); // TODO: account for player height?
                 State.PrimaryMatrix = view * proj;
                 Matrix4 proj2 = Engine.Client.VR.GetProjection(false, Engine.ZNear, Engine.ZFar());
-                Matrix4 view2 = Engine.Client.VR.Eye(false);
+                Matrix4 view2 = Engine.Client.VR.Eye(false, State.CameraRelativePosition); // TODO: account for player height?
                 State.PrimaryMatrix_OffsetFor3D = view2 * proj2;
                 State.PrimaryMatrixd = Matrix4d.CreateTranslation((-Config.CameraPos).ToOpenTK3D()) * view.ConvertToD() * proj.ConvertToD();
                 State.PrimaryMatrix_OffsetFor3Dd = Matrix4d.CreateTranslation((-Config.CameraPos).ToOpenTK3D()) * view2.ConvertToD() * proj2.ConvertToD();
@@ -295,17 +296,17 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Matrix4 projo2 = Engine.Client.VR.GetProjection(false, 60f, Engine.ZFarOut());
                 State.OutView_OffsetVR = view2 * projo2;
                 State.OutView_OffsetVRd = Matrix4d.CreateTranslation((-Config.CameraPos).ToOpenTK3D()) * view2.ConvertToD() * projo2.ConvertToD();
-                // TODO: Transform VR by cammod?
+                // TODO: Transform VR by cameraRotationModifier?
             }
             else
             {
                 Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Config.Width / (float)Config.Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
-                Location bx = Engine.Render3DView ? (State.CameraAdjust) : Location.Zero;
-                Matrix4 view = Matrix4.LookAt(bx.ToOpenTK(), (bx + camforward).ToOpenTK(), camup.ToOpenTK());
+                Vector3 bx = State.CameraRelativePosition + (Engine.Render3DView ? State.CameraAdjust.ToOpenTK() : Vector3.Zero);
+                Matrix4 view = Matrix4.LookAt(bx, bx + cameraForwardVector.ToOpenTK(), cameraUpVector.ToOpenTK());
                 State.PrimaryMatrix = view * proj;
                 if (Engine.Render3DView)
                 {
-                    Matrix4 view2 = Matrix4.LookAt((-State.CameraAdjust).ToOpenTK(), (-State.CameraAdjust + camforward).ToOpenTK(), camup.ToOpenTK());
+                    Matrix4 view2 = Matrix4.LookAt((-State.CameraAdjust).ToOpenTK(), (-State.CameraAdjust + cameraForwardVector).ToOpenTK(), cameraUpVector.ToOpenTK());
                     State.PrimaryMatrix_OffsetFor3D = view2 * proj;
                 }
                 Matrix4 proj_out = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Config.Width / (float)Config.Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
@@ -313,14 +314,14 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Matrix4d projd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV),
                     (float)Config.Width / (float)Config.Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
                 Location bxd = Engine.Render3DView ? (Config.CameraPos + State.CameraAdjust) : Config.CameraPos;
-                Matrix4d viewd = Matrix4d.LookAt(bxd.ToOpenTK3D(), (bxd + camforward).ToOpenTK3D(), camup.ToOpenTK3D());
+                Matrix4d viewd = Matrix4d.LookAt(bxd.ToOpenTK3D(), (bxd + cameraForwardVector).ToOpenTK3D(), cameraUpVector.ToOpenTK3D());
                 State.PrimaryMatrixd = viewd * projd;
                 Matrix4d proj_outd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Config.Width / (float)Config.Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
                 outviewD = viewd * proj_outd;
                 State.PrimaryMatrix_OffsetFor3Dd = Matrix4d.Identity;
                 if (Engine.Render3DView)
                 {
-                    Matrix4d view2d = Matrix4d.LookAt((Config.CameraPos - State.CameraAdjust).ToOpenTK3D(), (Config.CameraPos - State.CameraAdjust + camforward).ToOpenTK3D(), camup.ToOpenTK3D());
+                    Matrix4d view2d = Matrix4d.LookAt((Config.CameraPos - State.CameraAdjust).ToOpenTK3D(), (Config.CameraPos - State.CameraAdjust + cameraForwardVector).ToOpenTK3D(), cameraUpVector.ToOpenTK3D());
                     State.PrimaryMatrix_OffsetFor3Dd = view2d * projd;
                 }
             }

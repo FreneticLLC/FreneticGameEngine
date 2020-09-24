@@ -25,6 +25,8 @@ layout (location = 7) uniform vec3 camPos = vec3(0.0);
 #endif
 layout (location = 6) uniform float time = 0.0;
 layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
+// ...
+layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 
 in struct vox_out
 {

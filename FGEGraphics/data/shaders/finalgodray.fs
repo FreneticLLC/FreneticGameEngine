@@ -30,6 +30,8 @@ layout (location = 9) uniform float cameraTargetDepth = 0.01; // How far away th
 layout (location = 10) uniform float hdrExposure = 1.0; // The frame's HDR exposure value.
 layout (location = 11) uniform float frameDelta = 0.05; // The current frame's delta. // TODO: ???
 // ...
+layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
+// ...
 layout (location = 16) uniform float fogDist = 1.0 / 100000.0; // The distance fog should be around.
 layout (location = 17) uniform vec2 zdist = vec2(0.1, 1000.0); // The Z-Near and Z-Far value of the 3D projection.
 layout (location = 18) uniform vec4 fogCol = vec4(0.0); // What color any fog to apply is. For no fog, the alpha value will be zero.

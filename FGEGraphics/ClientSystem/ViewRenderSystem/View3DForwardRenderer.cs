@@ -165,6 +165,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             //CheckError("Render/Fast - Uniforms 1.43");
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.46");
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, new Vector2(Engine.ZNear, Engine.ZFar()));
             GraphicsUtil.CheckError("Render/Fast - Uniforms 1.5");
             /*if (Engine.CVars.r_forward_lights.ValueB)
@@ -195,6 +196,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             //GL.Uniform1(6, (float)Engine.GlobalTickTimeLocal);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.3");
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+            GL.Uniform3(14, State.CameraRelativePosition);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 3.5");
             float fogDist = 1.0f / Engine.FogMaxDist();
             fogDist *= fogDist;
@@ -215,6 +217,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.4");
             GL.Uniform1(13, fogDist);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.5");
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, zfar_rel);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 4.6");
             Engine.Rendering.SetColor(Color4.White, View);
@@ -226,6 +229,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, View);
             Shaders.Forward.AllTransparencies_Objects.Bind();
@@ -235,6 +239,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, View);
             Patches.PreSolidPatch?.Invoke(shadowmat_dat, light_dat, fogDist, maxLit, c);
@@ -256,6 +261,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.54");
             GL.Uniform1(13, fogDist);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.55");
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, View);
             GraphicsUtil.CheckError("Render/Fast - Uniforms 5.56");
@@ -280,6 +286,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
             //GL.Uniform2(14, zfar_rel);
             Engine.Rendering.SetColor(Color4.White, View);
             if (!Engine.Forward_Lights)
@@ -419,6 +426,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
             if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);
@@ -433,6 +441,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(6, (float)Engine.GlobalTickTime);
             GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
             GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
             if (Engine.Forward_Lights)
             {
                 GL.Uniform1(15, (float)c);

@@ -34,6 +34,11 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public Frustum CameraFrustum;
 
         /// <summary>
+        /// The position of the camera, relative to rendering origin.
+        /// </summary>
+        public Vector3 CameraRelativePosition;
+
+        /// <summary>
         /// Whether the system is rendering things where specular value is relevant.
         /// </summary>
         public bool RenderSpecular = false;
@@ -164,12 +169,12 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public Location CameraForward = Location.UnitX;
 
         /// <summary>
-        /// The camera's base position.
+        /// The camera's base position (the camera position according to config at frame start, without any adjustments applied).
         /// </summary>
         public Location CameraBasePos;
 
         /// <summary>
-        /// The camera's adjustment value for 3D.
+        /// The camera's adjustment value for 3D (shift vector towards the left or right eye).
         /// </summary>
         public Location CameraAdjust;
 

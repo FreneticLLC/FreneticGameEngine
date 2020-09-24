@@ -69,7 +69,7 @@ layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 layout (location = 11) uniform vec3 maximum_light = vec3(0.9, 0.9, 0.9);
 layout (location = 12) uniform vec4 fogCol = vec4(0.0);
 layout (location = 13) uniform float fogDist = 1.0 / 100000.0;
-// ...
+layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 layout (location = 15) uniform float lights_used = 0.0;
 layout (location = 16) uniform float minimum_light = 0.2;
 #if MCM_LIGHTS
@@ -105,7 +105,8 @@ void applyFog()
 	if (fogCol.w > 1.0)
 #endif
 	{
-		float dist = pow(dot(fi.pos, fi.pos) * fogDist, 0.6);
+		vec3 pos = fi.pos - cameraPos;
+		float dist = pow(dot(pos, pos) * fogDist, 0.6);
 		float fogMod = dist * exp(fogCol.w) * fogCol.w;
 		float fmz = min(fogMod, 1.0);
 #if MCM_SPECIAL_FOG
