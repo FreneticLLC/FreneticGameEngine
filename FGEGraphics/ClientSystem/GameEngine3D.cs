@@ -65,6 +65,11 @@ namespace FGEGraphics.ClientSystem
         public bool Deferred_TransparentLights = true;
 
         /// <summary>
+        /// Whether to enable deferred mode transparent-object-affecting light shadows.
+        /// </summary>
+        public bool Deferred_TransparentShadows = true;
+
+        /// <summary>
         /// Whether to enable deferred mode shadows.
         /// </summary>
         public bool Deferred_Shadows = true;

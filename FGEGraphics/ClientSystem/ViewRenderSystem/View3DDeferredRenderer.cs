@@ -699,7 +699,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             Patches.PreTransparentPatch?.Invoke(fogDist);
             if (Engine.Deferred_TransparentLights)
             {
-                if (Engine.Deferred_Shadows)
+                if (Engine.Deferred_TransparentShadows)
                 {
                     if (Engine.AllowLL)
                     {
@@ -776,7 +776,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Patches.VRTransparentPatch?.Invoke();
                 if (Engine.Deferred_TransparentLights)
                 {
-                    if (Engine.Deferred_Shadows)
+                    if (Engine.Deferred_TransparentShadows)
                     {
                         if (Engine.AllowLL)
                         {
