@@ -874,6 +874,40 @@ namespace FGECore.MathHelpers
         }
         #endregion
 
+        #region rounding
+
+        /// <summary>
+        /// Rounds each value towards the nearest integer.
+        /// Essentially, applies <see cref="Math.Round(double)"/> to each of the 3 coordinate values separately.
+        /// </summary>
+        /// <returns>The rounded location value.</returns>
+        public Location Round()
+        {
+            return new Location(Math.Round(X), Math.Round(Y), Math.Round(Z));
+        }
+
+        /// <summary>
+        /// Rounds each value towards downward.
+        /// Essentially, applies <see cref="Math.Floor(double)"/> to each of the 3 coordinate values separately.
+        /// </summary>
+        /// <returns>The floored location value.</returns>
+        public Location Floor()
+        {
+            return new Location(Math.Floor(X), Math.Floor(Y), Math.Floor(Z));
+        }
+
+        /// <summary>
+        /// Rounds each value towards upward.
+        /// Essentially, applies <see cref="Math.Ceiling(double)"/> to each of the 3 coordinate values separately.
+        /// </summary>
+        /// <returns>The rounded location value.</returns>
+        public Location Ceiling()
+        {
+            return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
+        }
+
+        #endregion
+
         #region BEPU interop
         /// <summary>
         /// Constructs a Location from a BEPUPhysics Vector3 structure, perfectly replicating it.
