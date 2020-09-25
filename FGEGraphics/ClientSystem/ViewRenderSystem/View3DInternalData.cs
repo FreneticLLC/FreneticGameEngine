@@ -71,6 +71,12 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public const float LIGHT_MAXIUM_RADIUS = 1E10f;
 
         /// <summary>
+        /// How much distance between camera-relative-positioning jumps.
+        /// The camera will never be more than this distance away from the render origin.
+        /// </summary>
+        public const double CAMERA_POSITION_JUMP_SCALE = 100;
+
+        /// <summary>
         /// Transparency FrameBufferObject.
         /// </summary>
         public int FBO_Transparents_Main;

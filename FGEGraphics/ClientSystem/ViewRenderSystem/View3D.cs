@@ -274,7 +274,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 //cameraAdjust = -cameraAdjust;
                 State.CameraAdjust = Location.Zero;
             }
-            State.RenderRelative = Location.Zero;// Config.CameraPos;
+            State.RenderRelative = (Config.CameraPos / View3DInternalData.CAMERA_POSITION_JUMP_SCALE).Round() * View3DInternalData.CAMERA_POSITION_JUMP_SCALE;
             SetViewportTracked();
             Config.CameraTarget = Config.CameraPos + cameraForwardVector;
             State.OffsetWorld = Matrix4d.CreateTranslation((-State.RenderRelative).ToOpenTK3D());
