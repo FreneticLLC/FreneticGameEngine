@@ -328,19 +328,10 @@ void main()
 	}
 #endif // MCM_INVERSE_FADE
 #if MCM_FADE_DEPTH
-	vec3 pos = fi.pos - cameraPos;
-	float dist = dot(pos, pos);
-	const float FULL_OPAQUE_DIST = 2.0;
-	const float FULL_TRANSP_DIST = 0.5;
-	float fadeAmount = (dist - FULL_TRANSP_DIST * FULL_TRANSP_DIST) / ((FULL_OPAQUE_DIST - FULL_TRANSP_DIST) * (FULL_OPAQUE_DIST - FULL_TRANSP_DIST));
-	color.w *= min(max(fadeAmount, 0.0), 1.0);
-	// Note: the below code is what should be used... if there was a depth texture available. Which there isn't in forward mode.
-	// If it worked, it would make particles soften when near solid objects. The above code is just a placeholder that softens particles when near the player's face, which is kinda nice too.
-
-	//float dist = linearizeDepth(gl_FragCoord.z);
-	//vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;
-	//float depthval = linearizeDepth(texture(depthTex, fc_xy).x);
-	//color.w *= min(max((depthval - dist) * fi.size * 0.5 * (screen_size.w - screen_size.z), 0.0), 1.0);
+	float dist = linearizeDepth(gl_FragCoord.z);
+	vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;
+	float depthval = linearizeDepth(texture(depthTex, fc_xy).x);
+	color.w *= min(max((depthval - dist) * fi.size * 0.5 * (screen_size.w - screen_size.z), 0.0), 1.0);
 #endif // MCM_FADE_DEPTH
 }
 

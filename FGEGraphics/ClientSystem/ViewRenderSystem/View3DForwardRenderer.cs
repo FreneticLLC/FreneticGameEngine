@@ -35,7 +35,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public void RenderPass_FAST()
         {
             GraphicsUtil.CheckError("Render/Fast - Prep");
-            if (Engine.DisplayDecals || Engine.ForwardReflections)
+            //if (Engine.DisplayDecals || Engine.ForwardReflections)
             {
                 State.DeferredTarget.Bind(View);
                 State.DeferredTarget.Clear();
@@ -337,7 +337,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Config.Render3D(View);
                 GraphicsUtil.CheckError("Render/Fast - Solid");
             }
-            if (Engine.DisplayDecals || Engine.ForwardReflections)
+            //if (Engine.DisplayDecals || Engine.ForwardReflections)
             {
                 State.DeferredTarget.Unbind(View);
                 View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
