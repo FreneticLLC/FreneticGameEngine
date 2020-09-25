@@ -36,7 +36,7 @@ layout (binding = 1) uniform sampler2D normal_tex;
 layout (binding = 2) uniform sampler2D spec;
 #endif
 #endif
-layout (binding = 4) uniform sampler2D depth;
+layout (binding = 4) uniform sampler2D depthTex;
 layout (binding = 5) uniform sampler2DArray shadowtex;
 // ...
 
@@ -320,7 +320,7 @@ void main()
 #if MCM_INVERSE_FADE
 	float dist = linearizeDepth(gl_FragCoord.z);
 	vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;
-	float depthval = linearizeDepth(texture(depth, fc_xy).x);
+	float depthval = linearizeDepth(texture(depthTex, fc_xy).x);
 	float mod2 = min(max(0.001 / max(depthval - dist, 0.001), 0.0), 1.0);
 	if (mod2 < 0.8)
 	{
@@ -328,10 +328,17 @@ void main()
 	}
 #endif // MCM_INVERSE_FADE
 #if MCM_FADE_DEPTH
-	float dist = linearizeDepth(gl_FragCoord.z);
-	vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;
-	float depthval = linearizeDepth(texture(depth, fc_xy).x);
-	color.w *= min(max((depthval - dist) * fi.size * 0.5 * (screen_size.w - screen_size.z), 0.0), 1.0);
+	vec3 pos = fi.pos - cameraPos;
+	float dist = dot(pos, pos);
+	const float FULL_OPAQUE_DIST = 2.0;
+	const float FULL_TRANSP_DIST = 0.5;
+	float fadeAmount = (dist - FULL_TRANSP_DIST * FULL_TRANSP_DIST) / ((FULL_OPAQUE_DIST - FULL_TRANSP_DIST) * (FULL_OPAQUE_DIST - FULL_TRANSP_DIST));
+	color.w *= min(max(fadeAmount, 0.0), 1.0);
+
+	//float dist = linearizeDepth(gl_FragCoord.z);
+	//vec2 fc_xy = gl_FragCoord.xy / screen_size.xy;
+	//float depthval = linearizeDepth(texture(depthTex, fc_xy).x);
+	//color.w *= min(max((depthval - dist) * fi.size * 0.5 * (screen_size.w - screen_size.z), 0.0), 1.0);
 #endif // MCM_FADE_DEPTH
 }
 
