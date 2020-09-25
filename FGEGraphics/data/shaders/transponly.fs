@@ -242,6 +242,7 @@ void main()
 #if MCM_GOOD_GRAPHICS
 	fcolor.xyz = desaturate(fcolor.xyz);
 #endif
+	fcolor = vec4(fcolor.xyz, tcolor.w * f.color.w);
 #if MCM_FADE_DEPTH // particles
 	float dist = linearizeDepth(gl_FragCoord.z);
 	vec2 fc_xy = gl_FragCoord.xy / vec2(lights_used_helper[0][3], lights_used_helper[1][0]);
