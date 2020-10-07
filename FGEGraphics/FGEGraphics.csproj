@@ -137,6 +137,7 @@
     <Compile Include="GraphicsHelpers\Renderer.cs" />
     <Compile Include="GraphicsHelpers\DeferredRenderTarget.cs" />
     <Compile Include="GraphicsHelpers\Shaders\Shader.cs" />
+    <Compile Include="GraphicsHelpers\Shaders\ShaderKey.cs" />
     <Compile Include="GraphicsHelpers\Textures\Texture.cs" />
     <Compile Include="GraphicsHelpers\Textures\TextureLoadedEventArgs.cs" />
     <Compile Include="GraphicsHelpers\VRSupport.cs" />
