@@ -109,6 +109,7 @@
     <Compile Include="ClientSystem\GE3DShaders.cs" />
     <Compile Include="ClientSystem\ShaderLocations.cs" />
     <Compile Include="ClientSystem\ViewRenderSystem\FBOID.cs" />
+    <Compile Include="ClientSystem\ViewRenderSystem\RenderTargetType.cs" />
     <Compile Include="ClientSystem\ViewRenderSystem\View3D.cs" />
     <Compile Include="ClientSystem\ViewRenderSystem\View3DConfiguration.cs" />
     <Compile Include="ClientSystem\ViewRenderSystem\View3DCoreDataSet.cs" />

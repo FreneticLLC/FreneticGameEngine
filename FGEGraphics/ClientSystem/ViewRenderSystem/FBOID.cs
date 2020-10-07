@@ -17,6 +17,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
 
     /// <summary>
     /// Helper for current rendering mode ID.
+    /// TODO: Replace this with <see cref="RenderTargetType"/>.
     /// </summary>
     public enum FBOID : byte
     {
