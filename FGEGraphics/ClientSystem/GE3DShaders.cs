@@ -70,11 +70,13 @@ namespace FGEGraphics.ClientSystem
             Forward.PostProcess = Shaders.GetShader("postfast" + def);
             Deferred.ShadowPass_Particles = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH,MCM_IS_A_SHADOW?particles");
             Forward.Particles = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH" + forw_extra + "?particles");
+            Forward.ParticlesNoFade = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP" + forw_extra + "?particles");
             Deferred.GBuffer_Decals = Shaders.GetShader("fbo" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE,MCM_PRETTY?decal");
             Forward.Decals = Shaders.GetShader("forward" + def + ",MCM_INVERSE_FADE,MCM_NO_ALPHA_CAP,MCM_GEOM_ACTIVE" + forw_extra + "?decal");
             Forward.AllTransparencies_NoFog = Shaders.GetShader("forward" + def + ",MCM_NO_ALPHA_CAP,MCM_BRIGHT,MCM_NO_BONES" + forw_extra);
             Forward.AllTransparencies_Objects = Shaders.GetShader("forward" + def + ",MCM_NO_BONES" + forw_extra);
             Forward.AllTransparencies_Sky = Shaders.GetShader("forward" + def + ",MCM_NO_ALPHA_CAP,MCM_BRIGHT,MCM_NO_BONES,MCM_SKY_FOG" + forw_extra);
+            Deferred.Solid_Particles = Shaders.GetShader("fbo" + def + ",MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH,MCM_NO_ALPHA_CAP?particles");
             Deferred.Transparents_Particles = Shaders.GetShader("transponly" + def + ",MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
             Deferred.Transparents_Particles_Lights = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
             Deferred.Transparents_Particles_Lights_Shadows = Shaders.GetShader("transponly" + def + ",MCM_LIT,MCM_SHADOWS,MCM_ANY,MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_FADE_DEPTH?particles");
@@ -120,6 +122,11 @@ namespace FGEGraphics.ClientSystem
             /// The shader used for particles in forward rendering mode.
             /// </summary>
             public Shader Particles;
+
+            /// <summary>
+            /// The shader used for particles in forward rendering mode, without 'depth fade' logic.
+            /// </summary>
+            public Shader ParticlesNoFade;
 
             /// <summary>
             /// The shader used for decal rendering in forward mode.
@@ -282,6 +289,11 @@ namespace FGEGraphics.ClientSystem
             /// The shader used to assist in HDR calculation acceleration.
             /// </summary>
             public Shader HDRPass;
+
+            /// <summary>
+            /// The shader used only for g-buffer particles.
+            /// </summary>
+            public Shader Solid_Particles;
 
             /// <summary>
             /// The shader used only for transparent particles.

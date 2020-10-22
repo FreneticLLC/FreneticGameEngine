@@ -14,6 +14,7 @@
 #define MCM_INVERSE_FADE 0
 #define MCM_NO_ALPHA_CAP 0
 #define MCM_NO_LIGHT_ANGLE 0
+#define MCM_FADE_DEPTH 0
 
 #if MCM_GEOM_ACTIVE
 layout (binding = 0) uniform sampler2DArray s;
@@ -54,6 +55,11 @@ in struct vox_fout
 #if MCM_INVERSE_FADE
 	float size;
 #endif // MCM_INVERSE_FADE
+#if MCM_FADE_DEPTH
+	vec2 scrpos;
+	float z;
+	float size;
+#endif // MCM_FADE_DEPTH
 } fi;
 
 layout (location = 0) out vec4 color;
@@ -141,4 +147,10 @@ void main()
 		discard;
 	}
 #endif // MCM_INVERSE_FADE
+#if MCM_FADE_DEPTH
+	position = vec4(0.0);
+	normal = vec4(0.0);
+	renderhint = vec4(0.0);
+	renderhint2 = vec4(0.0);
+#endif // MCM_FADE_DEPTH
 }

@@ -96,7 +96,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// Checks if the ID is the 'main + transparent' modes.
         /// </summary>
         /// <param name="id">The ID.</param>
-        /// <returns>Whether it is.</returns>
         public static bool IsMainTransp(this FBOID id)
         {
             return id == FBOID.TRANSP_LIT || id == FBOID.TRANSP_LIT_LL || id == FBOID.TRANSP_LL || id == FBOID.TRANSP_SHADOWS || id == FBOID.TRANSP_SHADOWS_LL || id == FBOID.TRANSP_UNLIT;
@@ -105,8 +104,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Checks if the ID is the 'main + opaque' modes.
         /// </summary>
-        /// <param name="id">The ID.</param>
-        /// <returns>Whether it is.</returns>
         public static bool IsMainSolid(this FBOID id)
         {
             return id == FBOID.FORWARD_SOLID || id == FBOID.MAIN;
@@ -115,8 +112,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Checks if the ID is the 'solid (opaque)' modes.
         /// </summary>
-        /// <param name="id">The ID.</param>
-        /// <returns>Whether it is.</returns>
         public static bool IsSolid(this FBOID id)
         {
             return id == FBOID.SHADOWS || id == FBOID.STATIC_SHADOWS || id == FBOID.DYNAMIC_SHADOWS || id == FBOID.FORWARD_SOLID || id == FBOID.REFRACT || id == FBOID.MAIN;
@@ -125,8 +120,6 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Checks if the ID is the 'forward' modes.
         /// </summary>
-        /// <param name="id">The ID.</param>
-        /// <returns>Whether it is.</returns>
         public static bool IsForward(this FBOID id)
         {
             return id == FBOID.FORWARD_SOLID || id == FBOID.FORWARD_TRANSP || id == FBOID.FORWARD_EXTRAS;
