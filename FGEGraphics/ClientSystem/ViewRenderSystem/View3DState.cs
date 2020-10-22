@@ -202,5 +202,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// Whether the system is currently rendering the second eye (When VR or 3D enabled).
         /// </summary>
         public bool IsSecondEye = false;
+
+        /// <summary>
+        /// The current (or last) transparent light count during deferred rendering.
+        /// </summary>
+        public int TransparentLightCount = 0;
     }
 }

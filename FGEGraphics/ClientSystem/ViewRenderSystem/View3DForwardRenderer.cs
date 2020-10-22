@@ -342,7 +342,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 State.DeferredTarget.Unbind(View);
                 View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
                 View.DrawBuffer(Internal.CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
-                GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, State.DeferredTarget.fbo);
+                GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, State.DeferredTarget.FBO);
                 GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
                 if (Engine.ForwardReflections)

@@ -284,7 +284,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             State.DeferredTarget.Unbind(View);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Decal);
             GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
-            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, State.DeferredTarget.fbo);
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, State.DeferredTarget.FBO);
             GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             State.DeferredTarget.Bind(View);
@@ -675,7 +675,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             View.DrawBuffer(Internal.CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
             State.BufferDontTouch = false;
             GraphicsUtil.CheckError("AFRFBO_1");
-            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.fbo); // TODO: is view line and line below needed?
+            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.FBO); // TODO: is view line and line below needed?
             GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
             GraphicsUtil.CheckError("AFRFBO_2");
             View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, Internal.FBO_GodRay_Main);
@@ -758,7 +758,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("PreTransp - 2");
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Transparents_Main);
             View.DrawBuffer(DrawBufferMode.ColorAttachment0);
-            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.fbo);
+            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.FBO);
             GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
             View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
@@ -1030,6 +1030,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                     }
                 }
             lights_apply:
+                State.TransparentLightCount = lightCount;
                 GraphicsUtil.CheckError("PreRenderTranspLights");
                 Matrix4 dataMatrix = new Matrix4(lightCount, Engine.ZNear, Engine.ZFar(), Config.Width, Config.Height, 0, 0, 0, 0, 0, 0, 0, (float)Config.FogCol.X, (float)Config.FogCol.Y, (float)Config.FogCol.Z, Config.FogAlpha);
                 if (Engine.Deferred_Shadows)

@@ -32,9 +32,9 @@ namespace FGEGraphics.GraphicsHelpers
         public int Height;
 
         /// <summary>
-        /// OpenGL FBo.
+        /// OpenGL FBO.
         /// </summary>
-        public uint fbo;
+        public uint FBO;
 
         /// <summary>
         /// OpenGL diffuse texture.
@@ -83,8 +83,8 @@ namespace FGEGraphics.GraphicsHelpers
             Rendering = rendering;
             Width = _width;
             Height = _height;
-            GL.GenFramebuffers(1, out fbo);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+            GL.GenFramebuffers(1, out FBO);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
             GL.GenTextures(1, out DiffuseTexture);
             GL.BindTexture(TextureTarget.Texture2D, DiffuseTexture);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
@@ -141,7 +141,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// </summary>
         public void Destroy()
         {
-            GL.DeleteFramebuffer(fbo);
+            GL.DeleteFramebuffer(FBO);
             GraphicsUtil.CheckError("RS4P - Destroy - 0.1");
             GL.DeleteTexture(DiffuseTexture);
             GraphicsUtil.CheckError("RS4P - Destroy - 0.2");
@@ -162,6 +162,17 @@ namespace FGEGraphics.GraphicsHelpers
         /// </summary>
         public bool IsBound = false;
 
+        static readonly DrawBuffersEnum[] DRAW_BUFFERS_ARRAY = new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
+                DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3, DrawBuffersEnum.ColorAttachment4, DrawBuffersEnum.ColorAttachment5 };
+
+        /// <summary>
+        /// Sets the proper "GL.DrawBuffers(6, ..." for this object.
+        /// </summary>
+        public void SetDrawBuffers()
+        {
+            GL.DrawBuffers(6, DRAW_BUFFERS_ARRAY);
+        }
+
         /// <summary>
         /// Binds the RS4P to OpenGL and a view.
         /// </summary>
@@ -170,10 +181,9 @@ namespace FGEGraphics.GraphicsHelpers
         {
             IsBound = true;
             view.State.BufferDontTouch = true;
-            view.BindFramebuffer(FramebufferTarget.Framebuffer, (int)fbo);
+            view.BindFramebuffer(FramebufferTarget.Framebuffer, (int)FBO);
             view.Viewport(0, 0, Width, Height);
-            GL.DrawBuffers(6, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
-                DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3, DrawBuffersEnum.ColorAttachment4, DrawBuffersEnum.ColorAttachment5 });
+            SetDrawBuffers();
             //GL.BlendFunc(3, BlendingFactorSrc.One, BlendingFactorDest.Zero);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.Enable(EnableCap.Texture2D);
