@@ -13,6 +13,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL4;
 using FGECore;
@@ -236,6 +237,30 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         }
 
         /// <summary>
+        /// Produces a copy of the given bitmap, with a new image size.
+        /// Akin to "new Bitmap(bmp, width, height)" but forces certain quality options to prevent edge-errors.
+        /// </summary>
+        /// <param name="bmp">The original image.</param>
+        /// <param name="width">The new output image's width (X) (in pixels).</param>
+        /// <param name="height">The new output image's height (Y) (in pixels).</param>
+        /// <returns>The resized image.</returns>
+        public Bitmap RescaleBitmap(Bitmap bmp, int width, int height)
+        {
+            Bitmap output = new Bitmap(width, height);
+            using (Graphics graphics = Graphics.FromImage(output))
+            {
+                using ImageAttributes ia = new ImageAttributes();
+                ia.SetWrapMode(WrapMode.TileFlipXY);
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.None;
+                graphics.CompositingQuality = CompositingQuality.AssumeLinear;
+                graphics.DrawImage(bmp, new Rectangle(0, 0, width, height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia);
+            }
+            return output;
+        }
+
+        /// <summary>
         /// Gets a <see cref="Bitmap"/> for some data, with size correction.
         /// </summary>
         /// <param name="data">The raw file data.</param>
@@ -254,9 +279,9 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             {
                 if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
                 {
-                    int wid = GetNextPOTValue(bmp.Width);
-                    int hei = GetNextPOTValue(bmp.Height);
-                    Bitmap bmp_fixed = new Bitmap(bmp, new Size(wid, hei));
+                    int width = GetNextPOTValue(bmp.Width);
+                    int height = GetNextPOTValue(bmp.Height);
+                    Bitmap bmp_fixed = RescaleBitmap(bmp, width, height);
                     bmp.Dispose();
                     return bmp_fixed;
                 }
@@ -268,7 +293,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
             else
             {
-                Bitmap bmp2 = new Bitmap(bmp, new Size(textureWidth, textureWidth));
+                Bitmap bmp2 = RescaleBitmap(bmp, textureWidth, textureWidth);
                 bmp.Dispose();
                 return bmp2;
             }
