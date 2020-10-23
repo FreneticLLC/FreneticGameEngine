@@ -248,7 +248,8 @@ namespace FGEGraphics.GraphicsHelpers
             /// <param name="tc">The texture coordinates.</param>
             /// <param name="offs">Whether to offset.</param>
             /// <param name="texf">The texture ID.</param>
-            public void AddSide(Location normal, TextureCoordinates tc, bool offs = false, float texf = 0)
+            /// <param name="scale">The distance from center for each side.</param>
+            public void AddSide(Location normal, TextureCoordinates tc, bool offs = false, float texf = 0, float scale = 1)
             {
                 if (Vertices.Capacity < 6)
                 {
@@ -270,8 +271,8 @@ namespace FGEGraphics.GraphicsHelpers
                 float cY = (tc.YFlip ? 0 : 1) * tc.YScale + tc.YShift;
                 float dX = (tc.XFlip ? 1 : 0) + tc.XShift;
                 float dY = (tc.YFlip ? 0 : 1) * tc.YScale + tc.YShift;
-                float zero = offs ? -0.5f : -1; // Sssh
-                float one = offs ? 0.5f : 1;
+                float zero = offs ? scale * -0.5f : -scale; // Sssh
+                float one = offs ? scale * 0.5f : scale;
                 if (normal.Z == 1)
                 {
                     // T1

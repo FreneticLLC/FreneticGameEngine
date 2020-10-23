@@ -87,12 +87,12 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <summary>
         /// The minimum model bound.
         /// </summary>
-        public BEPUutilities.Vector3 ModelMin;
+        public Location ModelMin;
 
         /// <summary>
         /// The maximum model bound.
         /// </summary>
-        public BEPUutilities.Vector3 ModelMax;
+        public Location ModelMax;
 
         /// <summary>
         /// Whether the model is loaded yet.

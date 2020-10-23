@@ -84,19 +84,19 @@ namespace FGEGraphics.GraphicsHelpers.Models
             {
                 Engine = this,
                 Skinned = true,
-                ModelMin = new BEPUutilities.Vector3(-1, -1, -1),
-                ModelMax = new BEPUutilities.Vector3(1, 1, 1)
+                ModelMin = new Location(-0.5),
+                ModelMax = new Location(0.5)
             };
             ModelMesh mm = new ModelMesh("cube");
             Renderable.ListBuilder builder = new Renderable.ListBuilder();
             builder.Prepare();
             TextureCoordinates tc = new TextureCoordinates();
-            builder.AddSide(Location.UnitX, tc, offs: true);
-            builder.AddSide(Location.UnitY, tc, offs: true);
-            builder.AddSide(Location.UnitZ, tc, offs: true);
-            builder.AddSide(-Location.UnitX, tc, offs: true);
-            builder.AddSide(-Location.UnitY, tc, offs: true);
-            builder.AddSide(-Location.UnitZ, tc, offs: true);
+            builder.AddSide(Location.UnitX, tc, offs: true, scale: 0.5f);
+            builder.AddSide(Location.UnitY, tc, offs: true, scale: 0.5f);
+            builder.AddSide(Location.UnitZ, tc, offs: true, scale: 0.5f);
+            builder.AddSide(-Location.UnitX, tc, offs: true, scale: 0.5f);
+            builder.AddSide(-Location.UnitY, tc, offs: true, scale: 0.5f);
+            builder.AddSide(-Location.UnitZ, tc, offs: true, scale: 0.5f);
             m.Original = new Model3D();
             Model3DMesh m3m = new Model3DMesh()
             {
@@ -211,19 +211,19 @@ namespace FGEGraphics.GraphicsHelpers.Models
                     model.RootNode = mod.RootNode;
                     model.LODHelper = null;
                     model.LODBox = default;
-                    model.ModelMin = new BEPUutilities.Vector3(-1, -1, -1);
-                    model.ModelMax = new BEPUutilities.Vector3(1, 1, 1);
+                    model.ModelMin = new Location(-0.5);
+                    model.ModelMax = new Location(0.5);
                     model.ModelBoundsSet = false;
                     model.IsLoaded = true;
                 });
             }
             void fileMissing()
             {
-                SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
+                SysConsole.Output(OutputType.WARNING, $"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
             }
             void handleError(string message)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Error}': {message}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Error}': {message}");
             }
             TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
