@@ -18,6 +18,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.Models;
@@ -318,7 +319,7 @@ namespace FGEGraphics.GraphicsHelpers
             OpenTK.Quaternion loquat = Position.ExtractRotation(true);
             BEPUutilities.Quaternion lquat = new BEPUutilities.Quaternion(loquat.X, loquat.Y, loquat.Z, loquat.W);
             BEPUutilities.Vector3 lforw = -BEPUutilities.Quaternion.Transform(BEPUutilities.Vector3.UnitZ, lquat);
-            return new Location(lforw);
+            return lforw.ToLocation();
         }
 
         /// <summary>

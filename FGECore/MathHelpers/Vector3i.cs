@@ -112,7 +112,7 @@ namespace FGECore.MathHelpers
         /// </summary>
         /// <returns>The float vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 ToBVector()
+        public Vector3 ToBEPU()
         {
             return new Vector3(X, Y, Z);
         }

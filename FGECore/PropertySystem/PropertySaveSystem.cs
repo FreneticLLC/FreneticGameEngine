@@ -65,7 +65,7 @@ namespace FGECore.PropertySystem
                 TypeSavers.Add(typeof(bool), new PropertySaverLoader()
                 {
                     Saver = (o) => new byte[] { ((bool)o) ? (byte)1 : (byte)0 },
-                    Loader = (b) => b[0] != 0 ? true : false,
+                    Loader = (b) => b[0] != 0,
                     SaveString = "C/bool"
                 });
                 TypeSavers.Add(typeof(byte), new PropertySaverLoader()
@@ -162,8 +162,8 @@ namespace FGECore.PropertySystem
                 // BEPU Helpers
                 TypeSavers.Add(typeof(Vector3), new PropertySaverLoader()
                 {
-                    Saver = (o) => (new Location((Vector3)o)).ToDoubleBytes(),
-                    Loader = (b) => Location.FromDoubleBytes(b, 0).ToBVector(),
+                    Saver = (o) => ((Vector3)o).ToLocation().ToDoubleBytes(),
+                    Loader = (b) => Location.FromDoubleBytes(b, 0).ToBEPU(),
                     SaveString = "C/B/vector3"
                 });
                 TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()

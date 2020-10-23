@@ -89,11 +89,11 @@ namespace FGECore.PhysicsSystem
         {
             get
             {
-                return new Location(Internal.ForceUpdater.Gravity);
+                return Internal.ForceUpdater.Gravity.ToLocation();
             }
             set
             {
-                Internal.ForceUpdater.Gravity = value.ToBVector();
+                Internal.ForceUpdater.Gravity = value.ToBEPU();
             }
         }
 
@@ -136,7 +136,7 @@ namespace FGECore.PhysicsSystem
         public IEnumerable<T> GetEntitiesInBox(AABB box)
         {
             List<BroadPhaseEntry> bpes = new List<BroadPhaseEntry>();
-            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToBVector(), box.Max.ToBVector()), bpes);
+            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToBEPU(), box.Max.ToBEPU()), bpes);
             foreach (BroadPhaseEntry bpe in bpes)
             {
                 if (bpe is EntityCollidable ec && ec.Entity.Tag is T res)
@@ -167,14 +167,14 @@ namespace FGECore.PhysicsSystem
             RayCastResult rcr;
             if (filter != null)
             {
-                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty<T, T2> t2) ? filter(t2.Entity) : false), out rcr))
+                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty<T, T2> t2) && filter(t2.Entity)), out rcr))
                 {
                     return null;
                 }
             }
             else
             {
-                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, out rcr))
+                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, out rcr))
                 {
                     return null;
                 }
@@ -206,14 +206,14 @@ namespace FGECore.PhysicsSystem
             RayCastResult rcr;
             if (filter != null)
             {
-                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, filter, out rcr))
+                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, filter, out rcr))
                 {
                     return null;
                 }
             }
             else
             {
-                if (!Internal.RayCast(new Ray(start.ToBVector(), dir.ToBVector()), dist, out rcr))
+                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, out rcr))
                 {
                     return null;
                 }

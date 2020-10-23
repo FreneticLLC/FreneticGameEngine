@@ -218,8 +218,8 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                         proc--;
                     }
                     AL.GetSource(src, ALGetSourcei.BuffersQueued, out int waiting);
-                    BEPUutilities.Vector3 bforw = ForwardDirection.ToBVector();
-                    BEPUutilities.Vector3 bup = UpDirection.ToBVector();
+                    BEPUutilities.Vector3 bforw = ForwardDirection.ToBEPU();
+                    BEPUutilities.Vector3 bup = UpDirection.ToBEPU();
                     if (waiting < BUFFERS_AT_ONCE)
                     {
                         byte[] b = new byte[ACTUAL_SAMPLES];
@@ -240,7 +240,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                                     if (toAdd.UsePosition)
                                     {
                                         float tempvol = 1.0f / Math.Max(1.0f, (float)toAdd.Position.DistanceSquared(Position));
-                                        BEPUutilities.Vector3 rel = ((toAdd.Position - Position).Normalize().ToBVector());
+                                        BEPUutilities.Vector3 rel = ((toAdd.Position - Position).Normalize().ToBEPU());
                                         BEPUutilities.Quaternion.GetQuaternionBetweenNormalizedVectors(ref rel, ref bforw, out BEPUutilities.Quaternion quat);
                                         float angle = (float)quat.AxisAngleFor(bup);
                                         angle += (float)Math.PI; // TODO: Sanity!

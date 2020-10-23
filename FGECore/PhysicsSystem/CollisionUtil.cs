@@ -191,11 +191,11 @@ namespace FGECore.PhysicsSystem
             };
             if (hit)
             {
-                cr.Normal = new Location(rcr.HitData.Normal);
-                cr.Position = new Location(rcr.HitData.Location);
-                if (rcr.HitObject is EntityCollidable)
+                cr.Normal = rcr.HitData.Normal.ToLocation();
+                cr.Position = rcr.HitData.Location.ToLocation();
+                if (rcr.HitObject is EntityCollidable collidable)
                 {
-                    cr.HitEnt = ((EntityCollidable)rcr.HitObject).Entity;
+                    cr.HitEnt = collidable.Entity;
                 }
                 else
                 {
@@ -221,7 +221,7 @@ namespace FGECore.PhysicsSystem
         public CollisionResult RayTrace(in Location start, in Location end, Func<BroadPhaseEntry, bool> filter = null)
         {
             double len = (end - start).Length();
-            Ray ray = new Ray(start.ToBVector(), ((end - start) / len).ToBVector());
+            Ray ray = new Ray(start.ToBEPU(), ((end - start) / len).ToBEPU());
             RayCastResult rcr;
             bool hit;
             if (filter == null)
@@ -235,11 +235,11 @@ namespace FGECore.PhysicsSystem
             CollisionResult cr = new CollisionResult() { Hit = hit };
             if (hit)
             {
-                cr.Normal = new Location(rcr.HitData.Normal);
-                cr.Position = new Location(rcr.HitData.Location);
-                if (rcr.HitObject is EntityCollidable)
+                cr.Normal = rcr.HitData.Normal.ToLocation();
+                cr.Position = rcr.HitData.Location.ToLocation();
+                if (rcr.HitObject is EntityCollidable collidable)
                 {
-                    cr.HitEnt = ((EntityCollidable)rcr.HitObject).Entity;
+                    cr.HitEnt = collidable.Entity;
                 }
                 else
                 {

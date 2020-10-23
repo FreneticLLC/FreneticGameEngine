@@ -907,27 +907,5 @@ namespace FGECore.MathHelpers
         }
 
         #endregion
-
-        #region BEPU interop
-        /// <summary>
-        /// Constructs a Location from a BEPUPhysics Vector3 structure, perfectly replicating it.
-        /// </summary>
-        public Location(BEPUutilities.Vector3 vec)
-        {
-            X = vec.X;
-            Y = vec.Y;
-            Z = vec.Z;
-        }
-
-        /// <summary>
-        /// Converts the Location to a BEPUPhysics Vector3.
-        /// </summary>
-        /// <returns>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BEPUutilities.Vector3 ToBVector()
-        {
-            return new BEPUutilities.Vector3(X, Y, Z);
-        }
-        #endregion
     }
 }

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using BEPUphysics.Character;
 using FGECore.MathHelpers;
 using FGECore.PropertySystem;
+using FGECore.PhysicsSystem;
 
 namespace FGECore.EntitySystem
 {
@@ -36,11 +37,11 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return new Location(Internal.ViewDirection);
+                return Internal.ViewDirection.ToLocation();
             }
             set
             {
-                Internal.ViewDirection = value.ToBVector();
+                Internal.ViewDirection = value.ToBEPU();
             }
         }
     }

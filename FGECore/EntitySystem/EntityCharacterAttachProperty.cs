@@ -79,7 +79,7 @@ namespace FGECore.EntitySystem
         /// <returns>The accurate position.</returns>
         public Location GetAccuratePosition(Location basePos)
         {
-            return basePos + new Location(Character.Down) * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+            return basePos + Character.Down.ToLocation() * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace FGECore.EntitySystem
         /// <param name="downDir">The stand-in down direction.</param>
         public void SetRelativeToCurrent(Vector3 viewDir, Location downDir)
         {
-            SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToBVector()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
+            SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToBEPU()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
         }
 
         /// <summary>

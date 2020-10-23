@@ -35,7 +35,7 @@ namespace FGECore.PhysicsSystem
         /// <returns>The angle.</returns>
         public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, in Vector3 axis)
         {
-            return rotation.ToCore().AxisAngleForRadians(new Location(axis)) * MathUtilities.PI180;
+            return rotation.ToCore().AxisAngleForRadians(axis.ToLocation()) * MathUtilities.PI180;
         }
 
         /// <summary>
@@ -56,6 +56,26 @@ namespace FGECore.PhysicsSystem
         public static MathHelpers.Quaternion ToCore(this BEPUutilities.Quaternion q)
         {
             return new MathHelpers.Quaternion(q.X, q.Y, q.Z, q.W);
+        }
+
+        /// <summary>
+        /// Converts a BEPUPhysics <see cref="Vector3"/> to a <see cref="Location"/>.
+        /// </summary>
+        /// <param name="loc">The BEPUPhysics <see cref="Vector3"/>.</param>
+        /// <returns>The <see cref="Location"/>.</returns>
+        public static Location ToLocation(this Vector3 loc)
+        {
+            return new Location(loc.X, loc.Y, loc.Z);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Location"/> to a BEPUPhysics <see cref="Vector3"/>.
+        /// </summary>
+        /// <param name="loc">The <see cref="Location"/>.</param>
+        /// <returns>The BEPUPhysics <see cref="Vector3"/>.</returns>
+        public static Vector3 ToBEPU(this Location loc)
+        {
+            return new Vector3(loc.X, loc.Y, loc.Z);
         }
 
         /// <summary>

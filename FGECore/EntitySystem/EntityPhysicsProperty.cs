@@ -131,7 +131,7 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return SpawnedBody == null ? InternalGravity : new Location(SpawnedBody.Gravity.Value);
+                return SpawnedBody == null ? InternalGravity : SpawnedBody.Gravity.Value.ToLocation();
             }
             set
             {
@@ -139,7 +139,7 @@ namespace FGECore.EntitySystem
                 GravityIsSet = true;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.Gravity = InternalGravity.ToBVector();
+                    SpawnedBody.Gravity = InternalGravity.ToBEPU();
                 }
             }
         }
@@ -197,14 +197,14 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return SpawnedBody == null ? InternalLinearVelocity : new Location(SpawnedBody.LinearVelocity);
+                return SpawnedBody == null ? InternalLinearVelocity : SpawnedBody.LinearVelocity.ToLocation();
             }
             set
             {
                 InternalLinearVelocity = value;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
+                    SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBEPU();
                 }
             }
         }
@@ -218,14 +218,14 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return SpawnedBody == null ? InternalAngularVelocity : new Location(SpawnedBody.AngularVelocity);
+                return SpawnedBody == null ? InternalAngularVelocity : SpawnedBody.AngularVelocity.ToLocation();
             }
             set
             {
                 InternalAngularVelocity = value;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
+                    SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBEPU();
                 }
             }
         }
@@ -240,14 +240,14 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return SpawnedBody == null ? InternalPosition : new Location(SpawnedBody.Position);
+                return SpawnedBody == null ? InternalPosition : SpawnedBody.Position.ToLocation();
             }
             set
             {
                 InternalPosition = value;
                 if (SpawnedBody != null)
                 {
-                    SpawnedBody.Position = InternalPosition.ToBVector();
+                    SpawnedBody.Position = InternalPosition.ToBEPU();
                 }
             }
         }
@@ -357,7 +357,7 @@ namespace FGECore.EntitySystem
             {
                 return;
             }
-            Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+            Location coff = BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation).ToLocation();
             Location p2 = (p * PhysicsWorld.RelativeScaleInverse) + coff;
             if (p2.DistanceSquared(InternalPosition) > 0.01) // TODO: Is this validation needed?
             {
@@ -410,13 +410,13 @@ namespace FGECore.EntitySystem
                 OriginalObject = SpawnedBody;
                 SpawnedBody.Orientation = InternalOrientation.ToBEPU();
             }
-            SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBVector();
-            SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBVector();
+            SpawnedBody.LinearVelocity = InternalLinearVelocity.ToBEPU();
+            SpawnedBody.AngularVelocity = InternalAngularVelocity.ToBEPU();
             SpawnedBody.Material.KineticFriction = InternalFriction;
             SpawnedBody.Material.StaticFriction = InternalFriction;
             SpawnedBody.Material.Bounciness = InternalBounciness;
-            SpawnedBody.Position = InternalPosition.ToBVector();
-            SpawnedBody.Gravity = InternalGravity.ToBVector();
+            SpawnedBody.Position = InternalPosition.ToBEPU();
+            SpawnedBody.Gravity = InternalGravity.ToBEPU();
             SpawnedBody.Tag = Entity;
             SpawnedBody.CollisionInformation.Tag = this;
             // TODO: Other settings
@@ -441,11 +441,11 @@ namespace FGECore.EntitySystem
         public void TickUpdates()
         {
             NoCheck = CheckDisableAllowed;
-            Location bpos = new Location(SpawnedBody.Position);
+            Location bpos = SpawnedBody.Position.ToLocation();
             if (InternalPosition.DistanceSquared(bpos) > 0.0001)
             {
                 InternalPosition = bpos;
-                Location coff = new Location(BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation));
+                Location coff = BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Orientation).ToLocation();
                 Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScaleForward);
             }
             BEPUutilities.Quaternion cur = SpawnedBody.Orientation;
@@ -465,12 +465,12 @@ namespace FGECore.EntitySystem
         public void UpdateFields()
         {
             InternalMass = SpawnedBody.Mass;
-            InternalGravity = new Location(SpawnedBody.Gravity.Value);
+            InternalGravity = SpawnedBody.Gravity.Value.ToLocation();
             InternalFriction = SpawnedBody.Material.KineticFriction;
             InternalBounciness = SpawnedBody.Material.Bounciness;
-            InternalLinearVelocity = new Location(SpawnedBody.LinearVelocity);
-            InternalAngularVelocity = new Location(SpawnedBody.AngularVelocity);
-            InternalPosition = new Location(SpawnedBody.Position);
+            InternalLinearVelocity = SpawnedBody.LinearVelocity.ToLocation();
+            InternalAngularVelocity = SpawnedBody.AngularVelocity.ToLocation();
+            InternalPosition = SpawnedBody.Position.ToLocation();
             InternalOrientation = SpawnedBody.Orientation.ToCore();
         }
 
@@ -513,7 +513,7 @@ namespace FGECore.EntitySystem
         {
             if (SpawnedBody != null)
             {
-                Vector3 vec = force.ToBVector();
+                Vector3 vec = force.ToBEPU();
                 SpawnedBody.ApplyLinearImpulse(ref vec);
                 SpawnedBody.ActivityInformation.Activate();
             }
@@ -536,8 +536,8 @@ namespace FGECore.EntitySystem
         {
             if (SpawnedBody != null)
             {
-                Vector3 ori = origin.ToBVector();
-                Vector3 vec = force.ToBVector();
+                Vector3 ori = origin.ToBEPU();
+                Vector3 vec = force.ToBEPU();
                 SpawnedBody.ApplyImpulse(ref ori, ref vec);
                 SpawnedBody.ActivityInformation.Activate();
             }
