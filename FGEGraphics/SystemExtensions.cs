@@ -164,6 +164,26 @@ namespace FGEGraphics
         }
 
         /// <summary>
+        /// Converts a BEPUPhysics <see cref="BEPUutilities.Vector3"/> to a <see cref="Location"/>.
+        /// </summary>
+        /// <param name="loc">The BEPUPhysics <see cref="BEPUutilities.Vector3"/>.</param>
+        /// <returns>The <see cref="Location"/>.</returns>
+        public static Location ToLocation(this BEPUutilities.Vector3 loc)
+        {
+            return new Location(loc.X, loc.Y, loc.Z);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Location"/> to a BEPUPhysics <see cref="BEPUutilities.Vector3"/>.
+        /// </summary>
+        /// <param name="loc">The <see cref="Location"/>.</param>
+        /// <returns>The BEPUPhysics <see cref="BEPUutilities.Vector3"/>.</returns>
+        public static BEPUutilities.Vector3 ToBEPU(this Location loc)
+        {
+            return new BEPUutilities.Vector3(loc.X, loc.Y, loc.Z);
+        }
+
+        /// <summary>
         /// Converts a OpenTK <see cref="Matrix4"/> to an OpenTK <see cref="Matrix4d"/>.
         /// </summary>
         /// <param name="mat">The input <see cref="Matrix4"/>.</param>
