@@ -164,7 +164,7 @@ namespace FGEGraphics.UISystem
             view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             float len = TextFont.MeasureFancyText(Text);
             float hei = TextFont.FontDefault.Height;
-            TextFont.DrawFancyText(Text, new Location(x + width / 2 - len / 2, y + height / 2 - hei / 2, 0));
+            TextFont.DrawFancyText(Text, new Location(Math.Round(x + width / 2 - len / 2), Math.Round(y + height / 2 - hei / 2), 0));
         }
     }
 }
