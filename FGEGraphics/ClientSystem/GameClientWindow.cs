@@ -359,7 +359,7 @@ namespace FGEGraphics.ClientSystem
                 }
                 // Mouse handling
                 PreviousMouse = CurrentMouse;
-                // TODO: Make mouse work again. CurrentMouse = Mouse.GetState();
+                CurrentMouse = Window.MouseState;
                 // Standard pre-tick
                 PreTick(e.Time);
                 ErrorCode ec = GL.GetError();
@@ -469,6 +469,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
 

@@ -56,6 +56,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
 
