@@ -247,7 +247,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
             text = text.ApplyBaseColor(baseColor);
             string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
-            void render(string line, float Y, TextVBO vbo)
+            void render(string line, float Y, TextVBOBuilder vbo)
             {
                 int color = _color;
                 bool bold = _bold;
@@ -283,10 +283,6 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 {
                     font = FontDefault;
                 }
-                int capa = line.Length * 8;
-                vbo.Vecs.Capacity = capa;
-                vbo.Texs.Capacity = capa;
-                vbo.Cols.Capacity = capa;
                 int start = 0;
                 for (int x = 0; x < line.Length; x++)
                 {
@@ -571,58 +567,25 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     }
                 }
             }
-
-            TextVBO cVBO = new TextVBO(Engine.GLFonts);
-            if (lines.Length <= 1)
+            if (lines.Length == 1)
             {
-                render(lines[0], (float)position.Y, cVBO);
+                render(lines[0], (float)position.Y, ReusableTextVBO);
             }
             else
             {
                 float Y = (float)position.Y;
-                List<Task> tasks = AsyncText ? new List<Task>(lines.Length) : null;
-                List<TextVBO> vbos = new List<TextVBO>(lines.Length);
                 string tcol = "";
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
                     if (line.Length > 0)
                     {
-                        TextVBO tvbo = new TextVBO(Engine.GLFonts);
-                        vbos.Add(tvbo);
                         float ty = Y;
                         string tcc = tcol;
-                        if (AsyncText)
-                        {
-                            tasks.Add(TFactory.StartNew(() => render(tcc + line, ty, tvbo)));
-                        }
-                        else
-                        {
-                            render(tcc + line, ty, tvbo);
-                        }
+                        render(tcc + line, ty, ReusableTextVBO);
                         tcol += GrabAllFormats(line);
                     }
                     Y += FontDefault.Height;
-                }
-                int len = 0;
-                for (int i = 0; i < vbos.Count; i++)
-                {
-                    if (AsyncText)
-                    {
-                        tasks[i].Wait();
-                    }
-                    len += vbos[i].Vecs.Count;
-                }
-                cVBO.Positions = new Vector4[len];
-                cVBO.TexCoords = new Vector4[len];
-                cVBO.Colors = new Vector4[len];
-                int pos = 0;
-                for (int i = 0; i < vbos.Count; i++)
-                {
-                    vbos[i].Vecs.CopyTo(cVBO.Positions, pos);
-                    vbos[i].Texs.CopyTo(cVBO.TexCoords, pos);
-                    vbos[i].Cols.CopyTo(cVBO.Colors, pos);
-                    pos += vbos[i].Vecs.Count;
                 }
             }
             Engine.GLFonts.Shaders.TextCleanerShader.Bind();
@@ -632,8 +595,8 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             //GL.UniformMatrix4(2, false, ref ident);
             Vector3 col = new Vector3(1, 1, 1);
             GL.Uniform3(3, ref col);
-            cVBO.Build();
-            cVBO.Render();
+            ReusableTextVBO.Build();
+            ReusableTextVBO.Render(Engine.GLFonts);
             if (Engine.FixToShader == null)
             {
                 Engine.GLFonts.Shaders.ColorMultShader.Bind();
@@ -643,14 +606,13 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 Engine.FixToShader.Bind();
             }
             r_depth--;
-            cVBO.Destroy();
             GraphicsUtil.CheckError("Render FontSet");
         }
 
         /// <summary>
-        /// Whether text should be async-accelerated.
+        /// The <see cref="TextVBOBuilder"/> that's reused for text rendering.
         /// </summary>
-        public bool AsyncText = false;
+        public TextVBOBuilder ReusableTextVBO = new TextVBOBuilder();
 
         /// <summary>
         /// The Font Engine's Task Factory.
@@ -706,7 +668,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="unreadable">Whether to randomize letters.</param>
         /// <param name="currentColor">The current color.</param>
         /// <returns>The length of the rendered text in pixels.</returns>
-        public float RenderBaseText(TextVBO vbo, float X, float Y, string text, GLFont font, int color,
+        public float RenderBaseText(TextVBOBuilder vbo, float X, float Y, string text, GLFont font, int color,
             int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool unreadable = false, Color currentColor = default)
         {
             if (unreadable || pseudo || random || jello)
@@ -1057,9 +1019,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="height">The height.</param>
         /// <param name="c">The color to use.</param>
         /// <param name="vbo">The VBO to render with.</param>
-        public void DrawRectangle(float X, float Y, float width, float height, Color c, TextVBO vbo)
+        public void DrawRectangle(float X, float Y, float width, float height, Color c, TextVBOBuilder vbo)
         {
-            vbo.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight,
+            TextVBOBuilder.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight,
                 new Vector4((float)c.R / 255f, (float)c.G / 255f, (float)c.B / 255f, (float)c.A / 255f));
         }
 

@@ -245,10 +245,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="color">The color of the character.</param>
         /// <returns>The length of the character in pixels.</returns>
-        public float DrawSingleCharacter(string symbol, float X, float Y, TextVBO vbo, Vector4 color)
+        public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Vector4 color)
         {
             RectangleF rec = RectForSymbol(symbol);
-            vbo.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
+            TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
                 (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
             return rec.Width;
         }
@@ -262,10 +262,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="color">The color.</param>
         /// <returns>The length of the character in pixels.</returns>
-        public float DrawSingleCharacterFlipped(string symbol, float X, float Y, TextVBO vbo, Vector4 color)
+        public float DrawSingleCharacterFlipped(string symbol, float X, float Y, TextVBOBuilder vbo, Vector4 color)
         {
             RectangleF rec = RectForSymbol(symbol);
-            vbo.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
+            TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
                 (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
             return rec.Width;
         }
@@ -280,9 +280,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="flip">Whether to flip text upside-down.</param>
         /// <returns>The length of the string in pixels.</returns>
-        public float DrawString(string str, float X, float Y, Vector4 color, TextVBO vbo, bool flip = false)
+        public float DrawString(string str, float X, float Y, Vector4 color, TextVBOBuilder vbo, bool flip = false)
         {
-            IEnumerable<string> strs = SeparateEmojiAndSpecialChars(str).ToList();
+            IEnumerable<string> strs = SeparateEmojiAndSpecialChars(str);
             float nX = 0;
             if (flip)
             {
