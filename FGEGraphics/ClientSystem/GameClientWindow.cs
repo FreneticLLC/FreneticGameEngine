@@ -273,6 +273,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         private void Window_Load()
         {
+            Window.Focus();
             SysConsole.Output(OutputType.INIT, "GameClient starting load sequence...");
             GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
             //GL.Enable(EnableCap.Texture2D);
