@@ -19,6 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
@@ -163,7 +164,7 @@ namespace FGEGraphics.UISystem
                 view.Rendering.SetColor(IconColor);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0), int.MaxValue, 1, false, BColor);
-                view.Rendering.SetColor(OpenTK.Vector4.One);
+                view.Rendering.SetColor(Vector4.One);
             }
             else
             {

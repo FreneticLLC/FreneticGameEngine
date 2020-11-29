@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.LightingSystem

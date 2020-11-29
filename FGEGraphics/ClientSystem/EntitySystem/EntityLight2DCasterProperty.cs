@@ -18,6 +18,7 @@ using FGECore.EntitySystem;
 using FGECore.PropertySystem;
 using FGEGraphics.LightingSystem;
 using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

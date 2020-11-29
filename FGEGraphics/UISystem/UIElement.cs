@@ -14,9 +14,11 @@ using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
+using OpenTK.Mathematics;
 using FGECore.MathHelpers;
 using OpenTK.Input;
 using System.Security.Policy;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem
 {
@@ -61,12 +63,12 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// Last known absolute position.
         /// </summary>
-        public Vector2i LastAbsolutePosition;
+        public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
 
         /// <summary>
         /// Last known absolute size (Width / Height).
         /// </summary>
-        public Vector2i LastAbsoluteSize;
+        public FGECore.MathHelpers.Vector2i LastAbsoluteSize;
 
         /// <summary>
         /// Last known aboslute rotation.
@@ -97,8 +99,8 @@ namespace FGEGraphics.UISystem
         {
             Position = pos;
             Position.For = this;
-            LastAbsolutePosition = new Vector2i(Position.X, Position.Y);
-            LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
+            LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
+            LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
             LastAbsoluteRotation = Position.Rotation;
         }
 
@@ -289,8 +291,8 @@ namespace FGEGraphics.UISystem
         /// <param name="delta">The time since the last tick.</param>
         protected virtual void TickChildren(double delta)
         {
-            int mX = Client.MouseX;
-            int mY = Client.MouseY;
+            int mX = (int)Client.MouseX; // TODO: Propagate float support.
+            int mY = (int)Client.MouseY;
             bool mDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
             foreach (UIElement element in Children)
             {
@@ -372,9 +374,9 @@ namespace FGEGraphics.UISystem
                     x = bx;
                     y = by;
                 }
-                LastAbsolutePosition = new Vector2i(x, y);
+                LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
                 LastAbsoluteRotation = lastRot.Z;
-                LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
+                LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
                 output.Add(this);
                 UpdateChildPositions(output, delta, x, y, lastRot);
             }

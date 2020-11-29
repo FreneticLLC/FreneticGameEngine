@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
@@ -199,16 +200,16 @@ namespace FGEGraphics.GraphicsHelpers.Models
             {
                 BEPUutilities.Vector3 vec = pNodeAnim.LerpPos(time);
                 BEPUutilities.Quaternion quat = pNodeAnim.LerpRotate(time);
-                OpenTK.Quaternion oquat = new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
+                OpenTK.Mathematics.Quaternion oquat = new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
                 Matrix4.CreateTranslation((float)vec.X, (float)vec.Y, (float)vec.Z, out Matrix4 trans);
                 trans.Transpose();
-                Matrix4.CreateFromQuaternion(ref oquat, out Matrix4 rot);
+                Matrix4.CreateFromQuaternion(oquat, out Matrix4 rot);
                 if (CustomAnimationAdjustments.TryGetValue(nodename, out Matrix4 r2))
                 {
                     rot *= r2;
                 }
                 rot.Transpose();
-                Matrix4.Mult(ref trans, ref rot, out nodeTransf);
+                nodeTransf = Matrix4.Mult(trans, rot);
             }
             else
             {
@@ -218,7 +219,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                     nodeTransf = temp;
                 }
             }
-            Matrix4.Mult(ref transf, ref nodeTransf, out Matrix4 global);
+            Matrix4 global = Matrix4.Mult(transf, nodeTransf);
             for (int i = 0; i < pNode.Bones.Count; i++)
             {
                 if (ForceBoneNoOffset)
@@ -227,7 +228,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 }
                 else
                 {
-                    Matrix4.Mult(ref global, ref pNode.Bones[i].Offset, out pNode.Bones[i].Transform);
+                    Matrix4.Mult(global, pNode.Bones[i].Offset, out pNode.Bones[i].Transform);
                 }
             }
             for (int i = 0; i < pNode.Children.Count; i++)

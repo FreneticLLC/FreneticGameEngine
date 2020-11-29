@@ -181,7 +181,7 @@ namespace FGECore.CoreSystems
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         const int SW_HIDE = 0;
         const int SW_SHOW = 5;
-        static IntPtr ConsoleHandle;
+        static IntPtr ConsoleHandle = IntPtr.Zero;
 #endif
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace FGECore.CoreSystems
 #if !LINUX
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (ConsoleHandle == null)
+                if (ConsoleHandle == IntPtr.Zero)
                 {
                     ConsoleHandle = Process.GetCurrentProcess().MainWindowHandle;
                 }

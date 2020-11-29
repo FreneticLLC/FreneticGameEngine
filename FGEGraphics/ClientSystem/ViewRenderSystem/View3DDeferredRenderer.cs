@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore.MathHelpers;
@@ -629,7 +630,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(24, (float)Config.Width);
             GL.Uniform1(25, (float)Config.Height);
             GL.Uniform1(26, (float)Engine.GlobalTickTime);
-            Vector4 v = Vector4.Transform(new Vector4(State.PreviousForward.ToOpenTK(), 1f), State.PrimaryMatrix);
+            Vector4 v = Vector4.TransformRow(new Vector4(State.PreviousForward.ToOpenTK(), 1f), State.PrimaryMatrix);
             Vector2 v2 = (v.Xy / v.W);
             Vector2 rel = (Internal.PreviousPFResult - v2) * 0.01f;
             if (float.IsNaN(rel.X) || float.IsInfinity(rel.X) || float.IsNaN(rel.Y) || float.IsInfinity(rel.Y))
@@ -875,7 +876,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 }
                 else
                 {
-                    Vector4d v = Vector4d.Transform(new Vector4d(Config.SunLocation.ToOpenTK3D(), 1.0), State.PrimaryMatrixd);
+                    Vector4d v = Vector4d.TransformRow(new Vector4d(Config.SunLocation.ToOpenTK3D(), 1.0), State.PrimaryMatrixd);
                     if (v.Z / v.W > 1.0f || v.Z / v.W < 0.0f)
                     {
                         GL.Uniform2(8, new Vector2(-10f, -10f));

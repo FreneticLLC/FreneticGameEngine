@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.UISystem
@@ -96,7 +97,7 @@ namespace FGEGraphics.UISystem
         {
             if (WatchMouse)
             {
-                Scroll -= Client.CurrentMouse.ScrollWheelValue * 10;
+                Scroll -= (int)Client.CurrentMouse.Scroll.Y * 10; // TODO: Why is scroll a Vector2?
                 if (Scroll < 0)
                 {
                     Scroll = 0;

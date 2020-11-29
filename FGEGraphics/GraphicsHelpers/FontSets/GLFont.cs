@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Globalization;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FGEGraphics.GraphicsHelpers.Textures;
@@ -183,7 +184,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 }
                 if (isEmoji)
                 {
-                    Texture t = Engine.Textures.GetTexture("emoji/" + inp[i].Substring(1, inp[i].Length - 2));
+                    Texture t = Engine.Textures.GetTexture("emoji/" + inp[i][1..^1]);
                     using Bitmap bmp = t.SaveToBMP();
                     gfx.DrawImage(bmp, new Rectangle(X, Y, (int)nwidth, (int)nwidth));
                 }
@@ -366,13 +367,13 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         }
                         else if (inp[x] == ':')
                         {
-                            string split = inp.Substring(i + 1, x - (i + 1));
+                            string split = inp[(i + 1)..x];
                             if (!IsEmojiName(split))
                             {
                                 InvalidEmoji.Add(split);
                                 break;
                             }
-                            string pre_pieces = inp.Substring(lstart, i - lstart);
+                            string pre_pieces = inp[lstart..i];
                             foreach (string stx in StringInfo.GetTextElementEnumerator(pre_pieces).AsEnumerable<string>())
                             {
                                 yield return stx;
@@ -385,7 +386,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     }
                 }
             }
-            string final_pieces = inp.Substring(lstart);
+            string final_pieces = inp[lstart..];
             foreach (string stx in StringInfo.GetTextElementEnumerator(final_pieces).AsEnumerable<string>())
             {
                 yield return stx;
@@ -411,6 +412,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
     }

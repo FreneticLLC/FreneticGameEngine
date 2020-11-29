@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore;
@@ -43,7 +44,7 @@ namespace FGEGraphics.UISystem
             SubEngine = new GameEngine3D()
             {
                 IsSubEngine = true,
-                SubSize = new Vector2i(Position.Width, Position.Height)
+                SubSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height)
             };
             SubEngine.OwningInstance = pos.View.Client;
             if (alphaBack)

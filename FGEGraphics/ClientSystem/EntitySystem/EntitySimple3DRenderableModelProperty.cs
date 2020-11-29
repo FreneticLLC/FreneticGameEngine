@@ -16,6 +16,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.Models;
 using FGECore.MathHelpers;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.ClientSystem.EntitySystem

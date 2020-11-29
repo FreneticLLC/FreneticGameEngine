@@ -18,6 +18,7 @@ using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
@@ -283,7 +284,7 @@ namespace FGEGraphics.UISystem
             view.Rendering.SetColor(Color);
             view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.FontDefault.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             GL.Enable(EnableCap.ScissorTest);
-            GL.Scissor(x, engine.Window.Height - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
+            GL.Scissor(x, engine.Window.Size.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
             if (Selected)
             {
                 float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
@@ -293,7 +294,7 @@ namespace FGEGraphics.UISystem
             }
             view.Rendering.SetColor(Color4.White);
             Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));
-            GL.Scissor(0, 0, engine.Window.Width, engine.Window.Height); // TODO: Bump around a stack, for embedded scroll groups?
+            GL.Scissor(0, 0, engine.Window.Size.X, engine.Window.Size.Y); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);
         }
     }

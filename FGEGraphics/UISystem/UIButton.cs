@@ -19,6 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {

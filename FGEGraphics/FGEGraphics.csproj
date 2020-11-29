@@ -1,36 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{CF20C1B4-C199-4D11-8053-ECF7D18B4B7B}</ProjectGuid>
+    <TargetFramework>net5.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FGEGraphics</RootNamespace>
-    <AssemblyName>FGEGraphics</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;WINDOWS</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DocumentationFile>bin\Debug\FGEGraphics.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;WINDOWS</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <DefineConstants>TRACE</DefineConstants>
     <RegisterForComInterop>false</RegisterForComInterop>
     <DocumentationFile>bin\Release\FGEGraphics.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
@@ -45,314 +25,179 @@
     <Reference Include="BEPUutilities">
       <HintPath>..\FGECore\BEPUutilities.dll</HintPath>
     </Reference>
-    <Reference Include="NVorbis, Version=0.10.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NVorbis.0.10.1\lib\net45\NVorbis.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Speech" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioSystem\ActiveSound.cs" />
-    <Compile Include="AudioSystem\EnforcerSystem\AudioEnforcer.cs" />
-    <Compile Include="AudioSystem\EnforcerSystem\AudioState.cs" />
-    <Compile Include="AudioSystem\EnforcerSystem\LiveAudioClip.cs" />
-    <Compile Include="AudioSystem\EnforcerSystem\LiveAudioInstance.cs" />
-    <Compile Include="AudioSystem\SoundEffect.cs" />
-    <Compile Include="AudioSystem\SoundEngine.cs" />
-    <Compile Include="AudioSystem\TextToSpeech.cs" />
-    <Compile Include="ClientSystem\Camera3D.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntity.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntityPhysicsCharacterProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntityPhysics2DLimitProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntityPhysicsProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntityProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntitySimpleAttachProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\Entity2DRenderableProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntityLight2DCasterProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntitySkyLight3DProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntityPointLight3DProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntityRenderableProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntitySimple2DRenderableBoxProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\EntitySimple3DRenderableModelProperty.cs" />
-    <Compile Include="ClientSystem\EntitySystem\ClientEntityCharacterAttachProperty.cs" />
-    <Compile Include="ClientSystem\GameClientWindow.cs" />
-    <Compile Include="ClientSystem\GameEngine3D.cs" />
-    <Compile Include="ClientSystem\GameEngineBase.cs" />
-    <Compile Include="ClientSystem\GE3DShaders.cs" />
-    <Compile Include="ClientSystem\ShaderLocations.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\FBOID.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\RenderTargetType.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3D.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DConfiguration.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DCoreDataSet.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DDeferredRenderer.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DForwardRenderer.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DGenerationHelper.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DInternalData.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DPatches.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DState.cs" />
-    <Compile Include="ClientSystem\ViewRenderSystem\View3DStats.cs" />
-    <Compile Include="ClientSystem\ViewUI2D.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="GraphicsHelpers\DecalInfo.cs" />
-    <Compile Include="GraphicsHelpers\FontSets\FontSet.cs" />
-    <Compile Include="GraphicsHelpers\FontSets\FontSetEngine.cs" />
-    <Compile Include="ClientSystem\GameEngine2D.cs" />
-    <Compile Include="GraphicsHelpers\FontSets\GLFont.cs" />
-    <Compile Include="GraphicsHelpers\FontSets\GLFontEngine.cs" />
-    <Compile Include="GraphicsHelpers\GraphicsUtil.cs" />
-    <Compile Include="GraphicsHelpers\Models\Model.cs" />
-    <Compile Include="GraphicsHelpers\Models\ModelBone.cs" />
-    <Compile Include="GraphicsHelpers\Models\ModelEngine.cs" />
-    <Compile Include="GraphicsHelpers\Models\ModelMesh.cs" />
-    <Compile Include="GraphicsHelpers\Models\ModelNode.cs" />
-    <Compile Include="GraphicsHelpers\Renderer.cs" />
-    <Compile Include="GraphicsHelpers\DeferredRenderTarget.cs" />
-    <Compile Include="GraphicsHelpers\Shaders\Shader.cs" />
-    <Compile Include="GraphicsHelpers\Shaders\ShaderKey.cs" />
-    <Compile Include="GraphicsHelpers\Textures\Texture.cs" />
-    <Compile Include="GraphicsHelpers\Textures\TextureLoadedEventArgs.cs" />
-    <Compile Include="GraphicsHelpers\VRSupport.cs" />
-    <Compile Include="LightingSystem\Light.cs" />
-    <Compile Include="LightingSystem\LightObject.cs" />
-    <Compile Include="LightingSystem\LightOrtho.cs" />
-    <Compile Include="LightingSystem\LightPoint.cs" />
-    <Compile Include="LightingSystem\PointLight.cs" />
-    <Compile Include="LightingSystem\PointLight2D.cs" />
-    <Compile Include="LightingSystem\SkyLight.cs" />
-    <Compile Include="LightingSystem\SpotLight.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ClientSystem\RenderContext.cs" />
-    <Compile Include="ClientSystem\RenderContext2D.cs" />
-    <Compile Include="GraphicsHelpers\Renderer2D.cs" />
-    <Compile Include="GraphicsHelpers\Shaders\ShaderEngine.cs" />
-    <Compile Include="SystemExtensions.cs" />
-    <Compile Include="GraphicsHelpers\Textures\TextureEngine.cs" />
-    <Compile Include="GraphicsHelpers\FontSets\TextVBO.cs" />
-    <Compile Include="GraphicsHelpers\Renderable.cs" />
-    <Compile Include="UISystem\UI3DSubEngine.cs" />
-    <Compile Include="UISystem\UIAnchor.cs" />
-    <Compile Include="UISystem\UIButton.cs" />
-    <Compile Include="UISystem\UIColoredBox.cs" />
-    <Compile Include="UISystem\UIElement.cs" />
-    <Compile Include="UISystem\UIGroup.cs" />
-    <Compile Include="UISystem\UIImage.cs" />
-    <Compile Include="UISystem\UIInputBox.cs" />
-    <Compile Include="UISystem\UILabel.cs" />
-    <Compile Include="UISystem\UIPositionHelper.cs" />
-    <Compile Include="UISystem\UIScreen.cs" />
-    <Compile Include="UISystem\UIScrollBox.cs" />
-    <Compile Include="UISystem\UITextLink.cs" />
-    <Compile Include="openvr_api.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FGECore\FGECore.csproj">
-      <Project>{c608fd6d-fb74-4a0b-affe-d24ac7deb3e3}</Project>
-      <Name>FGECore</Name>
-    </ProjectReference>
-    <ProjectReference Include="$(SolutionDir)FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj">
-      <Project>{97a8ec5c-0448-4017-8b16-7b6a33a15797}</Project>
-      <Name>FreneticUtilities</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\FGECore\FGECore.csproj" />
+    <ProjectReference Include="$(SolutionDir)FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="data\shaders\clearer.fs">
+    <None Update="data\shaders\clearer.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\fbo.fs">
+    <None Update="data\shaders\fbo.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\finalgodray.fs">
+    <None Update="data\shaders\finalgodray.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\fpass.fs">
+    <None Update="data\shaders\fpass.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\godray.fs">
+    <None Update="data\shaders\godray.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\hdrpass.fs">
+    <None Update="data\shaders\hdrpass.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\include_fxaa.inc">
+    <None Update="data\shaders\include_fxaa.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\include_toonify.inc">
+    <None Update="data\shaders\include_toonify.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightadder.fs">
+    <None Update="data\shaders\lightadder.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\shadow.fs">
+    <None Update="data\shaders\shadow.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\ssao.inc">
+    <None Update="data\shaders\ssao.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\transpadder.fs">
+    <None Update="data\shaders\transpadder.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\transponly.fs">
+    <None Update="data\shaders\transponly.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\clearer.vs">
+    <None Update="data\shaders\clearer.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\decal.geom">
+    <None Update="data\shaders\decal.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\fbo.vs">
+    <None Update="data\shaders\fbo.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\finalgodray.vs">
+    <None Update="data\shaders\finalgodray.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\fpass.vs">
+    <None Update="data\shaders\fpass.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\godray.vs">
+    <None Update="data\shaders\godray.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\hdrpass.vs">
+    <None Update="data\shaders\hdrpass.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightadder.vs">
+    <None Update="data\shaders\lightadder.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\particles.geom">
+    <None Update="data\shaders\particles.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\shadow.vs">
+    <None Update="data\shaders\shadow.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\text_cleaner.fs">
+    <None Update="data\shaders\text_cleaner.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightmap2d.fs">
+    <None Update="data\shaders\lightmap2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\combine2d.fs">
+    <None Update="data\shaders\combine2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\color_mult2d.fs">
+    <None Update="data\shaders\color_mult2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\color_mult.fs">
+    <None Update="data\shaders\color_mult.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\addlighttoscene2d.fs">
+    <None Update="data\shaders\addlighttoscene2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\addlighttoscene2d.vs">
+    <None Update="data\shaders\addlighttoscene2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\color_mult.vs">
+    <None Update="data\shaders\color_mult.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\color_mult2d.vs">
+    <None Update="data\shaders\color_mult2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\combine2d.vs">
+    <None Update="data\shaders\combine2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightmap2d.vs">
+    <None Update="data\shaders\lightmap2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\text.geom">
+    <None Update="data\shaders\text.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\text_cleaner.vs">
+    <None Update="data\shaders\text_cleaner.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\transpadder.vs">
+    <None Update="data\shaders\transpadder.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\transponly.vs">
+    <None Update="data\shaders\transponly.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightmap1d_2d.vs">
+    <None Update="data\shaders\lightmap1d_2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\lightmap1d_2d.fs">
+    <None Update="data\shaders\lightmap1d_2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\forward.fs">
+    <None Update="data\shaders\forward.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\forward.vs">
+    <None Update="data\shaders\forward.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\applylights1d_2d.vs">
+    <None Update="data\shaders\applylights1d_2d.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\applylights1d_2d.fs">
+    <None Update="data\shaders\applylights1d_2d.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\line_densen.geom">
+    <None Update="data\shaders\line_densen.geom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\glnoise.inc">
+    <None Update="data\shaders\glnoise.inc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\postfast.vs">
+    <None Update="data\shaders\postfast.vs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\shaders\postfast.fs">
+    <None Update="data\shaders\postfast.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\fonts\sourcecodepro.ttf">
+    <None Update="data\fonts\sourcecodepro.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\fonts\license-scp.txt">
+    <None Update="data\fonts\license-scp.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\textures\black.png">
+    <None Update="data\textures\black.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\textures\clear.png">
+    <None Update="data\textures\clear.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\textures\gray.png">
+    <None Update="data\textures\gray.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\textures\normal_def.png">
+    <None Update="data\textures\normal_def.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\textures\white.png">
+    <None Update="data\textures\white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\info\characters.dat">
+    <None Update="data\info\characters.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Content Include="openvr_api.dll">
@@ -362,6 +207,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="OpenTK" Version="4.3.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NVorbis" Version="0.10.1" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using FGECore.CoreSystems;
 using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
@@ -19,6 +20,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.ClientSystem.EntitySystem;
 using FGEGraphics.AudioSystem;
+using OpenTK.Windowing.Desktop;
 
 namespace FGEGraphics.ClientSystem
 {

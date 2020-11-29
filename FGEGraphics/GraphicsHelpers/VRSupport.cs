@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Valve.VR;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore.CoreSystems;
@@ -316,7 +317,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns></returns>
         public Location ForwardVector()
         {
-            OpenTK.Quaternion loquat = Position.ExtractRotation(true);
+            OpenTK.Mathematics.Quaternion loquat = Position.ExtractRotation(true);
             BEPUutilities.Quaternion lquat = new BEPUutilities.Quaternion(loquat.X, loquat.Y, loquat.Z, loquat.W);
             BEPUutilities.Vector3 lforw = -BEPUutilities.Quaternion.Transform(BEPUutilities.Vector3.UnitZ, lquat);
             return lforw.ToLocation();

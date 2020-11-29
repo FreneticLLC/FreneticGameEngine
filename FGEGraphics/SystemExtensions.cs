@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -24,13 +25,13 @@ namespace FGEGraphics
     public static class SystemExtensions
     {
         /// <summary>
-        /// Converts a Core <see cref="FGECore.MathHelpers.Quaternion"/> to an OpenTK <see cref="OpenTK.Quaternion"/>.
+        /// Converts a Core <see cref="FGECore.MathHelpers.Quaternion"/> to an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.
         /// </summary>
         /// <param name="quat">The Core <see cref="FGECore.MathHelpers.Quaternion"/>.</param>
-        /// <returns>The OpenTK <see cref="OpenTK.Quaternion"/>.</returns>
-        public static OpenTK.Quaternion ToOpenTK(this FGECore.MathHelpers.Quaternion quat)
+        /// <returns>The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</returns>
+        public static OpenTK.Mathematics.Quaternion ToOpenTK(this FGECore.MathHelpers.Quaternion quat)
         {
-            return new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
+            return new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
         }
 
         /// <summary>
@@ -44,41 +45,41 @@ namespace FGEGraphics
         }
 
         /// <summary>
-        /// Converts a BEPU <see cref="BEPUutilities.Quaternion"/> to an OpenTK <see cref="OpenTK.Quaternion"/>.
+        /// Converts a BEPU <see cref="BEPUutilities.Quaternion"/> to an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.
         /// </summary>
         /// <param name="quat">The BEPU <see cref="BEPUutilities.Quaternion"/>.</param>
-        /// <returns>The OpenTK <see cref="OpenTK.Quaternion"/>.</returns>
-        public static OpenTK.Quaternion ToOpenTK(this BEPUutilities.Quaternion quat)
+        /// <returns>The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</returns>
+        public static OpenTK.Mathematics.Quaternion ToOpenTK(this BEPUutilities.Quaternion quat)
         {
-            return new OpenTK.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
+            return new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
         }
 
         /// <summary>
-        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to a Core <see cref="FGECore.MathHelpers.Quaternion"/>.
+        /// Converts an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/> to a Core <see cref="FGECore.MathHelpers.Quaternion"/>.
         /// </summary>
-        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</param>
         /// <returns>The Core <see cref="FGECore.MathHelpers.Quaternion"/>.</returns>
-        public static FGECore.MathHelpers.Quaternion ToCore(this OpenTK.Quaternion quat)
+        public static FGECore.MathHelpers.Quaternion ToCore(this OpenTK.Mathematics.Quaternion quat)
         {
             return new FGECore.MathHelpers.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to a BEPU <see cref="BEPUutilities.Quaternion"/>.
+        /// Converts an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/> to a BEPU <see cref="BEPUutilities.Quaternion"/>.
         /// </summary>
-        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</param>
         /// <returns>The BEPU <see cref="BEPUutilities.Quaternion"/>.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Quaternion quat)
+        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Mathematics.Quaternion quat)
         {
             return new BEPUutilities.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
-        /// Converts an OpenTK <see cref="OpenTK.Quaternion"/> to an OpenTK <see cref="Quaterniond"/>.
+        /// Converts an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/> to an OpenTK <see cref="Quaterniond"/>.
         /// </summary>
-        /// <param name="quat">The OpenTK <see cref="OpenTK.Quaternion"/>.</param>
+        /// <param name="quat">The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</param>
         /// <returns>The OpenTK <see cref="Quaterniond"/>.</returns>
-        public static Quaterniond ToDoubles(this OpenTK.Quaternion quat)
+        public static Quaterniond ToDoubles(this OpenTK.Mathematics.Quaternion quat)
         {
             return new Quaterniond(quat.X, quat.Y, quat.Z, quat.W);
         }

@@ -16,6 +16,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 

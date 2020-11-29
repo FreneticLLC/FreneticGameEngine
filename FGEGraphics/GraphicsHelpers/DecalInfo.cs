@@ -15,6 +15,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {

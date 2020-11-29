@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore;
@@ -116,16 +117,16 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
             if (DirectToScreen)
             {
-                UIContext.ZoomMultiplier = Client.Window.Width * 0.5f;
-                UIContext.Width = Client.Window.Width;
-                UIContext.Height = Client.Window.Height;
+                UIContext.ZoomMultiplier = Client.Window.Size.X * 0.5f;
+                UIContext.Width = Client.Window.Size.X;
+                UIContext.Height = Client.Window.Size.Y;
                 float aspect = UIContext.Width / (float)UIContext.Height;
                 float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
                 UIContext.Scaler = new Vector2(sc, -sc * aspect);
-                UIContext.ViewCenter = new Vector2(-Client.Window.Width * 0.5f, -Client.Window.Height * 0.5f);
+                UIContext.ViewCenter = new Vector2(-Client.Window.Size.X * 0.5f, -Client.Window.Size.Y * 0.5f);
                 UIContext.Adder = UIContext.ViewCenter;
                 UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
-                Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Width, Client.Window.Height, 0, -1, 1);
+                Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Size.X, Client.Window.Size.Y, 0, -1, 1);
                 GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
             }
             // TODO: alternate Ortho setting from scaler/adder def!

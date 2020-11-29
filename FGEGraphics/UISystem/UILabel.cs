@@ -18,6 +18,7 @@ using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {

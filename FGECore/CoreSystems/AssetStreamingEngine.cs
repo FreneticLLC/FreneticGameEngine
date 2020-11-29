@@ -53,6 +53,11 @@ namespace FGECore.CoreSystems
         }
 
         /// <summary>
+        /// The cancel token for <see cref="FilesThread"/>.
+        /// </summary>
+        public CancellationTokenSource FileThreadCancelToken = new CancellationTokenSource();
+
+        /// <summary>
         /// Starts the asset streaming engine.
         /// </summary>
         public void Init()
@@ -66,7 +71,8 @@ namespace FGECore.CoreSystems
         /// </summary>
         public void Shutdown()
         {
-            FilesThread.Abort();
+            FileThreadCancelToken.Cancel();
+            GoalWaitingReset.Set();
         }
 
         /// <summary>
@@ -155,6 +161,10 @@ namespace FGECore.CoreSystems
             while (true)
             {
                 GoalWaitingReset.WaitOne();
+                if (FileThreadCancelToken.IsCancellationRequested)
+                {
+                    return;
+                }
                 while (Goals.TryDequeue(out StreamGoal goal))
                 {
                     ProcessGoal(goal);

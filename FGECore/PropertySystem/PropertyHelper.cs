@@ -176,7 +176,7 @@ namespace FGECore.PropertySystem
             validityTestProperties = validityTestProperties.OrderBy((k) => k.Priority).ToList();
             string newTypeID = $"__FGE_Property_{Internal.CPropID}__{propType.Name} __";
             AssemblyName asmName = new AssemblyName(newTypeID);
-            AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndSave);
+            AssemblyBuilder asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(newTypeID);
             TypeBuilder generatedType = moduleBuilder.DefineType(newTypeID + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
             MethodBuilder debugTypedMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutputTyped", MethodAttributes.Public | MethodAttributes.Virtual);

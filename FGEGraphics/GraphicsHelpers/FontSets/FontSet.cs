@@ -13,6 +13,7 @@ using System.Text;
 using System.Drawing;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
@@ -661,7 +662,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// </summary>
         /// <param name="input">The input string.</param>
         /// <returns>The color set.</returns>
-        public string GrabAllFormats(string input)
+        public static string GrabAllFormats(string input)
         {
             StringBuilder res = new StringBuilder();
             int cap = input.Length - 1;
@@ -802,7 +803,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <returns>The split string.</returns>
-        public List<string> CSplit(string input)
+        public static List<string> CSplit(string input)
         {
             List<string> temp = new List<string>();
             int start = 0;
@@ -819,11 +820,11 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 }
                 if (c == 0 && input[i] == '|')
                 {
-                    temp.Add(input.Substring(start, i - start));
+                    temp.Add(input[start..i]);
                     start = i + 1;
                 }
             }
-            temp.Add(input.Substring(start, input.Length - start));
+            temp.Add(input[start..]);
             return temp;
         }
 

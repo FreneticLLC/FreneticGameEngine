@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using FGECore;
@@ -21,6 +22,7 @@ using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.ClientSystem.EntitySystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
+using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.ClientSystem
 {
@@ -195,7 +197,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public override void ReloadScreenBuffers()
         {
-            MainView.GenerationHelper.Generate(Window.Width, Window.Height);
+            MainView.GenerationHelper.Generate(Window.Size.X, Window.Size.Y);
         }
 
         /// <summary>
@@ -227,7 +229,7 @@ namespace FGEGraphics.ClientSystem
             SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
             if (!IsSubEngine)
             {
-                SubSize = new Vector2i(Window.Width, Window.Height);
+                SubSize = new Vector2i(Window.Size.X, Window.Size.Y);
             }
             MainView.Config.Width = SubSize.X;
             MainView.Config.Height = SubSize.Y;
@@ -321,7 +323,7 @@ namespace FGEGraphics.ClientSystem
             // Prep
             MainContext.ResetCounters();
             // Audio handling
-            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.Focused);
+            Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.IsFocused);
             // Setup requirements
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);

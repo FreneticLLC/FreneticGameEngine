@@ -14,6 +14,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FGEGraphics.AudioSystem.EnforcerSystem;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using FGEGraphics.ClientSystem;
@@ -40,7 +41,11 @@ namespace FGEGraphics.AudioSystem
         {
             if (disposing)
             {
-                Context.Dispose();
+                if (Context.Handle != IntPtr.Zero)
+                {
+                    ALC.DestroyContext(Context);
+                }
+                Context = new ALContext(IntPtr.Zero);
             }
         }
 
@@ -58,9 +63,9 @@ namespace FGEGraphics.AudioSystem
         public SoundEffect Noise;
 
         /// <summary>
-        /// Theudio context from OpenAL.
+        /// The audio context from OpenAL.
         /// </summary>
-        public AudioContext Context;
+        public ALContext Context = new ALContext(IntPtr.Zero);
 
         /// <summary>
         /// The internal audio enforcer, if used.
@@ -94,21 +99,23 @@ namespace FGEGraphics.AudioSystem
             {
                 AudioInternal.Shutdown();
             }
-            if (Context != null)
+            if (Context.Handle != IntPtr.Zero)
             {
-                Context.Dispose();
+                ALC.DestroyContext(Context);
             }
             Client = tclient;
-            Context = new AudioContext(AudioContext.DefaultDevice, 0, 0, false, true);
+            string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
+            ALDevice device = ALC.OpenDevice(deviceName);
+            Context = ALC.CreateContext(device, (int[])null);
             if (Client.EnforceAudio)
             {
                 AudioInternal = new AudioEnforcer();
                 AudioInternal.Init(Context);
-                Context = null;
+                Context = new ALContext(IntPtr.Zero);
             }
             else
             {
-                Context.MakeCurrent();
+                ALC.MakeContextCurrent(Context);
             }
             /*try
             {
@@ -152,11 +159,11 @@ namespace FGEGraphics.AudioSystem
         public void Shutdown()
         {
             StopAll();
-            if (Context != null)
+            if (Context.Handle != IntPtr.Zero)
             {
-                Context.Dispose();
+                ALC.DestroyContext(Context);
             }
-            Context = null;
+            Context = new ALContext(IntPtr.Zero);
         }
 
         /// <summary>
@@ -738,7 +745,7 @@ namespace FGEGraphics.AudioSystem
             else
             {
                 sfx.Internal = AL.GenBuffer();
-                AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, data.Length, oggReader.SampleRate);
+                AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, oggReader.SampleRate);
             }
             return sfx;
         }
@@ -787,7 +794,7 @@ namespace FGEGraphics.AudioSystem
             else
             {
                 sfx.Internal = AL.GenBuffer();
-                AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, data.Length, rate);
+                AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, rate);
             }
             //SysConsole.Output(OutputType.DEBUG, "Audio / prepped: " + AudioInternal);
             return sfx;

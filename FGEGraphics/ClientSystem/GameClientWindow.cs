@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -25,6 +26,10 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.ClientSystem.EntitySystem;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.GraphicsLibraryFramework;
+using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
 
 namespace FGEGraphics.ClientSystem
 {
@@ -102,12 +107,12 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// The X-coordinate of the mouse in screen coordinates.
         /// </summary>
-        public int MouseX;
+        public float MouseX;
 
         /// <summary>
         /// The Y-coordinate of the mouse in screen coordinates.
         /// </summary>
-        public int MouseY;
+        public float MouseY;
 
         /// <summary>
         /// The current mouse state for this tick.
@@ -142,9 +147,8 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Monitors on-window mouse movement.
         /// </summary>
-        /// <param name="sender">The sender object.</param>
         /// <param name="e">The event data.</param>
-        private void Mouse_Move(object sender, MouseMoveEventArgs e)
+        private void Mouse_Move(MouseMoveEventArgs e)
         {
             MouseX = e.X;
             MouseY = e.Y;
@@ -160,14 +164,14 @@ namespace FGEGraphics.ClientSystem
         {
             get
             {
-                return Window == null ? WindWid : Window.Width;
+                return Window == null ? WindWid : Window.Size.X;
             }
             set
             {
                 WindWid = value;
                 if (Window != null)
                 {
-                    Window.Width = WindWid;
+                    Window.Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei);
                 }
             }
         }
@@ -179,14 +183,14 @@ namespace FGEGraphics.ClientSystem
         {
             get
             {
-                return Window == null ? WindHei : Window.Height;
+                return Window == null ? WindHei : Window.Size.Y;
             }
             set
             {
                 WindHei = value;
                 if (Window != null)
                 {
-                    Window.Height = WindHei;
+                    Window.Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei);
                 }
             }
         }
@@ -194,11 +198,11 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Size of the window.
         /// </summary>
-        public Vector2i WindowSize
+        public FGECore.MathHelpers.Vector2i WindowSize
         {
             get
             {
-                return Window == null ? new Vector2i(WindWid, WindHei) : new Vector2i(Window.Width, Window.Height);
+                return Window == null ? new FGECore.MathHelpers.Vector2i(WindWid, WindHei) : new FGECore.MathHelpers.Vector2i(Window.Size.X, Window.Size.Y);
             }
             set
             {
@@ -206,15 +210,10 @@ namespace FGEGraphics.ClientSystem
                 WindHei = value.Y;
                 if (Window != null)
                 {
-                    Window.ClientSize = new System.Drawing.Size(value.X, value.Y);
+                    Window.Size = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
                 }
             }
         }
-
-        /// <summary>
-        /// Whether to enable the CPU waste patch.
-        /// </summary>
-        public bool CPUWastePatch = true;
 
         private bool Loaded = false;
 
@@ -222,31 +221,35 @@ namespace FGEGraphics.ClientSystem
         /// Starts the game engine, and begins the primary loop.
         /// </summary>
         /// <param name="initialFlags">The initial window flag.</param>
-        public void Start(GameWindowFlags initialFlags = GameWindowFlags.FixedWindow)
+        public void Start(WindowBorder initialFlags = WindowBorder.Fixed)
         {
             try
             {
                 StackNoteHelper.Push("GameClientWindow - Start, run", this);
                 SysConsole.Output(OutputType.INIT, "GameEngine loading...");
-                Window = new GameWindow(WindWid, WindHei, new GraphicsMode(24, 24, 0, 0), StartingWindowTitle, initialFlags, DisplayDevice.Default, 4, 3, GraphicsContextFlags.ForwardCompatible);
+                Window = new GameWindow(new GameWindowSettings() { IsMultiThreaded = false }, new NativeWindowSettings()
+                {
+                    Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei),
+                    Title = StartingWindowTitle,
+                    Flags = ContextFlags.ForwardCompatible,
+                    IsFullscreen = false,
+                    WindowState = WindowState.Normal,
+                    API = ContextAPI.OpenGL,
+                    APIVersion = new Version(4, 3),
+                    Profile = ContextProfile.Core,
+                    StartFocused = true,
+                    StartVisible = true,
+                    WindowBorder = initialFlags
+                });
                 Window.Load += Window_Load;
                 Window.RenderFrame += Window_RenderFrame;
                 Window.MouseMove += Mouse_Move;
                 Window.Closed += Window_Closed;
                 Window.Resize += Window_Resize;
-                Window.ReduceCPUWaste = CPUWastePatch;
                 SysConsole.Output(OutputType.INIT, "GameEngine calling SetUp event...");
                 OnWindowSetUp?.Invoke();
                 SysConsole.Output(OutputType.INIT, "GameEngine running...");
-                if (CPUWastePatch)
-                {
-                    double rate = DisplayDevice.Default.RefreshRate;
-                    Window.Run(rate, rate);
-                }
-                else
-                {
-                    Window.Run();
-                }
+                Window.Run();
             }
             finally
             {
@@ -257,9 +260,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Fired when the window is resized.
         /// </summary>
-        /// <param name="sender">Irrelevant.</param>
-        /// <param name="e">Irrelevant.</param>
-        private void Window_Resize(object sender, EventArgs e)
+        private void Window_Resize(ResizeEventArgs e)
         {
             if (Loaded)
             {
@@ -270,12 +271,10 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Loads all content for the game, and starts the systems.
         /// </summary>
-        /// <param name="sender">Irrelevant.</param>
-        /// <param name="e">Irrelevant.</param>
-        private void Window_Load(object sender, EventArgs e)
+        private void Window_Load()
         {
             SysConsole.Output(OutputType.INIT, "GameClient starting load sequence...");
-            GL.Viewport(0, 0, Window.Width, Window.Height);
+            GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -328,9 +327,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Called when the window is closed.
         /// </summary>
-        /// <param name="sender">Irrelevant sender.</param>
-        /// <param name="e">Empty event args.</param>
-        private void Window_Closed(object sender, EventArgs e)
+        private void Window_Closed()
         {
             OnWindowClosed?.Invoke();
             if (ExitOnClose)
@@ -350,9 +347,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>
         /// Renders a single frame of the game, and also ticks.
         /// </summary>
-        /// <param name="sender">Irrelevant.</param>
-        /// <param name="e">Holds the frame time (delta).</param>
-        private void Window_RenderFrame(object sender, FrameEventArgs e)
+        private void Window_RenderFrame(FrameEventArgs e)
         {
             try
             {
@@ -364,7 +359,7 @@ namespace FGEGraphics.ClientSystem
                 }
                 // Mouse handling
                 PreviousMouse = CurrentMouse;
-                CurrentMouse = Mouse.GetState();
+                // TODO: Make mouse work again. CurrentMouse = Mouse.GetState();
                 // Standard pre-tick
                 PreTick(e.Time);
                 ErrorCode ec = GL.GetError();

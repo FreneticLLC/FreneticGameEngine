@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
 using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using FGECore;
@@ -102,7 +103,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// <summary>
         /// Relevant OpenAL audio context.
         /// </summary>
-        public AudioContext Context;
+        public ALContext Context;
 
         /// <summary>
         /// 3D Position of the audio "camera".
@@ -150,7 +151,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// Initialize and load the enforcer.
         /// </summary>
         /// <param name="acontext">The backing OpenAL context.</param>
-        public void Init(AudioContext acontext)
+        public void Init(ALContext acontext)
         {
             Context = acontext;
             Run = true;
@@ -193,7 +194,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                Context.MakeCurrent();
+                ALC.MakeContextCurrent(Context);
                 int src = AL.GenSource();
                 AL.Source(src, ALSourceb.Looping, false);
                 AL.Source(src, ALSourceb.SourceRelative, true);
@@ -203,7 +204,8 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                 {
                     if (!Run)
                     {
-                        Context.Dispose();
+                        ALC.DestroyContext(Context);
+                        Context = new ALContext(IntPtr.Zero);
                         return;
                     }
                     sw.Stop();
@@ -356,7 +358,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                             CurrentLevel = clevelval;
                         }
                         int buf = usable.Count > 0 ? usable.Dequeue() : AL.GenBuffer();
-                        AL.BufferData(buf, ALFormat.Stereo16, b, ACTUAL_SAMPLES, FREQUENCY);
+                        AL.BufferData(buf, ALFormat.Stereo16, b, FREQUENCY);
                         AL.SourceQueueBuffer(src, buf);
                         if (AL.GetSourceState(src) != ALSourceState.Playing)
                         {

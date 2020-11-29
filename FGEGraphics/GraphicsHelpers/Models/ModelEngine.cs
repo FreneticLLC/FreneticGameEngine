@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
+using OpenTK.Mathematics;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -425,7 +426,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <param name="ind">The index.</param>
         /// <param name="subind">The vector subindex.</param>
         /// <param name="val">The new value.</param>
-        void ForceSet(Vector4[] vecs, int ind, int subind, float val)
+        static void ForceSet(Vector4[] vecs, int ind, int subind, float val)
         {
             Vector4 vec = vecs[ind];
             vec[subind] = val;
