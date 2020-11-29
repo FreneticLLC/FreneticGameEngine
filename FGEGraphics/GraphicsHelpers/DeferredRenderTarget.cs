@@ -168,7 +168,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Sets the proper "GL.DrawBuffers(6, ..." for this object.
         /// </summary>
-        public void SetDrawBuffers()
+        public static void SetDrawBuffers()
         {
             GL.DrawBuffers(6, DRAW_BUFFERS_ARRAY);
         }
@@ -186,7 +186,8 @@ namespace FGEGraphics.GraphicsHelpers
             SetDrawBuffers();
             //GL.BlendFunc(3, BlendingFactorSrc.One, BlendingFactorDest.Zero);
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.Enable(EnableCap.Texture2D);
+            //GL.Enable(EnableCap.Texture2D);
+            GraphicsUtil.CheckError("Deferred Target - Bind");
         }
 
         /// <summary>
@@ -209,7 +210,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Clears the RS4P Buffers.
         /// </summary>
-        public void Clear()
+        public static void Clear()
         {
             GL.ClearBuffer(ClearBuffer.Color, 0, Internal.Zeroes);
             GL.ClearBuffer(ClearBuffer.Depth, 0, Internal.One);
@@ -218,6 +219,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.ClearBuffer(ClearBuffer.Color, 3, Internal.Zeroes);
             GL.ClearBuffer(ClearBuffer.Color, 4, Internal.Zeroes);
             GL.ClearBuffer(ClearBuffer.Color, 5, Internal.Zeroes);
+            GraphicsUtil.CheckError("DeferredRenderTarget - Clear");
         }
 
         /// <summary>

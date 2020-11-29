@@ -193,6 +193,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="rot">Any rotation.</param>
         public void RenderLineBox(Location min, Location max, View3D view, Matrix4d? rot = null)
         {
+            GraphicsUtil.CheckError("RenderLineBox: Pre");
             if (min.IsNaN() || min.IsInfinite() || max.IsNaN() || max.IsInfinite())
             {
                 SysConsole.Output(OutputType.WARNING, "Invalid line box from " + min + " to " + max);

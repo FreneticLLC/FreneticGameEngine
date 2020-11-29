@@ -39,9 +39,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             //if (Engine.DisplayDecals || Engine.ForwardReflections)
             {
                 State.DeferredTarget.Bind(View);
-                State.DeferredTarget.Clear();
+                DeferredRenderTarget.Clear();
                 GL.ClearBuffer(ClearBuffer.Color, 0, Config.ClearColor);
             }
+            GraphicsUtil.CheckError("Render/Fast - PreLight");
             float[] light_dat = new float[View3DInternalData.LIGHTS_MAX * 16];
             float[] shadowmat_dat = new float[View3DInternalData.LIGHTS_MAX * 16];
             int c = 0;
@@ -52,6 +53,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 {
                     if (light is SkyLight || State.CameraFrustum == null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
                     {
+                        GraphicsUtil.CheckError("Render/Fast - PreSingle");
                         double d1 = (light.EyePos - Config.CameraPos).LengthSquared();
                         double d2 = Config.LightsMaxDistance * Config.LightsMaxDistance + light.MaxDistance * light.MaxDistance;
                         double maxrangemult = 0;
@@ -95,6 +97,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                 {
                                     goto lights_apply;
                                 }
+                                GraphicsUtil.CheckError("Render/Fast - PostPoint");
                             }
                             else
                             {
@@ -138,6 +141,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                         goto lights_apply;
                                     }
                                 }
+                                GraphicsUtil.CheckError("Render/Fast - PostGeneric");
                             }
                         }
                     }

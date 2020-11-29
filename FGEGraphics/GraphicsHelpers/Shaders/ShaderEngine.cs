@@ -180,7 +180,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
                 string[] shaderVariables = filename.SplitFast('?', 1); // TODO: Less ridiculous system
                 string geomFilename = shaderVariables.Length > 1 ? shaderVariables[1] : null;
                 string[] dat1 = shaderVariables[0].SplitFast('#', 1);
-                string[] vars = new string[0];
+                string[] vars = Array.Empty<string>();
                 if (dat1.Length == 2)
                 {
                     vars = dat1[1].SplitFast(',');
@@ -246,7 +246,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// <param name="originalText">The shader text.</param>
         /// <param name="defValues">The define-value map.</param>
         /// <returns>The processed shader text.</returns>
-        public string PatchDefs(string originalText, Dictionary<string, string> defValues)
+        public static string PatchDefs(string originalText, Dictionary<string, string> defValues)
         {
             if (!originalText.Contains("#define"))
             {
@@ -258,11 +258,11 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 if (dat[i].StartsWith("#define "))
                 {
-                    string defined = dat[i].Substring("#define ".Length);
+                    string defined = dat[i]["#define ".Length..];
                     string name = defined.Before(" ");
                     if (defValues.TryGetValue(name, out string newValue))
                     {
-                        fullFileText.Append("#define ").Append(name).Append(" ").Append(newValue);
+                        fullFileText.Append("#define ").Append(name).Append(' ').Append(newValue);
                     }
                     else
                     {
@@ -296,7 +296,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 if (dat[i].StartsWith("#include "))
                 {
-                    string includeFilename = dat[i].Substring("#include ".Length);
+                    string includeFilename = dat[i]["#include ".Length..];
                     includeFilename = $"shaders/{includeFilename}";
                     if (!TryGetShaderFileText(includeFilename, out string included))
                     {
@@ -376,6 +376,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// <returns>The internal OpenGL program ID.</returns>
         public int CompileToProgram(string VS, string FS, string[] vars, string GS)
         {
+            GraphicsUtil.CheckError("Shader - BeforeCompile");
             if (vars.Length > 0)
             {
                 ReusableDefValues.Clear();

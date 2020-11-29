@@ -229,7 +229,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             State.CurrentFrustum = State.CameraFrustum;
             GL.ActiveTexture(TextureUnit.Texture0);
             State.DeferredTarget.Bind(View);
-            State.DeferredTarget.Clear();
+            DeferredRenderTarget.Clear();
             State.RenderLights = true;
             State.RenderSpecular = true;
             Engine.Rendering.SetColor(Color4.White, View);

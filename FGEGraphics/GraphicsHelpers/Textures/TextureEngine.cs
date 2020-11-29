@@ -47,6 +47,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
 
@@ -244,15 +245,15 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <param name="width">The new output image's width (X) (in pixels).</param>
         /// <param name="height">The new output image's height (Y) (in pixels).</param>
         /// <returns>The resized image.</returns>
-        public Bitmap RescaleBitmap(Bitmap bmp, int width, int height)
+        public static Bitmap RescaleBitmap(Bitmap bmp, int width, int height)
         {
             Bitmap output = new Bitmap(width, height);
             using (Graphics graphics = Graphics.FromImage(output))
             {
                 using ImageAttributes ia = new ImageAttributes();
                 ia.SetWrapMode(WrapMode.TileFlipXY);
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.None;
+                graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 graphics.PixelOffsetMode = PixelOffsetMode.None;
                 graphics.CompositingQuality = CompositingQuality.AssumeLinear;
                 graphics.DrawImage(bmp, new Rectangle(0, 0, width, height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia);
@@ -266,7 +267,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <param name="data">The raw file data.</param>
         /// <param name="textureWidth">The texture width (or 0 for any-valid).</param>
         /// <returns>The bitmap.</returns>
-        public Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
+        public static Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
         {
             Bitmap bmp = new Bitmap(new MemoryStream(data));
 #if DEBUG
@@ -464,7 +465,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// </summary>
         /// <param name="bmp">The bitmap to use.</param>
         /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
-        public void LockBitmapToTexture(Bitmap bmp, bool linear)
+        public static void LockBitmapToTexture(Bitmap bmp, bool linear)
         {
             BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
@@ -482,7 +483,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// </summary>
         /// <param name="bmp">The bitmap to use.</param>
         /// <param name="depth">The depth in a 3D texture.</param>
-        public void LockBitmapToTexture(Bitmap bmp, int depth)
+        public static void LockBitmapToTexture(Bitmap bmp, int depth)
         {
             BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
