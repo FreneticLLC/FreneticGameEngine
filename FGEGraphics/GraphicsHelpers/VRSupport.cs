@@ -113,6 +113,8 @@ namespace FGEGraphics.GraphicsHelpers
             RightTexture.GenerateFirst();
             RightControllerModel = TheClient.Models.GetModel("vr/controller/vive");
             LeftControllerModel = TheClient.Models.GetModel("vr/controller/vive");
+            TheClient.VR = this;
+            TheClient.Engine3D.Render3DView = true;
         }
 
         /// <summary>
@@ -156,7 +158,7 @@ namespace FGEGraphics.GraphicsHelpers
         }
 
         /// <summary>
-        /// The head matrix rotationj.
+        /// The head matrix rotation.
         /// </summary>
         public Matrix4 HeadMatRot = Matrix4.Identity;
 

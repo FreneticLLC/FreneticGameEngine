@@ -180,7 +180,7 @@ namespace FGECore.MathHelpers
                     0 => X,
                     1 => Y,
                     2 => Z,
-                    _ => throw new ArgumentOutOfRangeException("index", index, "Must be between 0 and 2"),
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), index, "Must be between 0 and 2"),
                 };
             }
             set
@@ -197,7 +197,7 @@ namespace FGECore.MathHelpers
                         Z = value;
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException("index", index, "Must be between 0 and 2");
+                        throw new ArgumentOutOfRangeException(nameof(index), index, "Must be between 0 and 2");
                 }
             }
         }
@@ -540,7 +540,7 @@ namespace FGECore.MathHelpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (!(obj is Location locationForm))
+            if (obj is not Location locationForm)
             {
                 return false;
             }

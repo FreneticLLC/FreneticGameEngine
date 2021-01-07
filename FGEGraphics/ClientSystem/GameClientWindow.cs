@@ -30,6 +30,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.ClientSystem
 {
@@ -102,6 +103,7 @@ namespace FGEGraphics.ClientSystem
                     OwningInstance = this
                 };
             }
+            Engines.Add(CurrentEngine);
         }
 
         /// <summary>
@@ -395,8 +397,27 @@ namespace FGEGraphics.ClientSystem
                 // Primary UI tick
                 MainUI.Tick();
                 GraphicsUtil.CheckError("GameClient - PostTick");
-                // Final step: Swap the render buffer onto the screen!
+                if (VR != null) // VR Push-To-Screen
+                {
+                    GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                    GL.DrawBuffer(DrawBufferMode.Back);
+                    Shaders.ColorMultShader.Bind();
+                    Rendering3D.SetColor(Vector4.One, Engine3D.MainView);
+                    GL.Disable(EnableCap.DepthTest);
+                    GL.Disable(EnableCap.CullFace);
+                    GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
+                    GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+                    GL.BindTexture(TextureTarget.Texture2D, Engine3D.MainView.Internal.CurrentFBOTexture);
+                    Rendering3D.RenderRectangle(-1, -1, 1, 1);
+                    GL.Enable(EnableCap.DepthTest);
+                    GL.Enable(EnableCap.CullFace);
+                }
+                // Final non-VR step: Swap the render buffer onto the screen!
                 Window.SwapBuffers();
+                if (VR != null) // VR Push-To-HMD
+                {
+                    VR.Submit();
+                }
                 GraphicsUtil.CheckError("GameClient - Post");
             }
             finally
