@@ -243,7 +243,7 @@ namespace FGEWelcomer
         /// <param name="f_in">Input file name.</param>
         /// <param name="f_out">Output file name.</param>
         /// <param name="projectData">Any custom settings.</param>
-        public void CopyOverText(string f_in, string f_out, List<KeyValuePair<string, string>> projectData)
+        public static void CopyOverText(string f_in, string f_out, List<KeyValuePair<string, string>> projectData)
         {
             string inp = File.ReadAllText("./generator/" + f_in + ".txt");
             for (int i = 0; i < projectData.Count; i++)
@@ -260,7 +260,7 @@ namespace FGEWelcomer
         /// <param name="folder">The folder to run it in.</param>
         /// <param name="gitExe">The git executable.</param>
         /// <param name="args">The git command arguments.</param>
-        public void RunGitCommand(string folder, string gitExe, string args)
+        public static void RunGitCommand(string folder, string gitExe, string args)
         {
             ProcessStartInfo psi = new ProcessStartInfo
             {
@@ -298,35 +298,34 @@ namespace FGEWelcomer
                 MessageBox.Show(this, "Invalid directory (not empty).", "Error");
                 return;
             }
-            string gitExe = null;
-            if (submodule)
+            string gitExe = "C:/Program Files/Git/cmd/git.exe";
+            if (submodule && !File.Exists(gitExe))
             {
-                using (OpenFileDialog ofd = new OpenFileDialog())
+                using OpenFileDialog ofd = new OpenFileDialog
                 {
-                    ofd.InitialDirectory = "C:/";
-                    ofd.Filter = "Git Executable File (*.exe)|*.exe";
-                    ofd.FilterIndex = 1;
-                    ofd.RestoreDirectory = true;
-                    ofd.Multiselect = false;
-                    ofd.Title = "Please select your git executable";
-                    DialogResult result = ofd.ShowDialog(this);
-                    if (result != DialogResult.OK)
-                    {
-                        MessageBox.Show(this, "Need a git executable for submodule backing.", "Generation failed.");
-                        return;
-                    }
-                    gitExe = ofd.FileName;
+                    InitialDirectory = "C:/",
+                    Filter = "Git Executable File (*.exe)|*.exe",
+                    FilterIndex = 1,
+                    RestoreDirectory = true,
+                    Multiselect = false,
+                    Title = "Please select your git executable"
+                };
+                DialogResult result = ofd.ShowDialog(this);
+                if (result != DialogResult.OK)
+                {
+                    MessageBox.Show(this, "Need a git executable for submodule backing.", "Generation failed.");
+                    return;
                 }
+                gitExe = ofd.FileName;
             }
             string pfname = folder.TrimEnd('/', '\\');
             int ind = pfname.LastIndexOfAny(new char[] { '/', '\\' });
-            string proj_name = pfname.Substring(ind + 1);
+            string proj_name = pfname[(ind + 1)..];
             string baseFolder = folder + "/" + proj_name + "/";
             List<KeyValuePair<string, string>> strs = new List<KeyValuePair<string, string>>() { };
             strs.Add(new KeyValuePair<string, string>("name", proj_name));
             strs.Add(new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()));
             strs.Add(new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()));
-            CopyOverText("app_conf", baseFolder + "App.config", strs);
             CopyOverText("gprogram_cs", baseFolder + "GameProgram.cs", strs);
             CopyOverText("gitignore", folder + "/.gitignore", strs);
             CopyOverText("fge_legal", folder + "/FGE-LEGAL.md", strs);
@@ -360,7 +359,13 @@ namespace FGEWelcomer
                 CopyDirectoryAndChildren("shaders", baseFolder + "bin/Debug/shaders/");
                 CopyDirectoryAndChildren("data", baseFolder + "bin/Debug/data/");
             }
-            Process.Start(folder + "/" + proj_name + ".sln");
+            new Process
+            {
+                StartInfo = new ProcessStartInfo(folder + "/" + proj_name + ".sln")
+                {
+                    UseShellExecute = true
+                }
+            }.Start();
             MessageBox.Show(this, "Created! Launching your editor... if it doesn't open, navigate to the folder and open the SLN file!", "Success");
         }
 
@@ -377,15 +382,15 @@ namespace FGEWelcomer
                 int find = f.LastIndexOfAny(new char[] { '/', '\\' });
                 if (f.EndsWith("/") || File.GetAttributes(f).HasFlag(FileAttributes.Directory))
                 {
-                    string fn = f.TrimEnd('/', '\\').Substring(find + 1);
+                    string fn = f.TrimEnd('/', '\\')[(find + 1)..];
                     CopyDirectoryAndChildren(dir + "/" + fn, newBase + fn + "/");
                     continue;
                 }
-                File.Copy(f, newBase + f.Substring(find + 1));
+                File.Copy(f, newBase + f[(find + 1)..]);
             }
         }
 
-        string[] FILES = new string[] { "BEPUphysics.dll", "BEPUphysics.pdb", "BEPUphysics.xml",
+        readonly string[] FILES = new string[] { "BEPUphysics.dll", "BEPUphysics.pdb", "BEPUphysics.xml",
             "BEPUutilities.dll", "BEPUutilities.pdb", "BEPUutilities.xml",
             "csogg.dll", "csvorbis.dll",
             "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",

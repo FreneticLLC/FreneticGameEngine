@@ -27,9 +27,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Update="generator\app_conf.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="generator\asminf_cs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -78,12 +80,11 @@ namespace {{{name}}}.MainGame
         /// <summary>
         /// Handles escape key pressing to exit.
         /// </summary>
-        /// <param name="sender">Sender.</param>
         /// <param name="e">Event data.</param>
-        private void Window_KeyDown(object sender, KeyboardKeyEventArgs e)
+        private void Window_KeyDown(KeyboardKeyEventArgs e)
         {
             // If the key pressed is Escape
-            if (e.Key == Key.Escape)
+            if (e.Key == Keys.Escape)
             {
                 // Close the main engine window! This will cause the entire game to shut down!
                 Window.Window.Close();
