@@ -55,6 +55,7 @@ namespace FGEGraphics.AudioSystem
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -476,7 +477,7 @@ namespace FGEGraphics.AudioSystem
             }
             if (pitch <= 0 || pitch > 2)
             {
-                throw new ArgumentException("Must be between 0 and 2", "pitch");
+                throw new ArgumentException("Must be between 0 and 2", nameof(pitch));
             }
             if (volume == 0)
             {
@@ -484,7 +485,7 @@ namespace FGEGraphics.AudioSystem
             }
             if (volume <= 0 || volume > 1)
             {
-                throw new ArgumentException("Must be between 0 and 1", "volume");
+                throw new ArgumentException("Must be between 0 and 1", nameof(volume));
             }
             void playSound()
             {
@@ -612,7 +613,7 @@ namespace FGEGraphics.AudioSystem
         /// <param name="channels">Channel count.</param>
         /// <param name="bits">Bit count.</param>
         /// <returns>AL format.</returns>
-        ALFormat GetSoundFormat(int channels, int bits)
+        static ALFormat GetSoundFormat(int channels, int bits)
         {
             if (channels == 1)
             {
@@ -808,7 +809,7 @@ namespace FGEGraphics.AudioSystem
         /// <param name="bits">Bit count output.</param>
         /// <param name="rate">Rate output.</param>
         /// <returns>The wave data.</returns>
-        public byte[] ProcessWAVEData(DataStream stream, out int channels, out int bits, out int rate)
+        public static byte[] ProcessWAVEData(DataStream stream, out int channels, out int bits, out int rate)
         {
             DataReader dr = new DataReader(stream);
             string signature = dr.ReadString(4);

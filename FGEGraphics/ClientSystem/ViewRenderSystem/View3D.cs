@@ -239,7 +239,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Sets the blend to a standard ordered blend.
         /// </summary>
-        public void StandardBlend()
+        public static void StandardBlend()
         {
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
@@ -247,7 +247,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// <summary>
         /// Sets the blend to additive (transparent) mode.
         /// </summary>
-        public void TranspBlend()
+        public static void TranspBlend()
         {
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
         }

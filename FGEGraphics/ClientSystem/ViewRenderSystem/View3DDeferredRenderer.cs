@@ -195,7 +195,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 {
                     Statistics.ShadowSpikeTime = Statistics.ShadowTime;
                 }
-                View.StandardBlend();
+                View3D.StandardBlend();
                 GraphicsUtil.CheckError("AfterShadows");
             }
         }
@@ -233,7 +233,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             State.RenderLights = true;
             State.RenderSpecular = true;
             Engine.Rendering.SetColor(Color4.White, View);
-            View.StandardBlend();
+            View3D.StandardBlend();
             GraphicsUtil.CheckError("Render - GBuffer - 1");
             if (Engine.Render3DView || Engine.Client.VR != null)
             {
@@ -424,7 +424,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.DepthTest);
-            View.TranspBlend();
+            View3D.TranspBlend();
             if (Engine.Deferred_Lights)
             {
                 float[] light_dat = new float[View3DInternalData.LIGHTS_MAX * 16];
@@ -531,7 +531,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                View.StandardBlend();
+                View3D.StandardBlend();
                 GraphicsUtil.CheckError("AfterLighting");
                 RenderPass_HDR();
             }
@@ -567,7 +567,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
                 GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
                 Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
-                View.StandardBlend();
+                View3D.StandardBlend();
                 GraphicsUtil.CheckError("AfterHDRPass");
             }
         }
@@ -750,11 +750,11 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("PreTransp - 1");
             if (Engine.AllowLL || !Engine.Deferred_BrightTransp)
             {
-                View.StandardBlend();
+                View3D.StandardBlend();
             }
             else
             {
-                View.TranspBlend();
+                View3D.TranspBlend();
             }
             GraphicsUtil.CheckError("PreTransp - 2");
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Transparents_Main);
@@ -851,7 +851,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         {
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
             View.DrawBuffer(Internal.CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
-            View.StandardBlend();
+            View3D.StandardBlend();
             State.FBOid = FBOID.NONE;
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.Disable(EnableCap.CullFace);
@@ -892,9 +892,9 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 GL.Uniform1(14, Engine.ZNear);
                 GL.Uniform1(15, Engine.ZFar());
                 GL.Uniform1(16, Engine.ZFarOut() * 0.5f);
-                View.TranspBlend();
+                View3D.TranspBlend();
                 Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
-                View.StandardBlend();
+                View3D.StandardBlend();
             }
             GraphicsUtil.CheckError("PostGR");
             {
