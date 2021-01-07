@@ -127,6 +127,7 @@ namespace FGEGraphics.ClientSystem
                 UIContext.Adder = UIContext.ViewCenter;
                 UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
                 Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Size.X, Client.Window.Size.Y, 0, -1, 1);
+                GL.Viewport(0, 0, UIContext.Width, UIContext.Height);
                 GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
             }
             // TODO: alternate Ortho setting from scaler/adder def!

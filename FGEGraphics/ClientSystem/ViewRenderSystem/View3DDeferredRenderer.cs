@@ -1185,7 +1185,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// Helper to find exposure from a result array.
         /// </summary>
         /// <param name="inp">Exposure array input.</param>
-        public float FindExp(float[] inp)
+        public static float FindExp(float[] inp)
         {
             float total = 0f;
             for (int i = 0; i < inp.Length; i++)

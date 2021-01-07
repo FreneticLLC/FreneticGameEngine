@@ -383,20 +383,6 @@ namespace FGEGraphics.ClientSystem
                 // Third step: general game rendering
                 CurrentEngine.RenderSingleFrame();
                 GraphicsUtil.CheckError("GameClient - PostMainEngine");
-                // Add the UI Layer too
-                MainUI.Draw();
-                GraphicsUtil.CheckError("GameClient - PostUI");
-                // Fourth step: clean up!
-                GL.BindTexture(TextureTarget.Texture2D, 0);
-                GL.BindVertexArray(0);
-                GL.UseProgram(0);
-                // Semi-final step: Tick logic!
-                GraphicsUtil.CheckError("GameClient - PreTick");
-                // Main instance tick.
-                Tick();
-                // Primary UI tick
-                MainUI.Tick();
-                GraphicsUtil.CheckError("GameClient - PostTick");
                 if (VR != null) // VR Push-To-Screen
                 {
                     GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -411,7 +397,22 @@ namespace FGEGraphics.ClientSystem
                     Rendering3D.RenderRectangle(-1, -1, 1, 1);
                     GL.Enable(EnableCap.DepthTest);
                     GL.Enable(EnableCap.CullFace);
+                    GraphicsUtil.CheckError("GameClient - PostVRPush");
                 }
+                // Add the UI Layer too
+                MainUI.Draw();
+                GraphicsUtil.CheckError("GameClient - PostUI");
+                // Fourth step: clean up!
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.BindVertexArray(0);
+                GL.UseProgram(0);
+                // Semi-final step: Tick logic!
+                GraphicsUtil.CheckError("GameClient - PreTick");
+                // Main instance tick.
+                Tick();
+                // Primary UI tick
+                MainUI.Tick();
+                GraphicsUtil.CheckError("GameClient - PostTick");
                 // Final non-VR step: Swap the render buffer onto the screen!
                 Window.SwapBuffers();
                 if (VR != null) // VR Push-To-HMD
