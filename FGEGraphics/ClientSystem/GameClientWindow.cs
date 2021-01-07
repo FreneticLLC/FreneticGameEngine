@@ -472,6 +472,19 @@ namespace FGEGraphics.ClientSystem
         public ViewUI2D MainUI;
 
         /// <summary>
+        /// Converts the window into VR mode, if possible.
+        /// </summary>
+        /// <returns>True if VR is enabled, false if not (there was an error, or there is no VR support on the client system).</returns>
+        public bool ActivateVR()
+        {
+            if (VR != null)
+            {
+                return true;
+            }
+            return VRSupport.TryInit(this) != null;
+        }
+
+        /// <summary>
         /// Dumb MS logic dispose method.
         /// </summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
