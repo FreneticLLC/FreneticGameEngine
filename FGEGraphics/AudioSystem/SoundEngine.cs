@@ -25,6 +25,7 @@ using FGECore.FileSystems;
 using NVorbis;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
+using System.Diagnostics;
 
 namespace FGEGraphics.AudioSystem
 {
@@ -180,9 +181,9 @@ namespace FGEGraphics.AudioSystem
         /// Checks for audio errors.
         /// </summary>
         /// <param name="inp">The location.</param>
+        [Conditional("AUDIO_ERROR_CHECK")]
         public void CheckError(string inp)
         {
-#if AUDIO_ERROR_CHECK
             if (AudioInternal == null)
             {
                 ALError err = AL.GetError();
@@ -193,7 +194,6 @@ namespace FGEGraphics.AudioSystem
                     return;
                 }
             }
-#endif
         }
 
         /// <summary>

@@ -34,14 +34,12 @@ namespace FGEGraphics.GraphicsHelpers
         [Conditional("DEBUG")]
         public static void CheckError(string loc)
         {
-#if DEBUG
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
                 SysConsole.Output(OutputType.ERROR, "OpenGL error [" + loc + "]: " + ec + "\n" + Environment.StackTrace);
                 ec = GL.GetError();
             }
-#endif
         }
 
     }
