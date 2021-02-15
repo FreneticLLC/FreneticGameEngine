@@ -27,38 +27,53 @@ namespace FGECore.ServerSystem
         /// <summary>
         /// Constructs the server game instance.
         /// </summary>
-        public ServerGameInstance()
+        /// <param name="shouldDefaultEngine">True to pre-load a default engine, false to skip that step.</param>
+        public ServerGameInstance(bool shouldDefaultEngine = true)
         {
-            try
+            if (shouldDefaultEngine)
             {
-                StackNoteHelper.Push("ServerGameInstance construction, preparation of default engine", this);
-                Engines.Add(new ServerEngine()
+                try
                 {
-                    OwningInstance = this
-                });
-                DefaultEngine.LoadBasic();
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
+                    StackNoteHelper.Push("ServerGameInstance construction, preparation of default engine", this);
+                    Engines.Add(new ServerEngine()
+                    {
+                        OwningInstance = this
+                    });
+                    DefaultEngine.LoadBasic();
+                }
+                finally
+                {
+                    StackNoteHelper.Pop();
+                }
             }
         }
 
         /// <summary>
-        /// Used to calculate the <see cref="GameInstance{T, T2}.Delta"/> value.
+        /// Helper class for internal data related to the server instance.
         /// </summary>
-        private Stopwatch DeltaCounter;
+        public struct InternalData
+        {
+            /// <summary>
+            /// Used to calculate the <see cref="GameInstance{T, T2}.Delta"/> value.
+            /// </summary>
+            public Stopwatch DeltaCounter;
+
+            /// <summary>
+            /// Used as part of accurate tick timing.
+            /// </summary>
+            public double TotalDelta;
+
+            /// <summary>
+            /// What delta amount the instance is currently trying to calculate at.
+            /// Inverse of this is present target FPS.
+            /// </summary>
+            public double TargetDelta;
+        }
 
         /// <summary>
-        /// Used as part of accurate tick timing.
+        /// Internal data for this server instance.
         /// </summary>
-        private double TotalDelta;
-
-        /// <summary>
-        /// What delta amount the instance is currently trying to calculate at.
-        /// Inverse of this is present target FPS.
-        /// </summary>
-        public double TargetDelta;
+        public InternalData Internal;
 
         /// <summary>
         /// Target frames per second.
@@ -71,19 +86,23 @@ namespace FGECore.ServerSystem
         public int TPS = 0;
 
         /// <summary>
+        /// Classifier term for the instance, for use in debug logs. Defaults to "server".
+        /// </summary>
+        public string InstanceClassification = "server";
+
+        /// <summary>
         /// Starts and runs the entire server game instance.
         /// Will take over present thread until completion.
         /// </summary>
         public void StartAndRun()
         {
-            // Tick
             double TARGETFPS;
             Stopwatch Counter = new Stopwatch();
-            DeltaCounter = new Stopwatch();
-            DeltaCounter.Start();
-            TotalDelta = 0;
+            Internal.DeltaCounter = new Stopwatch();
+            Internal.DeltaCounter.Start();
+            Internal.TotalDelta = 0;
             double CurrentDelta;
-            TargetDelta = 0.0;
+            Internal.TargetDelta = 0.0;
             int targettime;
             try
             {
@@ -94,31 +113,31 @@ namespace FGECore.ServerSystem
                     Counter.Reset();
                     Counter.Start();
                     // Update the tick delta counter
-                    DeltaCounter.Stop();
+                    Internal.DeltaCounter.Stop();
                     // Delta time = Elapsed ticks * (ticks/second)
-                    CurrentDelta = ((double)DeltaCounter.ElapsedTicks) / ((double)Stopwatch.Frequency);
+                    CurrentDelta = ((double)Internal.DeltaCounter.ElapsedTicks) / ((double)Stopwatch.Frequency);
                     // Begin the delta counter to find out how much time is /really/ slept+ticked for
-                    DeltaCounter.Reset();
-                    DeltaCounter.Start();
+                    Internal.DeltaCounter.Reset();
+                    Internal.DeltaCounter.Start();
                     // How much time should pass between each tick ideally
                     TARGETFPS = Target_FPS;
                     if (TARGETFPS < 1 || TARGETFPS > 600)
                     {
                         TARGETFPS = 30;
                     }
-                    TargetDelta = (1.0d / TARGETFPS);
+                    Internal.TargetDelta = (1.0d / TARGETFPS);
                     // How much delta has been built up
-                    TotalDelta += CurrentDelta;
-                    double tdelt = TargetDelta;
-                    while (TotalDelta > tdelt * 3)
+                    Internal.TotalDelta += CurrentDelta;
+                    double tdelt = Internal.TargetDelta;
+                    while (Internal.TotalDelta > tdelt * 3)
                     {
                         // Lagging - cheat to catch up!
                         tdelt *= 2;
                     }
                     // As long as there's more delta built up than delta wanted, tick
-                    while (TotalDelta > tdelt)
+                    while (Internal.TotalDelta > tdelt)
                     {
-                        if (NeedShutdown)
+                        if (NeedShutdown.IsCancellationRequested)
                         {
                             return;
                         }
@@ -127,7 +146,7 @@ namespace FGECore.ServerSystem
                             PreTick(tdelt);
                             Tick();
                         }
-                        TotalDelta -= tdelt;
+                        Internal.TotalDelta -= tdelt;
                     }
                     // The tick is done, stop measuring it
                     Counter.Stop();
@@ -147,7 +166,7 @@ namespace FGECore.ServerSystem
             }
             catch (Exception ex)
             {
-                SysConsole.Output("Server crash", ex);
+                SysConsole.Output($"{InstanceClassification} crash", ex);
             }
             finally
             {

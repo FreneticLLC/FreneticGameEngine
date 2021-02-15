@@ -24,6 +24,21 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntityBoxShape : EntityShapeHelper
     {
         /// <summary>
+        /// Constructs an empty <see cref="EntityBoxShape"/>, for details to be filled in later.
+        /// </summary>
+        public EntityBoxShape()
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="EntityBoxShape"/> of the specified size.
+        /// </summary>
+        public EntityBoxShape(Location _size)
+        {
+            Size = _size;
+        }
+
+        /// <summary>
         /// The size of the box on each axis.
         /// </summary>
         [PropertyDebuggable]

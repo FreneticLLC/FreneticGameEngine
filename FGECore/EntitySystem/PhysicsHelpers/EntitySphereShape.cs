@@ -23,6 +23,21 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntitySphereShape : EntityShapeHelper
     {
         /// <summary>
+        /// Constructs an empty <see cref="EntitySphereShape"/>, for details to be filled in later.
+        /// </summary>
+        public EntitySphereShape()
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="EntitySphereShape"/> of the specified size.
+        /// </summary>
+        public EntitySphereShape(double _size)
+        {
+            Size = _size;
+        }
+
+        /// <summary>
         /// The radius of the sphere.
         /// </summary>
         [PropertyDebuggable]

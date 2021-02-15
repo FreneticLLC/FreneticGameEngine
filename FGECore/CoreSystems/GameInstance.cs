@@ -15,6 +15,8 @@ using FGECore.StackNoteSystem;
 using FGECore.EntitySystem;
 using FGECore.FileSystems;
 using FreneticUtilities.FreneticToolkit;
+using System.Threading;
+using FGECore.UtilitySystems;
 
 namespace FGECore.CoreSystems
 {
@@ -42,7 +44,7 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// Whether the instance is marked for shutdown as soon as possible.
         /// </summary>
-        public bool NeedShutdown = false;
+        public readonly CancellationTokenSource NeedShutdown = new CancellationTokenSource();
 
         /// <summary>
         /// The name of the data folder. By default, "data".
@@ -108,6 +110,11 @@ namespace FGECore.CoreSystems
         public AssetStreamingEngine AssetStreaming;
 
         /// <summary>
+        /// Random helper object.
+        /// </summary>
+        public MTRandom RandomHelper = new MTRandom();
+
+        /// <summary>
         /// Does some pre-tick processing. Call <see cref="Tick"/> after.
         /// </summary>
         /// <param name="delta">How much time has passed since the last tick.</param>
@@ -135,6 +142,11 @@ namespace FGECore.CoreSystems
         }
 
         /// <summary>
+        /// Additional action to call during the instance tick, if any.
+        /// </summary>
+        public Action OnTick;
+
+        /// <summary>
         /// Ticks the instance and all engines.
         /// Called automatically by the standard run thread.
         /// Call <see cref="PreTick(double)"/> first.
@@ -149,6 +161,7 @@ namespace FGECore.CoreSystems
                     engine.Delta = Delta;
                     engine.Tick();
                 }
+                OnTick?.Invoke();
             }
             finally
             {
