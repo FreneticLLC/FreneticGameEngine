@@ -52,11 +52,6 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         }
 
         /// <summary>
-        /// What texture widths/heights are allowed.
-        /// </summary>
-        public static int[] AcceptableWidths = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
-
-        /// <summary>
         /// A full list of currently loaded textures.
         /// </summary>
         public Dictionary<string, Texture> LoadedTextures;
@@ -276,19 +271,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
                 throw new Exception("Failed to load texture: bitmap loading failed (bad output size)!");
             }
 #endif
-            if (textureWidth <= 0)
-            {
-                if (!AcceptableWidths.Contains(bmp.Width) || !AcceptableWidths.Contains(bmp.Height))
-                {
-                    int width = GetNextPOTValue(bmp.Width);
-                    int height = GetNextPOTValue(bmp.Height);
-                    Bitmap bmp_fixed = RescaleBitmap(bmp, width, height);
-                    bmp.Dispose();
-                    return bmp_fixed;
-                }
-                return bmp;
-            }
-            else if (bmp.Width == textureWidth && bmp.Height == textureWidth)
+            if (textureWidth <= 0 || (bmp.Width == textureWidth && bmp.Height == textureWidth))
             {
                 return bmp;
             }
@@ -328,21 +311,6 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// Whether textures should use linear mode usually.
         /// </summary>
         public bool DefaultLinear = true;
-
-        /// <summary>
-        /// Gets the next Power Of Two value.
-        /// </summary>
-        /// <param name="input">Input.</param>
-        /// <returns>Output.</returns>
-        public static int GetNextPOTValue(int input)
-        {
-            int x = 1;
-            while (input > x)
-            {
-                x *= 2;
-            }
-            return x;
-        }
 
         /// <summary>
         /// Loads a texture's bitmap from file.

@@ -224,7 +224,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                     BEPUutilities.Vector3 bup = UpDirection.ToBEPU();
                     if (waiting < BUFFERS_AT_ONCE)
                     {
-                        byte[] b = new byte[ACTUAL_SAMPLES];
+                        byte[] b = new byte[ACTUAL_SAMPLES]; // TODO: Reuse byte arrays rather than regenerating every cycle (be aware of buffer methods not necessarily copying)
                         lock (Locker)
                         {
                             foreach (LiveAudioInstance toAdd in Playing)
