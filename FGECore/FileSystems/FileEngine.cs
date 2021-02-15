@@ -549,14 +549,14 @@ namespace FGECore.FileSystems
             if (Directory.Exists(Internal.SavesFolder + "/" + folder))
             {
                 string fullPath = Path.GetFullPath(Internal.SavesFolder + "/" + folder);
-                yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s[fullPath.Length..]));
             }
             foreach (string rawFolder in Internal.RawFolders)
             {
                 if (Directory.Exists(rawFolder + "/" + folder))
                 {
                     string fullPath = Path.GetFullPath(rawFolder + "/" + folder);
-                    yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                    yield return Directory.EnumerateFiles(fullPath).Select(s => CleanFileName(s[fullPath.Length..]));
                 }
             }
             if (deep)
@@ -609,14 +609,14 @@ namespace FGECore.FileSystems
             if (Directory.Exists(Internal.SavesFolder + "/" + folder))
             {
                 string fullPath = Path.GetFullPath(Internal.SavesFolder + "/" + folder);
-                yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s[fullPath.Length..]));
             }
             foreach (string rawFolder in Internal.RawFolders)
             {
                 if (Directory.Exists(rawFolder + "/" + folder))
                 {
                     string fullPath = Path.GetFullPath(rawFolder + "/" + folder);
-                    yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s.Substring(fullPath.Length)));
+                    yield return Directory.EnumerateDirectories(fullPath).Select(s => CleanFileName(s[fullPath.Length..]));
                 }
             }
         }

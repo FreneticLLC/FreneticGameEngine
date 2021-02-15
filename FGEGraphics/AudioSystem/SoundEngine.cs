@@ -74,6 +74,12 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public AudioEnforcer AudioInternal;
 
+        /// <summary>
+        /// Maximum number of sound effects playing simultaneously before the next one gets fed to the enforcer instead of directly into OpenAL.
+        /// If set to 0, the enforcer is always used.
+        /// </summary>
+        public int MaxBeforeEnforce = 50;
+
         //public MicrophoneHandler Microphone = null;
 
         /// <summary>
@@ -184,7 +190,7 @@ namespace FGEGraphics.AudioSystem
         [Conditional("AUDIO_ERROR_CHECK")]
         public void CheckError(string inp)
         {
-            if (AudioInternal == null)
+            if (AudioInternal == null || MaxBeforeEnforce != 0)
             {
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
@@ -217,7 +223,7 @@ namespace FGEGraphics.AudioSystem
         public void Update(Location position, Location forward, Location up, Location velocity, bool selected)
         {
             CPosition = position;
-            if (AudioInternal == null)
+            if (AudioInternal == null || MaxBeforeEnforce != 0)
             {
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
@@ -268,81 +274,83 @@ namespace FGEGraphics.AudioSystem
             DeafLoop.LastUse = Engine.GlobalTickTime;*/
             for (int i = 0; i < PlayingNow.Count; i++)
             {
-                if (!PlayingNow[i].Exists || (AudioInternal == null && PlayingNow[i].Src < 0) || (AudioInternal == null ? AL.GetSourceState(PlayingNow[i].Src) == ALSourceState.Stopped : PlayingNow[i].AudioInternal.State == AudioState.DONE))
+                ActiveSound sound = PlayingNow[i];
+                if (!sound.Exists || (sound.AudioInternal == null && sound.Src < 0) || (sound.AudioInternal == null ? AL.GetSourceState(sound.Src) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
                 {
-                    PlayingNow[i].Destroy();
-                    if (AudioInternal == null)
+                    sound.Destroy();
+                    if (sound.AudioInternal == null)
                     {
-                        CheckError("Destroy:" + PlayingNow[i].Effect.Name);
+                        CheckError("Destroy:" + sound.Effect.Name);
                     }
                     PlayingNow.RemoveAt(i);
                     i--;
                     continue;
                 }
-                PlayingNow[i].Effect.LastUse = Client.GlobalTickTime;
-                /*if ((TimeDeaf > 0.0) && sel && !PlayingNow[i].IsBackground)
+                sound.Effect.LastUse = Client.GlobalTickTime;
+                /*if ((TimeDeaf > 0.0) && sel && !sound.IsBackground)
                 {
-                    PlayingNow[i].IsDeafened = true;
+                    sound.IsDeafened = true;
                     float lesser = (float)Math.Min(DeafenTime, TimeDeaf);
                     if (lesser < 0.999)
                     {
-                        if (AudioInternal == null)
+                        if (sound.AudioInternal == null)
                         {
-                            AL.Source(PlayingNow[i].Src, ALSourcef.Gain, PlayingNow[i].Gain * (1.0f - lesser));
+                            AL.Source(sound.Src, ALSourcef.Gain, sound.Gain * (1.0f - lesser));
                         }
                         else
                         {
-                            PlayingNow[i].AudioInternal.Gain = PlayingNow[i].Gain * (1.0f - lesser);
+                            sound.AudioInternal.Gain = sound.Gain * (1.0f - lesser);
                         }
                     }
                     else
                     {
-                        if (AudioInternal == null)
+                        if (sound.AudioInternal == null)
                         {
-                            AL.Source(PlayingNow[i].Src, ALSourcef.Gain, 0.0001f);
+                            AL.Source(sound.Src, ALSourcef.Gain, 0.0001f);
                         }
                         else
                         {
-                            PlayingNow[i].AudioInternal.Gain = 0.0001f;
+                            sound.AudioInternal.Gain = 0.0001f;
                         }
                     }
                 }
-                else */if (/*(TimeDeaf <= 0.0) && */sel && !PlayingNow[i].IsBackground)
+                else */
+                if (/*(TimeDeaf <= 0.0) && */sel && !sound.IsBackground)
                 {
-                    if (AudioInternal == null)
+                    if (sound.AudioInternal == null)
                     {
-                        AL.Source(PlayingNow[i].Src, ALSourcef.Gain, PlayingNow[i].Gain);
+                        AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
                     }
                     else
                     {
 
                     }
-                    PlayingNow[i].IsDeafened = false;
+                    sound.IsDeafened = false;
                 }
-                if (/*(TimeDeaf <= 0.0) && */!sel && PlayingNow[i].IsBackground && !PlayingNow[i].Backgrounded)
+                if (/*(TimeDeaf <= 0.0) && */!sel && sound.IsBackground && !sound.Backgrounded)
                 {
-                    if (AudioInternal == null)
+                    if (sound.AudioInternal == null)
                     {
-                        AL.Source(PlayingNow[i].Src, ALSourcef.Gain, 0.0001f);
+                        AL.Source(sound.Src, ALSourcef.Gain, 0.0001f);
                     }
                     else
                     {
-                        PlayingNow[i].AudioInternal.Gain = 0.0001f;
+                        sound.AudioInternal.Gain = 0.0001f;
                     }
-                    PlayingNow[i].Backgrounded = true;
+                    sound.Backgrounded = true;
                 }
-                else if (/*(TimeDeaf <= 0.0) && */sel && PlayingNow[i].Backgrounded)
+                else if (/*(TimeDeaf <= 0.0) && */sel && sound.Backgrounded)
                 {
-                    if (AudioInternal == null)
+                    if (sound.AudioInternal == null)
                     {
-                        AL.Source(PlayingNow[i].Src, ALSourcef.Gain, PlayingNow[i].Gain);
+                        AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
                     }
                     else
                     {
-                        PlayingNow[i].AudioInternal.Gain = PlayingNow[i].Gain;
+                        sound.AudioInternal.Gain = sound.Gain;
                     }
-                    PlayingNow[i].Backgrounded = false;
-                    PlayingNow[i].IsDeafened = false;
+                    sound.Backgrounded = false;
+                    sound.IsDeafened = false;
                 }
             }
             CheckError("Setup");
@@ -353,7 +361,7 @@ namespace FGEGraphics.AudioSystem
             CheckError("Microphone");
             float globvol = GlobalVolume;
             globvol = globvol <= 0 ? 0.001f : (globvol > 1 ? 1 : globvol);
-            if (AudioInternal == null)
+            if (AudioInternal == null || MaxBeforeEnforce != 0)
             {
                 Vector3 pos = position.ToOpenTK();
                 Vector3 forw = forward.ToOpenTK();
@@ -366,7 +374,7 @@ namespace FGEGraphics.AudioSystem
                 AL.Listener(ALListenerf.Gain, globvol);
                 CheckError("Gain");
             }
-            else
+            if (AudioInternal != null)
             {
                 // TODO: vel
                 //AudioInternal.Left = CVars.a_left.ValueB;
@@ -743,7 +751,7 @@ namespace FGEGraphics.AudioSystem
                 clip.Channels = (byte)oggReader.Channels;
                 sfx.Clip = clip;
             }
-            else
+            if (AudioInternal == null || MaxBeforeEnforce != 0)
             {
                 sfx.Internal = AL.GenBuffer();
                 AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, oggReader.SampleRate);
@@ -792,7 +800,7 @@ namespace FGEGraphics.AudioSystem
                 sfx.Clip = clip;
                 // SysConsole.Output(OutputType.DEBUG, "Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
             }
-            else
+            if (AudioInternal == null || MaxBeforeEnforce != 0)
             {
                 sfx.Internal = AL.GenBuffer();
                 AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, rate);

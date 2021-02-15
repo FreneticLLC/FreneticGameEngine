@@ -134,16 +134,16 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// Add an audio instance to the enforcer.
         /// </summary>
         /// <param name="inst">The instance to add.</param>
-        public void Add(LiveAudioInstance inst)
+        public void Add(ActiveSound inst)
         {
             lock (Locker)
             {
-                if (inst.State == AudioState.PLAYING)
+                if (inst.AudioInternal.State == AudioState.PLAYING)
                 {
                     return;
                 }
-                inst.State = AudioState.PLAYING;
-                Playing.Add(inst);
+                inst.AudioInternal.State = AudioState.PLAYING;
+                Playing.Add(inst.AudioInternal);
             }
         }
 

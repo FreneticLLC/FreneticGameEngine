@@ -98,7 +98,7 @@ namespace FGEGraphics.AudioSystem
         {
             if (!Exists)
             {
-                if (Engine.AudioInternal != null)
+                if (Engine.AudioInternal != null && Engine.PlayingNow.Count >= Engine.MaxBeforeEnforce)
                 {
                     AudioInternal = new LiveAudioInstance()
                     {
@@ -159,7 +159,7 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public void UpdatePitch()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 AudioInternal.Pitch = Pitch;
             }
@@ -180,7 +180,7 @@ namespace FGEGraphics.AudioSystem
         public void UpdateGain()
         {
             bool sel = Engine.Selected;
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 if (sel)
                 {
@@ -213,9 +213,9 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public void Play()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
-                Engine.AudioInternal.Add(AudioInternal);
+                Engine.AudioInternal.Add(this);
             }
             else
             {
@@ -233,7 +233,7 @@ namespace FGEGraphics.AudioSystem
         /// <param name="f">The location.</param>
         public void Seek(float f)
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 int samp = (int)(AudioInternal.Clip.Data.Length * f);
                 AudioInternal.CurrentSample = samp - samp % 4;
@@ -252,7 +252,7 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public void Pause()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 AudioInternal.State = AudioState.PAUSED;
             }
@@ -271,7 +271,7 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public void Stop()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 AudioInternal.State = AudioState.STOP;
             }
@@ -291,7 +291,7 @@ namespace FGEGraphics.AudioSystem
         /// <returns>Whether it is playing.</returns>
         public bool IsPlaying()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 return AudioInternal.State == AudioState.PLAYING;
             }
@@ -310,7 +310,7 @@ namespace FGEGraphics.AudioSystem
         /// </summary>
         public void Destroy()
         {
-            if (Engine.AudioInternal != null)
+            if (AudioInternal != null)
             {
                 AudioInternal.State = AudioState.STOP;
                 return;
