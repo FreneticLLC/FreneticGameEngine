@@ -90,7 +90,7 @@ namespace FGECore.CoreSystems
         {
             DateTime DT = DateTime.Now;
             string logfolder = Environment.CurrentDirectory + "/logs/" + DT.Year.ToString().PadLeft(4, '0') + "/" + DT.Month.ToString().PadLeft(2, '0') + "/";
-            return logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Process.GetCurrentProcess().Id + ".log";
+            return logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Environment.ProcessId + ".log";
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace FGECore.CoreSystems
         /// </summary>
         public static void FixTitle()
         {
-            Title = Program.GameName + " / " + Process.GetCurrentProcess().Id.ToString();
+            Title = Program.GameName + " / " + Environment.ProcessId.ToString();
             Console.Title = Title;
         }
 
@@ -410,48 +410,18 @@ namespace FGECore.CoreSystems
         /// <summary>
         /// Properly formats system console output.
         /// </summary>
-        /// <param name="ot">What type of output to use.</param>
+        /// <param name="outputType">What type of output to use.</param>
         /// <param name="text">The text to output.</param>
         /// <param name="bcolor">The base color.</param>
-        public static void Output(OutputType ot, string text, string bcolor = null)
+        public static void Output(OutputType outputType, string text, string bcolor = null)
         {
-            if (ot == OutputType.DEBUG && !ShouldOutputDebug())
+            if (outputType == OutputType.DEBUG && !ShouldOutputDebug())
             {
                 return;
             }
-            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + OutputColors[(int)ot] +
-                OutputNames[(int)ot] + "^r^7] " + OutputColors[(int)ot] + text, bcolor ?? OutputColors[(int)ot]);
+            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + outputType.BaseColor +
+                outputType.Name + "^r^7] " + outputType.BaseColor + text, bcolor ?? outputType.BaseColor);
         }
-
-        /// <summary>
-        /// Contains the default set of output colors.
-        /// </summary>
-        public static readonly string[] OutputColors = new string[]
-        {
-            "^r^7ERROR:OUTPUTTYPE=NONE?",
-            "^r^7",
-            "^r^2",
-            "^r^3",
-            "^r^7^h^0",
-            "^r^7",
-            "^7^&",
-            "^r^@"
-        };
-
-        /// <summary>
-        /// Contains the default set of output type names.
-        /// </summary>
-        public static readonly string[] OutputNames = new string[]
-        {
-            "NONE",
-            "INFO/CLIENT",
-            "INIT",
-            "WARNING",
-            "ERROR",
-            "INFO",
-            "DEBUG",
-            "INIT/CLIENT"
-        };
     }
 
     /// <summary>
@@ -473,40 +443,38 @@ namespace FGECore.CoreSystems
     /// <summary>
     /// All possible console output types.
     /// </summary>
-    public enum OutputType : int
+    public class OutputType
     {
-        /// <summary>
-        /// Do not use.
-        /// </summary>
-        NONE = 0,
-        /// <summary>
-        /// When the client is sending information to console.
-        /// </summary>
-        CLIENTINFO = 1,
-        /// <summary>
-        /// During the startup sequence.
-        /// </summary>
-        INIT = 2,
-        /// <summary>
-        /// An ignorable error.
-        /// </summary>
-        WARNING = 3,
-        /// <summary>
-        /// A major error.
-        /// </summary>
-        ERROR = 4,
-        /// <summary>
-        /// General information.
-        /// </summary>
-        INFO = 5,
-        /// <summary>
-        /// Disable-able minor debug information.
-        /// </summary>
-        DEBUG = 6,
-        /// <summary>
-        /// Initialization from the client
-        /// </summary>
-        CLIENTINIT = 7
+        /// <summary>When the client is sending information to console.</summary>
+        public static OutputType CLIENTINFO = new OutputType() { Name = "INFO/CLIENT", BaseColor = TextStyle.Simple };
+
+        /// <summary>During the startup sequence.</summary>
+        public static OutputType INIT = new OutputType() { Name = "INIT", BaseColor = "^r^2" };
+
+        /// <summary>A (probably) ignorable error.</summary>
+        public static OutputType WARNING = new OutputType() { Name = "WARNING", BaseColor = "^r^3" };
+
+        /// <summary>A major error.</summary>
+        public static OutputType ERROR = new OutputType() { Name = "ERROR", BaseColor = "^r^7^h^0" };
+
+        /// <summary>General information.</summary>
+        public static OutputType INFO = new OutputType() { Name = "INFO", BaseColor = TextStyle.Simple };
+
+        /// <summary>Disable-able minor debug information.</summary>
+        public static OutputType DEBUG = new OutputType() { Name = "DEBUG", BaseColor = "^7^&" };
+
+        /// <summary>Initialization from the client.</summary>
+        public static OutputType CLIENTINIT = new OutputType() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
         // TODO: More?
+
+        /// <summary>
+        /// The name of the output type.
+        /// </summary>
+        public string Name;
+
+        /// <summary>
+        /// The base color for this type.
+        /// </summary>
+        public string BaseColor;
     }
 }

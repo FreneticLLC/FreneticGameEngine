@@ -208,9 +208,23 @@ namespace FGEGraphics.GraphicsHelpers.Textures
                 Width = White.Width,
                 Height = White.Height
             };
+            void handleError(string message)
+            {
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
+                texture.LoadedProperly = false;
+            }
             void processLoad(byte[] data)
             {
-                Bitmap bmp = BitmapForBytes(data);
+                Bitmap bmp;
+                try
+                {
+                    bmp = BitmapForBytes(data);
+                }
+                catch (Exception ex)
+                {
+                    handleError(ex.ToString());
+                    return;
+                }
                 Schedule.ScheduleSyncTask(() =>
                 {
                     TextureFromBitMap(texture, bmp);
@@ -221,11 +235,6 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             void fileMissing()
             {
                 SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
-                texture.LoadedProperly = false;
-            }
-            void handleError(string message)
-            {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Error}': {message}");
                 texture.LoadedProperly = false;
             }
             AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
@@ -332,7 +341,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
                 return null;
             }
         }
@@ -393,7 +402,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Error}': {ex}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
                 return;
             }
         }

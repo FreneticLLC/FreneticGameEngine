@@ -225,7 +225,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             void handleError(string message)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Error}': {message}");
+                SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
             }
             TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
