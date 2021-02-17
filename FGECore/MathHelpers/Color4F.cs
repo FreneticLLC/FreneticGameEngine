@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using FGECore.UtilitySystems;
 using FreneticUtilities.FreneticToolkit;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.MathHelpers
 {
@@ -220,7 +221,6 @@ namespace FGECore.MathHelpers
         /// </summary>
         /// <param name="b">The byte input.</param>
         /// <param name="offset">The offset in the byte array.</param>
-        /// <returns>The color.</returns>
         public static Color4F FromBytes(byte[] b, int offset = 0)
         {
             return new Color4F(
@@ -244,7 +244,6 @@ namespace FGECore.MathHelpers
         /// <param name="g">Green.</param>
         /// <param name="b">Blue.</param>
         /// <param name="a">Alpha.</param>
-        /// <returns>The color.</returns>
         public static Color4F FromArgb(int a, int r, int g, int b)
         {
             return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, a * BYTE_TO_FLOAT);
@@ -257,10 +256,61 @@ namespace FGECore.MathHelpers
         /// <param name="r">Red.</param>
         /// <param name="g">Green.</param>
         /// <param name="b">Blue.</param>
-        /// <returns>The color.</returns>
         public static Color4F FromArgb(int r, int g, int b)
         {
             return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, 1);
+        }
+
+        private static readonly AsciiMatcher HexMatcher = new AsciiMatcher("0123456789ABCDEFabcdef");
+
+        private static int GetHexVal(char chr)
+        {
+            return chr - (chr < 58 ? 48 : (chr < 97 ? 55 : 87));
+        }
+
+        /// <summary>
+        /// Converts a color string to a color instance.
+        /// Can be in format "R,G,B,A" (like "1,1,1,1" for white), "R,G,B", or hex "#RRGGBB" (like "#FFFFFF" for white).
+        /// </summary>
+        /// <param name="str">The string to parse.</param>
+        public static Color4F? FromString(string str)
+        {
+            if (str.StartsWithFast('#') && (str.Length == 7 || str.Length == 9))
+            {
+                str = str[1..];
+                if (!HexMatcher.IsOnlyMatches(str))
+                {
+                    return null;
+                }
+                int r = GetHexVal(str[0]) << 4 | GetHexVal(str[1]);
+                int g = GetHexVal(str[2]) << 4 | GetHexVal(str[3]);
+                int b = GetHexVal(str[4]) << 4 | GetHexVal(str[5]);
+                int a = 255;
+                if (str.Length == 8)
+                {
+                    a = GetHexVal(str[6]) << 4 | GetHexVal(str[7]);
+                }
+            }
+            if (str.StartsWithFast('(') && (str.EndsWithFast(')')))
+            {
+                str = str[1..^1];
+            }
+            string[] split = str.SplitFast(',');
+            if (split.Length == 3 || split.Length == 4)
+            {
+                if (float.TryParse(split[0], out float r) && float.TryParse(split[1], out float g) && float.TryParse(split[2], out float b))
+                {
+                    if (split.Length == 3)
+                    {
+                        return new Color4F(r, g, b, 1f);
+                    }
+                    else if (split.Length == 4 && float.TryParse(split[3], out float a))
+                    {
+                        return new Color4F(r, g, b, a);
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
