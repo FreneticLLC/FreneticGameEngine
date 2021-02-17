@@ -139,6 +139,8 @@ namespace FGECore.ServerSystem
                     {
                         if (NeedShutdown.IsCancellationRequested)
                         {
+                            Internal.DeltaCounter.Stop();
+                            Counter.Stop();
                             return;
                         }
                         lock (TickLock)
@@ -171,6 +173,7 @@ namespace FGECore.ServerSystem
             finally
             {
                 StackNoteHelper.Pop();
+                InstanceShutdown();
             }
         }
 

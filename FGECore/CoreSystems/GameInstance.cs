@@ -62,6 +62,22 @@ namespace FGECore.CoreSystems
         public string Folder_Saves = "saves";
 
         /// <summary>
+        /// Whether the instance is already initialized or not.
+        /// </summary>
+        public bool IsInitialized = false;
+
+        /// <summary>
+        /// Fired before the instance has shut down.
+        /// </summary>
+        public Action PreShutdown;
+
+        /// <summary>
+        /// Fired when the instance has shut down.
+        /// Many variables will already be nulled.
+        /// </summary>
+        public Action OnShutdown;
+
+        /// <summary>
         /// Inits the game instance.
         /// </summary>
         public void InstanceInit()
@@ -70,6 +86,27 @@ namespace FGECore.CoreSystems
             Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
             AssetStreaming = new AssetStreamingEngine(Files, Schedule);
             AssetStreaming.Init();
+            IsInitialized = true;
+        }
+
+        /// <summary>
+        /// Shuts down the game instance, closing any applicable internal links and stopping all logic.
+        /// </summary>
+        public virtual void InstanceShutdown()
+        {
+            if (!IsInitialized)
+            {
+                return;
+            }
+            NeedShutdown.Cancel();
+            PreShutdown?.Invoke();
+            PreShutdown = null;
+            AssetStreaming.Shutdown();
+            AssetStreaming = null;
+            Files.Cleanup();
+            Files = null;
+            IsInitialized = false;
+            OnShutdown?.Invoke();
         }
 
         /// <summary>

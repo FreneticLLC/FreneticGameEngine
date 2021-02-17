@@ -227,8 +227,15 @@ namespace FGEGraphics.GraphicsHelpers.Textures
                 }
                 Schedule.ScheduleSyncTask(() =>
                 {
-                    TextureFromBitMap(texture, bmp);
-                    texture.LoadedProperly = true;
+                    try
+                    {
+                        TextureFromBitMap(texture, bmp);
+                        texture.LoadedProperly = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        handleError(ex.ToString());
+                    }
                     bmp.Dispose();
                 });
             }
