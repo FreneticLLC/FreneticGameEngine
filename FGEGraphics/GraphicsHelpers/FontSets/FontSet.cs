@@ -22,6 +22,8 @@ using FGECore.UtilitySystems;
 using FGECore.ConsoleHelpers;
 
 using MathHelper = FreneticUtilities.FreneticToolkit.MathHelper;
+using FGECore.StackNoteSystem;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
@@ -224,7 +226,15 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
         public void DrawFancyText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
         {
-            DrawFancyText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
+            StackNoteHelper.Push("FontSet - Draw fancy text", text);
+            try
+            {
+                DrawFancyText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
         }
 
         /// <summary>
@@ -797,6 +807,53 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         static int r_depth = 0;
 
         /// <summary>
+        /// Translates fancy text language inputs to raw strings.
+        /// </summary>
+        public string AutoTranslateFancyText(string text)
+        {
+            int index = text.IndexOf("^[lang=");
+            if (index == -1)
+            {
+                return text;
+            }
+            StringBuilder sb = new StringBuilder();
+            List<string> parts = new List<string>();
+            int c = 0;
+            int i;
+            for (i = index + "^[lang=".Length; i < text.Length; i++)
+            {
+                if (text[i] == '[')
+                {
+                    c++;
+                }
+                else if (text[i] == ']')
+                {
+                    c--;
+                    if (c == -1)
+                    {
+                        parts.Add(sb.ToString());
+                        break;
+                    }
+                }
+                if (text[i] == '|' && c == 0)
+                {
+                    parts.Add(sb.ToString());
+                    sb.Clear();
+                }
+                else
+                {
+                    sb.Append(text[i]);
+                }
+            }
+            if (i == text.Length)
+            {
+                return text;
+            }
+            string translated = Engine.GetLanguageHelper(parts.ToArray());
+            return text[..index] + translated + AutoTranslateFancyText(text[(i + 1)..]);
+        }
+
+        /// <summary>
         /// Measures fancy text.
         /// </summary>
         /// <param name="line">The line of text.</param>
@@ -962,13 +1019,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>The split string.</returns>
         public string SplitAppropriately(string text, int maxX)
         {
+            text = AutoTranslateFancyText(text);
             StringBuilder resultBuilder = new StringBuilder(text.Length + 50);
             string[] lines = text.Split('\n');
             foreach (string fullLine in lines)
             {
+                string line = fullLine;
                 while (true)
                 {
-                    string line = fullLine;
                     float width = MeasureFancyText(line);
                     if (width <= maxX)
                     {
@@ -1001,9 +1059,13 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                             }
                         }
                     }
-                    int lastSpace = MathHelper.Clamp(line.IndexOf(' '), 1, target);
+                    int lastSpace = line.LastIndexOf(' ', target);
+                    if (lastSpace == -1)
+                    {
+                        lastSpace = target;
+                    }
                     resultBuilder.Append(line, 0, lastSpace);
-                    //line = line.Substring(lastSpace + 1);
+                    line = line[lastSpace..];
                 }
             }
             resultBuilder.Length -= 1; // Trim off the final newline.
