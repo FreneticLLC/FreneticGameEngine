@@ -55,6 +55,11 @@ namespace FGEGraphics.GraphicsHelpers.Models
         public Model Sphere;
 
         /// <summary>
+        /// A clear (empty) model.
+        /// </summary>
+        public Model Clear;
+
+        /// <summary>
         /// The client engine.
         /// </summary>
         public GameClientWindow TheClient;
@@ -74,6 +79,8 @@ namespace FGEGraphics.GraphicsHelpers.Models
             LoadedModels.Add("cube", Cube);
             Cylinder = GetModel("cylinder");
             Sphere = GetModel("sphere");
+            Clear = new Model("clear") { Engine = this, Skinned = true, Original = new Model3D() };
+            LoadedModels.Add("clear", Clear);
         }
 
         /// <summary>
