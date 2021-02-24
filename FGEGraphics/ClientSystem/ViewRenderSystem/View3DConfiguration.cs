@@ -81,9 +81,9 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public float SunLight_Maximum = 1;
 
         /// <summary>
-        /// The alpha value to clear to.
+        /// The alpha value to clear the lighting buffer to.
         /// </summary>
-        public float RenderClearAlpha = 1f;
+        public float LightsRenderClearAlpha = 1f;
 
         /// <summary>
         /// The shadow blur factor for deferred mode.
