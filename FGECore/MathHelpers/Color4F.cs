@@ -298,13 +298,13 @@ namespace FGECore.MathHelpers
             string[] split = str.SplitFast(',');
             if (split.Length == 3 || split.Length == 4)
             {
-                if (float.TryParse(split[0], out float r) && float.TryParse(split[1], out float g) && float.TryParse(split[2], out float b))
+                if (float.TryParse(split[0].Trim(), out float r) && float.TryParse(split[1].Trim(), out float g) && float.TryParse(split[2].Trim(), out float b))
                 {
                     if (split.Length == 3)
                     {
                         return new Color4F(r, g, b, 1f);
                     }
-                    else if (split.Length == 4 && float.TryParse(split[3], out float a))
+                    else if (split.Length == 4 && float.TryParse(split[3].Trim(), out float a))
                     {
                         return new Color4F(r, g, b, a);
                     }

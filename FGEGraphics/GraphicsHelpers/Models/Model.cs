@@ -442,19 +442,19 @@ namespace FGEGraphics.GraphicsHelpers.Models
                                 {
                                     if (typer == "specular")
                                     {
-                                        Meshes[i].BaseRenderable.Tex_Specular = tex;
+                                        Meshes[i].BaseRenderable.SpecularTexture = tex;
                                     }
                                     else if (typer == "reflectivity")
                                     {
-                                        Meshes[i].BaseRenderable.Tex_Reflectivity = tex;
+                                        Meshes[i].BaseRenderable.ReflectivityTexture = tex;
                                     }
                                     else if (typer == "normal")
                                     {
-                                        Meshes[i].BaseRenderable.Tex_Normal = tex;
+                                        Meshes[i].BaseRenderable.NormalTexture = tex;
                                     }
                                     else if (typer == "")
                                     {
-                                        Meshes[i].BaseRenderable.Tex = tex;
+                                        Meshes[i].BaseRenderable.ColorTexture = tex;
                                     }
                                     else
                                     {

@@ -124,22 +124,22 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// The primary texture.
         /// </summary>
-        public Texture Tex;
+        public Texture ColorTexture;
         
         /// <summary>
         /// The specular texture.
         /// </summary>
-        public Texture Tex_Specular;
+        public Texture SpecularTexture;
         
         /// <summary>
         /// The reflectivity texture.
         /// </summary>
-        public Texture Tex_Reflectivity;
+        public Texture ReflectivityTexture;
 
         /// <summary>
         /// The normal texture.
         /// </summary>
-        public Texture Tex_Normal;
+        public Texture NormalTexture;
 
         /// <summary>
         /// Represents a <see cref="Renderable"/> builder type object.
@@ -865,49 +865,49 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
         public void Render(RenderContext context, bool fixafter)
         {
-            if (Tex != null)
+            if (ColorTexture != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
-                if (Tex_Reflectivity != null)
+                if (ReflectivityTexture != null)
                 {
-                    Tex_Reflectivity.Bind();
+                    ReflectivityTexture.Bind();
                 }
                 else
                 {
-                    Tex.Engine.Black.Bind();
+                    ColorTexture.Engine.Black.Bind();
                 }
                 GL.ActiveTexture(TextureUnit.Texture2);
-                if (Tex_Specular != null)
+                if (SpecularTexture != null)
                 {
-                    Tex_Specular.Bind();
+                    SpecularTexture.Bind();
                 }
                 else
                 {
-                    Tex.Engine.Black.Bind();
+                    ColorTexture.Engine.Black.Bind();
                 }
                 GL.ActiveTexture(TextureUnit.Texture1);
-                if (Tex_Normal != null)
+                if (NormalTexture != null)
                 {
-                    Tex_Normal.Bind();
+                    NormalTexture.Bind();
                 }
                 else
                 {
-                    Tex.Engine.NormalDef.Bind();
+                    ColorTexture.Engine.NormalDef.Bind();
                 }
                 GL.ActiveTexture(TextureUnit.Texture0);
-                Tex.Bind();
+                ColorTexture.Bind();
             }
             RenderWithoutTextures(context);
-            if (fixafter && Tex != null)
+            if (fixafter && ColorTexture != null)
             {
                 GL.ActiveTexture(TextureUnit.Texture3);
-                Tex.Engine.Black.Bind();
+                ColorTexture.Engine.Black.Bind();
                 GL.ActiveTexture(TextureUnit.Texture2);
-                Tex.Engine.Black.Bind();
+                ColorTexture.Engine.Black.Bind();
                 GL.ActiveTexture(TextureUnit.Texture1);
-                Tex.Engine.NormalDef.Bind();
+                ColorTexture.Engine.NormalDef.Bind();
                 GL.ActiveTexture(TextureUnit.Texture0);
-                Tex.Engine.White.Bind();
+                ColorTexture.Engine.White.Bind();
             }
         }
     }
