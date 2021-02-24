@@ -66,11 +66,11 @@ namespace FGEGraphics.UISystem
             GameEngineBase engine = view.Engine;
             if (Color.W > 0.0f)
             {
-                view.Rendering.SetColor(Color);
+                Renderer2D.SetColor(Color);
             }
             else
             {
-                view.Rendering.SetColor(Vector4.One);
+                Renderer2D.SetColor(Vector4.One);
             }
             if (GetTexture != null)
             {
@@ -88,7 +88,7 @@ namespace FGEGraphics.UISystem
             {
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
-            view.Rendering.SetColor(Vector4.One);
+            Renderer2D.SetColor(Vector4.One);
             engine.Textures.White.Bind();
         }
     }

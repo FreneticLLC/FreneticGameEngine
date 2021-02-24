@@ -127,9 +127,9 @@ namespace FGEGraphics.UISystem
                 float y = LastAbsolutePosition.Y;
                 float w = LastAbsoluteSize.X;
                 float h = LastAbsoluteSize.Y;
-                view.Rendering.SetColor(Color);
+                GraphicsHelpers.Renderer2D.SetColor(Color);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                view.Rendering.SetColor(new Vector4(1f));
+                GraphicsHelpers.Renderer2D.SetColor(new Vector4(1f));
             }
         }
 

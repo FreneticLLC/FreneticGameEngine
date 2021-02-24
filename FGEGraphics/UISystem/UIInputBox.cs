@@ -281,7 +281,7 @@ namespace FGEGraphics.UISystem
             int y = LastAbsolutePosition.Y;
             int w = LastAbsoluteSize.X;
             engine.Textures.White.Bind();
-            view.Rendering.SetColor(Color);
+            Renderer2D.SetColor(Color);
             view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.FontDefault.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             GL.Enable(EnableCap.ScissorTest);
             GL.Scissor(x, engine.Window.Size.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
@@ -289,10 +289,10 @@ namespace FGEGraphics.UISystem
             {
                 float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
                 float textw2 = Fonts.MeasureFancyText(typed.Substring(0, MaxCursor + cmax));
-                view.Rendering.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
+                Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
                 view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }
-            view.Rendering.SetColor(Color4.White);
+            Renderer2D.SetColor(Color4.White);
             Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));
             GL.Scissor(0, 0, engine.Window.Size.X, engine.Window.Size.Y); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);

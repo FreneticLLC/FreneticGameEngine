@@ -64,7 +64,7 @@ namespace FGECore.UtilitySystems
 
         /// <summary>
         /// Checks an exception for rethrow necessity.
-        /// <para>This in theory should not be needed as <see cref="ThreadAbortException"/> shouldn't be miscaught, but in practice it seems to sometimes happen.</para>
+        /// <para>This in theory should not be needed as <see cref="ThreadAbortException"/> shouldn't be miscaught, but in practice it seems to sometimes happen (might no longer apply for NET 5 update?).</para>
         /// </summary>
         /// <param name="ex">The exception to check.</param>
         public static void CheckException(Exception ex)

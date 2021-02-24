@@ -21,6 +21,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.UISystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Shaders;
+using FGECore.StackNoteSystem;
 
 namespace FGEGraphics.ClientSystem
 {
@@ -114,41 +115,57 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public void Draw()
         {
-            GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
-            if (DirectToScreen)
+            StackNoteHelper.Push("Draw ViewUI2D", this);
+            try
             {
-                UIContext.ZoomMultiplier = Client.Window.Size.X * 0.5f;
-                UIContext.Width = Client.Window.Size.X;
-                UIContext.Height = Client.Window.Size.Y;
-                float aspect = UIContext.Width / (float)UIContext.Height;
-                float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
-                UIContext.Scaler = new Vector2(sc, -sc * aspect);
-                UIContext.ViewCenter = new Vector2(-Client.Window.Size.X * 0.5f, -Client.Window.Size.Y * 0.5f);
-                UIContext.Adder = UIContext.ViewCenter;
-                UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
-                Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Size.X, Client.Window.Size.Y, 0, -1, 1);
-                GL.Viewport(0, 0, UIContext.Width, UIContext.Height);
-                GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
+                GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
+                if (DirectToScreen)
+                {
+                    UIContext.ZoomMultiplier = Client.Window.Size.X * 0.5f;
+                    UIContext.Width = Client.Window.Size.X;
+                    UIContext.Height = Client.Window.Size.Y;
+                    float aspect = UIContext.Width / (float)UIContext.Height;
+                    float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
+                    UIContext.Scaler = new Vector2(sc, -sc * aspect);
+                    UIContext.ViewCenter = new Vector2(-Client.Window.Size.X * 0.5f, -Client.Window.Size.Y * 0.5f);
+                    UIContext.Adder = UIContext.ViewCenter;
+                    UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
+                    Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.Size.X, Client.Window.Size.Y, 0, -1, 1);
+                    GL.Viewport(0, 0, UIContext.Width, UIContext.Height);
+                    GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
+                }
+                // TODO: alternate Ortho setting from scaler/adder def!
+                Client.Shaders.ColorMult2DShader.Bind();
+                Renderer2D.SetColor(Color4F.White);
+                GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
+                GL.Uniform2(2, ref UIContext.Adder);
+                GL.Disable(EnableCap.DepthTest);
+                GL.Disable(EnableCap.CullFace);
+                Shader s = Client.FontSets.FixToShader;
+                Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
+                GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
+                LastRenderedSet.Clear();
+                CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
+                GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
+                foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
+                {
+                    StackNoteHelper.Push("Draw UI Element", elem);
+                    try
+                    {
+                        elem.Render(this, Client.Delta);
+                    }
+                    finally
+                    {
+                        StackNoteHelper.Pop();
+                    }
+                }
+                GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
+                Client.FontSets.FixToShader = s;
             }
-            // TODO: alternate Ortho setting from scaler/adder def!
-            Client.Shaders.ColorMult2DShader.Bind();
-            Rendering.SetColor(Color4F.White);
-            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
-            GL.Uniform2(2, ref UIContext.Adder);
-            GL.Disable(EnableCap.DepthTest);
-            GL.Disable(EnableCap.CullFace);
-            Shader s = Client.FontSets.FixToShader;
-            Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
-            GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-            LastRenderedSet.Clear();
-            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
-            GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
+            finally
             {
-                elem.Render(this, Client.Delta);
+                StackNoteHelper.Pop();
             }
-            GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
-            Client.FontSets.FixToShader = s;
         }
 
         /// <summary>

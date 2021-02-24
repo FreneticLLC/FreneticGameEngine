@@ -318,7 +318,7 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("RenderSingleFrame - 3");
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
             GL.Uniform2(2, ref Adder);
-            Rendering.SetColor(Vector4.One);
+            Renderer2D.SetColor(Vector4.One);
             // Third step: Pass to the primary rendering system
             try
             {
@@ -358,7 +358,7 @@ namespace FGEGraphics.ClientSystem
             {
                 StackNoteHelper.Push("GameEngine2D - RenderAll", this);
                 Textures.White.Bind();
-                RenderHelper.SetColor(Vector4.One);
+                Renderer2D.SetColor(Vector4.One);
                 RenderAllObjectsPre?.Invoke(lights);
                 // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
                 foreach (ClientEntity ent in Entities.Values

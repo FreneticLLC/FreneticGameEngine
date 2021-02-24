@@ -127,9 +127,9 @@ namespace FGEGraphics.UISystem
             if (BackColor.W > 0)
             {
                 Location meas = TextFont.MeasureFancyLinesOfText(tex);
-                view.Rendering.SetColor(BackColor);
+                Renderer2D.SetColor(BackColor);
                 view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                view.Rendering.SetColor(Vector4.One);
+                Renderer2D.SetColor(Vector4.One);
             }
             TextFont.DrawFancyText(tex, new Location(bx, by, 0), baseColor: BColor);
         }

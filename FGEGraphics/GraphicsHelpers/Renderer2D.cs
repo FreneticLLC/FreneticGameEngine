@@ -159,7 +159,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// Sets the color of the next rendered objects.
         /// </summary>
         /// <param name="c">The color.</param>
-        public void SetColor(Color4F c)
+        public static void SetColor(Color4F c)
         {
             SetColor(new Vector4(c.R, c.G, c.B, c.A));
         }
@@ -168,7 +168,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// Sets the color of the next rendered objects.
         /// </summary>
         /// <param name="col">The color.</param>
-        public void SetColor(Vector4 col)
+        public static void SetColor(Vector4 col)
         {
             GL.Uniform4(ShaderLocations.Common2D.COLOR, ref col);
         }
@@ -177,7 +177,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// Sets the color of the next rendered objects.
         /// </summary>
         /// <param name="c">The color.</param>
-        public void SetColor(Color4 c)
+        public static void SetColor(Color4 c)
         {
             SetColor(new Vector4(c.R, c.G, c.B, c.A));
         }

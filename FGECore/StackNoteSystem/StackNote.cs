@@ -43,7 +43,7 @@ namespace FGECore.StackNoteSystem
             catch (Exception ex)
             {
                 CommonUtilities.CheckException(ex);
-                return Note + "(Exception parsing Related: " + ex.ToString() + ")";
+                return Note + $"(Exception parsing {nameof(StackNote)}.{nameof(Related)}: {ex})";
             }
         }
     }

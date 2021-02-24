@@ -165,10 +165,10 @@ namespace FGEGraphics.UISystem
                 float x = LastAbsolutePosition.X;
                 float y = LastAbsolutePosition.Y;
                 Icon.Bind();
-                view.Rendering.SetColor(IconColor);
+                Renderer2D.SetColor(IconColor);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0), int.MaxValue, 1, false, BColor);
-                view.Rendering.SetColor(Vector4.One);
+                Renderer2D.SetColor(Vector4.One);
             }
             else
             {
