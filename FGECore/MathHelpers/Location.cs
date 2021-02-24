@@ -762,6 +762,7 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// Converts a string representation of a location to a Location object.
         /// Inverts <see cref="ToString"/> and <see cref="ToSimpleString"/>.
+        /// Returns <see cref="NaN"/> when invalid.
         /// </summary>
         /// <param name="input">The location string.</param>
         /// <returns>the location object.</returns>

@@ -149,7 +149,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// Sets the bones to an array value.
         /// </summary>
         /// <param name="mats">The relevant array.</param>
-        public void SetBones(Matrix4[] mats)
+        public static void SetBones(Matrix4[] mats)
         {
             float[] set = new float[mats.Length * 16];
             for (int i = 0; i < mats.Length; i++)
@@ -168,7 +168,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <summary>
         /// Clears up the bones to identity.
         /// </summary>
-        public void BoneSafe()
+        public static void BoneSafe()
         {
             Matrix4 ident = Matrix4.Identity;
             GL.UniformMatrix4(100, false, ref ident);
