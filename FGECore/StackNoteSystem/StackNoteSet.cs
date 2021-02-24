@@ -30,12 +30,7 @@ namespace FGECore.StackNoteSystem
         /// <returns>The string output.</returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder(Notes.Count * 50);
-            foreach (StackNote note in Notes)
-            {
-                sb.Append(" -> " + note + "\n");
-            }
-            return sb.ToString();
+            return string.Concat(Notes.Select(note => $" -> {note}\n"));
         }
 
         /// <summary>

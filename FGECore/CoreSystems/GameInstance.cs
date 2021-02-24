@@ -78,38 +78,6 @@ namespace FGECore.CoreSystems
         public Action OnShutdown;
 
         /// <summary>
-        /// Inits the game instance.
-        /// </summary>
-        public void InstanceInit()
-        {
-            SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
-            Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
-            AssetStreaming = new AssetStreamingEngine(Files, Schedule);
-            AssetStreaming.Init();
-            IsInitialized = true;
-        }
-
-        /// <summary>
-        /// Shuts down the game instance, closing any applicable internal links and stopping all logic.
-        /// </summary>
-        public virtual void InstanceShutdown()
-        {
-            if (!IsInitialized)
-            {
-                return;
-            }
-            NeedShutdown.Cancel();
-            PreShutdown?.Invoke();
-            PreShutdown = null;
-            AssetStreaming.Shutdown();
-            AssetStreaming = null;
-            Files.Cleanup();
-            Files = null;
-            IsInitialized = false;
-            OnShutdown?.Invoke();
-        }
-
-        /// <summary>
         /// How much time has passed since the instance first loaded.
         /// </summary>
         public double GlobalTickTime = 1;
@@ -150,6 +118,47 @@ namespace FGECore.CoreSystems
         /// Random helper object.
         /// </summary>
         public MTRandom RandomHelper = new MTRandom();
+
+        /// <summary>
+        /// The watchdog handler for this game instance.
+        /// </summary>
+        public InstanceWatchdog<T, T2> Watchdog;
+
+        /// <summary>
+        /// Inits the game instance.
+        /// </summary>
+        public void InstanceInit()
+        {
+            SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
+            Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
+            AssetStreaming = new AssetStreamingEngine(Files, Schedule);
+            AssetStreaming.Init();
+            IsInitialized = true;
+            Watchdog = new InstanceWatchdog<T, T2>(this);
+            Watchdog.Start();
+        }
+
+        /// <summary>
+        /// Shuts down the game instance, closing any applicable internal links and stopping all logic.
+        /// </summary>
+        public virtual void InstanceShutdown()
+        {
+            if (!IsInitialized)
+            {
+                return;
+            }
+            NeedShutdown.Cancel();
+            PreShutdown?.Invoke();
+            PreShutdown = null;
+            AssetStreaming.Shutdown();
+            AssetStreaming = null;
+            Files.Cleanup();
+            Files = null;
+            IsInitialized = false;
+            Watchdog.Stop();
+            Watchdog = null;
+            OnShutdown?.Invoke();
+        }
 
         /// <summary>
         /// Does some pre-tick processing. Call <see cref="Tick"/> after.
@@ -193,6 +202,7 @@ namespace FGECore.CoreSystems
             try
             {
                 StackNoteHelper.Push("GameInstance tick sequence - Tick", this);
+                Watchdog.IsAlive();
                 foreach (T2 engine in Engines)
                 {
                     engine.Delta = Delta;

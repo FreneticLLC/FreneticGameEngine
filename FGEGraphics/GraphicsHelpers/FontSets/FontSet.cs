@@ -761,7 +761,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>
-        /// Helper to split strings.
+        /// Helper to split strings fancy-text complex-text strings, marked with [] around sections and | to separate values.
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <returns>The split string.</returns>

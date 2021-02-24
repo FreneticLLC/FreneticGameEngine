@@ -88,7 +88,7 @@ namespace FGECore.CoreSystems
             {
                 return doc;
             }
-            string path = "info/text/" + idlow + "_" + lang + ".fds";
+            string path = $"info/text/{idlow}_{lang}.fds";
             if (Files.TryReadFileText(path, out string dat))
             {
                 try
@@ -103,7 +103,7 @@ namespace FGECore.CoreSystems
                     SysConsole.Output("Reading language documents", ex);
                 }
             }
-            confs[idlow] = null;
+            confs[idlow] = null; // TODO: null values should probably be cleared from time to time, to prevent unintended overload from bad input spam
             return null;
         }
 
@@ -119,7 +119,7 @@ namespace FGECore.CoreSystems
         /// <param name="info">The text item.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The var-cleaned string.</returns>
-        public string Handle(string info, string[] pathAndVars)
+        public static string Handle(string info, string[] pathAndVars)
         {
             info = info.Replace('\r', '\n').Replace("\n", "");
             for (int i = 2; i < pathAndVars.Length; i++)
@@ -135,7 +135,7 @@ namespace FGECore.CoreSystems
         /// <param name="infolist">The list of infos.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>Handled lists.</returns>
-        public List<string> HandleList(List<string> infolist, string[] pathAndVars)
+        public static List<string> HandleList(List<string> infolist, string[] pathAndVars)
         {
             for (int i = 0; i < infolist.Count; i++)
             {
