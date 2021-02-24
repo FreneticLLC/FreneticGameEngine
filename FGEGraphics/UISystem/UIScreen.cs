@@ -82,15 +82,7 @@ namespace FGEGraphics.UISystem
         public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
         {
             InternalClient = client;
-        }
-
-        /// <summary>
-        /// Performs a tick on all children of this screen.
-        /// </summary>
-        /// <param name="delta">The time since the last tick.</param>
-        protected override void TickChildren(double delta)
-        {
-            base.TickChildren(delta);
+            IsValid = true;
         }
 
         /// <summary>

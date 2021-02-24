@@ -133,11 +133,15 @@ namespace FGEGraphics.UISystem
         /// </summary>
         protected override void MouseLeftUp()
         {
-            if (Clicked && Hovered)
+            if (!Clicked)
+            {
+                return;
+            }
+            Clicked = false;
+            if (Hovered)
             {
                 ClickedTask.Invoke();
             }
-            Clicked = false;
         }
 
         /// <summary>

@@ -39,6 +39,11 @@ namespace FGEGraphics.UISystem
         public UIElement Parent;
 
         /// <summary>
+        /// True when the element is valid and usable, false when not-yet-added or already removed.
+        /// </summary>
+        public bool IsValid;
+
+        /// <summary>
         /// Gets the client game window used to render this element.
         /// </summary>
         public virtual GameClientWindow Client
@@ -135,6 +140,7 @@ namespace FGEGraphics.UISystem
                 if (!Internal.ToRemove.Contains(child))
                 {
                     Internal.ToRemove.Add(child);
+                    child.IsValid = false;
                 }
             }
             else if (Internal.ToAdd.Contains(child))
@@ -156,6 +162,7 @@ namespace FGEGraphics.UISystem
             {
                 RemoveChild(child);
             }
+            Internal.ToAdd.Clear();
         }
 
         /// <summary>
@@ -165,7 +172,7 @@ namespace FGEGraphics.UISystem
         /// <returns></returns>
         public bool HasChild(UIElement element)
         {
-            return Children.Contains(element) && !Internal.ToRemove.Contains(element);
+            return element.IsValid && Children.Contains(element) && !Internal.ToRemove.Contains(element);
         }
         
         /// <summary>
@@ -178,7 +185,7 @@ namespace FGEGraphics.UISystem
         {
             foreach (UIElement child in Children)
             {
-                if (child.Contains(x, y))
+                if (child.IsValid && child.Contains(x, y))
                 {
                     return true;
                 }
@@ -238,11 +245,12 @@ namespace FGEGraphics.UISystem
                 {
                     Children.Add(element);
                     element.Parent = this;
+                    element.IsValid = true;
                     element.Init();
                 }
                 else
                 {
-                    throw new Exception("Failed to add a child!");
+                    throw new Exception($"UIElement: Failed to add a child element {element}!");
                 }
             }
             foreach (UIElement element in Internal.ToRemove)
@@ -254,7 +262,7 @@ namespace FGEGraphics.UISystem
                 }
                 else
                 {
-                    throw new Exception("Failed to remove a child!");
+                    throw new Exception($"UIElement: Failed to remove a child element {element}!");
                 }
             }
             Internal.ToAdd.Clear();
@@ -296,6 +304,10 @@ namespace FGEGraphics.UISystem
             bool mDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
             foreach (UIElement element in Children)
             {
+                if (!element.IsValid)
+                {
+                    continue;
+                }
                 if (element.Contains(mX, mY))
                 {
                     if (!element.HoverInternal)
@@ -328,10 +340,6 @@ namespace FGEGraphics.UISystem
                 element.FullTick(delta);
             }
             pDown = mDown;
-            foreach (UIElement element in Children)
-            {
-                element.FullTick(delta);
-            }
         }
 
         /// <summary>
@@ -404,7 +412,10 @@ namespace FGEGraphics.UISystem
             CheckChildren();
             foreach (UIElement element in Children)
             {
-                element.UpdatePositions(output, delta, xoff, yoff, lastRot);
+                if (element.IsValid)
+                {
+                    element.UpdatePositions(output, delta, xoff, yoff, lastRot);
+                }
             }
         }
 
@@ -491,17 +502,15 @@ namespace FGEGraphics.UISystem
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>A list of child elements containing the position.</returns>
-        protected virtual List<UIElement> GetAllAt(int x, int y)
+        protected virtual IEnumerable<UIElement> GetAllAt(int x, int y)
         {
-            List<UIElement> found = new List<UIElement>();
             foreach (UIElement element in Children)
             {
-                if (element.Contains(x, y))
+                if (element.IsValid && element.Contains(x, y))
                 {
-                    found.Add(element);
+                    yield return element;
                 }
             }
-            return found;
         }
 
         /// <summary>
@@ -510,17 +519,15 @@ namespace FGEGraphics.UISystem
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>A list of child elements not containing the position.</returns>
-        protected virtual List<UIElement> GetAllNotAt(int x, int y)
+        protected virtual IEnumerable<UIElement> GetAllNotAt(int x, int y)
         {
-            List<UIElement> found = new List<UIElement>();
             foreach (UIElement element in Children)
             {
-                if (!element.Contains(x, y))
+                if (element.IsValid && !element.Contains(x, y))
                 {
-                    found.Add(element);
+                    yield return element;
                 }
             }
-            return found;
         }
 
         /// <summary>
