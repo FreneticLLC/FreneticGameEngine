@@ -196,7 +196,7 @@ namespace FGEGraphics.AudioSystem
                 if (err != ALError.NoError)
                 {
                     SysConsole.Output(OutputType.WARNING, "Found audio error " + err + " for " + inp);
-                    //init(TheClient, CVars);
+                    //init(Client, CVars);
                     return;
                 }
             }
@@ -229,7 +229,7 @@ namespace FGEGraphics.AudioSystem
                 if (err != ALError.NoError)
                 {
                     SysConsole.Output(OutputType.WARNING, "Found audio error " + err + "!");
-                    //init(TheClient, CVars);
+                    //init(Client, CVars);
                     return;
                 }
             }

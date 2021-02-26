@@ -1130,7 +1130,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         {
             GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(4, Config.DesaturationAmount);
-            //GL.Uniform1(7, (float)TheClient.GlobalTickTimeLocal);
+            //GL.Uniform1(7, (float)Client.GlobalTickTimeLocal);
             GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
             GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
             GL.UniformMatrix4(9, false, ref dataMatrix);

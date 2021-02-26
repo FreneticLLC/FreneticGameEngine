@@ -39,7 +39,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// The game client window.
         /// </summary>
-        public GameClientWindow TheClient;
+        public GameClientWindow Client;
 
         /// <summary>
         /// The internal VR Compositor.
@@ -67,7 +67,7 @@ namespace FGEGraphics.GraphicsHelpers
                 return null;
             }
             EVRInitError err = EVRInitError.None;
-            VRSupport vrs = new VRSupport() { TheClient = tclient, VR = OpenVR.Init(ref err) };
+            VRSupport vrs = new VRSupport() { Client = tclient, VR = OpenVR.Init(ref err) };
             if (err != EVRInitError.None)
             {
                 SysConsole.Output(OutputType.INFO, "VR error: " + err + ": " + OpenVR.GetStringForHmdError(err));
@@ -95,8 +95,8 @@ namespace FGEGraphics.GraphicsHelpers
                 throw new Exception("Failed to start VR: Invalid render target size!");
             }
             w *= 2;
-            TheClient.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
-            TheClient.Engine3D.MainView.GenerationHelper.GenerateFBO();
+            Client.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
+            Client.Engine3D.MainView.GenerationHelper.GenerateFBO();
             StringBuilder val = new StringBuilder(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
@@ -107,14 +107,14 @@ namespace FGEGraphics.GraphicsHelpers
             Compositor.CompositorBringToFront();
             LeftTexture = new VRControllerTextureEngine();
             RightTexture = new VRControllerTextureEngine();
-            LeftTexture.BaseTexture = TheClient.Textures.GetTexture("vr/controller/vive_circle_left");
-            RightTexture.BaseTexture = TheClient.Textures.GetTexture("vr/controller/vive_circle_right");
+            LeftTexture.BaseTexture = Client.Textures.GetTexture("vr/controller/vive_circle_left");
+            RightTexture.BaseTexture = Client.Textures.GetTexture("vr/controller/vive_circle_right");
             LeftTexture.GenerateFirst();
             RightTexture.GenerateFirst();
-            RightControllerModel = TheClient.Models.GetModel("vr/controller/vive");
-            LeftControllerModel = TheClient.Models.GetModel("vr/controller/vive");
-            TheClient.VR = this;
-            TheClient.Engine3D.Render3DView = true;
+            RightControllerModel = Client.Models.GetModel("vr/controller/vive");
+            LeftControllerModel = Client.Models.GetModel("vr/controller/vive");
+            Client.VR = this;
+            Client.Engine3D.Render3DView = true;
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(TheClient.Engine3D.MainView.Internal.CurrentFBOTexture)
+                handle = new IntPtr(Client.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t bounds = new VRTextureBounds_t()
             {
@@ -291,7 +291,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(TheClient.Engine3D.MainView.Internal.CurrentFBOTexture)
+                handle = new IntPtr(Client.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t rbounds = new VRTextureBounds_t()
             {

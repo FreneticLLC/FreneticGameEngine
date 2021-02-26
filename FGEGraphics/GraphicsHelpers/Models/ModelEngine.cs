@@ -62,7 +62,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <summary>
         /// The client engine.
         /// </summary>
-        public GameClientWindow TheClient;
+        public GameClientWindow Client;
 
         /// <summary>
         /// Prepares the model system.
@@ -71,7 +71,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <param name="tclient">Backing client.</param>
         public void Init(AnimationEngine engine, GameClientWindow tclient)
         {
-            TheClient = tclient;
+            Client = tclient;
             AnimEngine = engine;
             Handler = new ModelHandler();
             LoadedModels = new Dictionary<string, Model>(128);
@@ -146,7 +146,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             try
             {
                 filename = FileEngine.CleanFileName(filename);
-                if (!TheClient.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
+                if (!Client.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
                         TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
@@ -207,7 +207,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 Model3D scene = Handler.LoadModel(data);
                 List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
                 Model mod = FromSceneNoGenerate(scene, modelName, builders);
-                TheClient.Schedule.ScheduleSyncTask(() =>
+                Client.Schedule.ScheduleSyncTask(() =>
                 {
                     foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
                     {
@@ -234,7 +234,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             {
                 SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
             }
-            TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
+            Client.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
         }
 

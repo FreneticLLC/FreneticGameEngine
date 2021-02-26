@@ -325,42 +325,42 @@ namespace FGEGraphics.GraphicsHelpers.Models
             Vector3 offs = new Vector3(-0.5f, -0.5f, 0f);
             Matrix4 off1 = Matrix4.CreateTranslation(offs);
             //Matrix4 off2 = Matrix4.CreateTranslation(-offs);
-            //Engine.TheClient.Rendering.SetMinimumLight(1f);
+            //Engine.Client.Rendering.SetMinimumLight(1f);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * Matrix4.CreateRotationX((float)Math.PI * 0.5f) * Matrix4.CreateRotationZ((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Key);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Value);
-            Engine.TheClient.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateRotationX((float)Math.PI) * Matrix4.CreateTranslation(vpos));
+            Engine.Client.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateRotationX((float)Math.PI) * Matrix4.CreateTranslation(vpos));
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            //Engine.TheClient.Rendering.SetMinimumLight(0f);
+            //Engine.Client.Rendering.SetMinimumLight(0f);
         }
 
         /// <summary>
@@ -421,7 +421,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 return;
             }
             Skinned = true;
-            if (Engine.TheClient.Files.TryReadFileText("models/" + Name + ".skin", out string fileText))
+            if (Engine.Client.Files.TryReadFileText("models/" + Name + ".skin", out string fileText))
             {
                 string[] data = fileText.SplitFast('\n');
                 int c = 0;
