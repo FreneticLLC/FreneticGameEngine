@@ -26,7 +26,7 @@ namespace FGECore.PhysicsSystem
     /// <summary>
     /// Represents a physical world (space).
     /// </summary>
-    public class PhysicsSpace<T, T2> where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+    public class PhysicsSpace
     {
         /// <summary>
         /// The actual internal physics space.
@@ -64,6 +64,56 @@ namespace FGECore.PhysicsSystem
         public double RelativeScaleInverse = 1.0;
 
         /// <summary>
+        /// Gets or sets the internal default gravity value.
+        /// </summary>
+        public Location Gravity
+        {
+            get
+            {
+                return Internal.ForceUpdater.Gravity.ToLocation();
+            }
+            set
+            {
+                Internal.ForceUpdater.Gravity = value.ToBEPU();
+            }
+        }
+
+        /// <summary>
+        /// Spawns a physical object into the physics world.
+        /// One entity per physics object only!
+        /// </summary>
+        /// <param name="bepuent">The BEPU object.</param>
+        public void Spawn(ISpaceObject bepuent)
+        {
+            Internal.Add(bepuent);
+        }
+
+        /// <summary>
+        /// De-Spawns a physical object from the physics world.
+        /// One entity per physics object only!
+        /// </summary>
+        /// <param name="bepuent">The BEPU object.</param>
+        public void Despawn(ISpaceObject bepuent)
+        {
+            Internal.Remove(bepuent);
+        }
+
+        /// <summary>
+        /// Returns a simple string form of this physics world.
+        /// </summary>
+        /// <returns>The simple string form.</returns>
+        public override string ToString()
+        {
+            return "Physics World, with entity count=" + Internal.Entities.Count;
+        }
+    }
+
+    /// <summary>
+    /// Represents a physical world (space), with generic types refering the implementation type.
+    /// </summary>
+    public class PhysicsSpace<T, T2> : PhysicsSpace where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+    {
+        /// <summary>
         /// Construct the physics space.
         /// </summary>
         /// <param name="construct">Set false to disable constructing the internal space.</param>
@@ -80,50 +130,6 @@ namespace FGECore.PhysicsSystem
             }
             Internal = new Space(pl);
             Internal.ForceUpdater.Gravity = new Vector3(0, 0, -9.8);
-        }
-
-        /// <summary>
-        /// Gets or sets the internal default gravity value.
-        /// </summary>
-        public Location Gravity
-        {
-            get
-            {
-                return Internal.ForceUpdater.Gravity.ToLocation();
-            }
-            set
-            {
-                Internal.ForceUpdater.Gravity = value.ToBEPU();
-            }
-        }
-
-        /// <summary>
-        /// All current entities in this physics world.
-        /// </summary>
-        public List<T> SpawnedEntities = new List<T>();
-
-        /// <summary>
-        /// Spawns a physical object into the physics world.
-        /// One entity per physics object only!
-        /// </summary>
-        /// <param name="ent">The controlling entity.</param>
-        /// <param name="bepuent">The BEPU object.</param>
-        public void Spawn(T ent, ISpaceObject bepuent)
-        {
-            Internal.Add(bepuent);
-            SpawnedEntities.Add(ent);
-        }
-
-        /// <summary>
-        /// De-Spawns a physical object from the physics world.
-        /// One entity per physics object only!
-        /// </summary>
-        /// <param name="ent">The controlling entity.</param>
-        /// <param name="bepuent">The BEPU object.</param>
-        public void Despawn(T ent, ISpaceObject bepuent)
-        {
-            Internal.Remove(bepuent);
-            SpawnedEntities.Remove(ent);
         }
 
         /// <summary>
@@ -147,9 +153,9 @@ namespace FGECore.PhysicsSystem
                 {
                     yield return bres;
                 }
-                else if (bpe.Tag is EntityPhysicsProperty<T, T2> pres)
+                else if (bpe.Tag is EntityPhysicsProperty pres)
                 {
-                    yield return pres.Entity;
+                    yield return pres.Entity as T;
                 }
             }
         }
@@ -167,7 +173,7 @@ namespace FGECore.PhysicsSystem
             RayCastResult rcr;
             if (filter != null)
             {
-                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty<T, T2> t2) && filter(t2.Entity)), out rcr))
+                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T)), out rcr))
                 {
                     return null;
                 }
@@ -185,9 +191,9 @@ namespace FGECore.PhysicsSystem
                 {
                     return res;
                 }
-                else if (rcr.HitObject.Tag is EntityPhysicsProperty<T, T2> pres)
+                else if (rcr.HitObject.Tag is EntityPhysicsProperty pres)
                 {
-                    return pres.Entity;
+                    return pres.Entity as T;
                 }
             }
             return null;
@@ -224,21 +230,12 @@ namespace FGECore.PhysicsSystem
                 {
                     return res;
                 }
-                else if (rcr.HitObject.Tag is EntityPhysicsProperty<T, T2> pres)
+                else if (rcr.HitObject.Tag is EntityPhysicsProperty pres)
                 {
-                    return pres.Entity;
+                    return pres.Entity as T;
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        /// Returns a simple string form of this physics world.
-        /// </summary>
-        /// <returns>The simple string form.</returns>
-        public override string ToString()
-        {
-            return "Physics World, with entity count=" + Internal.Entities.Count;
         }
     }
 }

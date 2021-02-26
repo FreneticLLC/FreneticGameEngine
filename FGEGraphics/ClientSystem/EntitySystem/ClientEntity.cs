@@ -16,9 +16,7 @@ using FGECore.PropertySystem;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents an entity on the client side.
-    /// </summary>
+    /// <summary>Represents an entity on the client side.</summary>
     public class ClientEntity : BasicEntity<ClientEntity, GameEngineBase>
     {
         /// <summary>
@@ -27,25 +25,12 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         /// </summary>
         public EntityRenderableProperty Renderer = null;
 
-        /// <summary>
-        /// Gets the client-side engine.
-        /// </summary>
-        public GameEngineBase ClientEngine
-        {
-            get
-            {
-                return Engine as GameEngineBase;
-            }
-        }
-
-        /// <summary>
-        /// Gets the client associated with this entity.
-        /// </summary>
+        /// <summary>Gets the client associated with this entity.</summary>
         public GameClientWindow Client
         {
             get
             {
-                return ClientEngine.Client;
+                return Engine.Client;
             }
         }
         
@@ -59,10 +44,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
         }
 
-        /// <summary>
-        /// Called when a property is added.
-        /// </summary>
-        /// <param name="prop">The property.</param>
+        /// <summary>Called when a property is added.</summary>
         public override void OnAdded(Property prop)
         {
             base.OnAdded(prop);
@@ -72,10 +54,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Called when a property is removed.
-        /// </summary>
-        /// <param name="prop">The property.</param>
+        /// <summary>Called when a property is removed.</summary>
         public override void OnRemoved(Property prop)
         {
             base.OnRemoved(prop);
@@ -85,13 +64,10 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
         
-        /// <summary>
-        /// Gets a string debug helper for this entity.
-        /// </summary>
-        /// <returns>A string.</returns>
+        /// <summary>Gets a string debug helper for this entity.</summary>
         public override string ToString()
         {
-            return "ClientEntity of type: " + GetType().Name + ", ID: " + EID + ", with properties: " + PropertyList();
+            return $"ClientEntity of type: {GetType().Name}, ID: {EID}, with properties: {PropertyList()}";
         }
     }
 }

@@ -21,7 +21,7 @@ namespace FGECore.EntitySystem
     /// <summary>
     /// Restricts a physics entity to 2D only.
     /// </summary>
-    public class EntityPhysics2DLimitProperty<T, T2, T3> : BasicEntityProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2> where T3: EntityPhysicsProperty<T, T2>
+    public class EntityPhysics2DLimitProperty : BasicEntityProperty
     {
         /// <summary>
         /// Whether to force the position (in addition to rotation).
@@ -35,7 +35,7 @@ namespace FGECore.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
-            PhysEnt = Entity.GetProperty<T3>();
+            PhysEnt = Entity.GetProperty<EntityPhysicsProperty>();
             Entity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
             Entity.OnTick += TickHandle;
             PhysEnt.DespawnEvent += RemoveJoints;
@@ -97,6 +97,6 @@ namespace FGECore.EntitySystem
         /// <summary>
         /// The relevant physics entity.
         /// </summary>
-        public T3 PhysEnt;
+        public EntityPhysicsProperty PhysEnt;
     }
 }

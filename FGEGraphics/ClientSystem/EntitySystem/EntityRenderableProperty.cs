@@ -17,9 +17,7 @@ using FGECore.PropertySystem;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Abstract helper to render an entity.
-    /// </summary>
+    /// <summary>Abstract helper to render an entity.</summary>
     public abstract class EntityRenderableProperty : ClientEntityProperty
     {
         /// <summary>
@@ -30,16 +28,12 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         [PropertyAutoSavable]
         public bool CastShadows = true;
 
-        /// <summary>
-        /// Whether to ONLY RENDER as a shadow.
-        /// </summary>
+        /// <summary>Whether to ONLY RENDER as a shadow.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public bool ShadowsOnly = false;
 
-        /// <summary>
-        /// Whether this Renderable entity is currently visible.
-        /// </summary>
+        /// <summary>Whether this Renderable entity is currently visible.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public bool IsVisible = true;
@@ -55,7 +49,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
 
         /// <summary>
         /// Where the entity should render at.
-        /// <para>Use <see cref="BasicEntity{T, T2}.SetPosition(Location)"/> to update this.</para>
+        /// <para>Use <see cref="BasicEntity.SetPosition(Location)"/> to update this.</para>
         /// </summary>
         [PropertyDebuggable]
         public Location RenderAt
@@ -68,7 +62,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
 
         /// <summary>
         /// What orientation to render the entity at.
-        /// <para>Use <see cref="BasicEntity{T, T2}.SetOrientation(Quaternion)"/> to update this.</para>
+        /// <para>Use <see cref="BasicEntity.SetOrientation(Quaternion)"/> to update this.</para>
         /// </summary>
         [PropertyDebuggable]
         public Quaternion RenderOrientation
@@ -79,9 +73,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Fired when the entity is spawned.
-        /// </summary>
+        /// <summary>Fired when the entity is spawned.</summary>
         public override void OnSpawn()
         {
             Entity.OnPositionChanged += FixLocation;
@@ -89,9 +81,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             HandledRemove = false;
         }
 
-        /// <summary>
-        /// Fired when the entity is de-spawned.
-        /// </summary>
+        /// <summary>Fired when the entity is de-spawned.</summary>
         public override void OnDespawn()
         {
             if (HandledRemove)
@@ -104,14 +94,10 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             Entity.OnOrientationChanged -= FixOrientation;
         }
 
-        /// <summary>
-        /// Whether the removal was already handled.
-        /// </summary>
+        /// <summary>Whether the removal was already handled.</summary>
         private bool HandledRemove = false;
 
-        /// <summary>
-        /// Handles removal event.
-        /// </summary>
+        /// <summary>Handles removal event.</summary>
         public override void OnRemoved()
         {
             OnDespawn();
@@ -120,15 +106,13 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Fixes the location of the renderable.
         /// </summary>
-        /// <param name="loc">The new location.</param>
-        public void FixLocation(Location loc)
+        /// <param name="location">The new location.</param>
+        public void FixLocation(Location location)
         {
             OtherLocationPatch();
         }
 
-        /// <summary>
-        /// Fired when the location is fixed.
-        /// </summary>
+        /// <summary>Fired when the location is fixed.</summary>
         public virtual void OtherLocationPatch()
         {
         }
@@ -136,15 +120,13 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         /// <summary>
         /// Fixes the orientation of the renderable.
         /// </summary>
-        /// <param name="q">The new orientation.</param>
-        public void FixOrientation(Quaternion q)
+        /// <param name="orientation">The new orientation.</param>
+        public void FixOrientation(Quaternion orientation)
         {
             OtherOrientationPatch();
         }
 
-        /// <summary>
-        /// Fired when the orientation is fixed.
-        /// </summary>
+        /// <summary>Fired when the orientation is fixed.</summary>
         public virtual void OtherOrientationPatch()
         {
         }

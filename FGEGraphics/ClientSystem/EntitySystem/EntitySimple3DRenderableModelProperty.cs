@@ -21,9 +21,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Renders a 3D model.
-    /// </summary>
+    /// <summary>Renders a 3D model.</summary>
     public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
     {
         /// <summary>

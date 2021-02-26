@@ -23,12 +23,12 @@ namespace FGECore.EntitySystem
      /// <summary>
      /// Attaches an entity to a character.
      /// </summary>
-    public class EntityCharacterAttachProperty<T, T2, T3> : EntitySimpleAttachProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2> where T3 : EntityPhysicsProperty<T, T2>
+    public class EntityCharacterAttachProperty : EntitySimpleAttachProperty
     {
         /// <summary>
         /// The entity this entity is attached to.
         /// </summary>
-        public override T AttachedTo
+        public override BasicEntity AttachedTo
         {
             get
             {
@@ -37,7 +37,7 @@ namespace FGECore.EntitySystem
             set
             {
                 base.AttachedTo = value;
-                Character = AttachedTo.GetProperty<T3>().OriginalObject as CharacterController;
+                Character = AttachedTo.GetProperty<EntityPhysicsProperty>().OriginalObject as CharacterController;
             }
         }
 
@@ -88,7 +88,7 @@ namespace FGECore.EntitySystem
         /// <param name="viewDir">The stand-in view direction.</param>
         /// <param name="downDir">The stand-in down direction.</param>
         /// <returns>The relative quaternion.</returns>
-        public MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
+        public static MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
         {
             // TODO: Less complicated option?!
             Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, viewDir, -downDir);

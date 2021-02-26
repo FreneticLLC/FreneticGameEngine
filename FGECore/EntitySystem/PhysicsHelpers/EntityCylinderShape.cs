@@ -40,7 +40,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
 
         /// <summary>
         /// Whether to auto fix the orientation of the cylinder.
-        /// <para>This will be Y-Up if false, might be beneficial to use <see cref="BasicEntity{T, T2}.RotateYToZ"/>.</para>
+        /// <para>This will be Y-Up if false, might be beneficial to use <see cref="BasicEntity.RotateYToZ"/>.</para>
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]

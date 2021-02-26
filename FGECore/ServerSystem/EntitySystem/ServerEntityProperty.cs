@@ -15,9 +15,7 @@ using FGECore.EntitySystem;
 
 namespace FGECore.ServerSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents a property on a server-side entity.
-    /// </summary>
+    /// <summary>Represents a property on a server-side entity.</summary>
     public class ServerEntityProperty : BasicEntityProperty<ServerEntity, ServerEngine>
     {
     }

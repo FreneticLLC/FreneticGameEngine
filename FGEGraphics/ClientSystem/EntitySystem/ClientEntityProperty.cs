@@ -18,14 +18,10 @@ using FGECore.EntitySystem;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents a property on a client-side entity.
-    /// </summary>
+    /// <summary>Represents a property on a client-side entity.</summary>
     public class ClientEntityProperty : BasicEntityProperty<ClientEntity, GameEngineBase>
     {
-        /// <summary>
-        /// Gets the associated client game engine in 2D form.
-        /// </summary>
+        /// <summary>Gets the associated client game engine, as a <see cref="GameEngine2D"/> (only works when the engine is 3D, of course)</summary>
         public GameEngine2D Engine2D
         {
             get
@@ -34,9 +30,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Gets the associated client game engine in 3D form.
-        /// </summary>
+        /// <summary>Gets the associated client game engine, as a <see cref="GameEngine3D"/> (only works when the engine is 3D, of course).</summary>
         public GameEngine3D Engine3D
         {
             get

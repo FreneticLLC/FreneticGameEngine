@@ -15,21 +15,15 @@ using FGECore.PropertySystem;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents a 2D renderable.
-    /// </summary>
+    /// <summary>Represents a 2D renderable.</summary>
     public abstract class Entity2DRenderableProperty : EntityRenderableProperty
     {
-        /// <summary>
-        /// Whether to automatically update the rendering priority based on Z position.
-        /// </summary>
+        /// <summary>Whether to automatically update the rendering priority based on Z position.</summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
         public bool AutoUpdatePriorityZ = true;
 
-        /// <summary>
-        /// Fired when the location is fixed.
-        /// </summary>
+        /// <summary>Fired when the location is fixed.</summary>
         public override void OtherLocationPatch()
         {
             if (AutoUpdatePriorityZ)

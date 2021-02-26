@@ -19,14 +19,10 @@ using FGEGraphics.GraphicsHelpers.Textures;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Renders a simple 2D box.
-    /// </summary>
+    /// <summary>Renders a simple 2D box.</summary>
     public class EntitySimple2DRenderableBoxProperty : Entity2DRenderableProperty
     {
-        /// <summary>
-        /// How far the box extends up and left.
-        /// </summary>
+        /// <summary>How far the box extends up and left.</summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
         public Vector2 BoxUpLeft;

@@ -26,12 +26,12 @@ namespace FGECore.EntitySystem
     /// <summary>
     /// Identifies and controls the factors of an entity relating to standard-implemented physics.
     /// </summary>
-    public class EntityPhysicsProperty<T, T2> : BasicEntityProperty<T, T2>, ICharacterTag where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
+    public class EntityPhysicsProperty : BasicEntityProperty, ICharacterTag
     {
         /// <summary>
         /// The owning physics world.
         /// </summary> // TODO: Save the correct physics world ref?
-        public PhysicsSpace<T, T2> PhysicsWorld; // Set by constructor.
+        public PhysicsSpace PhysicsWorld; // Set by constructor.
 
         /// <summary>
         /// The spawned physics body.
@@ -232,7 +232,7 @@ namespace FGECore.EntitySystem
 
         /// <summary>
         /// Gets or sets the entity's position.
-        /// This value is scaled to the physics scaling factor defined by <see cref="PhysicsSpace{T, T2}.RelativeScale"/>.
+        /// This value is scaled to the physics scaling factor defined by <see cref="PhysicsSpace.RelativeScale"/>.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -312,7 +312,7 @@ namespace FGECore.EntitySystem
         {
             if (PhysicsWorld == null)
             {
-                PhysicsWorld = Entity.Engine.PhysicsWorld;
+                PhysicsWorld = Engine.PhysicsWorldGeneric;
             }
             SpawnHandle();
             Entity.OnPositionChanged += PosCheck;
@@ -335,13 +335,13 @@ namespace FGECore.EntitySystem
         }
 
         /// <summary>
-        /// Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty{T, T2}"/> is pushing its own updates.
+        /// Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty"/> is pushing its own updates.
         /// </summary>
         public bool CheckDisableAllowed = true;
 
         /// <summary>
         /// Set to indicate that Position/Orientation checks are not needed currently.
-        /// This will be set (to true) automatically when the <see cref="EntityPhysicsProperty{T, T2}"/> is pushing out its own position updates,
+        /// This will be set (to true) automatically when the <see cref="EntityPhysicsProperty"/> is pushing out its own position updates,
         /// and must be explicitly disabled to update anyway.
         /// If disabling this explicitly may be problematic, consider disabling <see cref="CheckDisableAllowed"/> instead.
         /// </summary>
@@ -420,7 +420,7 @@ namespace FGECore.EntitySystem
             SpawnedBody.Tag = Entity;
             SpawnedBody.CollisionInformation.Tag = this;
             // TODO: Other settings
-            PhysicsWorld.Spawn(Entity, OriginalObject);
+            PhysicsWorld.Spawn(OriginalObject);
             Entity.OnTick += Tick;
             InternalPosition = Location.Zero;
             InternalOrientation = MathHelpers.Quaternion.Identity;
@@ -487,7 +487,7 @@ namespace FGECore.EntitySystem
             UpdateFields();
             Entity.OnTick -= Tick;
             DespawnEvent?.Invoke();
-            PhysicsWorld.Despawn(Entity, OriginalObject);
+            PhysicsWorld.Despawn(OriginalObject);
             SpawnedBody = null;
             OriginalObject = null;
         }

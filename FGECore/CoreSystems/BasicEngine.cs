@@ -19,110 +19,89 @@ using FGECore.PropertySystem;
 
 namespace FGECore.CoreSystems
 {
-    /// <summary>
-    /// Represents the common code shared by a server and client engine.
-    /// </summary>
-    public abstract class BasicEngine<T, T2> where T : BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+    /// <summary>Represents the common code shared by a server and client engine.</summary>
+    public abstract class BasicEngine
     {
-        /// <summary>
-        /// The general-purpose physics world.
-        /// </summary>
-        public PhysicsSpace<T, T2> PhysicsWorld;
-
-        /// <summary>
-        /// The instance that owns this engine.
-        /// </summary>
-        public GameInstance<T, T2> OwningInstance;
-
-        /// <summary>
-        /// Gets the scheduler from the backing GameInstance.
-        /// </summary>
-        public Scheduler Schedule
-        {
-            get
-            {
-                return OwningInstance.Schedule;
-            }
-        }
-
-        /// <summary>
-        /// Random helper object.
-        /// </summary>
+        /// <summary>Random helper object.</summary>
         public MTRandom RandomHelper = new MTRandom();
 
-        /// <summary>
-        /// Loads the basic engine.
-        /// </summary>
+        /// <summary>The source object for this engine. Set to any tag style constant reference you find most helpful to keep!</summary>
+        public Object Source;
+
+        /// <summary>Current frame delta (seconds).</summary>
+        public double Delta;
+
+        /// <summary>How long the game has run (seconds).</summary>
+        public double GlobalTickTime = 1.0;
+
+        /// <summary>The current highest EID value.</summary>
+        public long CurrentEID = 1;
+
+        /// <summary>The instance that owns this engine.</summary>
+        public abstract GameInstance OwningInstanceGeneric { get; }
+
+        /// <summary>The general-purpose physics world.</summary>
+        public abstract PhysicsSpace PhysicsWorldGeneric { get; }
+
+        /// <summary>Gets the scheduler from the backing GameInstance.</summary>
+        public Scheduler Schedule => OwningInstanceGeneric.Schedule;
+    }
+
+    /// <summary>
+    /// Represents the common code shared by a server and client engine, with generic types refering the implementation type.
+    /// </summary>
+    public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+    {
+        /// <summary>The general-purpose physics world.</summary>
+        public PhysicsSpace<T, T2> PhysicsWorld;
+
+        /// <summary>The general-purpose physics world.</summary>
+        public sealed override PhysicsSpace PhysicsWorldGeneric => PhysicsWorld;
+
+        /// <summary>The instance that owns this engine.</summary>
+        public GameInstance<T, T2> OwningInstance;
+
+        /// <summary>The instance that owns this engine.</summary>
+        public sealed override GameInstance OwningInstanceGeneric => OwningInstance;
+
+        /// <summary>Loads the basic engine.</summary>
         public void LoadBasic()
         {
             SysConsole.Output(OutputType.INIT, "BasicEngine prepping physics helper...");
             PhysicsWorld = new PhysicsSpace<T, T2>();
         }
 
-        /// <summary>
-        /// The source object for this engine. Set to any tag style constant reference you find most helpful to keep!
-        /// </summary>
-        public Object Source;
-
-        /// <summary>
-        /// Current frame delta (seconds).
-        /// </summary>
-        public double Delta;
-
-        /// <summary>
-        /// How long the game has run (seconds).
-        /// </summary>
-        public double GlobalTickTime = 1.0;
-
-        /// <summary>
-        /// All entities currently on this server, if EIDs are used.
-        /// </summary>
+        /// <summary>All entities currently on this server, if EIDs are used.</summary>
         public Dictionary<long, T> Entities = new Dictionary<long, T>(8192);
 
-        /// <summary>
-        /// All entities currently on the server.
-        /// </summary>
+        /// <summary>All entities currently on the server.</summary>
         public List<T> EntityList = new List<T>(8192);
 
         /// <summary>
         /// Returns a duplicate of the entity list, for when you expect the master list to change.
         /// </summary>
-        /// <returns>The duplicate.</returns>
         public IReadOnlyList<T> EntityListDuplicate()
         {
             return new List<T>(EntityList);
         }
 
-        /// <summary>
-        /// Adds an entity to the server, quick and deadly. Prefer spawn over this.
-        /// </summary>
-        /// <param name="be">The entity.</param>
-        public void AddEntity(T be)
+        /// <summary>Adds an entity to the server, quick and deadly. Prefer <see cref="SpawnEntity(Property[])"/> over this.</summary>
+        public void AddEntity(T entity)
         {
-            EntityList.Add(be);
-            Entities.Add(be.EID, be);
+            EntityList.Add(entity);
+            Entities.Add(entity.EID, entity);
         }
 
         /// <summary>
-        /// Removes an entity from the list, quick and deadly. Prefer despawn over this.
+        /// Removes an entity from the list, quick and deadly. Prefer <see cref="DespawnEntity(T)"/> over this.
         /// </summary>
-        /// <param name="be">The entity to remove.</param>
-        public void RemoveEntity(T be)
+        public void RemoveEntity(T entity)
         {
-            EntityList.Remove(be);
-            Entities.Remove(be.EID);
+            EntityList.Remove(entity);
+            Entities.Remove(entity.EID);
         }
 
-        /// <summary>
-        /// The current highest EID value.
-        /// </summary>
-        public long CurrentEID = 1;
-
-        /// <summary>
-        /// Gets all properties with a specific property type from any and all entities currently spawned.
-        /// </summary>
-        /// <typeparam name="TP">The property type.</typeparam>
-        /// <returns>All properties that match.</returns>
+        /// <summary>Gets all properties with a specific property type from any and all entities currently spawned.</summary>
         public IEnumerable<TP> GetAllByType<TP>() where TP: Property
         {
             foreach (T ent in EntityList)
@@ -134,11 +113,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Gets all properties with a specific property type from any and all entities currently spawned.
-        /// </summary>
-        /// <param name="t">The property type.</param>
-        /// <returns>All properties that match.</returns>
+        /// <summary>Gets all properties with a specific property type from any and all entities currently spawned.</summary>
         public IEnumerable<Property> GetAllByType(Type t)
         {
             foreach (T ent in EntityList)
@@ -154,8 +129,6 @@ namespace FGECore.CoreSystems
         /// Gets all properties that are a sub-type of the given property type from any and all entities currently spawned.
         /// <para>This can return multiple properties for any given entity.</para>
         /// </summary>
-        /// <typeparam name="TP">The property type.</typeparam>
-        /// <returns>All properties that match.</returns>
         public IEnumerable<TP> GetAllSubTypes<TP>() where TP : Property
         {
             foreach (T ent in EntityList)
@@ -171,8 +144,6 @@ namespace FGECore.CoreSystems
         /// Gets all properties that are a sub-type of the given property type from any and all entities currently spawned.
         /// <para>This can return multiple properties for any given entity.</para>
         /// </summary>
-        /// <param name="t">The property type.</param>
-        /// <returns>All properties that match.</returns>
         public IEnumerable<Property> GetAllSubTypes(Type t)
         {
             foreach (T ent in EntityList)
@@ -191,8 +162,6 @@ namespace FGECore.CoreSystems
         /// For example, the main player, or a game controller.</para>
         /// <para>Returns null if none found.</para>
         /// </summary>
-        /// <typeparam name="TP">The property type.</typeparam>
-        /// <returns>One property that matches, or null.</returns>
         public TP GetAnyByType<TP>() where TP : Property
         {
             foreach (T ent in EntityList)
@@ -212,8 +181,6 @@ namespace FGECore.CoreSystems
         /// For example, the main player, or a game controller.</para>
         /// <para>Returns null if none found.</para>
         /// </summary>
-        /// <param name="t">The property type.</param>
-        /// <returns>One property that matches, or null.</returns>
         public Property GetAnyByType(Type t)
         {
             foreach (T ent in EntityList)
@@ -226,20 +193,14 @@ namespace FGECore.CoreSystems
             return null;
         }
 
-        /// <summary>
-        /// Creates an entity.
-        /// </summary>
+        /// <summary>Creates an entity.</summary>
         /// <param name="ticks">Whether it should tick.</param>
-        /// <returns>The entity.</returns>
         public abstract T CreateEntity(bool ticks);
 
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
+        /// <summary>Spawns an entity into the world.</summary>
         /// <param name="ticks">Whether it should tick.</param>
         /// <param name="configure">A method to configure the entity prior to spawn or property add, if one applies.</param>
         /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
         public T SpawnEntity(bool ticks, Action<T> configure, params Property[] props)
         {
             try
@@ -278,42 +239,30 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
+        /// <summary>Spawns an entity into the world.</summary>
         /// <param name="ticks">Whether it should tick.</param>
         /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
         public T SpawnEntity(bool ticks, params Property[] props)
         {
             return SpawnEntity(ticks, null, props);
         }
 
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
+        /// <summary>Spawns an entity into the world.</summary>
         /// <param name="configure">A method to configure the entity prior to spawn, if one applies.</param>
         /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
         public T SpawnEntity(Action<T> configure, params Property[] props)
         {
             return SpawnEntity(true, configure, props);
         }
 
-        /// <summary>
-        /// Spawns an entity into the world.
-        /// </summary>
+        /// <summary>Spawns an entity into the world.</summary>
         /// <param name="props">Any properties to apply.</param>
-        /// <returns>The spawned entity.</returns>
         public T SpawnEntity(params Property[] props)
         {
             return SpawnEntity(true, null, props);
         }
 
-        /// <summary>
-        /// Removes an entity from the world.
-        /// </summary>
-        /// <param name="ent">The entity to remove.</param>
+        /// <summary>Removes an entity from the world.</summary>
         public void DespawnEntity(T ent)
         {
             if (!ent.IsSpawned)
@@ -341,9 +290,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// The internal engine tick sequence.
-        /// </summary>
+        /// <summary>The internal engine tick sequence.</summary>
         public void Tick()
         {
             try

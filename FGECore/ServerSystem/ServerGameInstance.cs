@@ -54,7 +54,7 @@ namespace FGECore.ServerSystem
         public struct InternalData
         {
             /// <summary>
-            /// Used to calculate the <see cref="GameInstance{T, T2}.Delta"/> value.
+            /// Used to calculate the <see cref="GameInstance.Delta"/> value.
             /// </summary>
             public Stopwatch DeltaCounter;
 

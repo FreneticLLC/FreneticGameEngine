@@ -20,9 +20,9 @@ using System.Threading.Tasks;
 namespace FGECore.CoreSystems
 {
     /// <summary>
-    /// Watchdog thread manager for <see cref="GameInstance{T, T2}"/>.
+    /// Watchdog thread manager for <see cref="GameInstance"/>.
     /// </summary>
-    public class InstanceWatchdog<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
+    public class InstanceWatchdog
     {
         /// <summary>
         /// The watchdog SysConsole output type.
@@ -30,12 +30,12 @@ namespace FGECore.CoreSystems
         public static OutputType OUT_TYPE = new OutputType() { Name = "WATCHDOG", BaseColor = "^r^3" };
 
         /// <summary>
-        /// The relevant <see cref="GameInstance{T, T2}"/> being watched.
+        /// The relevant <see cref="GameInstance"/> being watched.
         /// </summary>
-        public GameInstance<T, T2> Instance;
+        public GameInstance Instance;
 
         /// <summary>
-        /// The primary <see cref="GameInstance{T, T2}"/> tick thread.
+        /// The primary <see cref="GameInstance"/> tick thread.
         /// </summary>
         public Thread WatchedThread;
 
@@ -55,7 +55,7 @@ namespace FGECore.CoreSystems
             public LockObject Lock;
 
             /// <summary>
-            /// Counter, incremented via <see cref="InstanceWatchdog{T, T2}.IsAlive"/>.
+            /// Counter, incremented via <see cref="InstanceWatchdog.IsAlive"/>.
             /// </summary>
             public ulong Counter;
 
@@ -74,7 +74,7 @@ namespace FGECore.CoreSystems
         /// Constructs and readies the watchdog.
         /// Call <see cref="Start"/> to begin watching.
         /// </summary>
-        public InstanceWatchdog(GameInstance<T, T2> _instance)
+        public InstanceWatchdog(GameInstance _instance)
         {
             Instance = _instance;
             Internal.Lock = new LockObject();

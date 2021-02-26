@@ -23,7 +23,7 @@ namespace FGECore.EntitySystem
     /// Represents a physics character's advanced options.
     /// <para>ONLY ADD TO CHARACTER PHYSICS ENTITIES.</para>
     /// </summary>
-    public class EntityPhysicsCharacterProperty<T, T2, T3> : BasicEntityProperty<T, T2> where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2> where T3: EntityPhysicsProperty<T, T2>
+    public class EntityPhysicsCharacterProperty : BasicEntityProperty
     {
         /// <summary>
         /// Whether to automatically correct friction.
@@ -37,7 +37,7 @@ namespace FGECore.EntitySystem
         /// </summary>
         public override void OnSpawn()
         {
-            PhysEnt = Entity.GetProperty<T3>();
+            PhysEnt = Entity.GetProperty<EntityPhysicsProperty>();
             Entity.OnSpawnEvent.AddEvent(SpawnHandle, this, 0);
             Entity.OnTick += TickHandle;
         }
@@ -125,6 +125,6 @@ namespace FGECore.EntitySystem
         /// <summary>
         /// The relevant physics entity.
         /// </summary>
-        public T3 PhysEnt;
+        public EntityPhysicsProperty PhysEnt;
     }
 }

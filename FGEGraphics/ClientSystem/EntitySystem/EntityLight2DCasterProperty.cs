@@ -22,14 +22,12 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents the fact that the entity casts 2D light.
-    /// </summary>
+    /// <summary>Represents the fact that the entity casts 2D light.</summary>
     public class EntityLight2DCasterProperty : ClientEntityProperty
     {
         /// <summary>
         /// Fixes the position of the light to match a new location.
-        /// Automatically called by <see cref="BasicEntity{T, T2}.OnPositionChanged"/>.
+        /// Automatically called by <see cref="BasicEntity.OnPositionChanged"/>.
         /// </summary>
         /// <param name="pos">The new position.</param>
         public void FixPosition(Location pos)

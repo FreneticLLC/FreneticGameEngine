@@ -18,19 +18,13 @@ using FGECore.MathHelpers;
 
 namespace FGECore.ServerSystem.EntitySystem
 {
-    /// <summary>
-    /// Represents an entity on the server side.
-    /// </summary>
+    /// <summary>Represents an entity on the server side.</summary>
     public class ServerEntity : BasicEntity<ServerEntity, ServerEngine>
     {
-        /// <summary>
-        /// Whether this entity should be sent over the network.
-        /// </summary>
+        /// <summary>Whether this entity should be sent over the network.</summary>
         public bool ShouldNetwork;
         
-        /// <summary>
-        /// Gets the backing server engine.
-        /// </summary>
+        /// <summary>Gets the backing server engine.</summary>
         public ServerEngine Server
         {
             get
@@ -51,13 +45,10 @@ namespace FGECore.ServerSystem.EntitySystem
             ShouldNetwork = _shouldNetwork;
         }
 
-        /// <summary>
-        /// Gets a string debug helper for this entity.
-        /// </summary>
-        /// <returns>A string.</returns>
+        /// <summary>Gets a string debug helper for this entity.</summary>
         public override string ToString()
         {
-            return "ServerEntity of type: " + GetType().Name + ", ID: " + EID + ", with properties: " + PropertyList();
+            return $"ServerEntity of type: {GetType().Name}, ID: {EID}, with properties: {PropertyList()}";
         }
     }
 }
