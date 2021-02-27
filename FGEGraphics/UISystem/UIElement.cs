@@ -46,11 +46,11 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// Gets the client game window used to render this element.
         /// </summary>
-        public virtual GameClientWindow Client
+        public virtual GameClientWindow Window
         {
             get
             {
-                return Parent.Client;
+                return Parent.Window;
             }
         }
 
@@ -299,9 +299,9 @@ namespace FGEGraphics.UISystem
         /// <param name="delta">The time since the last tick.</param>
         protected virtual void TickChildren(double delta)
         {
-            int mX = (int)Client.MouseX; // TODO: Propagate float support.
-            int mY = (int)Client.MouseY;
-            bool mDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
+            int mX = (int)Window.MouseX; // TODO: Propagate float support.
+            int mY = (int)Window.MouseY;
+            bool mDown = Window.CurrentMouse.IsButtonDown(MouseButton.Left);
             foreach (UIElement element in Children)
             {
                 if (!element.IsValid)

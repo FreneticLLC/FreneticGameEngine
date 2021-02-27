@@ -58,7 +58,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         protected override void Init()
         {
-            SubEngine.OwningInstance = Client;
+            SubEngine.OwningInstance = Window;
             SubEngine.Load();
         }
 

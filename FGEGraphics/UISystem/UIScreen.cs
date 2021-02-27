@@ -31,7 +31,7 @@ namespace FGEGraphics.UISystem
 
         /// <summary>
         /// A reference to the relevant client backing this screen.
-        /// Get this using <see cref="Client"/>.
+        /// Get this using <see cref="Window"/>.
         /// </summary>
         private readonly GameClientWindow InternalClient;
 
@@ -49,7 +49,7 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// Gets the client game window this screen is associated with.
         /// </summary>
-        public override GameClientWindow Client
+        public override GameClientWindow Window
         {
             get
             {

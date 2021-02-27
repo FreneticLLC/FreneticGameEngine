@@ -97,7 +97,7 @@ namespace FGEGraphics.UISystem
         {
             if (WatchMouse)
             {
-                Scroll -= (int)Client.CurrentMouse.Scroll.Y * 10; // TODO: Why is scroll a Vector2?
+                Scroll -= (int)Window.CurrentMouse.Scroll.Y * 10; // TODO: Why is scroll a Vector2?
                 if (Scroll < 0)
                 {
                     Scroll = 0;

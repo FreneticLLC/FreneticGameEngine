@@ -95,7 +95,7 @@ namespace FGEGraphics.UISystem
             int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Window.MouseX)
                 {
                     MinCursor = i;
                     MaxCursor = i;
@@ -144,7 +144,7 @@ namespace FGEGraphics.UISystem
             int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Client.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Window.MouseX)
                 {
                     MinCursor = Math.Min(i, MStart);
                     MaxCursor = Math.Max(i, MStart);
