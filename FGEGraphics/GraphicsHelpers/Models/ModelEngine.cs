@@ -24,45 +24,35 @@ using FGEGraphics.ClientSystem;
 
 namespace FGEGraphics.GraphicsHelpers.Models
 {
-    /// <summary>
-    /// System to help with models.
-    /// </summary>
+    /// <summary>System to handle 3D models for rendering.</summary>
     public class ModelEngine
     {
-        /// <summary>
-        /// All currently loaded models.
-        /// </summary>
+        /// <summary>All currently loaded models, mapped by name.</summary>
         public Dictionary<string, Model> LoadedModels;
 
-        /// <summary>
-        /// Internal model helper from the core.
-        /// </summary>
+        /// <summary>Internal model helper from the core.</summary>
         public ModelHandler Handler;
 
-        /// <summary>
-        /// A cube.
-        /// </summary>
+        /// <summary>A generic 1x1x1 cube model.</summary>
         public Model Cube;
 
-        /// <summary>
-        /// A cylinder.
-        /// </summary>
+        /// <summary>A generic cylinder model.</summary>
         public Model Cylinder;
 
-        /// <summary>
-        /// A sphere.
-        /// </summary>
+        /// <summary>A generic sphere model.</summary>
         public Model Sphere;
 
-        /// <summary>
-        /// A clear (empty) model.
-        /// </summary>
+        /// <summary>A clear (empty) model.</summary>
         public Model Clear;
 
-        /// <summary>
-        /// The client engine.
-        /// </summary>
-        public GameClientWindow Client;
+        /// <summary>The client game window that owns this model engine.</summary>
+        public GameClientWindow Window;
+
+        /// <summary>Current known engine time (in seconds since engine start).</summary>
+        public double CurrentTime = 0;
+
+        /// <summary>Backing animation engine.</summary>
+        public AnimationEngine AnimEngine;
 
         /// <summary>
         /// Prepares the model system.
@@ -71,7 +61,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <param name="tclient">Backing client.</param>
         public void Init(AnimationEngine engine, GameClientWindow tclient)
         {
-            Client = tclient;
+            Window = tclient;
             AnimEngine = engine;
             Handler = new ModelHandler();
             LoadedModels = new Dictionary<string, Model>(128);
@@ -122,18 +112,13 @@ namespace FGEGraphics.GraphicsHelpers.Models
         }
 
         /// <summary>
-        /// Update for delta.
+        /// Update delta time tracker.
         /// </summary>
         /// <param name="time">The new noted time.</param>
         public void Update(double time)
         {
             CurrentTime = time;
         }
-
-        /// <summary>
-        /// Current known time.
-        /// </summary>
-        public double CurrentTime = 0;
 
         /// <summary>
         /// Loads a model from file by name.
@@ -146,7 +131,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             try
             {
                 filename = FileEngine.CleanFileName(filename);
-                if (!Client.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
+                if (!Window.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
                 {
                     SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
                         TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
@@ -207,7 +192,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 Model3D scene = Handler.LoadModel(data);
                 List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
                 Model mod = FromSceneNoGenerate(scene, modelName, builders);
-                Client.Schedule.ScheduleSyncTask(() =>
+                Window.Schedule.ScheduleSyncTask(() =>
                 {
                     foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
                     {
@@ -234,14 +219,9 @@ namespace FGEGraphics.GraphicsHelpers.Models
             {
                 SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
             }
-            Client.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
+            Window.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
         }
-
-        /// <summary>
-        /// Backing animation engine.
-        /// </summary>
-        public AnimationEngine AnimEngine;
 
         /// <summary>
         /// loads a model from a file byte array.
@@ -403,7 +383,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <param name="model">The model.</param>
         /// <param name="engine">The engine.</param>
         /// <param name="allNodes">All current nodes.</param>
-        void PopulateChildren(ModelNode node, Model3DNode orin, Model model, AnimationEngine engine, List<ModelNode> allNodes)
+        public void PopulateChildren(ModelNode node, Model3DNode orin, Model model, AnimationEngine engine, List<ModelNode> allNodes)
         {
             allNodes.Add(node);
             if (engine.HeadBones.Contains(node.Name))
@@ -439,6 +419,5 @@ namespace FGEGraphics.GraphicsHelpers.Models
             vec[subind] = val;
             vecs[ind] = vec;
         }
-
     }
 }

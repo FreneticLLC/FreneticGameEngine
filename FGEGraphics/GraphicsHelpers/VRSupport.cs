@@ -23,33 +23,53 @@ using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.Models;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.GraphicsHelpers
 {
-    /// <summary>
-    /// The system to support VR on a 3D client engine.
-    /// </summary>
+    /// <summary>The system to support VR on a 3D client engine.</summary>
     public class VRSupport
     {
-        /// <summary>
-        /// The internal VR System.
-        /// </summary>
+        /// <summary>The internal VR System.</summary>
         public CVRSystem VR = null;
 
-        /// <summary>
-        /// The game client window.
-        /// </summary>
-        public GameClientWindow Client;
+        /// <summary>The game client window that owns this <see cref="VRSupport"/> instance.</summary>
+        public GameClientWindow Window;
 
-        /// <summary>
-        /// The internal VR Compositor.
-        /// </summary>
+        /// <summary>The internal VR Compositor.</summary>
         public CVRCompositor Compositor;
 
-        /// <summary>
-        /// Returns whether VR is available at all (not necessarily loaded).
-        /// </summary>
-        /// <returns>VR readiness.</returns>
+        /// <summary>The currently running VR model, EG 'oculus'. Can be 'Unknown'.</summary>
+        public string VRModel = "Unknown";
+
+        /// <summary>The head matrix rotation.</summary>
+        public Matrix4 HeadMatRot = Matrix4.Identity;
+
+        /// <summary>The head matrix.</summary>
+        public Matrix4 headMat = Matrix4.LookAt(Vector3.Zero, Vector3.UnitY, Vector3.UnitZ);
+
+        /// <summary>Current left controller.</summary>
+        public VRController Left;
+
+        /// <summary>Current right controller.</summary>
+        public VRController Right;
+
+        /// <summary>Model for the left controller.</summary>
+        public Model LeftControllerModel;
+
+        /// <summary>Model for the right controller.</summary>
+        public Model RightControllerModel;
+
+        /// <summary>Helper for VR left controller textures.</summary>
+        public VRControllerTextureEngine LeftTexture;
+
+        /// <summary>Helper for VR right controller textures.</summary>
+        public VRControllerTextureEngine RightTexture;
+
+        /// <summary>The scaling from VR space to game space.</summary>
+        public float VRScale = 1f;
+
+        /// <summary>Returns whether VR is available at all (not necessarily loaded).</summary>
         public static bool Available()
         {
             return OpenVR.IsHmdPresent();
@@ -58,16 +78,15 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Tries to initialize VR - returns the VR support object, or null if loading failed.
         /// </summary>
-        /// <param name="tclient">The game client.</param>
-        /// <returns>VR, if any.</returns>
-        public static VRSupport TryInit(GameClientWindow tclient)
+        /// <param name="twindow">The game client window.</param>
+        public static VRSupport TryInit(GameClientWindow twindow)
         {
             if (!Available())
             {
                 return null;
             }
             EVRInitError err = EVRInitError.None;
-            VRSupport vrs = new VRSupport() { Client = tclient, VR = OpenVR.Init(ref err) };
+            VRSupport vrs = new VRSupport() { Window = twindow, VR = OpenVR.Init(ref err) };
             if (err != EVRInitError.None)
             {
                 SysConsole.Output(OutputType.INFO, "VR error: " + err + ": " + OpenVR.GetStringForHmdError(err));
@@ -76,15 +95,8 @@ namespace FGEGraphics.GraphicsHelpers
             vrs.Start();
             return vrs;
         }
-
-        /// <summary>
-        /// The currently running VR model, EG 'oculus'. Can be 'unknown'.
-        /// </summary>
-        public string VRModel = "Unknown";
         
-        /// <summary>
-        /// Internal start call for VR setup.
-        /// </summary>
+        /// <summary>Internal start call for VR setup.</summary>
         public void Start()
         {
             uint w = 0;
@@ -95,8 +107,8 @@ namespace FGEGraphics.GraphicsHelpers
                 throw new Exception("Failed to start VR: Invalid render target size!");
             }
             w *= 2;
-            Client.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
-            Client.Engine3D.MainView.GenerationHelper.GenerateFBO();
+            Window.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
+            Window.Engine3D.MainView.GenerationHelper.GenerateFBO();
             StringBuilder val = new StringBuilder(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
@@ -107,14 +119,14 @@ namespace FGEGraphics.GraphicsHelpers
             Compositor.CompositorBringToFront();
             LeftTexture = new VRControllerTextureEngine();
             RightTexture = new VRControllerTextureEngine();
-            LeftTexture.BaseTexture = Client.Textures.GetTexture("vr/controller/vive_circle_left");
-            RightTexture.BaseTexture = Client.Textures.GetTexture("vr/controller/vive_circle_right");
+            LeftTexture.BaseTexture = Window.Textures.GetTexture("vr/controller/vive_circle_left");
+            RightTexture.BaseTexture = Window.Textures.GetTexture("vr/controller/vive_circle_right");
             LeftTexture.GenerateFirst();
             RightTexture.GenerateFirst();
-            RightControllerModel = Client.Models.GetModel("vr/controller/vive");
-            LeftControllerModel = Client.Models.GetModel("vr/controller/vive");
-            Client.VR = this;
-            Client.Engine3D.Render3DView = true;
+            RightControllerModel = Window.Models.GetModel("vr/controller/vive");
+            LeftControllerModel = Window.Models.GetModel("vr/controller/vive");
+            Window.VR = this;
+            Window.Engine3D.Render3DView = true;
         }
 
         /// <summary>
@@ -147,25 +159,13 @@ namespace FGEGraphics.GraphicsHelpers
             return proj;
         }
 
-        /// <summary>
-        /// Stops the VR system. Will likely require additionally steps to fully remove VR from the client.
-        /// </summary>
+        /// <summary>Stops the VR system. Will likely require additionally steps to fully remove VR from the client.</summary>
         public void Stop()
         {
             OpenVR.Shutdown();
             LeftTexture.Destroy();
             RightTexture.Destroy();
         }
-
-        /// <summary>
-        /// The head matrix rotation.
-        /// </summary>
-        public Matrix4 HeadMatRot = Matrix4.Identity;
-
-        /// <summary>
-        /// The head matrix.
-        /// </summary>
-        public Matrix4 headMat = Matrix4.LookAt(Vector3.Zero, Vector3.UnitY, Vector3.UnitZ);
 
         /// <summary>
         /// Gets the current controller state.
@@ -201,44 +201,7 @@ namespace FGEGraphics.GraphicsHelpers
             return res;
         }
 
-        /// <summary>
-        /// Current left controller.
-        /// </summary>
-        public VRController Left;
-
-        /// <summary>
-        /// Current right controller.
-        /// </summary>
-        public VRController Right;
-
-        /// <summary>
-        /// Model for the left controller.
-        /// </summary>
-        public Model LeftControllerModel;
-
-        /// <summary>
-        /// Model for the right controller.
-        /// </summary>
-        public Model RightControllerModel;
-
-        /// <summary>
-        /// Helper for VR left controller textures.
-        /// </summary>
-        public VRControllerTextureEngine LeftTexture;
-
-        /// <summary>
-        /// Helper for VR right controller textures.
-        /// </summary>
-        public VRControllerTextureEngine RightTexture;
-
-        /// <summary>
-        /// The scaling from VR space to game space.
-        /// </summary>
-        public float VRScale = 1f;
-
-        /// <summary>
-        /// Submits the VR view to the screen.
-        /// </summary>
+        /// <summary>Submits the VR view to the screen.</summary>
         public void Submit()
         {
             VREvent_t evt = new VREvent_t();
@@ -273,7 +236,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(Client.Engine3D.MainView.Internal.CurrentFBOTexture)
+                handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t bounds = new VRTextureBounds_t()
             {
@@ -291,7 +254,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
-                handle = new IntPtr(Client.Engine3D.MainView.Internal.CurrentFBOTexture)
+                handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
             VRTextureBounds_t rbounds = new VRTextureBounds_t()
             {
@@ -308,15 +271,12 @@ namespace FGEGraphics.GraphicsHelpers
         }
     }
 
-    /// <summary>
-    /// Represents a VR Controller.
-    /// </summary>
+    /// <summary>Represents a VR Controller.</summary>
     public class VRController
     {
-        /// <summary>
-        /// Gets the forward vector of this controller.
-        /// </summary>
-        /// <returns></returns>
+        // TODO: This is mostly designed for the Vive controller still. It needs to be made more generic, and/or add better support for Oculus Touch and Valve Index controllers.
+
+        /// <summary>Gets the forward vector of this controller.</summary>
         public Location ForwardVector()
         {
             OpenTK.Mathematics.Quaternion loquat = Position.ExtractRotation(true);
@@ -325,24 +285,16 @@ namespace FGEGraphics.GraphicsHelpers
             return lforw.ToLocation();
         }
 
-        /// <summary>
-        /// Trackpad axis ID.
-        /// </summary>
+        /// <summary>Trackpad axis ID.</summary>
         public const int AXIS_TRACKPAD = 0;
 
-        /// <summary>
-        /// Trigger axis ID.
-        /// </summary>
+        /// <summary>Trigger axis ID.</summary>
         public const int AXIS_TRIGGER = 1;
 
-        /// <summary>
-        /// Side grip axis ID.
-        /// </summary>
+        /// <summary>Side grip axis ID.</summary>
         public const int AXIS_SIDEGRIP = 2;
 
-        /// <summary>
-        /// The side-grip axis.
-        /// </summary>
+        /// <summary>The side-grip axis.</summary>
         public float SideGrip
         {
             get
@@ -351,9 +303,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Gets the trackpad positioning.
-        /// </summary>
+        /// <summary>Gets the trackpad positioning.</summary>
         public Vector2 TrackPad
         {
             get
@@ -362,9 +312,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Gets the trigger positioning.
-        /// </summary>
+        /// <summary>Gets the trigger positioning.</summary>
         public float Trigger
         {
             get
@@ -373,24 +321,16 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// The 3D position and rotation matrix for this controller.
-        /// </summary>
+        /// <summary>The 3D position and rotation matrix for this controller.</summary>
         public Matrix4 Position;
 
-        /// <summary>
-        /// The axes of control potential.
-        /// </summary>
+        /// <summary>The axes of control potential.</summary>
         public Vector2[] Axes = new Vector2[5];
 
-        /// <summary>
-        /// All currently touched buttons, as a flag enum.
-        /// </summary>
+        /// <summary>All currently touched buttons, as a flag enum.</summary>
         public VRButtons Touched;
 
-        /// <summary>
-        /// All currently pressed buttons, as a flag enum.
-        /// </summary>
+        /// <summary>All currently pressed buttons, as a flag enum.</summary>
         public VRButtons Pressed;
 
         /// <summary>
@@ -399,53 +339,35 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>The buttons and axes as a string.</returns>
         public override string ToString()
         {
-            return "Controller{" + Axes[0] + ", " + Axes[1] + ", " + Axes[2] + ", " + Axes[3] + ", " + Axes[4] + "... " + Touched + "... " + Pressed + "}";
+            return $"Controller{{{Axes[0]}, {Axes[1]}, {Axes[2]}, {Axes[3]}, {Axes[4]}... {Touched}... {Pressed}}}";
         }
     }
 
-    /// <summary>
-    /// A helper to modify controller textures based on touches.
-    /// </summary>
+    /// <summary>A helper to modify controller textures based on touches.</summary>
     public class VRControllerTextureEngine
     {
-        /// <summary>
-        /// The FBO.
-        /// </summary>
+        /// <summary>The Frame Buffer Object.</summary>
         public int FBO;
 
-        /// <summary>
-        /// The texture.
-        /// </summary>
+        /// <summary>The texture.</summary>
         public int Texture;
 
-        /// <summary>
-        /// The base texture.
-        /// </summary>
+        /// <summary>The base texture.</summary>
         public Texture BaseTexture;
 
-        /// <summary>
-        /// The color of the touched spot.
-        /// </summary>
+        /// <summary>The color of the touched spot.</summary>
         public Color4 TouchSpotColor = Color4.Red;
 
-        /// <summary>
-        /// The color of the pressed spot.
-        /// </summary>
+        /// <summary>The color of the pressed spot.</summary>
         public Color4 PressSpotColor = Color4.DarkRed;
 
-        /// <summary>
-        /// The half-size of the touched spot.
-        /// </summary>
+        /// <summary>The half-size of the touched spot.</summary>
         public Vector2 TouchSpotHalfSize = new Vector2(0.05f, 0.05f);
 
-        /// <summary>
-        /// The half-size of the pressed spot.
-        /// </summary>
+        /// <summary>The half-size of the pressed spot.</summary>
         public Vector2 PressSpotHalfSize = new Vector2(0.1f, 0.1f);
 
-        /// <summary>
-        /// Initial set up and generation.
-        /// </summary>
+        /// <summary>Initial set up and generation.</summary>
         public void GenerateFirst()
         {
             FBO = GL.GenFramebuffer();
@@ -463,14 +385,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        /// <summary>
-        /// Identity.
-        /// </summary>
-        static Matrix4 id = Matrix4.Identity;
-
-        /// <summary>
-        /// Current time.
-        /// </summary>
+        /// <summary>Current time.</summary>
         double CTime;
 
         /// <summary>
@@ -495,7 +410,7 @@ namespace FGEGraphics.GraphicsHelpers
             BaseTexture.Bind();
             Matrix4 basic = Matrix4.CreateOrthographicOffCenter(-1, 1, -1, 1, -1, 1);
             GL.UniformMatrix4(1, false, ref basic);
-            GL.UniformMatrix4(2, false, ref id);
+            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
             tclient.Engine3D.Rendering.RenderRectangle(-1, -1, 1, 1);
             bool touched = cont.Touched.HasFlag(VRButtons.TRACKPAD);
             bool pressed = cont.Pressed.HasFlag(VRButtons.TRACKPAD);
@@ -513,9 +428,7 @@ namespace FGEGraphics.GraphicsHelpers
             tclient.Engine3D.MainView.FixVP();
         }
 
-        /// <summary>
-        /// Destroys this object.
-        /// </summary>
+        /// <summary>Destroys this object.</summary>
         public void Destroy()
         {
             GL.DeleteFramebuffer(FBO);
@@ -523,15 +436,11 @@ namespace FGEGraphics.GraphicsHelpers
         }
     }
 
-    /// <summary>
-    /// An enumeration of buttons known to the VR system.
-    /// </summary>
+    /// <summary>An enumeration of buttons known to the VR system.</summary>
     [Flags]
     public enum VRButtons : ulong // TODO: Less weird enum values/names. Also, Vive/Rift controller separation and explicit support.
     {
-        /// <summary>
-        /// No buttons down.
-        /// </summary>
+        /// <summary>No buttons down.</summary>
         NONE = 0,
         /// <summary>Unknown button.</summary>
         __A__ONE = 1,
