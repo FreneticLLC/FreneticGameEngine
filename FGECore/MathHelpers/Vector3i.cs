@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using BEPUutilities;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.MathHelpers
 {
@@ -89,7 +90,7 @@ namespace FGECore.MathHelpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object other)
         {
-            if (!(other is Vector3i vecForm))
+            if (other is not Vector3i vecForm)
             {
                 return false;
             }
@@ -210,6 +211,48 @@ namespace FGECore.MathHelpers
                 X = value.X;
                 Y = value.Y;
             }
+        }
+
+        /// <summary>
+        /// Reads the byte array to a <see cref="Vector3i"/> object.
+        /// Expects 12 bytes.
+        /// Inverts <see cref="ToBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="bytes">The bytes to read.</param>
+        /// <param name="index">The index to start at.</param>
+        public static Vector3i FromBytes(byte[] bytes, int index)
+        {
+            return new Vector3i(
+                PrimitiveConversionHelper.BytesToInt32(bytes, index),
+                PrimitiveConversionHelper.BytesToInt32(bytes, index + 4),
+                PrimitiveConversionHelper.BytesToInt32(bytes, index + (4 + 4))
+                );
+        }
+
+        /// <summary>
+        /// Converts the <see cref="Vector3i"/> to a simple byte[] representation.
+        /// Contains 12 bytes.
+        /// Inverts <see cref="FromBytes(byte[], int)"/>.
+        /// </summary>
+        public byte[] ToBytes()
+        {
+            byte[] toret = new byte[12];
+            ToBytes(toret, 0);
+            return toret;
+        }
+
+        /// <summary>
+        /// Copies the <see cref="Vector3i"/> into a byte array.
+        /// Copies 12 bytes.
+        /// Inverts <see cref="FromBytes(byte[], int)"/>.
+        /// </summary>
+        /// <param name="outputBytes">The output byte array.</param>
+        /// <param name="offset">The starting offset in the output array.</param>
+        public void ToBytes(byte[] outputBytes, int offset)
+        {
+            PrimitiveConversionHelper.Int32ToBytes(X, outputBytes, offset + 0);
+            PrimitiveConversionHelper.Int32ToBytes(Y, outputBytes, offset + 4);
+            PrimitiveConversionHelper.Int32ToBytes(Z, outputBytes, offset + (4 + 4));
         }
     }
 }
