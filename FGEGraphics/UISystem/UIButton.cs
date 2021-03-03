@@ -36,7 +36,7 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// The text to display on this button.
         /// </summary>
-        public string Text;
+        public RenderableText Text;
 
         /// <summary>
         /// The font to use.
@@ -85,7 +85,7 @@ namespace FGEGraphics.UISystem
             : base(pos)
         {
             TextureName = buttontexname;
-            Text = buttontext;
+            Text = font.ParseFancyText(buttontext);
             TextFont = font;
             ClickedTask = clicked;
         }
@@ -163,9 +163,8 @@ namespace FGEGraphics.UISystem
             float width = LastAbsoluteSize.X;
             float height = LastAbsoluteSize.Y;
             view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            float len = TextFont.MeasureFancyText(Text);
-            float hei = TextFont.FontDefault.Height;
-            TextFont.DrawFancyText(Text, new Location(Math.Round(x + width / 2 - len / 2), Math.Round(y + height / 2 - hei / 2), 0));
+            float textHeight = TextFont.FontDefault.Height * Text.Lines.Length;
+            TextFont.DrawFancyText(Text, new Location(Math.Round(x + width / 2 - Text.Width / 2), Math.Round(y + height / 2 - textHeight / 2), 0));
         }
     }
 }

@@ -31,7 +31,13 @@ namespace FGEGraphics.UISystem
         /// The internal text value.
         /// <para>This will not update this label's width or height.</para>
         /// </summary>
-        public string InternalText;
+        public RenderableText InternalText;
+
+        /// <summary>
+        /// The internal text value.
+        /// <para>This will not update this label's render data.</para>
+        /// </summary>
+        public string RawInternalText;
 
         /// <summary>
         /// The text to display on this label.
@@ -41,11 +47,12 @@ namespace FGEGraphics.UISystem
         {
             get
             {
-                return InternalText;
+                return RawInternalText;
             }
             set
             {
-                InternalText = value;
+                RawInternalText = value;
+                InternalText = InternalTextFont.ParseFancyText(RawInternalText, BColor);
                 FixScale();
             }
         }
@@ -69,6 +76,7 @@ namespace FGEGraphics.UISystem
             set
             {
                 InternalTextFont = value;
+                InternalText = InternalTextFont.ParseFancyText(RawInternalText, BColor);
                 FixScale();
             }
         }
@@ -93,8 +101,8 @@ namespace FGEGraphics.UISystem
         public UILabel(string btext, FontSet font, UIPositionHelper pos)
             : base(pos)
         {
-            InternalText = btext;
             InternalTextFont = font;
+            Text = btext;
             // TODO: Dynamic scaling support?
             CustomWidthValue = Position.Width;
             FixScale();
@@ -105,8 +113,8 @@ namespace FGEGraphics.UISystem
         /// </summary>
         public void FixScale()
         {
-            Location scale = TextFont.MeasureFancyLinesOfText(CustomWidthValue > 0 ? TextFont.SplitAppropriately(Text, CustomWidthValue) : Text, BColor);
-            Position.ConstantWidthHeight((int)scale.X, (int)scale.Y);
+            InternalText = CustomWidthValue > 0 ? FontSet.SplitAppropriately(InternalText, CustomWidthValue) : InternalText;
+            Position.ConstantWidthHeight((int)InternalText.Width, (int)(InternalText.Lines.Length * InternalTextFont.FontDefault.Height));
         }
 
         /// <summary>
@@ -121,17 +129,15 @@ namespace FGEGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
         {
-            string tex = CustomWidthValue > 0 ? TextFont.SplitAppropriately(Text, LastAbsoluteSize.X) : Text;
             int bx = LastAbsolutePosition.X;
             int by = LastAbsolutePosition.Y;
             if (BackColor.W > 0)
             {
-                Location meas = TextFont.MeasureFancyLinesOfText(tex);
                 Renderer2D.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + (float)meas.X, by + (float)meas.Y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + InternalText.Width, by + (InternalText.Lines.Length * InternalTextFont.FontDefault.Height), new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 Renderer2D.SetColor(Vector4.One);
             }
-            TextFont.DrawFancyText(tex, new Location(bx, by, 0), baseColor: BColor);
+            TextFont.DrawFancyText(InternalText, new Location(bx, by, 0));
         }
     }
 }

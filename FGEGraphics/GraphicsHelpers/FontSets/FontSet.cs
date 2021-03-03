@@ -185,10 +185,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>
         /// Helper cache to reduce over-parsing of reused fancy text.
-        /// Key is (baseColor, text), value is renderable.
+        /// Key is (baseColor, text), value is renderable text.
         /// TODO: This should be auto-cleaned somehow to avoid wasting RAM.
         /// </summary>
-        public Dictionary<(string, string), RenderableTextLine[]> FancyTextCache = new Dictionary<(string, string), RenderableTextLine[]>();
+        public Dictionary<(string, string), RenderableText> FancyTextCache = new Dictionary<(string, string), RenderableText>();
 
         /// <summary>
         /// Parses fancy text from raw fancy-text input to renderable data objects.
@@ -219,9 +219,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// The 'x' input, for the sake of this method, can be 'color' (set a custom RGB color) or 'lang' (read text from a language file),
         /// however other portions of the engine may apply other options (like 'hover' or 'click').</para>
         /// </summary>
-        public RenderableTextLine[] ParseFancyText(string originalText, string baseColor = "^r^7")
+        public RenderableText ParseFancyText(string originalText, string baseColor = "^r^7")
         {
-            if (FancyTextCache.TryGetValue((baseColor, originalText), out RenderableTextLine[] output))
+            if (FancyTextCache.TryGetValue((baseColor, originalText), out RenderableText output))
             {
                 return output;
             }
@@ -237,6 +237,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
                 RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
                 RenderableTextPart currentPart = new RenderableTextPart();
+                float maxWidth = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
@@ -432,9 +433,11 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         Parts = parts.ToArray(),
                         Width = X
                     };
+                    maxWidth = Math.Max(maxWidth, X);
                 }
-                FancyTextCache[(baseColor, originalText)] = outLines;
-                return outLines;
+                RenderableText result = new RenderableText() { Lines = outLines, Width = maxWidth };
+                FancyTextCache[(baseColor, originalText)] = result;
+                return result;
             }
             finally
             {
@@ -445,7 +448,6 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>
         /// Fully renders fancy text.
-        /// <para>Consider using <see cref="SplitAppropriately(string, int)"/> to split the input for a maximum width.</para>
         /// <para>Consider using <see cref="ParseFancyText(string, string)"/> to pre-parse the text into renderable format and cache the result.</para>
         /// </summary>
         /// <param name="text">The text to render.</param>
@@ -456,28 +458,32 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
         public void DrawFancyText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
         {
-            RenderableTextLine[] lines = ParseFancyText(text, baseColor);
-            DrawFancyText(lines, position, maxY, transmod, extraShadow, baseColor);
+            DrawFancyText(ParseFancyText(text, baseColor), position, maxY, transmod, extraShadow);
+        }
+
+        private static Color4F TransModify(Color4F color, float transMod)
+        {
+            return new Color4F(color.RGB, color.A * transMod);
         }
 
         /// <summary>
         /// Fully renders fancy text.
+        /// <para>Consider using <see cref="SplitAppropriately(RenderableText, int)"/> to split the input for a maximum width.</para>
         /// </summary>
-        /// <param name="lines">The text to render.</param>
+        /// <param name="text">The text to render.</param>
         /// <param name="position">The position on screen to render at.</param>
         /// <param name="maxY">Optional: The maximum Y value to keep drawing at (to prevent text from going past the end of a text-area).</param>
         /// <param name="transmod">Optional: Transparency modifier, from 0 to 1 (1 is opaque, lower is more transparent).</param>
         /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
-        /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
-        public void DrawFancyText(RenderableTextLine[] lines, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
+        public void DrawFancyText(RenderableText text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false)
         {
-            StackNoteHelper.Push("FontSet - Draw fancy text", lines);
+            StackNoteHelper.Push("FontSet - Draw fancy text", text.Lines);
             try
             {
                 float lineY = (float)position.Y;
-                for (int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < text.Lines.Length; i++)
                 {
-                    RenderableTextLine line = lines[i];
+                    RenderableTextLine line = text.Lines[i];
                     float X = (float)position.X;
                     foreach (RenderableTextPart part in line.Parts)
                     {
@@ -494,49 +500,49 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         {
                             if (part.Highlight)
                             {
-                                DrawRectangle(X, lineY, part.Width, FontDefault.Height, part.HighlightColor, ReusableTextVBO);
+                                DrawRectangle(X, lineY, part.Width, FontDefault.Height, TransModify(part.HighlightColor, transmod), ReusableTextVBO);
                             }
                             if (part.Underline)
                             {
-                                DrawRectangle(X, Y + (part.Font.Height * 4f / 5f), part.Width, 2, part.UnderlineColor, ReusableTextVBO);
+                                DrawRectangle(X, Y + (part.Font.Height * 4f / 5f), part.Width, 2, TransModify(part.UnderlineColor, transmod), ReusableTextVBO);
                             }
                             if (part.Overline)
                             {
-                                DrawRectangle(X, Y + 2f, part.Width, 2, part.OverlineColor, ReusableTextVBO);
+                                DrawRectangle(X, Y + 2f, part.Width, 2, TransModify(part.OverlineColor, transmod), ReusableTextVBO);
                             }
                             if (extraShadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f), ReusableTextVBO, part.Flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
                                 }
                             }
                             if (part.Shadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f), ReusableTextVBO, part.Flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
                                 }
                                 foreach (Point point in BetterShadowPoints)
                                 {
-                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f), ReusableTextVBO, part.Flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f * transmod), ReusableTextVBO, part.Flip);
                                 }
                             }
                             if (part.Emphasis)
                             {
                                 foreach (Point point in EmphasisPoints)
                                 {
-                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, part.EmphasisColor, ReusableTextVBO, part.Flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
                                 }
                                 foreach (Point point in BetterEmphasisPoints)
                                 {
-                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, part.EmphasisColor, ReusableTextVBO, part.Flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
                                 }
                             }
-                            RenderBaseText(ReusableTextVBO, X, Y, part);
+                            RenderBaseText(ReusableTextVBO, X, Y, part, transmod);
                             if (part.Strike)
                             {
-                                DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, part.StrikeColor, ReusableTextVBO);
+                                DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, TransModify(part.StrikeColor, transmod), ReusableTextVBO);
                             }
                             X += part.Width;
                         }
@@ -614,8 +620,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="X">The X location to render at.</param>
         /// <param name="Y">The Y location to render at.</param>
+        /// <param name="transMod">Transparency modifier.</param>
         /// <param name="part">The text to render.</param>
-        public float RenderBaseText(TextVBOBuilder vbo, float X, float Y, RenderableTextPart part)
+        public float RenderBaseText(TextVBOBuilder vbo, float X, float Y, RenderableTextPart part, float transMod)
         {
             if (part.Unreadable || part.PseudoRandom || part.Random || part.Jello)
             {
@@ -623,18 +630,18 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 foreach (string txt in part.Font.SeparateEmojiAndSpecialChars(part.Text))
                 {
                     string chr = txt;
-                    Color4F color = part.TextColor;
+                    Color4F color = TransModify(part.TextColor, transMod);
                     if (part.Random)
                     {
                         double ttime = Engine.GetGlobalTickTime();
                         double tempR = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV);
                         double tempG = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV + 7.6f);
                         double tempB = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV + 18.42f);
-                        color = new Color4F((float)tempR, (float)tempG, (float)tempB, 1f);
+                        color = new Color4F((float)tempR, (float)tempG, (float)tempB, transMod);
                     }
                     else if (part.PseudoRandom)
                     {
-                        color = ColorFor((chr[0] % (COLORS.Length - 1)) + 1, part.TextColor.A);
+                        color = ColorFor((chr[0] % (COLORS.Length - 1)) + 1, part.TextColor.A * transMod);
                     }
                     if (part.Unreadable)
                     {
@@ -661,7 +668,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
             else
             {
-                return part.Font.DrawString(part.Text, X, Y, part.TextColor, vbo, part.Flip);
+                return part.Font.DrawString(part.Text, X, Y, TransModify(part.TextColor, transMod), vbo, part.Flip);
             }
         }
 
@@ -768,75 +775,87 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>The horizontal width.</returns>
         public float MeasureFancyText(string text, string bcolor = "^r^7")
         {
-            RenderableTextLine[] lines = ParseFancyText(text, bcolor);
-            float maxX = 0;
-            foreach (RenderableTextLine line in lines)
-            {
-                maxX = Math.Max(maxX, line.Width);
-            }
-            return maxX;
+            return ParseFancyText(text, bcolor).Width;
         }
 
         /// <summary>
-        /// Splits a string at a maximum render width.
-        /// TODO: This is not programmed in an efficient manner. Much of the logic is redundant/repetitive.
+        /// Splits some text at a maximum render width.
         /// </summary>
-        /// <param name="text">The base text.</param>
+        /// <param name="text">The original (un-split) text.</param>
+        /// <param name="baseColor">The base color.</param>
         /// <param name="maxX">The maximum width.</param>
-        /// <returns>The split string.</returns>
-        public string SplitAppropriately(string text, int maxX)
+        /// <returns>The split text.</returns>
+        public RenderableText SplitAppropriately(string text, string baseColor, int maxX)
         {
-            text = AutoTranslateFancyText(text);
-            StringBuilder resultBuilder = new StringBuilder(text.Length + 50);
-            string[] lines = text.Split('\n');
-            foreach (string fullLine in lines)
+            return SplitAppropriately(ParseFancyText(text), maxX);
+        }
+
+        /// <summary>
+        /// Splits some text at a maximum render width.
+        /// </summary>
+        /// <param name="text">The original (un-split) text.</param>
+        /// <param name="maxX">The maximum width.</param>
+        /// <returns>The split text.</returns>
+        public static RenderableText SplitAppropriately(RenderableText text, int maxX)
+        {
+            if (text.Width < maxX)
             {
-                string line = fullLine;
+                return text;
+            }
+            List<RenderableTextLine> outLines = new List<RenderableTextLine>(text.Lines.Length * 2);
+            foreach (RenderableTextLine fullLine in text.Lines)
+            {
+                RenderableTextLine line = fullLine;
                 while (true)
                 {
-                    float width = MeasureFancyText(line);
-                    if (width <= maxX)
+                    if (line.Width <= maxX)
                     {
-                        resultBuilder.Append(line).Append('\n');
+                        outLines.Add(line);
                         break;
                     }
-                    float expectedSegments = width / maxX;
-                    int expectedCharacterCount = (int)(line.Length / expectedSegments);
-                    float subWidth = MeasureFancyText(line.Substring(0, expectedCharacterCount));
-                    int target = expectedCharacterCount;
-                    if (subWidth <= maxX)
+                    float x = 0;
+                    for (int i = 0; i < line.Parts.Length; i++)
                     {
-                        for (int i = expectedCharacterCount; i < line.Length; i++)
+                        x += line.Parts[i].Width;
+                        if (x >= maxX)
                         {
-                            if (MeasureFancyText(line[..i]) > maxX)
+                            RenderableTextPart part = line.Parts[i];
+                            int target = part.Text.Length - 1;
+                            for (int j = target; j >= 0; j--)
                             {
-                                target = i - 1;
-                                break;
+                                if (part.Font.MeasureString(part.Text[..j]) <= maxX)
+                                {
+                                    target = j;
+                                    break;
+                                }
                             }
+                            int lastSpace = part.Text.LastIndexOf(' ', target);
+                            if (lastSpace == -1)
+                            {
+                                lastSpace = target;
+                            }
+                            RenderableTextPart[] newFirstParts = line.Parts[..i];
+                            string firstLine = part.Text[..lastSpace];
+                            if (firstLine.Length > 0)
+                            {
+                                RenderableTextPart newFirstPart = part.Clone();
+                                newFirstPart.Text = firstLine;
+                                newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
+                                newFirstParts = newFirstParts.Append(newFirstPart).ToArray();
+                            }
+                            RenderableTextLine newFirstLine = new RenderableTextLine() { Parts = newFirstParts, Width = newFirstParts.Max(p => p.Width) };
+                            outLines.Add(newFirstLine);
+                            string nextLine = part.Text[lastSpace..];
+                            RenderableTextPart newNextPart = part.Clone();
+                            newNextPart.Text = nextLine;
+                            newNextPart.Width = newNextPart.Font.MeasureString(newNextPart.Text);
+                            RenderableTextPart[] newNextParts = line.Parts[(i + 1)..].Append(newNextPart).ToArray();
+                            line = new RenderableTextLine() { Parts = newNextParts, Width = newNextParts.Max(p => p.Width) };
                         }
                     }
-                    else // width > maxX
-                    {
-                        for (int i = expectedCharacterCount; i >= 0; i--)
-                        {
-                            if (MeasureFancyText(line[..i]) <= maxX)
-                            {
-                                target = i;
-                                break;
-                            }
-                        }
-                    }
-                    int lastSpace = line.LastIndexOf(' ', target);
-                    if (lastSpace == -1)
-                    {
-                        lastSpace = target;
-                    }
-                    resultBuilder.Append(line, 0, lastSpace).Append('\n');
-                    line = line[lastSpace..];
                 }
             }
-            resultBuilder.Length -= 1; // Trim off the final newline.
-            return resultBuilder.ToString();
+            return new RenderableText() { Lines = outLines.ToArray(), Width = outLines.Max(l => l.Width) };
         }
 
         /// <summary>

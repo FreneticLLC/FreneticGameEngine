@@ -36,17 +36,17 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// The text to display for this link.
         /// </summary>
-        public string Text;
+        public RenderableText Text;
 
         /// <summary>
         /// The text to display when hovering over this link.
         /// </summary>
-        public string TextHover;
+        public RenderableText TextHover;
 
         /// <summary>
         /// The text to display when clicking this link.
         /// </summary>
-        public string TextClick;
+        public RenderableText TextClick;
 
         /// <summary>
         /// The base text color for this link.
@@ -91,15 +91,14 @@ namespace FGEGraphics.UISystem
         public UITextLink(Texture ico, string btext, string btexthover, string btextclick, FontSet font, Action clicked, UIPositionHelper pos)
             : base(pos)
         {
+            TextFont = font;
             Icon = ico;
             ClickedTask = clicked;
-            Text = btext;
-
-            TextHover = btexthover;
-            TextClick = btextclick;
-            TextFont = font;
-            Position.ConstantWidth((int)(font.MeasureFancyText(Text, BColor) + (Icon == null ? 0 : font.FontDefault.Height)));
-            Position.ConstantHeight((int)TextFont.FontDefault.Height);
+            Text = font.ParseFancyText(btext, BColor);
+            TextHover = font.ParseFancyText(btexthover, BColor);
+            TextClick = font.ParseFancyText(btextclick, BColor);
+            Position.ConstantWidth((int)(Text.Width + (Icon == null ? 0 : font.FontDefault.Height)));
+            Position.ConstantHeight((int)TextFont.FontDefault.Height * Text.Lines.Length);
         }
 
         /// <summary>
@@ -151,7 +150,7 @@ namespace FGEGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
         {
-            string tt = Text;
+            RenderableText tt = Text;
             if (Clicked)
             {
                 tt = TextClick;
@@ -167,12 +166,12 @@ namespace FGEGraphics.UISystem
                 Icon.Bind();
                 Renderer2D.SetColor(IconColor);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0), int.MaxValue, 1, false, BColor);
+                TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0));
                 Renderer2D.SetColor(Vector4.One);
             }
             else
             {
-                TextFont.DrawFancyText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0), baseColor: BColor);
+                TextFont.DrawFancyText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0));
             }
         }
     }

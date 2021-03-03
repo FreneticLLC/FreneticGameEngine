@@ -95,7 +95,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public string ClickURL = null;
 
         /// <summary>Text to display when a mouse is hovered over this text.</summary>
-        public RenderableTextLine[] HoverText = null;
+        public RenderableText HoverText = null;
 
         /// <summary>Applies the correct font from a font set.</summary>
         public void SetFontFrom(FontSet set)
@@ -154,6 +154,16 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public RenderableTextPart[] Parts;
 
         /// <summary>The total width of the line.</summary>
+        public float Width;
+    }
+
+    /// <summary>Represents a section of renderable text.</summary>
+    public class RenderableText
+    {
+        /// <summary>An array of all lines of text.</summary>
+        public RenderableTextLine[] Lines;
+
+        /// <summary>The maximum width of the text.</summary>
         public float Width;
     }
 }
