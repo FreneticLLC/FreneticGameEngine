@@ -15,6 +15,7 @@ using OpenTK;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticToolkit;
+using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
@@ -80,11 +81,11 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="tmaxX">The maximum texture X.</param>
         /// <param name="tmaxY">The maximum texture Y.</param>
         /// <param name="color">The color.</param>
-        public static void AddQuad(float minX, float minY, float maxX, float maxY, float tminX, float tminY, float tmaxX, float tmaxY, Vector4 color)
+        public static void AddQuad(float minX, float minY, float maxX, float maxY, float tminX, float tminY, float tmaxX, float tmaxY, Color4F color)
         {
             ReusableVertexArray.Add(new Vector4(minX, minY, maxX, maxY));
             ReusableTextureCoordinateArray.Add(new Vector4(tminX, tminY, tmaxX, tmaxY));
-            ReusableColorArray.Add(color);
+            ReusableColorArray.Add(color.ToOpenTK());
         }
 
         /// <summary>

@@ -20,10 +20,7 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.MathHelpers;
 using FGECore.UtilitySystems;
 using FGECore.ConsoleHelpers;
-
-using MathHelper = FreneticUtilities.FreneticToolkit.MathHelper;
 using FGECore.StackNoteSystem;
-using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
@@ -118,29 +115,29 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <summary>
         /// All colors used by the different font set options.
         /// </summary>
-        public static readonly Color[] COLORS = new Color[] {
-            Color.FromArgb(0, 0, 0),      // 0  // 0 // Black
-            Color.FromArgb(255, 0, 0),    // 1  // 1 // Red
-            Color.FromArgb(0, 255, 0),    // 2  // 2 // Green
-            Color.FromArgb(255, 255, 0),  // 3  // 3 // Yellow
-            Color.FromArgb(0, 0, 255),    // 4  // 4 // Blue
-            Color.FromArgb(0, 255, 255),  // 5  // 5 // Cyan
-            Color.FromArgb(255, 0, 255),  // 6  // 6 // Magenta
-            Color.FromArgb(255, 255, 255),// 7  // 7 // White
-            Color.FromArgb(128,0,255),    // 8  // 8 // Purple
-            Color.FromArgb(0, 128, 90),   // 9  // 9 // Torqoise
-            Color.FromArgb(122, 77, 35),  // 10 // a // Brown
-            Color.FromArgb(128, 0, 0),    // 11 // ! // DarkRed
-            Color.FromArgb(0, 128, 0),    // 12 // @ // DarkGreen
-            Color.FromArgb(128, 128, 0),  // 13 // # // DarkYellow
-            Color.FromArgb(0, 0, 128),    // 14 // $ // DarkBlue
-            Color.FromArgb(0, 128, 128),  // 15 // % // DarkCyan
-            Color.FromArgb(128, 0, 128),  // 16 // - // DarkMagenta
-            Color.FromArgb(128, 128, 128),// 17 // & // LightGray
-            Color.FromArgb(64, 0, 128),   // 18 // * // DarkPurple
-            Color.FromArgb(0, 64, 40),    // 19 // ( // DarkTorqoise
-            Color.FromArgb(64, 64, 64),   // 20 // ) // DarkGray
-            Color.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
+        public static readonly Color4F[] COLORS = new Color4F[] {
+            new Color4F(0, 0, 0),      // 0  // 0 // Black
+            new Color4F(1, 0, 0),    // 1  // 1 // Red
+            new Color4F(0, 1, 0),    // 2  // 2 // Green
+            new Color4F(1, 1, 0),  // 3  // 3 // Yellow
+            new Color4F(0, 0, 1),    // 4  // 4 // Blue
+            new Color4F(0, 1, 1),  // 5  // 5 // Cyan
+            new Color4F(1, 0, 1),  // 6  // 6 // Magenta
+            new Color4F(1, 1, 1),// 7  // 7 // White
+            new Color4F(0.5f, 0, 1),    // 8  // 8 // Purple
+            Color4F.FromArgb(0, 128, 90),   // 9  // 9 // Torqoise
+            Color4F.FromArgb(122, 77, 35),  // 10 // a // Brown
+            new Color4F(0.5f, 0, 0),    // 11 // ! // DarkRed
+            new Color4F(0, 0.5f, 0),    // 12 // @ // DarkGreen
+            new Color4F(0.5f, 0.5f, 0),  // 13 // # // DarkYellow
+            new Color4F(0, 0, 0.5f),    // 14 // $ // DarkBlue
+            new Color4F(0, 0.5f, 0.5f),  // 15 // % // DarkCyan
+            new Color4F(0.5f, 0, 0.5f),  // 16 // - // DarkMagenta
+            new Color4F(0.5f, 0.5f, 0.5f),// 17 // & // LightGray
+            new Color4F(0.25f, 0, 0.5f),   // 18 // * // DarkPurple
+            Color4F.FromArgb(0, 64, 40),    // 19 // ( // DarkTorqoise
+            Color4F.FromArgb(64, 64, 64),   // 20 // ) // DarkGray
+            Color4F.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
         };
 
         private readonly static Point[] ShadowPoints = new Point[] {
@@ -173,24 +170,28 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         };
 
         /// <summary>
-        /// Represents the 'base' custom color, ie one that will be recognized as ignorable (in favor of the standard color code).
-        /// </summary>
-        private static readonly Color BaseCustomColor = Color.FromArgb(0, 0, 0, 0);
-
-        /// <summary>
-        /// Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText
+        /// Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText.
         /// </summary>
         /// <param name="color">The color number.</param>
-        /// <param name="trans">Transparency value, 0-255.</param>
+        /// <param name="trans">Transparency value, 0-1.</param>
         /// <returns>A correctly formed color object.</returns>
-        public static Color ColorFor(int color, int trans)
+        public static Color4F ColorFor(int color, float trans)
         {
-            return Color.FromArgb(trans, COLORS[color].R, COLORS[color].G, COLORS[color].B);
+            return new Color4F(COLORS[color].RGB, trans);
         }
 
+        [ThreadStatic]
+        private static int ParseDepth = 0;
+
         /// <summary>
-        /// Fully renders fancy text.
-        /// <para>Consider using <see cref="SplitAppropriately(string, int)"/> to split the input for a maximum width.</para>
+        /// Helper cache to reduce over-parsing of reused fancy text.
+        /// Key is (baseColor, text), value is renderable.
+        /// TODO: This should be auto-cleaned somehow to avoid wasting RAM.
+        /// </summary>
+        public Dictionary<(string, string), RenderableTextLine[]> FancyTextCache = new Dictionary<(string, string), RenderableTextLine[]>();
+
+        /// <summary>
+        /// Parses fancy text from raw fancy-text input to renderable data objects.
         /// <para>Fancy text is normal text with special color and format markings, in the form of a caret symbol '^' followed by a case-sensitive single character indicating the format or color to apply.</para>
         /// <para>Includes the following format codes:</para>
         /// <para> 0-9: simple color, refer to <see cref="COLORS"/>. The shift variant of these keys, as found on a US-QWERTY keyboard, apply a darker variant of the same color, with the exception of '^' which is instead represented by '-'.</para>
@@ -218,6 +219,235 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// The 'x' input, for the sake of this method, can be 'color' (set a custom RGB color) or 'lang' (read text from a language file),
         /// however other portions of the engine may apply other options (like 'hover' or 'click').</para>
         /// </summary>
+        public RenderableTextLine[] ParseFancyText(string originalText, string baseColor = "^r^7")
+        {
+            if (FancyTextCache.TryGetValue((baseColor, originalText), out RenderableTextLine[] output))
+            {
+                return output;
+            }
+            StackNoteHelper.Push("FontSet - Parse fancy text", originalText);
+            try
+            {
+                ParseDepth++;
+                if (ParseDepth >= 100 && originalText != "{{Recursion error}}")
+                {
+                    return ParseFancyText("{{Recursion error}}", "");
+                }
+                string text = AutoTranslateFancyText(originalText.ApplyBaseColor(baseColor));
+                string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
+                RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
+                RenderableTextPart currentPart = new RenderableTextPart();
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+                    List<RenderableTextPart> parts = new List<RenderableTextPart>(line.CountCharacter('^') + 1);
+                    int start = 0;
+                    float X = 0;
+                    for (int x = 0; x < line.Length; x++)
+                    {
+                        if ((line[x] == '^' && x + 1 < line.Length && (IsFormatSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
+                        {
+                            string subLine = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
+                            start = x + 2;
+                            x++;
+                            if (subLine.Length > 0)
+                            {
+                                RenderableTextPart addedPart = currentPart.Clone();
+                                addedPart.Font.RecognizeCharacters(subLine);
+                                addedPart.Text = subLine;
+                                addedPart.Width = addedPart.Font.MeasureString(addedPart.Text);
+                                X += addedPart.Width;
+                                parts.Add(addedPart);
+                            }
+                            if (x < line.Length)
+                            {
+                                switch (line[x])
+                                {
+                                    case '[':
+                                        {
+                                            x++;
+                                            int c = 0;
+                                            int xStart = x;
+                                            while (x < line.Length)
+                                            {
+                                                if (line[x] == '[')
+                                                {
+                                                    c++;
+                                                }
+                                                if (line[x] == ']')
+                                                {
+                                                    c--;
+                                                    if (c == -1)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                                x++;
+                                            }
+                                            string subText = line[xStart..x];
+                                            RenderableTextPart addedPart = currentPart.Clone();
+                                            if (x == line.Length)
+                                            {
+                                                addedPart.Text = "^[" + subText.ToString();
+                                                addedPart.Highlight = true;
+                                                addedPart.HighlightColor = Color4F.Red;
+                                            }
+                                            else
+                                            {
+                                                string subTextLow = subText.ToLowerFast();
+                                                if (subTextLow.StartsWith("color="))
+                                                {
+                                                    Color4F? specifiedColor = Color4F.FromString(subText["color=".Length..]);
+                                                    if (specifiedColor.HasValue)
+                                                    {
+                                                        currentPart.TextColor = specifiedColor.Value;
+                                                        addedPart.Text = "";
+                                                    }
+                                                    else
+                                                    {
+                                                        addedPart.Text = "^[" + subText.ToString();
+                                                        addedPart.Highlight = true;
+                                                        addedPart.HighlightColor = Color4F.Red;
+                                                    }
+                                                }
+                                                else if (subTextLow.StartsWith("url="))
+                                                {
+                                                    addedPart.ClickURL = subText["url=".Length..].BeforeAndAfter('|', out addedPart.Text);
+                                                }
+                                                else if (subTextLow.StartsWith("hover="))
+                                                {
+                                                    // TODO: Better newline method than this?
+                                                    addedPart.HoverText = ParseFancyText(subText["hover=".Length..].Replace("\\n", "\n").BeforeAndAfter('|', out addedPart.Text), "^R^)");
+                                                }
+                                                else if (subTextLow == "lb")
+                                                {
+                                                    addedPart.Text = "[";
+                                                }
+                                                else if (subTextLow == "rb")
+                                                {
+                                                    addedPart.Text = "]";
+                                                }
+                                                else
+                                                {
+                                                    addedPart.Text = subText;
+                                                    addedPart.Highlight = true;
+                                                    addedPart.HighlightColor = Color4F.Red;
+                                                }
+                                            }
+                                            if (addedPart.Text.Length > 0)
+                                            {
+                                                addedPart.Font.RecognizeCharacters(addedPart.Text);
+                                                addedPart.Width = addedPart.Font.MeasureString(addedPart.Text);
+                                                X += addedPart.Width;
+                                                parts.Add(addedPart);
+                                            }
+                                            start = x + 1;
+                                        }
+                                        break;
+                                    case '1': currentPart.TextColor = ColorFor(1, currentPart.TextColor.A); break;
+                                    case '!': currentPart.TextColor = ColorFor(11, currentPart.TextColor.A); break;
+                                    case '2': currentPart.TextColor = ColorFor(2, currentPart.TextColor.A); break;
+                                    case '@': currentPart.TextColor = ColorFor(12, currentPart.TextColor.A); break;
+                                    case '3': currentPart.TextColor = ColorFor(3, currentPart.TextColor.A); break;
+                                    case '#': currentPart.TextColor = ColorFor(13, currentPart.TextColor.A); break;
+                                    case '4': currentPart.TextColor = ColorFor(4, currentPart.TextColor.A); break;
+                                    case '$': currentPart.TextColor = ColorFor(14, currentPart.TextColor.A); break;
+                                    case '5': currentPart.TextColor = ColorFor(5, currentPart.TextColor.A); break;
+                                    case '%': currentPart.TextColor = ColorFor(15, currentPart.TextColor.A); break;
+                                    case '6': currentPart.TextColor = ColorFor(6, currentPart.TextColor.A); break;
+                                    case '-': currentPart.TextColor = ColorFor(16, currentPart.TextColor.A); break;
+                                    case '7': currentPart.TextColor = ColorFor(7, currentPart.TextColor.A); break;
+                                    case '&': currentPart.TextColor = ColorFor(17, currentPart.TextColor.A); break;
+                                    case '8': currentPart.TextColor = ColorFor(8, currentPart.TextColor.A); break;
+                                    case '*': currentPart.TextColor = ColorFor(18, currentPart.TextColor.A); break;
+                                    case '9': currentPart.TextColor = ColorFor(9, currentPart.TextColor.A); break;
+                                    case '(': currentPart.TextColor = ColorFor(19, currentPart.TextColor.A); break;
+                                    case '0': currentPart.TextColor = ColorFor(20, currentPart.TextColor.A); break;
+                                    case ')': currentPart.TextColor = ColorFor(20, currentPart.TextColor.A); break;
+                                    case 'a': currentPart.TextColor = ColorFor(10, currentPart.TextColor.A); break;
+                                    case 'A': currentPart.TextColor = ColorFor(21, currentPart.TextColor.A); break;
+                                    case 'i':
+                                        {
+                                            currentPart.Italic = true;
+                                            currentPart.SetFontFrom(this);
+                                        }
+                                        break;
+                                    case 'b':
+                                        {
+                                            currentPart.Bold = true;
+                                            currentPart.SetFontFrom(this);
+                                        }
+                                        break;
+                                    case 'u': currentPart.UnderlineColor = currentPart.TextColor; currentPart.Underline = true; break;
+                                    case 's': currentPart.StrikeColor = currentPart.TextColor; currentPart.Strike = true; break;
+                                    case 'h': currentPart.HighlightColor = currentPart.TextColor; currentPart.Highlight = true; break;
+                                    case 'e': currentPart.EmphasisColor = currentPart.TextColor; currentPart.Emphasis = true; break;
+                                    case 'O': currentPart.OverlineColor = currentPart.TextColor; currentPart.Overline = true; break;
+                                    case 't': currentPart.TextColor = new Color4F(currentPart.TextColor.RGB, 0.5f); break;
+                                    case 'T': currentPart.TextColor = new Color4F(currentPart.TextColor.RGB, 0.25f); break;
+                                    case 'o': currentPart.TextColor = new Color4F(currentPart.TextColor.RGB, 1f); break;
+                                    case 'S':
+                                        if (!currentPart.SuperScript)
+                                        {
+                                            if (currentPart.SubScript)
+                                            {
+                                                currentPart.SubScript = false;
+                                            }
+                                            currentPart.SuperScript = true;
+                                            currentPart.SetFontFrom(this);
+                                        }
+                                        break;
+                                    case 'l':
+                                        if (!currentPart.SubScript)
+                                        {
+                                            if (currentPart.SuperScript)
+                                            {
+                                                currentPart.SuperScript = false;
+                                            }
+                                            currentPart.SubScript = true;
+                                            currentPart.SetFontFrom(this);
+                                        }
+                                        break;
+                                    case 'd': currentPart.Shadow = true; break;
+                                    case 'j': currentPart.Jello = true; break;
+                                    case 'U': currentPart.Unreadable = true; break;
+                                    case 'R': currentPart.Random = true; break;
+                                    case 'p': currentPart.PseudoRandom = true; break;
+                                    case 'f': currentPart.Flip = true; break;
+                                    case 'n':
+                                        break;
+                                    case 'r':
+                                        {
+                                            currentPart = new RenderableTextPart() { Font = FontDefault, TextColor = currentPart.TextColor };
+                                            break;
+                                        }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    outLines[i] = new RenderableTextLine()
+                    {
+                        Parts = parts.ToArray(),
+                        Width = X
+                    };
+                }
+                FancyTextCache[(baseColor, originalText)] = outLines;
+                return outLines;
+            }
+            finally
+            {
+                ParseDepth--;
+                StackNoteHelper.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Fully renders fancy text.
+        /// <para>Consider using <see cref="SplitAppropriately(string, int)"/> to split the input for a maximum width.</para>
+        /// <para>Consider using <see cref="ParseFancyText(string, string)"/> to pre-parse the text into renderable format and cache the result.</para>
+        /// </summary>
         /// <param name="text">The text to render.</param>
         /// <param name="position">The position on screen to render at.</param>
         /// <param name="maxY">Optional: The maximum Y value to keep drawing at (to prevent text from going past the end of a text-area).</param>
@@ -226,397 +456,114 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
         public void DrawFancyText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
         {
-            StackNoteHelper.Push("FontSet - Draw fancy text", text);
-            try
-            {
-                DrawFancyText_InternalDetail(text, position, maxY, transmod, extraShadow, baseColor);
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
+            RenderableTextLine[] lines = ParseFancyText(text, baseColor);
+            DrawFancyText(lines, position, maxY, transmod, extraShadow, baseColor);
         }
 
         /// <summary>
-        /// Internal call to handle fancy-text rendering, with direct parameters for all key settings.
-        /// Generally not meant to be called from external code.
-        /// Generally, prefer <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.
+        /// Fully renders fancy text.
         /// </summary>
-        public void DrawFancyText_InternalDetail(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7",
-            int _color = DefaultColor, bool _bold = false, bool _italic = false, bool _underline = false, bool _strike = false, bool _overline = false, bool _highlight = false, bool _emphasis = false,
-            int _underlineColor = DefaultColor, int _strikeColor = DefaultColor, int _overlineColor = DefaultColor, int _highlightColor = DefaultColor, int _emphasisColor = DefaultColor,
-            bool _superScript = false, bool _subScript = false, bool _flip = false, bool _pseudoRandom = false, bool _jello = false, bool _unreadable = false, bool _random = false, bool _shadow = false, GLFont _font = null)
+        /// <param name="lines">The text to render.</param>
+        /// <param name="position">The position on screen to render at.</param>
+        /// <param name="maxY">Optional: The maximum Y value to keep drawing at (to prevent text from going past the end of a text-area).</param>
+        /// <param name="transmod">Optional: Transparency modifier, from 0 to 1 (1 is opaque, lower is more transparent).</param>
+        /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
+        /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
+        public void DrawFancyText(RenderableTextLine[] lines, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
         {
-            GraphicsUtil.CheckError("Render FontSet - Pre");
-            r_depth++;
-            if (r_depth >= 100 && text != "{{Recursion error}}")
+            StackNoteHelper.Push("FontSet - Draw fancy text", lines);
+            try
             {
-                DrawFancyText("{{Recursion error}}", position);
-                r_depth--;
-                return;
-            }
-            text = text.ApplyBaseColor(baseColor);
-            string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
-            void render(string line, float Y, TextVBOBuilder vbo)
-            {
-                int color = _color;
-                bool bold = _bold;
-                bool italic = _italic;
-                bool underline = _underline;
-                bool strike = _strike;
-                bool overline = _overline;
-                bool highlight = _highlight;
-                bool emphasis = _emphasis;
-                int underlineColor = _underlineColor;
-                int strikeColor = _strikeColor;
-                int overlineColor = _overlineColor;
-                int highlightColor = _highlightColor;
-                int emphasisColor = _emphasisColor;
-                bool superScript = _superScript;
-                bool subScript = _subScript;
-                bool flip = _flip;
-                bool pseudoRandom = _pseudoRandom;
-                bool jello = _jello;
-                bool unreadable = _unreadable;
-                bool random = _random;
-                bool shadow = _shadow;
-                GLFont font = _font;
-                int transparency = (int)(255 * transmod);
-                int overlineTransparency = (int)(255 * transmod);
-                int emphasisTransparency = (int)(255 * transmod);
-                int highlightTransparency = (int)(255 * transmod);
-                int strikeTransparency = (int)(255 * transmod);
-                int underlineTransparency = (int)(255 * transmod);
-                float X = (float)position.X;
-                Color customColor = BaseCustomColor;
-                if (font == null)
+                float lineY = (float)position.Y;
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    font = FontDefault;
-                }
-                int start = 0;
-                for (int x = 0; x < line.Length; x++)
-                {
-                    if ((line[x] == '^' && x + 1 < line.Length && (IsFormatSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
+                    RenderableTextLine line = lines[i];
+                    float X = (float)position.X;
+                    foreach (RenderableTextPart part in line.Parts)
                     {
-                        string drawme = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
-                        start = x + 2;
-                        x++;
-                        if (drawme.Length > 0 && Y >= -font.Height && Y - (subScript ? font.Height : 0) <= maxY)
+                        float Y = lineY;
+                        if (part.SuperScript)
                         {
-                            float width = font.MeasureString(drawme);
-                            if (highlight)
+                            Y += part.Font.Height * 0.25f;
+                        }
+                        else if (part.SubScript)
+                        {
+                            Y += part.Font.Height;
+                        }
+                        if (Y >= -part.Font.Height && Y - part.Font.Height <= maxY)
+                        {
+                            if (part.Highlight)
                             {
-                                DrawRectangle(X, Y, width, FontDefault.Height, ColorFor(highlightColor, highlightTransparency), vbo);
+                                DrawRectangle(X, lineY, part.Width, FontDefault.Height, part.HighlightColor, ReusableTextVBO);
                             }
-                            if (underline)
+                            if (part.Underline)
                             {
-                                DrawRectangle(X, Y + ((float)font.Height * 4f / 5f), width, 2, ColorFor(underlineColor, underlineTransparency), vbo);
+                                DrawRectangle(X, Y + (part.Font.Height * 4f / 5f), part.Width, 2, part.UnderlineColor, ReusableTextVBO);
                             }
-                            if (overline)
+                            if (part.Overline)
                             {
-                                DrawRectangle(X, Y + 2f, width, 2, ColorFor(overlineColor, overlineTransparency), vbo);
+                                DrawRectangle(X, Y + 2f, part.Width, 2, part.OverlineColor, ReusableTextVBO);
                             }
                             if (extraShadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 2, flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f), ReusableTextVBO, part.Flip);
                                 }
                             }
-                            if (shadow)
+                            if (part.Shadow)
                             {
                                 foreach (Point point in ShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 2, flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f), ReusableTextVBO, part.Flip);
                                 }
                                 foreach (Point point in BetterShadowPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, 0, transparency / 4, flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f), ReusableTextVBO, part.Flip);
                                 }
                             }
-                            if (emphasis)
+                            if (part.Emphasis)
                             {
                                 foreach (Point point in EmphasisPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, emphasisColor, emphasisTransparency, flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, part.EmphasisColor, ReusableTextVBO, part.Flip);
                                 }
                                 foreach (Point point in BetterEmphasisPoints)
                                 {
-                                    RenderBaseText(vbo, X + point.X, Y + point.Y, drawme, font, emphasisColor, emphasisTransparency, flip);
+                                    part.Font.DrawString(part.Text, X + point.X, Y + point.Y, part.EmphasisColor, ReusableTextVBO, part.Flip);
                                 }
                             }
-                            RenderBaseText(vbo, X, Y, drawme, font, color, transparency, flip, pseudoRandom, random, jello, unreadable, customColor);
-                            if (strike)
+                            RenderBaseText(ReusableTextVBO, X, Y, part);
+                            if (part.Strike)
                             {
-                                DrawRectangle(X, Y + (font.Height / 2), width, 2, ColorFor(strikeColor, strikeTransparency), vbo);
+                                DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, part.StrikeColor, ReusableTextVBO);
                             }
-                            X += width;
-                        }
-                        if (x < line.Length)
-                        {
-                            switch (line[x])
-                            {
-                                case '[':
-                                    {
-                                        StringBuilder sb = new StringBuilder();
-                                        x++;
-                                        int c = 0;
-                                        while (x < line.Length)
-                                        {
-                                            if (line[x] == '[')
-                                            {
-                                                c++;
-                                            }
-                                            if (line[x] == ']')
-                                            {
-                                                c--;
-                                                if (c == -1)
-                                                {
-                                                    break;
-                                                }
-                                            }
-                                            sb.Append(line[x]);
-                                            x++;
-                                        }
-                                        bool highl = true;
-                                        string ttext;
-                                        if (x == line.Length)
-                                        {
-                                            ttext = "^[" + sb.ToString();
-                                        }
-                                        else
-                                        {
-                                            string sbt = sb.ToString();
-                                            string sbl = sbt.ToLowerFast();
-                                            if (sbl.StartsWith("lang="))
-                                            {
-                                                string langinfo = sbl.After("lang=");
-                                                string[] subdats = CSplit(langinfo).ToArray();
-                                                ttext = Engine.GetLanguageHelper(subdats);
-                                                highl = false;
-                                            }
-                                            else if (sbl.StartsWith("color="))
-                                            {
-                                                string[] coldat = sbl.After("color=").SplitFast(',');
-                                                if (coldat.Length == 4)
-                                                {
-                                                    int r = StringConversionHelper.StringToInt(coldat[0]);
-                                                    int g = StringConversionHelper.StringToInt(coldat[1]);
-                                                    int b = StringConversionHelper.StringToInt(coldat[2]);
-                                                    int a = StringConversionHelper.StringToInt(coldat[3]);
-                                                    customColor = Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
-                                                    ttext = "";
-                                                    highl = false;
-                                                }
-                                                else
-                                                {
-                                                    ttext = "^[" + sb.ToString();
-                                                }
-                                            }
-                                            else if (sbl == "lb")
-                                            {
-                                                ttext = "[";
-                                                highl = false;
-                                            }
-                                            else if (sbl == "rb")
-                                            {
-                                                ttext = "]";
-                                                highl = false;
-                                            }
-                                            else
-                                            {
-                                                ttext = sbt.After("|");
-                                            }
-                                        }
-                                        if (highl)
-                                        {
-                                            float widt = FontDefault.MeasureString(ttext);
-                                            DrawRectangle(X, Y, widt, FontDefault.Height, Color.Black, vbo);
-                                            RenderBaseText(vbo, X, Y, ttext, FontDefault, 5);
-                                            DrawRectangle(X, Y + ((float)FontDefault.Height * 4f / 5f), widt, 2, Color.Blue, vbo);
-                                            X += widt;
-                                        }
-                                        else
-                                        {
-                                            float widt = MeasureFancyText(ttext);
-                                            DrawFancyText_InternalDetail(ttext, new Location(X, Y, 0), maxY, transmod, extraShadow, baseColor,
-                                                color, bold, italic, underline, strike, overline, highlight, emphasis, underlineColor, strikeColor, overlineColor, highlightColor, emphasisColor, superScript,
-                                                subScript, flip, pseudoRandom, jello, unreadable, random, shadow, font);
-                                            X += widt;
-                                        }
-                                        start = x + 1;
-                                    }
-                                    break;
-                                case '1': color = 1; customColor = BaseCustomColor; break;
-                                case '!': color = 11; customColor = BaseCustomColor; break;
-                                case '2': color = 2; customColor = BaseCustomColor; break;
-                                case '@': color = 12; customColor = BaseCustomColor; break;
-                                case '3': color = 3; customColor = BaseCustomColor; break;
-                                case '#': color = 13; customColor = BaseCustomColor; break;
-                                case '4': color = 4; customColor = BaseCustomColor; break;
-                                case '$': color = 14; customColor = BaseCustomColor; break;
-                                case '5': color = 5; customColor = BaseCustomColor; break;
-                                case '%': color = 15; customColor = BaseCustomColor; break;
-                                case '6': color = 6; customColor = BaseCustomColor; break;
-                                case '-': color = 16; customColor = BaseCustomColor; break;
-                                case '7': color = 7; customColor = BaseCustomColor; break;
-                                case '&': color = 17; customColor = BaseCustomColor; break;
-                                case '8': color = 8; customColor = BaseCustomColor; break;
-                                case '*': color = 18; customColor = BaseCustomColor; break;
-                                case '9': color = 9; customColor = BaseCustomColor; break;
-                                case '(': color = 19; customColor = BaseCustomColor; break;
-                                case '0': color = 0; customColor = BaseCustomColor; break;
-                                case ')': color = 20; customColor = BaseCustomColor; break;
-                                case 'a': color = 10; customColor = BaseCustomColor; break;
-                                case 'A': color = 21; customColor = BaseCustomColor; break;
-                                case 'i':
-                                    {
-                                        italic = true;
-                                        GLFont nfont = (superScript || subScript) ? (bold ? FontBoldItalicHalf : FontItalicHalf) :
-                                            (bold ? FontBoldItalic : FontItalic);
-                                        if (nfont != font)
-                                        {
-                                            font = nfont;
-                                        }
-                                    }
-                                    break;
-                                case 'b':
-                                    {
-                                        bold = true;
-                                        GLFont nfont = (superScript || subScript) ? (italic ? FontBoldItalicHalf : FontBoldHalf) :
-                                            (italic ? FontBoldItalic : FontBold);
-                                        if (nfont != font)
-                                        {
-                                            font = nfont;
-                                        }
-                                    }
-                                    break;
-                                case 'u': underlineTransparency = transparency; underline = true; underlineColor = color; break;
-                                case 's': strikeTransparency = transparency; strike = true; strikeColor = color; break;
-                                case 'h': highlightTransparency = transparency; highlight = true; highlightColor = color; break;
-                                case 'e': emphasisTransparency = transparency; emphasis = true; emphasisColor = color; break;
-                                case 'O': overlineTransparency = transparency; overline = true; overlineColor = color; break;
-                                case 't': transparency = (int)(128 * transmod); break;
-                                case 'T': transparency = (int)(64 * transmod); break;
-                                case 'o': transparency = (int)(255 * transmod); break;
-                                case 'S':
-                                    if (!superScript)
-                                    {
-                                        if (subScript)
-                                        {
-                                            subScript = false;
-                                            Y -= font.Height / 2;
-                                        }
-                                        GLFont nfont = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
-                                            italic ? FontItalicHalf : FontHalf;
-                                        if (nfont != font)
-                                        {
-                                            font = nfont;
-                                        }
-                                    }
-                                    superScript = true;
-                                    break;
-                                case 'l':
-                                    if (!subScript)
-                                    {
-                                        if (superScript)
-                                        {
-                                            superScript = false;
-                                        }
-                                        Y += FontDefault.Height / 2;
-                                        GLFont nfont = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
-                                            italic ? FontItalicHalf : FontHalf;
-                                        if (nfont != font)
-                                        {
-                                            font = nfont;
-                                        }
-                                    }
-                                    subScript = true;
-                                    break;
-                                case 'd': shadow = true; break;
-                                case 'j': jello = true; break;
-                                case 'U': unreadable = true; break;
-                                case 'R': random = true; break;
-                                case 'p': pseudoRandom = true; break;
-                                case 'f': flip = true; break;
-                                case 'n':
-                                    break;
-                                case 'r':
-                                    {
-                                        GLFont nfont = FontDefault;
-                                        if (nfont != font)
-                                        {
-                                            font = nfont;
-                                        }
-                                        if (subScript)
-                                        {
-                                            Y -= FontDefault.Height / 2;
-                                        }
-                                        subScript = false;
-                                        superScript = false;
-                                        flip = false;
-                                        random = false;
-                                        pseudoRandom = false;
-                                        jello = false;
-                                        unreadable = false;
-                                        shadow = false;
-                                        bold = false;
-                                        italic = false;
-                                        underline = false;
-                                        strike = false;
-                                        emphasis = false;
-                                        highlight = false;
-                                        transparency = (int)(255 * transmod);
-                                        overline = false;
-                                        break;
-                                    }
-                                default:
-                                    break;
-                            }
+                            X += part.Width;
                         }
                     }
+                    lineY += FontDefault.Height;
                 }
-            }
-            if (lines.Length == 1)
-            {
-                render(lines[0], (float)position.Y, ReusableTextVBO);
-            }
-            else
-            {
-                float Y = (float)position.Y;
-                string tcol = "";
-                for (int i = 0; i < lines.Length; i++)
+                Engine.GLFonts.Shaders.TextCleanerShader.Bind();
+                Matrix4 ortho = Engine.GetOrtho();
+                GL.UniformMatrix4(1, false, ref ortho);
+                Vector3 col = new Vector3(1, 1, 1);
+                GL.Uniform3(3, ref col);
+                ReusableTextVBO.Build();
+                ReusableTextVBO.Render(Engine.GLFonts);
+                if (Engine.FixToShader == null)
                 {
-                    string line = lines[i];
-                    if (line.Length > 0)
-                    {
-                        float ty = Y;
-                        string tcc = tcol;
-                        render(tcc + line, ty, ReusableTextVBO);
-                        tcol += GrabAllFormats(line);
-                    }
-                    Y += FontDefault.Height;
+                    Engine.GLFonts.Shaders.ColorMultShader.Bind();
                 }
+                else
+                {
+                    Engine.FixToShader.Bind();
+                }
+                GraphicsUtil.CheckError("Render FontSet");
             }
-            Engine.GLFonts.Shaders.TextCleanerShader.Bind();
-            Matrix4 ortho = Engine.GetOrtho();
-            GL.UniformMatrix4(1, false, ref ortho);
-            //Matrix4 ident = Matrix4.Identity;
-            //GL.UniformMatrix4(2, false, ref ident);
-            Vector3 col = new Vector3(1, 1, 1);
-            GL.Uniform3(3, ref col);
-            ReusableTextVBO.Build();
-            ReusableTextVBO.Render(Engine.GLFonts);
-            if (Engine.FixToShader == null)
+            finally
             {
-                Engine.GLFonts.Shaders.ColorMultShader.Bind();
+                StackNoteHelper.Pop();
             }
-            else
-            {
-                Engine.FixToShader.Bind();
-            }
-            r_depth--;
-            GraphicsUtil.CheckError("Render FontSet");
         }
 
         /// <summary>
@@ -667,72 +614,54 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="X">The X location to render at.</param>
         /// <param name="Y">The Y location to render at.</param>
-        /// <param name="text">The text to render.</param>
-        /// <param name="font">The font to use.</param>
-        /// <param name="color">The color ID number to use.</param>
-        /// <param name="trans">Transparency.</param>
-        /// <param name="flip">Whether to flip the text.</param>
-        /// <param name="pseudo">Whether to use pseudo-random color.</param>
-        /// <param name="random">Whether to use real-random color.</param>
-        /// <param name="jello">Whether to use a jello effect.</param>
-        /// <param name="unreadable">Whether to randomize letters.</param>
-        /// <param name="currentColor">The current color.</param>
-        /// <returns>The length of the rendered text in pixels.</returns>
-        public float RenderBaseText(TextVBOBuilder vbo, float X, float Y, string text, GLFont font, int color,
-            int trans = 255, bool flip = false, bool pseudo = false, bool random = false, bool jello = false, bool unreadable = false, Color currentColor = default)
+        /// <param name="part">The text to render.</param>
+        public float RenderBaseText(TextVBOBuilder vbo, float X, float Y, RenderableTextPart part)
         {
-            if (unreadable || pseudo || random || jello)
+            if (part.Unreadable || part.PseudoRandom || part.Random || part.Jello)
             {
                 float nX = 0;
-                foreach (string txt in font.SeparateEmojiAndSpecialChars(text))
+                foreach (string txt in part.Font.SeparateEmojiAndSpecialChars(part.Text))
                 {
                     string chr = txt;
-                    // int col = color;
-                    Color tcol = ColorFor(color, trans);
-                    if (random)
+                    Color4F color = part.TextColor;
+                    if (part.Random)
                     {
                         double ttime = Engine.GetGlobalTickTime();
                         double tempR = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV);
                         double tempG = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV + 7.6f);
                         double tempB = SimplexNoise.Generate((X + nX) / RAND_DIV + ttime * 0.4, Y / RAND_DIV + 18.42f);
-                        tcol = Color.FromArgb((int)(tempR * 255), (int)(tempG * 255), (int)(tempB * 255));
+                        color = new Color4F((float)tempR, (float)tempG, (float)tempB, 1f);
                     }
-                    else if (pseudo)
+                    else if (part.PseudoRandom)
                     {
-                        tcol = ColorFor((chr[0] % (COLORS.Length - 1)) + 1, trans);
+                        color = ColorFor((chr[0] % (COLORS.Length - 1)) + 1, part.TextColor.A);
                     }
-                    else if (currentColor.A > 0)
-                    {
-                        tcol = currentColor;
-                    }
-                    if (unreadable)
+                    if (part.Unreadable)
                     {
                         chr = ((char)Engine.RandomHelper.Next(33, 126)).ToString();
                     }
                     int iX = 0;
                     int iY = 0;
-                    if (jello)
+                    if (part.Jello)
                     {
                         iX = Engine.RandomHelper.Next(-1, 1);
                         iY = Engine.RandomHelper.Next(-1, 1);
                     }
-                    Vector4 col = new Vector4((float)tcol.R / 255f, (float)tcol.G / 255f, (float)tcol.B / 255f, (float)tcol.A / 255f);
-                    if (flip)
+                    if (part.Flip)
                     {
-                        font.DrawSingleCharacterFlipped(chr, X + iX + nX, Y + iY, vbo, col);
+                        part.Font.DrawSingleCharacterFlipped(chr, X + iX + nX, Y + iY, vbo, color);
                     }
                     else
                     {
-                        font.DrawSingleCharacter(chr, X + iX + nX, Y + iY, vbo, col);
+                        part.Font.DrawSingleCharacter(chr, X + iX + nX, Y + iY, vbo, color);
                     }
-                    nX += font.RectForSymbol(txt).Width;
+                    nX += part.Font.RectForSymbol(txt).Width;
                 }
                 return nX;
             }
             else
             {
-                Color tcol = currentColor.A > 0 ? currentColor : ColorFor(color, trans);
-                return font.DrawString(text, X, Y, new Vector4((float)tcol.R / 255f, (float)tcol.G / 255f, (float)tcol.B / 255f, (float)tcol.A / 255f), vbo, flip);
+                return part.Font.DrawString(part.Text, X, Y, part.TextColor, vbo, part.Flip);
             }
         }
 
@@ -745,29 +674,12 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public Location MeasureFancyLinesOfText(string text, string bcolor = "^r^7")
         {
             string[] data = text.SplitFast('\n');
-            float len = 0;
+            float width = 0;
             for (int i = 0; i < data.Length; i++)
             {
-                float newlen = MeasureFancyText(data[i], bcolor);
-                if (newlen > len)
-                {
-                    len = newlen;
-                }
+                width = Math.Max(width, MeasureFancyText(data[i], bcolor));
             }
-            return new Location(len, data.Length * FontDefault.Height, 0);
-        }
-
-        /// <summary>
-        /// Measures fancy notated text strings.
-        /// Note: Do not include newlines!
-        /// </summary>
-        /// <param name="line">The text to measure.</param>
-        /// <param name="bcolor">The base color.</param>
-        /// <param name="pushStr">Whether to push the string's contents to the render set.</param>
-        /// <returns>the X-width of the text.</returns>
-        public float MeasureFancyText(string line, string bcolor = "^r^7", bool pushStr = false)
-        {
-            return MeasureFancyText(line, out List<KeyValuePair<string, Rectangle2F>> _, bcolor, pushStr: pushStr);
+            return new Location(width, data.Length * FontDefault.Height, 0);
         }
 
         /// <summary>
@@ -799,12 +711,6 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             temp.Add(input[start..]);
             return temp;
         }
-
-        [ThreadStatic]
-        static int m_depth = 0;
-
-        [ThreadStatic]
-        static int r_depth = 0;
 
         /// <summary>
         /// Translates fancy text language inputs to raw strings.
@@ -849,170 +755,31 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             {
                 return text;
             }
-            string translated = Engine.GetLanguageHelper(parts.ToArray());
+            string translated = AutoTranslateFancyText(Engine.GetLanguageHelper(parts.ToArray()));
             return text[..index] + translated + AutoTranslateFancyText(text[(i + 1)..]);
         }
 
         /// <summary>
-        /// Measures fancy text.
+        /// Measures the width of fancy text.
+        /// Consider instead using <see cref="ParseFancyText(string, string)"/>.
         /// </summary>
-        /// <param name="line">The line of text.</param>
-        /// <param name="links">Output for any hover/click links.</param>
+        /// <param name="text">The line of text to measure.</param>
         /// <param name="bcolor">The base color.</param>
-        /// <param name="bold">Whether it is bold.</param>
-        /// <param name="italic">Whether it is italic.</param>
-        /// <param name="sub">Whether it is half-size.</param>
-        /// <param name="font">The font to start with.</param>
-        /// <param name="pushStr">Whether to push text to the underlying engine (ie, to make sure the underlying characters are recognizable and valid).</param>
-        /// <returns>The width.</returns>
-        public float MeasureFancyText(string line, out List<KeyValuePair<string, Rectangle2F>> links, string bcolor = "^r^7", bool bold = false, bool italic = false, bool sub = false, GLFont font = null, bool pushStr = false)
+        /// <returns>The horizontal width.</returns>
+        public float MeasureFancyText(string text, string bcolor = "^r^7")
         {
-            List<KeyValuePair<string, Rectangle2F>> tlinks = new List<KeyValuePair<string, Rectangle2F>>();
-            m_depth++;
-            if (m_depth >= 100)
+            RenderableTextLine[] lines = ParseFancyText(text, bcolor);
+            float maxX = 0;
+            foreach (RenderableTextLine line in lines)
             {
-                m_depth--;
-                links = tlinks;
-                return font.MeasureString("{{Recursion error}}");
+                maxX = Math.Max(maxX, line.Width);
             }
-            float MeasWidth = 0;
-            if (font == null)
-            {
-                font = FontDefault;
-            }
-            int start = 0;
-            line = line.Replace("^q", "\"").ApplyBaseColor(bcolor); // TODO: Effic of replace usage? And of per-line replaces?
-            for (int x = 0; x < line.Length; x++)
-            {
-                if ((line[x] == '^' && x + 1 < line.Length && (IsFormatSymbol(line[x + 1]) || line[x + 1] == '[')) || (x + 1 == line.Length))
-                {
-                    string drawme = line.Substring(start, (x - start) + ((x + 1 < line.Length) ? 0 : 1));
-                    start = x + 2;
-                    x++;
-                    if (drawme.Length > 0)
-                    {
-                        if (pushStr)
-                        {
-                            font.RecognizeCharacters(drawme);
-                        }
-                        MeasWidth += font.MeasureString(drawme);
-                    }
-                    if (x < line.Length)
-                    {
-                        switch (line[x])
-                        {
-                            case '[':
-                                {
-                                    StringBuilder sb = new StringBuilder();
-                                    x++;
-                                    int c = 0;
-                                    while (x < line.Length)
-                                    {
-                                        if (line[x] == '[')
-                                        {
-                                            c++;
-                                        }
-                                        if (line[x] == ']')
-                                        {
-                                            c--;
-                                            if (c == -1)
-                                            {
-                                                break;
-                                            }
-                                        }
-                                        sb.Append(line[x]);
-                                        x++;
-                                    }
-                                    bool highl = true;
-                                    string ttext;
-                                    if (x == line.Length)
-                                    {
-                                        ttext = "^[" + sb.ToString();
-                                    }
-                                    else
-                                    {
-                                        string sbt = sb.ToString();
-                                        string sbl = sbt.ToLowerFast();
-                                        if (sbl.StartsWith("lang="))
-                                        {
-                                            string langinfo = sbl.After("lang=");
-                                            string[] subdats = CSplit(langinfo).ToArray();
-                                            ttext = Engine.GetLanguageHelper(subdats);
-                                            highl = false;
-                                        }
-                                        else if (sbl.StartsWith("color="))
-                                        {
-                                            ttext = "";
-                                            highl = false;
-                                        }
-                                        else if (sbl == "lb")
-                                        {
-                                            ttext = "[";
-                                            highl = false;
-                                        }
-                                        else if (sbl == "rb")
-                                        {
-                                            ttext = "]";
-                                            highl = false;
-                                        }
-                                        else
-                                        {
-                                            ttext = sbt.After("|");
-                                        }
-                                    }
-                                    if (highl)
-                                    {
-                                        if (pushStr)
-                                        {
-                                            FontDefault.RecognizeCharacters(ttext);
-                                        }
-                                        float widt = FontDefault.MeasureString(ttext);
-                                        tlinks.Add(new KeyValuePair<string, Rectangle2F>(sb.ToString().Before("|"), new Rectangle2F() { X = MeasWidth, Y = 0, Width = widt, Height = FontDefault.Height }));
-                                        MeasWidth += widt;
-                                    }
-                                    else
-                                    {
-                                        float widt = MeasureFancyText(ttext, out _, bcolor, bold, italic, sub, font);
-                                        MeasWidth += widt;
-                                    }
-                                    start = x + 1;
-                                }
-                                break;
-                            case 'r':
-                                font = FontDefault;
-                                bold = false;
-                                sub = false;
-                                italic = false;
-                                break;
-                            case 'S':
-                            case 'l':
-                                font = bold && italic ? FontBoldItalicHalf : bold ? FontBoldHalf :
-                                    italic ? FontItalicHalf : FontHalf;
-                                sub = true;
-                                break;
-                            case 'i':
-                                italic = true;
-                                font = (sub) ? (bold ? FontBoldItalicHalf : FontItalicHalf) :
-                                    (bold ? FontBoldItalic : FontItalic);
-                                break;
-                            case 'b':
-                                bold = true;
-                                font = (sub) ? (italic ? FontBoldItalicHalf : FontBoldHalf) :
-                                    (italic ? FontBoldItalic : FontBold);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-            links = tlinks;
-            m_depth--;
-            return MeasWidth;
+            return maxX;
         }
 
         /// <summary>
         /// Splits a string at a maximum render width.
+        /// TODO: This is not programmed in an efficient manner. Much of the logic is redundant/repetitive.
         /// </summary>
         /// <param name="text">The base text.</param>
         /// <param name="maxX">The maximum width.</param>
@@ -1041,7 +808,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     {
                         for (int i = expectedCharacterCount; i < line.Length; i++)
                         {
-                            if (MeasureFancyText(line.Substring(0, i)) > maxX)
+                            if (MeasureFancyText(line[..i]) > maxX)
                             {
                                 target = i - 1;
                                 break;
@@ -1052,7 +819,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     {
                         for (int i = expectedCharacterCount; i >= 0; i--)
                         {
-                            if (MeasureFancyText(line.Substring(0, i)) <= maxX)
+                            if (MeasureFancyText(line[..i]) <= maxX)
                             {
                                 target = i;
                                 break;
@@ -1064,7 +831,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     {
                         lastSpace = target;
                     }
-                    resultBuilder.Append(line, 0, lastSpace);
+                    resultBuilder.Append(line, 0, lastSpace).Append('\n');
                     line = line[lastSpace..];
                 }
             }
@@ -1073,24 +840,23 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>
-        /// Draws a rectangle to screen.
+        /// Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.
         /// </summary>
         /// <param name="X">The starting X.</param>
         /// <param name="Y">The starting Y.</param>
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
-        /// <param name="c">The color to use.</param>
+        /// <param name="color">The color to use.</param>
         /// <param name="vbo">The VBO to render with.</param>
-        public void DrawRectangle(float X, float Y, float width, float height, Color c, TextVBOBuilder vbo)
+        public void DrawRectangle(float X, float Y, float width, float height, Color4F color, TextVBOBuilder vbo)
         {
-            TextVBOBuilder.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight,
-                new Vector4((float)c.R / 255f, (float)c.G / 255f, (float)c.B / 255f, (float)c.A / 255f));
+            TextVBOBuilder.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight, color);
         }
 
         /// <summary>
         /// Matcher object to recognize color/format codes.
         /// </summary>
-        public static AsciiMatcher FORMAT_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTU" + "!@#$%&*()-");
+        public static AsciiMatcher FORMAT_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTUO" + "!@#$%&*()-");
 
         /// <summary>
         /// Used to identify if an input character is a valid color/format symbol (generally the character that follows a '^'), for use by <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.

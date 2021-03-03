@@ -69,7 +69,38 @@ namespace FGECore.ConsoleHelpers
         /// <returns>The fixed string.</returns>
         public static string ApplyBaseColor(this string text, string color)
         {
-            return text.Replace(Base, "^r^7" + color);
+            if (color != "^r^7")
+            {
+                color = "^r^7" + color;
+            }
+            if (!text.Contains(Base))
+            {
+                return color + text;
+            }
+            StringBuilder result = new StringBuilder(text.Length * 2);
+            int brackets = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '^' && i + 1 < text.Length)
+                {
+                    if (text[i + 1] == '[')
+                    {
+                        brackets++;
+                    }
+                    else if (text[i + 1] == 'B' && brackets == 0)
+                    {
+                        result.Append(color);
+                        i++;
+                        continue;
+                    }
+                }
+                else if (text[i] == ']' && brackets > 0)
+                {
+                    brackets--;
+                }
+                result.Append(text[i]);
+            }
+            return result.ToString();
         }
     }
 }
