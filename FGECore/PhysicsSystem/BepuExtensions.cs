@@ -22,22 +22,9 @@ using FGECore.PhysicsSystem;
 
 namespace FGECore.PhysicsSystem
 {
-    /// <summary>
-    /// Helpers for BEPU classes.
-    /// </summary>
+    /// <summary>Helpers for BEPU classes.</summary>
     public static class BepuExtensions
     {
-        /// <summary>
-        /// Get the angle around an axis for a specific quaternion.
-        /// </summary>
-        /// <param name="rotation">The quaternion.</param>
-        /// <param name="axis">The relative axis.</param>
-        /// <returns>The angle.</returns>
-        public static double AxisAngleFor(this BEPUutilities.Quaternion rotation, in Vector3 axis)
-        {
-            return rotation.ToCore().AxisAngleForRadians(axis.ToLocation()) * MathUtilities.PI180;
-        }
-
         /// <summary>
         /// Converts a Core quaternion to a BEPU quaternion.
         /// </summary>

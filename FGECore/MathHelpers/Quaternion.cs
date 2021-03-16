@@ -369,7 +369,7 @@ namespace FGECore.MathHelpers
             Location p = ra.Project(axis);
             Quaternion twist = new Quaternion(p.X, p.Y, p.Z, W).Normalized();
             Location new_forward = twist.TransformX();
-            return MathUtilities.VectorToAngles(new_forward).Yaw;
+            return MathUtilities.VectorToAnglesYawRad(new_forward);
         }
 
         /// <summary>

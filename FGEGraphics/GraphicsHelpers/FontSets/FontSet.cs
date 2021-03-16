@@ -236,7 +236,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 string text = AutoTranslateFancyText(originalText.ApplyBaseColor(baseColor));
                 string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
                 RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
-                RenderableTextPart currentPart = new RenderableTextPart();
+                RenderableTextPart currentPart = new RenderableTextPart() { Font = FontDefault };
                 float maxWidth = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {

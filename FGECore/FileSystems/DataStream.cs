@@ -110,7 +110,7 @@ namespace FGECore.FileSystems
         /// </summary>
         public DataStream()
         {
-            Wrapped = new byte[0];
+            Wrapped = Array.Empty<byte>();
             Len = 0;
             Ind = 0;
         }
