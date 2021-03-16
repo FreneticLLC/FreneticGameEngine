@@ -72,7 +72,7 @@ namespace FGEGraphics.AudioSystem
         /// <summary>
         /// The internal audio enforcer, if used.
         /// </summary>
-        public AudioEnforcer AudioInternal;
+        public AudioEnforcer EnforcerInternal;
 
         /// <summary>
         /// Maximum number of sound effects playing simultaneously before the next one gets fed to the enforcer instead of directly into OpenAL.
@@ -103,9 +103,9 @@ namespace FGEGraphics.AudioSystem
         /// <param name="tclient">The backing client.</param>
         public void Init(GameEngineBase tclient)
         {
-            if (AudioInternal != null)
+            if (EnforcerInternal != null)
             {
-                AudioInternal.Shutdown();
+                EnforcerInternal.Shutdown();
             }
             if (Context.Handle != IntPtr.Zero)
             {
@@ -117,8 +117,8 @@ namespace FGEGraphics.AudioSystem
             Context = ALC.CreateContext(device, (int[])null);
             if (Client.EnforceAudio)
             {
-                AudioInternal = new AudioEnforcer();
-                AudioInternal.Init(Context);
+                EnforcerInternal = new AudioEnforcer();
+                EnforcerInternal.Init(Context);
                 Context = new ALContext(IntPtr.Zero);
             }
             else
@@ -167,7 +167,12 @@ namespace FGEGraphics.AudioSystem
         public void Shutdown()
         {
             StopAll();
-            if (Context.Handle != IntPtr.Zero)
+            if (EnforcerInternal != null)
+            {
+                EnforcerInternal.Shutdown();
+                EnforcerInternal = null;
+            }
+            if (Context.Handle != IntPtr.Zero && (EnforcerInternal == null || !EnforcerInternal.Run))
             {
                 ALC.DestroyContext(Context);
             }
@@ -190,7 +195,7 @@ namespace FGEGraphics.AudioSystem
         [Conditional("AUDIO_ERROR_CHECK")]
         public void CheckError(string inp)
         {
-            if (AudioInternal == null || MaxBeforeEnforce != 0)
+            if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
@@ -223,7 +228,7 @@ namespace FGEGraphics.AudioSystem
         public void Update(Location position, Location forward, Location up, Location velocity, bool selected)
         {
             CPosition = position;
-            if (AudioInternal == null || MaxBeforeEnforce != 0)
+            if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
@@ -361,7 +366,7 @@ namespace FGEGraphics.AudioSystem
             CheckError("Microphone");
             float globvol = GlobalVolume;
             globvol = globvol <= 0 ? 0.001f : (globvol > 1 ? 1 : globvol);
-            if (AudioInternal == null || MaxBeforeEnforce != 0)
+            if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 Vector3 pos = position.ToOpenTK();
                 Vector3 forw = forward.ToOpenTK();
@@ -374,15 +379,15 @@ namespace FGEGraphics.AudioSystem
                 AL.Listener(ALListenerf.Gain, globvol);
                 CheckError("Gain");
             }
-            if (AudioInternal != null)
+            if (EnforcerInternal != null)
             {
                 // TODO: vel
                 //AudioInternal.Left = CVars.a_left.ValueB;
                 //AudioInternal.Right = CVars.a_right.ValueB;
-                AudioInternal.Position = position;
-                AudioInternal.ForwardDirection = forward;
-                AudioInternal.UpDirection = up;
-                AudioInternal.Volume = globvol;
+                EnforcerInternal.Position = position;
+                EnforcerInternal.ForwardDirection = forward;
+                EnforcerInternal.UpDirection = up;
+                EnforcerInternal.Volume = globvol;
             }
             TimeTowardsNextClean += Client.Delta;
             if (TimeTowardsNextClean > 10.0)
@@ -470,7 +475,7 @@ namespace FGEGraphics.AudioSystem
                 //SysConsole.Output(OutputType.DEBUG, "Audio / null");
                 return;
             }
-            if (PlayingNow.Count > 200 && AudioInternal == null)
+            if (PlayingNow.Count > 200 && EnforcerInternal == null)
             {
                 if (!CanClean())
                 {
@@ -650,7 +655,7 @@ namespace FGEGraphics.AudioSystem
                 string newname = $"sounds/{name}.ogg";
                 if (!Client.Client.Files.FileExists(newname))
                 {
-                    //SysConsole.Output(OutputType.DEBUG, "Audio / nullsource");
+                    SysConsole.Output(OutputType.WARNING, $"Cannot load audio '{name}': file does not exist.");
                     return null;
                 }
                 SoundEffect tsfx = new SoundEffect()
@@ -730,19 +735,16 @@ namespace FGEGraphics.AudioSystem
                 Name = name,
                 LastUse = Client.GlobalTickTime
             };
-            int sampleCount = (int)oggReader.TotalSamples;
+            int sampleCount = (int)oggReader.TotalSamples * oggReader.Channels;
             // TODO: re-usable buffer for opti reasons?
             float[] sampleBuffer = new float[sampleCount];
-            int readSamples = oggReader.ReadSamples(sampleBuffer, 0, sampleCount);
+            oggReader.ReadSamples(sampleBuffer, 0, sampleCount);
             byte[] data = new byte[sampleCount * 2];
-            PrimitiveConversionHelper.Int32ByteUnion intConverter = default;
             for (int i = 0; i < sampleCount; i++)
             {
-                intConverter.Int32Value = (int)(sampleBuffer[i] * short.MaxValue);
-                data[i * 2] = intConverter.Bytes.Byte0Value;
-                data[i * 2 + 1] = intConverter.Bytes.Byte1Value;
+                PrimitiveConversionHelper.Short16ToBytes((short)(sampleBuffer[i] * short.MaxValue), data, i * 2);
             }
-            if (AudioInternal != null)
+            if (EnforcerInternal != null)
             {
                 LiveAudioClip clip = new LiveAudioClip()
                 {
@@ -751,7 +753,7 @@ namespace FGEGraphics.AudioSystem
                 clip.Channels = (byte)oggReader.Channels;
                 sfx.Clip = clip;
             }
-            if (AudioInternal == null || MaxBeforeEnforce != 0)
+            if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 sfx.Internal = AL.GenBuffer();
                 AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, oggReader.SampleRate);
@@ -773,13 +775,13 @@ namespace FGEGraphics.AudioSystem
                 LastUse = Client.GlobalTickTime
             };
             byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out int rate);
-            if (AudioInternal != null)
+            if (EnforcerInternal != null)
             {
                 LiveAudioClip clip = new LiveAudioClip()
                 {
                     Data = data
                 };
-                if (bits == 1)
+                if (bits == 8)
                 {
                     clip.Data = new byte[data.Length * 2];
                     for (int i = 0; i < data.Length; i++)
@@ -800,7 +802,7 @@ namespace FGEGraphics.AudioSystem
                 sfx.Clip = clip;
                 // SysConsole.Output(OutputType.DEBUG, "Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
             }
-            if (AudioInternal == null || MaxBeforeEnforce != 0)
+            if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 sfx.Internal = AL.GenBuffer();
                 AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, rate);
@@ -881,11 +883,11 @@ namespace FGEGraphics.AudioSystem
         /// <returns>The audio level.</returns>
         public float EstimateAudioLevel()
         {
-            if (AudioInternal != null)
+            if (EnforcerInternal != null)
             {
-                lock (AudioInternal.CLelLock)
+                lock (EnforcerInternal.CLelLock)
                 {
-                    return AudioInternal.CurrentLevel;
+                    return EnforcerInternal.CurrentLevel;
                 }
             }
             else

@@ -13,9 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using FGECore;
 using FGECore.CoreSystems;
@@ -25,109 +22,40 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FGEGraphics.AudioSystem.EnforcerSystem
 {
-    /// <summary>
-    /// The internal engine to crunch audio data and push it to the speakers (when OpenAL's matching subsystem is not playing nice).
-    /// </summary>
+    /// <summary>The internal engine to crunch audio data and push it to the speakers (when OpenAL's matching subsystem is not playing nice).</summary>
     public class AudioEnforcer
     {
-        /// <summary>
-        /// How many instances of the enforcer are live. This value starts at 1 and increments every time an enforcer is launched.
-        /// </summary>
+        /// <summary>How many instances of the enforcer have been created. This value starts at 1 and increments every time an enforcer is launched.</summary>
         public static long AudioID = 1;
 
-        /// <summary>
-        /// The thread for the enforcer.
-        /// </summary>
+        /// <summary>The thread for the enforcer.</summary>
         public Thread AudioForcer;
 
-        /// <summary>
-        /// The maximum pause, in milliseconds, between audio crunching passes.
-        /// </summary>
-        public const int PAUSE = 10;
-
-        /// <summary>
-        /// How many samples to load at once.
-        /// </summary>
-        public const int SAMPLE_LOAD = 33;
-
-        /// <summary>
-        /// The audio frequency, in Hz.
-        /// </summary>
-        public const int FREQUENCY = 44100;
-
-        /// <summary>
-        /// Audio channels to use.
-        /// </summary>
-        public const int CHANNELS = 2;
-
-        /// <summary>
-        /// Audio byte-rate to use.
-        /// </summary>
-        public const int BYTERATE = 2;
-
-        /// <summary>
-        /// Nubmer of audio buffers to use at the same time.
-        /// </summary>
-        public const int BUFFERS_AT_ONCE = 2;
-
-        /// <summary>
-        /// Actual byte space to load at once.
-        /// </summary>
-        public const int ACTUAL_SAMPLES = (int)((FREQUENCY * SAMPLE_LOAD) / 1000.0) * CHANNELS * BYTERATE;
-
-        /// <summary>
-        /// Multiplying an audio sample by this lowers its volume by 3 dB.
-        /// </summary>
-        public const float MINUS_THREE_DB = 0.707106781f;
-
-        /// <summary>
-        /// Whether the system is running.
-        /// </summary>
+        /// <summary>Whether the system is running.</summary>
         public bool Run = false;
 
-        /// <summary>
-        /// The current general volume of the audio enforcer.
-        /// </summary>
+        /// <summary>The current general volume of the audio enforcer.</summary>
         public float Volume = 0.5f;
 
-        /// <summary>
-        /// All currently playing audio.
-        /// </summary>
+        /// <summary>All currently playing audio.</summary>
         public List<LiveAudioInstance> Playing = new List<LiveAudioInstance>();
 
-        /// <summary>
-        /// Locker for interaction with the enforcer.
-        /// </summary>
+        /// <summary>Locker for interaction with the enforcer.</summary>
         public LockObject Locker = new LockObject();
 
-        /// <summary>
-        /// Relevant OpenAL audio context.
-        /// </summary>
-        public ALContext Context;
-
-        /// <summary>
-        /// 3D Position of the audio "camera".
-        /// </summary>
+        /// <summary>3D Position of the audio "camera".</summary>
         public Location Position;
 
-        /// <summary>
-        /// Forward direction (vector) of the audio "camera".
-        /// </summary>
+        /// <summary>Forward direction (vector) of the audio "camera".</summary>
         public Location ForwardDirection;
 
-        /// <summary>
-        /// Up direction (vector) of the audio "camera".
-        /// </summary>
+        /// <summary>Up direction (vector) of the audio "camera".</summary>
         public Location UpDirection;
 
-        /// <summary>
-        /// Whether the left channel is enabled.
-        /// </summary>
+        /// <summary>Whether the left channel is enabled.</summary>
         public bool Left = true;
 
-        /// <summary>
-        /// Whether the right channel is enabled.
-        /// </summary>
+        /// <summary>Whether the right channel is enabled.</summary>
         public bool Right = true;
 
         /// <summary>
@@ -153,230 +81,291 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// <param name="acontext">The backing OpenAL context.</param>
         public void Init(ALContext acontext)
         {
-            Context = acontext;
+            Internal.Instance = this;
+            Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
+            for (int i = 0; i < 10; i++)
+            {
+                Internal.ReusableBuffers[i] = new byte[InternalData.ACTUAL_SAMPLES];
+            }
+            Internal.Context = acontext;
             Run = true;
-            AudioForcer = new Thread(new ThreadStart(ForceAudioLoop))
+            AudioForcer = new Thread(new ThreadStart(Internal.ForceAudioLoop))
             {
                 Name = "Audio_" + Interlocked.Increment(ref AudioID)
             };
             AudioForcer.Start();
         }
 
-        /// <summary>
-        /// Shuts down the enforcer.
-        /// </summary>
+        /// <summary>Shuts down the enforcer. May take a moment before the enforcer thread stops.</summary>
         public void Shutdown()
         {
             Run = false;
         }
 
-        /// <summary>
-        /// One quarter of PI. A constant.
-        /// </summary>
-        public const float QUARTER_PI = (float)Math.PI * 0.25f;
-
-        /// <summary>
-        /// Current level (of audio) locker.
-        /// </summary>
+        /// <summary>Current level (of audio) locker.</summary>
         public LockObject CLelLock = new LockObject();
 
-        /// <summary>
-        /// Current audio levels. Use <see cref="CLelLock"/>.
-        /// </summary>
+        /// <summary>Current audio levels. Use <see cref="CLelLock"/>.</summary>
         public float CurrentLevel = 0.0f;
 
-        /// <summary>
-        /// The internal audio enforcer loop.
-        /// </summary>
-        public void ForceAudioLoop()
+        /// <summary>Internal data used by the enforcer.</summary>
+        public struct InternalData
         {
-            try
+            /// <summary>The relevant backing enforcer instance.</summary>
+            public AudioEnforcer Instance;
+
+            /// <summary>One quarter of PI. A constant.</summary>
+            public const float QUARTER_PI = (float)Math.PI * 0.25f;
+
+            /// <summary>The audio frequency, in Hz.</summary>
+            public const int FREQUENCY = 44100;
+
+            /// <summary>Audio channels to use.</summary>
+            public const int CHANNELS = 2;
+
+            /// <summary>Audio byte-rate to use.</summary>
+            public const int BYTERATE = 2;
+
+            /// <summary>Multiplying an audio sample by this lowers its volume by 3 dB.</summary>
+            public const float MINUS_THREE_DB = 0.707106781f;
+
+            /// <summary>The maximum pause, in milliseconds, between audio crunching passes.</summary>
+            public const int PAUSE = 10;
+
+            /// <summary>How many samples to load at once.</summary>
+            public const int SAMPLE_LOAD = 33;
+
+            /// <summary>Nubmer of audio buffers to use at the same time.</summary>
+            public const int BUFFERS_AT_ONCE = 2;
+
+            /// <summary>How many buffers are in <see cref="ReusableBuffers"/>.</summary>
+            public const int REUSABLE_BUFFER_ARRAY_SIZE = 10;
+
+            /// <summary>Actual byte space to load at once.</summary>
+            public const int ACTUAL_SAMPLES = (int)((FREQUENCY * SAMPLE_LOAD) / 1000.0) * CHANNELS * BYTERATE;
+
+            /// <summary>
+            /// Relevant OpenAL audio context.
+            /// </summary>
+            public ALContext Context;
+
+            /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the enforcer to prevent GC thrash.</summary>
+            public byte[][] ReusableBuffers;
+
+            /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
+            public int ByteBufferID;
+
+            /// <summary>
+            /// The OpenAL audio source ID.
+            /// </summary>
+            public int ALAudioSource;
+
+            /// <summary>Cached reusable list of dead audio instances.</summary>
+            public List<LiveAudioInstance> DeadInstances;
+
+            /// <summary>
+            /// Queue of reusable buffer IDs.
+            /// </summary>
+            public Queue<int> UsableBufferIDs;
+
+            /// <summary>Gets and cleans the next byte buffer to use.</summary>
+            public byte[] GetNextBuffer()
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                ALC.MakeContextCurrent(Context);
-                int src = AL.GenSource();
-                AL.Source(src, ALSourceb.Looping, false);
-                AL.Source(src, ALSourceb.SourceRelative, true);
-                Queue<int> usable = new Queue<int>();
-                List<LiveAudioInstance> dead = new List<LiveAudioInstance>();
-                while (true)
+                byte[] toReturn = ReusableBuffers[ByteBufferID++];
+                ByteBufferID %= REUSABLE_BUFFER_ARRAY_SIZE;
+                for (int i = 0; i < toReturn.Length; i++)
                 {
-                    if (!Run)
-                    {
-                        ALC.DestroyContext(Context);
-                        Context = new ALContext(IntPtr.Zero);
-                        return;
-                    }
-                    sw.Stop();
-                    double elSec = sw.ElapsedTicks / (double)Stopwatch.Frequency;
-                    sw.Reset();
-                    sw.Start();
-                    AL.GetSource(src, ALGetSourcei.BuffersProcessed, out int proc);
-                    while (proc > 0)
-                    {
-                        int buf = AL.SourceUnqueueBuffer(src);
-                        usable.Enqueue(buf);
-                        proc--;
-                    }
-                    AL.GetSource(src, ALGetSourcei.BuffersQueued, out int waiting);
-                    BEPUutilities.Vector3 bforw = ForwardDirection.ToBEPU();
-                    BEPUutilities.Vector3 bup = UpDirection.ToBEPU();
-                    if (waiting < BUFFERS_AT_ONCE)
-                    {
-                        byte[] b = new byte[ACTUAL_SAMPLES]; // TODO: Reuse byte arrays rather than regenerating every cycle (be aware of buffer methods not necessarily copying)
-                        lock (Locker)
-                        {
-                            foreach (LiveAudioInstance toAdd in Playing)
-                            {
-                                if (toAdd.State != AudioState.PLAYING)
-                                {
-                                    toAdd.CurrentSample = toAdd.Clip.Data.Length + 1;
-                                }
-                                if (toAdd.State != AudioState.PAUSED)
-                                {
-                                    int bpos = 0;
-                                    int pos = 0;
-                                    float tvol = 1f;
-                                    float tvol_2 = 1f;
-                                    if (toAdd.UsePosition)
-                                    {
-                                        float tempvol = 1.0f / Math.Max(1.0f, (float)toAdd.Position.DistanceSquared(Position));
-                                        BEPUutilities.Vector3 rel = ((toAdd.Position - Position).Normalize().ToBEPU());
-                                        BEPUutilities.Quaternion.GetQuaternionBetweenNormalizedVectors(ref rel, ref bforw, out BEPUutilities.Quaternion quat);
-                                        float angle = (float)quat.AxisAngleFor(bup);
-                                        angle += (float)Math.PI; // TODO: Sanity!
-                                        if (angle > (float)Math.PI)
-                                        {
-                                            angle -= (float)Math.PI * 2f;
-                                        }
-                                        else if (angle < -(float)Math.PI)
-                                        {
-                                            angle += (float)Math.PI * 2f;
-                                        }
+                    toReturn[i] = 0; // TODO: Is 0 correct for a no-audio buffer?
+                }
+                return toReturn;
+            }
 
-                                        bool any_left = true;
-                                        bool any_right = true;
+            /// <summary>Calculates the correct positional audio volume for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
+            public (float, float) GetPositionalVolume(Location position)
+            {
+                float distanceGain = 1.0f / Math.Max(1.0f, (float)position.DistanceSquared(Instance.Position));
+                Location relativeDirectionVector = (position - Instance.Position).Normalize();
+                Quaternion direction = Quaternion.GetQuaternionBetween(relativeDirectionVector, Instance.ForwardDirection);
+                float angle = (float)direction.AxisAngleForRadians(Instance.UpDirection);
+                float volumeRight = Instance.Right ? Math.Max(0f, (float)Math.Sin(angle + QUARTER_PI)) : 0f;
+                float volumeLeft = Instance.Left ? Math.Max(0f, (float)Math.Cos(angle + QUARTER_PI)) : 0f;
+                volumeRight *= volumeRight * distanceGain;
+                volumeLeft *= volumeLeft * distanceGain;
+                return (volumeLeft, volumeRight);
+            }
 
-                                        if (angle > QUARTER_PI)
-                                        {
-                                            if (angle > QUARTER_PI * 3f)
-                                            {
-                                                angle = (float)Math.PI - angle;
-                                            }
-                                            else
-                                            {
-                                                any_right = false;
-                                            }
-                                        }
-                                        else if (angle < -QUARTER_PI)
-                                        {
-                                            if (angle < -QUARTER_PI * 3f)
-                                            {
-                                                angle = (-(float)Math.PI) - angle;
-                                            }
-                                            else
-                                            {
-                                                any_left = false;
-                                            }
-                                        }
+            /// <summary>Completely closes and stops the audio enforcer system.</summary>
+            public void CloseAndStop()
+            {
+                if (AL.GetSourceState(ALAudioSource) == ALSourceState.Playing)
+                {
+                    AL.SourceStop(ALAudioSource);
+                }
+                if (Context.Handle != IntPtr.Zero)
+                {
+                    ALC.DestroyContext(Context);
+                }
+                Context = new ALContext(IntPtr.Zero);
+            }
 
-                                        tvol = Right && any_right ? (float)Math.Cos(angle + QUARTER_PI) : 0f;
-                                        tvol_2 = Left && any_left ? (float)Math.Sin(angle + QUARTER_PI) : 0f;
-
-                                        tvol *= tvol * tempvol;
-                                        tvol_2 *= tvol_2 * tempvol;
-                                    }
-                                    float gain = toAdd.Gain * Volume;
-                                    gain *= gain;
-                                    int mod = (int)((tvol * gain) * ushort.MaxValue);
-                                    int mod_2 = (int)((tvol_2 * gain) * ushort.MaxValue);
-                                    int lim = Math.Min(toAdd.Clip.Data.Length - toAdd.CurrentSample, ACTUAL_SAMPLES);
-                                    while (bpos < lim && bpos + 3 < ACTUAL_SAMPLES)
-                                    {
-                                        // TODO: pitch, velocity, etc.?
-                                        int sample = (short)((toAdd.Clip.Data[pos + toAdd.CurrentSample + 1] << 8) | toAdd.Clip.Data[pos + toAdd.CurrentSample]);
-                                        int bproc = (sample * mod_2) >> 16;
-                                        int bsample = (short)((b[bpos + 1] << 8) | b[bpos]);
-                                        bproc += bsample; // TODO: Better scaled adder
-                                        bproc = Math.Max(short.MinValue, Math.Min(short.MaxValue, bproc));
-                                        b[bpos] = (byte)bproc;
-                                        b[bpos + 1] = (byte)(bproc >> 8);
-                                        bpos += 2;
-                                        if (toAdd.Clip.Channels == 2)
-                                        {
-                                            pos += 2;
-                                            sample = (short)((toAdd.Clip.Data[pos + toAdd.CurrentSample + 1] << 8) | toAdd.Clip.Data[pos + toAdd.CurrentSample]);
-                                            bproc = (sample * mod) >> 16;
-                                            bsample = (short)((b[bpos + 1] << 8) | b[bpos]);
-                                            bproc += bsample; // TODO: Better scaled adder
-                                            b[bpos] = (byte)bproc;
-                                            b[bpos + 1] = (byte)(bproc >> 8);
-                                        }
-                                        else
-                                        {
-                                            bproc = (sample * mod) >> 16;
-                                            bsample = (short)((b[bpos + 1] << 8) | b[bpos]);
-                                            bproc += bsample; // TODO: Better scaled adder
-                                            b[bpos] = (byte)bproc;
-                                            b[bpos + 1] = (byte)(bproc >> 8);
-                                        }
-                                        pos += 2;
-                                        bpos += 2;
-                                    }
-                                    toAdd.CurrentSample += pos;
-                                    if (toAdd.CurrentSample >= toAdd.Clip.Data.Length)
-                                    {
-                                        toAdd.CurrentSample = 0;
-                                        if (toAdd.Loop)
-                                        {
-                                            // TODO: Append first few samples from the Data array.
-                                        }
-                                        else
-                                        {
-                                            toAdd.State = AudioState.DONE;
-                                            dead.Add(toAdd);
-                                        }
-                                    }
-                                }
-                            }
-                            foreach (LiveAudioInstance inst in dead)
-                            {
-                                Playing.Remove(inst);
-                            }
-                        }
-                        float clevelval = 0.0f;
-                        for (int i = 0; i < b.Length; i += BYTERATE)
-                        {
-                            int val = b[i] | (b[i + 1] << 8);
-                            float tval = val / (float)ushort.MaxValue;
-                            clevelval += tval;
-                        }
-                        clevelval /= (b.Length / 2) * Volume;
-                        lock (CLelLock)
-                        {
-                            CurrentLevel = clevelval;
-                        }
-                        int buf = usable.Count > 0 ? usable.Dequeue() : AL.GenBuffer();
-                        AL.BufferData(buf, ALFormat.Stereo16, b, FREQUENCY);
-                        AL.SourceQueueBuffer(src, buf);
-                        if (AL.GetSourceState(src) != ALSourceState.Playing)
-                        {
-                            AL.SourcePlay(src);
-                        }
-                    }
-                    int ms = PAUSE - (int)(elSec * 1000.0);
-                    if (ms > 0)
+            /// <summary>Adds a single audio instance to a raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
+            public void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
+            {
+                int outBufPosition = 0;
+                float volumeLeft = 1f, volumeRight = 1f;
+                if (toAdd.UsePosition)
+                {
+                    (volumeLeft, volumeRight) = GetPositionalVolume(toAdd.Position);
+                }
+                float gain = toAdd.Gain * Instance.Volume;
+                gain *= gain;
+                int volumeModifierRight = (int)((volumeRight * gain) * ushort.MaxValue);
+                int volumeModifierLeft = (int)((volumeLeft * gain) * ushort.MaxValue);
+                byte[] clipData = toAdd.Clip.Data;
+                int maxBytePosition = toAdd.Loop ? ACTUAL_SAMPLES : Math.Min(clipData.Length - toAdd.CurrentSample, ACTUAL_SAMPLES);
+                while (outBufPosition < maxBytePosition && outBufPosition + 3 < ACTUAL_SAMPLES)
+                {
+                    // TODO: pitch, velocity, etc.?
+                    int rawSampleInLeft = (short)((clipData[toAdd.CurrentSample + 1] << 8) | clipData[toAdd.CurrentSample]);
+                    int outSampleLeft = (rawSampleInLeft * volumeModifierLeft) >> 16;
+                    int rawPreValueLeft = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
+                    outSampleLeft += rawPreValueLeft; // TODO: Better scaled adder?
+                    outSampleLeft = Math.Max(short.MinValue, Math.Min(short.MaxValue, outSampleLeft));
+                    outBuffer[outBufPosition] = (byte)outSampleLeft;
+                    outBuffer[outBufPosition + 1] = (byte)(outSampleLeft >> 8);
+                    outBufPosition += 2;
+                    int outSampleRight;
+                    if (toAdd.Clip.Channels == 2)
                     {
-                        Thread.Sleep(ms);
+                        toAdd.CurrentSample += 2;
+                        int rawSampleInRight = (short)((clipData[toAdd.CurrentSample + 1] << 8) | clipData[toAdd.CurrentSample]);
+                        outSampleRight = (rawSampleInRight * volumeModifierRight) >> 16;
                     }
+                    else
+                    {
+                        outSampleRight = (rawSampleInLeft * volumeModifierRight) >> 16;
+                    }
+                    int rawPreValueRight = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
+                    outSampleRight += rawPreValueRight; // TODO: Better scaled adder?
+                    outBuffer[outBufPosition] = (byte)outSampleRight;
+                    outBuffer[outBufPosition + 1] = (byte)(outSampleRight >> 8);
+                    toAdd.CurrentSample += 2;
+                    if (toAdd.Loop)
+                    {
+                        toAdd.CurrentSample %= clipData.Length;
+                    }
+                    outBufPosition += 2;
+                }
+                if (toAdd.CurrentSample >= clipData.Length)
+                {
+                    toAdd.CurrentSample = 0;
+                    toAdd.State = AudioState.DONE;
+                    DeadInstances.Add(toAdd);
                 }
             }
-            catch (Exception ex)
+
+            /// <summary>Calculates the audio level of a raw audio buffer.</summary>
+            public float GetLevelFor(byte[] buffer)
             {
-                SysConsole.Output("Handling audio enforcer", ex);
+                float level = 0.0f;
+                for (int i = 0; i < buffer.Length; i += BYTERATE)
+                {
+                    int val = buffer[i] | (buffer[i + 1] << 8);
+                    float tval = val / (float)ushort.MaxValue;
+                    level += tval;
+                }
+                level /= (buffer.Length / 2) * Instance.Volume;
+                return level;
+            }
+
+            /// <summary>Causes a single buffer of audio to be added to the live playing audio in OpenAL. Also ensures the enforcer is playing in OpenAL at all.</summary>
+            public void PlayBuffer(byte[] buffer)
+            {
+                int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
+                AL.BufferData(bufferID, ALFormat.Stereo16, buffer, FREQUENCY);
+                AL.SourceQueueBuffer(ALAudioSource, bufferID);
+                if (AL.GetSourceState(ALAudioSource) != ALSourceState.Playing)
+                {
+                    AL.SourcePlay(ALAudioSource);
+                }
+            }
+
+            /// <summary>The internal audio enforcer loop.</summary>
+            public void ForceAudioLoop()
+            {
+                try
+                {
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    ALC.MakeContextCurrent(Context);
+                    ALAudioSource = AL.GenSource();
+                    AL.Source(ALAudioSource, ALSourceb.Looping, false);
+                    AL.Source(ALAudioSource, ALSourceb.SourceRelative, true);
+                    UsableBufferIDs = new Queue<int>();
+                    DeadInstances = new List<LiveAudioInstance>();
+                    while (true)
+                    {
+                        if (!Instance.Run)
+                        {
+                            CloseAndStop();
+                            return;
+                        }
+                        stopwatch.Stop();
+                        double elSec = stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+                        stopwatch.Reset();
+                        stopwatch.Start();
+                        AL.GetSource(ALAudioSource, ALGetSourcei.BuffersProcessed, out int buffersDone);
+                        while (buffersDone > 0)
+                        {
+                            int bufferID = AL.SourceUnqueueBuffer(ALAudioSource);
+                            UsableBufferIDs.Enqueue(bufferID);
+                            buffersDone--;
+                        }
+                        AL.GetSource(ALAudioSource, ALGetSourcei.BuffersQueued, out int waiting);
+                        if (waiting < BUFFERS_AT_ONCE)
+                        {
+                            byte[] buffer = GetNextBuffer();
+                            lock (Instance.Locker)
+                            {
+                                foreach (LiveAudioInstance audio in Instance.Playing)
+                                {
+                                    if (audio.State == AudioState.PLAYING)
+                                    {
+                                        AddClipToBuffer(buffer, audio);
+                                    }
+                                    else if (audio.State == AudioState.STOP || audio.State == AudioState.DONE)
+                                    {
+                                        DeadInstances.Add(audio);
+                                    }
+                                }
+                                foreach (LiveAudioInstance inst in DeadInstances)
+                                {
+                                    Instance.Playing.Remove(inst);
+                                }
+                                DeadInstances.Clear();
+                            }
+                            float newCurrentLevel = GetLevelFor(buffer);
+                            lock (Instance.CLelLock)
+                            {
+                                Instance.CurrentLevel = newCurrentLevel;
+                            }
+                            PlayBuffer(buffer);
+                        }
+                        int ms = PAUSE - (int)(elSec * 1000.0);
+                        if (ms > 0)
+                        {
+                            Thread.Sleep(ms);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SysConsole.Output("Handling audio enforcer", ex);
+                }
             }
         }
 
+        /// <summary>Internal data used by the enforcer.</summary>
+        public InternalData Internal;
     }
 }

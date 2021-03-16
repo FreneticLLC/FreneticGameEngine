@@ -98,7 +98,7 @@ namespace FGEGraphics.AudioSystem
         {
             if (!Exists)
             {
-                if (Engine.AudioInternal != null && Engine.PlayingNow.Count >= Engine.MaxBeforeEnforce)
+                if (Engine.EnforcerInternal != null && Engine.PlayingNow.Count >= Engine.MaxBeforeEnforce)
                 {
                     AudioInternal = new LiveAudioInstance()
                     {
@@ -215,7 +215,7 @@ namespace FGEGraphics.AudioSystem
         {
             if (AudioInternal != null)
             {
-                Engine.AudioInternal.Add(this);
+                Engine.EnforcerInternal.Add(this);
             }
             else
             {
