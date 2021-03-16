@@ -390,14 +390,13 @@ namespace FGEWelcomer
             }
         }
 
-        readonly string[] FILES = new string[] { "BEPUphysics.dll", "BEPUphysics.pdb", "BEPUphysics.xml",
-            "BEPUutilities.dll", "BEPUutilities.pdb", "BEPUutilities.xml",
-            "csogg.dll", "csvorbis.dll",
+        readonly string[] FILES = new string[] { "BepuPhysics.dll", "BepuPhysics.pdb", "BepuPhysics.xml",
+            "BepuUtilities.dll", "BepuUtilities.pdb", "BepuUtilities.xml",
             "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",
             "FGECore.dll", "FGECore.pdb", "FGECore.xml",
             "FGEGraphics.dll", "FGEGraphics.pdb", "FGEGraphics.xml",
-            //"FreneticScript.dll", "FreneticScript.pdb", "FreneticScript.xml",
             "LZ4.dll",
+            "NVorbis.dll",
             "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml",
             "openvr_api.dll", "openvr_api.pdb"
         };

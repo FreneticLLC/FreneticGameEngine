@@ -32,17 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BEPUphysics">
-      <HintPath>.\BEPUphysics.dll</HintPath>
+    <Reference Include="BepuPhysics">
+      <HintPath>.\BepuPhysics.dll</HintPath>
     </Reference>
-    <Reference Include="BEPUutilities">
-      <HintPath>.\BEPUutilities.dll</HintPath>
-    </Reference>
-    <Reference Include="csogg">
-      <HintPath>.\csogg.dll</HintPath>
-    </Reference>
-    <Reference Include="csvorbis">
-      <HintPath>.\csvorbis.dll</HintPath>
+    <Reference Include="BepuUtilities">
+      <HintPath>.\BepuUtilities.dll</HintPath>
     </Reference>
     <Reference Include="FreneticUtilities">
       <HintPath>.\FreneticUtilities.dll</HintPath>

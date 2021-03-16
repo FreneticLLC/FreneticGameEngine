@@ -16,14 +16,14 @@
     <ApplicationIcon>FGE_Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BEPUphysics">
-      <HintPath>.\BEPUphysics.dll</HintPath>
+    <Reference Include="BepuPhysics">
+      <HintPath>..\lib\BepuPhysics.dll</HintPath>
     </Reference>
-    <Reference Include="BEPUutilities">
-      <HintPath>.\BEPUutilities.dll</HintPath>
+    <Reference Include="BepuUtilities">
+      <HintPath>..\lib\BepuUtilities.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
-      <HintPath>.\LZ4.dll</HintPath>
+      <HintPath>..\lib\LZ4.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Compression" />
   </ItemGroup>

@@ -18,14 +18,14 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BEPUphysics">
-      <HintPath>..\FreneticGameEngine\FGECore\BEPUphysics.dll</HintPath>
+    <Reference Include="BepuPhysics">
+      <HintPath>..\FreneticGameEngine\lib\BepuPhysics.dll</HintPath>
     </Reference>
-    <Reference Include="BEPUutilities">
-      <HintPath>..\FreneticGameEngine\FGECore\BEPUutilities.dll</HintPath>
+    <Reference Include="BepuUtilities">
+      <HintPath>..\FreneticGameEngine\lib\BepuUtilities.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
-      <HintPath>..\FreneticGameEngine\FGECore\LZ4.dll</HintPath>
+      <HintPath>..\FreneticGameEngine\lib\LZ4.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
