@@ -11,15 +11,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics;
 using FGECore.EntitySystem;
-using BEPUutilities;
-using BEPUphysics.Entities;
-using BEPUutilities.Threading;
-using BEPUphysics.BroadPhaseEntries;
-using BEPUphysics.BroadPhaseEntries.MobileCollidables;
 using FGECore.MathHelpers;
 using FGECore.CoreSystems;
+using BepuPhysics;
+using BepuUtilities.Memory;
+using BepuUtilities;
+using System.Numerics;
+using BepuPhysics.CollisionDetection;
+using BepuPhysics.Collidables;
+using BepuPhysics.Constraints;
+using BepuPhysics.Trees;
 
 namespace FGECore.PhysicsSystem
 {
@@ -28,10 +30,35 @@ namespace FGECore.PhysicsSystem
     /// </summary>
     public class PhysicsSpace
     {
-        /// <summary>
-        /// The actual internal physics space.
-        /// </summary>
-        public Space Internal;
+        /// <summary>Internal data for the physics space.</summary>
+        public struct InternalData
+        {
+            /// <summary>The actual internal physics simulation core.</summary>
+            public Simulation CoreSimulation;
+
+            /// <summary>The <see cref="IThreadDispatcher"/> used by this simulation.</summary>
+            public BepuThreadDispatcher ThreadDispatcher;
+
+            /// <summary>The pose handler, with gravity and all.</summary>
+            public BepuPoseIntegratorCallbacks PoseHandler;
+
+            /// <summary>The standard <see cref="INarrowPhaseCallbacks"/> instance.</summary>
+            public BepuNarrowPhaseCallbacks NarrowPhaseHandler;
+
+            /// <summary>Initialize internal space data.</summary>
+            public void Init()
+            {
+                // TODO: Add user configurability to the thread count.
+                int targetThreadCount = Math.Max(1, Environment.ProcessorCount > 4 ? Environment.ProcessorCount - 2 : Environment.ProcessorCount - 1);
+                ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
+                PoseHandler = new BepuPoseIntegratorCallbacks();
+                NarrowPhaseHandler = new BepuNarrowPhaseCallbacks();
+                CoreSimulation = Simulation.Create(new BufferPool(), NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
+            }
+        }
+
+        /// <summary>Internal data for the physics space.</summary>
+        public InternalData Internal;
 
         /// <summary>
         /// The scale of all physics vs. rendered objects. Phys * Scale = Render.
@@ -70,11 +97,11 @@ namespace FGECore.PhysicsSystem
         {
             get
             {
-                return Internal.ForceUpdater.Gravity.ToLocation();
+                return Internal.PoseHandler.Gravity.ToLocation();
             }
             set
             {
-                Internal.ForceUpdater.Gravity = value.ToBEPU();
+                Internal.PoseHandler.Gravity = value.ToNumerics();
             }
         }
 
@@ -83,9 +110,9 @@ namespace FGECore.PhysicsSystem
         /// One entity per physics object only!
         /// </summary>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Spawn(ISpaceObject bepuent)
+        public void Spawn(BodyDescription bepuent)
         {
-            Internal.Add(bepuent);
+            Internal.CoreSimulation.Bodies.Add(bepuent);
         }
 
         /// <summary>
@@ -93,9 +120,9 @@ namespace FGECore.PhysicsSystem
         /// One entity per physics object only!
         /// </summary>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Despawn(ISpaceObject bepuent)
+        public void Despawn(BodyHandle bepuent)
         {
-            Internal.Remove(bepuent);
+            Internal.CoreSimulation.Bodies.Remove(bepuent);
         }
 
         /// <summary>
@@ -104,7 +131,7 @@ namespace FGECore.PhysicsSystem
         /// <returns>The simple string form.</returns>
         public override string ToString()
         {
-            return "Physics World, with entity count=" + Internal.Entities.Count;
+            return "Physics World";
         }
     }
 
@@ -123,13 +150,7 @@ namespace FGECore.PhysicsSystem
             {
                 return;
             }
-            ParallelLooper pl = new ParallelLooper();
-            for (int i = 0; i < Environment.ProcessorCount * 2; i++)
-            {
-                pl.AddThread();
-            }
-            Internal = new Space(pl);
-            Internal.ForceUpdater.Gravity = new Vector3(0, 0, -9.8);
+            Internal.Init();
         }
 
         /// <summary>
@@ -160,6 +181,27 @@ namespace FGECore.PhysicsSystem
             }
         }
 
+        public struct RayTraceHelper : IRayHitHandler
+        {
+            public Func<T, bool> Filter;
+
+            public bool AllowTest(CollidableReference collidable)
+            {
+                // TODO
+                throw new NotImplementedException();
+            }
+
+            public bool AllowTest(CollidableReference collidable, int childIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         /// <summary>
         /// Sends a world ray trace, giving back the single found object, or null if none.
         /// Uses a standard filter.
@@ -173,14 +215,15 @@ namespace FGECore.PhysicsSystem
             RayCastResult rcr;
             if (filter != null)
             {
-                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T)), out rcr))
+                Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T))
+                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float) dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T)), out rcr))
                 {
                     return null;
                 }
             }
             else
             {
-                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, out rcr))
+                if (!Internal.CoreSimulation.RayCast(start.ToBEPU(), dir.ToBEPU(), (float)dist, out rcr))
                 {
                     return null;
                 }
@@ -212,14 +255,14 @@ namespace FGECore.PhysicsSystem
             RayCastResult rcr;
             if (filter != null)
             {
-                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, filter, out rcr))
+                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, filter, out rcr))
                 {
                     return null;
                 }
             }
             else
             {
-                if (!Internal.RayCast(new Ray(start.ToBEPU(), dir.ToBEPU()), dist, out rcr))
+                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, out rcr))
                 {
                     return null;
                 }

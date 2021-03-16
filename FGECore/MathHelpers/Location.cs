@@ -823,13 +823,19 @@ namespace FGECore.MathHelpers
 
         #region conversion
         /// <summary>
-        /// Converts the Location to an integer vector.
+        /// Converts the <see cref="Location"/> to an integer <see cref="Vector3i"/>.
         /// This will truncate decimal values.
         /// </summary>
         /// <returns>The integer vector.</returns>
         public Vector3i ToVec3i()
         {
             return new Vector3i((int)X, (int)Y, (int)Z);
+        }
+
+        /// <summary>Converts the <see cref="Location"/> value to a floating point <see cref="System.Numerics.Vector3"/>.</summary>
+        public System.Numerics.Vector3 ToNumerics()
+        {
+            return new System.Numerics.Vector3(XF, YF, ZF);
         }
         #endregion
 
@@ -908,5 +914,15 @@ namespace FGECore.MathHelpers
         }
 
         #endregion
+    }
+
+    /// <summary>Helper extensions for <see cref="Location"/>.</summary>
+    public static class ExtensionsForLocation
+    {
+        /// <summary>Converts a floating point <see cref="System.Numerics.Vector3"/> to a <see cref="Location"/>.</summary>
+        public static Location ToLocation(this System.Numerics.Vector3 vector)
+        {
+            return new Location(vector.X, vector.Y, vector.Z);
+        }
     }
 }

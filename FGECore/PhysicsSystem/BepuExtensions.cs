@@ -11,14 +11,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics.CollisionShapes.ConvexShapes;
-using BEPUutilities;
 using System.Globalization;
-using BEPUutilities.ResourceManagement;
-using BEPUutilities.DataStructures;
 using FGECore.UtilitySystems;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
+using BepuUtilities;
+using BepuPhysics.Collidables;
 
 namespace FGECore.PhysicsSystem
 {
@@ -26,52 +24,12 @@ namespace FGECore.PhysicsSystem
     public static class BepuExtensions
     {
         /// <summary>
-        /// Converts a Core quaternion to a BEPU quaternion.
-        /// </summary>
-        /// <param name="q">The OpenTK quaternion.</param>
-        /// <returns>The BEPU quaternion.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this MathHelpers.Quaternion q)
-        {
-            return new BEPUutilities.Quaternion(q.X, q.Y, q.Z, q.W);
-        }
-
-        /// <summary>
-        /// Converts a BEPU quaternion to a Core quaternion.
-        /// </summary>
-        /// <param name="q">The BEPU quaternion.</param>
-        /// <returns>The Core quaternion.</returns>
-        public static MathHelpers.Quaternion ToCore(this BEPUutilities.Quaternion q)
-        {
-            return new MathHelpers.Quaternion(q.X, q.Y, q.Z, q.W);
-        }
-
-        /// <summary>
-        /// Converts a BEPUPhysics <see cref="Vector3"/> to a <see cref="Location"/>.
-        /// </summary>
-        /// <param name="loc">The BEPUPhysics <see cref="Vector3"/>.</param>
-        /// <returns>The <see cref="Location"/>.</returns>
-        public static Location ToLocation(this Vector3 loc)
-        {
-            return new Location(loc.X, loc.Y, loc.Z);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="Location"/> to a BEPUPhysics <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="loc">The <see cref="Location"/>.</param>
-        /// <returns>The BEPUPhysics <see cref="Vector3"/>.</returns>
-        public static Vector3 ToBEPU(this Location loc)
-        {
-            return new Vector3(loc.X, loc.Y, loc.Z);
-        }
-
-        /// <summary>
         /// Rescales a convex hull shape.
         /// </summary>
         /// <param name="shape">The shape.</param>
         /// <param name="scaleFactor">The scaling factor.</param>
         /// <returns>The new hull.</returns>
-        public static ConvexHullShape Rescale(this ConvexHullShape shape, double scaleFactor)
+        public static ConvexHull Rescale(this ConvexHull shape, double scaleFactor)
         {
             ReadOnlyList<Vector3> verts = shape.Vertices;
             List<Vector3> newlist = new List<Vector3>(verts.Count);
@@ -94,7 +52,7 @@ namespace FGECore.PhysicsSystem
                 MinimumRadius = shape.MinimumRadius * scaleFactor
             };
             CommonResources.GiveBack(triangles);
-            return new ConvexHullShape(newlist, csd);
+            return new ConvexHull(newlist, csd);
         }
 
         /// <summary>
@@ -103,7 +61,7 @@ namespace FGECore.PhysicsSystem
         /// <param name="shape">The shape.</param>
         /// <param name="scaleFactor">The scaling factor.</param>
         /// <returns>The new hull.</returns>
-        public static ConvexHullShape Rescale(this ConvexHullShape shape, in Vector3 scaleFactor)
+        public static ConvexHull Rescale(this ConvexHull shape, in Vector3 scaleFactor)
         {
             ReadOnlyList<Vector3> verts = shape.Vertices;
             List<Vector3> newlist = new List<Vector3>(verts.Count);
@@ -127,7 +85,7 @@ namespace FGECore.PhysicsSystem
                 MinimumRadius = shape.MinimumRadius * len
             };
             CommonResources.GiveBack(triangles);
-            return new ConvexHullShape(newlist, csd);
+            return new ConvexHull(newlist, csd);
         }
     }
 }
