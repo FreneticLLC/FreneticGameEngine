@@ -163,7 +163,7 @@ namespace FGECore.PropertySystem
                 TypeSavers.Add(typeof(Vector3), new PropertySaverLoader()
                 {
                     Saver = (o) => ((Vector3)o).ToLocation().ToDoubleBytes(),
-                    Loader = (b) => Location.FromDoubleBytes(b, 0).ToBEPU(),
+                    Loader = (b) => Location.FromDoubleBytes(b, 0).ToNumerics(),
                     SaveString = "C/B/vector3"
                 });
                 TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()

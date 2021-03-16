@@ -59,7 +59,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         {
             if (FixedOrientation)
             {
-                return new CompoundShape(new CompoundShapeEntry[] { new CompoundShapeEntry(new CylinderShape(Height, Radius), Y2Z.ToBEPU()) });
+                return new CompoundShape(new CompoundShapeEntry[] { new CompoundShapeEntry(new CylinderShape(Height, Radius), Y2Z.ToNumerics()) });
             }
             return new CylinderShape(Height, Radius);
         }

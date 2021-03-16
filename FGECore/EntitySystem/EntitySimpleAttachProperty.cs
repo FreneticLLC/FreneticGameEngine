@@ -48,9 +48,9 @@ namespace FGECore.EntitySystem
         /// <param name="pos">The attached position.</param>
         public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
         {
-            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(pos.ToBEPU());
+            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToNumerics()) * Matrix.CreateTranslation(pos.ToNumerics());
             Matrix.Invert(ref worldTrans, out Matrix inverted);
-            RelativeOffset = Matrix.CreateFromQuaternion(Entity.LastKnownOrientation.ToBEPU()) * Matrix.CreateTranslation(Entity.LastKnownPosition.ToBEPU()) * inverted;
+            RelativeOffset = Matrix.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace FGECore.EntitySystem
         /// <param name="orient">The attached-to entity's orientation.</param>
         public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
         {
-            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToBEPU()) * Matrix.CreateTranslation(position.ToBEPU());
+            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToNumerics()) * Matrix.CreateTranslation(position.ToNumerics());
             Matrix tmat = RelativeOffset * worldTrans;
             Location pos = tmat.Translation.ToLocation();
             MathHelpers.Quaternion quat = BEPUutilities.Quaternion.CreateFromRotationMatrix(tmat).ToCore();

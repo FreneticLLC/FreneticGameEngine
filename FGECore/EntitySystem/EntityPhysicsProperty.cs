@@ -120,7 +120,7 @@ namespace FGECore.EntitySystem
                 GravityIsSet = true;
                 if (IsSpawned)
                 {
-                    SpawnedBody.Gravity = Internal.Gravity.ToBEPU();
+                    SpawnedBody.Gravity = Internal.Gravity.ToNumerics();
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace FGECore.EntitySystem
             {
                 return;
             }
-            Location coff = BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Pose.Orientation).ToLocation();
+            Location coff = SpawnedBody.Pose.Orientation.ToCore().Transform(Shape.GetCenterOffset().ToLocation());
             Location p2 = (p * PhysicsWorld.RelativeScaleInverse) + coff;
             if (p2.DistanceSquared(Internal.Position) > 0.01) // TODO: Is this validation needed?
             {
@@ -383,7 +383,7 @@ namespace FGECore.EntitySystem
             SpawnedBody.Material.KineticFriction = Internal.Friction;
             SpawnedBody.Material.StaticFriction = Internal.Friction;
             SpawnedBody.Material.Bounciness = Internal.Bounciness;
-            SpawnedBody.Position = Internal.Position.ToNumerics();
+            SpawnedBody.Pose.Position = Internal.Position.ToNumerics();
             SpawnedBody.Gravity = Internal.Gravity.ToNumerics();
             SpawnedBody.Tag = Entity;
             SpawnedBody.CollisionInformation.Tag = this;

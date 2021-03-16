@@ -116,6 +116,7 @@ namespace FGECore.PhysicsSystem
         {
             if (!Disposed)
             {
+                GC.SuppressFinalize(this);
                 Disposed = true;
                 SignalThreads();
                 for (int i = 0; i < BufferPools.Length; ++i)

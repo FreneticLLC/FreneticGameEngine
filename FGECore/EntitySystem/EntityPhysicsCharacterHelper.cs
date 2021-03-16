@@ -41,7 +41,7 @@ namespace FGECore.EntitySystem
             }
             set
             {
-                Internal.ViewDirection = value.ToBEPU();
+                Internal.ViewDirection = value.ToNumerics();
             }
         }
     }

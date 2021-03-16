@@ -32,7 +32,6 @@ namespace FGECore.PhysicsSystem
         /// <summary>Performs any required initialization logic after the Simulation instance has been constructed.</summary>
         public void Initialize(Simulation simulation)
         {
-            throw new NotImplementedException();
         }
 
         /// <summary>Copy of <see cref="Gravity"/> pre-multiplied by delta-time for optimization reasons.</summary>

@@ -51,7 +51,7 @@ namespace FGECore.PhysicsSystem
                 // TODO: Add user configurability to the thread count.
                 int targetThreadCount = Math.Max(1, Environment.ProcessorCount > 4 ? Environment.ProcessorCount - 2 : Environment.ProcessorCount - 1);
                 ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
-                PoseHandler = new BepuPoseIntegratorCallbacks();
+                PoseHandler = new BepuPoseIntegratorCallbacks() { Gravity = new Vector3(0, 0, -9.8f) };
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks();
                 CoreSimulation = Simulation.Create(new BufferPool(), NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
             }
@@ -163,7 +163,7 @@ namespace FGECore.PhysicsSystem
         public IEnumerable<T> GetEntitiesInBox(AABB box)
         {
             List<BroadPhaseEntry> bpes = new List<BroadPhaseEntry>();
-            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToBEPU(), box.Max.ToBEPU()), bpes);
+            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), bpes);
             foreach (BroadPhaseEntry bpe in bpes)
             {
                 if (bpe is EntityCollidable ec && ec.Entity.Tag is T res)
@@ -223,7 +223,7 @@ namespace FGECore.PhysicsSystem
             }
             else
             {
-                if (!Internal.CoreSimulation.RayCast(start.ToBEPU(), dir.ToBEPU(), (float)dist, out rcr))
+                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, out rcr))
                 {
                     return null;
                 }

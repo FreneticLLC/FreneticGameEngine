@@ -221,7 +221,7 @@ namespace FGECore.PhysicsSystem
         public CollisionResult RayTrace(in Location start, in Location end, Func<BroadPhaseEntry, bool> filter = null)
         {
             double len = (end - start).Length();
-            Ray ray = new Ray(start.ToBEPU(), ((end - start) / len).ToBEPU());
+            Ray ray = new Ray(start.ToNumerics(), ((end - start) / len).ToNumerics());
             RayCastResult rcr;
             bool hit;
             if (filter == null)

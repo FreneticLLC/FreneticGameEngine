@@ -126,7 +126,7 @@ namespace FGECore.EntitySystem
         /// <param name="downDir">The stand-in down direction.</param>
         public void SetRelativeToCurrent(Vector3 viewDir, Location downDir)
         {
-            SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToBEPU()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
+            SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToNumerics()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
         }
 
         /// <summary>
