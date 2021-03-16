@@ -68,6 +68,9 @@ namespace FGECore.PhysicsSystem
     /// <summary>Implementation for <see cref="INarrowPhaseCallbacks"/>. Some doc comments copied from BEPU source.</summary>
     public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     {
+        /// <summary>The backing physics space.</summary>
+        public PhysicsSpace Space;
+
         /// <summary>Defines the default constraint's penetration recovery spring properties.</summary>
         public SpringSettings ContactSpringiness;
 
@@ -90,7 +93,13 @@ namespace FGECore.PhysicsSystem
         /// <returns>True if collision detection should proceed, false otherwise.</returns>
         public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
         {
-            return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
+            if (a.Mobility != CollidableMobility.Dynamic && b.Mobility != CollidableMobility.Dynamic)
+            {
+                return false;
+            }
+            EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
+            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
+            return aEntity.CGroup.DoesCollide(bEntity.CGroup);
         }
 
         /// <summary>
@@ -120,9 +129,10 @@ namespace FGECore.PhysicsSystem
         /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
         public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
         {
-            // TODO: ?
-            pairMaterial.FrictionCoefficient = 1f;
-            pairMaterial.MaximumRecoveryVelocity = 2f;
+            EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[pair.A.BodyHandle.Value];
+            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[pair.B.BodyHandle.Value];
+            pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
+            pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness; // TODO: What values are actually appropriate for this?
             pairMaterial.SpringSettings = ContactSpringiness;
             return true;
         }

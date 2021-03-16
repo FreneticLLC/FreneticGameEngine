@@ -54,12 +54,6 @@ namespace FGECore.EntitySystem
             /// <summary>The starting gravity of the physics body.</summary>
             public Location Gravity; // Auto-set to match the region at object construct time.
 
-            /// <summary>The starting friction value of the physics body.</summary>
-            public float Friction;
-
-            /// <summary>The starting bounciness (restitution coefficient) of the physics body.</summary>
-            public float Bounciness;
-
             /// <summary>The starting linear velocity of the physics body.</summary>
             public Location LinearVelocity; // 0,0,0 is good.
 
@@ -74,7 +68,7 @@ namespace FGECore.EntitySystem
         }
 
         /// <summary>Internal data for this physics property.</summary>
-        public InternalData Internal = new InternalData() { Mass = 1f, Orientation = Quaternion.Identity, Friction = 0.5f, Bounciness = 0.25f };
+        public InternalData Internal = new InternalData() { Mass = 1f, Orientation = Quaternion.Identity };
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
@@ -122,46 +116,15 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /*
-        /// <summary>Gets or sets the entity's friction.</summary>
+        /// <summary>The entity's friction.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public double Friction
-        {
-            get
-            {
-                // TODO: Separate kinetic and static friction?
-                return SpawnedBody == null ? Internal.Friction : SpawnedBody.Material.KineticFriction;
-            }
-            set
-            {
-                Internal.Friction = value;
-                if (IsSpawned)
-                {
-                    SpawnedBody.Material.KineticFriction = Internal.Friction;
-                    SpawnedBody.Material.StaticFriction = Internal.Friction;
-                }
-            }
-        }
+        public float Friction = 0.5f;
 
-        /// <summary>Gets or sets the entity's bounciness (Restitution coefficient).</summary>
+        /// <summary>The entity's bounciness (Restitution coefficient).</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public double Bounciness
-        {
-            get
-            {
-                return SpawnedBody == null ? Internal.Bounciness : SpawnedBody.Material.Bounciness;
-            }
-            set
-            {
-                Internal.Bounciness = value;
-                if (IsSpawned)
-                {
-                    SpawnedBody.Material.Bounciness = Internal.Bounciness;
-                }
-            }
-        }*/
+        public float Bounciness = 0.25f;
 
         /// <summary>Gets or sets the entity's linear velocity.</summary>
         [PropertyDebuggable]
@@ -203,7 +166,6 @@ namespace FGECore.EntitySystem
 
         /// <summary>
         /// Gets or sets the entity's position.
-        /// This value is scaled to the physics scaling factor defined by <see cref="PhysicsSpace.RelativeScale"/>.
         /// </summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -298,15 +260,14 @@ namespace FGECore.EntitySystem
         /// <summary>
         /// Checks and handles a position update.
         /// </summary>
-        /// <param name="position">The new position.</param>
-        public bool PosCheck(Location position)
+        /// <param name="_position">The new position.</param>
+        public bool PosCheck(Location _position)
         {
-            Location physPos = FGEToPhysics(position);
-            if (physPos.DistanceSquared(Internal.Position) > 0.01)
+            if (_position.DistanceSquared(Internal.Position) > 0.01)
             {
                 if (!NoCheck)
                 {
-                    Position = physPos;
+                    Position = _position;
                 }
                 return true;
             }
@@ -331,20 +292,6 @@ namespace FGECore.EntitySystem
             return false;
         }
 
-        /// <summary>Converts a physics space position to an FGE position, going through the space's relative scaling factor and body center offsetting.</summary>
-        public Location PhysicsToFGE(Location position)
-        {
-            Location centerOffset = Orientation.Transform(Shape.GetCenterOffset().ToLocation());
-            return (position - centerOffset) * PhysicsWorld.RelativeScale;
-        }
-
-        /// <summary>Converts an FGE position to a physics space position, going through the space's relative scaling factor and body center offsetting.</summary>
-        public Location FGEToPhysics(Location position)
-        {
-            Location centerOffset = Orientation.Transform(Shape.GetCenterOffset().ToLocation());
-            return (position * PhysicsWorld.RelativeScaleInverse) + centerOffset;
-        }
-
         // TODO: Damping values!
 
         /// <summary>Handles the physics entity being spawned into a world.</summary>
@@ -365,9 +312,6 @@ namespace FGECore.EntitySystem
             convexShape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
             CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-3f, 1e-2f));
             BodyDescription description = BodyDescription.CreateDynamic(pose, velocity, inertia, collidable, new BodyActivityDescription(0.01f));
-            //SpawnedBody.Material.KineticFriction = Internal.Friction;
-            //SpawnedBody.Material.StaticFriction = Internal.Friction;
-            //SpawnedBody.Material.Bounciness = Internal.Bounciness;
             // TODO: Other settings
             SpawnedBody = PhysicsWorld.Spawn(this, description);
             Entity.OnTick += Tick;
@@ -387,7 +331,7 @@ namespace FGECore.EntitySystem
         public void TickUpdates()
         {
             NoCheck = CheckDisableAllowed;
-            if (PosCheck(PhysicsToFGE(SpawnedBody.Pose.Position.ToLocation())))
+            if (PosCheck(SpawnedBody.Pose.Position.ToLocation()))
             {
                 Entity.OnPositionChanged?.Invoke(Internal.Position);
             }
@@ -403,8 +347,6 @@ namespace FGECore.EntitySystem
         {
             float invMass = SpawnedBody.LocalInertia.InverseMass;
             Internal.Mass = invMass == 0 ? 0 : 1f / invMass;
-            //Internal.Friction = SpawnedBody.Material.KineticFriction;
-            //Internal.Bounciness = SpawnedBody.Material.Bounciness;
             Internal.LinearVelocity = SpawnedBody.Velocity.Linear.ToLocation();
             Internal.AngularVelocity = SpawnedBody.Velocity.Angular.ToLocation();
             Internal.Position = SpawnedBody.Pose.Position.ToLocation();
