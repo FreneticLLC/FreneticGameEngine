@@ -169,7 +169,7 @@ namespace FGECore.PropertySystem
                 TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()
                 {
                     Saver = (o) => BepuUtilities.QuaternionToBytes((BEPUutilities.Quaternion)o),
-                    Loader = (b) => BepuUtilities.BytesToQuaternion(b, 0),
+                    Loader = (b) => Quaternion.FromFloatBytes(b, 0),
                     SaveString = "C/B/quaternion"
                 });
                 // End default helpers

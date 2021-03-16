@@ -20,6 +20,13 @@ namespace FGECore.MathHelpers
     /// </summary>
     public struct AABB
     {
+        /// <summary>Constructs an <see cref="AABB"/> with given mins/maxes.</summary>
+        public AABB(Location _min, Location _max)
+        {
+            Min = _min;
+            Max = _max;
+        }
+
         /// <summary>
         /// The minimum coordinates.
         /// </summary>

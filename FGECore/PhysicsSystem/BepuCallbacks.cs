@@ -10,6 +10,7 @@ using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
+using FGECore.EntitySystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,8 @@ namespace FGECore.PhysicsSystem
     /// <summary>Implementation for <see cref="IPoseIntegratorCallbacks"/>. Some doc comments copied from BEPU source.</summary>
     public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     {
-        /// <summary>Gravity to apply to all dynamic bodies.</summary>
-        public Vector3 Gravity;
+        /// <summary>The backing physics space.</summary>
+        public PhysicsSpace Space;
 
         /// <summary>Gets how the pose integrator should handle angular velocity integration.</summary>
         public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.ConserveMomentum;
@@ -34,8 +35,8 @@ namespace FGECore.PhysicsSystem
         {
         }
 
-        /// <summary>Copy of <see cref="Gravity"/> pre-multiplied by delta-time for optimization reasons.</summary>
-        public Vector3 GravityDt;
+        /// <summary>Current delta time value.</summary>
+        public float Delta;
 
         /// <summary>
         /// Called prior to integrating the simulation's active bodies. When used with a substepping timestepper, this could be called multiple times per frame with different time step values.
@@ -43,7 +44,7 @@ namespace FGECore.PhysicsSystem
         /// <param name="dt">Current time step duration.</param>
         public void PrepareForIntegration(float dt)
         {
-            GravityDt = Gravity * dt;
+            Delta = dt;
         }
 
         /// <summary>
@@ -58,7 +59,8 @@ namespace FGECore.PhysicsSystem
         {
             if (localInertia.InverseMass > 0)
             {
-                velocity.Linear += GravityDt;
+                EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
+                velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
             }
         }
     }

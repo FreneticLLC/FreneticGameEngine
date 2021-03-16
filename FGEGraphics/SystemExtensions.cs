@@ -45,16 +45,6 @@ namespace FGEGraphics
         }
 
         /// <summary>
-        /// Converts a BEPU <see cref="BEPUutilities.Quaternion"/> to an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.
-        /// </summary>
-        /// <param name="quat">The BEPU <see cref="BEPUutilities.Quaternion"/>.</param>
-        /// <returns>The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</returns>
-        public static OpenTK.Mathematics.Quaternion ToOpenTK(this BEPUutilities.Quaternion quat)
-        {
-            return new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
-        }
-
-        /// <summary>
         /// Converts an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/> to a Core <see cref="FGECore.MathHelpers.Quaternion"/>.
         /// </summary>
         /// <param name="quat">The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</param>
@@ -62,16 +52,6 @@ namespace FGEGraphics
         public static FGECore.MathHelpers.Quaternion ToCore(this OpenTK.Mathematics.Quaternion quat)
         {
             return new FGECore.MathHelpers.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-        }
-
-        /// <summary>
-        /// Converts an OpenTK <see cref="OpenTK.Mathematics.Quaternion"/> to a BEPU <see cref="BEPUutilities.Quaternion"/>.
-        /// </summary>
-        /// <param name="quat">The OpenTK <see cref="OpenTK.Mathematics.Quaternion"/>.</param>
-        /// <returns>The BEPU <see cref="BEPUutilities.Quaternion"/>.</returns>
-        public static BEPUutilities.Quaternion ToBEPU(this OpenTK.Mathematics.Quaternion quat)
-        {
-            return new BEPUutilities.Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         /// <summary>
@@ -122,16 +102,6 @@ namespace FGEGraphics
         public static Vector4 ToOpenTK(this Color4F color)
         {
             return new Vector4(color.R, color.G, color.B, color.A);
-        }
-
-        /// <summary>
-        /// Converts a BEPU <see cref="BEPUutilities.Vector3"/> to an OpenTK <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="vec">The BEPU <see cref="BEPUutilities.Vector3"/>.</param>
-        /// <returns>The OpenTK <see cref="Vector3"/>.</returns>
-        public static Vector3 ToOpenTK(this BEPUutilities.Vector3 vec)
-        {
-            return new Vector3((float)vec.X, (float)vec.Y, (float)vec.Z);
         }
 
         /// <summary>

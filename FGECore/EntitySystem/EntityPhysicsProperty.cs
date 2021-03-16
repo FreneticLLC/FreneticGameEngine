@@ -112,16 +112,12 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return SpawnedBody == null ? Internal.Gravity : SpawnedBody.Gravity.Value.ToLocation();
+                return Internal.Gravity;
             }
             set
             {
                 Internal.Gravity = value;
                 GravityIsSet = true;
-                if (IsSpawned)
-                {
-                    SpawnedBody.Gravity = Internal.Gravity.ToNumerics();
-                }
             }
         }
 
@@ -388,7 +384,7 @@ namespace FGECore.EntitySystem
             SpawnedBody.Tag = Entity;
             SpawnedBody.CollisionInformation.Tag = this;
             // TODO: Other settings
-            PhysicsWorld.Spawn(SpawnedBody);
+            SpawnedBody = PhysicsWorld.Spawn(SpawnedBody);
             Entity.OnTick += Tick;
             Internal.Position = Location.Zero;
             Internal.Orientation = Quaternion.Identity;

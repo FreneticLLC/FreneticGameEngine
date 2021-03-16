@@ -45,13 +45,17 @@ namespace FGECore.PhysicsSystem
             /// <summary>The standard <see cref="INarrowPhaseCallbacks"/> instance.</summary>
             public BepuNarrowPhaseCallbacks NarrowPhaseHandler;
 
+            /// <summary>An array of FGE entities, where the index in the array is a physics space handle ID.</summary>
+            public EntityPhysicsProperty[] EntitiesByPhysicsID;
+
             /// <summary>Initialize internal space data.</summary>
-            public void Init()
+            public void Init(PhysicsSpace space)
             {
+                EntitiesByPhysicsID = new EntityPhysicsProperty[128];
                 // TODO: Add user configurability to the thread count.
                 int targetThreadCount = Math.Max(1, Environment.ProcessorCount > 4 ? Environment.ProcessorCount - 2 : Environment.ProcessorCount - 1);
                 ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
-                PoseHandler = new BepuPoseIntegratorCallbacks() { Gravity = new Vector3(0, 0, -9.8f) };
+                PoseHandler = new BepuPoseIntegratorCallbacks() { Space = space };
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks();
                 CoreSimulation = Simulation.Create(new BufferPool(), NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
             }
@@ -91,28 +95,27 @@ namespace FGECore.PhysicsSystem
         public double RelativeScaleInverse = 1.0;
 
         /// <summary>
-        /// Gets or sets the internal default gravity value.
+        /// The default gravity value.
         /// </summary>
-        public Location Gravity
-        {
-            get
-            {
-                return Internal.PoseHandler.Gravity.ToLocation();
-            }
-            set
-            {
-                Internal.PoseHandler.Gravity = value.ToNumerics();
-            }
-        }
+        public Location Gravity = new Location(0, 0, -9.8);
 
         /// <summary>
         /// Spawns a physical object into the physics world.
         /// One entity per physics object only!
         /// </summary>
+        /// <param name="entity">The FGE entity.</param>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Spawn(BodyDescription bepuent)
+        public BodyReference Spawn(EntityPhysicsProperty entity, BodyDescription bepuent)
         {
-            Internal.CoreSimulation.Bodies.Add(bepuent);
+            BodyHandle handle = Internal.CoreSimulation.Bodies.Add(bepuent);
+            if (Internal.EntitiesByPhysicsID.Length < handle.Value)
+            {
+                EntityPhysicsProperty[] newArray = new EntityPhysicsProperty[Internal.EntitiesByPhysicsID.Length * 2];
+                Array.Copy(Internal.EntitiesByPhysicsID, newArray, Internal.EntitiesByPhysicsID.Length);
+                Internal.EntitiesByPhysicsID = newArray;
+            }
+            Internal.EntitiesByPhysicsID[handle.Value] = entity;
+            return new BodyReference(handle, Internal.CoreSimulation.Bodies);
         }
 
         /// <summary>
@@ -123,6 +126,7 @@ namespace FGECore.PhysicsSystem
         public void Despawn(BodyHandle bepuent)
         {
             Internal.CoreSimulation.Bodies.Remove(bepuent);
+            Internal.EntitiesByPhysicsID[bepuent.Value] = null;
         }
 
         /// <summary>
@@ -150,7 +154,7 @@ namespace FGECore.PhysicsSystem
             {
                 return;
             }
-            Internal.Init();
+            Internal.Init(this);
         }
 
         /// <summary>
