@@ -10,6 +10,7 @@ using BepuUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,14 +57,14 @@ namespace FGECore.MathHelpers
         /// Constructs the Frustum from a Matrix.
         /// </summary>
         /// <param name="matrix">The matrix.</param>
-        public Frustum(Matrix matrix)
+        public Frustum(Matrix4x4 matrix)
         {
-            Left = new Plane(new Location(-matrix.X.W - matrix.X.X, -matrix.Y.W - matrix.Y.X, -matrix.Z.W - matrix.Z.X), -matrix.W.W - matrix.W.X);
-            Right = new Plane(new Location(matrix.X.X - matrix.X.W, matrix.Y.X - matrix.Y.W, matrix.Z.X - matrix.Z.W), matrix.W.X - matrix.W.W);
-            Top = new Plane(new Location(matrix.X.Y - matrix.X.W, matrix.Y.Y - matrix.Y.W, matrix.Z.Y - matrix.Z.W), matrix.W.Y - matrix.W.W);
-            Bottom = new Plane(new Location(-matrix.X.W - matrix.X.Y, -matrix.Y.W - matrix.Y.Y, -matrix.Y.W - matrix.Z.Y), -matrix.W.W - matrix.W.Y);
-            Near = new Plane(new Location(-matrix.X.Z, -matrix.Y.Z, -matrix.Z.Z), -matrix.W.Z);
-            Far = new Plane(new Location(matrix.X.Z - matrix.X.W, matrix.Y.Z - matrix.Y.W, matrix.Z.Z - matrix.Z.W), matrix.W.Z - matrix.W.W);
+            Left = new Plane(new Location(-matrix.M14 - matrix.M11, -matrix.M24 - matrix.M21, -matrix.M34 - matrix.M31), -matrix.M44 - matrix.M41);
+            Right = new Plane(new Location(matrix.M11 - matrix.M14, matrix.M21 - matrix.M24, matrix.M31 - matrix.M34), matrix.M41 - matrix.M44);
+            Top = new Plane(new Location(matrix.M12 - matrix.M14, matrix.M22 - matrix.M24, matrix.M32 - matrix.M34), matrix.M42 - matrix.M44);
+            Bottom = new Plane(new Location(-matrix.M14 - matrix.M12, -matrix.M24 - matrix.M22, -matrix.M34 - matrix.M32), -matrix.M44 - matrix.M42);
+            Near = new Plane(new Location(-matrix.M13, -matrix.M23, -matrix.M33), -matrix.M43);
+            Far = new Plane(new Location(matrix.M13 - matrix.M14, matrix.M23 - matrix.M24, matrix.M33 - matrix.M34), matrix.M43 - matrix.M44);
         }
 
         /// <summary>

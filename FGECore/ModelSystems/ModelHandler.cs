@@ -11,11 +11,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
-using BEPUphysics.CollisionShapes;
-using BEPUphysics.CollisionShapes.ConvexShapes;
 using FGECore.FileSystems;
 using FreneticUtilities.FreneticExtensions;
+using System.Numerics;
+using BepuPhysics.Collidables;
+using FGECore.PhysicsSystem;
+using BepuUtilities.Memory;
 
 namespace FGECore.ModelSystems
 {
@@ -50,7 +51,7 @@ namespace FGECore.ModelSystems
             DataStream ds = new DataStream(dat_filt);
             DataReader dr = new DataReader(ds);
             Model3D mod = new Model3D();
-            Matrix matA = ReadMat(dr);
+            Matrix4x4 matA = ReadMat(dr);
             mod.MatrixA = matA;
             int meshCount = dr.ReadInt();
             mod.Meshes = new Model3DMesh[meshCount];
@@ -63,9 +64,9 @@ namespace FGECore.ModelSystems
                 mesh.Vertices = new Vector3[vertexCount];
                 for (int v = 0; v < vertexCount; v++)
                 {
-                    double f1 = dr.ReadFloat();
-                    double f2 = dr.ReadFloat();
-                    double f3 = dr.ReadFloat();
+                    float f1 = dr.ReadFloat();
+                    float f2 = dr.ReadFloat();
+                    float f3 = dr.ReadFloat();
                     mesh.Vertices[v] = new Vector3(f1, f2, f3);
                 }
                 int indiceCount = dr.ReadInt() * 3;
@@ -78,17 +79,17 @@ namespace FGECore.ModelSystems
                 mesh.TexCoords = new Vector2[tcCount];
                 for (int t = 0; t < tcCount; t++)
                 {
-                    double f1 = dr.ReadFloat();
-                    double f2 = dr.ReadFloat();
+                    float f1 = dr.ReadFloat();
+                    float f2 = dr.ReadFloat();
                     mesh.TexCoords[t] = new Vector2(f1, f2);
                 }
                 int normCount = dr.ReadInt();
                 mesh.Normals = new Vector3[normCount];
                 for (int n = 0; n < normCount; n++)
                 {
-                    double f1 = dr.ReadFloat();
-                    double f2 = dr.ReadFloat();
-                    double f3 = dr.ReadFloat();
+                    float f1 = dr.ReadFloat();
+                    float f2 = dr.ReadFloat();
+                    float f3 = dr.ReadFloat();
                     mesh.Normals[n] = new Vector3(f1, f2, f3);
                 }
                 int boneCount = dr.ReadInt();
@@ -139,25 +140,25 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="reader">The data reader.</param>
         /// <returns>The matrix.</returns>
-        public Matrix ReadMat(DataReader reader)
+        public static Matrix4x4 ReadMat(DataReader reader)
         {
-            double a1 = reader.ReadFloat();
-            double a2 = reader.ReadFloat();
-            double a3 = reader.ReadFloat();
-            double a4 = reader.ReadFloat();
-            double b1 = reader.ReadFloat();
-            double b2 = reader.ReadFloat();
-            double b3 = reader.ReadFloat();
-            double b4 = reader.ReadFloat();
-            double c1 = reader.ReadFloat();
-            double c2 = reader.ReadFloat();
-            double c3 = reader.ReadFloat();
-            double c4 = reader.ReadFloat();
-            double d1 = reader.ReadFloat();
-            double d2 = reader.ReadFloat();
-            double d3 = reader.ReadFloat();
-            double d4 = reader.ReadFloat();
-            return new Matrix(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4);
+            float a1 = reader.ReadFloat();
+            float a2 = reader.ReadFloat();
+            float a3 = reader.ReadFloat();
+            float a4 = reader.ReadFloat();
+            float b1 = reader.ReadFloat();
+            float b2 = reader.ReadFloat();
+            float b3 = reader.ReadFloat();
+            float b4 = reader.ReadFloat();
+            float c1 = reader.ReadFloat();
+            float c2 = reader.ReadFloat();
+            float c3 = reader.ReadFloat();
+            float c4 = reader.ReadFloat();
+            float d1 = reader.ReadFloat();
+            float d2 = reader.ReadFloat();
+            float d3 = reader.ReadFloat();
+            float d4 = reader.ReadFloat();
+            return new Matrix4x4(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4);
             //return new Matrix(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4);
         }
 
@@ -166,7 +167,7 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
-        public IEnumerable<Vector3[]> IterateCollisionVertices(Model3D input)
+        public static IEnumerable<Vector3[]> IterateCollisionVertices(Model3D input)
         {
             foreach (Model3DMesh mesh in input.Meshes)
             {
@@ -182,7 +183,7 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
-        public IEnumerable<Vector3[]> IteratePossibleCollisionVertices(Model3D input)
+        public static IEnumerable<Vector3[]> IteratePossibleCollisionVertices(Model3D input)
         {
             foreach (Model3DMesh mesh in input.Meshes)
             {
@@ -198,7 +199,7 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
-        public Vector3[] GetCollisionVertices(Model3D input)
+        public static Vector3[] GetCollisionVertices(Model3D input)
         {
             int count = 0;
             bool colOnly = true;
@@ -227,34 +228,37 @@ namespace FGECore.ModelSystems
         /// <summary>
         /// Converts a mesh to a BEPU perfect mesh.
         /// </summary>
+        /// <param name="space">The relevant physics space.</param>
         /// <param name="input">The model.</param>
         /// <param name="verts">The vertice count if needed.</param>
         /// <returns>The BEPU mesh.</returns>
-        public MobileMeshShape MeshToBepu(Model3D input, out int verts)
+        public static Mesh MeshToBepu(PhysicsSpace space, Model3D input, out int verts)
         {
             Vector3[] vertices = GetCollisionVertices(input);
-            int[] indices = new int[vertices.Length];
-            for (int i = 0; i < indices.Length; i++)
-            {
-                indices[i] = i;
-            }
             verts = vertices.Length;
-            return new MobileMeshShape(vertices, indices, AffineTransform.Identity, MobileMeshSolidity.DoubleSided);
+            int tris = vertices.Length / 3;
+            space.Internal.CoreSimulation.BufferPool.Take(tris, out Buffer<Triangle> triangles);
+            for (int i = 0; i < tris; i++)
+            {
+                triangles[i] = new Triangle(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+            }
+            return new Mesh(triangles, Vector3.One, space.Internal.CoreSimulation.BufferPool);
         }
 
         /// <summary>
         /// Converts a mesh to a BEPU convex mesh.
         /// </summary>
+        /// <param name="space">The relevant physics space.</param>
         /// <param name="input">The model.</param>
         /// <param name="verts">The vertice count if needed.</param>
         /// <param name="center">The center output.</param>
         /// <returns>The BEPU mesh.</returns>
-        public ConvexHullShape MeshToBepuConvex(Model3D input, out int verts, out Vector3 center)
+        public static ConvexHull MeshToBepuConvex(PhysicsSpace space, Model3D input, out int verts, out Vector3 center)
         {
-            List<Vector3> vertices = new List<Vector3>(GetCollisionVertices(input));
-            ConvexHullHelper.RemoveRedundantPoints(vertices);
-            verts = vertices.Count;
-            return new ConvexHullShape(vertices, out center);
+            Span<Vector3> vertices = new Span<Vector3>(GetCollisionVertices(input));
+            verts = vertices.Length;
+            ConvexHullHelper.CreateShape(vertices, space.Internal.CoreSimulation.BufferPool, out center, out ConvexHull hull);
+            return hull;
         }
     }
 }

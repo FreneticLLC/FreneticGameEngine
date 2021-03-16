@@ -242,16 +242,15 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Construct the physics entity property.
-        /// </summary>
+        /// <summary>This entity's collision group.</summary>
+        public CollisionGroup CGroup;
+
+        /// <summary>Construct the physics entity property.</summary>
         public EntityPhysicsProperty()
         {
         }
 
-        /// <summary>
-        /// Fired when the entity is added to the world.
-        /// </summary>
+        /// <summary>Fired when the entity is added to the world.</summary>
         public override void OnSpawn()
         {
             if (PhysicsWorld == null)
@@ -263,9 +262,7 @@ namespace FGECore.EntitySystem
             Entity.OnOrientationChanged += DoOrientationCheckEvent;
         }
 
-        /// <summary>
-        /// Fired when the entity is removed from the world.
-        /// </summary>
+        /// <summary>Fired when the entity is removed from the world.</summary>
         public override void OnDespawn()
         {
             if (HandledRemove)
@@ -287,9 +284,7 @@ namespace FGECore.EntitySystem
             OrientationCheck(orientation);
         }
 
-        /// <summary>
-        /// Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty"/> is pushing its own updates.
-        /// </summary>
+        /// <summary>Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty"/> is pushing its own updates.</summary>
         public bool CheckDisableAllowed = true;
 
         /// <summary>
@@ -352,15 +347,17 @@ namespace FGECore.EntitySystem
 
         // TODO: Damping values!
 
-        /// <summary>
-        /// Handles the physics entity being spawned into a world.
-        /// </summary>
+        /// <summary>Handles the physics entity being spawned into a world.</summary>
         public void SpawnHandle()
         {
             if (!GravityIsSet)
             {
                 Internal.Gravity = PhysicsWorld.Gravity;
                 GravityIsSet = true;
+            }
+            if (CGroup == null)
+            {
+                CGroup = CollisionUtil.Solid;
             }
             RigidPose pose = new RigidPose(Internal.Position.ToNumerics(), Internal.Orientation.ToNumerics());
             BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
@@ -380,17 +377,13 @@ namespace FGECore.EntitySystem
             TickUpdates();
         }
         
-        /// <summary>
-        /// Ticks the physics entity.
-        /// </summary>
+        /// <summary>Ticks the physics entity.</summary>
         public void Tick()
         {
             TickUpdates();
         }
 
-        /// <summary>
-        /// Ticks external positioning updates.
-        /// </summary>
+        /// <summary>Ticks external positioning updates.</summary>
         public void TickUpdates()
         {
             NoCheck = CheckDisableAllowed;
@@ -405,9 +398,7 @@ namespace FGECore.EntitySystem
             NoCheck = false;
         }
 
-        /// <summary>
-        /// Updates the entity's local fields from spawned variant.
-        /// </summary>
+        /// <summary>Updates the entity's local fields from spawned variant.</summary>
         public void UpdateFields()
         {
             float invMass = SpawnedBody.LocalInertia.InverseMass;
@@ -420,28 +411,22 @@ namespace FGECore.EntitySystem
             Internal.Orientation = SpawnedBody.Pose.Orientation.ToCore();
         }
 
-        /// <summary>
-        /// Fired before the physics entity is despawned from the world.
-        /// </summary>
+        /// <summary>Fired before the physics entity is despawned from the world.</summary>
         public Action DespawnEvent;
         
-        /// <summary>
-        /// Handles the physics entity being de-spawned from a world.
-        /// </summary>
+        /// <summary>Handles the physics entity being de-spawned from a world.</summary>
         public void DespawnHandle()
         {
             UpdateFields();
             Entity.OnTick -= Tick;
             DespawnEvent?.Invoke();
-            PhysicsWorld.Despawn(SpawnedBody.Handle);
+            PhysicsWorld.Despawn(SpawnedBody);
             IsSpawned = false;
         }
 
         private bool HandledRemove = false;
 
-        /// <summary>
-        /// Handles removal event.
-        /// </summary>
+        /// <summary>Handles removal event.</summary>
         public override void OnRemoved()
         {
             OnDespawn();

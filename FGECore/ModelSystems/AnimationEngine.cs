@@ -13,11 +13,11 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.FileSystems;
 using FreneticUtilities.FreneticExtensions;
-using BEPUutilities;
 using FGECore.UtilitySystems;
 using FGECore.MathHelpers;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
+using System.Numerics;
 
 namespace FGECore.ModelSystems
 {
@@ -140,7 +140,7 @@ namespace FGECore.ModelSystems
                         else
                         {
                             string key = dat[0].Trim();
-                            string value = dat[1].Substring(0, dat[1].Length - 1).Trim();
+                            string value = dat[1][0..^1].Trim();
                             entries.Add(new KeyValuePair<string, string>(key, value));
                         }
                     }
@@ -188,7 +188,7 @@ namespace FGECore.ModelSystems
                                     {
                                         string[] posdata = rots[x].SplitFast('=');
                                         node.RotTimes.Add(StringConversionHelper.StringToDouble(posdata[0]));
-                                        node.Rotations.Add(new BEPUutilities.Quaternion(StringConversionHelper.StringToFloat(posdata[1]), StringConversionHelper.StringToFloat(posdata[2]),
+                                        node.Rotations.Add(new MathHelpers.Quaternion(StringConversionHelper.StringToFloat(posdata[1]), StringConversionHelper.StringToFloat(posdata[2]),
                                             StringConversionHelper.StringToFloat(posdata[3]), StringConversionHelper.StringToFloat(posdata[4])));
                                     }
                                 }
@@ -325,7 +325,7 @@ namespace FGECore.ModelSystems
         /// <summary>
         /// The rotations.
         /// </summary>
-        public List<BEPUutilities.Quaternion> Rotations = new List<BEPUutilities.Quaternion>();
+        public List<MathHelpers.Quaternion> Rotations = new List<MathHelpers.Quaternion>();
 
         /// <summary>
         /// Finds a position by time.
@@ -349,36 +349,33 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="aTime">The time.</param>
         /// <returns>The position.</returns>
-        public Vector3 LerpPos(double aTime)
+        public Location LerpPos(double aTime)
         {
             if (Positions.Count == 0)
             {
-                return new Vector3(0, 0, 0);
+                return Location.Zero;
             }
             if (Positions.Count == 1)
             {
-                Location pos = Positions[0];
-                return new Vector3((double)pos.X, (double)pos.Y, (double)pos.Z);
+                return Positions[0];
             }
             int index = FindPos(aTime);
             int nextIndex = index + 1;
             if (nextIndex >= Positions.Count)
             {
-                Location pos = Positions[0];
-                return new Vector3((double)pos.X, (double)pos.Y, (double)pos.Z);
+                return Positions[0];
             }
             double deltaT = PosTimes[nextIndex] - PosTimes[index];
             double factor = (aTime - PosTimes[index]) / deltaT;
             if (factor < 0 || factor > 1)
             {
-                Location pos = Positions[0];
-                return new Vector3((double)pos.X, (double)pos.Y, (double)pos.Z);
+                return Positions[0];
             }
             Location start = Positions[index];
             Location end = Positions[nextIndex];
             Location deltaV = end - start;
             Location npos = start + (double)factor * deltaV;
-            return new Vector3((double)npos.X, (double)npos.Y, (double)npos.Z);
+            return npos;
         }
 
         /// <summary>
@@ -403,11 +400,11 @@ namespace FGECore.ModelSystems
         /// </summary>
         /// <param name="aTime">The time.</param>
         /// <returns>The rotation.</returns>
-        public BEPUutilities.Quaternion LerpRotate(double aTime)
+        public MathHelpers.Quaternion LerpRotate(double aTime)
         {
             if (Rotations.Count == 0)
             {
-                return BEPUutilities.Quaternion.Identity;
+                return MathHelpers.Quaternion.Identity;
             }
             if (Rotations.Count == 1)
             {
@@ -425,11 +422,10 @@ namespace FGECore.ModelSystems
             {
                 return Rotations[0];
             }
-            BEPUutilities.Quaternion start = Rotations[index];
-            BEPUutilities.Quaternion end = Rotations[nextIndex];
-            BEPUutilities.Quaternion res = BEPUutilities.Quaternion.Slerp(start, end, (double)factor);
-            res.Normalize();
-            return res;
+            MathHelpers.Quaternion start = Rotations[index];
+            MathHelpers.Quaternion end = Rotations[nextIndex];
+            MathHelpers.Quaternion res = start.Slerp(end, factor);
+            return res.Normalized();
         }
 
         /// <summary>
@@ -438,14 +434,14 @@ namespace FGECore.ModelSystems
         /// <param name="aTime">The time.</param>
         /// <param name="adjs">The adjustments if any.</param>
         /// <returns>The resultant matrix.</returns>
-        public Matrix GetBoneTotalMatrix(double aTime, Dictionary<string, Matrix> adjs = null)
+        public Matrix4x4 GetBoneTotalMatrix(double aTime, Dictionary<string, Matrix4x4> adjs = null)
         {
-            Matrix pos = Matrix.CreateTranslation(LerpPos(aTime));
-            Matrix rot = Matrix.CreateFromQuaternion(LerpRotate(aTime));
-            pos.Transpose();
-            rot.Transpose();
-            Matrix combined;
-            if (adjs != null && adjs.TryGetValue(Name, out Matrix t))
+            Matrix4x4 pos = Matrix4x4.CreateTranslation(LerpPos(aTime).ToNumerics());
+            Matrix4x4 rot = Matrix4x4.CreateFromQuaternion(LerpRotate(aTime).ToNumerics());
+            pos = Matrix4x4.Transpose(pos);
+            rot = Matrix4x4.Transpose(rot);
+            Matrix4x4 combined;
+            if (adjs != null && adjs.TryGetValue(Name, out Matrix4x4 t))
             {
                 combined = pos * rot * t;
             }

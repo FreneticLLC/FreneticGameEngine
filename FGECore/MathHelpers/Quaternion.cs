@@ -536,6 +536,27 @@ namespace FGECore.MathHelpers
         {
             return new System.Numerics.Quaternion(XF, YF, ZF, WF);
         }
+
+        /// <summary>Returns the Spherical Linear Interpolation ('slerp') between this quaternion and another.</summary>
+        public Quaternion Slerp(Quaternion end, double interpolationAmount)
+        {
+            double cosHalfTheta = W * end.W + X * end.X + Y * end.Y + Z * end.Z;
+            if (cosHalfTheta < 0)
+            {
+                end = end.Negative();
+                cosHalfTheta = -cosHalfTheta;
+            }
+            if (cosHalfTheta > (1.0 - 1e-12))
+            {
+                return this;
+            }
+            double halfTheta = Math.Acos(cosHalfTheta);
+            double sinHalfTheta = Math.Sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+            double aFraction = Math.Sin((1 - interpolationAmount) * halfTheta) / sinHalfTheta;
+            double bFraction = Math.Sin(interpolationAmount * halfTheta) / sinHalfTheta;
+            return new Quaternion(X * aFraction + end.X * bFraction, Y * aFraction + end.Y * bFraction,
+                Z * aFraction + end.Z * bFraction, W * aFraction + end.W * bFraction);
+        }
     }
 
     /// <summary>Helper extensions for <see cref="Quaternion"/>.</summary>

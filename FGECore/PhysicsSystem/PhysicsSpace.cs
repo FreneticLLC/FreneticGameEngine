@@ -123,16 +123,130 @@ namespace FGECore.PhysicsSystem
         /// One entity per physics object only!
         /// </summary>
         /// <param name="bepuent">The BEPU object.</param>
-        public void Despawn(BodyHandle bepuent)
+        public void Despawn(BodyReference bepuent)
         {
-            Internal.CoreSimulation.Bodies.Remove(bepuent);
-            Internal.EntitiesByPhysicsID[bepuent.Value] = null;
+            bepuent.Bodies.Remove(bepuent.Handle);
+            Internal.EntitiesByPhysicsID[bepuent.Handle.Value] = null;
         }
 
         /// <summary>Performs a single tick update of all physics world data.</summary>
         public void Tick(float delta)
         {
             Internal.CoreSimulation.Timestep(delta, Internal.ThreadDispatcher);
+        }
+
+        private class EntitiesInBoxHelper : IBreakableForEach<CollidableReference>
+        {
+            public List<EntityPhysicsProperty> Entities;
+
+            public PhysicsSpace Space;
+
+            public bool LoopBody(CollidableReference collidable) // true = continue, false = stop
+            {
+                Entities.Add(Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value]);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets all (physics enabled) entities whose boundaries touch the specified bounding box. This includes entities fully within the box.
+        /// TODO: Filter options!
+        /// </summary>
+        /// <param name="box">The bounding box.</param>
+        /// <returns>The list of entities found.</returns>
+        public IEnumerable<EntityPhysicsProperty> GetEntitiesInBox(AABB box)
+        {
+            EntitiesInBoxHelper helper = new EntitiesInBoxHelper() { Entities = new List<EntityPhysicsProperty>(), Space = this };
+            Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
+            return helper.Entities;
+        }
+
+        private struct RayTraceHelper : IRayHitHandler
+        {
+            public Func<EntityPhysicsProperty, bool> Filter;
+
+            public CollisionResult Hit;
+
+            public PhysicsSpace Space;
+
+            public bool AllowTest(CollidableReference collidable)
+            {
+                EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
+                return Filter == null || Filter(entity);
+            }
+
+            public bool AllowTest(CollidableReference collidable, int childIndex)
+            {
+                return AllowTest(collidable);
+            }
+
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
+            {
+                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+            }
+        }
+
+        /// <summary>
+        /// Sends a world ray trace, giving back the single found object, or null if none.
+        /// Uses a standard filter.
+        /// </summary>
+        /// <param name="start">The start position.</param>
+        /// <param name="dir">The direction.</param>
+        /// <param name="dist">The distance.</param>
+        /// <param name="filter">The filter, if any.</param>
+        public CollisionResult RayTraceSingle(Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null)
+        {
+            RayTraceHelper helper = new RayTraceHelper() { Space = this, Filter = filter };
+            Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, ref helper);
+            return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
+        }
+
+        private struct ConvexTraceHelper : ISweepHitHandler
+        {
+            public Func<EntityPhysicsProperty, bool> Filter;
+
+            public CollisionResult Hit;
+
+            public PhysicsSpace Space;
+
+            public Location Start;
+
+            public bool AllowTest(CollidableReference collidable)
+            {
+                EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
+                return Filter == null || Filter(entity);
+            }
+
+            public bool AllowTest(CollidableReference collidable, int childIndex)
+            {
+                return AllowTest(collidable);
+            }
+
+            public void OnHit(ref float maximumT, float t, in Vector3 hitLocation, in Vector3 hitNormal, CollidableReference collidable)
+            {
+                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
+            }
+
+            public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable)
+            {
+                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = Location.Zero, Position = Start };
+            }
+        }
+
+        /// <summary>
+        /// Sends a world convex-shape trace, giving back the single found object, or null if none.
+        /// Uses a standard filter.
+        /// </summary>
+        /// <param name="shape">The shape to trace with.</param>
+        /// <param name="start">The start position.</param>
+        /// <param name="dir">The direction.</param>
+        /// <param name="dist">The distance.</param>
+        /// <param name="filter">The filter, if any.</param>
+        public CollisionResult ConvexTraceSingle<TShape>(TShape shape, Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null) where TShape : unmanaged, IConvexShape
+        {
+            ConvexTraceHelper helper = new ConvexTraceHelper() { Space = this, Filter = filter, Start = start };
+            Internal.CoreSimulation.Sweep(shape, new RigidPose(start.ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(dir.ToNumerics(), Vector3.Zero), (float)dist, Internal.CoreSimulation.BufferPool, ref helper);
+            return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
         }
 
         /// <summary>
@@ -161,79 +275,6 @@ namespace FGECore.PhysicsSystem
                 return;
             }
             Internal.Init(this);
-        }
-
-        private class EntitiesInBoxHelper : IBreakableForEach<CollidableReference>
-        {
-            public List<T> Entities;
-
-            public PhysicsSpace Space;
-
-            public bool LoopBody(CollidableReference collidable) // true = continue, false = stop
-            {
-                if (collidable.Mobility == CollidableMobility.Dynamic)
-                {
-                    Entities.Add(Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T);
-                }
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Gets all (physics enabled) entities whose boundaries touch the specified bounding box. This includes entities fully within the box.
-        /// TODO: Filter options!
-        /// </summary>
-        /// <param name="box">The bounding box.</param>
-        /// <returns>The list of entities found.</returns>
-        public IEnumerable<T> GetEntitiesInBox(AABB box)
-        {
-            EntitiesInBoxHelper helper = new EntitiesInBoxHelper() { Entities = new List<T>(), Space = this };
-            Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
-            return helper.Entities;
-        }
-
-        private struct RayTraceHelper : IRayHitHandler
-        {
-            public Func<T, bool> Filter;
-
-            public T Hit;
-
-            public PhysicsSpace Space;
-
-            public bool AllowTest(CollidableReference collidable)
-            {
-                if (collidable.Mobility == CollidableMobility.Dynamic)
-                {
-                    T entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T;
-                    return Filter == null || Filter(entity);
-                }
-                return false;
-            }
-
-            public bool AllowTest(CollidableReference collidable, int childIndex)
-            {
-                return AllowTest(collidable);
-            }
-
-            public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
-            {
-                Hit = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T;
-            }
-        }
-
-        /// <summary>
-        /// Sends a world ray trace, giving back the single found object, or null if none.
-        /// Uses a standard filter.
-        /// </summary>
-        /// <param name="start">The start position.</param>
-        /// <param name="dir">The direction.</param>
-        /// <param name="dist">The distance.</param>
-        /// <param name="filter">The filter, if any.</param>
-        public T RayTraceSingle(Location start, Location dir, double dist, Func<T, bool> filter = null)
-        {
-            RayTraceHelper helper = new RayTraceHelper() { Space = this, Filter = filter };
-            Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, ref helper);
-            return helper.Hit;
         }
     }
 }

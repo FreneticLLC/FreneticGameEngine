@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using BEPUutilities;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.MathHelpers
@@ -106,16 +105,6 @@ namespace FGECore.MathHelpers
         public bool Equals(Vector3i other)
         {
             return other.X == X && other.Y == Y && other.Z == Z;
-        }
-
-        /// <summary>
-        /// Converts this vector a BEPU floating point vector.
-        /// </summary>
-        /// <returns>The float vector.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 ToBEPU()
-        {
-            return new Vector3(X, Y, Z);
         }
 
         /// <summary>

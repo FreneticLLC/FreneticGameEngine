@@ -41,9 +41,10 @@ namespace FGECore.EntitySystem
             PhysEnt.DespawnEvent += RemoveJoints;
         }
 
-        private PointOnPlaneJoint POPJ;
+        // TODO: Reimplement.
+        //private PointOnPlaneJoint POPJ;
 
-        private RevoluteAngularJoint RAJ;
+        //private RevoluteAngularJoint RAJ;
 
         /// <summary>
         /// Post-spawn handling.
@@ -53,11 +54,11 @@ namespace FGECore.EntitySystem
         {
             if (ForcePosition)
             {
-                POPJ = new PointOnPlaneJoint(null, PhysEnt.SpawnedBody, Vector3.Zero, Vector3.UnitZ, Vector3.Zero);
-                PhysEnt.PhysicsWorld.Internal.Add(POPJ);
+                //POPJ = new PointOnPlaneJoint(null, PhysEnt.SpawnedBody, Vector3.Zero, Vector3.UnitZ, Vector3.Zero);
+                //PhysEnt.PhysicsWorld.Internal.Add(POPJ);
             }
-            RAJ = new RevoluteAngularJoint(null, PhysEnt.SpawnedBody, Vector3.UnitZ);
-            PhysEnt.PhysicsWorld.Internal.Add(RAJ);
+            //RAJ = new RevoluteAngularJoint(null, PhysEnt.SpawnedBody, Vector3.UnitZ);
+            //PhysEnt.PhysicsWorld.Internal.Add(RAJ);
         }
 
         /// <summary>
@@ -78,11 +79,11 @@ namespace FGECore.EntitySystem
         {
             if (ForcePosition)
             {
-                PhysEnt.PhysicsWorld.Internal.Remove(POPJ);
-                POPJ = null;
+                //PhysEnt.PhysicsWorld.Internal.Remove(POPJ);
+                //POPJ = null;
             }
-            PhysEnt.PhysicsWorld.Internal.Remove(RAJ);
-            RAJ = null;
+            //PhysEnt.PhysicsWorld.Internal.Remove(RAJ);
+            //RAJ = null;
         }
 
         /// <summary>

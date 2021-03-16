@@ -9,9 +9,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
 
 namespace FGECore.ModelSystems
 {
@@ -33,7 +33,7 @@ namespace FGECore.ModelSystems
         /// <summary>
         /// The default matrix of the model.
         /// </summary>
-        public Matrix MatrixA;
+        public Matrix4x4 MatrixA;
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ namespace FGECore.ModelSystems
         /// <summary>
         /// The default matrix of this bone.
         /// </summary>
-        public Matrix MatrixA;
+        public Matrix4x4 MatrixA;
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ namespace FGECore.ModelSystems
         /// <summary>
         /// The default matrix of this node.
         /// </summary>
-        public Matrix MatrixA;
+        public Matrix4x4 MatrixA;
 
         /// <summary>
         /// The parent of this node.
