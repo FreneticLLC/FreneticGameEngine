@@ -38,6 +38,7 @@ namespace FGEGraphics.ClientSystem
             if (disposing)
             {
                 Sounds.Dispose();
+                Shutdown();
             }
         }
 

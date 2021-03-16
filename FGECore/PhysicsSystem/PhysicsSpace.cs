@@ -224,10 +224,14 @@ namespace FGECore.PhysicsSystem
             return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
         }
 
-        /// <summary>
-        /// Returns a simple string form of this physics world.
-        /// </summary>
-        /// <returns>The simple string form.</returns>
+        /// <summary>Shuts down the physics world and all internal resources.</summary>
+        public void Shutdown()
+        {
+            Internal.CoreSimulation.Dispose();
+            Internal.CoreSimulation = null;
+        }
+
+        /// <summary>Returns a simple string to represent this physics world.</summary>
         public override string ToString()
         {
             return "Physics World";

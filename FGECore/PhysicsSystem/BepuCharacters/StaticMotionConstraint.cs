@@ -72,6 +72,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         //by grabbing an offset instance, we're selecting a specific slot in the bundle to modify. For simplicity and to guarantee consistency of field strides,
         //we refer to that slot using the same struct and then write only to the first slot.
         //(Note that accessing slots after the first may result in access violations; the 'offset instance' is not guaranteed to refer to valid data beyond the first slot!)
+        /// <summary>Not documented in BEPU source.</summary>
         public void ApplyDescription(ref TypeBatch batch, int bundleIndex, int innerIndex)
         {
             ref var target = ref GetOffsetInstance(ref Buffer<StaticCharacterMotionPrestep>.Get(ref batch.PrestepData, bundleIndex), innerIndex);
@@ -84,6 +85,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
         }
 
+        /// <summary>Not documented in BEPU source.</summary>
         public void BuildDescription(ref TypeBatch batch, int bundleIndex, int innerIndex, out StaticCharacterMotionConstraint description)
         {
             ref var source = ref GetOffsetInstance(ref Buffer<StaticCharacterMotionPrestep>.Get(ref batch.PrestepData, bundleIndex), innerIndex);
@@ -111,33 +113,50 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         //Note that the prestep data layout is important. The solver tends to be severely memory bandwidth bound, so using a minimal representation is valuable.
         //That's why the Basis is stored as a quaternion and not a full Matrix- the cost of the arithmetic operations to expand it back into the original matrix form is far less
         //than the cost of loading all the extra lanes of data when scaled up to many cores.
+        /// <summary>Not documented in BEPU source.</summary>
         public QuaternionWide SurfaceBasis;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> MaximumHorizontalForce;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> MaximumVerticalForce;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> Depth;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector2Wide TargetVelocity;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector3Wide OffsetFromCharacter;
 
     }
 
     //Using the prestep data plus some current body state, the solver computes the information required to execute velocity iterations. The main purpose of this intermediate data
     //is to describe the projection from body velocities into constraint space impulses, and from constraint space impulses to body velocities again.
+    /// <summary>Not documented in BEPU source.</summary>
     public struct StaticCharacterMotionProjection
     {
+        /// <summary>Not documented in BEPU source.</summary>
         public QuaternionWide SurfaceBasis;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector3Wide OffsetFromCharacter;
 
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector2Wide TargetVelocity;
+        /// <summary>Not documented in BEPU source.</summary>
         public Symmetric2x2Wide HorizontalEffectiveMass;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> MaximumHorizontalImpulse;
+        /// <summary>Not documented in BEPU source.</summary>
         public BodyInertias InertiaA;
 
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> VerticalBiasVelocity;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> VerticalEffectiveMass;
+        /// <summary>Not documented in BEPU source.</summary>
         public Vector<float> MaximumVerticalForce;
 
     }
 
+    /// <summary>Not documented in BEPU source.</summary>
     public struct StaticCharacterMotionFunctions : IOneBodyConstraintFunctions<StaticCharacterMotionPrestep, StaticCharacterMotionProjection, CharacterMotionAccumulatedImpulse>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,6 +190,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
         }
 
+        /// <summary>Not documented in BEPU source.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Prestep(Bodies bodies, ref Vector<int> bodyReferences, int count, float dt, float inverseDt, ref BodyInertias inertiaA, ref StaticCharacterMotionPrestep prestepData, out StaticCharacterMotionProjection projection)
         {
@@ -264,6 +284,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             Vector3Wide.Add(velocityA.Angular, angularChangeA, out velocityA.Angular);
         }
 
+        /// <summary>Not documented in BEPU source.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WarmStart(ref BodyVelocities velocityA, ref StaticCharacterMotionProjection projection, ref CharacterMotionAccumulatedImpulse accumulatedImpulse)
         {
@@ -273,6 +294,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             ApplyVerticalImpulse(basis, verticalAngularJacobianA, accumulatedImpulse.Vertical, projection.InertiaA, ref velocityA);
         }
 
+        /// <summary>Not documented in BEPU source.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Solve(ref BodyVelocities velocityA, ref StaticCharacterMotionProjection projection, ref CharacterMotionAccumulatedImpulse accumulatedImpulse)
         {
@@ -318,6 +340,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
     //Each constraint type has its own 'type processor'- it acts as the outer loop that handles all the common logic across batches of constraints and invokes
     //the per-constraint logic as needed. The CharacterMotionFunctions type provides the actual implementation.
+    /// <summary>Not documented in BEPU source.</summary>
     public class StaticCharacterMotionTypeProcessor : OneBodyTypeProcessor<StaticCharacterMotionPrestep, StaticCharacterMotionProjection, CharacterMotionAccumulatedImpulse, StaticCharacterMotionFunctions>
     {
         /// <summary>

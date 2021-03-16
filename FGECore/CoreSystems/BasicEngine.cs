@@ -45,6 +45,12 @@ namespace FGECore.CoreSystems
 
         /// <summary>Gets the scheduler from the backing GameInstance.</summary>
         public Scheduler Schedule => OwningInstanceGeneric.Schedule;
+
+        /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
+        public void Shutdown()
+        {
+            PhysicsWorldGeneric.Shutdown();
+        }
     }
 
     /// <summary>
