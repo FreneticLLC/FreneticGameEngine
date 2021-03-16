@@ -87,7 +87,7 @@ namespace FGECore.MathHelpers
                 return (float)Z;
             }
         }
-        
+
         /// <summary>
         /// Returns W as a float.
         /// </summary>
@@ -98,7 +98,7 @@ namespace FGECore.MathHelpers
                 return (float)W;
             }
         }
-        
+
         /// <summary>
         /// Constructs a Quaternion with specific components.
         /// </summary>
@@ -243,7 +243,7 @@ namespace FGECore.MathHelpers
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Equality.</returns>
-        public static bool operator==(in Quaternion a, in Quaternion b)
+        public static bool operator ==(in Quaternion a, in Quaternion b)
         {
             return a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
         }
@@ -329,7 +329,6 @@ namespace FGECore.MathHelpers
         /// </summary>
         /// <param name="v1">First vector location.</param>
         /// <param name="v2">Second vector location.</param>
-        /// <returns>The quaternion.</returns>
         public static Quaternion GetQuaternionBetween(in Location v1, in Location v2)
         {
             double dot = v1.Dot(v2);
@@ -359,10 +358,21 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
+        /// Gets the quaternion between two quaternions.
+        /// Equivalent to: <code>a.MultipliedBy(b.Conjugate())</code>
+        /// Returns a result such that: <code>b == a.MultipliedBy(result)</code>
+        /// </summary>
+        /// <param name="a">First quaternion.</param>
+        /// <param name="b">Second quaternion.</param>
+        public static Quaternion GetQuaternionBetween(in Quaternion a, in Quaternion b)
+        {
+            return a.MultipliedBy(b.Conjugate());
+        }
+
+        /// <summary>
         /// Get the angle around an axis for a specific quaternion, in radians.
         /// </summary>
         /// <param name="axis">The relative axis.</param>
-        /// <returns>The angle.</returns>
         public double AxisAngleForRadians(in Location axis)
         {
             Location ra = new Location(X, Y, Z);
@@ -502,6 +512,39 @@ namespace FGECore.MathHelpers
                 Z = Math.Sin(value * 0.5);
                 W = Math.Cos(value * 0.5);
             }
+        }
+
+        /// <summary>Gets the angle represented by the Quaternion.</summary>
+        public double RepresentedAngle()
+        {
+            double wAbs = Math.Abs(W);
+            if (wAbs > 1)
+            {
+                return 0;
+            }
+            return 2 * Math.Acos(wAbs);
+        }
+
+        /// <summary>Gets the axis of rotation represented by the Quaternion.</summary>
+        public Location RepresentedAxis()
+        {
+            return (new Location(X, Y, Z) * Math.Sign(W)).Normalize();
+        }
+
+        /// <summary>Converts the <see cref="Quaternion"/> value to a floating point <see cref="System.Numerics.Quaternion"/>.</summary>
+        public System.Numerics.Quaternion ToNumerics()
+        {
+            return new System.Numerics.Quaternion(XF, YF, ZF, WF);
+        }
+    }
+
+    /// <summary>Helper extensions for <see cref="Quaternion"/>.</summary>
+    public static class ExtensionsForQuaternion
+    {
+        /// <summary>Converts a floating point <see cref="System.Numerics.Quaternion"/> to a <see cref="Quaternion"/>.</summary>
+        public static Quaternion ToCore(this System.Numerics.Quaternion quat)
+        {
+            return new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
         }
     }
 }
