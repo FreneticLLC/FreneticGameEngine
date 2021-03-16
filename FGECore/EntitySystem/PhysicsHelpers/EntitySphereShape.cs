@@ -11,55 +11,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics.CollisionShapes;
-using BEPUphysics.CollisionShapes.ConvexShapes;
+using BepuPhysics;
+using BepuPhysics.Collidables;
+using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>
-    /// A sphere shape for an entity.
-    /// </summary>
+    /// <summary>A sphere shape for an entity.</summary>
     public class EntitySphereShape : EntityShapeHelper
     {
-        /// <summary>
-        /// Constructs an empty <see cref="EntitySphereShape"/>, for details to be filled in later.
-        /// </summary>
-        public EntitySphereShape()
+        /// <summary>Constructs a new <see cref="EntitySphereShape"/> of the specified size.</summary>
+        public EntitySphereShape(float size, PhysicsSpace space)
         {
-        }
-
-        /// <summary>
-        /// Constructs a new <see cref="EntitySphereShape"/> of the specified size.
-        /// </summary>
-        public EntitySphereShape(double _size)
-        {
-            Size = _size;
-        }
-
-        /// <summary>
-        /// The radius of the sphere.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public double Size;
-
-        /// <summary>
-        /// Gets the BEPU shape object.
-        /// </summary>
-        /// <returns>The BEPU shape.</returns>
-        public override EntityShape GetBEPUShape()
-        {
-            return new SphereShape(Size);
-        }
-
-        /// <summary>
-        /// The string form of this shape helper.
-        /// </summary>
-        /// <returns>String form.</returns>
-        public override string ToString()
-        {
-            return "SphereShape, size=" + Size;
+            Sphere sphere = new Sphere(size);
+            BepuShape = sphere;
+            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(sphere);
         }
     }
 }

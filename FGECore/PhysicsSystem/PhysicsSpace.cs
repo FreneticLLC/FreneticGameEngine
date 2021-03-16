@@ -129,6 +129,12 @@ namespace FGECore.PhysicsSystem
             Internal.EntitiesByPhysicsID[bepuent.Value] = null;
         }
 
+        /// <summary>Performs a single tick update of all physics world data.</summary>
+        public void Tick(float delta)
+        {
+            Internal.CoreSimulation.Timestep(delta, Internal.ThreadDispatcher);
+        }
+
         /// <summary>
         /// Returns a simple string form of this physics world.
         /// </summary>
@@ -157,52 +163,61 @@ namespace FGECore.PhysicsSystem
             Internal.Init(this);
         }
 
+        private class EntitiesInBoxHelper : IBreakableForEach<CollidableReference>
+        {
+            public List<T> Entities;
+
+            public PhysicsSpace Space;
+
+            public bool LoopBody(CollidableReference collidable) // true = continue, false = stop
+            {
+                if (collidable.Mobility == CollidableMobility.Dynamic)
+                {
+                    Entities.Add(Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T);
+                }
+                return true;
+            }
+        }
+
         /// <summary>
         /// Gets all (physics enabled) entities whose boundaries touch the specified bounding box. This includes entities fully within the box.
-        /// <para>Note that this method is designed for best acceleration with LINQ.</para>
         /// TODO: Filter options!
         /// </summary>
         /// <param name="box">The bounding box.</param>
         /// <returns>The list of entities found.</returns>
         public IEnumerable<T> GetEntitiesInBox(AABB box)
         {
-            List<BroadPhaseEntry> bpes = new List<BroadPhaseEntry>();
-            Internal.BroadPhase.QueryAccelerator.GetEntries(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), bpes);
-            foreach (BroadPhaseEntry bpe in bpes)
-            {
-                if (bpe is EntityCollidable ec && ec.Entity.Tag is T res)
-                {
-                    yield return res;
-                }
-                else if (bpe.Tag is T bres)
-                {
-                    yield return bres;
-                }
-                else if (bpe.Tag is EntityPhysicsProperty pres)
-                {
-                    yield return pres.Entity as T;
-                }
-            }
+            EntitiesInBoxHelper helper = new EntitiesInBoxHelper() { Entities = new List<T>(), Space = this };
+            Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
+            return helper.Entities;
         }
 
-        public struct RayTraceHelper : IRayHitHandler
+        private struct RayTraceHelper : IRayHitHandler
         {
             public Func<T, bool> Filter;
 
+            public T Hit;
+
+            public PhysicsSpace Space;
+
             public bool AllowTest(CollidableReference collidable)
             {
-                // TODO
-                throw new NotImplementedException();
+                if (collidable.Mobility == CollidableMobility.Dynamic)
+                {
+                    T entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T;
+                    return Filter == null || Filter(entity);
+                }
+                return false;
             }
 
             public bool AllowTest(CollidableReference collidable, int childIndex)
             {
-                throw new NotImplementedException();
+                return AllowTest(collidable);
             }
 
             public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
             {
-                throw new NotImplementedException();
+                Hit = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value].Entity as T;
             }
         }
 
@@ -216,73 +231,9 @@ namespace FGECore.PhysicsSystem
         /// <param name="filter">The filter, if any.</param>
         public T RayTraceSingle(Location start, Location dir, double dist, Func<T, bool> filter = null)
         {
-            RayCastResult rcr;
-            if (filter != null)
-            {
-                Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T))
-                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float) dist, (b) => (b.Tag is T t1) ? filter(t1) : ((b.Tag is EntityPhysicsProperty t2) && filter(t2.Entity as T)), out rcr))
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, out rcr))
-                {
-                    return null;
-                }
-            }
-            if (rcr.HitObject != null && rcr.HitObject.Tag != null)
-            {
-                if (rcr.HitObject.Tag is T res)
-                {
-                    return res;
-                }
-                else if (rcr.HitObject.Tag is EntityPhysicsProperty pres)
-                {
-                    return pres.Entity as T;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Sends a world ray trace, giving back the single found object, or null if none.
-        /// Uses a raw filter.
-        /// </summary>
-        /// <param name="start">The start position.</param>
-        /// <param name="dir">The direction.</param>
-        /// <param name="dist">The distance.</param>
-        /// <param name="filter">The filter, if any.</param>
-        public T RayTraceSingle_RawFilter(Location start, Location dir, double dist, Func<BroadPhaseEntry, bool> filter = null)
-        {
-            RayCastResult rcr;
-            if (filter != null)
-            {
-                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, filter, out rcr))
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                if (!Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, out rcr))
-                {
-                    return null;
-                }
-            }
-            if (rcr.HitObject != null && rcr.HitObject.Tag != null)
-            {
-                if (rcr.HitObject.Tag is T res)
-                {
-                    return res;
-                }
-                else if (rcr.HitObject.Tag is EntityPhysicsProperty pres)
-                {
-                    return pres.Entity as T;
-                }
-            }
-            return null;
+            RayTraceHelper helper = new RayTraceHelper() { Space = this, Filter = filter };
+            Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, ref helper);
+            return helper.Hit;
         }
     }
 }

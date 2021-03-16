@@ -11,66 +11,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics.CollisionShapes;
-using BEPUphysics.CollisionShapes.ConvexShapes;
 using FGECore.PhysicsSystem;
-using FGECore.MathHelpers;
 using FGECore.PropertySystem;
+using BepuPhysics.Collidables;
+using BepuPhysics;
+using BepuUtilities.Memory;
+using System.Numerics;
+using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>
-    /// A cylinder shape for an entity.
-    /// </summary>
+    /// <summary>A cylinder shape for an entity.</summary>
     public class EntityCylinderShape : EntityShapeHelper
     {
-        /// <summary>
-        /// The height of the cylinder.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public double Height;
-
-        /// <summary>
-        /// The radius of the cylinder.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public double Radius;
-
-        /// <summary>
-        /// Whether to auto fix the orientation of the cylinder.
-        /// <para>This will be Y-Up if false, might be beneficial to use <see cref="BasicEntity.RotateYToZ"/>.</para>
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public bool FixedOrientation = true;
-
-        /// <summary>
-        /// Used with <see cref="FixedOrientation"/>.
-        /// </summary>
-        private static Quaternion Y2Z = Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ);
-
-        /// <summary>
-        /// Gets the BEPU shape object.
-        /// </summary>
-        /// <returns>The BEPU shape.</returns>
-        public override EntityShape GetBEPUShape()
+        /// <summary>Constructs a new <see cref="EntityCylinderShape"/> of the specified size.</summary>
+        public EntityCylinderShape(float radius, float height, PhysicsSpace space)
         {
-            if (FixedOrientation)
-            {
-                return new CompoundShape(new CompoundShapeEntry[] { new CompoundShapeEntry(new CylinderShape(Height, Radius), Y2Z.ToNumerics()) });
-            }
-            return new CylinderShape(Height, Radius);
+            Cylinder cylinder = new Cylinder(radius, height);
+            TypedIndex cylinderIndex = space.Internal.CoreSimulation.Shapes.Add(cylinder);
+            space.Internal.CoreSimulation.BufferPool.Take(1, out Buffer<CompoundChild> buffer);
+            buffer[0].LocalPose = new RigidPose(Vector3.Zero, Y2Z);
+            buffer[0].ShapeIndex = cylinderIndex;
+            Compound compound = new Compound(buffer);
+            BepuShape = cylinder;
+            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(compound);
         }
 
-        /// <summary>
-        /// The string form of this shape helper.
-        /// </summary>
-        /// <returns>String form.</returns>
-        public override string ToString()
-        {
-            return "CylinderShape, Radius=" + Radius + ", Height=" + Height;
-        }
+        private static System.Numerics.Quaternion Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
     }
 }

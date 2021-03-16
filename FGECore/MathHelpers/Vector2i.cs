@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using BEPUutilities;
 
 namespace FGECore.MathHelpers
 {
@@ -68,7 +67,7 @@ namespace FGECore.MathHelpers
         /// <returns>Whether they are equal.</returns>
         public override bool Equals(object other)
         {
-            if (!(other is Vector2i vecForm))
+            if (other is not Vector2i vecForm)
             {
                 return false;
             }
@@ -83,15 +82,6 @@ namespace FGECore.MathHelpers
         public bool Equals(Vector2i other)
         {
             return other.X == X && other.Y == Y;
-        }
-
-        /// <summary>
-        /// Converts this vector a BEPU floating point vector.
-        /// </summary>
-        /// <returns>The float vector.</returns>
-        public Vector2 ToVector2()
-        {
-            return new Vector2(X, Y);
         }
 
         /// <summary>

@@ -11,9 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics.Character;
-using BEPUutilities.DataStructures;
-using BEPUphysics.NarrowPhaseSystems.Pairs;
 using FGECore.CoreSystems;
 using FGECore.PropertySystem;
 

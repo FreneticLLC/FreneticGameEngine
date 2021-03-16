@@ -17,6 +17,7 @@ using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using BepuUtilities;
 using BepuPhysics.Collidables;
+using System.Numerics;
 
 namespace FGECore.PhysicsSystem
 {

@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
@@ -153,24 +152,11 @@ namespace FGECore.PropertySystem
                     Loader = (b) => Color4F.FromBytes(b),
                     SaveString = "C/color4f"
                 });
-                TypeSavers.Add(typeof(MathHelpers.Quaternion), new PropertySaverLoader()
+                TypeSavers.Add(typeof(Quaternion), new PropertySaverLoader()
                 {
-                    Saver = (o) => ((MathHelpers.Quaternion)o).ToDoubleBytes(),
-                    Loader = (b) => MathHelpers.Quaternion.FromDoubleBytes(b, 0),
+                    Saver = (o) => ((Quaternion)o).ToDoubleBytes(),
+                    Loader = (b) => Quaternion.FromDoubleBytes(b, 0),
                     SaveString = "C/quaternion"
-                });
-                // BEPU Helpers
-                TypeSavers.Add(typeof(Vector3), new PropertySaverLoader()
-                {
-                    Saver = (o) => ((Vector3)o).ToLocation().ToDoubleBytes(),
-                    Loader = (b) => Location.FromDoubleBytes(b, 0).ToNumerics(),
-                    SaveString = "C/B/vector3"
-                });
-                TypeSavers.Add(typeof(BEPUutilities.Quaternion), new PropertySaverLoader()
-                {
-                    Saver = (o) => BepuUtilities.QuaternionToBytes((BEPUutilities.Quaternion)o),
-                    Loader = (b) => Quaternion.FromFloatBytes(b, 0),
-                    SaveString = "C/B/quaternion"
                 });
                 // End default helpers
                 foreach (PropertySaverLoader psl in TypeSavers.Values)

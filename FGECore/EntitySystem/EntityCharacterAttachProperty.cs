@@ -11,12 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
-using BEPUphysics.Character;
 using FGECore.UtilitySystems;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using FGECore.CoreSystems;
+using System.Numerics;
 
 namespace FGECore.EntitySystem
 {   
@@ -68,8 +67,8 @@ namespace FGECore.EntitySystem
         public MathHelpers.Quaternion GetRelativeQuaternion()
         {
             // TODO: Less complicated option?!
-            Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, Character.ViewDirection, -Character.Down);
-            return BEPUutilities.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
+            Matrix4x4 relative = Matrix4x4.CreateLookAt(Vector3.Zero, Character.ViewDirection, -Character.Down);
+            return System.Numerics.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
 
         /// <summary>
@@ -91,8 +90,8 @@ namespace FGECore.EntitySystem
         public static MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
         {
             // TODO: Less complicated option?!
-            Matrix relative = Matrix.CreateLookAtRH(Vector3.Zero, viewDir, -downDir);
-            return BEPUutilities.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
+            Matrix4x4 relative = Matrix4x4.CreateLookAt(Vector3.Zero, viewDir, -downDir);
+            return System.Numerics.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
 
         /// <summary>

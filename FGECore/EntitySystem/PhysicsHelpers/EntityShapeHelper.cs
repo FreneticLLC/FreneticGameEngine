@@ -6,7 +6,9 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using BepuPhysics;
 using BepuPhysics.Collidables;
+using FGECore.PhysicsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,16 +18,14 @@ using System.Threading.Tasks;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>
-    /// Implementations of this class are helpers for the various possible entity physics shapes.
-    /// </summary>
+    /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
     public abstract class EntityShapeHelper
     {
-        /// <summary>
-        /// Gets the BEPU shape object.
-        /// </summary>
-        /// <returns>The BEPU shape.</returns>
-        public abstract CollidableDescription GetBEPUShape();
+        /// <summary>Gets the BEPU shape index.</summary>
+        public TypedIndex ShapeIndex;
+
+        /// <summary>Gets the BEPU convex shape (if possible).</summary>
+        public IConvexShape BepuShape;
 
         /// <summary>
         /// Gets the BEPU Shape offset, if any.
@@ -34,15 +34,6 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         public virtual Vector3 GetCenterOffset()
         {
             return Vector3.Zero;
-        }
-
-        /// <summary>
-        /// The string form of this shape helper.
-        /// </summary>
-        /// <returns>String form.</returns>
-        public override string ToString()
-        {
-            return "EntityShapeHelper / Undefined";
         }
     }
 }

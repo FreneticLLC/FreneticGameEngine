@@ -11,56 +11,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUphysics.CollisionShapes;
-using BEPUphysics.CollisionShapes.ConvexShapes;
+using BepuPhysics.Collidables;
 using FGECore.MathHelpers;
+using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>
-    /// A box shape for an entity.
-    /// </summary>
+    /// <summary>A box shape for an entity.</summary>
     public class EntityBoxShape : EntityShapeHelper
     {
-        /// <summary>
-        /// Constructs an empty <see cref="EntityBoxShape"/>, for details to be filled in later.
-        /// </summary>
-        public EntityBoxShape()
+        /// <summary>Constructs a new <see cref="EntityBoxShape"/> of the specified size.</summary>
+        public EntityBoxShape(Location size, PhysicsSpace space)
         {
-        }
-
-        /// <summary>
-        /// Constructs a new <see cref="EntityBoxShape"/> of the specified size.
-        /// </summary>
-        public EntityBoxShape(Location _size)
-        {
-            Size = _size;
-        }
-
-        /// <summary>
-        /// The size of the box on each axis.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Location Size;
-
-        /// <summary>
-        /// Gets the BEPU shape object.
-        /// </summary>
-        /// <returns>The BEPU shape.</returns>
-        public override EntityShape GetBEPUShape()
-        {
-            return new BoxShape(Size.X, Size.Y, Size.Z);
-        }
-
-        /// <summary>
-        /// The string form of this shape helper.
-        /// </summary>
-        /// <returns>String form.</returns>
-        public override string ToString()
-        {
-            return "BoxShape, size=" + Size;
+            Box box = new Box(size.XF, size.YF, size.ZF);
+            BepuShape = box;
+            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(box);
         }
     }
 }

@@ -9,12 +9,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
-using BEPUphysics.Constraints.TwoEntity.Joints;
 using FGECore.CoreSystems;
 using FGECore.PropertySystem;
+using BepuPhysics.Constraints;
 
 namespace FGECore.EntitySystem
 {
@@ -65,9 +65,9 @@ namespace FGECore.EntitySystem
         /// </summary>
         public void TickHandle()
         {
-            if (ForcePosition && Math.Abs(PhysEnt.SpawnedBody.Position.Z) > 0.1)
+            if (ForcePosition && Math.Abs(PhysEnt.SpawnedBody.Pose.Position.Z) > 0.1)
             {
-                PhysEnt.SpawnedBody.Position = new Vector3(PhysEnt.SpawnedBody.Position.X, PhysEnt.SpawnedBody.Position.Y, 0.0);
+                PhysEnt.SpawnedBody.Pose.Position = new Vector3(PhysEnt.SpawnedBody.Pose.Position.X, PhysEnt.SpawnedBody.Pose.Position.Y, 0.0f);
             }
         }
 

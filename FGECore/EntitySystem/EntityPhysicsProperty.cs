@@ -17,6 +17,7 @@ using FGECore.MathHelpers;
 using FGECore.CoreSystems;
 using FGECore.PropertySystem;
 using BepuPhysics;
+using BepuPhysics.Collidables;
 
 namespace FGECore.EntitySystem
 {
@@ -121,6 +122,7 @@ namespace FGECore.EntitySystem
             }
         }
 
+        /*
         /// <summary>Gets or sets the entity's friction.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -159,7 +161,7 @@ namespace FGECore.EntitySystem
                     SpawnedBody.Material.Bounciness = Internal.Bounciness;
                 }
             }
-        }
+        }*/
 
         /// <summary>Gets or sets the entity's linear velocity.</summary>
         [PropertyDebuggable]
@@ -241,30 +243,6 @@ namespace FGECore.EntitySystem
         }
 
         /// <summary>
-        /// Gets relevant helper systems for the entity (if it is a character, otherwise: null).
-        /// </summary>
-        [PropertyPriority(1000)]
-        [PropertyDebuggable]
-        public EntityPhysicsCharacterHelper Character
-        {
-            get
-            {
-                return (OriginalObject is CharacterController cc) ? new EntityPhysicsCharacterHelper() { Internal = cc } : null;
-            }
-        }
-
-        /// <summary>
-        /// Character instance ID.
-        /// </summary>
-        public long InstanceId
-        {
-            get
-            {
-                return SpawnedBody.InstanceId;
-            }
-        }
-
-        /// <summary>
         /// Construct the physics entity property.
         /// </summary>
         public EntityPhysicsProperty()
@@ -281,8 +259,8 @@ namespace FGECore.EntitySystem
                 PhysicsWorld = Engine.PhysicsWorldGeneric;
             }
             SpawnHandle();
-            Entity.OnPositionChanged += PosCheck;
-            Entity.OnOrientationChanged += OriCheck;
+            Entity.OnPositionChanged += DoPosCheckEvent;
+            Entity.OnOrientationChanged += DoOrientationCheckEvent;
         }
 
         /// <summary>
@@ -296,8 +274,17 @@ namespace FGECore.EntitySystem
             }
             HandledRemove = true;
             DespawnHandle();
-            Entity.OnPositionChanged -= PosCheck;
-            Entity.OnOrientationChanged -= OriCheck;
+            Entity.OnPositionChanged -= DoPosCheckEvent;
+            Entity.OnOrientationChanged -= DoOrientationCheckEvent;
+        }
+
+        private void DoPosCheckEvent(Location position)
+        {
+            PosCheck(position);
+        }
+        private void DoOrientationCheckEvent(Quaternion orientation)
+        {
+            OrientationCheck(orientation);
         }
 
         /// <summary>
@@ -316,36 +303,51 @@ namespace FGECore.EntitySystem
         /// <summary>
         /// Checks and handles a position update.
         /// </summary>
-        /// <param name="p">The new position.</param>
-        public void PosCheck(Location p)
+        /// <param name="position">The new position.</param>
+        public bool PosCheck(Location position)
         {
-            if (NoCheck)
+            Location physPos = FGEToPhysics(position);
+            if (physPos.DistanceSquared(Internal.Position) > 0.01)
             {
-                return;
+                if (!NoCheck)
+                {
+                    Position = physPos;
+                }
+                return true;
             }
-            Location coff = SpawnedBody.Pose.Orientation.ToCore().Transform(Shape.GetCenterOffset().ToLocation());
-            Location p2 = (p * PhysicsWorld.RelativeScaleInverse) + coff;
-            if (p2.DistanceSquared(Internal.Position) > 0.01) // TODO: Is this validation needed?
-            {
-                Position = p2;
-            }
+            return false;
         }
 
         /// <summary>
         /// Checks and handles an orientation update.
         /// </summary>
-        /// <param name="q">The new orientation.</param>
-        public void OriCheck(Quaternion q)
+        /// <param name="orientation">The new orientation.</param>
+        public bool OrientationCheck(Quaternion orientation)
         {
-            if (NoCheck)
-            {
-                return;
-            }
-            Quaternion relative = Quaternion.GetQuaternionBetween(q, Internal.Orientation);
+            Quaternion relative = Quaternion.GetQuaternionBetween(orientation, Internal.Orientation);
             if (relative.RepresentedAngle() > 0.01) // TODO: Is this validation needed? This is very expensive to run.
             {
-                Orientation = q;
+                if (!NoCheck)
+                {
+                    Orientation = orientation;
+                }
+                return true;
             }
+            return false;
+        }
+
+        /// <summary>Converts a physics space position to an FGE position, going through the space's relative scaling factor and body center offsetting.</summary>
+        public Location PhysicsToFGE(Location position)
+        {
+            Location centerOffset = Orientation.Transform(Shape.GetCenterOffset().ToLocation());
+            return (position - centerOffset) * PhysicsWorld.RelativeScale;
+        }
+
+        /// <summary>Converts an FGE position to a physics space position, going through the space's relative scaling factor and body center offsetting.</summary>
+        public Location FGEToPhysics(Location position)
+        {
+            Location centerOffset = Orientation.Transform(Shape.GetCenterOffset().ToLocation());
+            return (position * PhysicsWorld.RelativeScaleInverse) + centerOffset;
         }
 
         // TODO: Damping values!
@@ -360,31 +362,17 @@ namespace FGECore.EntitySystem
                 Internal.Gravity = PhysicsWorld.Gravity;
                 GravityIsSet = true;
             }
-            if (Shape is EntityCharacterShape chr)
-            {
-                CharacterController cc = chr.GetBEPUCharacter();
-                cc.Tag = Entity;
-                OriginalObject = cc;
-                SpawnedBody = cc.Body;
-                SpawnedBody.Mass = Internal.Mass;
-            }
-            else
-            {
-                SpawnedBody = new Entity(Shape.GetBEPUShape(), Internal.Mass);
-                OriginalObject = SpawnedBody;
-                SpawnedBody.Pose.Orientation = Internal.Orientation.ToNumerics();
-            }
-            SpawnedBody.Velocity.Linear = Internal.LinearVelocity.ToNumerics();
-            SpawnedBody.Velocity.Angular = Internal.AngularVelocity.ToNumerics();
-            SpawnedBody.Material.KineticFriction = Internal.Friction;
-            SpawnedBody.Material.StaticFriction = Internal.Friction;
-            SpawnedBody.Material.Bounciness = Internal.Bounciness;
-            SpawnedBody.Pose.Position = Internal.Position.ToNumerics();
-            SpawnedBody.Gravity = Internal.Gravity.ToNumerics();
-            SpawnedBody.Tag = Entity;
-            SpawnedBody.CollisionInformation.Tag = this;
+            RigidPose pose = new RigidPose(Internal.Position.ToNumerics(), Internal.Orientation.ToNumerics());
+            BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
+            IConvexShape convexShape = Shape.BepuShape;
+            convexShape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
+            CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-3f, 1e-2f));
+            BodyDescription description = BodyDescription.CreateDynamic(pose, velocity, inertia, collidable, new BodyActivityDescription(0.01f));
+            //SpawnedBody.Material.KineticFriction = Internal.Friction;
+            //SpawnedBody.Material.StaticFriction = Internal.Friction;
+            //SpawnedBody.Material.Bounciness = Internal.Bounciness;
             // TODO: Other settings
-            SpawnedBody = PhysicsWorld.Spawn(SpawnedBody);
+            SpawnedBody = PhysicsWorld.Spawn(this, description);
             Entity.OnTick += Tick;
             Internal.Position = Location.Zero;
             Internal.Orientation = Quaternion.Identity;
@@ -406,20 +394,13 @@ namespace FGECore.EntitySystem
         public void TickUpdates()
         {
             NoCheck = CheckDisableAllowed;
-            Location bpos = SpawnedBody.Pose.Position.ToLocation();
-            if (Internal.Position.DistanceSquared(bpos) > 0.0001)
+            if (PosCheck(PhysicsToFGE(SpawnedBody.Pose.Position.ToLocation())))
             {
-                Internal.Position = bpos;
-                Location coff = BEPUutilities.Quaternion.Transform(Shape.GetCenterOffset(), SpawnedBody.Pose.Orientation).ToLocation();
-                Entity.OnPositionChanged?.Invoke((bpos - coff) * PhysicsWorld.RelativeScaleForward);
+                Entity.OnPositionChanged?.Invoke(Internal.Position);
             }
-            BEPUutilities.Quaternion cur = SpawnedBody.Pose.Orientation;
-            BEPUutilities.Quaternion qio = Internal.Orientation.ToNumerics();
-            BEPUutilities.Quaternion.GetRelativeRotation(ref cur, ref qio, out BEPUutilities.Quaternion rel);
-            if (BEPUutilities.Quaternion.GetAngleFromQuaternion(ref rel) > 0.0001)
+            if (OrientationCheck(SpawnedBody.Pose.Orientation.ToCore()))
             {
-                Internal.Orientation = cur.ToCore();
-                Entity.OnOrientationChanged?.Invoke(cur.ToCore());
+                Entity.OnOrientationChanged?.Invoke(Internal.Orientation);
             }
             NoCheck = false;
         }
@@ -431,9 +412,8 @@ namespace FGECore.EntitySystem
         {
             float invMass = SpawnedBody.LocalInertia.InverseMass;
             Internal.Mass = invMass == 0 ? 0 : 1f / invMass;
-            Internal.Gravity = SpawnedBody.Gravity.Value.ToLocation();
-            Internal.Friction = SpawnedBody.Material.KineticFriction;
-            Internal.Bounciness = SpawnedBody.Material.Bounciness;
+            //Internal.Friction = SpawnedBody.Material.KineticFriction;
+            //Internal.Bounciness = SpawnedBody.Material.Bounciness;
             Internal.LinearVelocity = SpawnedBody.Velocity.Linear.ToLocation();
             Internal.AngularVelocity = SpawnedBody.Velocity.Angular.ToLocation();
             Internal.Position = SpawnedBody.Pose.Position.ToLocation();

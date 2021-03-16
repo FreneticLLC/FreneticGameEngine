@@ -11,11 +11,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BEPUutilities;
 using FGECore.UtilitySystems;
 using FGECore.PhysicsSystem;
 using FGECore.MathHelpers;
 using FGECore.CoreSystems;
+using BepuUtilities;
+using BepuPhysics;
+using System.Numerics;
 
 namespace FGECore.EntitySystem
 {
@@ -48,15 +50,15 @@ namespace FGECore.EntitySystem
         /// <param name="pos">The attached position.</param>
         public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
         {
-            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToNumerics()) * Matrix.CreateTranslation(pos.ToNumerics());
-            Matrix.Invert(ref worldTrans, out Matrix inverted);
-            RelativeOffset = Matrix.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
+            Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(pos.ToNumerics());
+            Matrix4x4.Invert(worldTrans, out Matrix4x4 inverted);
+            RelativeOffset = Matrix4x4.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix4x4.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
         }
 
         /// <summary>
         /// The relative offset matrix offset to maintain.
         /// </summary>
-        public Matrix RelativeOffset = Matrix.Identity;
+        public Matrix4x4 RelativeOffset = Matrix4x4.Identity;
 
         /// <summary>
         /// Handles the spawn event.
@@ -92,10 +94,10 @@ namespace FGECore.EntitySystem
         /// <param name="orient">The attached-to entity's orientation.</param>
         public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
         {
-            Matrix worldTrans = Matrix.CreateFromQuaternion(orient.ToNumerics()) * Matrix.CreateTranslation(position.ToNumerics());
-            Matrix tmat = RelativeOffset * worldTrans;
+            Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(position.ToNumerics());
+            Matrix4x4 tmat = RelativeOffset * worldTrans;
             Location pos = tmat.Translation.ToLocation();
-            MathHelpers.Quaternion quat = BEPUutilities.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
+            MathHelpers.Quaternion quat = System.Numerics.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
             Entity.SetPosition(pos);
             Entity.SetOrientation(quat);
         }
