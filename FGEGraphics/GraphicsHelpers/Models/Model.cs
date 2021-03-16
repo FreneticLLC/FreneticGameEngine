@@ -198,8 +198,8 @@ namespace FGEGraphics.GraphicsHelpers.Models
             SingleAnimationNode pNodeAnim = FindNodeAnim(nodename, pNode.Mode, out double time);
             if (pNodeAnim != null)
             {
-                BEPUutilities.Vector3 vec = pNodeAnim.LerpPos(time);
-                BEPUutilities.Quaternion quat = pNodeAnim.LerpRotate(time);
+                Location vec = pNodeAnim.LerpPos(time);
+                FGECore.MathHelpers.Quaternion quat = pNodeAnim.LerpRotate(time);
                 OpenTK.Mathematics.Quaternion oquat = new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
                 Matrix4.CreateTranslation((float)vec.X, (float)vec.Y, (float)vec.Z, out Matrix4 trans);
                 trans.Transpose();

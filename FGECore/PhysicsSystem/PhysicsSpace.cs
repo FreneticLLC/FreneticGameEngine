@@ -48,6 +48,9 @@ namespace FGECore.PhysicsSystem
             /// <summary>An array of FGE entities, where the index in the array is a physics space handle ID.</summary>
             public EntityPhysicsProperty[] EntitiesByPhysicsID;
 
+            /// <summary>Bepu physics character controller system.</summary>
+            public BepuCharacters.CharacterControllers Characters;
+
             /// <summary>Initialize internal space data.</summary>
             public void Init(PhysicsSpace space)
             {
@@ -57,7 +60,9 @@ namespace FGECore.PhysicsSystem
                 ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
                 PoseHandler = new BepuPoseIntegratorCallbacks() { Space = space };
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks() { Space = space };
-                CoreSimulation = Simulation.Create(new BufferPool(), NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
+                BufferPool pool = new BufferPool();
+                Characters = new BepuCharacters.CharacterControllers(pool);
+                CoreSimulation = Simulation.Create(pool, NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
             }
         }
 

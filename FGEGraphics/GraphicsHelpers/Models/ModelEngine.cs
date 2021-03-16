@@ -103,7 +103,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             };
             m3m.Indices = builder.Indices.ToArray();
             m3m.Vertices = builder.Vertices.ConvertAll((o) => o.ToLocation().ToNumerics()).ToArray();
-            m3m.TexCoords = builder.TexCoords.ConvertAll((o) => new BEPUutilities.Vector2(o.X, o.Y)).ToArray();
+            m3m.TexCoords = builder.TexCoords.ConvertAll((o) => new System.Numerics.Vector2(o.X, o.Y)).ToArray();
             m3m.Normals = builder.Normals.ConvertAll((o) => o.ToLocation().ToNumerics()).ToArray();
             m.Original.Meshes = new Model3DMesh[] { m3m };
             mm.BaseRenderable.GenerateVBO(builder);

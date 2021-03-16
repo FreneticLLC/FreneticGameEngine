@@ -24,9 +24,7 @@ namespace FGECore.EntitySystem
      /// </summary>
     public class EntityCharacterAttachProperty : EntitySimpleAttachProperty
     {
-        /// <summary>
-        /// The entity this entity is attached to.
-        /// </summary>
+        /// <summary>The character entity the other entity is attached to.</summary>
         public override BasicEntity AttachedTo
         {
             get
@@ -36,14 +34,12 @@ namespace FGECore.EntitySystem
             set
             {
                 base.AttachedTo = value;
-                Character = AttachedTo.GetProperty<EntityPhysicsProperty>().OriginalObject as CharacterController;
+                Physics = AttachedTo.GetProperty<EntityPhysicsProperty>();
             }
         }
 
-        /// <summary>
-        /// The character controller of <see cref="AttachedTo"/>.
-        /// </summary>
-        public CharacterController Character;
+        /// <summary>The relevant entity physics property for the character.</summary>
+        public EntityPhysicsProperty Physics;
 
         /// <summary>
         /// The view height multiplier of the character controller.
@@ -51,23 +47,24 @@ namespace FGECore.EntitySystem
         /// </summary>
         public double ViewHeight = 0.95;
 
-        /// <summary>
-        /// Handles the spawn event.
-        /// </summary>
+        /// <summary>Handles the spawn event.</summary>
         public override void OnSpawn()
         {
             base.OnSpawn();
             Entity.OnTick += Tick;
         }
 
-        /// <summary>
-        /// Gets the relative quaternion for this attachment.
-        /// </summary>
-        /// <returns>The relative quaternion.</returns>
+        /// <summary>Gets a reference to the Bepu character controller.</summary>
+        public ref PhysicsSystem.BepuCharacters.CharacterController GetCharacter()
+        {
+            return ref AttachedTo.EngineGeneric.PhysicsWorldGeneric.Internal.Characters.GetCharacterByBodyHandle(Physics.SpawnedBody.Handle);
+        }
+
+        /// <summary>Gets the relative quaternion for this attachment.</summary>
         public MathHelpers.Quaternion GetRelativeQuaternion()
         {
             // TODO: Less complicated option?!
-            Matrix4x4 relative = Matrix4x4.CreateLookAt(Vector3.Zero, Character.ViewDirection, -Character.Down);
+            Matrix4x4 relative = Matrix4x4.CreateLookAt(Vector3.Zero, GetCharacter().ViewDirection, GetCharacter().LocalUp);
             return System.Numerics.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
 
@@ -75,10 +72,9 @@ namespace FGECore.EntitySystem
         /// Gets the accurate location for this attachment.
         /// </summary>
         /// <param name="basePos">The base entity position of the character.</param>
-        /// <returns>The accurate position.</returns>
         public Location GetAccuratePosition(Location basePos)
         {
-            return basePos + Character.Down.ToLocation() * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+            return basePos + GetCharacter().LocalUp.ToLocation() * (/*GetCharacter().StanceManager.StandingHeight * */ViewHeight * 0.5);
         }
 
         /// <summary>
@@ -86,7 +82,6 @@ namespace FGECore.EntitySystem
         /// </summary>
         /// <param name="viewDir">The stand-in view direction.</param>
         /// <param name="downDir">The stand-in down direction.</param>
-        /// <returns>The relative quaternion.</returns>
         public static MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
         {
             // TODO: Less complicated option?!
@@ -99,10 +94,9 @@ namespace FGECore.EntitySystem
         /// </summary>
         /// <param name="basePos">The base entity position of the character.</param>
         /// <param name="downDir">The stand-in down direction.</param>
-        /// <returns>The accurate position.</returns>
         public Location GetAccuratePosition(Location basePos, Location downDir)
         {
-            return basePos + downDir * (Character.StanceManager.StandingHeight * ViewHeight * (-0.5));
+            return basePos + downDir * (/*Character.StanceManager.StandingHeight * */ViewHeight * (-0.5));
         }
 
         /// <summary>
@@ -136,9 +130,7 @@ namespace FGECore.EntitySystem
             SetRelativeBasedOn(GetRelativeQuaternion(), GetAccuratePosition(AttachedTo.LastKnownPosition));
         }
 
-        /// <summary>
-        /// Fixes this entity's position based on its attachment.
-        /// </summary>
+        /// <summary>Fixes this entity's position based on its attachment.</summary>
         public override void FixPosition(Location position)
         {
             SetPositionOrientation(GetAccuratePosition(position), GetRelativeQuaternion());
@@ -152,17 +144,13 @@ namespace FGECore.EntitySystem
         {
         }
 
-        /// <summary>
-        /// Handles the tick event.
-        /// </summary>
+        /// <summary>Handles the tick event.</summary>
         public void Tick()
         {
             FixPosition(AttachedTo.LastKnownPosition);
         }
 
-        /// <summary>
-        /// Handles the despawn event.
-        /// </summary>
+        /// <summary>Handles the despawn event.</summary>
         public override void OnDespawn()
         {
             base.OnDespawn();

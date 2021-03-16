@@ -82,6 +82,7 @@ namespace FGECore.PhysicsSystem
                 // TODO: ?
                 ContactSpringiness = new SpringSettings(30, 1);
             }
+            Space.Internal.Characters.Initialize(simulation);
         }
 
         /// <summary>
@@ -134,6 +135,7 @@ namespace FGECore.PhysicsSystem
             pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
             pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness; // TODO: What values are actually appropriate for this?
             pairMaterial.SpringSettings = ContactSpringiness;
+            Space.Internal.Characters.TryReportContacts(pair, ref manifold, workerIndex, ref pairMaterial);
             return true;
         }
 
@@ -155,6 +157,7 @@ namespace FGECore.PhysicsSystem
         /// <summary>Releases any resources held by the callbacks. Called by the owning narrow phase when it is being disposed.</summary>
         public void Dispose()
         {
+            Space.Internal.Characters.Dispose();
         }
     }
 }
