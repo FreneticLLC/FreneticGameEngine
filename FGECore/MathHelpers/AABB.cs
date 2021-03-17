@@ -15,9 +15,7 @@ using System.Threading.Tasks;
 
 namespace FGECore.MathHelpers
 {
-    /// <summary>
-    /// Represents an Axis-Aligned Bounding Box.
-    /// </summary>
+    /// <summary>Represents an Axis-Aligned Bounding Box.</summary>
     public struct AABB
     {
         /// <summary>Constructs an <see cref="AABB"/> with given mins/maxes.</summary>
@@ -27,21 +25,16 @@ namespace FGECore.MathHelpers
             Max = _max;
         }
 
-        /// <summary>
-        /// The minimum coordinates.
-        /// </summary>
+        /// <summary>The minimum coordinates.</summary>
         public Location Min;
 
-        /// <summary>
-        /// The maximum coordinates.
-        /// </summary>
+        /// <summary>The maximum coordinates.</summary>
         public Location Max;
 
         /// <summary>
         /// Returns whether the box intersects another box.
         /// </summary>
         /// <param name="box2">The second box.</param>
-        /// <returns>Whether they intersect.</returns>
         public bool Intersects(in AABB box2)
         {
             Location min2 = box2.Min;
@@ -52,7 +45,6 @@ namespace FGECore.MathHelpers
         /// <summary>
         /// Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)
         /// </summary>
-        /// <returns>The string.</returns>
         public override string ToString()
         {
             return Min + "/" + Max;
@@ -88,6 +80,16 @@ namespace FGECore.MathHelpers
             {
                 Max.Z = pos.Z;
             }
+        }
+    }
+
+    /// <summary>Helper extensions for <see cref="AABB"/>.</summary>
+    public static class ExtensionsForAABB
+    {
+        /// <summary>Converts a floating point <see cref="BepuUtilities.BoundingBox"/> to an <see cref="AABB"/>.</summary>
+        public static AABB ToCore(this BepuUtilities.BoundingBox box)
+        {
+            return new AABB(box.Min.ToLocation(), box.Max.ToLocation());
         }
     }
 }

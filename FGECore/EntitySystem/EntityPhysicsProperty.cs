@@ -219,6 +219,7 @@ namespace FGECore.EntitySystem
             {
                 PhysicsWorld = Engine.PhysicsWorldGeneric;
             }
+            HandledRemove = false;
             SpawnHandle();
             Entity.OnPositionChanged += DoPosCheckEvent;
             Entity.OnOrientationChanged += DoOrientationCheckEvent;
@@ -297,6 +298,10 @@ namespace FGECore.EntitySystem
         /// <summary>Handles the physics entity being spawned into a world.</summary>
         public void SpawnHandle()
         {
+            if (IsSpawned)
+            {
+                OnDespawn();
+            }
             if (!GravityIsSet)
             {
                 Internal.Gravity = PhysicsWorld.Gravity;

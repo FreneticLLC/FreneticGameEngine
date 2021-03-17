@@ -25,14 +25,8 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         /// </summary>
         public EntityRenderableProperty Renderer = null;
 
-        /// <summary>Gets the client associated with this entity.</summary>
-        public GameClientWindow Client
-        {
-            get
-            {
-                return Engine.Client;
-            }
-        }
+        /// <summary>Gets the client window associated with this entity.</summary>
+        public GameClientWindow Window => Engine.Client;
         
         /// <summary>
         /// Constructs a client-side entity.
