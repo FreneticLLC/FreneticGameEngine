@@ -85,7 +85,7 @@ namespace FGECore.PhysicsSystem
             if (ContactSpringiness.AngularFrequency == 0 && ContactSpringiness.TwiceDampingRatio == 0)
             {
                 // TODO: ?
-                ContactSpringiness = new SpringSettings(30, 1);
+                ContactSpringiness = new SpringSettings(30, 0.5f);
             }
             Space.Internal.Characters.Initialize(simulation);
         }
@@ -138,7 +138,7 @@ namespace FGECore.PhysicsSystem
             EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[pair.A.BodyHandle.Value];
             EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[pair.B.BodyHandle.Value];
             pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
-            pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness; // TODO: What values are actually appropriate for this?
+            pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
             pairMaterial.SpringSettings = ContactSpringiness;
             Space.Internal.Characters.TryReportContacts(pair, ref manifold, workerIndex, ref pairMaterial);
             return true;

@@ -121,7 +121,7 @@ namespace FGECore.EntitySystem
         [PropertyAutoSavable]
         public float Friction = 0.5f;
 
-        /// <summary>The entity's bounciness (Restitution coefficient).</summary>
+        /// <summary>The entity's bounciness.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float Bounciness = 0.25f;
@@ -248,59 +248,23 @@ namespace FGECore.EntitySystem
             Entity.OnOrientationChanged -= DoOrientationCheckEvent;
         }
 
+        /// <summary>Whether the position and orientation changed events should be propogated to the physics body. Usually leave true.</summary>
+        public bool DoTrackPositionChange = true;
+
         private void DoPosCheckEvent(Location position)
         {
-            PosCheck(position);
+            if (DoTrackPositionChange)
+            {
+                Position = position;
+            }
         }
+
         private void DoOrientationCheckEvent(Quaternion orientation)
         {
-            OrientationCheck(orientation);
-        }
-
-        /// <summary>Whether <see cref="NoCheck"/> should be automatically set (to true) when the <see cref="EntityPhysicsProperty"/> is pushing its own updates.</summary>
-        public bool CheckDisableAllowed = true;
-
-        /// <summary>
-        /// Set to indicate that Position/Orientation checks are not needed currently.
-        /// This will be set (to true) automatically when the <see cref="EntityPhysicsProperty"/> is pushing out its own position updates,
-        /// and must be explicitly disabled to update anyway.
-        /// If disabling this explicitly may be problematic, consider disabling <see cref="CheckDisableAllowed"/> instead.
-        /// </summary>
-        public bool NoCheck = false;
-
-        /// <summary>
-        /// Checks and handles a position update.
-        /// </summary>
-        /// <param name="_position">The new position.</param>
-        public bool PosCheck(Location _position)
-        {
-            if (_position.DistanceSquared(Internal.Position) > 0.01)
+            if (DoTrackPositionChange)
             {
-                if (!NoCheck)
-                {
-                    Position = _position;
-                }
-                return true;
+                Orientation = orientation;
             }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks and handles an orientation update.
-        /// </summary>
-        /// <param name="orientation">The new orientation.</param>
-        public bool OrientationCheck(Quaternion orientation)
-        {
-            Quaternion relative = Quaternion.GetQuaternionBetween(orientation, Internal.Orientation);
-            if (relative.RepresentedAngle() > 0.01) // TODO: Is this validation needed? This is very expensive to run.
-            {
-                if (!NoCheck)
-                {
-                    Orientation = orientation;
-                }
-                return true;
-            }
-            return false;
         }
 
         /// <summary>Handles the physics entity being spawned into a world.</summary>
@@ -321,10 +285,18 @@ namespace FGECore.EntitySystem
             }
             RigidPose pose = new RigidPose(Internal.Position.ToNumerics(), Internal.Orientation.ToNumerics());
             BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
-            IConvexShape convexShape = Shape.BepuShape;
-            convexShape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
             CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-3f, 1e-2f));
-            BodyDescription description = BodyDescription.CreateDynamic(pose, velocity, inertia, collidable, new BodyActivityDescription(0.01f));
+            BodyDescription description;
+            if (Mass == 0)
+            {
+                description = BodyDescription.CreateKinematic(pose, velocity, collidable, new BodyActivityDescription(0.01f));
+            }
+            else
+            {
+                IConvexShape convexShape = Shape.BepuShape;
+                convexShape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
+                description = BodyDescription.CreateDynamic(pose, velocity, inertia, collidable, new BodyActivityDescription(0.01f));
+            }
             // TODO: Other settings
             SpawnedBody = PhysicsWorld.Spawn(this, description);
             Entity.OnTick += Tick;
@@ -337,22 +309,31 @@ namespace FGECore.EntitySystem
         /// <summary>Ticks the physics entity.</summary>
         public void Tick()
         {
-            TickUpdates();
+            if (IsSpawned)
+            {
+                TickUpdates();
+            }
         }
+
+        /// <summary>Whether this entity was awake at last check.</summary>
+        public bool WasAwake = true;
 
         /// <summary>Ticks external positioning updates.</summary>
         public void TickUpdates()
         {
-            NoCheck = CheckDisableAllowed;
-            if (PosCheck(SpawnedBody.Pose.Position.ToLocation()))
+            bool isAwake = SpawnedBody.Awake;
+            if (!isAwake && !WasAwake)
             {
-                Entity.OnPositionChanged?.Invoke(Internal.Position);
+                return;
             }
-            if (OrientationCheck(SpawnedBody.Pose.Orientation.ToCore()))
-            {
-                Entity.OnOrientationChanged?.Invoke(Internal.Orientation);
-            }
-            NoCheck = false;
+            WasAwake = isAwake;
+            bool shouldTrack = DoTrackPositionChange;
+            DoTrackPositionChange = false;
+            Internal.Position = SpawnedBody.Pose.Position.ToLocation();
+            Entity.OnPositionChanged?.Invoke(Internal.Position);
+            Internal.Orientation = SpawnedBody.Pose.Orientation.ToCore();
+            Entity.OnOrientationChanged?.Invoke(Internal.Orientation);
+            DoTrackPositionChange = shouldTrack;
         }
 
         /// <summary>Updates the entity's local fields from spawned variant.</summary>

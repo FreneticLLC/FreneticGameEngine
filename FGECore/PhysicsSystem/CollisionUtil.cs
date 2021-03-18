@@ -64,7 +64,7 @@ namespace FGECore.PhysicsSystem
         /// <summary>Sets whether this group should collide with another.</summary>
         public void SetNoCollide(CollisionGroup two, bool noCollide)
         {
-            if (NoCollideWith.Length < two.ID)
+            if (two.ID >= NoCollideWith.Length)
             {
                 bool[] newArr = new bool[two.ID + 5];
                 Array.Copy(NoCollideWith, newArr, NoCollideWith.Length);

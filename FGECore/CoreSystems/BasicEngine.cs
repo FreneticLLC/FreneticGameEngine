@@ -226,7 +226,7 @@ namespace FGECore.CoreSystems
                     ce.IsSpawned = true;
                     foreach (Property prop in ce.GetAllProperties())
                     {
-                        if (prop is BasicEntityProperty<T, T2> bep)
+                        if (prop is BasicEntityProperty bep)
                         {
                             bep.OnSpawn();
                         }
@@ -281,7 +281,7 @@ namespace FGECore.CoreSystems
                 StackNoteHelper.Push("BasicEngine - Despawn Entity", ent);
                 foreach (Property prop in ent.EnumerateAllProperties())
                 {
-                    if (prop is BasicEntityProperty<T, T2> bep)
+                    if (prop is BasicEntityProperty bep)
                     {
                         bep.OnDespawn();
                     }

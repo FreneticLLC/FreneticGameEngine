@@ -62,7 +62,7 @@ namespace FGECore.PhysicsSystem
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks() { Space = space };
                 BufferPool pool = new BufferPool();
                 Characters = new BepuCharacters.CharacterControllers(pool);
-                CoreSimulation = Simulation.Create(pool, NarrowPhaseHandler, PoseHandler, new PositionFirstTimestepper());
+                CoreSimulation = Simulation.Create(pool, NarrowPhaseHandler, PoseHandler, new PositionLastTimestepper());
             }
         }
 
