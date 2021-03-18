@@ -8,6 +8,7 @@
 
 using BepuPhysics;
 using BepuPhysics.Collidables;
+using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,9 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
     public abstract class EntityShapeHelper
     {
+        /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
+        public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
+
         /// <summary>Gets the BEPU shape index.</summary>
         public TypedIndex ShapeIndex;
 

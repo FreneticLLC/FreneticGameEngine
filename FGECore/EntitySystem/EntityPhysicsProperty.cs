@@ -116,10 +116,10 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /// <summary>The entity's friction.</summary>
+        /// <summary>The entity's friction coefficient.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
-        public float Friction = 0.5f;
+        public float Friction = 1f;
 
         /// <summary>The entity's bounciness.</summary>
         [PropertyDebuggable]
@@ -217,14 +217,13 @@ namespace FGECore.EntitySystem
         /// <summary>This entity's collision group.</summary>
         public CollisionGroup CGroup;
 
-        /// <summary>Construct the physics entity property.</summary>
-        public EntityPhysicsProperty()
-        {
-        }
-
         /// <summary>Fired when the entity is added to the world.</summary>
         public override void OnSpawn()
         {
+            if (IsSpawned)
+            {
+                return;
+            }
             if (PhysicsWorld == null)
             {
                 PhysicsWorld = Engine.PhysicsWorldGeneric;
@@ -272,7 +271,7 @@ namespace FGECore.EntitySystem
         {
             if (IsSpawned)
             {
-                OnDespawn();
+                return;
             }
             if (!GravityIsSet)
             {
@@ -353,6 +352,10 @@ namespace FGECore.EntitySystem
         /// <summary>Handles the physics entity being de-spawned from a world.</summary>
         public void DespawnHandle()
         {
+            if (!IsSpawned)
+            {
+                return;
+            }
             UpdateFields();
             Entity.OnTick -= Tick;
             DespawnEvent?.Invoke();

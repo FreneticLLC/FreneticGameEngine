@@ -9,31 +9,30 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using BepuPhysics;
+using BepuPhysics.Collidables;
+using BepuUtilities.Memory;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
-using BepuPhysics.Collidables;
-using BepuPhysics;
-using BepuUtilities.Memory;
-using System.Numerics;
-using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>A cylinder shape for an entity.</summary>
-    public class EntityCylinderShape : EntityShapeHelper
+    /// <summary>A capsule shape for an entity.</summary>
+    public class EntityCapsuleShape : EntityShapeHelper
     {
-        /// <summary>Constructs a new <see cref="EntityCylinderShape"/> of the specified size.</summary>
-        public EntityCylinderShape(float radius, float height, PhysicsSpace space)
+        /// <summary>Constructs a new <see cref="EntityCapsuleShape"/> of the specified size.</summary>
+        public EntityCapsuleShape(float radius, float height, PhysicsSpace space)
         {
-            Cylinder cylinder = new Cylinder(radius, height);
-            TypedIndex cylinderIndex = space.Internal.CoreSimulation.Shapes.Add(cylinder);
+            Capsule capsule = new Capsule(radius, height);
+            TypedIndex capsuleIndex = space.Internal.CoreSimulation.Shapes.Add(capsule);
             space.Internal.CoreSimulation.BufferPool.Take(1, out Buffer<CompoundChild> buffer);
             buffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
-            buffer[0].ShapeIndex = cylinderIndex;
+            buffer[0].ShapeIndex = capsuleIndex;
             Compound compound = new Compound(buffer);
-            BepuShape = cylinder;
+            BepuShape = capsule;
             ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(compound);
         }
     }
