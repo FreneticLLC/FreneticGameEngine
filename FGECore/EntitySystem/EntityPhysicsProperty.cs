@@ -95,7 +95,22 @@ namespace FGECore.EntitySystem
                 Internal.Mass = value;
                 if (IsSpawned)
                 {
-                    SpawnedBody.LocalInertia.InverseMass = value == 0 ? 0 : 1f / value;
+                    if (value == SpawnedBody.LocalInertia.InverseMass)
+                    {
+                        return;
+                    }
+                    if (value == 0)
+                    {
+                        SpawnedBody.BecomeKinematic();
+                    }
+                    else if (SpawnedBody.LocalInertia.InverseMass == 0)
+                    {
+                        Shape.BepuShape.ComputeInertia(value, out SpawnedBody.LocalInertia);
+                    }
+                    else
+                    {
+                        SpawnedBody.LocalInertia.InverseMass = 1f / value;
+                    }
                 }
             }
         }

@@ -10,6 +10,7 @@ using BepuPhysics;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem.BepuCharacters;
+using FGECore.PropertySystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,16 +33,92 @@ namespace FGECore.EntitySystem
         public ref CharacterController Controller => ref Characters.GetCharacterByBodyHandle(Physics.SpawnedBody.Handle);
 
         /// <summary>The forward vector that the character should be facing.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location ViewDirection;
 
         /// <summary>The 2D movement vector the character is moving on (length should be less than or equal to 1).</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public Location Movement;
 
         /// <summary>How fast the character can move.</summary>
-        public float Speed = 4;
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float SpeedStanding = 4, SpeedCrouching = 2, SpeedProne = 1;
+
+        /// <summary>How the multiplier over body height when the character's stance changes.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float HeightModStanding = 1, HeightModCrouching = 0.5f, HeightModProne = 0.3f;
+
+        /// <summary>The character's current speed (changes when stance does).</summary>
+        public float CurrentSpeed = 4;
+
+        /// <summary>The character's current height (changes when stance does).</summary>
+        public float CurrentHeight = 2f;
+
+        /// <summary>The character's body height.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float BodyHeight = 2f;
+
+        /// <summary>The character's body radius.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float BodyRadius = 0.5f;
+
+        /// <summary>Possible built-in character stances.</summary>
+        public enum Stance
+        {
+            /// <summary>The character is standing normally.</summary>
+            STANDING,
+            /// <summary>The character is crouching.</summary>
+            CROUCHING,
+            /// <summary>The character is prone (laying down).</summary>
+            PRONE
+        }
+
+        /// <summary>Which stance the character is currently in.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public Stance CurrentStance = Stance.STANDING;
 
         /// <summary>Set to true to indicate that the character should be trying to jump (will only actually jump if ground supports it).</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
         public bool TryingToJump = false;
+
+        /// <summary>Changes the character's current stance.</summary>
+        public void SetStance(Stance stance)
+        {
+            if (stance == CurrentStance)
+            {
+                return;
+            }
+            switch (stance)
+            {
+                case Stance.STANDING:
+                    SetStance(HeightModStanding, SpeedStanding);
+                    break;
+                case Stance.CROUCHING:
+                    SetStance(HeightModCrouching, SpeedCrouching);
+                    break;
+                case Stance.PRONE:
+                    SetStance(HeightModProne, SpeedProne);
+                    break;
+            }
+            CurrentStance = stance;
+        }
+
+        /// <summary>Changes the character's current stance details.</summary>
+        public void SetStance(float heightMod, float speed)
+        {
+            CurrentSpeed = speed;
+            CurrentHeight = heightMod;
+            // TODO: Actually resize the physics body
+            // TODO: Reject or delay impossible growth
+        }
 
         /// <summary>Fired when the entity is added to the world.</summary>
         public override void OnSpawn()
@@ -50,27 +127,25 @@ namespace FGECore.EntitySystem
             {
                 return;
             }
-            float mass = 60;
-            float radius = 0.5f;
             if (Physics == null && !Entity.TryGetProperty(out Physics))
             {
                 Physics = new EntityPhysicsProperty()
                 {
-                    Mass = mass,
-                    Shape = new EntityCapsuleShape(radius, 1f, Engine.PhysicsWorldGeneric)
+                    Mass = 60,
+                    Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric)
                 };
                 Entity.AddProperty(Physics);
             }
             Physics.OnSpawn();
-            Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / mass };
+            Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / Physics.Mass };
             ref CharacterController controller = ref Characters.AllocateCharacter(Physics.SpawnedBody.Handle);
             controller.LocalUp = Vector3.UnitZ;
             // TODO: Customizable values for these.
             controller.CosMaximumSlope = MathF.Cos(MathF.PI * 0.4f);
             controller.JumpVelocity = 6;
-            controller.MaximumVerticalForce = 100 * mass;
-            controller.MaximumHorizontalForce = 20 * mass;
-            controller.MinimumSupportDepth = radius * -0.01f;
+            controller.MaximumVerticalForce = 100 * Physics.Mass;
+            controller.MaximumHorizontalForce = 20 * Physics.Mass;
+            controller.MinimumSupportDepth = BodyRadius * -0.01f;
             controller.MinimumSupportContinuationDepth = -0.1f;
             Entity.OnTick += Tick;
             IsSpawned = true;
@@ -100,7 +175,7 @@ namespace FGECore.EntitySystem
         public void Tick()
         {
             ref CharacterController controller = ref Controller;
-            Vector3 velocity = Movement.ToNumerics() * Speed;
+            Vector3 velocity = Movement.ToNumerics() * CurrentSpeed;
             if (!Physics.SpawnedBody.Awake && (TryingToJump || velocity.LengthSquared() > 0 || controller.ViewDirection != ViewDirection.ToNumerics()))
             {
                 Physics.SpawnedBody.Awake = true;
