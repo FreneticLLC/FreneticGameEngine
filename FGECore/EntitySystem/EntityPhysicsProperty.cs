@@ -126,6 +126,16 @@ namespace FGECore.EntitySystem
         [PropertyAutoSavable]
         public float Bounciness = 0.25f;
 
+        /// <summary>The entity's linear damping (per second) rate.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float LinearDamping = 0.03f;
+
+        /// <summary>The entity's angular damping (per second) rate.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float AngularDamping = 0.03f;
+
         /// <summary>Gets or sets the entity's linear velocity.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -292,8 +302,6 @@ namespace FGECore.EntitySystem
             }
             return false;
         }
-
-        // TODO: Damping values!
 
         /// <summary>Handles the physics entity being spawned into a world.</summary>
         public void SpawnHandle()

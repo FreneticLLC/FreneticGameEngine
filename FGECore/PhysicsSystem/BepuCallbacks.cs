@@ -10,6 +10,7 @@ using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
+using BepuUtilities;
 using FGECore.EntitySystem;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,10 @@ namespace FGECore.PhysicsSystem
             {
                 EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
                 velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
+                float linearDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.LinearDamping, 0, 1), Delta);
+                float angularDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.AngularDamping, 0, 1), Delta);
+                velocity.Linear *= linearDampingDt;
+                velocity.Angular *= angularDampingDt;
             }
         }
     }
