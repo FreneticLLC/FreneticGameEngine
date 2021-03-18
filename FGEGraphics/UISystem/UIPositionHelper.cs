@@ -16,9 +16,7 @@ using FGECore.MathHelpers;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Helper for positioning.
-    /// </summary>
+    /// <summary>Helper for positioning of UI elements.</summary>
     public class UIPositionHelper
     {
         /// <summary>
@@ -33,47 +31,19 @@ namespace FGEGraphics.UISystem
             ConstantRotation(0f);
         }
 
-        /// <summary>
-        /// Helper to return a zero.
-        /// </summary>
-        /// <returns>The zero.</returns>
-        public static int GetZero()
-        {
-            return 0;
-        }
-
-        /// <summary>
-        /// Helper to return a zero.
-        /// </summary>
-        /// <returns>The zero.</returns>
-        public static float GetZeroF()
-        {
-            return 0f;
-        }
-
-        /// <summary>
-        /// The view backing this element's positioning logic.
-        /// </summary>
+        /// <summary>The view backing this element's positioning logic.</summary>
         public ViewUI2D View;
 
-        /// <summary>
-        /// The element this is the position for.
-        /// </summary>
+        /// <summary>The element this is the position for.</summary>
         public UIElement For;
 
-        /// <summary>
-        /// The main positional anchor.
-        /// </summary>
+        /// <summary>The main positional anchor.</summary>
         public UIAnchor MainAnchor = UIAnchor.CENTER;
 
-        /// <summary>
-        /// Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.
-        /// </summary>
+        /// <summary>Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// Position mode for X.
-            /// </summary>
+            /// <summary>Position mode for X.</summary>
             public UIPosMode PM_X;
 
             /// <summary>
@@ -88,9 +58,7 @@ namespace FGEGraphics.UISystem
             /// </summary>
             public Func<int> Getter_X;
 
-            /// <summary>
-            /// Position mode for Y.
-            /// </summary>
+            /// <summary>Position mode for Y.</summary>
             public UIPosMode PM_Y;
 
             /// <summary>
@@ -105,15 +73,13 @@ namespace FGEGraphics.UISystem
             /// </summary>
             public Func<int> Getter_Y;
 
-            /// <summarHeight>
-            /// Position mode for Width.
-            /// </summarHeight>
+            /// <summary>Position mode for Width.</summary>
             public UIPosMode PM_Width;
 
-            /// <summarHeight>
+            /// <summary>
             /// Constant value for Width, if <see cref="PM_Width"/> is set to <see cref="UIPosMode.CONSTANT"/>.
             /// Generally, instead of reading this, use <see cref="Width"/>. Instead of setting this, use <see cref="ConstantWidth(int)"/>.
-            /// </summarHeight>
+            /// </summary>
             public int Const_Width;
 
             /// <summary>
@@ -122,15 +88,13 @@ namespace FGEGraphics.UISystem
             /// </summary>
             public Func<int> Getter_Width;
 
-            /// <summarHeight>
-            /// Position mode for Height.
-            /// </summarHeight>
+            /// <summary>Position mode for Height.</summary>
             public UIPosMode PM_Height;
 
-            /// <summarHeight>
+            /// <summary>
             /// Constant value for Height, if <see cref="PM_Height"/> is set to <see cref="UIPosMode.CONSTANT"/>.
             /// Generally, instead of reading this, use <see cref="Height"/>. Instead of setting this, use <see cref="ConstantHeight(int)"/>.
-            /// </summarHeight>
+            /// </summary>
             public int Const_Height;
 
             /// <summary>
@@ -139,15 +103,13 @@ namespace FGEGraphics.UISystem
             /// </summary>
             public Func<int> Getter_Height;
 
-            /// <summarHeight>
-            /// Position mode for Rotation.
-            /// </summarHeight>
+            /// <summary>Position mode for Rotation.</summary>
             public UIPosMode PM_Rot;
 
-            /// <summarHeight>
+            /// <summary>
             /// Constant value for Rotation, if <see cref="PM_Rot"/> is set to <see cref="UIPosMode.CONSTANT"/>.
             /// Generally, instead of reading this, use <see cref="Rotation"/>. Instead of setting this, use <see cref="ConstantRotation(float)"/>.
-            /// </summarHeight>
+            /// </summary>
             public float Const_Rot;
 
             /// <summary>
@@ -157,9 +119,7 @@ namespace FGEGraphics.UISystem
             public Func<float> Getter_Rot;
         }
 
-        /// <summary>
-        /// Internal data that should usually not be accessed directly.
-        /// </summary>
+        /// <summary>Internal data that should usually not be accessed directly.</summary>
         public InternalData Internal;
 
         /// <summary>
@@ -353,9 +313,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Gets the X coordinate.
-        /// </summary>
+        /// <summary>Gets the X coordinate.</summary>
         public int X
         {
             get
@@ -373,9 +331,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the Y coordinate.
-        /// </summary>
+        /// <summary>Gets the Y coordinate.</summary>
         public int Y
         {
             get
@@ -393,9 +349,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the width.
-        /// </summary>
+        /// <summary>Gets the width.</summary>
         public int Width
         {
             get
@@ -412,9 +366,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the height.
-        /// </summary>
+        /// <summary>Gets the height.</summary>
         public int Height
         {
             get
@@ -431,9 +383,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the local Rotation value.
-        /// </summary>
+        /// <summary>Gets the local Rotation value.</summary>
         public float Rotation
         {
             get
@@ -450,50 +400,25 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the X/Y coordinate pair.
-        /// </summary>
-        public Vector2i Position
-        {
-            get
-            {
-                return new Vector2i(X, Y);
-            }
-        }
+        /// <summary>Gets the X/Y coordinate pair.</summary>
+        public Vector2i Position => new Vector2i(X, Y);
 
-        /// <summary>
-        /// Gets the Width/Height coordinate pair.
-        /// </summary>
-        public Vector2i Size
-        {
-            get
-            {
-                return new Vector2i(Width, Height);
-            }
-        }
+        /// <summary>Gets the Width/Height coordinate pair.</summary>
+        public Vector2i Size => new Vector2i(Width, Height);
 
-        /// <summary>
-        /// Converts this position helper's present data to a simplified debug string.
-        /// </summary>
-        /// <returns>The debug string.</returns>
+        /// <summary>Converts this position helper's present data to a simplified debug string.</summary>
         public override string ToString()
         {
-            return "UIPositionHelper:PresentState{XY: " + X + ", " + Y + " / WH: " + Width + ", " + Height + " / Rot: " + Rotation + "}";
+            return $"UIPositionHelper:PresentState(XY: {X}, {Y} / WH: {Width}, {Height} / Rot: {Rotation})";
         }
     }
 
-    /// <summary>
-    /// Modes for the <see cref="UIPositionHelper"/>.
-    /// </summary>
+    /// <summary>Modes for the <see cref="UIPositionHelper"/>.</summary>
     public enum UIPosMode : byte
     {
-        /// <summary>
-        /// A constant position.
-        /// </summary>
+        /// <summary>A constant position.</summary>
         CONSTANT = 0,
-        /// <summary>
-        /// A getter function.
-        /// </summary>
+        /// <summary>A getter function.</summary>
         GETTER = 1
         // TODO: More modes!
     }

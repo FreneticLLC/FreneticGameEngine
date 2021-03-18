@@ -101,10 +101,10 @@ namespace FGEGraphics.UISystem
         public UILabel(string btext, FontSet font, UIPositionHelper pos)
             : base(pos)
         {
+            CustomWidthValue = Position.Width;
             InternalTextFont = font;
             Text = btext;
             // TODO: Dynamic scaling support?
-            CustomWidthValue = Position.Width;
             FixScale();
         }
 
