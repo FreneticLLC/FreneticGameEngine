@@ -344,9 +344,9 @@ namespace FGECore.EntitySystem
             bool shouldTrack = DoTrackPositionChange;
             DoTrackPositionChange = false;
             Internal.Position = SpawnedBody.Pose.Position.ToLocation();
-            Entity.OnPositionChanged?.Invoke(Internal.Position);
+            Entity.SetPosition(Internal.Position);
             Internal.Orientation = SpawnedBody.Pose.Orientation.ToCore();
-            Entity.OnOrientationChanged?.Invoke(Internal.Orientation);
+            Entity.SetOrientation(Internal.Orientation);
             DoTrackPositionChange = shouldTrack;
         }
 

@@ -75,8 +75,6 @@ namespace FGECore.EntitySystem
         /// <summary>Constructs the <see cref="BasicEntity"/>.</summary>
         public BasicEntity()
         {
-            OnPositionChanged += SetLKP;
-            OnOrientationChanged += SetLKO;
         }
 
         /// <summary>
@@ -125,6 +123,7 @@ namespace FGECore.EntitySystem
         /// <param name="orientation">The new orientation quaternion.</param>
         public void SetOrientation(Quaternion orientation)
         {
+            LastKnownOrientation = orientation;
             OnOrientationChanged?.Invoke(orientation);
         }
 
@@ -134,25 +133,8 @@ namespace FGECore.EntitySystem
         /// <param name="position">New position.</param>
         public void SetPosition(Location position)
         {
-            OnPositionChanged?.Invoke(position);
-        }
-
-        /// <summary>
-        /// Sets the last known orientation to the input value.
-        /// </summary>
-        /// <param name="orientation">The last known orientation.</param>
-        private void SetLKO(Quaternion orientation)
-        {
-            LastKnownOrientation = orientation;
-        }
-
-        /// <summary>
-        /// Sets the last known position to the input value.
-        /// </summary>
-        /// <param name="position">The last known position.</param>
-        private void SetLKP(Location position)
-        {
             LastKnownPosition = position;
+            OnPositionChanged?.Invoke(position);
         }
 
         /// <summary>Tick the entity. Just fires the tick event!</summary>
