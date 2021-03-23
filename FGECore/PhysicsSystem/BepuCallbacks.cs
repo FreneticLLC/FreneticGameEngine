@@ -141,6 +141,7 @@ namespace FGECore.PhysicsSystem
             pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
             pairMaterial.SpringSettings = ContactSpringiness;
             Space.Internal.Characters.TryReportContacts(pair, ref manifold, workerIndex, ref pairMaterial);
+#warning BEPU REWRITE TODO: Add a collision event, called from here
             return true;
         }
 

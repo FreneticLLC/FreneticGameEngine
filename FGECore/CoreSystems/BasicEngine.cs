@@ -6,16 +6,14 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FGECore.EntitySystem;
-using FGECore.StackNoteSystem;
-using FGECore.UtilitySystems;
+using FGECore.EntitySystem.JointSystems;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
+using FGECore.StackNoteSystem;
+using FGECore.UtilitySystems;
+using System;
+using System.Collections.Generic;
 
 namespace FGECore.CoreSystems
 {
@@ -34,8 +32,11 @@ namespace FGECore.CoreSystems
         /// <summary>How long the game has run (seconds).</summary>
         public double GlobalTickTime = 1.0;
 
-        /// <summary>The current highest EID value.</summary>
-        public long CurrentEID = 1;
+        /// <summary>The current highest EntityID value.</summary>
+        public long CurrentEntityID = 1;
+
+        /// <summary>The current highest JointID value.</summary>
+        public long CurrentJointID = 1;
 
         /// <summary>The instance that owns this engine.</summary>
         public abstract GameInstance OwningInstanceGeneric { get; }
@@ -45,6 +46,49 @@ namespace FGECore.CoreSystems
 
         /// <summary>Gets the scheduler from the backing GameInstance.</summary>
         public Scheduler Schedule => OwningInstanceGeneric.Schedule;
+
+        /// <summary>Any/all joints currently registered into this engine.</summary>
+        public Dictionary<long, GenericBaseJoint> Joints = new Dictionary<long, GenericBaseJoint>(512);
+
+        /// <summary>Any/all non-physics joints currently registered into this engine.</summary>
+        public List<NonPhysicalJointBase> NonPhysicalJoints = new List<NonPhysicalJointBase>(64);
+
+        /// <summary>Add and activate a joint into this engine.</summary>
+        public void AddJoint(GenericBaseJoint joint)
+        {
+            if (joint.JointID > 0)
+            {
+                throw new InvalidOperationException("Cannot add a joint that is already added to an engine.");
+            }
+            joint.JointID = CurrentJointID++;
+            Joints.Add(joint.JointID, joint);
+            if (joint is NonPhysicalJointBase nonPhysJoint)
+            {
+                NonPhysicalJoints.Add(nonPhysJoint);
+            }
+            else if (joint is PhysicsJointBase physJoint)
+            {
+                physJoint.AddToSpace(PhysicsWorldGeneric);
+            }
+        }
+
+        /// <summary>Remove and deactivate a joint from this engine.</summary>
+        public void RemoveJoint(GenericBaseJoint joint)
+        {
+            if (joint.JointID <= 0 || !Joints.Remove(joint.JointID))
+            {
+                throw new InvalidOperationException("Cannot remove a joint that is not added to an engine.");
+            }
+            joint.JointID = 0;
+            if (joint is NonPhysicalJointBase nonPhysJoint)
+            {
+                NonPhysicalJoints.Remove(nonPhysJoint);
+            }
+            else if (joint is PhysicsJointBase physJoint)
+            {
+                physJoint.RemoveFromSpace(PhysicsWorldGeneric);
+            }
+        }
 
         /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
         public void Shutdown()
@@ -77,10 +121,10 @@ namespace FGECore.CoreSystems
             PhysicsWorld = new PhysicsSpace<T, T2>();
         }
 
-        /// <summary>All entities currently on this server, if EIDs are used.</summary>
+        /// <summary>All entities currently spawned in this engine.</summary>
         public Dictionary<long, T> Entities = new Dictionary<long, T>(8192);
 
-        /// <summary>All entities currently on the server.</summary>
+        /// <summary>All entities currently spawned in the engine.</summary>
         public List<T> EntityList = new List<T>(8192);
 
         /// <summary>
@@ -213,7 +257,7 @@ namespace FGECore.CoreSystems
             {
                 StackNoteHelper.Push("BasicEngine - Spawn Entity", this);
                 T ce = CreateEntity(ticks);
-                ce.EID = CurrentEID++;
+                ce.EID = CurrentEntityID++;
                 try
                 {
                     StackNoteHelper.Push("BasicEngine - Configure Entity", ce);
@@ -310,17 +354,29 @@ namespace FGECore.CoreSystems
             }
             try
             {
+                StackNoteHelper.Push("BasicEngine - Update Joints", this);
+                foreach (NonPhysicalJointBase joint in NonPhysicalJoints)
+                {
+                    joint.Solve();
+                }
+            }
+            finally
+            {
+                StackNoteHelper.Pop();
+            }
+            try
+            {
                 StackNoteHelper.Push("BasicEngine - Tick all entities", this);
                 // Dup list, to ensure ents can despawn themselves in the tick method!
                 IReadOnlyList<T> ents = EntityListDuplicate();
-                for (int i = 0; i < ents.Count; i++)
+                foreach (T ent in ents)
                 {
-                    if (ents[i].Ticks)
+                    if (ent.Ticks)
                     {
                         try
                         {
-                            StackNoteHelper.Push("BasicEngine - Tick specific entity", ents[i]);
-                            ents[i].TickThis();
+                            StackNoteHelper.Push("BasicEngine - Tick specific entity", ent);
+                            ent.TickThis();
                         }
                         finally
                         {
