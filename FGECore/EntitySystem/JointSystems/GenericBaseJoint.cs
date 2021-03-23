@@ -29,5 +29,11 @@ namespace FGECore.EntitySystem.JointSystems
 
         /// <summary>A unique ID for this specific joint.</summary>
         public long JointID;
+
+        /// <summary>Called to enable the joint however necessary.</summary>
+        public abstract void Enable();
+
+        /// <summary>Called to disable the joint however necessary.</summary>
+        public abstract void Disable();
     }
 }

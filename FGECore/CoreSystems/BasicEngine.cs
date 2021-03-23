@@ -66,10 +66,7 @@ namespace FGECore.CoreSystems
             {
                 NonPhysicalJoints.Add(nonPhysJoint);
             }
-            else if (joint is PhysicsJointBase physJoint)
-            {
-                physJoint.AddToSpace(PhysicsWorldGeneric);
-            }
+            joint.Enable();
         }
 
         /// <summary>Remove and deactivate a joint from this engine.</summary>
@@ -84,10 +81,7 @@ namespace FGECore.CoreSystems
             {
                 NonPhysicalJoints.Remove(nonPhysJoint);
             }
-            else if (joint is PhysicsJointBase physJoint)
-            {
-                physJoint.RemoveFromSpace(PhysicsWorldGeneric);
-            }
+            joint.Disable();
         }
 
         /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>

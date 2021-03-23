@@ -29,11 +29,8 @@ namespace FGECore.EntitySystem.JointSystems
         /// <summary>Implements <see cref="GenericBaseJoint.EntityTwo"/>.</summary>
         public override BasicEntity EntityTwo => Two.Entity;
 
-        /// <summary>Adds the joint to the given physics space.</summary>
-        public abstract void AddToSpace(PhysicsSpace space);
-
-        /// <summary>Removes the joint from the given physics space.</summary>
-        public abstract void RemoveFromSpace(PhysicsSpace space);
+        /// <summary>Gets the relevant <see cref="PhysicsSpace"/>.</summary>
+        public PhysicsSpace PhysicsWorld => One.PhysicsWorld;
     }
 
     /// <summary>The base class for all physics-based joints, with a type reference to the underlying constraint.</summary>
@@ -52,16 +49,16 @@ namespace FGECore.EntitySystem.JointSystems
         /// <summary>Construct the applicable joint description object.</summary>
         public abstract T CreateJointDescription();
 
-        /// <summary>Adds the joint to the given physics space.</summary>
-        public sealed override void AddToSpace(PhysicsSpace space)
+        /// <summary>Implements <see cref="GenericBaseJoint.Enable"/> by spawning the joint into the physics space.</summary>
+        public override void Enable()
         {
-            CurrentJoint = space.Internal.CoreSimulation.Solver.Add(One.SpawnedBody.Handle, Two.SpawnedBody.Handle, CreateJointDescription());
+            CurrentJoint = PhysicsWorld.Internal.CoreSimulation.Solver.Add(One.SpawnedBody.Handle, Two.SpawnedBody.Handle, CreateJointDescription());
         }
 
-        /// <summary>Removes the joint from the given physics space.</summary>
-        public sealed override void RemoveFromSpace(PhysicsSpace space)
+        /// <summary>Implements <see cref="GenericBaseJoint.Disable"/> by spawning the joint into the physics space.</summary>
+        public override void Disable()
         {
-            space.Internal.CoreSimulation.Solver.Remove(CurrentJoint);
+            PhysicsWorld.Internal.CoreSimulation.Solver.Remove(CurrentJoint);
             CurrentJoint = default;
         }
     }

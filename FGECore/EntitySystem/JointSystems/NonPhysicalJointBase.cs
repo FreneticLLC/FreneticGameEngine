@@ -17,6 +17,13 @@ namespace FGECore.EntitySystem.JointSystems
     /// <summary>The base class for all non-physics-based joints.</summary>
     public abstract class NonPhysicalJointBase : GenericBaseJoint
     {
+        /// <summary>Constructs the non-physics joint base.</summary>
+        public NonPhysicalJointBase(BasicEntity _one, BasicEntity _two)
+        {
+            One = _one;
+            Two = _two;
+        }
+
         /// <summary>The applicable entities for this joint.</summary>
         public BasicEntity One, Two;
 
@@ -28,5 +35,15 @@ namespace FGECore.EntitySystem.JointSystems
 
         /// <summary>Calculate the joint's logic and apply it.</summary>
         public abstract void Solve();
+
+        /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Enable"/>.</summary>
+        public override void Enable()
+        {
+        }
+
+        /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Disable"/>.</summary>
+        public override void Disable()
+        {
+        }
     }
 }
