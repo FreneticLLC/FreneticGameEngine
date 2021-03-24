@@ -67,6 +67,8 @@ namespace FGECore.CoreSystems
                 NonPhysicalJoints.Add(nonPhysJoint);
             }
             joint.Enable();
+            joint.EntityOne.Joints.Add(joint);
+            joint.EntityTwo.Joints.Add(joint);
         }
 
         /// <summary>Remove and deactivate a joint from this engine.</summary>
@@ -82,6 +84,8 @@ namespace FGECore.CoreSystems
                 NonPhysicalJoints.Remove(nonPhysJoint);
             }
             joint.Disable();
+            joint.EntityOne.Joints.Remove(joint);
+            joint.EntityTwo.Joints.Remove(joint);
         }
 
         /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
@@ -317,6 +321,10 @@ namespace FGECore.CoreSystems
             try
             {
                 StackNoteHelper.Push("BasicEngine - Despawn Entity", ent);
+                foreach (GenericBaseJoint joint in new List<GenericBaseJoint>(ent.Joints))
+                {
+                    RemoveJoint(joint);
+                }
                 foreach (Property prop in ent.EnumerateAllProperties())
                 {
                     if (prop is BasicEntityProperty bep)

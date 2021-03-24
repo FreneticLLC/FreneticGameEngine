@@ -105,6 +105,11 @@ namespace FGECore.PhysicsSystem
             }
             EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
             EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
+            HashSet<long> noCollide = aEntity.Internal.NoCollideIDs;
+            if (noCollide != null && noCollide.Contains(bEntity.Entity.EID))
+            {
+                return false;
+            }
             return aEntity.CGroup.DoesCollide(bEntity.CGroup);
         }
 

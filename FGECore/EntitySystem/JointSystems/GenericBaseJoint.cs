@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace FGECore.EntitySystem.JointSystems
 {
     /// <summary>The lowest level base class for all joints.</summary>
-    public abstract class GenericBaseJoint
+    public abstract class GenericBaseJoint : IEquatable<GenericBaseJoint>
     {
         /// <summary>Get the first entity in the joint.</summary>
         public abstract BasicEntity EntityOne { get; }
@@ -35,5 +35,27 @@ namespace FGECore.EntitySystem.JointSystems
 
         /// <summary>Called to disable the joint however necessary.</summary>
         public abstract void Disable();
+
+        /// <summary>Implements <see cref="Object.GetHashCode"/>.</summary>
+        public override int GetHashCode()
+        {
+            return JointID.GetHashCode();
+        }
+
+        /// <summary>Implements <see cref="Object.Equals(object?)"/>.</summary>
+        public override bool Equals(object obj)
+        {
+            return obj is GenericBaseJoint joint && Equals(joint);
+        }
+
+        /// <summary>Returns whether this joint is the same as other.</summary>
+        public bool Equals(GenericBaseJoint other)
+        {
+            if (JointID == 0)
+            {
+                return ReferenceEquals(this, other);
+            }
+            return JointID == other.JointID;
+        }
     }
 }

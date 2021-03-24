@@ -16,6 +16,7 @@ using FGECore.MathHelpers;
 using FGECore.CoreSystems;
 using FGECore.PropertySystem;
 using FreneticUtilities.FreneticToolkit;
+using FGECore.EntitySystem.JointSystems;
 
 namespace FGECore.EntitySystem
 {
@@ -68,6 +69,9 @@ namespace FGECore.EntitySystem
 
         /// <summary>Fired when this entity is despawned out of a world.</summary>
         public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent;
+
+        /// <summary>All joints attached to this entity.</summary>
+        public HashSet<GenericBaseJoint> Joints = new HashSet<GenericBaseJoint>();
 
         /// <summary>The owning engine.</summary>
         public abstract BasicEngine EngineGeneric { get; }
