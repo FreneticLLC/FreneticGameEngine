@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BepuPhysics;
 using BepuPhysics.Collidables;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
@@ -18,13 +19,19 @@ using FGECore.PropertySystem;
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
     /// <summary>A convex hull shape for an entity.</summary>
-    public class EntityConvexHullShape : EntityShapeHelper
+    public class EntityMeshShape : EntityShapeHelper
     {
-        /// <summary>Constructs a new <see cref="EntityConvexHullShape"/> from the specified hull object.</summary>
-        public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space)
+        /// <summary>Constructs a new <see cref="EntityMeshShape"/> from the specified mesh object.</summary>
+        public EntityMeshShape(Mesh mesh, PhysicsSpace space)
         {
-            BepuShape = hull;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(hull);
+            BepuShape = mesh;
+            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(mesh);
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.ComputeInertia(float, out BodyInertia)"/>.</summary>
+        public override void ComputeInertia(float mass, out BodyInertia inertia)
+        {
+            ((Mesh) BepuShape).ComputeClosedInertia(mass, out inertia);
         }
     }
 }

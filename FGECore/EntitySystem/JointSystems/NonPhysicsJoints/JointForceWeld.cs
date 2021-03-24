@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints
 {
     /// <summary>Constrains entity Two to be force-welded to entity One, meaning that wherever One moves, Two will follow.</summary>
-    class JointForceWeld : NonPhysicalJointBase
+    public class JointForceWeld : NonPhysicalJointBase
     {
         /// <summary>Constructs the <see cref="JointForceWeld"/>.</summary>
         public JointForceWeld(BasicEntity e1, BasicEntity e2) : base(e1, e2)

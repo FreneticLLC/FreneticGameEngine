@@ -187,6 +187,7 @@ namespace FGECore.EntitySystem
             {
                 // TODO: In-air movement
             }
+            TryingToJump = false;
         }
     }
 }

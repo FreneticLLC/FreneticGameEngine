@@ -110,7 +110,7 @@ namespace FGECore.EntitySystem
                     }
                     else if (SpawnedBody.LocalInertia.InverseMass == 0)
                     {
-                        Shape.BepuShape.ComputeInertia(value, out SpawnedBody.LocalInertia);
+                        Shape.ComputeInertia(value, out SpawnedBody.LocalInertia);
                     }
                     else
                     {
@@ -312,8 +312,7 @@ namespace FGECore.EntitySystem
             }
             else
             {
-                IConvexShape convexShape = Shape.BepuShape;
-                convexShape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
+                Shape.ComputeInertia(Internal.Mass, out BodyInertia inertia);
                 description = BodyDescription.CreateDynamic(pose, velocity, inertia, collidable, new BodyActivityDescription(0.01f));
             }
             // TODO: Other settings

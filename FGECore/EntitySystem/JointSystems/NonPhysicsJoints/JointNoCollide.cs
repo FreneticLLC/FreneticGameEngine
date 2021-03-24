@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints
 {
     /// <summary>Special pseudo-constraint to indicate two entities shouldn't collide with each other.</summary>
-    class JointNoCollide : PhysicsJointBase
+    public class JointNoCollide : PhysicsJointBase
     {
         /// <summary>Constructs the <see cref="JointNoCollide"/>.</summary>
         public JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _two)

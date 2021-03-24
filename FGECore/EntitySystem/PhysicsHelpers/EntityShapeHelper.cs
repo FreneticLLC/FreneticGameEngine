@@ -29,7 +29,20 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         public TypedIndex ShapeIndex;
 
         /// <summary>Gets the BEPU convex shape (if possible).</summary>
-        public IConvexShape BepuShape;
+        public IShape BepuShape;
+
+        /// <summary>Compute inertia for the shape.</summary>
+        public virtual void ComputeInertia(float mass, out BodyInertia inertia)
+        {
+            if (BepuShape is IConvexShape convex)
+            {
+                convex.ComputeInertia(mass, out inertia);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// Gets the BEPU Shape offset, if any.
