@@ -199,12 +199,12 @@ namespace FGECore.PhysicsSystem
 
             public void OnHit(ref float maximumT, float t, in Vector3 hitLocation, in Vector3 hitNormal, CollidableReference collidable)
             {
-                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
+                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
             }
 
             public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable)
             {
-                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = Location.Zero, Position = Start };
+                Hit = new CollisionResult() { Hit = true, Time = 0, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = Location.Zero, Position = Start };
             }
         }
 

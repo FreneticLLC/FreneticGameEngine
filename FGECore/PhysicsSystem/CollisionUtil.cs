@@ -41,6 +41,11 @@ namespace FGECore.PhysicsSystem
         /// The hit entity, if any.
         /// </summary>
         public EntityPhysicsProperty HitEnt;
+
+        /// <summary>
+        /// The time of hit, where 0 is colliding-at-the-start, and 1 is colliding-at-end.
+        /// </summary>
+        public float Time;
     }
 
     /// <summary>Helper to group together logic for whether two objects collide.</summary>

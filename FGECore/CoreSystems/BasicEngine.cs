@@ -71,6 +71,17 @@ namespace FGECore.CoreSystems
             joint.EntityTwo.Joints.Add(joint);
         }
 
+        /// <summary>Remove and deactivate a joint from this engine, by ID. Returns true if a joint was removed, or false if the ID is invalid.</summary>
+        public bool RemoveJoint(long jointID)
+        {
+            if (Joints.TryGetValue(jointID, out GenericBaseJoint joint))
+            {
+                RemoveJoint(joint);
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>Remove and deactivate a joint from this engine.</summary>
         public void RemoveJoint(GenericBaseJoint joint)
         {

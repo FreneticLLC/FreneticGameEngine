@@ -293,7 +293,7 @@ namespace FGECore.MathHelpers
         /// <returns>Same or shortened Location vector.</returns>
         public Location WithMaxmimumLength(double len)
         {
-            Debug.Assert(len >= 0, $"Length input to WithMaxmimumLength should be greater than 0, but was {len}");
+            Debug.Assert(len > 0, $"Length input to {nameof(WithMaxmimumLength)} should be greater than 0, but was {len}");
             double lsq = LengthSquared();
             if (lsq > len * len)
             {
@@ -313,7 +313,7 @@ namespace FGECore.MathHelpers
         /// <returns>The new Location vector.</returns>
         public Location WithMinimumLength(double len, Location defaultValue)
         {
-            Debug.Assert(len >= 0, $"Length input to WithMinimumLength should be greater than 0, but was {len}");
+            Debug.Assert(len > 0, $"Length input to {nameof(WithMinimumLength)} should be greater than 0, but was {len}");
             double lenSquared = LengthSquared();
             if (lenSquared < len * len)
             {
@@ -731,7 +731,7 @@ namespace FGECore.MathHelpers
         /// <returns>The location string.</returns>
         public string ToSimpleString()
         {
-            return X + ", " + Y + ", " + Z;
+            return $"{X}, {Y}, {Z}";
         }
 
         /// <summary>
@@ -741,7 +741,7 @@ namespace FGECore.MathHelpers
         /// <returns>The location string.</returns>
         public override string ToString()
         {
-            return "(" + X + ", " + Y + ", " + Z + ")";
+            return $"({X}, {Y}, {Z})";
         }
 
         /// <summary>
