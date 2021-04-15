@@ -132,10 +132,10 @@ namespace FGECore.EntitySystem
                 Physics = new EntityPhysicsProperty()
                 {
                     Mass = 60,
-                    Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric)
                 };
                 Entity.AddProperty(Physics);
             }
+            Physics.Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric);
             Physics.OnSpawn();
             Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / Physics.Mass };
             ref CharacterController controller = ref Characters.AllocateCharacter(Physics.SpawnedBody.Handle);

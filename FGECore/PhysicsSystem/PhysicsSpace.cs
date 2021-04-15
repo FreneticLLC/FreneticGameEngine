@@ -83,7 +83,7 @@ namespace FGECore.PhysicsSystem
         public BodyReference Spawn(EntityPhysicsProperty entity, BodyDescription bepuent)
         {
             BodyHandle handle = Internal.CoreSimulation.Bodies.Add(bepuent);
-            if (Internal.EntitiesByPhysicsID.Length < handle.Value)
+            if (Internal.EntitiesByPhysicsID.Length <= handle.Value)
             {
                 EntityPhysicsProperty[] newArray = new EntityPhysicsProperty[Internal.EntitiesByPhysicsID.Length * 2];
                 Array.Copy(Internal.EntitiesByPhysicsID, newArray, Internal.EntitiesByPhysicsID.Length);
