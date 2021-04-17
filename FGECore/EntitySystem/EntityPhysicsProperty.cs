@@ -248,6 +248,10 @@ namespace FGECore.EntitySystem
             {
                 PhysicsWorld = Engine.PhysicsWorldGeneric;
             }
+            if (Shape == null)
+            {
+                return;
+            }
             HandledRemove = false;
             SpawnHandle();
             Entity.OnPositionChanged += DoPosCheckEvent;
