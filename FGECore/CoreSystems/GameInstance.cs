@@ -120,6 +120,7 @@ namespace FGECore.CoreSystems
         /// <param name="delta">How much time has passed since the last tick.</param>
         public void PreTick(double delta)
         {
+            StackNoteHelper.Notes.Clean();
             Delta = delta;
             GlobalTickTime += delta;
             TickScheduler();

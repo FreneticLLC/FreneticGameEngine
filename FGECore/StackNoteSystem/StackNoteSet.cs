@@ -14,41 +14,53 @@ using System.Threading.Tasks;
 
 namespace FGECore.StackNoteSystem
 {
-    /// <summary>
-    /// Represents a current set of stack notes.
-    /// </summary>
+    /// <summary>Represents a current set of stack notes.</summary>
     public class StackNoteSet
     {
-        /// <summary>
-        /// Current stack of notes.
-        /// </summary>
-        public Stack<StackNote> Notes = new Stack<StackNote>(128);
+        /// <summary>Current stack of notes.</summary>
+        public StackNote[] Notes = new StackNote[128];
 
-        /// <summary>
-        /// Gets a string output of the current stack notes.
-        /// </summary>
-        /// <returns>The string output.</returns>
+        /// <summary>How deep the the stack is currently.</summary>
+        public int Depth = 0;
+
+        /// <summary>How deep the the stack has gone.</summary>
+        public int MaxDepth = 0;
+
+        /// <summary>Gets a string output of the current stack notes.</summary>
         public override string ToString()
         {
-            return string.Concat(Notes.Select(note => $" -> {note}\n"));
+            return string.Concat(Notes.Take(Depth).Select(note => $" -> {note}\n")) + "\nOver depth:\n" + string.Concat(Notes.Skip(Depth).Take(MaxDepth - Depth).Select(note => $" -> {note}\n"));
         }
 
-        /// <summary>
-        /// Pushes a new entry to the note stack.
-        /// </summary>
+        /// <summary>Pushes a new entry to the note stack.</summary>
         /// <param name="note">The note.</param>
         /// <param name="relatedObj">A related object, if any.</param>
         public void Push(string note, object relatedObj = null)
         {
-            Notes.Push(new StackNote() { Note = note, Related = relatedObj });
+            if (Depth == Notes.Length)
+            {
+                StackNote[] expanded = new StackNote[Notes.Length * 2];
+                Array.Copy(Notes, expanded, Notes.Length);
+                Notes = expanded;
+            }
+            Notes[Depth++] = new StackNote() { Note = note, Related = relatedObj };
+            MaxDepth = Math.Max(MaxDepth, Depth);
         }
 
-        /// <summary>
-        /// Pops the current entry from the note stack.
-        /// </summary>
+        /// <summary>Pops the current entry from the note stack.</summary>
         public void Pop()
         {
-            Notes.Pop();
+            Depth--;
+        }
+
+        /// <summary>Cleans out any references from the stack note set.</summary>
+        public void Clean()
+        {
+            for (int index = Depth + 1; index <= MaxDepth; index++)
+            {
+                Notes[index] = new StackNote();
+            }
+            MaxDepth = Depth;
         }
     }
 }
