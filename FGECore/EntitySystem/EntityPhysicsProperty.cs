@@ -20,6 +20,7 @@ using BepuPhysics;
 using BepuPhysics.Collidables;
 using FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 using FGECore.EntitySystem.JointSystems;
+using BepuPhysics.CollisionDetection;
 
 namespace FGECore.EntitySystem
 {
@@ -35,6 +36,9 @@ namespace FGECore.EntitySystem
 
         /// <summary>The spawned physics body handle.</summary>
         public BodyReference SpawnedBody; // Set by spawner.
+
+        /// <summary>Event fired when this entity collides with another.</summary>
+        public Action<CollisionEvent> CollisionHandler; // Set by client.
 
         /// <summary>The shape of the physics body.</summary>
         [PropertyDebuggable]

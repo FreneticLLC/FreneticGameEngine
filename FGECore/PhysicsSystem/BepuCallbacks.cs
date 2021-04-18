@@ -12,6 +12,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuUtilities;
 using FGECore.EntitySystem;
+using FGECore.EntitySystem.PhysicsHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -174,8 +175,17 @@ namespace FGECore.PhysicsSystem
                 pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
             }
             pairMaterial.SpringSettings = ContactSpringiness;
+            if (aEntity?.CollisionHandler != null || bEntity?.CollisionHandler != null)
+            {
+                CollisionEvent evt = new CollisionEvent<TManifold>() { One = aEntity, Two = bEntity, Manifold = manifold };
+                aEntity?.CollisionHandler?.Invoke(evt);
+                bEntity?.CollisionHandler?.Invoke(evt);
+                if (evt.Cancel)
+                {
+                    return false;
+                }
+            }
             Space.Internal.Characters.TryReportContacts(pair, ref manifold, workerIndex, ref pairMaterial);
-#warning BEPU REWRITE TODO: Add a collision event, called from here
             return true;
         }
 
