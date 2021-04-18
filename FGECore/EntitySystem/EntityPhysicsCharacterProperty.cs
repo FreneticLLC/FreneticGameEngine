@@ -144,7 +144,7 @@ namespace FGECore.EntitySystem
             controller.CosMaximumSlope = MathF.Cos(MathF.PI * 0.4f);
             controller.JumpVelocity = 6;
             controller.MaximumVerticalForce = 100 * Physics.Mass;
-            controller.MaximumHorizontalForce = 20 * Physics.Mass;
+            controller.MaximumHorizontalForce = 80 * Physics.Mass;
             controller.MinimumSupportDepth = BodyRadius * -0.01f;
             controller.MinimumSupportContinuationDepth = -0.1f;
             Entity.OnTick += Tick;
