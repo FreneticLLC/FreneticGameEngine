@@ -108,7 +108,7 @@ namespace FGECore.PhysicsSystem
                 return false;
             }
             EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
-            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
+            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[b.BodyHandle.Value];
             if (aEntity == null || bEntity == null)
             {
                 EntityPhysicsProperty validOne = (aEntity ?? bEntity);
@@ -207,7 +207,6 @@ namespace FGECore.PhysicsSystem
         /// <summary>Releases any resources held by the callbacks. Called by the owning narrow phase when it is being disposed.</summary>
         public void Dispose()
         {
-            Space.Internal.Characters.Dispose();
         }
     }
 }

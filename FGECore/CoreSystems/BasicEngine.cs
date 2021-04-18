@@ -127,7 +127,7 @@ namespace FGECore.CoreSystems
         public void LoadBasic()
         {
             SysConsole.Output(OutputType.INIT, "BasicEngine prepping physics helper...");
-            PhysicsWorld = new PhysicsSpace<T, T2>();
+            PhysicsWorld = new PhysicsSpace<T, T2>(this);
         }
 
         /// <summary>All entities currently spawned in this engine.</summary>

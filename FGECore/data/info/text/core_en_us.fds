@@ -1,4 +1,4 @@
-﻿# Texts for FGE's core.
+# Texts for FGE's core.
 # These can be accessed by any in-game text writer via ^[LANG=core|example.path.here]
 # Arguments can be given as such: ^[LANG=core|example.path.here|alpha|beta] where {{1}} will become alpha, {{2}} becomes beta, etc.
 # You can use color codes here, but use them sparingly (IE, only use as needed). Try not to use language calls ("^[LANG=...]")... instead, use arguments!

@@ -51,6 +51,9 @@ namespace FGECore.PhysicsSystem
             /// <summary>Bepu physics character controller system.</summary>
             public BepuCharacters.CharacterControllers Characters;
 
+            /// <summary>Bepu physics memory buffer pool.</summary>
+            public BufferPool Pool;
+
             /// <summary>Initialize internal space data.</summary>
             public void Init(PhysicsSpace space)
             {
@@ -60,11 +63,14 @@ namespace FGECore.PhysicsSystem
                 ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
                 PoseHandler = new BepuPoseIntegratorCallbacks() { Space = space };
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks() { Space = space };
-                BufferPool pool = new BufferPool();
-                Characters = new BepuCharacters.CharacterControllers(pool);
-                CoreSimulation = Simulation.Create(pool, NarrowPhaseHandler, PoseHandler, new PositionLastTimestepper());
+                Pool = new BufferPool();
+                Characters = new BepuCharacters.CharacterControllers(Pool);
+                CoreSimulation = Simulation.Create(Pool, NarrowPhaseHandler, PoseHandler, new PositionLastTimestepper());
             }
         }
+
+        /// <summary>The backing engine.</summary>
+        public BasicEngine Engine;
 
         /// <summary>Internal data for the physics space.</summary>
         public InternalData Internal;
@@ -229,6 +235,14 @@ namespace FGECore.PhysicsSystem
         {
             Internal.CoreSimulation.Dispose();
             Internal.CoreSimulation = null;
+            Internal.Characters.Dispose();
+            Internal.Characters = null;
+            Internal.ThreadDispatcher.Dispose();
+            Internal.ThreadDispatcher = null;
+            Internal.EntitiesByPhysicsID = null;
+            Internal.NarrowPhaseHandler.Dispose();
+            Internal.Pool.Clear();
+            Internal.Pool = null;
         }
 
         /// <summary>Returns a simple string to represent this physics world.</summary>
@@ -246,9 +260,11 @@ namespace FGECore.PhysicsSystem
         /// <summary>
         /// Construct the physics space.
         /// </summary>
+        /// <param name="_engine">The backing engine.</param>
         /// <param name="construct">Set false to disable constructing the internal space.</param>
-        public PhysicsSpace(bool construct = true)
+        public PhysicsSpace(BasicEngine _engine, bool construct = true)
         {
+            Engine = _engine;
             if (!construct)
             {
                 return;

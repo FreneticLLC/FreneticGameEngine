@@ -60,6 +60,15 @@ namespace FGECore.PhysicsSystem
         /// <summary>An array of booleans, with a true value for any indices that match a collision group ID that this group will NOT collide with.</summary>
         public bool[] NoCollideWith = Array.Empty<bool>();
 
+        /// <summary>The clean name of this collision group.</summary>
+        public string Name;
+
+        /// <summary>Construct a new collision group instance.</summary>
+        public CollisionGroup(string _name)
+        {
+            Name = _name;
+        }
+
         /// <summary>Returns true if this group should collide with another.</summary>
         public bool DoesCollide(CollisionGroup two)
         {
@@ -77,6 +86,12 @@ namespace FGECore.PhysicsSystem
             }
             NoCollideWith[two.ID] = noCollide;
         }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            return $"CollisionGroup({Name})";
+        }
     }
 
     /// <summary>
@@ -92,37 +107,37 @@ namespace FGECore.PhysicsSystem
         /// <summary>
         /// The non-solid group.
         /// </summary>
-        public static CollisionGroup NonSolid = new CollisionGroup();
+        public static CollisionGroup NonSolid = new CollisionGroup("NonSolid");
 
         /// <summary>
-        /// The solid group.
+        /// The solid entity group.
         /// </summary>
-        public static CollisionGroup Solid = new CollisionGroup();
+        public static CollisionGroup Solid = new CollisionGroup("Solid");
 
         /// <summary>
         /// The player group.
         /// </summary>
-        public static CollisionGroup Player = new CollisionGroup();
+        public static CollisionGroup Player = new CollisionGroup("Player");
 
         /// <summary>
-        /// The item group.
+        /// The item-entity group.
         /// </summary>
-        public static CollisionGroup Item = new CollisionGroup();
+        public static CollisionGroup Item = new CollisionGroup("Item");
 
         /// <summary>
-        /// The water group.
+        /// The water (or other liquid) group.
         /// </summary>
-        public static CollisionGroup Water = new CollisionGroup();
+        public static CollisionGroup Water = new CollisionGroup("Water");
 
         /// <summary>
         /// The world-solid group.
         /// </summary>
-        public static CollisionGroup WorldSolid = new CollisionGroup();
+        public static CollisionGroup WorldSolid = new CollisionGroup("WorldSolid");
 
         /// <summary>
-        /// The character group.
+        /// The non-player character group.
         /// </summary>
-        public static CollisionGroup Character = new CollisionGroup();
+        public static CollisionGroup Character = new CollisionGroup("Character");
 
         static CollisionUtil()
         {
