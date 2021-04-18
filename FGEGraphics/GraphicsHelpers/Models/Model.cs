@@ -488,10 +488,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
         }
 
-        /// <summary>
-        /// Gets VRAM used by this model.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary>Gets VRAM used by this model.</summary>
         public long GetVRAMUsage()
         {
             long ret = 0;
@@ -500,6 +497,12 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 ret += mesh.BaseRenderable.GetVRAMUsage();
             }
             return ret;
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            return $"Model({Name})";
         }
     }
 }

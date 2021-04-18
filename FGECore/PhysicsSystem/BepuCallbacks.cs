@@ -61,11 +61,14 @@ namespace FGECore.PhysicsSystem
             if (localInertia.InverseMass > 0)
             {
                 EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
-                velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
-                float linearDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.LinearDamping, 0, 1), Delta);
-                float angularDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.AngularDamping, 0, 1), Delta);
-                velocity.Linear *= linearDampingDt;
-                velocity.Angular *= angularDampingDt;
+                if (physicsEntity != null)
+                {
+                    velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
+                    float linearDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.LinearDamping, 0, 1), Delta); // TODO: These clamps look wrong. Should be done in advance, or should surround the pow call?
+                    float angularDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.AngularDamping, 0, 1), Delta);
+                    velocity.Linear *= linearDampingDt;
+                    velocity.Angular *= angularDampingDt;
+                }
             }
         }
     }
@@ -105,6 +108,15 @@ namespace FGECore.PhysicsSystem
             }
             EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
             EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
+            if (aEntity == null || bEntity == null)
+            {
+                EntityPhysicsProperty validOne = (aEntity ?? bEntity);
+                if (validOne != null)
+                {
+                    return validOne.CGroup.DoesCollide(CollisionUtil.WorldSolid);
+                }
+                return false;
+            }
             HashSet<long> noCollide = aEntity.Internal.NoCollideIDs;
             if (noCollide != null && noCollide.Contains(bEntity.Entity.EID))
             {
@@ -142,8 +154,25 @@ namespace FGECore.PhysicsSystem
         {
             EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[pair.A.BodyHandle.Value];
             EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[pair.B.BodyHandle.Value];
-            pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
-            pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
+            if (aEntity == null || bEntity == null)
+            {
+                EntityPhysicsProperty validOne = (aEntity ?? bEntity);
+                if (validOne != null)
+                {
+                    pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
+                    pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 2;
+                }
+                else
+                {
+                    pairMaterial.FrictionCoefficient = 1f;
+                    pairMaterial.MaximumRecoveryVelocity = 0.5f;
+                }
+            }
+            else
+            {
+                pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
+                pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
+            }
             pairMaterial.SpringSettings = ContactSpringiness;
             Space.Internal.Characters.TryReportContacts(pair, ref manifold, workerIndex, ref pairMaterial);
 #warning BEPU REWRITE TODO: Add a collision event, called from here

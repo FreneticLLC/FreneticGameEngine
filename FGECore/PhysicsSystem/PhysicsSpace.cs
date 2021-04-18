@@ -147,7 +147,7 @@ namespace FGECore.PhysicsSystem
             public bool AllowTest(CollidableReference collidable)
             {
                 EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
-                return Filter == null || Filter(entity);
+                return entity == null || Filter == null || Filter(entity);
             }
 
             public bool AllowTest(CollidableReference collidable, int childIndex)
@@ -157,7 +157,7 @@ namespace FGECore.PhysicsSystem
 
             public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
             {
-                Hit = new CollisionResult() { Hit = true, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
             }
         }
 
@@ -189,7 +189,7 @@ namespace FGECore.PhysicsSystem
             public bool AllowTest(CollidableReference collidable)
             {
                 EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
-                return Filter == null || Filter(entity);
+                return entity == null || Filter == null || Filter(entity);
             }
 
             public bool AllowTest(CollidableReference collidable, int childIndex)

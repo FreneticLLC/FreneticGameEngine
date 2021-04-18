@@ -28,5 +28,12 @@ namespace FGECore.EntitySystem.PhysicsHelpers
             BepuShape = box;
             ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(box);
         }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            Box box = (Box)BepuShape;
+            return $"EntityBoxShape({box.Width}, {box.Height}, {box.Length})";
+        }
     }
 }

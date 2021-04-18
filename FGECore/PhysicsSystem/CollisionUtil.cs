@@ -43,7 +43,7 @@ namespace FGECore.PhysicsSystem
         public EntityPhysicsProperty HitEnt;
 
         /// <summary>
-        /// The time of hit, where 0 is colliding-at-the-start, and 1 is colliding-at-end.
+        /// The time of hit, where 0 is colliding-at-the-start, up to the distance from start to target.
         /// </summary>
         public float Time;
     }
