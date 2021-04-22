@@ -20,6 +20,8 @@ using static BepuUtilities.GatherScatter;
 
 namespace FGECore.PhysicsSystem.BepuCharacters
 {
+    // The majority of code in this file came from the BEPUPhysicsv2 demos.
+
     //Constraint descriptions provide an explicit mapping from the array-of-structures format to the internal array-of-structures-of-arrays format used by the solver.
     //Note that there is a separate description for the one and two body case- constraint implementations take advantage of the lack of a second body to reduce data gathering requirements.
     /// <summary>

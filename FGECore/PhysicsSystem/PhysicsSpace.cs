@@ -142,6 +142,16 @@ namespace FGECore.PhysicsSystem
             return helper.Entities;
         }
 
+        /// <summary>Converts a BEPU collidable instance to an FGE entity physics property, or null.</summary>
+        public EntityPhysicsProperty GetEntityFrom(CollidableReference collidable)
+        {
+            if (collidable.Mobility == CollidableMobility.Static)
+            {
+                return null;
+            }
+            return Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
+        }
+
         private struct RayTraceHelper : IRayHitHandler
         {
             public Func<EntityPhysicsProperty, bool> Filter;
@@ -152,7 +162,7 @@ namespace FGECore.PhysicsSystem
 
             public bool AllowTest(CollidableReference collidable)
             {
-                EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
+                EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
                 return entity == null || Filter == null || Filter(entity);
             }
 
@@ -163,7 +173,7 @@ namespace FGECore.PhysicsSystem
 
             public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
             {
-                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
             }
         }
 
@@ -194,7 +204,7 @@ namespace FGECore.PhysicsSystem
 
             public bool AllowTest(CollidableReference collidable)
             {
-                EntityPhysicsProperty entity = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
+                EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
                 return entity == null || Filter == null || Filter(entity);
             }
 
@@ -205,12 +215,12 @@ namespace FGECore.PhysicsSystem
 
             public void OnHit(ref float maximumT, float t, in Vector3 hitLocation, in Vector3 hitNormal, CollidableReference collidable)
             {
-                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
+                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
             }
 
             public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable)
             {
-                Hit = new CollisionResult() { Hit = true, Time = 0, HitEnt = Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value], Normal = Location.Zero, Position = Start };
+                Hit = new CollisionResult() { Hit = true, Time = 0, HitEnt = Space.GetEntityFrom(collidable), Normal = Location.Zero, Position = Start };
             }
         }
 

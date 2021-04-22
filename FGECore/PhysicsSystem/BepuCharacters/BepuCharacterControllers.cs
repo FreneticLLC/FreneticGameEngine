@@ -20,6 +20,8 @@ using System.Threading;
 
 namespace FGECore.PhysicsSystem.BepuCharacters
 {
+    // The majority of code in this file came from the BEPUPhysicsv2 demos.
+
     /// <summary>
     /// System that manages all the characters in a simulation. Responsible for updating movement constraints based on character goals and contact states.
     /// </summary>

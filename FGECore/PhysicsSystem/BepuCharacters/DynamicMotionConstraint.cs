@@ -17,8 +17,11 @@ using System.Diagnostics;
 using BepuPhysics.Constraints;
 using BepuUtilities.Memory;
 using static BepuUtilities.GatherScatter;
+
 namespace FGECore.PhysicsSystem.BepuCharacters
 {
+    // The majority of code in this file came from the BEPUPhysicsv2 demos.
+
     /// <summary>Not documented in BEPU source.</summary>
     public struct CharacterMotionAccumulatedImpulse
     {
