@@ -243,5 +243,11 @@ namespace FGECore.MathHelpers
             PrimitiveConversionHelper.Int32ToBytes(Y, outputBytes, offset + 4);
             PrimitiveConversionHelper.Int32ToBytes(Z, outputBytes, offset + (4 + 4));
         }
+
+        /// <summary>Converts the <see cref="Vector3i"/> to a <see cref="System.Numerics.Vector3"/>.</summary>
+        public System.Numerics.Vector3 ToNumerics()
+        {
+            return new System.Numerics.Vector3(X, Y, Z);
+        }
     }
 }
