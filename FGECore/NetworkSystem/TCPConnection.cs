@@ -147,8 +147,8 @@ namespace FGECore.NetworkSystem
                             {
                                 throw new Exception("Connection refused: Not a game engine proper connection.");
                             }
-                            str = str.Substring(HEADER.Length);
-                            int nextLine = str.IndexOf('\n');
+                            str = str[HEADER.Length..];
+                            int nextLine = str.IndexOf('\n', StringComparison.Ordinal);
                             string FGEData = str.Substring(0, nextLine);
                             string[] keys = FGEData.Split(':');
                             int chan = int.Parse(keys[0]);
@@ -157,7 +157,7 @@ namespace FGECore.NetworkSystem
                                 throw new Exception("Connection refused: Invalid (non-registered) channel.");
                             }
                             Channel = chan;
-                            str = str.Substring(nextLine + 1);
+                            str = str[(nextLine + 1)..];
                             OpeningInformation = str;
                             if (Network.WantsReady?.Invoke(this) ?? true)
                             {
@@ -254,6 +254,7 @@ namespace FGECore.NetworkSystem
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
     }

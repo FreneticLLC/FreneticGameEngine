@@ -329,7 +329,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 throw new Exception($"Compute shader file '{fileName}' does not exist.");
             }
-            int index = fileText.IndexOf(FILE_START);
+            int index = fileText.IndexOf(FILE_START, StringComparison.Ordinal);
             if (index < 0)
             {
                 index = 0;

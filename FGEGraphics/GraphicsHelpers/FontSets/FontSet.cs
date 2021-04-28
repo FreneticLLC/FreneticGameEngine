@@ -654,14 +654,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         iX = Engine.RandomHelper.Next(-1, 1);
                         iY = Engine.RandomHelper.Next(-1, 1);
                     }
-                    if (part.Flip)
-                    {
-                        part.Font.DrawSingleCharacterFlipped(chr, X + iX + nX, Y + iY, vbo, color);
-                    }
-                    else
-                    {
-                        part.Font.DrawSingleCharacter(chr, X + iX + nX, Y + iY, vbo, color);
-                    }
+                    part.Font.DrawSingleCharacter(chr, X + iX + nX, Y + iY, vbo, color, part.Flip);
                     nX += part.Font.RectForSymbol(txt).Width;
                 }
                 return nX;
@@ -724,7 +717,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// </summary>
         public string AutoTranslateFancyText(string text)
         {
-            int index = text.IndexOf("^[lang=");
+            int index = text.IndexOf("^[lang=", StringComparison.Ordinal);
             if (index == -1)
             {
                 return text;

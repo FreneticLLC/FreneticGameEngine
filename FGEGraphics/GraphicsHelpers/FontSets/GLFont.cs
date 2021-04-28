@@ -20,68 +20,54 @@ using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGECore.MathHelpers;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
 
-    /// <summary>
-    /// A class for rendering text within OpenGL.
-    /// </summary>
+    /// <summary>A class for rendering text within OpenGL.</summary>
     public class GLFont : IDisposable
     {
-        /// <summary>
-        /// The base Font engine.
-        /// </summary>
+        /// <summary>The base Font engine.</summary>
         public GLFontEngine Engine;
 
-        /// <summary>
-        /// The texture containing all character images.
-        /// </summary>
+        /// <summary>The texture containing all character images.</summary>
         public Texture BaseTexture;
 
-        /// <summary>
-        /// A list of all character locations on the base texture.
-        /// </summary>
-        public Dictionary<string, RectangleF> CharacterLocations;
+        /// <summary>A list of all symbol locations on the base texture.</summary>
+        public Dictionary<string, RectangleF> SymbolLocations;
 
-        /// <summary>
-        /// The name of the font.
-        /// </summary>
+        /// <summary>A list of all character locations on the base texture.</summary>
+        public Dictionary<char, RectangleF> CharacterLocations;
+
+        /// <summary>The name of the font.</summary>
         public string Name;
 
-        /// <summary>
-        /// The size of the font.
-        /// </summary>
+        /// <summary>The size of the font.</summary>
         public int Size;
 
-        /// <summary>
-        /// Whether the font is bold.
-        /// </summary>
+        /// <summary>Whether the font is bold.</summary>
         public bool Bold;
 
-        /// <summary>
-        /// Whether the font is italic.
-        /// </summary>
+        /// <summary>Whether the font is italic.</summary>
         public bool Italic;
 
-        /// <summary>
-        /// The font used to create this GLFont.
-        /// </summary>
+        /// <summary>The font used to create this GLFont.</summary>
         public Font Internal_Font;
 
-        /// <summary>
-        /// The backup font to use when the main font lacks a symbol.
-        /// </summary>
+        /// <summary>The backup font to use when the main font lacks a symbol.</summary>
         public Font BackupFont;
 
-        /// <summary>
-        /// How tall a rendered symbol is.
-        /// </summary>
+        /// <summary>How tall a rendered symbol is.</summary>
         public float Height;
 
-        /// <summary>
-        /// Constructs a GLFont.
-        /// </summary>
+        /// <summary>The size of <see cref="LowCodepointLocs"/>.</summary>
+        public const int LOW_CODEPOINT_RANGE_CAP = 8192;
+
+        /// <summary>Low code-point range symbol rectangle locations.</summary>
+        private readonly RectangleF[] LowCodepointLocs = new RectangleF[LOW_CODEPOINT_RANGE_CAP];
+
+        /// <summary>Constructs a GLFont.</summary>
         /// <param name="font">The CPU font to use.</param>
         /// <param name="eng">The backing engine.</param>
         public GLFont(Font font, GLFontEngine eng)
@@ -94,44 +80,52 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             Bold = font.Bold;
             Italic = font.Italic;
             Height = font.Height;
-            CharacterLocations = new Dictionary<string, RectangleF>(2048);
+            SymbolLocations = new Dictionary<string, RectangleF>(LOW_CODEPOINT_RANGE_CAP);
+            CharacterLocations = new Dictionary<char, RectangleF>(LOW_CODEPOINT_RANGE_CAP);
             Internal_Font = font;
             BackupFont = new Font(Engine.BackupFontFamily, font.SizeInPoints);
-            AddAll(StringInfo.GetTextElementEnumerator(Engine.textfile).AsEnumerable<string>().ToList());
+            AddAll(StringInfo.GetTextElementEnumerator(Engine.CoreTextFileCharacters).AsEnumerable<string>());
         }
 
-        /// <summary>
-        /// The format to render strings under.
-        /// </summary>
+        /// <summary>The format to render strings under.</summary>
         readonly static StringFormat RenderFormat;
 
-        /// <summary>
-        /// Prepares static helpers.
-        /// </summary>
+        /// <summary>Prepares static helpers.</summary>
         static GLFont()
         {
             RenderFormat = new StringFormat(StringFormat.GenericTypographic);
             RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap;
         }
 
-        /// <summary>
-        /// Causes the system to recognize any characters in the string, adding them to the GLFont mega texture if needed.
-        /// </summary>
-        /// <param name="inp">The text containing relevant characters.</param>
-        public void RecognizeCharacters(string inp)
+        /// <summary>Returns 'true' if a <see cref="RecognizeCharacters(string)"/> call might be needed for the text (characters outside of quick-lookup range, or characters not already recognized). This call exists for opti reasons only.</summary>
+        public bool AnyMightNeedAdding(string input)
         {
-            List<string> NeedsAdding = new List<string>();
-            foreach (string str in SeparateEmojiAndSpecialChars(inp).Distinct())
+            if (StringHasHighOrderCharacters(input))
             {
-                if (!CharacterLocations.ContainsKey(str))
+                return true;
+            }
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (!CharacterLocations.ContainsKey(input[i]))
                 {
-                    NeedsAdding.Add(str);
+                    return true;
                 }
             }
-            if (NeedsAdding.Count > 0)
+            return false;
+        }
+
+        /// <summary>Causes the system to recognize any characters in the string, adding them to the GLFont mega texture if needed.</summary>
+        /// <param name="input">The text containing relevant characters.</param>
+        public void RecognizeCharacters(string input)
+        {
+            if (!AnyMightNeedAdding(input))
             {
-                List<string> toadd = NeedsAdding;
-                while ((toadd = AddAll(toadd)) != null)
+                return;
+            }
+            IEnumerable<string> needsAdding = SeparateEmojiAndSpecialChars(input).Distinct().Where(s => !SymbolLocations.ContainsKey(s));
+            if (needsAdding.Any())
+            {
+                while ((needsAdding = AddAll(needsAdding)) != null)
                 {
                     Engine.Expand();
                 }
@@ -139,12 +133,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
         }
 
-        /// <summary>
-        /// Adds all the symbols to the GLFont mega texture.
-        /// </summary>
-        /// <param name="inp">The list of symbols.</param>
+        /// <summary>Adds all the symbols to the GLFont mega texture.</summary>
+        /// <param name="input">The list of symbols.</param>
         /// <returns>The list of symbols not able to added without expaninding, if any.</returns>
-        private List<string> AddAll(List<string> inp) // TODO: Enumerable input?
+        private IEnumerable<string> AddAll(IEnumerable<string> input)
         {
             using Graphics gfx = Graphics.FromImage(Engine.CurrentBMP);
             gfx.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
@@ -152,11 +144,12 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             int Y = Engine.CY;
             Brush brush = new SolidBrush(Color.White);
             Engine.CMinHeight = Math.Max((int)Height + 8, Engine.CMinHeight); // TODO: 8 -> ???
-            for (int i = 0; i < inp.Count; i++)
+            int processed = 0;
+            foreach (string inputSymbol in input)
             {
-                bool isEmoji = inp[i].Length > 2 && inp[i].StartsWith(":") && inp[i].EndsWith(":");
-                Font fnt = (inp[i].Length == 1 ? Internal_Font : BackupFont);
-                string chr = inp[i] == "\t" ? "    " : inp[i];
+                bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(":") && inputSymbol.EndsWith(":");
+                Font fnt = (inputSymbol.Length == 1 ? Internal_Font : BackupFont);
+                string chr = inputSymbol == "\t" ? "    " : inputSymbol;
                 float nwidth = Height;
                 if (!isEmoji)
                 {
@@ -176,16 +169,12 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         Engine.CX = X;
                         Engine.CY = Y;
                         List<string> toret = new List<string>();
-                        for (int x = i; x < inp.Count; x++)
-                        {
-                            toret.Add(inp[x]);
-                        }
-                        return toret;
+                        return input.Skip(processed);
                     }
                 }
                 if (isEmoji)
                 {
-                    Texture t = Engine.Textures.GetTexture("emoji/" + inp[i][1..^1]);
+                    Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
                     using Bitmap bmp = t.SaveToBMP();
                     gfx.DrawImage(bmp, new Rectangle(X, Y, (int)nwidth, (int)nwidth));
                 }
@@ -193,11 +182,16 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 {
                     gfx.DrawString(chr, fnt, brush, new PointF(X, Y), RenderFormat);
                 }
+                processed++;
                 RectangleF rect = new RectangleF(X, Y, nwidth, Height);
-                CharacterLocations[inp[i]] = rect;
-                if (chr.Length == 1 && chr[0] < 128)
+                SymbolLocations[inputSymbol] = rect;
+                if (chr.Length == 1)
                 {
-                    ASCIILocs[inp[i][0]] = rect;
+                    CharacterLocations[inputSymbol[0]] = rect;
+                    if (chr[0] < LOW_CODEPOINT_RANGE_CAP)
+                    {
+                        LowCodepointLocs[inputSymbol[0]] = rect;
+                    }
                 }
                 X += (int)Math.Ceiling(nwidth + 8); // TODO: 8 -> ???
             }
@@ -206,18 +200,11 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return null;
         }
 
-        /// <summary>
-        /// Removes the GLFont.
-        /// </summary>
+        /// <summary>Removes the GLFont.</summary>
         public void Remove()
         {
             Engine.Fonts.Remove(this);
         }
-
-        /// <summary>
-        /// ASCII range symbol rectangle locations.
-        /// </summary>
-        private readonly RectangleF[] ASCIILocs = new RectangleF[128];
 
         /// <summary>
         /// Gets the location of a symbol.
@@ -226,47 +213,67 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>A rectangle containing the precise location of a symbol.</returns>
         public RectangleF RectForSymbol(string symbol)
         {
-            if (symbol.Length == 1 && symbol[0] < 128)
+            if (symbol.Length == 1 && symbol[0] < LOW_CODEPOINT_RANGE_CAP)
             {
-                return ASCIILocs[symbol[0]];
+                return LowCodepointLocs[symbol[0]];
+            }
+            if (SymbolLocations.TryGetValue(symbol, out RectangleF rect))
+            {
+                return rect;
+            }
+            return LowCodepointLocs['?'];
+        }
+
+        /// <summary>
+        /// Gets the location of a symbol.
+        /// </summary>
+        /// <param name="symbol">The symbol to find.</param>
+        /// <returns>A rectangle containing the precise location of a symbol.</returns>
+        public RectangleF RectForSymbol(char symbol)
+        {
+            if (symbol < LOW_CODEPOINT_RANGE_CAP)
+            {
+                return LowCodepointLocs[symbol];
             }
             if (CharacterLocations.TryGetValue(symbol, out RectangleF rect))
             {
                 return rect;
             }
-            return ASCIILocs['?'];
+            return LowCodepointLocs['?'];
         }
 
         /// <summary>
         /// Draws a single symbol at a specified location.
         /// </summary>
-        /// <param name="symbol">The symbol to draw..</param>
+        /// <param name="symbol">The symbol to draw.</param>
         /// <param name="X">The X location to draw it at.</param>
         /// <param name="Y">The Y location to draw it at.</param>
         /// <param name="vbo">The VBO to render with.</param>
         /// <param name="color">The color of the character.</param>
+        /// <param name="flip">Whether to flip the character.</param>
         /// <returns>The length of the character in pixels.</returns>
-        public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color)
+        public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
         {
             RectangleF rec = RectForSymbol(symbol);
-            TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
+            TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y: (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
                 (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
             return rec.Width;
         }
 
         /// <summary>
-        /// Draws a single symbol at a specified location, flipped.
+        /// Draws a single character at a specified location.
         /// </summary>
-        /// <param name="symbol">The symbol to draw..</param>
+        /// <param name="character">The character to draw.</param>
         /// <param name="X">The X location to draw it at.</param>
         /// <param name="Y">The Y location to draw it at.</param>
         /// <param name="vbo">The VBO to render with.</param>
-        /// <param name="color">The color.</param>
+        /// <param name="color">The color of the character.</param>
+        /// <param name="flip">Whether to flip the character.</param>
         /// <returns>The length of the character in pixels.</returns>
-        public float DrawSingleCharacterFlipped(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color)
+        public float DrawSingleCharacter(char character, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
         {
-            RectangleF rec = RectForSymbol(symbol);
-            TextVBOBuilder.AddQuad(X, Y + rec.Height, X + rec.Width, Y, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
+            RectangleF rec = RectForSymbol(character);
+            TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y : (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
                 (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
             return rec.Width;
         }
@@ -283,30 +290,29 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>The length of the string in pixels.</returns>
         public float DrawString(string str, float X, float Y, Color4F color, TextVBOBuilder vbo, bool flip = false)
         {
-            IEnumerable<string> strs = SeparateEmojiAndSpecialChars(str);
             float nX = 0;
-            if (flip)
+            if (StringHasHighOrderCharacters(str))
             {
-                foreach (string stri in strs)
+                foreach (string stri in SeparateEmojiAndSpecialChars(str))
                 {
                     if (stri == "\n")
                     {
                         Y += Height;
                         nX = 0;
                     }
-                    nX += DrawSingleCharacterFlipped(stri, X + nX, Y, vbo, color);
+                    nX += DrawSingleCharacter(stri, X + nX, Y, vbo, color, flip);
                 }
             }
             else
             {
-                foreach (string stri in strs)
+                foreach (char c in str)
                 {
-                    if (stri == "\n")
+                    if (c == '\n')
                     {
                         Y += Height;
                         nX = 0;
                     }
-                    nX += DrawSingleCharacter(stri, X + nX, Y, vbo, color);
+                    nX += DrawSingleCharacter(c, X + nX, Y, vbo, color, flip);
                 }
             }
             return nX;
@@ -317,64 +323,98 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// For monospaced fonts, this is (characterCount * width).
         /// This code assumes non-monospaced, and as such, grabs the width of each character before reading it.
         /// </summary>
-        /// <param name="str">The string to measure.</param>
+        /// <param name="text">The string to measure.</param>
         /// <returns>The length of the string.</returns>
-        public float MeasureString(string str)
+        public float MeasureString(string text)
         {
             float X = 0;
-            foreach (string stx in SeparateEmojiAndSpecialChars(str))
+            // Opti: don't do advanced separation if not needed, as character based lookup is faster.
+            if (StringHasHighOrderCharacters(text))
             {
-                X += RectForSymbol(stx).Width;
+                foreach (string symbol in SeparateEmojiAndSpecialChars(text))
+                {
+                    X += RectForSymbol(symbol).Width;
+                }
+            }
+            else
+            {
+                foreach (char c in text)
+                {
+                    X += RectForSymbol(c).Width;
+                }
             }
             return X;
         }
 
-        /// <summary>
-        /// Definitely not valid emoji values.
-        /// </summary>
-        public HashSet<string> InvalidEmoji = new HashSet<string>();
+        /// <summary>Already-tested emoji names, with a boolean indicating whether they are valid.</summary>
+        public Dictionary<string, bool> TestedEmoji = new Dictionary<string, bool>();
 
-        /// <summary>
-        /// Returns whether the string is an emoji name.
-        /// </summary>
+        /// <summary>Returns whether the string is an emoji name.</summary>
         /// <param name="str">The string.</param>
         /// <returns>Whether it's an emoji name.</returns>
         public bool IsEmojiName(string str)
         {
-            if (InvalidEmoji.Contains(str))
+            if (TestedEmoji.TryGetValue(str, out bool result))
             {
-                return false;
+                return result;
             }
-            return Engine.Files.FileExists("textures/emoji/" + str + ".png");
+            result = Engine.Files.FileExists($"textures/emoji/{str}.png");
+            TestedEmoji[str] = result;
+            return result;
+        }
+        
+        /// <summary>Returns 'true' if the string contains any high-order characters that require multiple 'char' instances per symbol, such as emoji or obscure languages. This is mainly used for opti reasons.</summary>
+        public static bool StringHasHighOrderCharacters(string text)
+        {
+            int colon = -1;
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (c == ':')
+                {
+                    if (colon != -1)
+                    {
+                        return true;
+                    }
+                    colon = i;
+                }
+                else if (c == ' ' || c == '\n')
+                {
+                    colon = -1;
+                }
+                // Note: This range is "surrogate code points", which is how .NET 5.0 encodes multi-character symbols (per UTF-16 standard).
+                if (c >= 0xD800 && c <= 0xDFFF)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        /// <summary>
-        /// Separates emoji and special characters from a complex string.
-        /// </summary>
-        /// <param name="inp">The input string.</param>
+        /// <summary>Separates emoji and special characters from a complex string.</summary>
+        /// <param name="input">The input string.</param>
         /// <returns>The enumerable of emojis, characters, and special characters.</returns>
-        public IEnumerable<string> SeparateEmojiAndSpecialChars(string inp)
+        public IEnumerable<string> SeparateEmojiAndSpecialChars(string input)
         {
             int lstart = 0;
-            for (int i = 0; i < inp.Length; i++)
+            for (int i = 0; i < input.Length; i++)
             {
-                if (inp[i] == ':')
+                if (input[i] == ':')
                 {
-                    for (int x = i + 1; x < inp.Length; x++)
+                    for (int x = i + 1; x < input.Length; x++)
                     {
-                        if (inp[x] == ' ')
+                        if (input[x] == ' ')
                         {
                             break;
                         }
-                        else if (inp[x] == ':')
+                        else if (input[x] == ':')
                         {
-                            string split = inp[(i + 1)..x];
+                            string split = input[(i + 1)..x];
                             if (!IsEmojiName(split))
                             {
-                                InvalidEmoji.Add(split);
                                 break;
                             }
-                            string pre_pieces = inp[lstart..i];
+                            string pre_pieces = input[lstart..i];
                             foreach (string stx in StringInfo.GetTextElementEnumerator(pre_pieces).AsEnumerable<string>())
                             {
                                 yield return stx;
@@ -387,16 +427,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     }
                 }
             }
-            string final_pieces = inp[lstart..];
+            string final_pieces = input[lstart..];
             foreach (string stx in StringInfo.GetTextElementEnumerator(final_pieces).AsEnumerable<string>())
             {
                 yield return stx;
             }
         }
 
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -408,9 +446,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
         }
 
-        /// <summary>
-        /// Disposes the font instance.
-        /// </summary>
+        /// <summary>Disposes the font instance.</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);

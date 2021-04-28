@@ -29,9 +29,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
     /// </summary>
     public class GLFontEngine : IDisposable
     {
-        /// <summary>
-        /// Constructs a GLFontEngine. Does not initialize.
-        /// </summary>
+        /// <summary>Constructs a GLFontEngine. Does not initialize.</summary>
         /// <param name="teng">The texture system.</param>
         /// <param name="sengine">The shader system.</param>
         public GLFontEngine(TextureEngine teng, ShaderEngine sengine)
@@ -40,44 +38,28 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             Shaders = sengine;
         }
 
-        /// <summary>
-        /// The texture system.
-        /// </summary>
+        /// <summary>The texture system.</summary>
         public TextureEngine Textures;
 
-        /// <summary>
-        /// The shader system.
-        /// </summary>
+        /// <summary>The shader system.</summary>
         public ShaderEngine Shaders;
 
-        /// <summary>
-        /// The default font.
-        /// </summary>
+        /// <summary>The default font.</summary>
         public GLFont Standard;
 
-        /// <summary>
-        /// A full list of loaded GLFonts.
-        /// </summary>
+        /// <summary>A full list of loaded GLFonts.</summary>
         public List<GLFont> Fonts;
 
-        /// <summary>
-        /// Set this to modify the DPI scaling (Particularly in the user screen has a non-100% DPI).
-        /// </summary>
+        /// <summary>Set this to modify the DPI scaling (Particularly if the user screen has a non-100% DPI).</summary>
         public float DPIScale = 1f;
         
-        /// <summary>
-        /// The default width of the GLFont mega texture.
-        /// </summary>
+        /// <summary>The default width of the GLFont mega texture.</summary>
         public const int DEFAULT_TEXTURE_SIZE_WIDTH = 2048;
 
-        /// <summary>
-        /// The default height of the GLFont mega texture.
-        /// </summary>
+        /// <summary>The default height of the GLFont mega texture.</summary>
         public const int DEFAULT_TEXTURE_SIZE_HEIGHT = 2048;
 
-        /// <summary>
-        /// Expands the CPU-Side GLFont mega texture. Does not update to the GPU.
-        /// </summary>
+        /// <summary>Expands the CPU-Side GLFont mega texture. Does not update to the GPU.</summary>
         public void Expand()
         {
             CurrentHeight *= 2;
@@ -91,34 +73,25 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             CurrentBMP = bmp2;
         }
 
-        /// <summary>
-        /// The current height of the GLFont mega texture.
-        /// </summary>
+        /// <summary>The current height of the GLFont mega texture.</summary>
         public int CurrentHeight = DEFAULT_TEXTURE_SIZE_HEIGHT;
 
-        /// <summary>
-        /// The currently used CPU-Side GLFont mega texture.
-        /// </summary>
+        /// <summary>The currently used CPU-Side GLFont mega texture.</summary>
         public Bitmap CurrentBMP;
 
-        /// <summary>
-        /// The current X coordinate.
-        /// </summary>
+        /// <summary>The GPU-Side mega texture ID.</summary>
+        public int TextureMain = -1;
+
+        /// <summary>The current X coordinate in the GLFont mega texture.</summary>
         public int CX = 26;
 
-        /// <summary>
-        /// The current Y coordinate.
-        /// </summary>
+        /// <summary>The current Y coordinate in the GLFont mega texture.</summary>
         public int CY = 6;
 
-        /// <summary>
-        /// The current minimum height of the GLFont mega texture.
-        /// </summary>
+        /// <summary>The current minimum height of the GLFont mega texture.</summary>
         public int CMinHeight = 20;
 
-        /// <summary>
-        /// Update the CPU-Side mega texture onto the GPU.
-        /// </summary>
+        /// <summary>Update the CPU-Side mega texture onto the GPU.</summary>
         public void UpdateTexture()
         {
             if (TextureMain != -1)
@@ -138,24 +111,19 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        /// <summary>
-        /// Keep this public and valid: if it gets released, the fonts it contains are lost for some reason!
-        /// </summary>
-        public PrivateFontCollection pfc;
+        /// <summary>Keep this public and valid: if it gets released by the GC, the fonts it contains are lost for some reason!</summary>
+        public PrivateFontCollection InternalFontCollection;
 
-        /// <summary>
-        /// The backup font that contains emojis, etc.
-        /// </summary>
+        /// <summary>The backup font that contains emojis, etc.</summary>
         public FontFamily BackupFontFamily;
 
-        /// <summary>
-        /// The backing file system.
-        /// </summary>
+        /// <summary>The backing file system.</summary>
         public FileEngine Files;
 
-        /// <summary>
-        /// Prepares the font system.
-        /// </summary>
+        /// <summary>The core font name to use that has a .ttf file.</summary>
+        public string CoreFontPreference = "sourcecodepro";
+
+        /// <summary>Prepares the font system.</summary>
         /// <param name="files">The backing file system.</param>
         public void Init(FileEngine files)
         {
@@ -184,65 +152,64 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             int family_priority = 0;
             for (int i = 0; i < families.Length; i++)
             {
-                if (family_priority < 20 && families[i].Name.ToLowerFast() == "segoe ui emoji")
+                string familyName = families[i].Name.ToLowerFast();
+                if (family_priority < 20 && familyName == "segoe ui emoji")
                 {
                     family = families[i];
                     family_priority = 20;
                 }
-                else if (family_priority < 10 && families[i].Name.ToLowerFast() == "segoe ui")
+                else if (family_priority < 10 && familyName == "segoe ui")
                 {
                     family = families[i];
                     family_priority = 10;
                 }
-                else if (family_priority < 5 && families[i].Name.ToLowerFast() == "arial")
+                else if (family_priority < 5 && familyName == "arial")
                 {
                     family = families[i];
                     family_priority = 5;
                 }
-                else if (family_priority < 2 && families[i].Name.ToLowerFast() == "calibri")
+                else if (family_priority < 2 && familyName == "calibri")
                 {
                     family = families[i];
                     family_priority = 2;
                 }
-                else if (family_priority < 1 && families[i].Name.ToLowerFast() == "dejavu serif")
+                else if (family_priority < 1 && familyName == "dejavu serif")
                 {
                     family = families[i];
                     family_priority = 1;
                 }
             }
             BackupFontFamily = family;
-            SysConsole.Output(OutputType.INIT, "Select backup font: " + BackupFontFamily.Name);
-            string fname = "sourcecodepro";
-            try
+            SysConsole.Output(OutputType.INIT, $"Select backup font: {BackupFontFamily.Name}");
+            if (!string.IsNullOrWhiteSpace(CoreFontPreference))
             {
-                pfc = new PrivateFontCollection();
-                // TODO: Move out of data directory, as we don't use the file handler at all anyway?
-                pfc.AddFontFile(Environment.CurrentDirectory + "/data/fonts/" + fname + ".ttf");
-                family = pfc.Families[0];
-                family_priority = 100;
-            }
-            catch (Exception ex)
-            {
-                SysConsole.Output(OutputType.WARNING, "Loading " + fname + ": " + ex.ToString());
+                try
+                {
+                    InternalFontCollection = new PrivateFontCollection();
+                    // TODO: Move out of data directory, as we don't use the file handler at all anyway?
+                    InternalFontCollection.AddFontFile($"{Environment.CurrentDirectory}/data/fonts/{CoreFontPreference}.ttf");
+                    family = InternalFontCollection.Families[0];
+                    family_priority = 100;
+                }
+                catch (Exception ex)
+                {
+                    SysConsole.Output(OutputType.WARNING, $"Loading {CoreFontPreference}: {ex}");
+                }
             }
             Font def = new Font(family, 12);
             Standard = new GLFont(def, this);
             Fonts.Add(Standard);
-            SysConsole.Output(OutputType.INIT, "Select main font: " + family.Name);
+            SysConsole.Output(OutputType.INIT, $"Select main font: {family.Name}");
             UpdateTexture();
         }
 
-        /// <summary>
-        /// The text file string to base letters on.
-        /// </summary>
-        public string textfile;
+        /// <summary>The text file string to base letters on.</summary>
+        public string CoreTextFileCharacters;
 
-        /// <summary>
-        /// Loads the character list file.
-        /// </summary>
+        /// <summary>Loads the character list file.</summary>
         public void LoadTextFile()
         {
-            textfile = "";
+            CoreTextFileCharacters = "";
             string[] datas;
             if (Files.TryReadFileText("info/characters.dat", out string charsFile))
             {
@@ -250,30 +217,25 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
             else
             {
-                datas = new string[] { " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=~`[]{};:'\",./<>?\\| " };
+                datas = new string[] { " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=~`[]{};:'\",./<>?\\|\x00A0" };
             }
             for (int i = 0; i < datas.Length; i++)
             {
                 if (datas[i].Length > 0 && !datas[i].StartsWith("//"))
                 {
-                    textfile += datas[i];
+                    CoreTextFileCharacters += datas[i];
                 }
             }
             string tempfile = "?";
-            for (int i = 0; i < textfile.Length; i++)
+            for (int i = 0; i < CoreTextFileCharacters.Length; i++)
             {
-                if (!tempfile.Contains(textfile[i]))
+                if (!tempfile.Contains(CoreTextFileCharacters[i]))
                 {
-                    tempfile += textfile[i].ToString();
+                    tempfile += CoreTextFileCharacters[i].ToString();
                 }
             }
-            textfile = tempfile;
+            CoreTextFileCharacters = tempfile;
         }
-
-        /// <summary>
-        /// The GPU-Side mega texture ID.
-        /// </summary>
-        public int TextureMain = -1;
 
         /// <summary>
         /// Gets the font matching the specified settings.
@@ -320,9 +282,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return f;
         }
 
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -330,15 +290,17 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             {
                 Standard.Dispose();
                 CurrentBMP.Dispose();
-                pfc.Dispose();
+                if (InternalFontCollection != null)
+                {
+                    InternalFontCollection.Dispose();
+                }
             }
         }
 
-        /// <summary>
-        /// Disposes the font engine.
-        /// </summary>
+        /// <summary>Disposes the font engine.</summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
     }
