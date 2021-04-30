@@ -23,8 +23,8 @@ namespace FGECore.CoreSystems
         /// <summary>Random helper object.</summary>
         public MTRandom RandomHelper = new MTRandom();
 
-        /// <summary>The source object for this engine. Set to any tag style constant reference you find most helpful to keep!</summary>
-        public Object Source;
+        /// <summary>The source object for this engine.</summary>
+        public Object Source => OwningInstanceGeneric.Source;
 
         /// <summary>Current frame delta (seconds).</summary>
         public double Delta;

@@ -63,7 +63,7 @@ namespace FGECore.PropertySystem
                 // Core Helpers
                 TypeSavers.Add(typeof(bool), new PropertySaverLoader()
                 {
-                    Saver = (o) => new byte[] { ((bool)o) ? (byte)1 : (byte)0 },
+                    Saver = (o) => new byte[] { ((bool)o) ? 1 : 0 },
                     Loader = (b) => b[0] != 0,
                     SaveString = "C/bool"
                 });

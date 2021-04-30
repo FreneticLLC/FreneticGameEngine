@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -94,6 +95,13 @@ namespace FGECore.PhysicsSystem
             Space.Internal.Characters.Initialize(simulation);
         }
 
+        /// <summary>Helper to get a <see cref="EntityPhysicsProperty"/> from a <see cref="CollidableReference"/>, or null.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public EntityPhysicsProperty PhysPropForCollidable(CollidableReference collidable)
+        {
+            return collidable.Mobility == CollidableMobility.Dynamic ? Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value] : null;
+        }
+
         /// <summary>
         /// Chooses whether to allow contact generation to proceed for two overlapping collidables.
         /// </summary>
@@ -107,8 +115,8 @@ namespace FGECore.PhysicsSystem
             {
                 return false;
             }
-            EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[a.BodyHandle.Value];
-            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[b.BodyHandle.Value];
+            EntityPhysicsProperty aEntity = PhysPropForCollidable(a);
+            EntityPhysicsProperty bEntity = PhysPropForCollidable(b);
             if (aEntity == null || bEntity == null)
             {
                 EntityPhysicsProperty validOne = (aEntity ?? bEntity);
@@ -153,8 +161,8 @@ namespace FGECore.PhysicsSystem
         /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
         public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
         {
-            EntityPhysicsProperty aEntity = Space.Internal.EntitiesByPhysicsID[pair.A.BodyHandle.Value];
-            EntityPhysicsProperty bEntity = Space.Internal.EntitiesByPhysicsID[pair.B.BodyHandle.Value];
+            EntityPhysicsProperty aEntity = PhysPropForCollidable(pair.A);
+            EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
             if (aEntity == null || bEntity == null)
             {
                 EntityPhysicsProperty validOne = (aEntity ?? bEntity);

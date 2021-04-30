@@ -27,7 +27,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
 
         /// <summary>Gets the BEPU shape index.</summary>
         public TypedIndex ShapeIndex;
-#warning TODO: shape indices need some form of lookup table to avoid duplication
+#warning TODO: shape indices need some form of lookup table to avoid duplication - or automatic removal
 
         /// <summary>Gets the BEPU convex shape (if possible).</summary>
         public IShape BepuShape;

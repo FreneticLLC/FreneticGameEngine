@@ -29,7 +29,12 @@ namespace FGECore.StackNoteSystem
         /// <summary>Gets a string output of the current stack notes.</summary>
         public override string ToString()
         {
-            return string.Concat(Notes.Take(Depth).Select(note => $" -> {note}\n")) + "\nOver depth:\n" + string.Concat(Notes.Skip(Depth).Take(MaxDepth - Depth).Select(note => $" -> {note}\n"));
+            string main = string.Concat(Notes.Take(Depth).Select(note => $" -> {note}\n"));
+            if (MaxDepth > Depth)
+            {
+                return main + "\nOver depth:\n" + string.Concat(Notes.Skip(Depth).Take(MaxDepth - Depth).Select(note => $" -> {note}\n"));
+            }
+            return main;
         }
 
         /// <summary>Pushes a new entry to the note stack.</summary>
