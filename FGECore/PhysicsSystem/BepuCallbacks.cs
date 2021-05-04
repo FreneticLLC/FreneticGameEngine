@@ -65,7 +65,7 @@ namespace FGECore.PhysicsSystem
                 EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
                 if (physicsEntity != null)
                 {
-                    velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
+                    velocity.Linear += physicsEntity.ActualGravity.ToNumerics() * Delta;
                     float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
                     float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
                     velocity.Linear *= linearDampingDt;

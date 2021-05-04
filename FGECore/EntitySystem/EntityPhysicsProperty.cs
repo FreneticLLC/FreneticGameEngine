@@ -125,7 +125,7 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /// <summary>Gets or sets the entity's gravity.</summary>
+        /// <summary>Gets or sets the entity's custom gravity value. Can be unset to use gravity shared gravity value.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location Gravity
@@ -140,6 +140,9 @@ namespace FGECore.EntitySystem
                 GravityIsSet = true;
             }
         }
+
+        /// <summary>Gets the actual current gravity value.</summary>
+        public Location ActualGravity => GravityIsSet ? Internal.Gravity : PhysicsWorld.Gravity;
 
         /// <summary>The entity's friction coefficient.</summary>
         [PropertyDebuggable]
