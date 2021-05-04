@@ -66,8 +66,8 @@ namespace FGECore.PhysicsSystem
                 if (physicsEntity != null)
                 {
                     velocity.Linear += (physicsEntity.GravityIsSet ? physicsEntity.Gravity : Space.Gravity).ToNumerics() * Delta;
-                    float linearDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.LinearDamping, 0, 1), Delta); // TODO: These clamps look wrong. Should be done in advance, or should surround the pow call?
-                    float angularDampingDt = MathF.Pow(MathHelper.Clamp(1 - physicsEntity.AngularDamping, 0, 1), Delta);
+                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
+                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
                     velocity.Linear *= linearDampingDt;
                     velocity.Angular *= angularDampingDt;
                 }

@@ -151,12 +151,12 @@ namespace FGECore.EntitySystem
         [PropertyAutoSavable]
         public float Bounciness = 0.25f;
 
-        /// <summary>The entity's linear damping (per second) rate.</summary>
+        /// <summary>The entity's linear damping (per second) rate. Must be from 0 to 1, inclusive.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LinearDamping = 0.03f;
 
-        /// <summary>The entity's angular damping (per second) rate.</summary>
+        /// <summary>The entity's angular damping (per second) rate. Must be from 0 to 1, inclusive.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float AngularDamping = 0.03f;
