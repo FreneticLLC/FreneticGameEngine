@@ -37,7 +37,8 @@ namespace FGECore.EntitySystem
         /// <summary>The spawned physics body handle.</summary>
         public BodyReference SpawnedBody; // Set by spawner.
 
-        /// <summary>Event fired when this entity collides with another.</summary>
+        /// <summary>Event fired when this entity collides with another.
+        /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
         public Action<CollisionEvent> CollisionHandler; // Set by client.
 
         /// <summary>The shape of the physics body.</summary>

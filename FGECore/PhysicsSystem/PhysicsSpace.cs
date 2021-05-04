@@ -173,7 +173,10 @@ namespace FGECore.PhysicsSystem
 
             public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
             {
-                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                if (Hit == null || t < Hit.Time)
+                {
+                    Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                }
             }
         }
 
@@ -215,7 +218,10 @@ namespace FGECore.PhysicsSystem
 
             public void OnHit(ref float maximumT, float t, in Vector3 hitLocation, in Vector3 hitNormal, CollidableReference collidable)
             {
-                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
+                if (Hit == null || t < Hit.Time)
+                {
+                    Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = hitNormal.ToLocation(), Position = hitLocation.ToLocation() };
+                }
             }
 
             public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable)
