@@ -22,11 +22,24 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntitySphereShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntitySphereShape"/> of the specified size.</summary>
-        public EntitySphereShape(float size, PhysicsSpace space)
+        public EntitySphereShape(float size, PhysicsSpace space) : base(space)
         {
-            Sphere sphere = new Sphere(size);
-            BepuShape = sphere;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(sphere);
+            BepuShape = new Sphere(size);
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntitySphereShape Register()
+        {
+            EntitySphereShape dup = MemberwiseClone() as EntitySphereShape;
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Sphere)BepuShape);
+            return dup;
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            Sphere sphere = (Sphere)BepuShape;
+            return $"{nameof(EntitySphereShape)}({sphere.Radius})";
         }
     }
 }

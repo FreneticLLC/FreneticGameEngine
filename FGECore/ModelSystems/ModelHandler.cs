@@ -237,12 +237,12 @@ namespace FGECore.ModelSystems
             Vector3[] vertices = GetCollisionVertices(input);
             verts = vertices.Length;
             int tris = vertices.Length / 3;
-            space.Internal.CoreSimulation.BufferPool.Take(tris, out Buffer<Triangle> triangles);
+            space.Internal.Pool.Take(tris, out Buffer<Triangle> triangles);
             for (int i = 0; i < tris; i++)
             {
                 triangles[i] = new Triangle(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
             }
-            return new Mesh(triangles, Vector3.One, space.Internal.CoreSimulation.BufferPool);
+            return new Mesh(triangles, Vector3.One, space.Internal.Pool);
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace FGECore.ModelSystems
         {
             Span<Vector3> vertices = new Span<Vector3>(GetCollisionVertices(input));
             verts = vertices.Length;
-            ConvexHullHelper.CreateShape(vertices, space.Internal.CoreSimulation.BufferPool, out center, out ConvexHull hull);
+            ConvexHullHelper.CreateShape(vertices, space.Internal.Pool, out center, out ConvexHull hull);
             return hull;
         }
     }

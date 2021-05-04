@@ -21,10 +21,24 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntityConvexHullShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntityConvexHullShape"/> from the specified hull object.</summary>
-        public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space)
+        public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space) : base(space)
         {
             BepuShape = hull;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(hull);
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntityConvexHullShape Register()
+        {
+            EntityConvexHullShape dup = MemberwiseClone() as EntityConvexHullShape;
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((ConvexHull) BepuShape);
+            return dup;
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            ConvexHull hull = (ConvexHull)BepuShape;
+            return $"{nameof(EntityConvexHullShape)}({hull.Points.Length} points)";
         }
     }
 }

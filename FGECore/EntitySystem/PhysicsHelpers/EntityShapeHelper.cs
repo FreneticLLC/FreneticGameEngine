@@ -22,12 +22,33 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
     public abstract class EntityShapeHelper
     {
+        /// <summary>Constructs the <see cref="EntityShapeHelper"/>.</summary>
+        public EntityShapeHelper(PhysicsSpace _space)
+        {
+            Space = _space;
+        }
+
         /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
         public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
 
-        /// <summary>Gets the BEPU shape index.</summary>
+        /// <summary>The space this shape is registered into.</summary>
+        public PhysicsSpace Space;
+
+        /// <summary>The BEPU shape index if registered.</summary>
         public TypedIndex ShapeIndex;
-#warning TODO: shape indices need some form of lookup table to avoid duplication - or automatic removal
+
+        /// <summary>Unregisters the shape from the physics space, invalidating it.</summary>
+        public virtual void Unregister()
+        {
+            if (ShapeIndex.Exists)
+            {
+                Space.Internal.CoreSimulation.Shapes.Remove(ShapeIndex);
+                ShapeIndex = default;
+            }
+        }
+
+        /// <summary>Registers the shape into the physics space, and returns the BEPU shape index.</summary>
+        public abstract EntityShapeHelper Register();
 
         /// <summary>Gets the BEPU convex shape (if possible).</summary>
         public IShape BepuShape;
@@ -43,15 +64,6 @@ namespace FGECore.EntitySystem.PhysicsHelpers
             {
                 throw new NotImplementedException();
             }
-        }
-
-        /// <summary>
-        /// Gets the BEPU Shape offset, if any.
-        /// </summary>
-        /// <returns>The shape offset, or Zero if none.</returns>
-        public virtual Vector3 GetCenterOffset()
-        {
-            return Vector3.Zero;
         }
     }
 }

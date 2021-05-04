@@ -242,7 +242,7 @@ namespace FGECore.PhysicsSystem
         public CollisionResult ConvexTraceSingle<TShape>(TShape shape, Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null) where TShape : unmanaged, IConvexShape
         {
             ConvexTraceHelper helper = new ConvexTraceHelper() { Space = this, Filter = filter, Start = start };
-            Internal.CoreSimulation.Sweep(shape, new RigidPose(start.ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(dir.ToNumerics(), Vector3.Zero), (float)dist, Internal.CoreSimulation.BufferPool, ref helper);
+            Internal.CoreSimulation.Sweep(shape, new RigidPose(start.ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(dir.ToNumerics(), Vector3.Zero), (float)dist, Internal.Pool, ref helper);
             return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
         }
 

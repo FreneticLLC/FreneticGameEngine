@@ -24,16 +24,51 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntityCapsuleShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntityCapsuleShape"/> of the specified size.</summary>
-        public EntityCapsuleShape(float radius, float height, PhysicsSpace space)
+        public EntityCapsuleShape(float radius, float height, PhysicsSpace space) : base(space)
         {
-            Capsule capsule = new Capsule(radius, height);
-            TypedIndex capsuleIndex = space.Internal.CoreSimulation.Shapes.Add(capsule);
-            space.Internal.CoreSimulation.BufferPool.Take(1, out Buffer<CompoundChild> buffer);
-            buffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
-            buffer[0].ShapeIndex = capsuleIndex;
-            Compound compound = new Compound(buffer);
-            BepuShape = capsule;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(compound);
+            BepuShape = new Capsule(radius, height);
+        }
+
+        /// <summary>The index of the capsule sub-component, if registered.</summary>
+        public TypedIndex CapsuleIndex;
+
+        /// <summary>The buffer for the shape's compound child, if registered.</summary>
+        public Buffer<CompoundChild> CompoundBuffer;
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntityCapsuleShape Register()
+        {
+            EntityCapsuleShape dup = MemberwiseClone() as EntityCapsuleShape;
+            dup.CapsuleIndex = Space.Internal.CoreSimulation.Shapes.Add((Capsule) BepuShape);
+            Space.Internal.Pool.Take(1, out dup.CompoundBuffer);
+            dup.CompoundBuffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
+            dup.CompoundBuffer[0].ShapeIndex = dup.CapsuleIndex;
+            Compound compound = new Compound(dup.CompoundBuffer);
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(compound);
+            return dup;
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Unregister"/>.</summary>
+        public override void Unregister()
+        {
+            if (CapsuleIndex.Exists)
+            {
+                Space.Internal.CoreSimulation.Shapes.Remove(CapsuleIndex);
+                CapsuleIndex = default;
+            }
+            base.Unregister();
+            if (CompoundBuffer.Allocated)
+            {
+                Space.Internal.Pool.Return(ref CompoundBuffer);
+                CompoundBuffer = default;
+            }
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            Capsule capsule = (Capsule)BepuShape;
+            return $"{nameof(EntityCapsuleShape)}(radius={capsule.Radius}, length={capsule.Length})";
         }
     }
 }

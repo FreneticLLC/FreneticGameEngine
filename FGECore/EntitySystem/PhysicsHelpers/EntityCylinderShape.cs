@@ -25,16 +25,51 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntityCylinderShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntityCylinderShape"/> of the specified size.</summary>
-        public EntityCylinderShape(float radius, float height, PhysicsSpace space)
+        public EntityCylinderShape(float radius, float height, PhysicsSpace space) : base(space)
         {
-            Cylinder cylinder = new Cylinder(radius, height);
-            TypedIndex cylinderIndex = space.Internal.CoreSimulation.Shapes.Add(cylinder);
-            space.Internal.CoreSimulation.BufferPool.Take(1, out Buffer<CompoundChild> buffer);
-            buffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
-            buffer[0].ShapeIndex = cylinderIndex;
-            Compound compound = new Compound(buffer);
-            BepuShape = cylinder;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(compound);
+            BepuShape = new Cylinder(radius, height);
+        }
+
+        /// <summary>The index of the cylinder sub-component, if registered.</summary>
+        public TypedIndex CylinderIndex;
+
+        /// <summary>The buffer for the shape's compound child, if registered.</summary>
+        public Buffer<CompoundChild> CompoundBuffer;
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntityCylinderShape Register()
+        {
+            EntityCylinderShape dup = MemberwiseClone() as EntityCylinderShape;
+            dup.CylinderIndex = Space.Internal.CoreSimulation.Shapes.Add((Cylinder)BepuShape);
+            Space.Internal.Pool.Take(1, out dup.CompoundBuffer);
+            dup.CompoundBuffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
+            dup.CompoundBuffer[0].ShapeIndex = dup.CylinderIndex;
+            Compound compound = new Compound(dup.CompoundBuffer);
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(compound);
+            return dup;
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Unregister"/>.</summary>
+        public override void Unregister()
+        {
+            if (CylinderIndex.Exists)
+            {
+                Space.Internal.CoreSimulation.Shapes.Remove(CylinderIndex);
+                CylinderIndex = default;
+            }
+            base.Unregister();
+            if (CompoundBuffer.Allocated)
+            {
+                Space.Internal.Pool.Return(ref CompoundBuffer);
+                CompoundBuffer = default;
+            }
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            Cylinder cylinder = (Cylinder)BepuShape;
+            return $"{nameof(EntityCylinderShape)}(radius={cylinder.Radius}, length={cylinder.Length})";
         }
     }
 }

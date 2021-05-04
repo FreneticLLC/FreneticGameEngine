@@ -22,18 +22,24 @@ namespace FGECore.EntitySystem.PhysicsHelpers
     public class EntityBoxShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntityBoxShape"/> of the specified size.</summary>
-        public EntityBoxShape(Location size, PhysicsSpace space)
+        public EntityBoxShape(Location size, PhysicsSpace space) : base(space)
         {
-            Box box = new Box(size.XF, size.YF, size.ZF);
-            BepuShape = box;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(box);
+            BepuShape = new Box(size.XF, size.YF, size.ZF);
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntityBoxShape Register()
+        {
+            EntityBoxShape dup = MemberwiseClone() as EntityBoxShape;
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Box) BepuShape);
+            return dup;
         }
 
         /// <summary>Implements <see cref="Object.ToString"/>.</summary>
         public override string ToString()
         {
             Box box = (Box)BepuShape;
-            return $"EntityBoxShape({box.Width}, {box.Height}, {box.Length})";
+            return $"{nameof(EntityBoxShape)}({box.Width}, {box.Height}, {box.Length})";
         }
     }
 }

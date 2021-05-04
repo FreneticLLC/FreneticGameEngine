@@ -41,7 +41,7 @@ namespace FGECore.EntitySystem
         /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
         public Action<CollisionEvent> CollisionHandler; // Set by client.
 
-        /// <summary>The shape of the physics body.</summary>
+        /// <summary>The shape of the physics body. This should not be altered while the entity is spawned.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         [PropertyPriority(-1000)]
@@ -313,6 +313,7 @@ namespace FGECore.EntitySystem
             }
             RigidPose pose = new RigidPose(Internal.Position.ToNumerics(), Internal.Orientation.ToNumerics());
             BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
+            Shape = Shape.Register();
             CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-3f, 1e-2f));
             BodyDescription description;
             if (Mass == 0)
@@ -388,6 +389,7 @@ namespace FGECore.EntitySystem
             Entity.OnTick -= Tick;
             DespawnEvent?.Invoke();
             PhysicsWorld.Despawn(SpawnedBody);
+            Shape.Unregister();
             IsSpawned = false;
         }
 

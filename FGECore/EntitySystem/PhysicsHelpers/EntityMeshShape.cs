@@ -18,14 +18,28 @@ using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {
-    /// <summary>A convex hull shape for an entity.</summary>
+    /// <summary>A concave mesh shape for an entity.</summary>
     public class EntityMeshShape : EntityShapeHelper
     {
         /// <summary>Constructs a new <see cref="EntityMeshShape"/> from the specified mesh object.</summary>
-        public EntityMeshShape(Mesh mesh, PhysicsSpace space)
+        public EntityMeshShape(Mesh mesh, PhysicsSpace space) : base(space)
         {
             BepuShape = mesh;
-            ShapeIndex = space.Internal.CoreSimulation.Shapes.Add(mesh);
+        }
+
+        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+        public override EntityMeshShape Register()
+        {
+            EntityMeshShape dup = MemberwiseClone() as EntityMeshShape;
+            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Mesh)BepuShape);
+            return dup;
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+        public override string ToString()
+        {
+            Mesh mesh = (Mesh)BepuShape;
+            return $"{nameof(EntityMeshShape)}({mesh.Triangles.Length} tris)";
         }
 
         /// <summary>Implements <see cref="EntityShapeHelper.ComputeInertia(float, out BodyInertia)"/>.</summary>
