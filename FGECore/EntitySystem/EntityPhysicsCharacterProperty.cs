@@ -7,6 +7,7 @@
 //
 
 using BepuPhysics;
+using FGECore.CoreSystems;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem.BepuCharacters;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Quaternion = FGECore.MathHelpers.Quaternion;
 
 namespace FGECore.EntitySystem
 {
@@ -67,6 +69,16 @@ namespace FGECore.EntitySystem
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float BodyRadius = 0.5f;
+
+        /// <summary>How much force the character can apply while in the air (falling or jumping).</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float MaximumAerialForce = 100;
+
+        /// <summary>The fraction of normal speed that can be achieved by moving while in the air.</summary>
+        [PropertyDebuggable]
+        [PropertyAutoSavable]
+        public float AerialVelocityFraction = 0.6f;
 
         /// <summary>Possible built-in character stances.</summary>
         public enum Stance
@@ -147,6 +159,7 @@ namespace FGECore.EntitySystem
             controller.MaximumHorizontalForce = 80 * Physics.Mass;
             controller.MinimumSupportDepth = BodyRadius * -0.01f;
             controller.MinimumSupportContinuationDepth = -0.1f;
+            MaximumAerialForce = 10 * Physics.Mass;
             Entity.OnTick += Tick;
             IsSpawned = true;
         }
@@ -183,11 +196,45 @@ namespace FGECore.EntitySystem
             controller.TargetVelocity = new Vector2(velocity.X, velocity.Y);
             controller.ViewDirection = ViewDirection.ToNumerics();
             controller.TryJump = TryingToJump;
-            if (!controller.Supported)
+            if (!controller.Supported && MaximumAerialForce > 0 && Physics.SpawnedBody.LocalInertia.InverseMass > 0)
             {
-                // TODO: In-air movement
+                Location airMoveGoal = Quaternion.GetQuaternionBetween(Location.UnitY, ViewDirection.WithZ(0).Normalize()).Transform(Movement * CurrentSpeed * AerialVelocityFraction);
+                Location rawVelocity = Physics.SpawnedBody.Velocity.Linear.ToLocation();
+                Location absoluteAirMoveGoal = airMoveGoal.Abs();
+                Location absoluteVelocity = rawVelocity.Abs();
+                Location impulse = airMoveGoal * (MaximumAerialForce * Engine.Delta);
+                Location postVelocity = rawVelocity + impulse * Physics.SpawnedBody.LocalInertia.InverseMass;
+                Location postVelocityAbs = postVelocity.Abs();
+                if (Math.Sign(airMoveGoal.X) == Math.Sign(rawVelocity.X))
+                {
+                    if (absoluteVelocity.X > absoluteAirMoveGoal.X)
+                    {
+                        impulse.X = 0;
+                    }
+                    else
+                    {
+                        if (postVelocityAbs.X > absoluteAirMoveGoal.X)
+                        {
+                            impulse.X = Math.Sign(impulse.X) * (absoluteAirMoveGoal.X - absoluteVelocity.X) * Physics.Mass;
+                        }
+                    }
+                }
+                if (Math.Sign(airMoveGoal.Y) == Math.Sign(rawVelocity.Y) && absoluteVelocity.Y > absoluteAirMoveGoal.Y)
+                {
+                    if (absoluteVelocity.Y > absoluteAirMoveGoal.Y)
+                    {
+                        impulse.Y = 0;
+                    }
+                    else
+                    {
+                        if (postVelocityAbs.Y > absoluteAirMoveGoal.Y)
+                        {
+                            impulse.Y = Math.Sign(impulse.Y) * (absoluteAirMoveGoal.Y - absoluteVelocity.Y) * Physics.Mass;
+                        }
+                    }
+                }
+                Physics.SpawnedBody.ApplyLinearImpulse(impulse.ToNumerics());
             }
-            TryingToJump = false;
         }
     }
 }

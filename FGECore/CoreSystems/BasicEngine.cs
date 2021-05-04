@@ -61,6 +61,12 @@ namespace FGECore.CoreSystems
                 throw new InvalidOperationException("Cannot add a joint that is already added to an engine.");
             }
             joint.JointID = CurrentJointID++;
+            AddJoint_WithJID(joint);
+        }
+
+        /// <summary>Add and activate a joint into this engine with an existing JointID.</summary>
+        public void AddJoint_WithJID(GenericBaseJoint joint)
+        {
             Joints.Add(joint.JointID, joint);
             if (joint is NonPhysicalJointBase nonPhysJoint)
             {

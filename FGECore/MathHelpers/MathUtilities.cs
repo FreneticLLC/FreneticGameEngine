@@ -21,7 +21,7 @@ namespace FGECore.MathHelpers
     public static class MathUtilities
     {
         /// <summary>
-        /// Represents the constant PI / 180.
+        /// Represents the constant PI / 180. (Which is the conversion from Degrees to Radians).
         /// </summary>
         public const double PI180 = Math.PI / 180.0;
 

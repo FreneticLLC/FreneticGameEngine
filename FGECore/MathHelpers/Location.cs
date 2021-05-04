@@ -913,6 +913,15 @@ namespace FGECore.MathHelpers
             return new Location(Math.Ceiling(X), Math.Ceiling(Y), Math.Ceiling(Z));
         }
 
+        /// <summary>
+        /// Gets the absolute value of each component of this location.
+        /// Essentially, applies <see cref="Math.Abs(double)"/> to each of the 3 coordinate values separately.
+        /// </summary>
+        public Location Abs()
+        {
+            return new Location(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
+        }
+
         #endregion
     }
 
