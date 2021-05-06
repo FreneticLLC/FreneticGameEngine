@@ -11,8 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGEGraphics.ClientSystem;
 using FGECore.MathHelpers;
+using FGEGraphics.ClientSystem;
 
 namespace FGEGraphics.UISystem
 {

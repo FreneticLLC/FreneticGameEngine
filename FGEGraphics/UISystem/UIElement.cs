@@ -9,15 +9,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
-using OpenTK.Mathematics;
-using FGECore.MathHelpers;
 using OpenTK.Input;
-using System.Security.Policy;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem

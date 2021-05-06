@@ -6,14 +6,16 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using FGECore.EntitySystem;
 using FGECore.EntitySystem.JointSystems;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
-using System;
-using System.Collections.Generic;
 
 namespace FGECore.CoreSystems
 {

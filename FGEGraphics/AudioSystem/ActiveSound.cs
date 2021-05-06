@@ -11,14 +11,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGEGraphics.AudioSystem.EnforcerSystem;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGEGraphics.AudioSystem.EnforcerSystem;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.AudioSystem
 {

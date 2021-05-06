@@ -12,11 +12,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.PhysicsSystem;
+using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
-using FGECore.PhysicsSystem;
-using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {

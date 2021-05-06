@@ -8,24 +8,24 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 using System.Threading.Tasks;
-using FGEGraphics.AudioSystem.EnforcerSystem;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Audio;
-using OpenTK.Audio.OpenAL;
-using FGEGraphics.ClientSystem;
-using FGECore;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
-using FGECore.FileSystems;
-using NVorbis;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using System.Diagnostics;
+using FGECore;
+using FGECore.CoreSystems;
+using FGECore.FileSystems;
+using FGECore.MathHelpers;
+using FGEGraphics.AudioSystem.EnforcerSystem;
+using FGEGraphics.ClientSystem;
+using OpenTK;
+using OpenTK.Audio;
+using OpenTK.Audio.OpenAL;
+using OpenTK.Mathematics;
+using NVorbis;
 
 namespace FGEGraphics.AudioSystem
 {

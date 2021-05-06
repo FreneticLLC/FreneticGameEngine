@@ -11,11 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGEGraphics.GraphicsHelpers;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using FGEGraphics.GraphicsHelpers;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {

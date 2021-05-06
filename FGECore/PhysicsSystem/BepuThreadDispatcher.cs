@@ -6,10 +6,13 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
 using BepuUtilities;
 using BepuUtilities.Memory;
-using System;
-using System.Threading;
 
 namespace FGECore.PhysicsSystem
 {

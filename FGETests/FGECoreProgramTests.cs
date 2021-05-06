@@ -11,10 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NUnit.Framework;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using NUnit.Framework;
 
 namespace FGETests
 {

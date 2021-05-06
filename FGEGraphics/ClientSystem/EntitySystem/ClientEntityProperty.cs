@@ -13,8 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore;
 using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGECore.EntitySystem;
+using FGECore.MathHelpers;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

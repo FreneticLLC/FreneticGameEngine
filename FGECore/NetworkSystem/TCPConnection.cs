@@ -9,14 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using FreneticUtilities.FreneticToolkit;
+using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.UtilitySystems;
-using FGECore.CoreSystems;
-using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.NetworkSystem
 {

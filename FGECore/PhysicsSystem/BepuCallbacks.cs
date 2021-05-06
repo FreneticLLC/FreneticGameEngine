@@ -6,13 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuPhysics;
-using BepuPhysics.Collidables;
-using BepuPhysics.CollisionDetection;
-using BepuPhysics.Constraints;
-using BepuUtilities;
-using FGECore.EntitySystem;
-using FGECore.EntitySystem.PhysicsHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +13,13 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.EntitySystem;
+using FGECore.EntitySystem.PhysicsHelpers;
+using BepuPhysics;
+using BepuPhysics.Collidables;
+using BepuPhysics.CollisionDetection;
+using BepuPhysics.Constraints;
+using BepuUtilities;
 
 namespace FGECore.PhysicsSystem
 {

@@ -6,12 +6,12 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGECore.CoreSystems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 
 namespace FGECore.EntitySystem.JointSystems
 {

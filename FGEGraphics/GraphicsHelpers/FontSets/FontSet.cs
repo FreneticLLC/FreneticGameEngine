@@ -8,19 +8,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Drawing;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using FGECore.MathHelpers;
-using FGECore.UtilitySystems;
 using FGECore.ConsoleHelpers;
+using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
+using FGECore.UtilitySystems;
+using OpenTK;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {

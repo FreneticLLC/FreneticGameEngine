@@ -8,21 +8,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
-using System.Runtime.CompilerServices;
-using FGEGraphics.GraphicsHelpers;
-using System.Diagnostics;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGEGraphics.LightingSystem;
 using FGECore.UtilitySystems;
+using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.LightingSystem;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {

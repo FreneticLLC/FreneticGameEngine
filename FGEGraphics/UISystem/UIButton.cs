@@ -16,8 +16,8 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
-using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 

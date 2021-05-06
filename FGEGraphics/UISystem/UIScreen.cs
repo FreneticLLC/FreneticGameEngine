@@ -14,8 +14,8 @@ using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {

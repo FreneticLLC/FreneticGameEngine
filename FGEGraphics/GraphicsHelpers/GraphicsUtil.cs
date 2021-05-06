@@ -8,17 +8,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {

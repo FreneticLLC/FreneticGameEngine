@@ -10,22 +10,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
 using FGECore;
 using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGECore.FileSystems;
-using FGEGraphics.LightingSystem;
-using FGEGraphics.GraphicsHelpers;
-using FGEGraphics.GraphicsHelpers.Shaders;
-using System.Threading;
+using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGEGraphics.ClientSystem.EntitySystem;
+using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.LightingSystem;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem
 {

@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGEGraphics.LightingSystem;
 using OpenTK;
 using OpenTK.Mathematics;
-using FGEGraphics.LightingSystem;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {

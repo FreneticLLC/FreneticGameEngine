@@ -6,13 +6,13 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuPhysics.Constraints;
-using FGECore.MathHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
+using BepuPhysics.Constraints;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
 {

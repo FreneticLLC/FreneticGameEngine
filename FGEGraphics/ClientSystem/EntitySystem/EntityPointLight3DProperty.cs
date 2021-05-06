@@ -12,8 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGECore.EntitySystem;
+using FGECore.MathHelpers;
 using FGECore.PropertySystem;
 using FGEGraphics.LightingSystem;
 

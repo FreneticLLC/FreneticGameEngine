@@ -11,11 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.UtilitySystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
+using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {

@@ -11,17 +11,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
+using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
-using FGEGraphics.GraphicsHelpers.Models;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {

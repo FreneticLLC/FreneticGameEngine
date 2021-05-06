@@ -11,17 +11,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
-using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.ClientSystem.EntitySystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
+using FGEGraphics.GraphicsHelpers;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+
 using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.ClientSystem

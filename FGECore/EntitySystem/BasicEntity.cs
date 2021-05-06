@@ -11,12 +11,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticToolkit;
+using FGECore.CoreSystems;
+using FGECore.EntitySystem.JointSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
-using FGECore.CoreSystems;
 using FGECore.PropertySystem;
-using FreneticUtilities.FreneticToolkit;
-using FGECore.EntitySystem.JointSystems;
 
 namespace FGECore.EntitySystem
 {

@@ -6,18 +6,19 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuPhysics;
-using FGECore.CoreSystems;
-using FGECore.EntitySystem.PhysicsHelpers;
-using FGECore.MathHelpers;
-using FGECore.PhysicsSystem.BepuCharacters;
-using FGECore.PropertySystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
+using FGECore.EntitySystem.PhysicsHelpers;
+using FGECore.MathHelpers;
+using FGECore.PhysicsSystem.BepuCharacters;
+using FGECore.PropertySystem;
+using BepuPhysics;
+
 using Quaternion = FGECore.MathHelpers.Quaternion;
 
 namespace FGECore.EntitySystem

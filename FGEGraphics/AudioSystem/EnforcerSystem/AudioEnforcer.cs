@@ -8,17 +8,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Diagnostics;
-using OpenTK.Audio.OpenAL;
+using System.Threading.Tasks;
+using FreneticUtilities.FreneticToolkit;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
-using FreneticUtilities.FreneticToolkit;
+using OpenTK.Audio.OpenAL;
 
 namespace FGEGraphics.AudioSystem.EnforcerSystem
 {

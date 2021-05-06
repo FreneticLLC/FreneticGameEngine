@@ -11,12 +11,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NUnit.Framework;
+using FreneticUtilities.FreneticToolkit;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.UtilitySystems;
-using FreneticUtilities.FreneticToolkit;
+using NUnit.Framework;
 
 namespace FGETests
 {

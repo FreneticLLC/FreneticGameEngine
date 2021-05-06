@@ -6,16 +6,20 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuUtilities;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using System.Numerics;
-using System;
 using BepuPhysics.CollisionDetection;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 using BepuPhysics.Constraints;
+using BepuUtilities;
 using BepuUtilities.Memory;
+
 using static BepuUtilities.GatherScatter;
 
 namespace FGECore.PhysicsSystem.BepuCharacters

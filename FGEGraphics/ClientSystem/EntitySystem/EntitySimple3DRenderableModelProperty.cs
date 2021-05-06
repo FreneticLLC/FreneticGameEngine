@@ -11,13 +11,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGEGraphics.GraphicsHelpers;
-using FGEGraphics.GraphicsHelpers.Textures;
-using FGEGraphics.GraphicsHelpers.Models;
 using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Models;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.EntitySystem
 {

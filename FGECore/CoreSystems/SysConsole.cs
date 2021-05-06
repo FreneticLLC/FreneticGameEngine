@@ -7,18 +7,19 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using FreneticUtilities.FreneticToolkit;
+using FGECore.ConsoleHelpers;
 using FGECore.FileSystems;
-using System.IO;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
-using FGECore.ConsoleHelpers;
-using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.CoreSystems
 {

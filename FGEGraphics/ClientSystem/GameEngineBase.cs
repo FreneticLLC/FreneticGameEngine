@@ -11,15 +11,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
 using FGECore.CoreSystems;
 using FGECore.StackNoteSystem;
+using FGEGraphics.AudioSystem;
+using FGEGraphics.ClientSystem.EntitySystem;
+using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
-using FGEGraphics.GraphicsHelpers.Models;
-using FGEGraphics.ClientSystem.EntitySystem;
-using FGEGraphics.AudioSystem;
+using OpenTK;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
 namespace FGEGraphics.ClientSystem

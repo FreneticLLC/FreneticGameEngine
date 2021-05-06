@@ -11,26 +11,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGECore.StackNoteSystem;
 using FGECore.ModelSystems;
+using FGECore.StackNoteSystem;
+using FGEGraphics.ClientSystem.EntitySystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers;
-using FGEGraphics.GraphicsHelpers.Shaders;
-using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Models;
-using FGEGraphics.ClientSystem.EntitySystem;
-using OpenTK.Windowing.Desktop;
+using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.GraphicsHelpers.Textures;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+
 using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
-using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.ClientSystem
 {

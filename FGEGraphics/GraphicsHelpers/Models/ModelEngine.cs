@@ -11,16 +11,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
 using FreneticUtilities.FreneticExtensions;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
-using FGECore.FileSystems;
-using FGECore.ModelSystems;
 using FGECore.ConsoleHelpers;
+using FGECore.CoreSystems;
+using FGECore.FileSystems;
+using FGECore.MathHelpers;
+using FGECore.ModelSystems;
 using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
+using OpenTK;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.Models
 {

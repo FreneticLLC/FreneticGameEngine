@@ -10,12 +10,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using FGECore.StackNoteSystem;
+using FreneticUtilities.FreneticToolkit;
 using FGECore.EntitySystem;
 using FGECore.FileSystems;
-using FreneticUtilities.FreneticToolkit;
-using System.Threading;
+using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
 
 namespace FGECore.CoreSystems

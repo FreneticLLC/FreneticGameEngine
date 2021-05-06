@@ -9,19 +9,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.EntitySystem;
 using FGECore.MathHelpers;
-using FGECore.CoreSystems;
 using BepuPhysics;
-using BepuUtilities.Memory;
-using BepuUtilities;
-using System.Numerics;
-using BepuPhysics.CollisionDetection;
 using BepuPhysics.Collidables;
+using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuPhysics.Trees;
+using BepuUtilities;
+using BepuUtilities.Memory;
 
 namespace FGECore.PhysicsSystem
 {

@@ -11,9 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL4;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -21,6 +18,9 @@ using FGECore.ModelSystems;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers.Textures;
+using OpenTK;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.Models
 {

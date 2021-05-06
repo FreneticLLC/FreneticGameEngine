@@ -15,9 +15,9 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using OpenTK;
-using OpenTK.Mathematics;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {

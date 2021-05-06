@@ -11,10 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BepuPhysics.Collidables;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
+using BepuPhysics.Collidables;
 
 namespace FGECore.EntitySystem.PhysicsHelpers
 {

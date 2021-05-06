@@ -11,10 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NUnit.Framework;
-using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticDataSyntax;
+using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
+using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests
 {
