@@ -20,6 +20,7 @@ FGE is not a **Game**. You cannot play it out of the box. It does not do much ju
 - OpenTK - https://github.com/opentk/opentk/
 - OpenVR - https://github.com/ValveSoftware/openvr
 - NVorbis - https://github.com/NVorbis/NVorbis
+- TextCopy - https://github.com/CopyText/TextCopy
 
 -----
 
