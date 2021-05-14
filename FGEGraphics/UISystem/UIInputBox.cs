@@ -17,6 +17,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.UISystem.InputSystems;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -178,8 +179,7 @@ namespace FGEGraphics.UISystem
                     MaxCursor = min;
                 }
                 bool modified = false;
-                /*
-                KeyHandlerState khs = KeyHandler.GetKBState();
+                KeyHandlerState khs = Window.Keyboard.BuildingState;
                 if (khs.Escaped)
                 {
                     TriedToEscape = true;
@@ -199,15 +199,15 @@ namespace FGEGraphics.UISystem
                     {
                         end = MinCursor;
                     }
-                    Text = Text.Substring(0, end) + Text.Substring(MaxCursor);
+                    Text = Text.Substring(0, end) + Text[MaxCursor..];
                     MinCursor = end;
                     MaxCursor = end;
                     modified = true;
                 }
                 if (khs.KeyboardString.Length > 0)
                 {
-                    Text = Text.Substring(0, MinCursor) + khs.KeyboardString + Text.Substring(MaxCursor);
-                    MinCursor = MinCursor + khs.KeyboardString.Length;
+                    Text = Text.Substring(0, MinCursor) + khs.KeyboardString + Text[MaxCursor..];
+                    MinCursor += khs.KeyboardString.Length;
                     MaxCursor = MinCursor;
                     modified = true;
                 }
@@ -225,7 +225,6 @@ namespace FGEGraphics.UISystem
                     modified = true;
                     EnterPressed?.Invoke();
                 }
-                */
                 if (modified && TextModified != null)
                 {
                     TextModified.Invoke(this, null);
