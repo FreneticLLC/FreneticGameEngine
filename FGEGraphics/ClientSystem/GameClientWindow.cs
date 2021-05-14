@@ -22,6 +22,7 @@ using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.UISystem.InputSystems;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -35,52 +36,108 @@ using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// Represents a game client window for a game.
-    /// </summary>
+    /// <summary>Represents a game client window for a game.</summary>
     public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDisposable
     {
-        /// <summary>
-        /// The primary window for the game.
-        /// </summary>
+        /// <summary>The primary window for the game.</summary>
         public GameWindow Window;
 
-        /// <summary>
-        /// The current primary engine, dominating the view.
-        /// </summary>
+        /// <summary>The current primary engine, dominating the view.</summary>
         public GameEngineBase CurrentEngine;
 
-        /// <summary>
-        /// Gets a 2D form of the current engine, if valid.
-        /// </summary>
-        public GameEngine2D Engine2D
-        {
-            get
-            {
-                return CurrentEngine as GameEngine2D;
-            }
-        }
+        /// <summary>Gets a 2D form of the current engine, if valid.</summary>
+        public GameEngine2D Engine2D => CurrentEngine as GameEngine2D;
 
-        /// <summary>
-        /// Gets a 3D form of the current engine, if valid.
-        /// </summary>
-        public GameEngine3D Engine3D
-        {
-            get
-            {
-                return CurrentEngine as GameEngine3D;
-            }
-        }
+        /// <summary>Gets a 3D form of the current engine, if valid.</summary>
+        public GameEngine3D Engine3D => CurrentEngine as GameEngine3D;
 
-        /// <summary>
-        /// The VR support system, if any.
-        /// </summary>
+        /// <summary>The VR support system, if any.</summary>
         public VRSupport VR = null;
 
-        /// <summary>
-        /// The title of the window.
-        /// </summary>
+        /// <summary>The title of the window.</summary>
         public readonly string StartingWindowTitle;
+
+        /// <summary>The X-coordinate of the mouse in screen coordinates.</summary>
+        public float MouseX;
+
+        /// <summary>The Y-coordinate of the mouse in screen coordinates.</summary>
+        public float MouseY;
+
+        /// <summary>The current mouse state for this tick.</summary>
+        public MouseState CurrentMouse;
+
+        /// <summary>The mouse state during the previous tick.</summary>
+        public MouseState PreviousMouse;
+
+        /// <summary>System to help with models.</summary>
+        public ModelEngine Models;
+
+        /// <summary>The render helper system, for 3D rendering.</summary>
+        public Renderer Rendering3D;
+
+        /// <summary>The 2D rendering helper, for any UI or general 2D logic.</summary>
+        public Renderer2D Rendering2D;
+
+        /// <summary>The 3D animation helper.</summary>
+        public AnimationEngine Animations;
+
+        /// <summary>The keyboard input helper.</summary>
+        public KeyHandler Keyboard;
+
+        /// <summary>The current Orthographic matrix, for Font rendering simplicity.</summary>
+        public Matrix4 Ortho;
+
+        /// <summary>The shader system.</summary>
+        public ShaderEngine Shaders;
+
+        /// <summary>Helper for internal GL font data in the system.</summary>
+        public GLFontEngine GLFonts;
+
+        /// <summary>Helper for all font sets in the system.</summary>
+        public FontSetEngine FontSets;
+
+        /// <summary>Helper for all textures in the system.</summary>
+        public TextureEngine Textures;
+
+        /// <summary>Fired when the window is set up.</summary>
+        public Action OnWindowSetUp;
+
+        /// <summary>Fired when the window is loading. Use this to load any data you need.</summary>
+        public Action OnWindowLoad;
+
+        /// <summary>Fired when the window is closed.</summary>
+        public Action OnWindowClosed;
+
+        /// <summary>Whether the program should shut down when the window is closed.</summary>
+        public bool ExitOnClose = true;
+
+        /// <summary>The currently rendering UI for this engine.</summary>
+        public ViewUI2D MainUI;
+
+        /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
+        public struct InternalData
+        {
+            /// <summary>The expected window width.</summary>
+            public int WindowWidth;
+
+            /// <summary>The expected window height.</summary>
+            public int WindowHeight;
+
+            /// <summary>
+            /// The color to blank the screen to every frame.
+            /// Defaults to cyan (0:1:1:1).
+            /// </summary>
+            public float[] ScreenClearColor;
+
+            /// <summary>The depth value to blank the screen to every frame. Defaults to 1 (full-distance).</summary>
+            public float[] DepthClear;
+
+            /// <summary>Whether the window is already loaded.</summary>
+            public bool Loaded;
+        }
+
+        /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
+        public InternalData Internal = new InternalData() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = new[] { 0f, 1f, 1f, 1f }, DepthClear = new[] { 1f }, Loaded = false };
 
         /// <summary>
         /// Constructs the game client window.
@@ -107,49 +164,7 @@ namespace FGEGraphics.ClientSystem
             Engines.Add(CurrentEngine);
         }
 
-        /// <summary>
-        /// The X-coordinate of the mouse in screen coordinates.
-        /// </summary>
-        public float MouseX;
-
-        /// <summary>
-        /// The Y-coordinate of the mouse in screen coordinates.
-        /// </summary>
-        public float MouseY;
-
-        /// <summary>
-        /// The current mouse state for this tick.
-        /// </summary>
-        public MouseState CurrentMouse;
-
-        /// <summary>
-        /// The mouse state during the previous tick.
-        /// </summary>
-        public MouseState PreviousMouse;
-
-        /// <summary>
-        /// System to help with models.
-        /// </summary>
-        public ModelEngine Models;
-
-        /// <summary>
-        /// The render helper system, for 3D rendering.
-        /// </summary>
-        public Renderer Rendering3D;
-
-        /// <summary>
-        /// The 2D rendering helper, for any UI or general 2D logic.
-        /// </summary>
-        public Renderer2D Rendering2D;
-
-        /// <summary>
-        /// The 3D animation helper.
-        /// </summary>
-        public AnimationEngine Animations;
-
-        /// <summary>
-        /// Monitors on-window mouse movement.
-        /// </summary>
+        /// <summary>Monitors on-window mouse movement.</summary>
         /// <param name="e">The event data.</param>
         private void Mouse_Move(MouseMoveEventArgs e)
         {
@@ -157,60 +172,51 @@ namespace FGEGraphics.ClientSystem
             MouseY = e.Y;
         }
 
-        private int WindWid = 800;
-        private int WindHei = 600;
-
-        /// <summary>
-        /// Window width.
-        /// </summary>
+        /// <summary>Window width.</summary>
         public int WindowWidth
         {
             get
             {
-                return Window == null ? WindWid : Window.Size.X;
+                return Window == null ? Internal.WindowWidth : Window.Size.X;
             }
             set
             {
-                WindWid = value;
+                Internal.WindowWidth = value;
                 if (Window != null)
                 {
-                    Window.Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei);
+                    Window.Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
                 }
             }
         }
 
-        /// <summary>
-        /// Window height.
-        /// </summary>
+        /// <summary>Window height.</summary>
         public int WindowHeight
         {
             get
             {
-                return Window == null ? WindHei : Window.Size.Y;
+                return Window == null ? Internal.WindowHeight : Window.Size.Y;
             }
             set
             {
-                WindHei = value;
+                Internal.WindowHeight = value;
                 if (Window != null)
                 {
-                    Window.Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei);
+                    Window.Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
                 }
             }
         }
 
-        /// <summary>
-        /// Size of the window.
-        /// </summary>
+        /// <summary>Size of the window.</summary>
         public FGECore.MathHelpers.Vector2i WindowSize
         {
             get
             {
-                return Window == null ? new FGECore.MathHelpers.Vector2i(WindWid, WindHei) : new FGECore.MathHelpers.Vector2i(Window.Size.X, Window.Size.Y);
+                return Window == null ? new FGECore.MathHelpers.Vector2i(Internal.WindowWidth, Internal.WindowHeight) : new FGECore.MathHelpers.Vector2i(Window.Size.X, Window.Size.Y);
             }
             set
             {
-                WindWid = value.X;
-                WindHei = value.Y;
+                Internal.WindowWidth = value.X;
+                Internal.WindowHeight = value.Y;
                 if (Window != null)
                 {
                     Window.Size = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
@@ -218,11 +224,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        private bool Loaded = false;
-
-        /// <summary>
-        /// Starts the game engine, and begins the primary loop.
-        /// </summary>
+        /// <summary>Starts the game engine, and begins the primary loop.</summary>
         /// <param name="initialFlags">The initial window flag.</param>
         public void Start(WindowBorder initialFlags = WindowBorder.Fixed)
         {
@@ -232,7 +234,7 @@ namespace FGEGraphics.ClientSystem
                 SysConsole.Output(OutputType.INIT, "GameEngine loading...");
                 Window = new GameWindow(new GameWindowSettings() { IsMultiThreaded = false }, new NativeWindowSettings()
                 {
-                    Size = new OpenTK.Mathematics.Vector2i(WindWid, WindHei),
+                    Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
                     Title = StartingWindowTitle,
                     Flags = ContextFlags.ForwardCompatible,
                     IsFullscreen = false,
@@ -260,26 +262,21 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Fired when the window is resized.
-        /// </summary>
+        /// <summary>Fired when the window is resized.</summary>
         private void Window_Resize(ResizeEventArgs e)
         {
-            if (Loaded)
+            if (Internal.Loaded)
             {
                 CurrentEngine.ReloadScreenBuffers();
             }
         }
 
-        /// <summary>
-        /// Loads all content for the game, and starts the systems.
-        /// </summary>
+        /// <summary>Loads all content for the game, and starts the systems.</summary>
         private void Window_Load()
         {
             Window.Focus();
             SysConsole.Output(OutputType.INIT, "GameClient starting load sequence...");
             GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
-            //GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -304,6 +301,7 @@ namespace FGEGraphics.ClientSystem
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
             GraphicsUtil.CheckError("GEB - Fonts");
             SysConsole.Output(OutputType.INIT, "GameClient loading 2D/UI render helper...");
+            Keyboard = new KeyHandler(this);
             MainUI = new ViewUI2D(this);
             SysConsole.Output(OutputType.INIT, "GameClient loading model engine...");
             Animations = new AnimationEngine();
@@ -320,17 +318,10 @@ namespace FGEGraphics.ClientSystem
             OnWindowLoad?.Invoke();
             SysConsole.Output(OutputType.INIT, "GameClient is ready and loaded! Starting main game loop...");
             GraphicsUtil.CheckError("GEB - Loaded");
-            Loaded = true;
+            Internal.Loaded = true;
         }
 
-        /// <summary>
-        /// The Ortho matrix, for Font rendering simplicity.
-        /// </summary>
-        public Matrix4 Ortho;
-
-        /// <summary>
-        /// Called when the window is closed.
-        /// </summary>
+        /// <summary>Called when the window is closed.</summary>
         private void Window_Closed()
         {
             OnWindowClosed?.Invoke();
@@ -340,17 +331,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// The color to blank the screen to every frame.
-        /// Defaults to cyan (0:1:1:1).
-        /// </summary>
-        public readonly float[] ScreenClearColor = new float[] { 0, 1, 1, 1 };
-
-        private readonly float[] DepthClear = new float[] { 1 };
-
-        /// <summary>
-        /// Renders a single frame of the game, and also ticks.
-        /// </summary>
+        /// <summary>Renders a single frame of the game, and also ticks.</summary>
         private void Window_RenderFrame(FrameEventArgs e)
         {
             try
@@ -373,8 +354,8 @@ namespace FGEGraphics.ClientSystem
                     ec = GL.GetError();
                 }
                 // Second step: clear the screen
-                GL.ClearBuffer(ClearBuffer.Color, 0, ScreenClearColor);
-                GL.ClearBuffer(ClearBuffer.Depth, 0, DepthClear);
+                GL.ClearBuffer(ClearBuffer.Color, 0, Internal.ScreenClearColor);
+                GL.ClearBuffer(ClearBuffer.Depth, 0, Internal.DepthClear);
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
                 GL.DrawBuffer(DrawBufferMode.Back);
                 GraphicsUtil.CheckError("GameClient - Pre");
@@ -413,6 +394,7 @@ namespace FGEGraphics.ClientSystem
                 Tick();
                 // Primary UI tick
                 MainUI.Tick();
+                Keyboard.ResetState();
                 GraphicsUtil.CheckError("GameClient - PostTick");
                 // Final non-VR step: Swap the render buffer onto the screen!
                 Window.SwapBuffers();
@@ -427,51 +409,6 @@ namespace FGEGraphics.ClientSystem
                 StackNoteHelper.Pop();
             }
         }
-
-        /// <summary>
-        /// The shader system.
-        /// </summary>
-        public ShaderEngine Shaders;
-
-        /// <summary>
-        /// Helper for internal GL font data in the system.
-        /// </summary>
-        public GLFontEngine GLFonts;
-
-        /// <summary>
-        /// Helper for all font sets in the system.
-        /// </summary>
-        public FontSetEngine FontSets;
-
-        /// <summary>
-        /// Helper for all textures in the system.
-        /// </summary>
-        public TextureEngine Textures;
-
-        /// <summary>
-        /// Fired when the window is set up.
-        /// </summary>
-        public Action OnWindowSetUp;
-
-        /// <summary>
-        /// Fired when the window is loading. Use this to load any data you need.
-        /// </summary>
-        public Action OnWindowLoad;
-
-        /// <summary>
-        /// Fired when the window is closed.
-        /// </summary>
-        public Action OnWindowClosed;
-
-        /// <summary>
-        /// Whether the program should shut down when the window is closed.
-        /// </summary>
-        public bool ExitOnClose = true;
-
-        /// <summary>
-        /// The currently rendering UI for this engine.
-        /// </summary>
-        public ViewUI2D MainUI;
 
         /// <summary>
         /// Converts the window into VR mode, if possible.
@@ -501,19 +438,14 @@ namespace FGEGraphics.ClientSystem
             }
         }
         
-        /// <summary>
-        /// Disposes the window client.
-        /// </summary>
+        /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
             Dispose(true);
         }
 
-        /// <summary>
-        /// Returns a string of this object.
-        /// </summary>
-        /// <returns>The string.</returns>
+        /// <summary>Returns a string of this object.</summary>
         public override string ToString()
         {
             return "GameClientWindow";
