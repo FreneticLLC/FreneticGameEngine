@@ -23,19 +23,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a 3D sub-engine within a UI.
-    /// </summary>
+    /// <summary>Represents a 3D sub-engine within a UI.</summary>
     public class UI3DSubEngine : UIElement
     {
-        /// <summary>
-        /// The held sub-engine.
-        /// </summary>
+        /// <summary>The held sub-engine.</summary>
         public GameEngine3D SubEngine;
 
-        /// <summary>
-        /// Constructs a new 3D sub-engine.
-        /// </summary>
+        /// <summary>Constructs a new 3D sub-engine.</summary>
         /// <param name="pos">The position of the element.</param>
         /// <param name="alphaBack">Whether to have an alpha background.</param>
         public UI3DSubEngine(UIPositionHelper pos, bool alphaBack)
@@ -53,28 +47,22 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Initializes the subengine.
-        /// </summary>
-        protected override void Init()
+        /// <summary>Initializes the subengine.</summary>
+        public override void Init()
         {
             SubEngine.OwningInstance = Window;
             SubEngine.Load();
         }
 
-        /// <summary>
-        /// Destroys the subengine.
-        /// </summary>
-        protected override void Destroy()
+        /// <summary>Destroys the subengine.</summary>
+        public override void Destroy()
         {
             SubEngine.MainView.GenerationHelper.Destroy();
         }
 
-        /// <summary>
-        /// Ticks the element.
-        /// </summary>
+        /// <summary>Ticks the element.</summary>
         /// <param name="delta">Delta.</param>
-        protected override void Tick(double delta)
+        public override void Tick(double delta)
         {
             SubEngine.Delta = delta;
             // TODO: Check for resize need?
@@ -82,9 +70,7 @@ namespace FGEGraphics.UISystem
             SubEngine.Tick();
         }
 
-        /// <summary>
-        /// Renders the view on-screen.
-        /// </summary>
+        /// <summary>Renders the view on-screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">Delta time.</param>
         public override void Render(ViewUI2D view, double delta)

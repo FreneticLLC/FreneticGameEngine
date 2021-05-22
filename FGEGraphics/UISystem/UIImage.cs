@@ -19,19 +19,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a simple image on a screen.
-    /// </summary>
+    /// <summary>Represents a simple image on a screen.</summary>
     public class UIImage : UIElement
     {
-        /// <summary>
-        /// The image to display.
-        /// </summary>
+        /// <summary>The image to display.</summary>
         public Texture Image;
 
-        /// <summary>
-        /// Constructs an image.
-        /// </summary>
+        /// <summary>Constructs an image.</summary>
         /// <param name="image">The image to display.</param>
         /// <param name="pos">The position of the element.</param>
         public UIImage(Texture image, UIPositionHelper pos)
@@ -40,9 +34,7 @@ namespace FGEGraphics.UISystem
             Image = image;
         }
 
-        /// <summary>
-        /// Renders the image on a screen.
-        /// </summary>
+        /// <summary>Renders the image on a screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)

@@ -19,9 +19,7 @@ namespace FGEGraphics.UISystem
     /// <summary>Helper for positioning of UI elements.</summary>
     public class UIPositionHelper
     {
-        /// <summary>
-        /// Constructs the UI Position Helper.
-        /// </summary>
+        /// <summary>Constructs the UI Position Helper.</summary>
         /// <param name="uiview">The backing view.</param>
         public UIPositionHelper(ViewUI2D uiview)
         {

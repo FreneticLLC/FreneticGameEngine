@@ -28,67 +28,29 @@ namespace FGEGraphics.UISystem
     /// </summary>
     public abstract class UIElement
     {
-        /// <summary>
-        /// Do not access directly, except for debugging.
-        /// </summary>
-        public List<UIElement> Children = new List<UIElement>();
-        
-        /// <summary>
-        /// The parent of this element.
-        /// </summary>
+        /// <summary>The parent of this element.</summary>
         public UIElement Parent;
 
-        /// <summary>
-        /// True when the element is valid and usable, false when not-yet-added or already removed.
-        /// </summary>
+        /// <summary>True when the element is valid and usable, false when not-yet-added or already removed.</summary>
         public bool IsValid;
 
-        /// <summary>
-        /// Gets the client game window used to render this element.
-        /// </summary>
-        public virtual GameClientWindow Window
-        {
-            get
-            {
-                return Parent.Window;
-            }
-        }
+        /// <summary>Gets the client game window used to render this element.</summary>
+        public virtual GameClientWindow Window => Parent.Window;
 
-        /// <summary>
-        /// Gets the client game engine used to render this element.
-        /// </summary>
-        public virtual GameEngineBase Engine
-        {
-            get
-            {
-                return Parent.Engine;
-            }
-        }
+        /// <summary>Gets the client game engine used to render this element.</summary>
+        public virtual GameEngineBase Engine => Parent.Engine;
 
-        /// <summary>
-        /// Last known absolute position.
-        /// </summary>
+        /// <summary>Last known absolute position.</summary>
         public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
 
-        /// <summary>
-        /// Last known absolute size (Width / Height).
-        /// </summary>
+        /// <summary>Last known absolute size (Width / Height).</summary>
         public FGECore.MathHelpers.Vector2i LastAbsoluteSize;
 
-        /// <summary>
-        /// Last known aboslute rotation.
-        /// </summary>
+        /// <summary>Last known aboslute rotation.</summary>
         public float LastAbsoluteRotation;
 
-        /// <summary>
-        /// The position and size of this element.
-        /// </summary>
+        /// <summary>The position and size of this element.</summary>
         public UIPositionHelper Position;
-
-        /// <summary>
-        /// Internal use only.
-        /// </summary>
-        public bool HoverInternal;
 
         /// <summary>
         /// Priority for rendering logic.
@@ -96,9 +58,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         public double RenderPriority = 0;
 
-        /// <summary>
-        /// Constructs a new element to be placed on a <see cref="UIScreen"/>.
-        /// </summary>
+        /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
         /// <param name="pos">The position of the element.</param>
         public UIElement(UIPositionHelper pos)
         {
@@ -109,9 +69,7 @@ namespace FGEGraphics.UISystem
             LastAbsoluteRotation = Position.Rotation;
         }
 
-        /// <summary>
-        /// Adds a child to this element.
-        /// </summary>
+        /// <summary>Adds a child to this element.</summary>
         /// <param name="child">The element to be parented.</param>
         public void AddChild(UIElement child)
         {
@@ -119,9 +77,9 @@ namespace FGEGraphics.UISystem
             {
                 throw new Exception("Tried to add a child that already has a parent!");
             }
-            if (!Children.Contains(child))
+            if (!ElementInternal.Children.Contains(child))
             {
-                Internal.ToAdd.Add(child);
+                ElementInternal.ToAdd.Add(child);
             }
             else
             {
@@ -129,23 +87,21 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Removes a child from this element.
-        /// </summary>
+        /// <summary>Removes a child from this element.</summary>
         /// <param name="child">The element to be unparented.</param>
         public void RemoveChild(UIElement child)
         {
-            if (Children.Contains(child))
+            if (ElementInternal.Children.Contains(child))
             {
-                if (!Internal.ToRemove.Contains(child))
+                if (!ElementInternal.ToRemove.Contains(child))
                 {
-                    Internal.ToRemove.Add(child);
+                    ElementInternal.ToRemove.Add(child);
                     child.IsValid = false;
                 }
             }
-            else if (Internal.ToAdd.Contains(child))
+            else if (ElementInternal.ToAdd.Contains(child))
             {
-                Internal.ToAdd.Remove(child);
+                ElementInternal.ToAdd.Remove(child);
             }
             else
             {
@@ -153,37 +109,30 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Removes all children from this element.
-        /// </summary>
+        /// <summary>Removes all children from this element.</summary>
         public void RemoveAllChildren()
         {
-            foreach (UIElement child in Children)
+            foreach (UIElement child in ElementInternal.Children)
             {
                 RemoveChild(child);
             }
-            Internal.ToAdd.Clear();
+            ElementInternal.ToAdd.Clear();
         }
 
-        /// <summary>
-        /// Checks if this element has the specified child.
-        /// </summary>
+        /// <summary>Checks if this element has the specified child.</summary>
         /// <param name="element">The possible child.</param>
-        /// <returns></returns>
         public bool HasChild(UIElement element)
         {
-            return element.IsValid && Children.Contains(element) && !Internal.ToRemove.Contains(element);
+            return element.IsValid && ElementInternal.Children.Contains(element) && !ElementInternal.ToRemove.Contains(element);
         }
         
-        /// <summary>
-        /// Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.
-        /// </summary>
+        /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>Whether the position is within any of the boundaries.</returns>
         public bool Contains(int x, int y)
         {
-            foreach (UIElement child in Children)
+            foreach (UIElement child in ElementInternal.Children)
             {
                 if (child.IsValid && child.Contains(x, y))
                 {
@@ -193,13 +142,11 @@ namespace FGEGraphics.UISystem
             return SelfContains(x, y);
         }
 
-        /// <summary>
-        /// Checks if this element's boundaries contain the position on the screen.
-        /// </summary>
+        /// <summary>Checks if this element's boundaries contain the position on the screen.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>Whether the position is within any of the boundaries.</returns>
-        protected bool SelfContains(int x, int y)
+        public bool SelfContains(int x, int y)
         {
             int lowX = LastAbsolutePosition.X;
             int lowY = LastAbsolutePosition.Y;
@@ -209,41 +156,41 @@ namespace FGEGraphics.UISystem
                 && y > lowY && y < highY;
         }
 
-        /// <summary>
-        /// Data internal to a <see cref="UIElement"/> instance.
-        /// </summary>
-        public struct InternalData
+        /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
+        public struct ElementInternalData
         {
-            /// <summary>
-            /// Elements queued to be added as children.
-            /// </summary>
+            /// <summary>Current child elements.</summary>
+            public List<UIElement> Children;
+
+            /// <summary>Elements queued to be added as children.</summary>
             public List<UIElement> ToAdd;
 
-            /// <summary>
-            /// Elements queued to be removed as children.
-            /// </summary>
+            /// <summary>Elements queued to be removed as children.</summary>
             public List<UIElement> ToRemove;
+
+            /// <summary>Whether the mouse left button was previously down.</summary>
+            public bool MousePreviouslyDown;
+
+            /// <summary>Internal use only.</summary>
+            public bool HoverInternal;
         }
 
-        /// <summary>
-        /// Data internal to a <see cref="UIElement"/> instance.
-        /// </summary>
-        public InternalData Internal = new InternalData()
+        /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
+        public ElementInternalData ElementInternal = new ElementInternalData()
         {
             ToAdd = new List<UIElement>(),
-            ToRemove = new List<UIElement>()
+            ToRemove = new List<UIElement>(),
+            Children = new List<UIElement>()
         };
 
-        /// <summary>
-        /// Adds and removes any queued children.
-        /// </summary>
+        /// <summary>Adds and removes any queued children.</summary>
         public void CheckChildren()
         {
-            foreach (UIElement element in Internal.ToAdd)
+            foreach (UIElement element in ElementInternal.ToAdd)
             {
-                if (!Children.Contains(element))
+                if (!ElementInternal.Children.Contains(element))
                 {
-                    Children.Add(element);
+                    ElementInternal.Children.Add(element);
                     element.Parent = this;
                     element.IsValid = true;
                     element.Init();
@@ -253,9 +200,9 @@ namespace FGEGraphics.UISystem
                     throw new Exception($"UIElement: Failed to add a child element {element}!");
                 }
             }
-            foreach (UIElement element in Internal.ToRemove)
+            foreach (UIElement element in ElementInternal.ToRemove)
             {
-                if (Children.Remove(element))
+                if (ElementInternal.Children.Remove(element))
                 {
                     element.Destroy();
                     element.Parent = null;
@@ -265,13 +212,11 @@ namespace FGEGraphics.UISystem
                     throw new Exception($"UIElement: Failed to remove a child element {element}!");
                 }
             }
-            Internal.ToAdd.Clear();
-            Internal.ToRemove.Clear();
+            ElementInternal.ToAdd.Clear();
+            ElementInternal.ToRemove.Clear();
         }
 
-        /// <summary>
-        /// Performs a tick on this element and its children.
-        /// </summary>
+        /// <summary>Performs a tick on this element and its children.</summary>
         /// <param name="delta">The time since the last tick.</param>
         public void FullTick(double delta)
         {
@@ -280,29 +225,20 @@ namespace FGEGraphics.UISystem
             TickChildren(delta);
         }
 
-        /// <summary>
-        /// Performs a tick on this element.
-        /// </summary>
+        /// <summary>Performs a tick on this element.</summary>
         /// <param name="delta">The time since the last tick.</param>
-        protected virtual void Tick(double delta)
+        public virtual void Tick(double delta)
         {
         }
 
-        /// <summary>
-        /// Whether the mouse left button was previously down.
-        /// </summary>
-        private bool pDown;
-
-        /// <summary>
-        /// Performs a tick on this element's children.
-        /// </summary>
+        /// <summary>Performs a tick on this element's children.</summary>
         /// <param name="delta">The time since the last tick.</param>
-        protected virtual void TickChildren(double delta)
+        public virtual void TickChildren(double delta)
         {
             int mX = (int)Window.MouseX; // TODO: Propagate float support.
             int mY = (int)Window.MouseY;
             bool mDown = Window.CurrentMouse.IsButtonDown(MouseButton.Left);
-            foreach (UIElement element in Children)
+            foreach (UIElement element in ElementInternal.Children)
             {
                 if (!element.IsValid)
                 {
@@ -310,41 +246,39 @@ namespace FGEGraphics.UISystem
                 }
                 if (element.Contains(mX, mY))
                 {
-                    if (!element.HoverInternal)
+                    if (!element.ElementInternal.HoverInternal)
                     {
-                        element.HoverInternal = true;
+                        element.ElementInternal.HoverInternal = true;
                         element.MouseEnter();
                     }
-                    if (mDown && !pDown)
+                    if (mDown && !ElementInternal.MousePreviouslyDown)
                     {
                         element.MouseLeftDown(mX, mY);
                     }
-                    else if (!mDown && pDown)
+                    else if (!mDown && ElementInternal.MousePreviouslyDown)
                     {
                         element.MouseLeftUp(mX, mY);
                     }
                 }
-                else if (element.HoverInternal)
+                else if (element.ElementInternal.HoverInternal)
                 {
-                    element.HoverInternal = false;
+                    element.ElementInternal.HoverInternal = false;
                     element.MouseLeave();
-                    if (mDown && !pDown)
+                    if (mDown && !ElementInternal.MousePreviouslyDown)
                     {
                         element.MouseLeftDownOutside(mX, mY);
                     }
                 }
-                else if (mDown && !pDown)
+                else if (mDown && !ElementInternal.MousePreviouslyDown)
                 {
                     element.MouseLeftDownOutside(mX, mY);
                 }
                 element.FullTick(delta);
             }
-            pDown = mDown;
+            ElementInternal.MousePreviouslyDown = mDown;
         }
 
-        /// <summary>
-        /// Updates positions of this element and its children.
-        /// </summary>
+        /// <summary>Updates positions of this element and its children.</summary>
         /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
@@ -352,7 +286,7 @@ namespace FGEGraphics.UISystem
         /// <param name="lastRot">The last rotation made in the render chain.</param>
         public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
         {
-            if (Parent == null || !Parent.Internal.ToRemove.Contains(this))
+            if (Parent == null || !Parent.ElementInternal.ToRemove.Contains(this))
             {
                 int x;
                 int y;
@@ -390,27 +324,23 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Performs a render on this element.
-        /// </summary>
+        /// <summary>Performs a render on this element.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public virtual void Render(ViewUI2D view, double delta)
         {
         }
 
-        /// <summary>
-        /// Updates this element's child positions.
-        /// </summary>
+        /// <summary>Updates this element's child positions.</summary>
         /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
         /// <param name="xoff">The X offset of this element's parent.</param>
         /// <param name="yoff">The Y offset of this element's parent.</param>
         /// <param name="lastRot">The last rotation made in the render chain.</param>
-        protected virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+        public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
         {
             CheckChildren();
-            foreach (UIElement element in Children)
+            foreach (UIElement element in ElementInternal.Children)
             {
                 if (element.IsValid)
                 {
@@ -419,9 +349,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Fires <see cref="MouseLeftDown()"/> for all children included in the position.
-        /// </summary>
+        /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>
         /// <param name="x">The X position of the mouse.</param>
         /// <param name="y">The Y position of the mouse.</param>
         public void MouseLeftDown(int x, int y)
@@ -433,9 +361,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// <see cref="MouseLeftDownOutside()"/> for all children included in the position.
-        /// </summary>
+        /// <summary>Fires <see cref="MouseLeftDownOutside()"/> for all children included in the position.</summary>
         /// <param name="x">The X position of the mouse.</param>
         /// <param name="y">The Y position of the mouse.</param>
         public void MouseLeftDownOutside(int x, int y)
@@ -447,9 +373,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Fires <see cref="MouseLeftUp()"/> for all children included in the position.
-        /// </summary>
+        /// <summary>Fires <see cref="MouseLeftUp()"/> for all children included in the position.</summary>
         /// <param name="x">The X position of the mouse.</param>
         /// <param name="y">The Y position of the mouse.</param>
         public void MouseLeftUp(int x, int y)
@@ -461,50 +385,38 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Ran when the mouse enters the boundaries of this element.
-        /// </summary>
-        protected virtual void MouseEnter()
+        /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
+        public virtual void MouseEnter()
         {
         }
 
-        /// <summary>
-        /// Ran when the mouse exits the boundaries of this element.
-        /// </summary>
-        protected virtual void MouseLeave()
+        /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
+        public virtual void MouseLeave()
         {
         }
 
-        /// <summary>
-        /// Ran when the left mouse button is pressed down within the boundaries of this element or its children.
-        /// </summary>
-        protected virtual void MouseLeftDown()
+        /// <summary>Ran when the left mouse button is pressed down within the boundaries of this element or its children.</summary>
+        public virtual void MouseLeftDown()
         {
         }
 
-        /// <summary>
-        /// Ran when the left mouse button is pressed down outside of the boundaries of this element or its children.
-        /// </summary>
-        protected virtual void MouseLeftDownOutside()
+        /// <summary>Ran when the left mouse button is pressed down outside of the boundaries of this element or its children.</summary>
+        public virtual void MouseLeftDownOutside()
         {
         }
 
-        /// <summary>
-        /// Ran when the left mouse button is released within the boundaries of this element or its children.
-        /// </summary>
-        protected virtual void MouseLeftUp()
+        /// <summary>Ran when the left mouse button is released within the boundaries of this element or its children.</summary>
+        public virtual void MouseLeftUp()
         {
         }
 
-        /// <summary>
-        /// Gets all children that contain the position on the screen.
-        /// </summary>
+        /// <summary>Gets all children that contain the position on the screen.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>A list of child elements containing the position.</returns>
-        protected virtual IEnumerable<UIElement> GetAllAt(int x, int y)
+        public virtual IEnumerable<UIElement> GetAllAt(int x, int y)
         {
-            foreach (UIElement element in Children)
+            foreach (UIElement element in ElementInternal.Children)
             {
                 if (element.IsValid && element.Contains(x, y))
                 {
@@ -513,15 +425,13 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets all children that do not contain the position on the screen.
-        /// </summary>
+        /// <summary>Gets all children that do not contain the position on the screen.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>A list of child elements not containing the position.</returns>
-        protected virtual IEnumerable<UIElement> GetAllNotAt(int x, int y)
+        public virtual IEnumerable<UIElement> GetAllNotAt(int x, int y)
         {
-            foreach (UIElement element in Children)
+            foreach (UIElement element in ElementInternal.Children)
             {
                 if (element.IsValid && !element.Contains(x, y))
                 {
@@ -530,17 +440,13 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Preps the element.
-        /// </summary>
-        protected virtual void Init()
+        /// <summary>Preps the element.</summary>
+        public virtual void Init()
         {
         }
 
-        /// <summary>
-        /// Destroys any data tracked by the element.
-        /// </summary>
-        protected virtual void Destroy()
+        /// <summary>Destroys any data tracked by the element.</summary>
+        public virtual void Destroy()
         {
         }
     }

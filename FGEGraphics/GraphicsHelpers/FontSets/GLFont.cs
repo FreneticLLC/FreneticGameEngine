@@ -59,7 +59,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public Font BackupFont;
 
         /// <summary>How tall a rendered symbol is.</summary>
-        public float Height;
+        public int Height;
 
         /// <summary>The size of <see cref="LowCodepointLocs"/>.</summary>
         public const int LOW_CODEPOINT_RANGE_CAP = 8192;
@@ -94,7 +94,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         static GLFont()
         {
             RenderFormat = new StringFormat(StringFormat.GenericTypographic);
-            RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap;
+            RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap | StringFormatFlags.NoClip;
         }
 
         /// <summary>Returns 'true' if a <see cref="RecognizeCharacters(string)"/> call might be needed for the text (characters outside of quick-lookup range, or characters not already recognized). This call exists for opti reasons only.</summary>
@@ -140,20 +140,26 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         {
             using Graphics gfx = Graphics.FromImage(Engine.CurrentBMP);
             gfx.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            gfx.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
             int X = Engine.CX;
             int Y = Engine.CY;
             Brush brush = new SolidBrush(Color.White);
-            Engine.CMinHeight = Math.Max((int)Height + 8, Engine.CMinHeight); // TODO: 8 -> ???
+            Engine.CMinHeight = Math.Max(Height + 8, Engine.CMinHeight); // TODO: 8 -> ???
             int processed = 0;
             foreach (string inputSymbol in input)
             {
                 bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(":") && inputSymbol.EndsWith(":");
                 Font fnt = (inputSymbol.Length == 1 ? Internal_Font : BackupFont);
                 string chr = inputSymbol == "\t" ? "    " : inputSymbol;
-                float nwidth = Height;
+                int nwidth = Height;
+                float rawHeight = Height;
                 if (!isEmoji)
                 {
-                    nwidth = (float)Math.Ceiling(gfx.MeasureString(chr, fnt, new PointF(0, 0), RenderFormat).Width);
+                    SizeF measured = gfx.MeasureString(chr, fnt, new PointF(0, 0), RenderFormat);
+                    nwidth = (int)Math.Ceiling(measured.Width);
+                    // TODO: These added values are hacks to compensate for font sizes not matching character sizes. A better measure method should be used instead.
+                    rawHeight = measured.Height + fnt.SizeInPoints * 0.1f;
                     if (fnt.Italic)
                     {
                         nwidth += (int)(fnt.SizeInPoints * 0.17);
@@ -162,7 +168,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 if (X + nwidth >= GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH)
                 {
                     Y += Engine.CMinHeight;
-                    Engine.CMinHeight = (int)Height + 8; // TODO: 8 -> ???
+                    Engine.CMinHeight = Height + 8; // TODO: 8 -> ???
                     X = 6;
                     if (Y + Engine.CMinHeight > Engine.CurrentHeight)
                     {
@@ -176,14 +182,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 {
                     Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
                     using Bitmap bmp = t.SaveToBMP();
-                    gfx.DrawImage(bmp, new Rectangle(X, Y, (int)nwidth, (int)nwidth));
+                    gfx.DrawImage(bmp, new Rectangle(X, Y, nwidth, nwidth));
                 }
                 else
                 {
                     gfx.DrawString(chr, fnt, brush, new PointF(X, Y), RenderFormat);
                 }
                 processed++;
-                RectangleF rect = new RectangleF(X, Y, nwidth, Height);
+                RectangleF rect = new RectangleF(X, Y, nwidth, rawHeight);
                 SymbolLocations[inputSymbol] = rect;
                 if (chr.Length == 1)
                 {
@@ -193,7 +199,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                         LowCodepointLocs[inputSymbol[0]] = rect;
                     }
                 }
-                X += (int)Math.Ceiling(nwidth + 8); // TODO: 8 -> ???
+                X += nwidth + 8; // TODO: 8 -> ???
             }
             Engine.CX = X;
             Engine.CY = Y;

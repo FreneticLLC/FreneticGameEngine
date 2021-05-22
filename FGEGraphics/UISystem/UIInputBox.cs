@@ -25,49 +25,43 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents an interactable text input box on a screen.
-    /// </summary>
+    /// <summary>Represents an interactable text input box on a screen.</summary>
     public class UIInputBox : UIElement
     {
-        /// <summary>
-        /// The current text in this input box.
-        /// </summary>
+        /// <summary>The current text in this input box.</summary>
         public string Text;
 
-        /// <summary>
-        /// Information about this input box.
-        /// </summary>
+        /// <summary>Information about this input box.</summary>
         public string Info;
 
-        /// <summary>
-        /// The font to use.
-        /// </summary>
+        /// <summary>The font to use.</summary>
         public FontSet Fonts;
 
-        /// <summary>
-        /// Whether this input box is currently selected.
-        /// </summary>
+        /// <summary>Whether this input box is currently selected.</summary>
         public bool Selected = false;
         
-        /// <summary>
-        /// Whether this input box is multi-line.
-        /// </summary>
+        /// <summary>Whether this input box is multi-line.</summary>
         public bool MultiLine = false;
 
-        /// <summary>
-        /// The current minimum position of the cursor.
-        /// </summary>
+        /// <summary>The current minimum position of the cursor.</summary>
         public int MinCursor = 0;
 
-        /// <summary>
-        /// The current maximum position of the cursor.
-        /// </summary>
+        /// <summary>The current maximum position of the cursor.</summary>
         public int MaxCursor = 0;
 
-        /// <summary>
-        /// Constructs a new text input box.
-        /// </summary>
+        /// <summary>Whether the user tried to press the escape key.</summary>
+        public bool TriedToEscape = false;
+
+        /// <summary>Fired when the text in this input box is modified.</summary>
+        public EventHandler<EventArgs> TextModified;
+
+        /// <summary>Fired when the enter key is pressed while this input box is selected.</summary>
+        public Action EnterPressed;
+
+        /// <summary>The color of this input box.</summary>
+        public Vector4 Color = Vector4.One;
+
+        /// <summary>Constructs a new text input box.</summary>
         /// <param name="text">The default text in the box.</param>
         /// <param name="info">Information about the box.</param>
         /// <param name="fonts">The font to use.</param>
@@ -80,16 +74,23 @@ namespace FGEGraphics.UISystem
             Fonts = fonts;
         }
 
-        private bool MDown = false;
-
-        private int MStart = 0;
-
-        /// <summary>
-        /// Selects this input box.
-        /// </summary>
-        protected override void MouseLeftDown()
+        /// <summary>Internal values for <see cref="UIInputBox"/>.</summary>
+        public struct InternalData
         {
-            MDown = true;
+            /// <summary>Whether the mouse left button is currently down.</summary>
+            public bool MDown;
+
+            /// <summary>The starting index of a mouse multi-select in-progress.</summary>
+            public int MStart;
+        }
+
+        /// <summary>Internal values for <see cref="UIInputBox"/>.</summary>
+        public InternalData Internal;
+
+        /// <summary>Selects this input box.</summary>
+        public override void MouseLeftDown()
+        {
+            Internal.MDown = true;
             Selected = true;
             // TODO: implement
             // /* KeyHandlerState khs = */KeyHandler.GetKBState();
@@ -100,18 +101,16 @@ namespace FGEGraphics.UISystem
                 {
                     MinCursor = i;
                     MaxCursor = i;
-                    MStart = i;
+                    Internal.MStart = i;
                     return;
                 }
             }
             MinCursor = Text.Length;
             MaxCursor = Text.Length;
-            MStart = Text.Length;
+            Internal.MStart = Text.Length;
         }
 
-        /// <summary>
-        /// Clears this input box.
-        /// </summary>
+        /// <summary>Clears this input box.</summary>
         public void Clear()
         {
             Text = "";
@@ -120,53 +119,40 @@ namespace FGEGraphics.UISystem
             TriedToEscape = false;
         }
 
-        /// <summary>
-        /// Deselects this input box.
-        /// </summary>
-        protected override void MouseLeftDownOutside()
+        /// <summary>Deselects this input box.</summary>
+        public override void MouseLeftDownOutside()
         {
             Selected = false;
         }
 
-        /// <summary>
-        /// Sets the new cursor position.
-        /// </summary>
-        protected override void MouseLeftUp()
+        /// <summary>Sets the new cursor position.</summary>
+        public override void MouseLeftUp()
         {
             AdjustMax();
-            MDown = false;
+            Internal.MDown = false;
         }
 
-        /// <summary>
-        /// Adjusts the cursor position based on the mouse X coordinate.
-        /// </summary>
-        protected void AdjustMax()
+        /// <summary>Adjusts the cursor position based on the mouse X coordinate.</summary>
+        public void AdjustMax()
         {
             int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
                 if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Window.MouseX)
                 {
-                    MinCursor = Math.Min(i, MStart);
-                    MaxCursor = Math.Max(i, MStart);
+                    MinCursor = Math.Min(i, Internal.MStart);
+                    MaxCursor = Math.Max(i, Internal.MStart);
                     return;
                 }
             }
             MaxCursor = Text.Length;
         }
 
-        /// <summary>
-        /// Whether the user tried to press the escape key.
-        /// </summary>
-        public bool TriedToEscape = false;
-
-        /// <summary>
-        /// Performs a tick on this element.
-        /// </summary>
+        /// <summary>Performs a tick on this element.</summary>
         /// <param name="delta">The time since the last tick.</param>
-        protected override void Tick(double delta)
+        public override void Tick(double delta)
         {
-            if (MDown)
+            if (Internal.MDown)
             {
                 AdjustMax();
             }
@@ -232,24 +218,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Fired when the text in this input box is modified.
-        /// </summary>
-        public EventHandler<EventArgs> TextModified;
-
-        /// <summary>
-        /// Fired when the enter key is pressed while this input box is selected.
-        /// </summary>
-        public Action EnterPressed;
-
-        /// <summary>
-        /// The color of this input box.
-        /// </summary>
-        public Vector4 Color = Vector4.One;
-
-        /// <summary>
-        /// Renders this input box on the screen.
-        /// </summary>
+        /// <summary>Renders this input box on the screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)

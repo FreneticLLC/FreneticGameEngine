@@ -11,24 +11,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
-using OpenTK;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a scrollable box containing other elements.
-    /// </summary>
+    /// <summary>Represents a scrollable box containing other elements.</summary>
     public class UIScrollBox : UIElement
     {
-        /// <summary>
-        /// The current scroll position.
-        /// </summary>
+        /// <summary>The current scroll position.</summary>
         public int Scroll = 0;
 
         /// <summary>
@@ -37,48 +29,38 @@ namespace FGEGraphics.UISystem
         /// </summary>
         public int MaxScroll = 0;
 
-        /// <summary>
-        /// Construcsts the UI scroll box.
-        /// </summary>
+        /// <summary>Constructs the UI scroll box.</summary>
         /// <param name="pos">The position of the element.</param>
         public UIScrollBox(UIPositionHelper pos)
             : base(pos)
         {
         }
 
-        /// <summary>
-        /// Whether to watch the mouse scroll wheel.
-        /// </summary>
-        private bool WatchMouse = false;
+        /// <summary>(Internal) Whether to watch the mouse scroll wheel.</summary>
+        public bool WatchMouse = false;
 
-        /// <summary>
-        /// Begins watching the mouse.
-        /// </summary>
-        protected override void MouseEnter()
+        /// <summary>Begins watching the mouse.</summary>
+        public override void MouseEnter()
         {
             WatchMouse = true;
         }
 
-        /// <summary>
-        /// Stops watching the mouse.
-        /// </summary>
-        protected override void MouseLeave()
+        /// <summary>Stops watching the mouse.</summary>
+        public override void MouseLeave()
         {
             WatchMouse = false;
         }
 
-        /// <summary>
-        /// Gets all visible children that contain the position on the screen within this scroll box.
-        /// </summary>
+        /// <summary>Gets all visible children that contain the position on the screen within this scroll box.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>
         /// <returns>A list of visible child elements containing the position.</returns>
-        protected override List<UIElement> GetAllAt(int x, int y)
+        public override List<UIElement> GetAllAt(int x, int y)
         {
             List<UIElement> found = new List<UIElement>();
             if (SelfContains(x, y))
             {
-                foreach (UIElement element in Children)
+                foreach (UIElement element in ElementInternal.Children)
                 {
                     if (element.Contains(x, y))
                     {
@@ -89,11 +71,9 @@ namespace FGEGraphics.UISystem
             return found;
         }
 
-        /// <summary>
-        /// Checks the mouse scroll wheel if necessary and changes the scroll position.
-        /// </summary>
+        /// <summary>Checks the mouse scroll wheel if necessary and changes the scroll position.</summary>
         /// <param name="delta">The time since the last tick.</param>
-        protected override void Tick(double delta)
+        public override void Tick(double delta)
         {
             if (WatchMouse)
             {
@@ -109,14 +89,10 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// The color of the background of the scroll box (set to Alpha 0 to remove).
-        /// </summary>
+        /// <summary>The color of the background of the scroll box (set to Alpha 0 to remove).</summary>
         public Color4F Color = new Color4F(0f, 0.5f, 0.6f, 0.3f);
 
-        /// <summary>
-        /// Renders this scroll box on the screen.
-        /// </summary>
+        /// <summary>Renders this scroll box on the screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)

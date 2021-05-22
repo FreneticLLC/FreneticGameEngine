@@ -22,22 +22,33 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a simple text box on a screen.
-    /// </summary>
+    /// <summary>Represents a simple piece text on a screen.</summary>
     public class UILabel : UIElement
     {
-        /// <summary>
-        /// The internal text value.
-        /// <para>This will not update this label's width or height.</para>
-        /// </summary>
-        public RenderableText InternalText;
+        /// <summary>Internal data for <see cref="UILabel"/>.</summary>
+        public struct InternalData
+        {
+            /// <summary>
+            /// The internal text value.
+            /// <para>This will not update this label's width or height.</para>
+            /// </summary>
+            public RenderableText Text;
 
-        /// <summary>
-        /// The internal text value.
-        /// <para>This will not update this label's render data.</para>
-        /// </summary>
-        public string RawInternalText;
+            /// <summary>
+            /// The internal text value.
+            /// <para>This will not update this label's render data.</para>
+            /// </summary>
+            public string RawText;
+
+            /// <summary>
+            /// The internal text font value.
+            /// <para>This will not update this label's width or height.</para>
+            /// </summary>
+            public FontSet TextFont;
+        }
+
+        /// <summary>Internal data for <see cref="UILabel"/>.</summary>
+        public InternalData Internal;
 
         /// <summary>
         /// The text to display on this label.
@@ -47,21 +58,15 @@ namespace FGEGraphics.UISystem
         {
             get
             {
-                return RawInternalText;
+                return Internal.RawText;
             }
             set
             {
-                RawInternalText = value;
-                InternalText = InternalTextFont.ParseFancyText(RawInternalText, BColor);
+                Internal.RawText = value;
+                Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
                 FixScale();
             }
         }
-
-        /// <summary>
-        /// The internal text font value.
-        /// <para>This will not update this label's width or height.</para>
-        /// </summary>
-        public FontSet InternalTextFont;
 
         /// <summary>
         /// The font to use.
@@ -71,12 +76,12 @@ namespace FGEGraphics.UISystem
         {
             get
             {
-                return InternalTextFont;
+                return Internal.TextFont;
             }
             set
             {
-                InternalTextFont = value;
-                InternalText = InternalTextFont.ParseFancyText(RawInternalText, BColor);
+                Internal.TextFont = value;
+                Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
                 FixScale();
             }
         }
@@ -87,14 +92,13 @@ namespace FGEGraphics.UISystem
         /// </summary>
         public Vector4 BackColor = Vector4.Zero;
 
-        /// <summary>
-        /// The base text color for this label.
-        /// </summary>
+        /// <summary>The base text color for this label.</summary>
         public string BColor = "^r^7";
 
-        /// <summary>
-        /// Constructs a new label.
-        /// </summary>
+        /// <summary>The custom-limit width.</summary>
+        public int CustomWidthValue;
+
+        /// <summary>Constructs a new label.</summary>
         /// <param name="btext">The text to display on the label.</param>
         /// <param name="font">The font to use.</param>
         /// <param name="pos">The position of the element.</param>
@@ -102,29 +106,20 @@ namespace FGEGraphics.UISystem
             : base(pos)
         {
             CustomWidthValue = Position.Width;
-            InternalTextFont = font;
+            Internal.TextFont = font;
             Text = btext;
             // TODO: Dynamic scaling support?
             FixScale();
         }
 
-        /// <summary>
-        /// Fixes this label's width and height based on <see cref="Text"/> and <see cref="TextFont"/>.
-        /// </summary>
+        /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="TextFont"/>.</summary>
         public void FixScale()
         {
-            InternalText = CustomWidthValue > 0 ? FontSet.SplitAppropriately(InternalText, CustomWidthValue) : InternalText;
-            Position.ConstantWidthHeight((int)InternalText.Width, (int)(InternalText.Lines.Length * InternalTextFont.FontDefault.Height));
+            Internal.Text = CustomWidthValue > 0 ? FontSet.SplitAppropriately(Internal.Text, CustomWidthValue) : Internal.Text;
+            Position.ConstantWidthHeight((int)Internal.Text.Width, (int)(Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height));
         }
 
-        /// <summary>
-        /// The custom-limit width.
-        /// </summary>
-        public int CustomWidthValue;
-
-        /// <summary>
-        /// Renders this label on the screen.
-        /// </summary>
+        /// <summary>Renders this label on the screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
@@ -134,10 +129,10 @@ namespace FGEGraphics.UISystem
             if (BackColor.W > 0)
             {
                 Renderer2D.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + InternalText.Width, by + (InternalText.Lines.Length * InternalTextFont.FontDefault.Height), new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + Internal.Text.Width, by + (Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height), new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 Renderer2D.SetColor(Vector4.One);
             }
-            TextFont.DrawFancyText(InternalText, new Location(bx, by, 0));
+            TextFont.DrawFancyText(Internal.Text, new Location(bx, by, 0));
         }
     }
 }

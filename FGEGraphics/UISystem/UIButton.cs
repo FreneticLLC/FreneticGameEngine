@@ -23,59 +23,37 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents an interactable button on a screen.
-    /// </summary>
+    /// <summary>Represents an interactable button on a screen.</summary>
     public class UIButton : UIElement
     {
-        /// <summary>
-        /// The name of the texture for this button.
-        /// </summary>
-        private readonly string TextureName;
+        /// <summary>The name of the texture for this button.</summary>
+        public readonly string TextureName;
 
-        /// <summary>
-        /// The text to display on this button.
-        /// </summary>
+        /// <summary>The text to display on this button.</summary>
         public RenderableText Text;
 
-        /// <summary>
-        /// The font to use.
-        /// </summary>
+        /// <summary>The font to use.</summary>
         public FontSet TextFont;
 
-        /// <summary>
-        /// Ran when this button is clicked.
-        /// </summary>
+        /// <summary>Ran when this button is clicked.</summary>
         public Action ClickedTask;
 
-        /// <summary>
-        /// The standard texture.
-        /// </summary>
+        /// <summary>The standard texture.</summary>
         public Texture Tex_None;
 
-        /// <summary>
-        /// The texture used when hovering over this button.
-        /// </summary>
+        /// <summary>The texture used when hovering over this button.</summary>
         public Texture Tex_Hover;
 
-        /// <summary>
-        /// The texture used when this button is being clicked.
-        /// </summary>
+        /// <summary>The texture used when this button is being clicked.</summary>
         public Texture Tex_Click;
 
-        /// <summary>
-        /// Whether the mouse is hovering over this button.
-        /// </summary>
+        /// <summary>Whether the mouse is hovering over this button.</summary>
         public bool Hovered = false;
 
-        /// <summary>
-        /// Whether this button is being clicked.
-        /// </summary>
+        /// <summary>Whether this button is being clicked.</summary>
         public bool Clicked = false;
 
-        /// <summary>
-        /// Constructs a new button.
-        /// </summary>
+        /// <summary>Constructs a new button.</summary>
         /// <param name="buttontexname">The name of the texture to use.</param>
         /// <param name="buttontext">The text to display.</param>
         /// <param name="font">The font to use.</param>
@@ -90,10 +68,8 @@ namespace FGEGraphics.UISystem
             ClickedTask = clicked;
         }
 
-        /// <summary>
-        /// Preps the button's textures.
-        /// </summary>
-        protected override void Init()
+        /// <summary>Preps the button's textures.</summary>
+        public override void Init()
         {
             TextureEngine Textures = Engine.Textures;
             Tex_None = Textures.GetTexture(TextureName + "_none");
@@ -101,36 +77,28 @@ namespace FGEGraphics.UISystem
             Tex_Click = Textures.GetTexture(TextureName + "_click");
         }
 
-        /// <summary>
-        /// Ran when the mouse enters the boundaries of this button.
-        /// </summary>
-        protected override void MouseEnter()
+        /// <summary>Ran when the mouse enters the boundaries of this button.</summary>
+        public override void MouseEnter()
         {
             Hovered = true;
         }
 
-        /// <summary>
-        /// Ran when the mouse exits the boundaries of this button.
-        /// </summary>
-        protected override void MouseLeave()
+        /// <summary>Ran when the mouse exits the boundaries of this button.</summary>
+        public override void MouseLeave()
         {
             Hovered = false;
             Clicked = false;
         }
 
-        /// <summary>
-        /// Ran when the left mouse button is pressed down within the boundaries of this button.
-        /// </summary>
-        protected override void MouseLeftDown()
+        /// <summary>Ran when the left mouse button is pressed down within the boundaries of this button.</summary>
+        public override void MouseLeftDown()
         {
             Hovered = true;
             Clicked = true;
         }
 
-        /// <summary>
-        /// Ran when the left mouse button is released within the boundaries of this button.
-        /// </summary>
-        protected override void MouseLeftUp()
+        /// <summary>Ran when the left mouse button is released within the boundaries of this button.</summary>
+        public override void MouseLeftUp()
         {
             if (Clicked && Hovered)
             {
@@ -139,9 +107,7 @@ namespace FGEGraphics.UISystem
             Clicked = false;
         }
 
-        /// <summary>
-        /// Renders this button on the screen.
-        /// </summary>
+        /// <summary>Renders this button on the screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)

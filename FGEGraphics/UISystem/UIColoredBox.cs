@@ -19,29 +19,19 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a simple colored box on a screen.
-    /// </summary>
+    /// <summary>Represents a simple colored box on a screen.</summary>
     public class UIColoredBox : UIElement
     {
-        /// <summary>
-        /// The color of this box.
-        /// </summary>
+        /// <summary>The color of this box.</summary>
         public Vector4 Color;
 
-        /// <summary>
-        /// Gets the texture ID this box uses.
-        /// </summary>
+        /// <summary>Gets the texture ID this box uses.</summary>
         public Func<int> GetTexture;
 
-        /// <summary>
-        /// Whether this box is flipped over the X axis.
-        /// </summary>
+        /// <summary>Whether this box is vertically flipped.</summary>
         public bool Flip = false;
 
-        /// <summary>
-        /// Constructs a simple colored box.
-        /// </summary>
+        /// <summary>Constructs a simple colored box.</summary>
         /// <param name="color">The color to use.</param>
         /// <param name="pos">The position of the element.</param>
         /// <param name="texture">The function to use to get the texture ID, if any.</param>
@@ -52,9 +42,7 @@ namespace FGEGraphics.UISystem
             GetTexture = texture;
         }
 
-        /// <summary>
-        /// Renders this box on the screen.
-        /// </summary>
+        /// <summary>Renders this box on the screen.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)

@@ -14,14 +14,10 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents a simple container of several UI elements.
-    /// </summary>
+    /// <summary>Represents a simple container of several UI elements.</summary>
     public class UIGroup : UIElement
     {
-        /// <summary>
-        /// Constructs a new group.
-        /// </summary>
+        /// <summary>Constructs a new group.</summary>
         /// <param name="pos">The position of the element.</param>
         public UIGroup(UIPositionHelper pos)
             : base(pos)

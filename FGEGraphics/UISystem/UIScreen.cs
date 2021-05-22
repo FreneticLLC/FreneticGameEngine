@@ -19,14 +19,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem
 {
-    /// <summary>
-    /// Represents an entire screen with any kind of graphics.
-    /// </summary>
+    /// <summary>Represents an entire screen with any kind of graphics.</summary>
     public class UIScreen : UIElement
     {
-        /// <summary>
-        /// The default priority of a UI Screen.
-        /// </summary>
+        /// <summary>The default priority of a UI Screen.</summary>
         public const double SCREEN_PRIORITY_DEFAULT = -10E10;
 
         /// <summary>
@@ -35,9 +31,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         private readonly GameClientWindow InternalClient;
 
-        /// <summary>
-        /// Gets the client game engine this screen is associated with.
-        /// </summary>
+        /// <summary>Gets the client game engine this screen is associated with.</summary>
         public override GameEngineBase Engine
         {
             get
@@ -46,9 +40,7 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Gets the client game window this screen is associated with.
-        /// </summary>
+        /// <summary>Gets the client game window this screen is associated with.</summary>
         public override GameClientWindow Window
         {
             get
@@ -63,9 +55,7 @@ namespace FGEGraphics.UISystem
         /// </summary>
         protected bool ResetOnRender = false;
 
-        /// <summary>
-        /// Constructs a screen that covers the entire game window.
-        /// </summary>
+        /// <summary>Constructs a screen that covers the entire game window.</summary>
         /// <param name="view">The client UI View.</param>
         public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
         {
@@ -74,9 +64,7 @@ namespace FGEGraphics.UISystem
             RenderPriority = SCREEN_PRIORITY_DEFAULT;
         }
 
-        /// <summary>
-        /// Constructs a screen that covers a specific portion of the game window.
-        /// </summary>
+        /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
         /// <param name="client">The client game window.</param>
         /// <param name="pos">The position of the element.</param>
         public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
@@ -85,9 +73,7 @@ namespace FGEGraphics.UISystem
             IsValid = true;
         }
 
-        /// <summary>
-        /// Performs a render on this element.
-        /// </summary>
+        /// <summary>Performs a render on this element.</summary>
         /// <param name="view">The UI view.</param>
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
@@ -100,16 +86,12 @@ namespace FGEGraphics.UISystem
             }
         }
 
-        /// <summary>
-        /// Preps the switch to this screen.
-        /// </summary>
+        /// <summary>Preps the switch to this screen.</summary>
         public virtual void SwitchTo()
         {
         }
 
-        /// <summary>
-        /// Preps the switch from this screen.
-        /// </summary>
+        /// <summary>Preps the switch from this screen.</summary>
         public virtual void SwitchFrom()
         {
         }

@@ -25,19 +25,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// A 2D UI view.
-    /// </summary>
+    /// <summary>A 2D UI view.</summary>
     public class ViewUI2D
     {
-        /// <summary>
-        /// The backing client window.
-        /// </summary>
+        /// <summary>The backing client window.</summary>
         public GameClientWindow Client;
 
-        /// <summary>
-        /// Gets the primary engine.
-        /// </summary>
+        /// <summary>Gets the primary engine.</summary>
         public GameEngineBase Engine
         {
             get
@@ -46,9 +40,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Gets the rendering helper for the engine.
-        /// </summary>
+        /// <summary>Gets the rendering helper for the engine.</summary>
         public Renderer2D Rendering
         {
             get
@@ -57,9 +49,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// The default basic UI screen.
-        /// </summary>
+        /// <summary>The default basic UI screen.</summary>
         public UIScreen DefaultScreen;
 
         /// <summary>
@@ -80,9 +70,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public UIScreen InternalCurrentScreen;
 
-        /// <summary>
-        /// The current main screen.
-        /// </summary>
+        /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen
         {
             get
@@ -100,19 +88,13 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// The render context (2D) for the UI.
-        /// </summary>
+        /// <summary>The render context (2D) for the UI.</summary>
         public RenderContext2D UIContext;
 
-        /// <summary>
-        /// Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).
-        /// </summary>
+        /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
         public bool DirectToScreen = true;
 
-        /// <summary>
-        /// Draw the menu to the relevant back buffer.
-        /// </summary>
+        /// <summary>Draw the menu to the relevant back buffer.</summary>
         public void Draw()
         {
             StackNoteHelper.Push("Draw ViewUI2D", this);
@@ -138,9 +120,8 @@ namespace FGEGraphics.ClientSystem
                 Client.Shaders.ColorMult2DShader.Bind();
                 Renderer2D.SetColor(Color4F.White);
                 GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
-                GL.Uniform2(2, ref UIContext.Adder);
+                GL.Uniform2(ShaderLocations.Common2D.ADDER, ref UIContext.Adder);
                 GL.Disable(EnableCap.DepthTest);
-                GL.Disable(EnableCap.CullFace);
                 Shader s = Client.FontSets.FixToShader;
                 Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
                 GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
@@ -168,19 +149,13 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Whether to sort the view by priority order (if not, will be parent/child logical order).
-        /// </summary>
+        /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
         public bool SortToPriority = false;
 
-        /// <summary>
-        /// The last set of elements that were rendered (not sorted).
-        /// </summary>
+        /// <summary>The last set of elements that were rendered (not sorted).</summary>
         public List<UIElement> LastRenderedSet = new List<UIElement>();
 
-        /// <summary>
-        /// Ticks all elements attached to this view.
-        /// </summary>
+        /// <summary>Ticks all elements attached to this view.</summary>
         public void Tick()
         {
             CurrentScreen.FullTick(Client.Delta);
