@@ -29,48 +29,21 @@ namespace FGECore.CoreSystems
     /// </summary>
     public class SysConsole
     {
-        /// <summary>
-        /// All currently waiting messages.
-        /// </summary>
-        readonly static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
-
-        /// <summary>
-        /// Locker for the console.
-        /// </summary>
-        static LockObject ConsoleLock;
-
-        /// <summary>
-        /// Locker for writing.
-        /// </summary>
-        static LockObject WriteLock;
-
-        /// <summary>
-        /// The thread being used for console output.
-        /// </summary>
-        static Thread ConsoleOutputThread;
-
-        /// <summary>
-        /// Helper to cancel the console output thread.
-        /// </summary>
-        public static CancellationTokenSource ConsoleOutputCanceller;
-
-        /// <summary>
-        /// Closes the SysConsole.
-        /// </summary>
+        /// <summary>Closes the SysConsole.</summary>
         public static void ShutDown()
         {
-            lock (ConsoleLock)
+            lock (Internal.ConsoleLock)
             {
-                lock (WriteLock)
+                lock (Internal.WriteLock)
                 {
-                    ConsoleOutputCanceller.Cancel();
-                    if (Waiting.Count > 0)
+                    Internal.ConsoleOutputCanceller.Cancel();
+                    if (Internal.Waiting.Count > 0)
                     {
-                        foreach (KeyValuePair<string, string> message in Waiting)
+                        foreach (KeyValuePair<string, string> message in Internal.Waiting)
                         {
-                            WriteInternal(message.Value, message.Key);
+                            Internal.WriteInternal(message.Value, message.Key);
                         }
-                        Waiting.Clear();
+                        Internal.Waiting.Clear();
                     }
                 }
             }
@@ -94,9 +67,7 @@ namespace FGECore.CoreSystems
             return logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Environment.ProcessId + ".log";
         }
 
-        /// <summary>
-        /// The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.
-        /// </summary>
+        /// <summary>The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.</summary>
         // TODO: Configuration option to change the log file name (with a disable option that routes to a null). With options to put a value like logs/%year%/%month%/%day%.log
         public static string LogFileName = GenerateLogFileName();
 
@@ -107,23 +78,21 @@ namespace FGECore.CoreSystems
                             "^^nS is ^SSuperScript^r, ^^nl is ^lSubScript (AKA Lower-Text)^r, ^h^8^d^^nd is Drop-Shadow,^r^7 ^f^^nf is flip,^r ^^nr is regular text, ^^nq is a ^qquote^q, ^^nn is nothing (escape-symbol),^r " +
                             "and ^^nB is base-colors.";
 
-        /// <summary>
-        /// Prepares the system console.
-        /// </summary>
+        /// <summary>Prepares the system console.</summary>
         public static void Init()
         {
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Preparing console...");
-            ConsoleLock = new LockObject();
-            WriteLock = new LockObject();
-            ConsoleOutputCanceller = new CancellationTokenSource();
-            ConsoleOutputThread = new Thread(new ParameterizedThreadStart(ConsoleLoop));
-            ConsoleOutputThread.Start(ConsoleOutputCanceller);
+            Internal.ConsoleLock = new LockObject();
+            Internal.WriteLock = new LockObject();
+            Internal.ConsoleOutputCanceller = new CancellationTokenSource();
+            Internal.ConsoleOutputThread = new Thread(new ParameterizedThreadStart(Internal.ConsoleLoop));
+            Internal.ConsoleOutputThread.Start(Internal.ConsoleOutputCanceller);
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(LogFileName));
-                FSOUT = File.OpenWrite(LogFileName);
+                Internal.FSOUT = File.OpenWrite(LogFileName);
             }
             catch (Exception ex)
             {
@@ -134,58 +103,200 @@ namespace FGECore.CoreSystems
             Output(OutputType.INIT, TestColorsMessage);
         }
 
-        static FileStream FSOUT = null;
-
-        static void ConsoleLoop(Object obj)
+        /// <summary>Internal handlers for the SysConsole.</summary>
+        public static class Internal
         {
-            CancellationTokenSource cts = obj as CancellationTokenSource;
-            while (true)
+            /// <summary>All currently waiting messages.</summary>
+            public readonly static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
+
+            /// <summary>Locker for the console.</summary>
+            public static LockObject ConsoleLock;
+
+            /// <summary>Locker for writing.</summary>
+            public static LockObject WriteLock;
+
+            /// <summary>The thread being used for console output.</summary>
+            public static Thread ConsoleOutputThread;
+
+            /// <summary>Helper to cancel the console output thread.</summary>
+            public static CancellationTokenSource ConsoleOutputCanceller;
+
+            /// <summary>Log file output stream.</summary>
+            public static FileStream FSOUT = null;
+
+            /// <summary>Central loop thread for for the console handler.</summary>
+            /// <param name="obj">Loop context object: a <see cref="CancellationTokenSource"/>.</param>
+            public static void ConsoleLoop(object obj)
             {
-                List<KeyValuePair<string, string>> twaiting;
-                lock (ConsoleLock)
+                CancellationTokenSource cts = obj as CancellationTokenSource;
+                while (true)
                 {
-                    if (cts.IsCancellationRequested)
+                    List<KeyValuePair<string, string>> twaiting;
+                    lock (ConsoleLock)
                     {
-                        return;
-                    }
-                    twaiting = new List<KeyValuePair<string, string>>(Waiting);
-                    Waiting.Clear();
-                }
-                if (twaiting.Count > 0)
-                {
-                    lock (WriteLock)
-                    {
-                        foreach (KeyValuePair<string, string> message in twaiting)
+                        if (cts.IsCancellationRequested)
                         {
-                            WriteInternal(message.Value, message.Key);
+                            return;
+                        }
+                        twaiting = new List<KeyValuePair<string, string>>(Waiting);
+                        Waiting.Clear();
+                    }
+                    if (twaiting.Count > 0)
+                    {
+                        lock (WriteLock)
+                        {
+                            foreach (KeyValuePair<string, string> message in twaiting)
+                            {
+                                WriteInternal(message.Value, message.Key);
+                            }
                         }
                     }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
+            }
+
+            /// <summary>Writes some colored text to the system console.</summary>
+            /// <param name="text">The text to write.</param>
+            /// <param name="bcolor">The base color.</param>
+            public static void Write(string text, string bcolor)
+            {
+                lock (ConsoleLock)
+                {
+                    Written?.Invoke(null, new ConsoleWrittenEventArgs() { Text = text, BaseColor = bcolor });
+                    Waiting.Add(new KeyValuePair<string, string>(bcolor, text));
+                }
+            }
+
+            /// <summary>Writes some colored text to the system console.</summary>
+            /// <param name="text">The text to write.</param>
+            /// <param name="bcolor">The base color.</param>
+            public static void WriteInternal(string text, string bcolor)
+            {
+                text = bcolor + text.ApplyBaseColor(bcolor);
+                if (FSOUT != null)
+                {
+                    byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
+                    FSOUT.Write(b, 0, b.Length);
+                    FSOUT.Flush(); // TODO: Flush(true)?
+                }
+                if (AllowCursor)
+                {
+                    Console.SetCursorPosition(0, Console.CursorTop);
+                }
+                else
+                {
+                    byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(text);
+                    StringBuilder outp = new StringBuilder(t.Length);
+                    for (int i = 0; i < t.Length; i++)
+                    {
+                        outp.Append((char)t[i]);
+                    }
+                    Console.Write(outp.ToString());
+                    return;
+                }
+                StringBuilder outme = new StringBuilder();
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (text[i] == '^' && i + 1 < text.Length && IsColorSymbol(text[i + 1]))
+                    {
+                        if (outme.Length > 0)
+                        {
+                            Console.Write(outme);
+                            outme.Clear();
+                        }
+                        i++;
+                        switch (text[i])
+                        {
+                            case '0': Console.ForegroundColor = ConsoleColor.Black; break;
+                            case '1': Console.ForegroundColor = ConsoleColor.Red; break;
+                            case '2': Console.ForegroundColor = ConsoleColor.Green; break;
+                            case '3': Console.ForegroundColor = ConsoleColor.Yellow; break;
+                            case '4': Console.ForegroundColor = ConsoleColor.Blue; break;
+                            case '5': Console.ForegroundColor = ConsoleColor.Cyan; break;
+                            case '6': Console.ForegroundColor = ConsoleColor.Magenta; break;
+                            case '7': Console.ForegroundColor = ConsoleColor.White; break;
+                            case '8': Console.ForegroundColor = ConsoleColor.Magenta; break;
+                            case '9': Console.ForegroundColor = ConsoleColor.Cyan; break;
+                            case 'a': Console.ForegroundColor = ConsoleColor.Yellow; break;
+                            case ')': Console.ForegroundColor = ConsoleColor.DarkGray; break;
+                            case '!': Console.ForegroundColor = ConsoleColor.DarkRed; break;
+                            case '@': Console.ForegroundColor = ConsoleColor.DarkGreen; break;
+                            case '#': Console.ForegroundColor = ConsoleColor.DarkYellow; break;
+                            case '$': Console.ForegroundColor = ConsoleColor.DarkBlue; break;
+                            case '%': Console.ForegroundColor = ConsoleColor.DarkCyan; break;
+                            case '-': Console.ForegroundColor = ConsoleColor.DarkMagenta; break;
+                            case '&': Console.ForegroundColor = ConsoleColor.Gray; break;
+                            case '*': Console.ForegroundColor = ConsoleColor.DarkMagenta; break;
+                            case '(': Console.ForegroundColor = ConsoleColor.DarkCyan; break;
+                            case 'A': Console.ForegroundColor = ConsoleColor.DarkYellow; break;
+                            case 'b': break;
+                            case 'i': break;
+                            case 'u': break;
+                            case 's': break;
+                            case 'O': break;
+                            case 'j': break;
+                            case 'e': break;
+                            case 't': break;
+                            case 'T': break;
+                            case 'o': break;
+                            case 'R': break;
+                            case 'p': break; // TODO: Probably shouldn't be implemented, but... it's possible
+                            case 'k': break;
+                            case 'S': break;
+                            case 'l': break;
+                            case 'd': break;
+                            case 'f': break;
+                            case 'n': break;
+                            case 'q': outme.Append('"'); break;
+                            case 'r': Console.BackgroundColor = ConsoleColor.Black; break;
+                            case 'h': Console.BackgroundColor = Console.ForegroundColor; break;
+                            default: outme.Append($"INVALID-COLOR-CHAR:{text[i]}?"); break;
+                        }
+                    }
+                    else
+                    {
+                        outme.Append(text[i]);
+                    }
+                }
+                if (outme.Length > 0)
+                {
+                    Console.Write(outme);
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                if (AllowCursor)
+                {
+                    Console.Write(">");// TODO + ConsoleHandler.read);
+                }
             }
         }
 
-        /// <summary>
-        /// The console title.
-        /// </summary>
+        /// <summary>The console title.</summary>
         public static string Title = "";
 
-        /// <summary>
-        /// Fixes the title of the system console to how the Client expects it.
-        /// </summary>
+        /// <summary>Fixes the title of the system console to how launcher clients would expect it.</summary>
         public static void FixTitle()
         {
-            Title = Program.GameName + " / " + Environment.ProcessId.ToString();
+            Title = $"{Program.GameName} / {Environment.ProcessId}";
             Console.Title = Title;
         }
 
 #if !LINUX
-        // Used for HideConsole() and ShowConsole(), exclusively on Windows.
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        const int SW_HIDE = 0;
-        const int SW_SHOW = 5;
-        static IntPtr ConsoleHandle = IntPtr.Zero;
+        /// <summary>Internal values only applicable on Windows OS.</summary>
+        public static class Internal_Windows
+        {
+            /// <summary>Used by <see cref="HideConsole"/> and <see cref="ShowConsole"/>.</summary>
+            /// <param name="hWnd">Window handle.</param>
+            /// <param name="nCmdShow"><see cref="SW_SHOW"/> or <see cref="SW_HIDE"/>.</param>
+            [DllImport("user32.dll")]
+            public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+            /// <summary>Enum constants for <see cref="ShowWindow(IntPtr, int)"/>.</summary>
+            public const int SW_HIDE = 0, SW_SHOW = 5;
+
+            /// <summary>Current console window handle, if any.</summary>
+            public static IntPtr ConsoleHandle = IntPtr.Zero;
+        }
 #endif
 
         /// <summary>
@@ -197,7 +308,11 @@ namespace FGECore.CoreSystems
 #if !LINUX
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                ShowWindow(ConsoleHandle, SW_HIDE);
+                if (Internal_Windows.ConsoleHandle == IntPtr.Zero)
+                {
+                    Internal_Windows.ConsoleHandle = Process.GetCurrentProcess().MainWindowHandle;
+                }
+                Internal_Windows.ShowWindow(Internal_Windows.ConsoleHandle, Internal_Windows.SW_HIDE);
             }
 #endif
         }
@@ -211,11 +326,11 @@ namespace FGECore.CoreSystems
 #if !LINUX
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (ConsoleHandle == IntPtr.Zero)
+                if (Internal_Windows.ConsoleHandle == IntPtr.Zero)
                 {
-                    ConsoleHandle = Process.GetCurrentProcess().MainWindowHandle;
+                    Internal_Windows.ConsoleHandle = Process.GetCurrentProcess().MainWindowHandle;
                 }
-                ShowWindow(ConsoleHandle, SW_SHOW);
+                Internal_Windows.ShowWindow(Internal_Windows.ConsoleHandle, Internal_Windows.SW_SHOW);
             }
 #endif
         }
@@ -227,169 +342,38 @@ namespace FGECore.CoreSystems
         /// <param name="bcolor">The base color.</param>
         public static void WriteLine(string text, string bcolor)
         {
-            Write(text + "\n", bcolor);
+            Internal.Write(text + "\n", bcolor);
         }
 
-        /// <summary>
-        /// Event fired when the console is written to.
-        /// </summary>
+        /// <summary>Event fired when the console is written to.</summary>
         public static EventHandler<ConsoleWrittenEventArgs> Written;
         
-        /// <summary>
-        /// Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.
-        /// </summary>
+        /// <summary>Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.</summary>
         public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
             "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
 
-        /// <summary>
-        /// Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText
-        /// </summary>
-        /// <param name="c"><paramref name="c"/>The character to check.</param>
+        /// <summary>Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText.</summary>
+        /// <param name="c">The character to check.</param>
         /// <returns>whether the character is a valid color symbol.</returns>
         public static bool IsColorSymbol(char c)
         {
             return ColorSymbolMatcher.IsMatch(c);
         }
 
-        /// <summary>
-        /// Writes some colored text to the system console.
-        /// </summary>
-        /// <param name="text">The text to write.</param>
-        /// <param name="bcolor">The base color.</param>
-        private static void Write(string text, string bcolor)
-        {
-            lock (ConsoleLock)
-            {
-                Written?.Invoke(null, new ConsoleWrittenEventArgs() { Text = text, BColor = bcolor });
-                Waiting.Add(new KeyValuePair<string, string>(bcolor, text));
-            }
-        }
-
-        static void WriteInternal(string text, string bcolor)
-        {
-            text = bcolor + text.ApplyBaseColor(bcolor);
-            if (FSOUT != null)
-            {
-                byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
-                FSOUT.Write(b, 0, b.Length);
-                FSOUT.Flush(); // TODO: Flush(true)?
-            }
-            if (AllowCursor)
-            {
-                Console.SetCursorPosition(0, Console.CursorTop);
-            }
-            else
-            {
-                byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(text);
-                StringBuilder outp = new StringBuilder(t.Length);
-                for (int i = 0; i < t.Length; i++)
-                {
-                    outp.Append((char)t[i]);
-                }
-                Console.Write(outp.ToString());
-                return;
-            }
-            StringBuilder outme = new StringBuilder();
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (text[i] == '^' && i + 1 < text.Length && IsColorSymbol(text[i + 1]))
-                {
-                    if (outme.Length > 0)
-                    {
-                        Console.Write(outme);
-                        outme.Clear();
-                    }
-                    i++;
-                    switch (text[i])
-                    {
-                        case '0': Console.ForegroundColor = ConsoleColor.Black; break;
-                        case '1': Console.ForegroundColor = ConsoleColor.Red; break;
-                        case '2': Console.ForegroundColor = ConsoleColor.Green; break;
-                        case '3': Console.ForegroundColor = ConsoleColor.Yellow; break;
-                        case '4': Console.ForegroundColor = ConsoleColor.Blue; break;
-                        case '5': Console.ForegroundColor = ConsoleColor.Cyan; break;
-                        case '6': Console.ForegroundColor = ConsoleColor.Magenta; break;
-                        case '7': Console.ForegroundColor = ConsoleColor.White; break;
-                        case '8': Console.ForegroundColor = ConsoleColor.Magenta; break;
-                        case '9': Console.ForegroundColor = ConsoleColor.Cyan; break;
-                        case 'a': Console.ForegroundColor = ConsoleColor.Yellow; break;
-                        case ')': Console.ForegroundColor = ConsoleColor.DarkGray; break;
-                        case '!': Console.ForegroundColor = ConsoleColor.DarkRed; break;
-                        case '@': Console.ForegroundColor = ConsoleColor.DarkGreen; break;
-                        case '#': Console.ForegroundColor = ConsoleColor.DarkYellow; break;
-                        case '$': Console.ForegroundColor = ConsoleColor.DarkBlue; break;
-                        case '%': Console.ForegroundColor = ConsoleColor.DarkCyan; break;
-                        case '-': Console.ForegroundColor = ConsoleColor.DarkMagenta; break;
-                        case '&': Console.ForegroundColor = ConsoleColor.Gray; break;
-                        case '*': Console.ForegroundColor = ConsoleColor.DarkMagenta; break;
-                        case '(': Console.ForegroundColor = ConsoleColor.DarkCyan; break;
-                        case 'A': Console.ForegroundColor = ConsoleColor.DarkYellow; break;
-                        case 'b': break;
-                        case 'i': break;
-                        case 'u': break;
-                        case 's': break;
-                        case 'O': break;
-                        case 'j': break;
-                        case 'e': break;
-                        case 't': break;
-                        case 'T': break;
-                        case 'o': break;
-                        case 'R': break;
-                        case 'p': break; // TODO: Probably shouldn't be implemented, but... it's possible
-                        case 'k': break;
-                        case 'S': break;
-                        case 'l': break;
-                        case 'd': break;
-                        case 'f': break;
-                        case 'n': break;
-                        case 'q': outme.Append('"'); break;
-                        case 'r': Console.BackgroundColor = ConsoleColor.Black; break;
-                        case 'h': Console.BackgroundColor = Console.ForegroundColor; break;
-                        default: outme.Append("INVALID-COLOR-CHAR:" + text[i] + "?"); break;
-                    }
-                }
-                else
-                {
-                    outme.Append(text[i]);
-                }
-            }
-            if (outme.Length > 0)
-            {
-                Console.Write(outme);
-            }
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-            if (AllowCursor)
-            {
-                Console.Write(">");// TODO + ConsoleHandler.read);
-            }
-        }
-
-        /// <summary>
-        /// Outputs an exception with a message explaining the source of the exception.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="ex">The exception.</param>
+        /// <summary>Outputs an exception with a message explaining the source of the exception.</summary>
         public static void Output(string message, Exception ex)
         {
-            Output(OutputType.ERROR, message + ": " + ex.ToString() + "\n\n" + Environment.StackTrace + "\n\n" + StackNoteHelper.Notes);
+            Output(OutputType.ERROR, $"{message}: {ex}\n\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
         }
 
-        /// <summary>
-        /// Outputs an exception.
-        /// </summary>
-        /// <param name="ex">The exception.</param>
+        /// <summary>Outputs an exception.</summary>
         public static void Output(Exception ex)
         {
-            Output(OutputType.ERROR, ex.ToString() + "\n\n" + Environment.StackTrace + "\n\n" + StackNoteHelper.Notes);
+            Output(OutputType.ERROR, $"{ex}\n\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
         }
 
-        /// <summary>
-        /// Gets a date-time-string for output.
-        /// </summary>
-        /// <param name="time">The DateTime.</param>
-        /// <returns>A string form of it.</returns>
-        public static string DateTimeString(DateTime time)
+        /// <summary>Gets a date-time-string for output.</summary>
+        public static string DateTimeString(DateTimeOffset time)
         {
             return time.Year.ToString().PadLeft(4, '0') + "/" + time.Month.ToString().PadLeft(2, '0') + "/" + time.Day.ToString().PadLeft(2, '0')
                 + " " + time.Hour.ToString().PadLeft(2, '0') + ":" + time.Minute.ToString().PadLeft(2, '0') + ":" + time.Second.ToString().PadLeft(2, '0');
@@ -403,12 +387,10 @@ namespace FGECore.CoreSystems
         /// <param name="bcolor">The custom base color.</param>
         public static void OutputCustom(string type, string message, string bcolor = "^r^7")
         {
-            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + bcolor + type + "^r^7] " + bcolor + message, bcolor);
+            WriteLine($"^r^7{DateTimeString(DateTimeOffset.Now)} [{bcolor}{type}^r^7] {bcolor}{message}", bcolor);
         }
 
-        /// <summary>
-        /// Can be replaced to control whether the SysConsole should output debug data.
-        /// </summary>
+        /// <summary>Can be replaced to control whether the SysConsole should output debug data.</summary>
         public static Func<bool> ShouldOutputDebug = () => true;
 
         /// <summary>
@@ -423,30 +405,21 @@ namespace FGECore.CoreSystems
             {
                 return;
             }
-            WriteLine("^r^7" + DateTimeString(DateTime.Now) + " [" + outputType.BaseColor +
-                outputType.Name + "^r^7] " + outputType.BaseColor + text, bcolor ?? outputType.BaseColor);
+            WriteLine($"^r^7{DateTimeString(DateTimeOffset.Now)} [{outputType.BaseColor}{outputType.Name}^r^7] {outputType.BaseColor}{text}", bcolor ?? outputType.BaseColor);
         }
     }
 
-    /// <summary>
-    /// An event arguments for when the <see cref="SysConsole"/> is written to.
-    /// </summary>
+    /// <summary>An event arguments class for when the <see cref="SysConsole"/> is written to.</summary>
     public class ConsoleWrittenEventArgs : EventArgs
     {
-        /// <summary>
-        /// The written text.
-        /// </summary>
+        /// <summary>The written text.</summary>
         public string Text;
 
-        /// <summary>
-        /// The base color written with.
-        /// </summary>
-        public string BColor;
+        /// <summary>The base color written with.</summary>
+        public string BaseColor;
     }
 
-    /// <summary>
-    /// All possible console output types.
-    /// </summary>
+    /// <summary>All possible console output types.</summary>
     public class OutputType
     {
         /// <summary>When the client is sending information to console.</summary>
@@ -471,14 +444,10 @@ namespace FGECore.CoreSystems
         public static OutputType CLIENTINIT = new OutputType() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
         // TODO: More?
 
-        /// <summary>
-        /// The name of the output type.
-        /// </summary>
+        /// <summary>The name of the output type.</summary>
         public string Name;
 
-        /// <summary>
-        /// The base color for this type.
-        /// </summary>
+        /// <summary>The base color for this type.</summary>
         public string BaseColor;
     }
 }
