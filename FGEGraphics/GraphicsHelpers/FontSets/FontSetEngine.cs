@@ -44,6 +44,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <summary>The general font for slightly bigger text rendering.</summary>
         public FontSet SlightlyBigger;
 
+        /// <summary>The general font for double sized text rendering.</summary>
+        public FontSet DoubleSize;
+
         /// <summary>A list of all currently loaded font sets.</summary>
         public Dictionary<(string, int), FontSet> Fonts = new Dictionary<(string, int), FontSet>();
 
@@ -71,6 +74,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             SlightlyBigger = new FontSet("slightlybigger", this);
             SlightlyBigger.Load(GLFonts.Standard.Name, GLFonts.Standard.Size + 5);
             Fonts.Add((SlightlyBigger.Name, SlightlyBigger.FontDefault.Size), SlightlyBigger);
+            DoubleSize = new FontSet("doublesize", this);
+            DoubleSize.Load(GLFonts.Standard.Name, GLFonts.Standard.Size * 2);
+            Fonts.Add((DoubleSize.Name, DoubleSize.FontDefault.Size), DoubleSize);
         }
 
         /// <summary>

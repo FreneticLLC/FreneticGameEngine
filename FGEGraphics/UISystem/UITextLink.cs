@@ -74,7 +74,7 @@ namespace FGEGraphics.UISystem
             TextHover = font.ParseFancyText(btexthover, BColor);
             TextClick = font.ParseFancyText(btextclick, BColor);
             Position.ConstantWidth((int)(Text.Width + (Icon == null ? 0 : font.FontDefault.Height)));
-            Position.ConstantHeight((int)TextFont.FontDefault.Height * Text.Lines.Length);
+            Position.ConstantHeight(TextFont.FontDefault.Height * Text.Lines.Length);
         }
 
         /// <summary>Detects hovering.</summary>
