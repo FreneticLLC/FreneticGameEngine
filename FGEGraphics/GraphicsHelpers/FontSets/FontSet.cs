@@ -24,64 +24,40 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
-    /// <summary>
-    /// Contains various GLFonts needed to render fancy text.
-    /// </summary>
+    /// <summary>Contains various <see cref="GLFont"/>s needed to render fancy text.</summary>
     public class FontSet
     {
-        /// <summary>
-        /// The backing engine.
-        /// </summary>
+        /// <summary>The backing engine.</summary>
         public FontSetEngine Engine;
 
-        /// <summary>
-        /// Default font.
-        /// </summary>
+        /// <summary>Default font.</summary>
         public GLFont FontDefault;
 
-        /// <summary>
-        /// Bold font.
-        /// </summary>
+        /// <summary>Bold font.</summary>
         public GLFont FontBold;
 
-        /// <summary>
-        /// Italic font.
-        /// </summary>
+        /// <summary>Italic font.</summary>
         public GLFont FontItalic;
 
-        /// <summary>
-        /// Bold+Italic font.
-        /// </summary>
+        /// <summary>Bold+Italic font.</summary>
         public GLFont FontBoldItalic;
 
-        /// <summary>
-        /// Half-size font.
-        /// </summary>
+        /// <summary> Half-size font.</summary>
         public GLFont FontHalf;
 
-        /// <summary>
-        /// Half-size bold font.
-        /// </summary>
+        /// <summary>Half-size bold font.</summary>
         public GLFont FontBoldHalf;
 
-        /// <summary>
-        /// Half-size italic font.
-        /// </summary>
+        /// <summary>Half-size italic font.</summary>
         public GLFont FontItalicHalf;
 
-        /// <summary>
-        /// Half-size bold+italic font.
-        /// </summary>
+        /// <summary>Half-size bold+italic font.</summary>
         public GLFont FontBoldItalicHalf;
 
-        /// <summary>
-        /// Name of the font set.
-        /// </summary>
+        /// <summary>Name of the font set.</summary>
         public string Name;
 
-        /// <summary>
-        /// Prepares a font set but does not load it,
-        /// </summary>
+        /// <summary>Prepares a font set but does not load it.</summary>
         /// <param name="_name">The name of the set.</param>
         /// <param name="engine">The backing engine.</param>
         public FontSet(string _name, FontSetEngine engine)
@@ -90,9 +66,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             Engine = engine;
         }
 
-        /// <summary>
-        /// Loads the font set.
-        /// </summary>
+        /// <summary>Loads the font set.</summary>
         /// <param name="fontname">The name of the font.</param>
         /// <param name="fontsize">The size of the font.</param>
         public void Load(string fontname, int fontsize)
@@ -107,14 +81,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             FontBoldItalicHalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
         }
 
-        /// <summary>
-        /// The default color of text.
-        /// </summary>
-        public const int DefaultColor = 7;
-
-        /// <summary>
-        /// All colors used by the different font set options.
-        /// </summary>
+        /// <summary>All colors used by the different font set options.</summary>
         public static readonly Color4F[] COLORS = new Color4F[] {
             new Color4F(0, 0, 0),      // 0  // 0 // Black
             new Color4F(1, 0, 0),    // 1  // 1 // Red
@@ -169,9 +136,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             new Point(-2, 0),
         };
 
-        /// <summary>
-        /// Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText.
-        /// </summary>
+        /// <summary>Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText.</summary>
         /// <param name="color">The color number.</param>
         /// <param name="trans">Transparency value, 0-1.</param>
         /// <returns>A correctly formed color object.</returns>
@@ -552,8 +517,8 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 Engine.GLFonts.Shaders.TextCleanerShader.Bind();
                 Matrix4 ortho = Engine.GetOrtho();
                 GL.UniformMatrix4(1, false, ref ortho);
-                Vector3 col = new Vector3(1, 1, 1);
-                GL.Uniform3(3, ref col);
+                GL.Uniform4(2, Vector4.One);
+                GL.Uniform3(3, Vector3.One);
                 ReusableTextVBO.Build();
                 ReusableTextVBO.Render(Engine.GLFonts);
                 if (Engine.FixToShader == null)
@@ -572,19 +537,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
         }
 
-        /// <summary>
-        /// The <see cref="TextVBOBuilder"/> that's reused for text rendering.
-        /// </summary>
+        /// <summary>The <see cref="TextVBOBuilder"/> that's reused for text rendering.</summary>
         public TextVBOBuilder ReusableTextVBO = new TextVBOBuilder();
 
-        /// <summary>
-        /// The Font Engine's Task Factory.
-        /// </summary>
-        public TaskFactory TFactory = new TaskFactory();
-
-        /// <summary>
-        /// Grabs a string containing only formats/colors from the string containing text.
-        /// </summary>
+        /// <summary>Grabs a string containing only formats/colors from the string containing text.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>The color set.</returns>
         public static string GrabAllFormats(string input)
@@ -601,9 +557,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return res.ToString();
         }
 
-        /// <summary>
-        /// Escapes fancy text to render as plain text.
-        /// </summary>
+        /// <summary>Escapes fancy text to render as plain text.</summary>
         /// <param name="input">Unescaped text.</param>
         /// <returns>Escaped text.</returns>
         public static string EscapeFancyText(string input)
@@ -665,9 +619,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             }
         }
 
-        /// <summary>
-        /// Measures several lines of text.
-        /// </summary>
+        /// <summary>Measures several lines of text.</summary>
         /// <param name="text">The text.</param>
         /// <param name="bcolor">The base color.</param>
         /// <returns>The size.</returns>
@@ -682,9 +634,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return new Location(width, data.Length * FontDefault.Height, 0);
         }
 
-        /// <summary>
-        /// Helper to split strings fancy-text complex-text strings, marked with [] around sections and | to separate values.
-        /// </summary>
+        /// <summary>Helper to split strings fancy-text complex-text strings, marked with [] around sections and | to separate values.</summary>
         /// <param name="input">The original string.</param>
         /// <returns>The split string.</returns>
         public static List<string> CSplit(string input)
@@ -712,9 +662,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return temp;
         }
 
-        /// <summary>
-        /// Translates fancy text language inputs to raw strings.
-        /// </summary>
+        /// <summary>Translates fancy text language inputs to raw strings.</summary>
         public string AutoTranslateFancyText(string text)
         {
             int index = text.IndexOf("^[lang=", StringComparison.Ordinal);
@@ -771,9 +719,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return ParseFancyText(text, bcolor).Width;
         }
 
-        /// <summary>
-        /// Splits some text at a maximum render width.
-        /// </summary>
+        /// <summary>Splits some text at a maximum render width.</summary>
         /// <param name="text">The original (un-split) text.</param>
         /// <param name="baseColor">The base color.</param>
         /// <param name="maxX">The maximum width.</param>
@@ -783,9 +729,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return SplitAppropriately(ParseFancyText(text), maxX);
         }
 
-        /// <summary>
-        /// Splits some text at a maximum render width.
-        /// </summary>
+        /// <summary>Splits some text at a maximum render width.</summary>
         /// <param name="text">The original (un-split) text.</param>
         /// <param name="maxX">The maximum width.</param>
         /// <returns>The split text.</returns>
@@ -851,9 +795,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return new RenderableText() { Lines = outLines.ToArray(), Width = outLines.Max(l => l.Width) };
         }
 
-        /// <summary>
-        /// Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.
-        /// </summary>
+        /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>
         /// <param name="X">The starting X.</param>
         /// <param name="Y">The starting Y.</param>
         /// <param name="width">The width.</param>
@@ -865,9 +807,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             TextVBOBuilder.AddQuad(X, Y, X + width, Y + height, 2f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 2f / Engine.GLFonts.CurrentHeight, 4f / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, 4f / Engine.GLFonts.CurrentHeight, color);
         }
 
-        /// <summary>
-        /// Matcher object to recognize color/format codes.
-        /// </summary>
+        /// <summary>Matcher object to recognize color/format codes.</summary>
         public static AsciiMatcher FORMAT_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTUO" + "!@#$%&*()-");
 
         /// <summary>

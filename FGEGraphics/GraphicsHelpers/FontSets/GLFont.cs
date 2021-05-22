@@ -159,7 +159,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     SizeF measured = gfx.MeasureString(chr, fnt, new PointF(0, 0), RenderFormat);
                     nwidth = (int)Math.Ceiling(measured.Width);
                     // TODO: These added values are hacks to compensate for font sizes not matching character sizes. A better measure method should be used instead.
-                    rawHeight = measured.Height + fnt.SizeInPoints * 0.1f;
+                    rawHeight = measured.Height + Math.Min(6, fnt.SizeInPoints * 0.3f);
                     if (fnt.Italic)
                     {
                         nwidth += (int)(fnt.SizeInPoints * 0.17);
