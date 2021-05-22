@@ -357,7 +357,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             string str = GL.GetProgramInfoLog(program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, $"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
+                SysConsole.Output(OutputType.CLIENTINFO, $"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
             }
             GL.DeleteShader(shaderObject);
             GraphicsUtil.CheckError("Shader - Compute - Compile");
@@ -436,7 +436,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             string str = GL.GetProgramInfoLog(Program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.INFO, $"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
+                SysConsole.Output(OutputType.CLIENTINFO, $"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
             }
             GL.DeleteShader(FragmentObject);
             GL.DeleteShader(VertexObject);

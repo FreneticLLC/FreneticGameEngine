@@ -84,10 +84,16 @@ namespace FGECore.CoreSystems
         /// <summary>Additional action to call during the instance tick, if any.</summary>
         public Action OnTick;
 
+        /// <summary>The <see cref="SysConsole"/> output type for "init" messages.</summary>
+        public abstract OutputType InitOutputType { get; }
+
+        /// <summary>The <see cref="SysConsole"/> output type for "info" messages.</summary>
+        public abstract OutputType InfoOutputType { get; }
+
         /// <summary>Inits the game instance.</summary>
         public void InstanceInit()
         {
-            SysConsole.Output(OutputType.INIT, "GameInstance loading file helpers...");
+            SysConsole.Output(InitOutputType, "GameInstance loading file helpers...");
             Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
             AssetStreaming = new AssetStreamingEngine(Files, Schedule);
             AssetStreaming.Init();

@@ -180,7 +180,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 }
             }
             BackupFontFamily = family;
-            SysConsole.Output(OutputType.INIT, $"Select backup font: {BackupFontFamily.Name}");
+            SysConsole.Output(OutputType.CLIENTINIT, $"Select backup font: {BackupFontFamily.Name}");
             if (!string.IsNullOrWhiteSpace(CoreFontPreference))
             {
                 try
@@ -199,7 +199,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             Font def = new Font(family, 12);
             Standard = new GLFont(def, this);
             Fonts.Add(Standard);
-            SysConsole.Output(OutputType.INIT, $"Select main font: {family.Name}");
+            SysConsole.Output(OutputType.CLIENTINIT, $"Select main font: {family.Name}");
             UpdateTexture();
         }
 

@@ -158,16 +158,16 @@ namespace FGEGraphics.ClientSystem
             try
             {
                 StackNoteHelper.Push("GameEngineBase - Loading", this);
-                SysConsole.Output(OutputType.INIT, "GameEngine starting load sequence, start with basic...");
+                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine starting load sequence, start with basic...");
                 LoadBasic();
-                SysConsole.Output(OutputType.INIT, "GameEngine loading shaders...");
+                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine loading shaders...");
                 GetShaders();
-                SysConsole.Output(OutputType.INIT, "GameEngine core load complete, calling additional load...");
+                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine core load complete, calling additional load...");
                 PostLoad();
-                SysConsole.Output(OutputType.INIT, "GameEngine prepping audio systems...");
+                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine prepping audio systems...");
                 Sounds = new SoundEngine();
                 Sounds.Init(this);
-                SysConsole.Output(OutputType.INIT, "GameEngine load sequence complete.");
+                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine load sequence complete.");
             }
             finally
             {

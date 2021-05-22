@@ -89,7 +89,7 @@ namespace FGEGraphics.GraphicsHelpers
             VRSupport vrs = new VRSupport() { Window = twindow, VR = OpenVR.Init(ref err) };
             if (err != EVRInitError.None)
             {
-                SysConsole.Output(OutputType.INFO, "VR error: " + err + ": " + OpenVR.GetStringForHmdError(err));
+                SysConsole.Output(OutputType.CLIENTINFO, $"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
                 return null;
             }
             vrs.Start();
@@ -112,7 +112,7 @@ namespace FGEGraphics.GraphicsHelpers
             StringBuilder val = new StringBuilder(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
-            SysConsole.Output(OutputType.INIT, "Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
+            SysConsole.Output(OutputType.CLIENTINIT, "Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
             VRModel = val.ToString();
             Compositor = OpenVR.Compositor;
             Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseStanding);

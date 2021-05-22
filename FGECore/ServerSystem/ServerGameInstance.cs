@@ -90,6 +90,12 @@ namespace FGECore.ServerSystem
         /// </summary>
         public string InstanceClassification = "server";
 
+        /// <summary>The <see cref="SysConsole"/> output type for "init" messages: <see cref="OutputType.SERVERINIT"/>.</summary>
+        public override OutputType InitOutputType => OutputType.SERVERINIT;
+
+        /// <summary>The <see cref="SysConsole"/> output type for "info" messages: <see cref="OutputType.SERVERINFO"/>.</summary>
+        public override OutputType InfoOutputType => OutputType.SERVERINFO;
+
         /// <summary>
         /// Starts and runs the entire server game instance.
         /// Will take over present thread until completion.

@@ -163,11 +163,11 @@ namespace FGEGraphics.ClientSystem
         public override void PostLoad()
         {
             GraphicsUtil.CheckError("PostLoad - Pre");
-            SysConsole.Output(OutputType.INIT, "GameEngine loading render helpers...");
+            SysConsole.Output(OutputType.CLIENTINIT, "GameEngine loading render helpers...");
             RenderHelper = new Renderer2D(Textures, Shaders);
             RenderHelper.Init();
             GraphicsUtil.CheckError("PostLoad - RenderHelper Done");
-            SysConsole.Output(OutputType.INIT, "GameEngine loading 2D light helpers...");
+            SysConsole.Output(OutputType.CLIENTINIT, "GameEngine loading 2D light helpers...");
             LoadLightHelpers();
             GraphicsUtil.CheckError("PostLoad - Post");
         }

@@ -99,8 +99,8 @@ namespace FGECore.CoreSystems
                 Output(OutputType.WARNING, "Unable to open log file, will not log for this session!");
                 Output("Loading Log File", ex);
             }
-            Output(OutputType.INIT, "Console prepared...");
-            Output(OutputType.INIT, TestColorsMessage);
+            OutputCustom("SysConsole/Core/Init", "Console prepared...");
+            OutputCustom("SysConsole/Core/Init", TestColorsMessage);
         }
 
         /// <summary>Internal handlers for the SysConsole.</summary>
@@ -425,8 +425,14 @@ namespace FGECore.CoreSystems
         /// <summary>When the client is sending information to console.</summary>
         public static OutputType CLIENTINFO = new OutputType() { Name = "INFO/CLIENT", BaseColor = TextStyle.Simple };
 
-        /// <summary>During the startup sequence.</summary>
-        public static OutputType INIT = new OutputType() { Name = "INIT", BaseColor = "^r^2" };
+        /// <summary>General information.</summary>
+        public static OutputType SERVERINFO = new OutputType() { Name = "INFO/SERVER", BaseColor = TextStyle.Simple };
+
+        /// <summary>During the server startup sequence.</summary>
+        public static OutputType SERVERINIT = new OutputType() { Name = "INIT/SERVER", BaseColor = "^r^2" };
+
+        /// <summary>Initialization from the client.</summary>
+        public static OutputType CLIENTINIT = new OutputType() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
 
         /// <summary>A (probably) ignorable error.</summary>
         public static OutputType WARNING = new OutputType() { Name = "WARNING", BaseColor = "^r^3" };
@@ -434,14 +440,8 @@ namespace FGECore.CoreSystems
         /// <summary>A major error.</summary>
         public static OutputType ERROR = new OutputType() { Name = "ERROR", BaseColor = "^r^7^h^0" };
 
-        /// <summary>General information.</summary>
-        public static OutputType INFO = new OutputType() { Name = "INFO", BaseColor = TextStyle.Simple };
-
         /// <summary>Disable-able minor debug information.</summary>
         public static OutputType DEBUG = new OutputType() { Name = "DEBUG", BaseColor = "^7^&" };
-
-        /// <summary>Initialization from the client.</summary>
-        public static OutputType CLIENTINIT = new OutputType() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
         // TODO: More?
 
         /// <summary>The name of the output type.</summary>

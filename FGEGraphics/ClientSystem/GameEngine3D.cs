@@ -224,10 +224,10 @@ namespace FGEGraphics.ClientSystem
             MainContext.Engine = this;
             FogMaxDist = () => ZFar();
             GraphicsUtil.CheckError("PostLoad - Pre");
-            SysConsole.Output(OutputType.INIT, "GameEngine configuring graphics...");
+            SysConsole.Output(OutputType.CLIENTINIT, "GameEngine configuring graphics...");
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
-            SysConsole.Output(OutputType.INIT, "GameEngine loading main 3D view...");
+            SysConsole.Output(OutputType.CLIENTINIT, "GameEngine loading main 3D view...");
             if (!IsSubEngine)
             {
                 SubSize = new Vector2i(Window.Size.X, Window.Size.Y);
