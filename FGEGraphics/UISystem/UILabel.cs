@@ -116,7 +116,7 @@ namespace FGEGraphics.UISystem
         public void FixScale()
         {
             Internal.Text = CustomWidthValue > 0 ? FontSet.SplitAppropriately(Internal.Text, CustomWidthValue) : Internal.Text;
-            Position.ConstantWidthHeight((int)Internal.Text.Width, (int)(Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height));
+            Position.ConstantWidthHeight((int)Internal.Text.Width, (Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height));
         }
 
         /// <summary>Renders this label on the screen.</summary>
@@ -124,12 +124,13 @@ namespace FGEGraphics.UISystem
         /// <param name="delta">The time since the last render.</param>
         public override void Render(ViewUI2D view, double delta)
         {
+            int height = Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height;
             int bx = LastAbsolutePosition.X;
             int by = LastAbsolutePosition.Y;
             if (BackColor.W > 0)
             {
                 Renderer2D.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + Internal.Text.Width, by + (Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height), new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + Internal.Text.Width, by + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
                 Renderer2D.SetColor(Vector4.One);
             }
             TextFont.DrawFancyText(Internal.Text, new Location(bx, by, 0));

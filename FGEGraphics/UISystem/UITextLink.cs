@@ -73,7 +73,7 @@ namespace FGEGraphics.UISystem
             Text = font.ParseFancyText(btext, BColor);
             TextHover = font.ParseFancyText(btexthover, BColor);
             TextClick = font.ParseFancyText(btextclick, BColor);
-            Position.ConstantWidth((int)(Text.Width + (Icon == null ? 0 : font.FontDefault.Height)));
+            Position.ConstantWidth(Text.Width + (Icon == null ? 0 : font.FontDefault.Height));
             Position.ConstantHeight(TextFont.FontDefault.Height * Text.Lines.Length);
         }
 
@@ -125,10 +125,10 @@ namespace FGEGraphics.UISystem
             {
                 tt = TextHover;
             }
+            int x = LastAbsolutePosition.X;
+            int y = LastAbsolutePosition.Y;
             if (Icon != null)
             {
-                float x = LastAbsolutePosition.X;
-                float y = LastAbsolutePosition.Y;
                 Icon.Bind();
                 Renderer2D.SetColor(IconColor);
                 view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
@@ -137,7 +137,7 @@ namespace FGEGraphics.UISystem
             }
             else
             {
-                TextFont.DrawFancyText(tt, new Location(LastAbsolutePosition.X, LastAbsolutePosition.Y, 0));
+                TextFont.DrawFancyText(tt, new Location(x, y, 0));
             }
         }
     }

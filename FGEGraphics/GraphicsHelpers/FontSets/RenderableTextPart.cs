@@ -154,7 +154,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public RenderableTextPart[] Parts;
 
         /// <summary>The total width of the line.</summary>
-        public float Width;
+        public int Width;
     }
 
     /// <summary>Represents a section of renderable text.</summary>
@@ -164,6 +164,6 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public RenderableTextLine[] Lines;
 
         /// <summary>The maximum width of the text.</summary>
-        public float Width;
+        public int Width;
     }
 }

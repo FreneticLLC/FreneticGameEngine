@@ -202,7 +202,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
                 RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
                 RenderableTextPart currentPart = new RenderableTextPart() { Font = FontDefault };
-                float maxWidth = 0;
+                int maxWidth = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
@@ -396,9 +396,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     outLines[i] = new RenderableTextLine()
                     {
                         Parts = parts.ToArray(),
-                        Width = X
+                        Width = (int)Math.Ceiling(X)
                     };
-                    maxWidth = Math.Max(maxWidth, X);
+                    maxWidth = Math.Max(maxWidth, outLines[i].Width);
                 }
                 RenderableText result = new RenderableText() { Lines = outLines, Width = maxWidth };
                 FancyTextCache[(baseColor, originalText)] = result;
@@ -780,14 +780,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                                 newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
                                 newFirstParts = newFirstParts.Append(newFirstPart).ToArray();
                             }
-                            RenderableTextLine newFirstLine = new RenderableTextLine() { Parts = newFirstParts, Width = newFirstParts.Max(p => p.Width) };
+                            RenderableTextLine newFirstLine = new RenderableTextLine() { Parts = newFirstParts, Width = (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
                             outLines.Add(newFirstLine);
                             string nextLine = part.Text[lastSpace..];
                             RenderableTextPart newNextPart = part.Clone();
                             newNextPart.Text = nextLine;
                             newNextPart.Width = newNextPart.Font.MeasureString(newNextPart.Text);
                             RenderableTextPart[] newNextParts = line.Parts[(i + 1)..].Append(newNextPart).ToArray();
-                            line = new RenderableTextLine() { Parts = newNextParts, Width = newNextParts.Max(p => p.Width) };
+                            line = new RenderableTextLine() { Parts = newNextParts, Width = (int)Math.Ceiling(newNextParts.Max(p => p.Width)) };
                         }
                     }
                 }
