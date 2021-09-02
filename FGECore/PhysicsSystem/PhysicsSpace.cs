@@ -54,6 +54,9 @@ namespace FGECore.PhysicsSystem
             /// <summary>Bepu physics memory buffer pool.</summary>
             public BufferPool Pool;
 
+            /// <summary>Accumulator for delta, to avoid over-processing.</summary>
+            public double DeltaAccumulator;
+
             /// <summary>Initialize internal space data.</summary>
             public void Init(PhysicsSpace space)
             {
@@ -79,6 +82,11 @@ namespace FGECore.PhysicsSystem
         /// The default gravity value.
         /// </summary>
         public Location Gravity = new Location(0, 0, -9.8);
+
+        /// <summary>
+        /// The delta value to use for all non-lagging physics updates.
+        /// </summary>
+        public double UpdateDelta = 1.0 / 60.0;
 
         /// <summary>
         /// Spawns a physical object into the physics world.
@@ -111,9 +119,19 @@ namespace FGECore.PhysicsSystem
         }
 
         /// <summary>Performs a single tick update of all physics world data.</summary>
-        public void Tick(float delta)
+        public void Tick(double delta)
         {
-            Internal.CoreSimulation.Timestep(delta, Internal.ThreadDispatcher);
+            Internal.DeltaAccumulator += delta;
+            while (Internal.DeltaAccumulator > UpdateDelta)
+            {
+                double updateBy = UpdateDelta;
+                while (Internal.DeltaAccumulator > updateBy * 3)
+                {
+                    updateBy *= 3;
+                }
+                Internal.DeltaAccumulator -= updateBy;
+                Internal.CoreSimulation.Timestep((float)updateBy, Internal.ThreadDispatcher);
+            }
         }
 
         private class EntitiesInBoxHelper : IBreakableForEach<CollidableReference>

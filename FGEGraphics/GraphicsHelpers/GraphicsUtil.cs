@@ -15,11 +15,11 @@ using System.Threading.Tasks;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGECore.StackNoteSystem;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using FGECore.StackNoteSystem;
 
 namespace FGEGraphics.GraphicsHelpers
 {

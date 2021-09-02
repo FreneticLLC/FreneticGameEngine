@@ -219,6 +219,7 @@ namespace FGECore.EntitySystem
                 if (IsSpawned)
                 {
                     SpawnedBody.Pose.Position = Internal.Position.ToNumerics();
+                    SpawnedBody.UpdateBounds();
                 }
             }
         }
@@ -238,6 +239,7 @@ namespace FGECore.EntitySystem
                 if (IsSpawned)
                 {
                     SpawnedBody.Pose.Orientation = Internal.Orientation.ToNumerics();
+                    SpawnedBody.UpdateBounds();
                 }
             }
         }

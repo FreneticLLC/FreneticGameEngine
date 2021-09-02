@@ -367,7 +367,7 @@ namespace FGECore.CoreSystems
             try
             {
                 StackNoteHelper.Push("BasicEngine - Update Physics", PhysicsWorld);
-                PhysicsWorld.Tick((float)Delta);
+                PhysicsWorld.Tick(Delta);
             }
             finally
             {
