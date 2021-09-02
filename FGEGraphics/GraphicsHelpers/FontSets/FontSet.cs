@@ -442,7 +442,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
         public void DrawFancyText(RenderableText text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false)
         {
-            StackNoteHelper.Push("FontSet - Draw fancy text", text.Lines);
+            StackNoteHelper.Push("FontSet - Draw fancy text", text);
             try
             {
                 float lineY = (float)position.Y;
@@ -514,12 +514,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     }
                     lineY += FontDefault.Height;
                 }
+                GraphicsUtil.CheckError("FontSet - Render - Pre");
                 Engine.GLFonts.Shaders.TextCleanerShader.Bind();
                 Matrix4 ortho = Engine.GetOrtho();
                 GL.UniformMatrix4(1, false, ref ortho);
-                GL.Uniform4(2, Vector4.One);
                 GL.Uniform3(3, Vector3.One);
+                GraphicsUtil.CheckError("FontSet - Render - PreBuild");
                 ReusableTextVBO.Build();
+                GraphicsUtil.CheckError("FontSet - Render - PostBuild");
                 ReusableTextVBO.Render(Engine.GLFonts);
                 if (Engine.FixToShader == null)
                 {
@@ -529,7 +531,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 {
                     Engine.FixToShader.Bind();
                 }
-                GraphicsUtil.CheckError("Render FontSet");
+                GraphicsUtil.CheckError("FontSet - Render - Post");
             }
             finally
             {
