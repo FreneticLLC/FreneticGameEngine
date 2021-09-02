@@ -6,15 +6,16 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGEGraphics.ClientSystem;
-using FreneticUtilities.FreneticExtensions;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
+using FGEGraphics.ClientSystem;
+using FreneticUtilities.FreneticExtensions;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem.InputSystems
 {
@@ -114,9 +115,6 @@ namespace FGEGraphics.UISystem.InputSystems
         /// <summary>The set of keys released since last tick.</summary>
         public Queue<Keys> KeyUps = new Queue<Keys>();
 
-        /// <summary>Tracks last mouse wheel offset, to identify when it changed.</summary>
-        public double MouseWheelOffsetLast = 0;
-
         /// <summary>Initialize and register the key handler into the window.</summary>
         public KeyHandler(GameClientWindow _window)
         {
@@ -189,15 +187,13 @@ namespace FGEGraphics.UISystem.InputSystems
         /// <summary>Called every time the mouse wheel is moved.</summary>
         public void Mouse_Wheel(MouseWheelEventArgs e)
         {
-            double change = e.OffsetY - MouseWheelOffsetLast;
-            MouseWheelOffsetLast = e.OffsetY;
             if (!Window.Window.IsFocused)
             {
                 return;
             }
-            if (change != 0)
+            if (e.OffsetY != 0)
             {
-                Keys k = change < 0 ? KEY_MOUSE_WHEEL_DOWN : KEY_MOUSE_WHEEL_UP;
+                Keys k = e.OffsetY < 0 ? KEY_MOUSE_WHEEL_DOWN : KEY_MOUSE_WHEEL_UP;
                 if (!KeyPresses.Contains(k))
                 {
                     KeyPresses.Enqueue(k);
