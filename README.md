@@ -16,7 +16,7 @@ FGE is not a **Game**. You cannot play it out of the box. It does not do much ju
 ### Used Libraries
 
 - FreneticUtilities - https://github.com/FreneticLLC/FreneticUtilities
-- BEPUphysicsv1 (update to v2 pending) - https://github.com/bepu/bepuphysics1
+- BEPUphysicsv2 - https://github.com/bepu/bepuphysics2
 - OpenTK - https://github.com/opentk/opentk/
 - OpenVR - https://github.com/ValveSoftware/openvr
 - NVorbis - https://github.com/NVorbis/NVorbis
