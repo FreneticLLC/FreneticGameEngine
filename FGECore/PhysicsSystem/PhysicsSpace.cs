@@ -25,9 +25,7 @@ using BepuUtilities.Memory;
 
 namespace FGECore.PhysicsSystem
 {
-    /// <summary>
-    /// Represents a physical world (space).
-    /// </summary>
+    /// <summary>Represents a physical world (space).</summary>
     public class PhysicsSpace
     {
         /// <summary>Internal data for the physics space.</summary>
@@ -57,6 +55,9 @@ namespace FGECore.PhysicsSystem
             /// <summary>Accumulator for delta, to avoid over-processing.</summary>
             public double DeltaAccumulator;
 
+            /// <summary>The Position offset, used to reduce issues converting from engine double-precision space to physics single-precision space.</summary>
+            public Location Offset;
+
             /// <summary>Initialize internal space data.</summary>
             public void Init(PhysicsSpace space)
             {
@@ -78,15 +79,59 @@ namespace FGECore.PhysicsSystem
         /// <summary>Internal data for the physics space.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// The default gravity value.
-        /// </summary>
+        /// <summary>The default gravity value (which is later configurable on a per-entity basis).</summary>
         public Location Gravity = new Location(0, 0, -9.8);
 
-        /// <summary>
-        /// The delta value to use for all non-lagging physics updates.
-        /// </summary>
+        /// <summary>The delta value to use for all non-lagging physics updates.</summary>
         public double UpdateDelta = 1.0 / 60.0;
+
+        /// <summary>Gets Position offset, used to reduce issues converting from engine double-precision space to physics single-precision space.
+        /// <para>To change this value, use <see cref="Recenter(Location)"/>.</para></summary>
+        public Location Offset => Internal.Offset;
+
+        /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
+        public void Recenter(Location newCenter)
+        {
+            Location relative = newCenter - Offset;
+            ref Buffer<BodySet> sets = ref Internal.CoreSimulation.Bodies.Sets;
+            for (int s = 0; s < sets.Length; s++)
+            {
+                ref BodySet set = ref sets[s];
+                if (set.Allocated)
+                {
+                    ref Buffer<BodyHandle> handles = ref set.IndexToHandle;
+                    if (handles.Allocated)
+                    {
+                        for (int h = 0; h < handles.Length; h++)
+                        {
+                            BodyHandle handle = handles[h];
+                            BodyReference body = new BodyReference(handle, Internal.CoreSimulation.Bodies);
+                            if (body.Exists)
+                            {
+                                // convert to doubles before doing the addition, then convert back. The hope is that this will avoid numerical precision issues from the repositioning.
+                                body.Pose.Position = (body.Pose.Position.ToLocation() + relative).ToNumerics();
+                                body.UpdateBounds();
+                            }
+                        }
+                    }
+                }
+            }
+            ref Buffer<StaticHandle> staticHandles = ref Internal.CoreSimulation.Statics.IndexToHandle;
+            if (staticHandles.Allocated)
+            {
+                for (int h = 0; h < staticHandles.Length; h++)
+                {
+                    StaticHandle handle = staticHandles[h];
+                    StaticReference staticRef = new StaticReference(handle, Internal.CoreSimulation.Statics);
+                    if (staticRef.Exists)
+                    {
+                        staticRef.Pose.Position = (staticRef.Pose.Position.ToLocation() + relative).ToNumerics();
+                        staticRef.UpdateBounds();
+                    }
+                }
+            }
+            Internal.Offset = newCenter;
+        }
 
         /// <summary>
         /// Spawns a physical object into the physics world.
@@ -286,9 +331,7 @@ namespace FGECore.PhysicsSystem
         }
     }
 
-    /// <summary>
-    /// Represents a physical world (space), with generic types refering the implementation type.
-    /// </summary>
+    /// <summary>Represents a physical world (space), with generic types refering the implementation type.</summary>
     public class PhysicsSpace<T, T2> : PhysicsSpace where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>

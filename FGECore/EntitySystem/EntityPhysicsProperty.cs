@@ -211,14 +211,14 @@ namespace FGECore.EntitySystem
         {
             get
             {
-                return IsSpawned ? SpawnedBody.Pose.Position.ToLocation() : Internal.Position;
+                return IsSpawned ? SpawnedBody.Pose.Position.ToLocation() + PhysicsWorld.Offset : Internal.Position;
             }
             set
             {
                 Internal.Position = value;
                 if (IsSpawned)
                 {
-                    SpawnedBody.Pose.Position = Internal.Position.ToNumerics();
+                    SpawnedBody.Pose.Position = (Internal.Position - PhysicsWorld.Offset).ToNumerics();
                     SpawnedBody.UpdateBounds();
                 }
             }
@@ -316,10 +316,10 @@ namespace FGECore.EntitySystem
             {
                 CGroup = CollisionUtil.Solid;
             }
-            RigidPose pose = new RigidPose(Internal.Position.ToNumerics(), Internal.Orientation.ToNumerics());
+            RigidPose pose = new RigidPose((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
             BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
             Shape = Shape.Register();
-            CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-3f, 1e-2f));
+            CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-4f, 1e-4f));
             BodyDescription description;
             if (Mass == 0)
             {
@@ -333,8 +333,6 @@ namespace FGECore.EntitySystem
             // TODO: Other settings
             SpawnedBody = PhysicsWorld.Spawn(this, description);
             Entity.OnTick += Tick;
-            Internal.Position = Location.Zero;
-            Internal.Orientation = Quaternion.Identity;
             IsSpawned = true;
             TickUpdates();
         }
@@ -362,9 +360,9 @@ namespace FGECore.EntitySystem
             WasAwake = isAwake;
             bool shouldTrack = DoTrackPositionChange;
             DoTrackPositionChange = false;
-            Internal.Position = SpawnedBody.Pose.Position.ToLocation();
+            Internal.Position = Position;
             Entity.SetPosition(Internal.Position);
-            Internal.Orientation = SpawnedBody.Pose.Orientation.ToCore();
+            Internal.Orientation = Orientation;
             Entity.SetOrientation(Internal.Orientation);
             DoTrackPositionChange = shouldTrack;
         }
@@ -374,10 +372,10 @@ namespace FGECore.EntitySystem
         {
             float invMass = SpawnedBody.LocalInertia.InverseMass;
             Internal.Mass = invMass == 0 ? 0 : 1f / invMass;
-            Internal.LinearVelocity = SpawnedBody.Velocity.Linear.ToLocation();
-            Internal.AngularVelocity = SpawnedBody.Velocity.Angular.ToLocation();
-            Internal.Position = SpawnedBody.Pose.Position.ToLocation();
-            Internal.Orientation = SpawnedBody.Pose.Orientation.ToCore();
+            Internal.LinearVelocity = LinearVelocity;
+            Internal.AngularVelocity = AngularVelocity;
+            Internal.Position = Position;
+            Internal.Orientation = Orientation;
         }
 
         /// <summary>Fired before the physics entity is despawned from the world.</summary>
