@@ -15,30 +15,22 @@ using FGECore.UtilitySystems;
 
 namespace FGECore.StackNoteSystem
 {
-    /// <summary>
-    /// Represents a note about current stack data.
-    /// </summary>
+    /// <summary>Represents a note about current stack data.</summary>
     public struct StackNote
     {
-        /// <summary>
-        /// The stack note.
-        /// </summary>
+        /// <summary>The stack note.</summary>
         public string Note;
 
-        /// <summary>
-        /// A related object, if any.
-        /// </summary>
+        /// <summary>A related object, if any.</summary>
         public object Related;
 
-        /// <summary>
-        /// Gets a string output for this stack note.
-        /// </summary>
-        /// <returns>The string output.</returns>
+        /// <summary>Gets a string output for this stack note.</summary>
         public override string ToString()
         {
             try
             {
-                return Note + " (" + (Related ?? "None") + ")";
+                string relatedString = Related == null ? "None" : Related.ToString().Replace("\n", "\\n");
+                return $"{Note} ({relatedString})";
             }
             catch (Exception ex)
             {

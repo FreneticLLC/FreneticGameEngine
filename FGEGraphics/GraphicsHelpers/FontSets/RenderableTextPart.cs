@@ -141,10 +141,10 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>Returns a perfect copy of the part.</summary>
-        public RenderableTextPart Clone()
-        {
-            return MemberwiseClone() as RenderableTextPart;
-        }
+        public RenderableTextPart Clone() => MemberwiseClone() as RenderableTextPart;
+
+        /// <summary>Implements <see cref="Object.ToString"/> to return the raw text.</summary>
+        public override string ToString() => Text;
     }
 
     /// <summary>Represents a single line of renderable text.</summary>
@@ -155,6 +155,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>The total width of the line.</summary>
         public int Width;
+
+        /// <summary>Implements <see cref="Object.ToString"/> to make an un-separated string of the contents.</summary>
+        public override string ToString() => string.Concat<RenderableTextPart>(Parts);
     }
 
     /// <summary>Represents a section of renderable text.</summary>
@@ -165,5 +168,8 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>The maximum width of the text.</summary>
         public int Width;
+
+        /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
+        public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
     }
 }

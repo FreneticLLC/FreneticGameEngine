@@ -19,6 +19,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using FGECore.StackNoteSystem;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -37,7 +38,7 @@ namespace FGEGraphics.GraphicsHelpers
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
-                SysConsole.Output(OutputType.ERROR, "OpenGL error [" + loc + "]: " + ec + "\n" + Environment.StackTrace);
+                SysConsole.Output(OutputType.ERROR, $"OpenGL error [{loc}]: {ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
                 ec = GL.GetError();
             }
         }
