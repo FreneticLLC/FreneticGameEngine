@@ -42,8 +42,11 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2111:PointersShouldNotBeVisible", Scope = "member", Target = "~F:Valve.VR.VulkanData_t.m_pQueue")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "0", Scope = "member", Target = "~M:Valve.VR.OpenVRInterop.GetGenericInterface(System.String,Valve.VR.EVRInitError@)~System.IntPtr")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "0", Scope = "member", Target = "~M:Valve.VR.OpenVRInterop.IsInterfaceVersionValid(System.String)~System.Boolean")]
-[assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "<Pending>")]
-[assembly: SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "<Pending>", Scope = "type", Target = "~T:Valve.VR.EVRButtonId")]
+[assembly: SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Scope = "type", Target = "~T:Valve.VR.EVRButtonId")]
+[assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
+[assembly: SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable")]
+[assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly")]
+[assembly: SuppressMessage("Design", "CA1060:Move pinvokes to native methods class", Scope = "type", Target = "~T:Valve.VR.OpenVRInterop")]
 // This file is used by Code Analysis to maintain SuppressMessage 
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given 

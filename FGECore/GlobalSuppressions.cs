@@ -7,3 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
 [assembly: SuppressMessage("Interoperability", "CA1401:P/Invokes should not be visible")]
+[assembly: SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable")]
+[assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly")]
+[assembly: SuppressMessage("Design", "CA1060:Move pinvokes to native methods class")]
