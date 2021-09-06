@@ -691,6 +691,10 @@ namespace FGECore.FileSystems
             File.WriteAllBytes(fullPath + "~1", data);
             if (File.Exists(fullPath))
             {
+                if (File.Exists(fullPath + "~2"))
+                {
+                    File.Delete(fullPath + "~2");
+                }
                 File.Move(fullPath, fullPath + "~2");
             }
             File.Move(fullPath + "~1", fullPath);
