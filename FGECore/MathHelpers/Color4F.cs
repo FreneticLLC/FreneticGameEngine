@@ -191,7 +191,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns a 16-byte set representation of this color.
+        /// Returns a 16-byte set representation of this color (4 x 32-bit float).
         /// </summary>
         /// <returns>The color bytes.</returns>
         public byte[] ToBytes()
@@ -202,7 +202,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Returns a 16-byte set representation of this color.
+        /// Returns a 16-byte set representation of this color (4 x 32-bit float).
         /// Inverts <see cref="FromBytes(byte[], int)"/>.
         /// </summary>
         /// <param name="outputBytes">The output byte array.</param>
@@ -216,7 +216,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>
-        /// Converts a 16-byte set to a color.
+        /// Converts a 16-byte set (4 x 32-bit float) to a color.
         /// Inverts <see cref="ToBytes(byte[], int)"/>.
         /// </summary>
         /// <param name="b">The byte input.</param>
@@ -259,6 +259,21 @@ namespace FGECore.MathHelpers
         public static Color4F FromArgb(int r, int g, int b)
         {
             return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, 1);
+        }
+
+        /// <summary>
+        /// Constructs a Color4F from an BGRA packed integer.
+        /// <para>Built for quick conversion of integer colors, especially big-integer hex color notation (eg "0xFFFF0000" representing full-alpha red).</para>
+        /// <para>Note that this is the format output by <see cref="System.Drawing.Color.ToArgb"/>.</para>
+        /// <para>For individual byte input, the format expected "b | (g &lt;&lt; 8) | (r &lt;&lt; 16) | (a &lt;&lt; 24)".</para>
+        /// </summary>
+        public static Color4F FromBgraInt(uint bgra)
+        {
+            byte b = (byte)(bgra & 0xFF);
+            byte g = (byte)((bgra >> 8) & 0xFF);
+            byte r = (byte)((bgra >> 16) & 0xFF);
+            byte a = (byte)((bgra >> 24) & 0xFF);
+            return FromArgb(a, r, g, b);
         }
 
         private static readonly AsciiMatcher HexMatcher = new AsciiMatcher("0123456789ABCDEFabcdef");

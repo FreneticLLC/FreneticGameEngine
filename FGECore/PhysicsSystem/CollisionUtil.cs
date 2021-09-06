@@ -52,10 +52,10 @@ namespace FGECore.PhysicsSystem
     public class CollisionGroup
     {
         /// <summary>Static current collision group ID to always give a unique ID to new group objects.</summary>
-        public static int CurrentID = 0;
+        public static uint CurrentID = 0;
 
         /// <summary>A unique integer identifying this collision group instance.</summary>
-        public int ID = CurrentID++;
+        public uint ID = CurrentID++;
 
         /// <summary>An array of booleans, with a true value for any indices that match a collision group ID that this group will NOT collide with.</summary>
         public bool[] NoCollideWith = Array.Empty<bool>();
