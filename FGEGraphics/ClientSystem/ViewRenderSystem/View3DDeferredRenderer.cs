@@ -39,8 +39,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             if (Config.ShouldRedrawShadows() && Config.ShadowingAllowed)
             {
                 bool redraw = Config.GetAndResetShouldMajorUpdates();
-                Statistics.Shadows_Timer.Reset();
-                Statistics.Shadows_Timer.Start();
+                Statistics.Shadows.Start();
                 Shaders.Deferred.ShadowPass_Basic = Shaders.Deferred.ShadowPass_Basic.Bind();
                 Patches.PreShadowsPatch?.Invoke();
                 State.RenderingShadows = true;
@@ -189,12 +188,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 Config.CameraPos = campos;
                 State.RenderingShadows = false;
                 State.ShadowsOnly = false;
-                Statistics.Shadows_Timer.Stop();
-                Statistics.ShadowTime = (double)Statistics.Shadows_Timer.ElapsedMilliseconds / 1000f;
-                if (Statistics.ShadowTime > Statistics.ShadowSpikeTime)
-                {
-                    Statistics.ShadowSpikeTime = Statistics.ShadowTime;
-                }
+                Statistics.Shadows.Stop();
                 View3D.StandardBlend();
                 GraphicsUtil.CheckError("AfterShadows");
             }
@@ -205,8 +199,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public void RenderPass_GBuffer()
         {
-            Statistics.GBuffer_Timer.Reset();
-            Statistics.GBuffer_Timer.Start();
+            Statistics.FrameBuffer.Start();
             View.SetViewportTracked();
             Shaders.Deferred.GBuffer_Decals = Shaders.Deferred.GBuffer_Decals.Bind();
             GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
@@ -267,12 +260,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("AfterFBO");
             RenderPass_Decals();
             RenderPass_RefractionBuffer();
-            Statistics.GBuffer_Timer.Stop();
-            Statistics.FBOTime = (double)Statistics.GBuffer_Timer.ElapsedMilliseconds / 1000f;
-            if (Statistics.FBOTime > Statistics.FBOSpikeTime)
-            {
-                Statistics.FBOSpikeTime = Statistics.FBOTime;
-            }
+            Statistics.FrameBuffer.Stop();
             GraphicsUtil.CheckError("Render - GBuffer - Final");
         }
 
@@ -379,7 +367,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public void RenderPass_Lights()
         {
-            Statistics.Lights_Timer.Restart();
+            Statistics.Lights.Start();
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Screen_Main);
             View.DrawBuffer(DrawBufferMode.ColorAttachment0);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.0f, 0.0f, 0.0f, Config.LightsRenderClearAlpha });
@@ -539,12 +527,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             RenderPass_LightsToBase();
             int lightc = RenderPass_Transparents();
             RenderPass_Bloom(lightc);
-            Statistics.Lights_Timer.Stop();
-            Statistics.LightsTime = (double)Statistics.Lights_Timer.ElapsedMilliseconds / 1000f;
-            if (Statistics.LightsTime > Statistics.LightsSpikeTime)
-            {
-                Statistics.LightsSpikeTime = Statistics.LightsTime;
-            }
+            Statistics.Lights.Stop();
             GraphicsUtil.CheckError("AtEnd");
         }
 

@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.UtilitySystems;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,69 +16,37 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {
-    /// <summary>
-    /// Timing statistics for a <see cref="View3D"/> (when enabled).
-    /// </summary>
+    /// <summary>Timing statistics for a <see cref="View3D"/> (when enabled).</summary>
     public class View3DStats
     {
-        /// <summary>
-        /// Time statistic: Shadows.
-        /// </summary>
-        public double ShadowTime;
+        /// <summary>Time contributed by the named specific part of performance processing.</summary>
+        public PerformanceTimer Shadows = new PerformanceTimer("Shadows"),
+            FrameBuffer = new PerformanceTimer("FrameBuffer"),
+            Lights = new PerformanceTimer("Lights"),
+            Total = new PerformanceTimer("RenderTotal");
 
-        /// <summary>
-        /// Time statistic: FBO.
-        /// </summary>
-        public double FBOTime;
+        /// <summary>How much delta time has accumulated since the last spike reset.</summary>
+        public double TimeSinceSpikeReset = 0;
 
-        /// <summary>
-        /// Time statistic: Lights.
-        /// </summary>
-        public double LightsTime;
+        /// <summary>How much delta time shall accumulate before spikes are reset.</summary>
+        public double TimeToRetainSpikes = 5;
 
-        /// <summary>
-        /// Time statistic: Total.
-        /// </summary>
-        public double TotalTime;
-
-        /// <summary>
-        /// Time statistic (spike): Shadows.
-        /// </summary>
-        public double ShadowSpikeTime;
-
-        /// <summary>
-        /// Time statistic (spike): FBO.
-        /// </summary>
-        public double FBOSpikeTime;
-
-        /// <summary>
-        /// Time statistic (spike): Lights.
-        /// </summary>
-        public double LightsSpikeTime;
-
-        /// <summary>
-        /// Time statistic (spike): Total.
-        /// </summary>
-        public double TotalSpikeTime;
-
-        /// <summary>
-        /// Statistics timer for <see cref="TotalTime"/> and <see cref="TotalSpikeTime"/>.
-        /// </summary>
-        public readonly Stopwatch Render_Timer = new Stopwatch();
-
-        /// <summary>
-        /// Statistics timer for <see cref="ShadowTime"/> and <see cref="ShadowSpikeTime"/>.
-        /// </summary>
-        public readonly Stopwatch Shadows_Timer = new Stopwatch();
-
-        /// <summary>
-        /// Statistics timer for <see cref="FBOTime"/> and <see cref="FBOSpikeTime"/>.
-        /// </summary>
-        public readonly Stopwatch GBuffer_Timer = new Stopwatch();
-
-        /// <summary>
-        /// Statistics timer for <see cref="LightsTime"/> and <see cref="LightsSpikeTime"/>.
-        /// </summary>
-        public readonly Stopwatch Lights_Timer = new Stopwatch();
+        /// <summary>Resets perf spike times when needed.</summary>
+        public void Check(double delta)
+        {
+            if (PerformanceTimer.DISABLE)
+            {
+                return;
+            }
+            TimeSinceSpikeReset += delta;
+            if (TimeSinceSpikeReset >= TimeToRetainSpikes)
+            {
+                TimeSinceSpikeReset = 0;
+                Shadows.SpikeMS = 0;
+                FrameBuffer.SpikeMS = 0;
+                Lights.SpikeMS = 0;
+                Total.SpikeMS = 0;
+            }
+        }
     }
 }

@@ -137,8 +137,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                     GenerationHelper.EndNF(pfbo);
                     return;
                 }
-                Statistics.Render_Timer.Reset();
-                Statistics.Render_Timer.Start();
+                Statistics.Total.Start();
                 if (Engine.Deferred_Shadows)
                 {
                     DeferredRenderer.RenderPass_Shadows();
@@ -149,12 +148,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                 DeferredRenderer.RenderPass_Lights();
                 GraphicsUtil.CheckError("Render - Lights");
                 State.PreviousForward = Config.CameraPos + State.CameraForward;
-                Statistics.Render_Timer.Stop();
-                Statistics.TotalTime = (double)Statistics.Render_Timer.ElapsedMilliseconds / 1000f;
-                if (Statistics.TotalTime > Statistics.TotalSpikeTime)
-                {
-                    Statistics.TotalSpikeTime = Statistics.TotalTime;
-                }
+                Statistics.Total.Stop();
                 GenerationHelper.EndNF(pfbo);
             }
             catch (Exception ex)
