@@ -200,7 +200,7 @@ namespace FGEGraphics.AudioSystem
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Found audio error " + err + " for " + inp);
+                    OutputType.WARNING.Output("Found audio error " + err + " for " + inp);
                     //init(Client, CVars);
                     return;
                 }
@@ -233,7 +233,7 @@ namespace FGEGraphics.AudioSystem
                 ALError err = AL.GetError();
                 if (err != ALError.NoError)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Found audio error " + err + "!");
+                    OutputType.WARNING.Output("Found audio error " + err + "!");
                     //init(Client, CVars);
                     return;
                 }
@@ -472,14 +472,14 @@ namespace FGEGraphics.AudioSystem
         {
             if (sfx == null)
             {
-                //SysConsole.Output(OutputType.DEBUG, "Audio / null");
+                //OutputType.DEBUG.Output("Audio / null");
                 return;
             }
             if (PlayingNow.Count > 200 && EnforcerInternal == null)
             {
                 if (!CanClean())
                 {
-                    //SysConsole.Output(OutputType.DEBUG, "Audio / count");
+                    //OutputType.DEBUG.Output("Audio / count");
                     return;
                 }
             }
@@ -504,7 +504,7 @@ namespace FGEGraphics.AudioSystem
             {
                 if (sfx.Clip == null && sfx.Internal < 0)
                 {
-                    //SysConsole.Output(OutputType.DEBUG, "Audio / clip");
+                    //OutputType.DEBUG.Output("Audio / clip");
                     return;
                 }
                 ActiveSound actsfx = new ActiveSound(sfx)
@@ -518,7 +518,7 @@ namespace FGEGraphics.AudioSystem
                 actsfx.Create();
                 if (actsfx.AudioInternal == null && actsfx.Src < 0)
                 {
-                    //SysConsole.Output(OutputType.DEBUG, "Audio / src");
+                    //OutputType.DEBUG.Output("Audio / src");
                     return;
                 }
                 CheckError("Create:" + sfx.Name);
@@ -541,7 +541,7 @@ namespace FGEGraphics.AudioSystem
                 CheckError("Preconfig:" + sfx.Name);
                 actsfx.Play();
                 CheckError("Play:" + sfx.Name);
-                //SysConsole.Output(OutputType.DEBUG, "Audio / sucess");
+                //OutputType.DEBUG.Output("Audio / sucess");
                 PlayingNow.Add(actsfx);
                 callback?.Invoke(actsfx);
             }
@@ -549,7 +549,7 @@ namespace FGEGraphics.AudioSystem
             {
                 if (sfx.Clip == null && sfx.Internal == -1)
                 {
-                    //SysConsole.Output(OutputType.DEBUG, "Audio / delay");
+                    //OutputType.DEBUG.Output("Audio / delay");
                     sfx.Loaded += (o, e) =>
                     {
                         playSound();
@@ -655,7 +655,7 @@ namespace FGEGraphics.AudioSystem
                 string newname = $"sounds/{name}.ogg";
                 if (!Client.Client.Files.FileExists(newname))
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Cannot load audio '{name}': file does not exist.");
+                    OutputType.WARNING.Output($"Cannot load audio '{name}': file does not exist.");
                     return null;
                 }
                 SoundEffect tsfx = new SoundEffect()
@@ -679,7 +679,7 @@ namespace FGEGraphics.AudioSystem
                             tsfx.Internal = ts.Internal;
                             tsfx.Clip = ts.Clip;
                         }
-                        //SysConsole.Output(OutputType.DEBUG, "Audio / valid1: " + tsfx.Internal + ", " + tsfx.Clip);
+                        //OutputType.DEBUG.Output("Audio / valid1: " + tsfx.Internal + ", " + tsfx.Clip);
                         if (tsfx.Loaded != null)
                         {
                             Client.Schedule.ScheduleSyncTask(() =>
@@ -696,12 +696,12 @@ namespace FGEGraphics.AudioSystem
                         SysConsole.Output($"loading audio file '{name}'", ex);
                     }
                 });
-                //SysConsole.Output(OutputType.DEBUG, "Audio / valid: " + tsfx);
+                //OutputType.DEBUG.Output("Audio / valid: " + tsfx);
                 return tsfx;
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Reading sound file '{name}': {ex}");
+                OutputType.ERROR.Output($"Reading sound file '{name}': {ex}");
                 return null;
             }
         }
@@ -800,14 +800,14 @@ namespace FGEGraphics.AudioSystem
                 // TODO: clip.Rate = rate;
                 clip.Channels = (byte)channels;
                 sfx.Clip = clip;
-                // SysConsole.Output(OutputType.DEBUG, "Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
+                // OutputType.DEBUG.Output("Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
             }
             if (EnforcerInternal == null || MaxBeforeEnforce != 0)
             {
                 sfx.Internal = AL.GenBuffer();
                 AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, rate);
             }
-            //SysConsole.Output(OutputType.DEBUG, "Audio / prepped: " + AudioInternal);
+            //OutputType.DEBUG.Output("Audio / prepped: " + AudioInternal);
             return sfx;
         }
 

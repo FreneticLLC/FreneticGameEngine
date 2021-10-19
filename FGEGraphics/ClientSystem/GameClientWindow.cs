@@ -237,7 +237,7 @@ namespace FGEGraphics.ClientSystem
             try
             {
                 StackNoteHelper.Push("GameClientWindow - Start, run", this);
-                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine loading...");
+                OutputType.CLIENTINIT.Output("GameEngine loading...");
                 Window = new GameWindow(new GameWindowSettings() { IsMultiThreaded = false }, new NativeWindowSettings()
                 {
                     Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
@@ -257,9 +257,9 @@ namespace FGEGraphics.ClientSystem
                 Window.MouseMove += Mouse_Move;
                 Window.Closed += Window_Closed;
                 Window.Resize += Window_Resize;
-                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine calling SetUp event...");
+                OutputType.CLIENTINIT.Output("GameEngine calling SetUp event...");
                 OnWindowSetUp?.Invoke();
-                SysConsole.Output(OutputType.CLIENTINIT, "GameEngine running...");
+                OutputType.CLIENTINIT.Output("GameEngine running...");
                 Window.Run();
             }
             finally
@@ -281,7 +281,7 @@ namespace FGEGraphics.ClientSystem
         private void Window_Load()
         {
             Window.Focus();
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient starting load sequence...");
+            OutputType.CLIENTINIT.Output("GameClient starting load sequence...");
             GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -289,14 +289,14 @@ namespace FGEGraphics.ClientSystem
             GL.Disable(EnableCap.CullFace);
             GraphicsUtil.CheckError("GEB - Initial");
             InstanceInit();
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading shader helpers...");
+            OutputType.CLIENTINIT.Output("GameClient loading shader helpers...");
             Shaders = new ShaderEngine();
             Shaders.InitShaderSystem(Files);
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading texture helpers...");
+            OutputType.CLIENTINIT.Output("GameClient loading texture helpers...");
             Textures = new TextureEngine();
             Textures.InitTextureSystem(Files, AssetStreaming, Schedule);
             GraphicsUtil.CheckError("GEB - Textures");
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading font helpers...");
+            OutputType.CLIENTINIT.Output("GameClient loading font helpers...");
             GLFonts = new GLFontEngine(Textures, Shaders);
             GLFonts.Init(Files);
             FontSets = new FontSetEngine(GLFonts)
@@ -306,23 +306,23 @@ namespace FGEGraphics.ClientSystem
             // TODO: FGE/Core->Languages engine!
             FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
             GraphicsUtil.CheckError("GEB - Fonts");
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading 2D/UI render helper...");
+            OutputType.CLIENTINIT.Output("GameClient loading 2D/UI render helper...");
             Keyboard = new KeyHandler(this);
             MainUI = new ViewUI2D(this);
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading model engine...");
+            OutputType.CLIENTINIT.Output("GameClient loading model engine...");
             Animations = new AnimationEngine();
             Models = new ModelEngine();
             Models.Init(Animations, this);
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient loading render helper...");
+            OutputType.CLIENTINIT.Output("GameClient loading render helper...");
             Rendering3D = new Renderer(Textures, Shaders, Models);
             Rendering3D.Init();
             Rendering2D = new Renderer2D(Textures, Shaders);
             Rendering2D.Init();
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient calling engine load...");
+            OutputType.CLIENTINIT.Output("GameClient calling engine load...");
             CurrentEngine.Load();
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient calling external load event...");
+            OutputType.CLIENTINIT.Output("GameClient calling external load event...");
             OnWindowLoad?.Invoke();
-            SysConsole.Output(OutputType.CLIENTINIT, "GameClient is ready and loaded! Starting main game loop...");
+            OutputType.CLIENTINIT.Output("GameClient is ready and loaded! Starting main game loop...");
             GraphicsUtil.CheckError("GEB - Loaded");
             Internal.Loaded = true;
         }
@@ -356,7 +356,7 @@ namespace FGEGraphics.ClientSystem
                 ErrorCode ec = GL.GetError();
                 while (ec != ErrorCode.NoError)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Uncaught GL Error: " + ec);
+                    OutputType.WARNING.Output("Uncaught GL Error: " + ec);
                     ec = GL.GetError();
                 }
                 // Second step: clear the screen

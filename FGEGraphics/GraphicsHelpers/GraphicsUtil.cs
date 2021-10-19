@@ -38,7 +38,7 @@ namespace FGEGraphics.GraphicsHelpers
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
-                SysConsole.Output(OutputType.ERROR, $"OpenGL error [{loc}]: {ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
+                OutputType.ERROR.Output($"OpenGL error [{loc}]: {ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
                 ec = GL.GetError();
             }
         }

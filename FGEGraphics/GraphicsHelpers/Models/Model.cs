@@ -458,7 +458,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                                     }
                                     else
                                     {
-                                        SysConsole.Output(OutputType.WARNING, "Unknown skin entry typer: '" + typer + "', expected reflectivity, specular, or simply no specification!");
+                                        OutputType.WARNING.Output("Unknown skin entry typer: '" + typer + "', expected reflectivity, specular, or simply no specification!");
                                     }
                                     c++;
                                     success = true;
@@ -466,25 +466,25 @@ namespace FGEGraphics.GraphicsHelpers.Models
                             }
                             if (!success)
                             {
-                                SysConsole.Output(OutputType.WARNING, "Unknown skin entry " + datums[0]);
+                                OutputType.WARNING.Output("Unknown skin entry " + datums[0]);
                                 StringBuilder all = new StringBuilder(Meshes.Count * 100);
                                 for (int i = 0; i < Meshes.Count; i++)
                                 {
                                     all.Append(Meshes[i].Name + ", ");
                                 }
-                                SysConsole.Output(OutputType.WARNING, "Available: " + all.ToString());
+                                OutputType.WARNING.Output("Available: " + all.ToString());
                             }
                         }
                     }
                 }
                 if (c == 0)
                 {
-                    SysConsole.Output(OutputType.WARNING, "No entries in " + Name + ".skin");
+                    OutputType.WARNING.Output("No entries in " + Name + ".skin");
                 }
             }
             else
             {
-                SysConsole.Output(OutputType.WARNING, "Can't find models/" + Name + ".skin!");
+                OutputType.WARNING.Output("Can't find models/" + Name + ".skin!");
             }
         }
 

@@ -343,7 +343,7 @@ namespace FGECore.CoreSystems
         {
             if (!ent.IsSpawned)
             {
-                SysConsole.Output(OutputType.WARNING, "Despawing non-spawned entity.");
+                OutputType.WARNING.Output("Despawing non-spawned entity.");
                 return;
             }
             try

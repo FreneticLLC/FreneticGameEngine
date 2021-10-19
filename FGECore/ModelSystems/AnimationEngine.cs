@@ -90,7 +90,7 @@ namespace FGECore.ModelSystems
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Loading an animation: " + ex.ToString());
+                OutputType.ERROR.Output("Loading an animation: " + ex.ToString());
                 sa = new SingleAnimation() { Name = namelow, Length = 1, Engine = this };
                 Animations.Add(sa.Name, sa);
                 return sa;
@@ -135,7 +135,7 @@ namespace FGECore.ModelSystems
                         string[] dat = data[i].SplitFast(':');
                         if (dat.Length <= 1)
                         {
-                            SysConsole.Output(OutputType.WARNING, "Invalid key dat: " + dat[0]);
+                            OutputType.WARNING.Output("Invalid key dat: " + dat[0]);
                         }
                         else
                         {
@@ -160,7 +160,7 @@ namespace FGECore.ModelSystems
                             }
                             else
                             {
-                                SysConsole.Output(OutputType.WARNING, "Unknown GENERAL key: " + entry.Key);
+                                OutputType.WARNING.Output("Unknown GENERAL key: " + entry.Key);
                             }
                         }
                         else
@@ -205,7 +205,7 @@ namespace FGECore.ModelSystems
                             }
                             else
                             {
-                                SysConsole.Output(OutputType.WARNING, "Unknown NODE key: " + entry.Key);
+                                OutputType.WARNING.Output("Unknown NODE key: " + entry.Key);
                             }
                         }
                     }

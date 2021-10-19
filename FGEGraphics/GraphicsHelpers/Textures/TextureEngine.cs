@@ -210,7 +210,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             };
             void handleError(string message)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
+                OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
                 texture.LoadedProperly = false;
             }
             void processLoad(byte[] data)
@@ -241,7 +241,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
             void fileMissing()
             {
-                SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
+                OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
                 texture.LoadedProperly = false;
             }
             AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
@@ -341,14 +341,14 @@ namespace FGEGraphics.GraphicsHelpers.Textures
                 filename = FileEngine.CleanFileName(filename);
                 if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureFile))
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                    OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                     return null;
                 }
                 return BitmapForBytes(textureFile, twidth);
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
+                OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
                 return null;
             }
         }
@@ -401,7 +401,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
                 filename = FileEngine.CleanFileName(filename);
                 if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureData))
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                    OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                     return;
                 }
                 using Bitmap bmp = BitmapForBytes(textureData, twidth);
@@ -409,7 +409,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
+                OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
                 return;
             }
         }

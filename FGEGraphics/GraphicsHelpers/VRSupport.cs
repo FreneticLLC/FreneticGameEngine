@@ -89,7 +89,7 @@ namespace FGEGraphics.GraphicsHelpers
             VRSupport vrs = new VRSupport() { Window = twindow, VR = OpenVR.Init(ref err) };
             if (err != EVRInitError.None)
             {
-                SysConsole.Output(OutputType.CLIENTINFO, $"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
+                OutputType.CLIENTINFO.Output($"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
                 return null;
             }
             vrs.Start();
@@ -112,7 +112,7 @@ namespace FGEGraphics.GraphicsHelpers
             StringBuilder val = new StringBuilder(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
-            SysConsole.Output(OutputType.CLIENTINIT, "Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
+            OutputType.CLIENTINIT.Output("Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
             VRModel = val.ToString();
             Compositor = OpenVR.Compositor;
             Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseStanding);
@@ -224,13 +224,13 @@ namespace FGEGraphics.GraphicsHelpers
             }
             if (merr != EVRCompositorError.None)
             {
-                SysConsole.Output(OutputType.WARNING, "Posing error: " + merr);
+                OutputType.WARNING.Output("Posing error: " + merr);
             }
             Left = GetController(true);
             Right = GetController(false);
             if (!Compositor.CanRenderScene())
             {
-                SysConsole.Output(OutputType.WARNING, "Can't render VR scene!");
+                OutputType.WARNING.Output("Can't render VR scene!");
             }
             Texture_t left = new Texture_t()
             {
@@ -248,7 +248,7 @@ namespace FGEGraphics.GraphicsHelpers
             EVRCompositorError lerr = Compositor.Submit(EVREye.Eye_Left, ref left, ref bounds, EVRSubmitFlags.Submit_Default);
             if (lerr != EVRCompositorError.None)
             {
-                SysConsole.Output(OutputType.WARNING, "Left eye error: " + lerr);
+                OutputType.WARNING.Output("Left eye error: " + lerr);
             }
             Texture_t right = new Texture_t()
             {
@@ -266,7 +266,7 @@ namespace FGEGraphics.GraphicsHelpers
             EVRCompositorError rerr = Compositor.Submit(EVREye.Eye_Right, ref right, ref rbounds, EVRSubmitFlags.Submit_Default);
             if (rerr != EVRCompositorError.None)
             {
-                SysConsole.Output(OutputType.WARNING, "Right eye error: " + rerr);
+                OutputType.WARNING.Output("Right eye error: " + rerr);
             }
         }
     }

@@ -196,8 +196,8 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("RenderLineBox: Pre");
             if (min.IsNaN() || min.IsInfinite() || max.IsNaN() || max.IsInfinite())
             {
-                SysConsole.Output(OutputType.WARNING, "Invalid line box from " + min + " to " + max);
-                SysConsole.Output(OutputType.DEBUG, Environment.StackTrace);
+                OutputType.WARNING.Output("Invalid line box from " + min + " to " + max);
+                OutputType.DEBUG.Output(Environment.StackTrace);
                 return;
             }
             GL.ActiveTexture(TextureUnit.Texture0);

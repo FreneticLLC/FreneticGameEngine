@@ -133,7 +133,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 filename = FileEngine.CleanFileName(filename);
                 if (!Window.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
                 {
-                    SysConsole.Output(OutputType.WARNING, "Cannot load model, file '" +
+                    OutputType.WARNING.Output("Cannot load model, file '" +
                         TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
                         "' does not exist.");
                     return null;
@@ -142,7 +142,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to load model from filename '" +
+                OutputType.ERROR.Output("Failed to load model from filename '" +
                     TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Error + "': " + ex.ToString());
                 return null;
             }
@@ -168,7 +168,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, ex.ToString());
+                OutputType.ERROR.Output(ex.ToString());
             }
             if (Loaded == null)
             {
@@ -213,11 +213,11 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             void fileMissing()
             {
-                SysConsole.Output(OutputType.WARNING, $"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
+                OutputType.WARNING.Output($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
             }
             void handleError(string message)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
+                OutputType.ERROR.Output($"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
             }
             Window.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
@@ -283,11 +283,11 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
                 if (!hasn)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Mesh has no normals! (" + name + ")");
+                    OutputType.WARNING.Output("Mesh has no normals! (" + name + ")");
                 }
                 if (!hastc)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Mesh has no texcoords! (" + name + ")");
+                    OutputType.WARNING.Output("Mesh has no texcoords! (" + name + ")");
                 }
                 Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
                 builder.Prepare(mesh.Vertices.Length, mesh.Indices.Length);
@@ -319,7 +319,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 int bc = mesh.Bones.Length;
                 if (bc > 200)
                 {
-                    SysConsole.Output(OutputType.WARNING, "Mesh has " + bc + " bones! (" + name + ")");
+                    OutputType.WARNING.Output("Mesh has " + bc + " bones! (" + name + ")");
                     bc = 200;
                 }
                 int[] pos = new int[builder.Vertices.Length];
@@ -332,7 +332,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                         int spot = pos[IDa]++;
                         if (spot > 7)
                         {
-                            //SysConsole.Output(OutputType.WARNING, "Too many bones influencing " + vw.VertexID + "!");
+                            //OutputType.WARNING.Output("Too many bones influencing " + vw.VertexID + "!");
                             ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
                         }
                         else if (spot > 3)

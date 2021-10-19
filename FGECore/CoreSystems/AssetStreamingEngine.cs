@@ -133,7 +133,7 @@ namespace FGECore.CoreSystems
                 }
                 catch (Exception ex2)
                 {
-                    SysConsole.Output(OutputType.ERROR, "Exception in asset streaming error handler: " + ex2 + "\nCaused by: File not found.");
+                    OutputType.ERROR.Output("Exception in asset streaming error handler: " + ex2 + "\nCaused by: File not found.");
                 }
             }
 
@@ -151,12 +151,12 @@ namespace FGECore.CoreSystems
                     }
                     else
                     {
-                        SysConsole.Output(OutputType.ERROR, "Asset streaming engine encountered error: " + message);
+                        OutputType.ERROR.Output("Asset streaming engine encountered error: " + message);
                     }
                 }
                 catch (Exception ex2)
                 {
-                    SysConsole.Output(OutputType.ERROR, "Exception in asset streaming error handler: " + ex2 + "\nCaused by:\n" + message);
+                    OutputType.ERROR.Output("Exception in asset streaming error handler: " + ex2 + "\nCaused by:\n" + message);
                 }
             }
         }

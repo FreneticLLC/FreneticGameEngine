@@ -48,7 +48,7 @@ namespace FGECore.FileSystems
 
         private static void PackageWarningMethod(string warning)
         {
-            SysConsole.Output(OutputType.WARNING, "[FileEngine/PackageHandler] " + warning);
+            OutputType.WARNING.Output("[FileEngine/PackageHandler] " + warning);
         }
         #endregion
 

@@ -109,7 +109,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
             else
             {
-                SysConsole.Output(OutputType.WARNING, "3D light spawned into a non-3D-engine-based game!");
+                OutputType.WARNING.Output("3D light spawned into a non-3D-engine-based game!");
             }
         }
 
@@ -128,7 +128,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
             else
             {
-                SysConsole.Output(OutputType.WARNING, "3D light despawned from a non-3D-engine-based game!");
+                OutputType.WARNING.Output("3D light despawned from a non-3D-engine-based game!");
             }
         }
     }

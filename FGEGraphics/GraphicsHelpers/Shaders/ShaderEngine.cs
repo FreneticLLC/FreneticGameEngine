@@ -189,12 +189,12 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
                 filename = $"shaders/{filename}";
                 if (!TryGetShaderFileText(filename + ".vs", out string VS))
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Cannot load vertex shader, file '{TextStyle.Standout}{filename}.vs{TextStyle.Base}' does not exist.");
+                    OutputType.WARNING.Output($"Cannot load vertex shader, file '{TextStyle.Standout}{filename}.vs{TextStyle.Base}' does not exist.");
                     return null;
                 }
                 if (!TryGetShaderFileText(filename + ".fs", out string FS))
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Cannot load fragment shader, file '{TextStyle.Standout}{filename}.fs{TextStyle.Base}' does not exist.");
+                    OutputType.WARNING.Output($"Cannot load fragment shader, file '{TextStyle.Standout}{filename}.fs{TextStyle.Base}' does not exist.");
                     return null;
                 }
                 string GS = null;
@@ -204,7 +204,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
                     geomFilename = $"shaders/{geomFilename}.geom";
                     if (!TryGetShaderFileText(geomFilename, out GS))
                     {
-                        SysConsole.Output(OutputType.WARNING, $"Cannot load geometry shader, file '{TextStyle.Standout}{geomFilename}{TextStyle.Base}' does not exist.");
+                        OutputType.WARNING.Output($"Cannot load geometry shader, file '{TextStyle.Standout}{geomFilename}{TextStyle.Base}' does not exist.");
                         return null;
                     }
                 }
@@ -212,7 +212,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             }
             catch (Exception ex)
             {
-                SysConsole.Output(OutputType.ERROR, $"Failed to load shader from filename '{TextStyle.Standout}{filename}.fs or .vs{TextStyle.Base}': {ex}");
+                OutputType.ERROR.Output($"Failed to load shader from filename '{TextStyle.Standout}{filename}.fs or .vs{TextStyle.Base}': {ex}");
                 return null;
             }
         }
@@ -357,7 +357,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             string str = GL.GetProgramInfoLog(program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.CLIENTINFO, $"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
+                OutputType.CLIENTINFO.Output($"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
             }
             GL.DeleteShader(shaderObject);
             GraphicsUtil.CheckError("Shader - Compute - Compile");
@@ -436,7 +436,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             string str = GL.GetProgramInfoLog(Program);
             if (str.Length != 0)
             {
-                SysConsole.Output(OutputType.CLIENTINFO, $"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
+                OutputType.CLIENTINFO.Output($"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
             }
             GL.DeleteShader(FragmentObject);
             GL.DeleteShader(VertexObject);

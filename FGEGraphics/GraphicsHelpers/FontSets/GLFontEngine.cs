@@ -180,7 +180,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 }
             }
             BackupFontFamily = family;
-            SysConsole.Output(OutputType.CLIENTINIT, $"Select backup font: {BackupFontFamily.Name}");
+            OutputType.CLIENTINIT.Output($"Select backup font: {BackupFontFamily.Name}");
             if (!string.IsNullOrWhiteSpace(CoreFontPreference))
             {
                 try
@@ -193,13 +193,13 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 }
                 catch (Exception ex)
                 {
-                    SysConsole.Output(OutputType.WARNING, $"Loading {CoreFontPreference}: {ex}");
+                    OutputType.WARNING.Output($"Loading {CoreFontPreference}: {ex}");
                 }
             }
             Font def = new Font(family, 12);
             Standard = new GLFont(def, this);
             Fonts.Add(Standard);
-            SysConsole.Output(OutputType.CLIENTINIT, $"Select main font: {family.Name}");
+            OutputType.CLIENTINIT.Output($"Select main font: {family.Name}");
             UpdateTexture();
         }
 

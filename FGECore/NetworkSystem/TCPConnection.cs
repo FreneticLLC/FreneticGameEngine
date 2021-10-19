@@ -110,7 +110,7 @@ namespace FGECore.NetworkSystem
                 CommonUtilities.CheckException(ex);
                 RelevantSocket.Close();
                 RelevantSocket = null;
-                SysConsole.Output(OutputType.SERVERINFO, $"[Connections:Error] {ex}");
+                OutputType.SERVERINFO.Output($"[Connections:Error] {ex}");
             }
         }
 
@@ -232,7 +232,7 @@ namespace FGECore.NetworkSystem
                 CommonUtilities.CheckException(ex);
                 RelevantSocket.Close();
                 RelevantSocket = null;
-                SysConsole.Output(OutputType.SERVERINFO, $"[Connections:Error] {ex.Message}");
+                OutputType.SERVERINFO.Output($"[Connections:Error] {ex.Message}");
             }
         }
 

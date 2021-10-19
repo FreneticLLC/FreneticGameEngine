@@ -662,7 +662,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 if (buildList.Vertices == null)
                 {
-                    SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, null vertices!");
+                    OutputType.ERROR.Output("Failed to generate VBO, null vertices!");
                     return;
                 }
                 vecs = buildList.Vertices.ToArray();
@@ -684,7 +684,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 if (buildArray.Vertices == null)
                 {
-                    SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, null vertices!");
+                    OutputType.ERROR.Output("Failed to generate VBO, null vertices!");
                     return;
                 }
                 vecs = buildArray.Vertices;
@@ -704,28 +704,28 @@ namespace FGEGraphics.GraphicsHelpers
             }
             else
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, unknown builder type '" + builder + "'!");
+                OutputType.ERROR.Output("Failed to generate VBO, unknown builder type '" + builder + "'!");
                 return;
             }
             if (vecs.Length == 0)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, empty vertices!");
+                OutputType.ERROR.Output("Failed to generate VBO, empty vertices!");
                 return;
             }
 #if DEBUG
             if (vecs.Length != norms.Length || vecs.Length != texs.Length || vecs.Length != tangs.Length)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, main vertex attribute counts not aligned!");
+                OutputType.ERROR.Output("Failed to generate VBO, main vertex attribute counts not aligned!");
                 return;
             }
             if (cols != null && vecs.Length != cols.Length)
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, vertex color attribute count not aligned!");
+                OutputType.ERROR.Output("Failed to generate VBO, vertex color attribute count not aligned!");
                 return;
             }
             if (Internal.HasBones && (vecs.Length != ids.Length || vecs.Length != weights.Length || vecs.Length != ids2.Length || vecs.Length != weights2.Length))
             {
-                SysConsole.Output(OutputType.ERROR, "Failed to generate VBO, vertex bone attribute counts not aligned!");
+                OutputType.ERROR.Output("Failed to generate VBO, vertex bone attribute counts not aligned!");
                 return;
             }
 #endif
