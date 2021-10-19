@@ -153,10 +153,15 @@ namespace FGECore.CoreSystems
         }
 
         /// <summary>Adds an entity to the server, quick and deadly. Prefer <see cref="SpawnEntity(Property[])"/> over this.</summary>
-        public void AddEntity(T entity)
+        /// <returns>True if added, false if add failed.</returns>
+        public bool AddEntity(T entity)
         {
-            EntityList.Add(entity);
-            Entities.Add(entity.EID, entity);
+            if (Entities.TryAdd(entity.EID, entity))
+            {
+                EntityList.Add(entity);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -283,7 +288,11 @@ namespace FGECore.CoreSystems
                     {
                         ce.AddProperty(props[i]);
                     }
-                    AddEntity(ce);
+                    while (!AddEntity(ce))
+                    {
+                        OutputType.WARNING.Output($"Entity with newly generated EID {ce.EID} failed to add - EID tracker may be corrupt, or save data may have been mixed. Re-attempting...");
+                        ce.EID = CurrentEntityID++;
+                    }
                     ce.IsSpawned = true;
                     foreach (Property prop in ce.GetAllProperties())
                     {

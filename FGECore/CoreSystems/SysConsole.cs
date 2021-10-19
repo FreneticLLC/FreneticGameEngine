@@ -29,7 +29,7 @@ namespace FGECore.CoreSystems
     /// </summary>
     public class SysConsole
     {
-        /// <summary>Closes the SysConsole.</summary>
+        /// <summary>Closes the <see cref="SysConsole"/>.</summary>
         public static void ShutDown()
         {
             lock (Internal.ConsoleLock)
@@ -335,9 +335,7 @@ namespace FGECore.CoreSystems
 #endif
         }
 
-        /// <summary>
-        /// Writes a line of colored text to the system console.
-        /// </summary>
+        /// <summary>Writes a line of colored text to the system console.</summary>
         /// <param name="text">The text to write.</param>
         /// <param name="bcolor">The base color.</param>
         public static void WriteLine(string text, string bcolor)
@@ -379,9 +377,7 @@ namespace FGECore.CoreSystems
                 + " " + time.Hour.ToString().PadLeft(2, '0') + ":" + time.Minute.ToString().PadLeft(2, '0') + ":" + time.Second.ToString().PadLeft(2, '0');
         }
 
-        /// <summary>
-        /// Outputs custom debug information.
-        /// </summary>
+        /// <summary>Outputs custom debug information.</summary>
         /// <param name="type">The custom type.</param>
         /// <param name="message">The message.</param>
         /// <param name="bcolor">The custom base color.</param>
@@ -393,12 +389,10 @@ namespace FGECore.CoreSystems
         /// <summary>Can be replaced to control whether the SysConsole should output debug data.</summary>
         public static Func<bool> ShouldOutputDebug = () => true;
 
-        /// <summary>
-        /// Properly formats system console output.
-        /// </summary>
+        /// <summary>Properly formats system console output.</summary>
         /// <param name="outputType">What type of output to use.</param>
         /// <param name="text">The text to output.</param>
-        /// <param name="bcolor">The base color.</param>
+        /// <param name="bcolor">The base color (if any).</param>
         public static void Output(OutputType outputType, string text, string bcolor = null)
         {
             if (outputType == OutputType.DEBUG && !ShouldOutputDebug())
@@ -449,5 +443,11 @@ namespace FGECore.CoreSystems
 
         /// <summary>The base color for this type.</summary>
         public string BaseColor;
+
+        /// <summary>Outputs a message to the <see cref="SysConsole"/>. This is a convenience method equivalent to <see cref="SysConsole.Output(OutputType, string, string)"/>.</summary>
+        public void Output(string message)
+        {
+            SysConsole.Output(this, message, BaseColor);
+        }
     }
 }
