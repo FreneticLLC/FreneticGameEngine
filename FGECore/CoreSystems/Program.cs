@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FreneticUtilities.FreneticToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,19 +17,13 @@ using System.Threading.Tasks;
 
 namespace FGECore.CoreSystems
 {
-    /// <summary>
-    /// Represents the current program abstractly.
-    /// </summary>
+    /// <summary>Represents the current program abstractly.</summary>
     public abstract class Program
     {
-        /// <summary>
-        /// The current program instance.
-        /// </summary>
+        /// <summary>The current program instance.</summary>
         public static Program Instance;
         
-        /// <summary>
-        /// The original system culture.
-        /// </summary>
+        /// <summary>The original system culture.</summary>
         public static CultureInfo SystemCulture;
 
         /// <summary>
@@ -45,24 +40,16 @@ namespace FGECore.CoreSystems
             Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
         }
 
-        /// <summary>
-        /// The name of this program.
-        /// </summary>
+        /// <summary>The name of this program.</summary>
         public readonly string Name;
 
-        /// <summary>
-        /// The version (number) of this program.
-        /// </summary>
+        /// <summary>The version (number) of this program.</summary>
         public readonly string Version;
 
-        /// <summary>
-        /// The version description of this program.
-        /// </summary>
+        /// <summary>The version description of this program.</summary>
         public readonly string VersionDescription;
 
-        /// <summary>
-        /// The current program's game name.
-        /// </summary>
+        /// <summary>The current program's game name.</summary>
         public static string GameName
         {
             get
@@ -71,9 +58,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// The current program's game version.
-        /// </summary>
+        /// <summary>The current program's game version.</summary>
         public static string GameVersion
         {
             get
@@ -94,9 +79,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Construct the program descriptor.
-        /// </summary>
+        /// <summary>Construct the program descriptor.</summary>
         /// <param name="_name">Game name.</param>
         /// <param name="_version">Game version.</param>
         /// <param name="_versdesc">Game version descriptor.</param>

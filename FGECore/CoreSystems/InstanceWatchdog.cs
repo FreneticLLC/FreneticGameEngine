@@ -29,6 +29,21 @@ namespace FGECore.CoreSystems
         /// </summary>
         public static OutputType OUT_TYPE = new OutputType() { Name = "WATCHDOG", BaseColor = "^r^3" };
 
+        /// <summary>Matcher for symbols to allow in thread names to reduce risk of errors.</summary>
+        public static AsciiMatcher ThreadNameSafetyMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_.");
+
+        /// <summary>Incremental thread ID to ensure thread names are unique.</summary>
+        public static long CurrentThreadNameID = 0;
+
+        /// <summary>Applies a custom name to the thread.</summary>
+        public static void NameThread(Thread thread, string name)
+        {
+            if (thread.Name is null)
+            {
+                thread.Name = ThreadNameSafetyMatcher.TrimToMatches(name) + "_" + (CurrentThreadNameID++);
+            }
+        }
+
         /// <summary>
         /// The relevant <see cref="GameInstance"/> being watched.
         /// </summary>
@@ -95,10 +110,9 @@ namespace FGECore.CoreSystems
                 Internal.CancelToken = new CancellationTokenSource();
                 WatchedThread = Thread.CurrentThread;
                 NotesForWatchedThread = StackNoteHelper.Notes;
-                new Thread(MainWatchdogLoop)
-                {
-                    Name = "fge_instance_watchdog"
-                }.Start();
+                Thread thread = new Thread(MainWatchdogLoop);
+                NameThread(thread, "fge_instance_watchdog" + (WatchedThread.Name is null ? "" : "_for_" + WatchedThread.Name));
+                thread.Start();
             }
         }
 

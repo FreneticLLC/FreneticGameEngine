@@ -91,17 +91,15 @@ namespace FGECore.UtilitySystems
             return toret.ToString();
         }
 
-        private const string AlphabetChars = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
         /// <summary>
         /// Alphabetical character matcher (a-z, A-Z).
         /// </summary>
-        public static readonly AsciiMatcher AlphabetMatcher = new AsciiMatcher(AlphabetChars);
+        public static readonly AsciiMatcher AlphabetMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters);
 
         /// <summary>
         /// Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).
         /// </summary>
-        public static readonly AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(AlphabetChars + "0123456789" + "_");
+        public static readonly AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
 
         /// <summary>
         /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII (a-z, A-Z, 0-9, _).
