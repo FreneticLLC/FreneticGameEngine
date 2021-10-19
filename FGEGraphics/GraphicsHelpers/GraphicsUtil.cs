@@ -31,14 +31,16 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>
         /// Checks errors when debug is enabled.
         /// </summary>
-        /// <param name="loc">The source calling location.</param>
+        /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
+        /// <param name="context">An optional context object.</param>
         [Conditional("DEBUG")]
-        public static void CheckError(string loc)
+        public static void CheckError(string callerLocationLabel, object context = null)
         {
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
-                OutputType.ERROR.Output($"OpenGL error [{loc}]: {ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
+                string contextText = context is null ? "" : context + ": ";
+                OutputType.ERROR.Output($"OpenGL error [{callerLocationLabel}]: {contextText}{ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
                 ec = GL.GetError();
             }
         }
