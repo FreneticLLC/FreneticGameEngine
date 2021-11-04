@@ -57,10 +57,10 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         }
 
         /// <summary>
-        /// Tests "Before" and "BeforeLast".
+        /// Tests "Before" and "BeforeLast" string versions.
         /// </summary>
         [Test]
-        public static void BeforeTests()
+        public static void BeforeStringTests()
         {
             Assert.AreEqual("One", "OneTwoThree".Before("Two"), "Before 'OneTwoThree' isn't right");
             Assert.AreEqual("One", "OneTwoThreeTwo".Before("Two"), "Before 'OneTwoThreeTwo' isn't right");
@@ -69,10 +69,22 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         }
 
         /// <summary>
-        /// Tests "After" and "AfterLast".
+        /// Tests "Before" and "BeforeLast" character versions.
         /// </summary>
         [Test]
-        public static void AfterTests()
+        public static void BeforeCharTests()
+        {
+            Assert.AreEqual("One", "One2Three".Before('2'), "Before char 'One2Three' isn't right");
+            Assert.AreEqual("One", "One2Three2".Before('2'), "Before char 'One2ThreeTwo' isn't right");
+            Assert.AreEqual("One", "One2Three".BeforeLast('2'), "BeforeLast char 'One2Three' isn't right");
+            Assert.AreEqual("One2Three", "One2Three2".BeforeLast('2'), "BeforeLast char 'OneTwoThree2' isn't right");
+        }
+
+        /// <summary>
+        /// Tests "After" and "AfterLast" string versions.
+        /// </summary>
+        [Test]
+        public static void AfterStringTests()
         {
             Assert.AreEqual("Three", "OneTwoThree".After("Two"), "After 'OneTwoThree' isn't right");
             Assert.AreEqual("ThreeTwo", "OneTwoThreeTwo".After("Two"), "After 'OneTwoThreeTwo' isn't right");
@@ -81,15 +93,47 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         }
 
         /// <summary>
-        /// Tests "BeforeAndAfter" and "BeforeAndAfterLast".
+        /// Tests "After" and "AfterLast" character versions.
         /// </summary>
         [Test]
-        public static void BeforeAndAfterTests()
+        public static void AfterCharTests()
+        {
+            Assert.AreEqual("Three", "One2Three".After('2'), "After char 'One2Three' isn't right");
+            Assert.AreEqual("Three2", "One2Three2".After('2'), "After char 'One2Three2' isn't right");
+            Assert.AreEqual("Three", "One2Three".AfterLast('2'), "AfterLast char 'One2Three' isn't right");
+            Assert.AreEqual("Four", "One2Three2Four".AfterLast('2'), "AfterLast char 'One2Three2Four' isn't right");
+        }
+
+        /// <summary>
+        /// Tests "BeforeAndAfter" and "BeforeAndAfterLast" string versions.
+        /// </summary>
+        [Test]
+        public static void BeforeAndAfterStringTests()
         {
             Assert.That("OneTwoThree".BeforeAndAfter("Two", out string out1) == "One" && out1 == "Three", "BeforeAndAfter 'OneTwoThree' isn't right");
             Assert.That("OneTwoThreeTwo".BeforeAndAfter("Two", out string out2) == "One" && out2 == "ThreeTwo", "BeforeAndAfter 'OneTwoThreeTwo' isn't right");
             Assert.That("OneTwoThree".BeforeAndAfterLast("Two", out string out3) == "One" && out3 == "Three", "BeforeAndAfterLast 'OneTwoThree' isn't right");
             Assert.That("OneTwoThreeTwoFour".BeforeAndAfterLast("Two", out string out4) == "OneTwoThree" && out4 == "Four", "BeforeAndAfterLast 'OneTwoThreeTwoFour' isn't right");
+            Assert.That("OneTwoThree".BeforeAndAfter("Two") == ("One", "Three"), "BeforeAndAfter pair 'OneTwoThree' isn't right");
+            Assert.That("OneTwoThreeTwo".BeforeAndAfter("Two") == ("One", "ThreeTwo"), "BeforeAndAfter pair 'OneTwoThreeTwo' isn't right");
+            Assert.That("OneTwoThree".BeforeAndAfterLast("Two") == ("One", "Three"), "BeforeAndAfterLast pair 'OneTwoThree' isn't right");
+            Assert.That("OneTwoThreeTwoFour".BeforeAndAfterLast("Two") == ("OneTwoThree", "Four"), "BeforeAndAfterLast pair 'OneTwoThreeTwoFour' isn't right");
+        }
+
+        /// <summary>
+        /// Tests "BeforeAndAfter" and "BeforeAndAfterLast" character versions.
+        /// </summary>
+        [Test]
+        public static void BeforeAndAfterCharTests()
+        {
+            Assert.That("One2Three".BeforeAndAfter('2', out string out1) == "One" && out1 == "Three", "BeforeAndAfter 'One2Three' isn't right");
+            Assert.That("One2Three2".BeforeAndAfter('2', out string out2) == "One" && out2 == "Three2", "BeforeAndAfter 'One2Three2' isn't right");
+            Assert.That("One2Three".BeforeAndAfterLast('2', out string out3) == "One" && out3 == "Three", "BeforeAndAfterLast 'One2Three' isn't right");
+            Assert.That("One2Three2Four".BeforeAndAfterLast('2', out string out4) == "One2Three" && out4 == "Four", "BeforeAndAfterLast 'One2Three2Four' isn't right");
+            Assert.That("One2Three".BeforeAndAfter('2') == ("One", "Three"), "BeforeAndAfter pair 'One2Three' isn't right");
+            Assert.That("One2Three2".BeforeAndAfter('2') == ("One", "Three2"), "BeforeAndAfter pair 'One2Three2' isn't right");
+            Assert.That("One2Three".BeforeAndAfterLast('2') == ("One", "Three"), "BeforeAndAfterLast pair 'One2Three' isn't right");
+            Assert.That("One2Three2Four".BeforeAndAfterLast('2') == ("One2Three", "Four"), "BeforeAndAfterLast pair 'One2Three2Four' isn't right");
         }
 
         /// <summary>

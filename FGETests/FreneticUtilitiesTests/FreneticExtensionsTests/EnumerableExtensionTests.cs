@@ -52,6 +52,20 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         }
 
         /// <summary>
+        /// Tests "PairsToDictionary".
+        /// </summary>
+        [Test]
+        public static void PairsToDictionary()
+        {
+            Dictionary<string, int> resultDict = new[] { ("a", 1), ("b", 2), ("c", 3) }.PairsToDictionary();
+            Assert.AreEqual(3, resultDict.Count, "PairsToDictionary resultDict Count wrong");
+            Assert.AreEqual(1, resultDict["a"], "PairsToDictionary resultDict['a'] wrong");
+            Assert.AreEqual(2, resultDict["b"], "PairsToDictionary resultDict['b'] wrong");
+            Assert.AreEqual(3, resultDict["c"], "PairsToDictionary resultDict['c'] wrong");
+            Assert.Throws<ArgumentException>(() => new[] { ("a", 1), ("b", 2), ("c", 3), ("b", 4), ("d", 5) }.PairsToDictionary(), "PairsToDictionary allowed a dup");
+        }
+
+        /// <summary>
         /// Tests "ToDictionaryWithNoDup".
         /// </summary>
         [Test]
@@ -157,7 +171,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void IsEmptyTest()
         {
-            Assert.That(new string[] {}.IsEmpty(), "IsEmptyTest wrong");
+            Assert.That(Array.Empty<string>().IsEmpty(), "IsEmptyTest wrong");
             Assert.That(!(new string[] { "1", "2" }.IsEmpty()), "!IsEmptyTest wrong");
         }
     }
