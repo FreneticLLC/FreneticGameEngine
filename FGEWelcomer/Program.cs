@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace FGEWelcomer
     {
         /// <summary>The main entry point for the application.</summary>
         [STAThread]
+        [SupportedOSPlatform("windows")]
         static void Main()
         {
             // Pre-Init

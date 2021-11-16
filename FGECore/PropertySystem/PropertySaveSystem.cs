@@ -21,10 +21,10 @@ namespace FGECore.PropertySystem
     public class PropertySaveSystem
     {
         /// <summary>All type saver methods.</summary>
-        public static Dictionary<Type, PropertySaverLoader> TypeSavers = new Dictionary<Type, PropertySaverLoader>(1024);
+        public static Dictionary<Type, PropertySaverLoader> TypeSavers = new(1024);
 
         /// <summary>All type loader methods.</summary>
-        public static Dictionary<string, PropertySaverLoader> TypeLoaders = new Dictionary<string, PropertySaverLoader>(1024);
+        public static Dictionary<string, PropertySaverLoader> TypeLoaders = new(1024);
 
         /// <summary>Ensures initialization.</summary>
         static PropertySaveSystem()
@@ -49,7 +49,7 @@ namespace FGECore.PropertySystem
                 // Core Helpers
                 TypeSavers.Add(typeof(bool), new PropertySaverLoader()
                 {
-                    Saver = (o) => new byte[] { ((bool)o) ? 1 : 0 },
+                    Saver = (o) => new byte[] { (byte)(((bool)o) ? 1 : 0) },
                     Loader = (b) => b[0] != 0,
                     SaveString = "C/bool"
                 });

@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,6 +25,7 @@ namespace FGEWelcomer
     /// The main Welcomer form.
     /// TODO: This system should have its own simple UI engine, as opposed to hardcoding everything.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public partial class WelcomerForm : Form
     {
         /// <summary>possible things for the mouse to be over on this form.</summary>
@@ -109,7 +111,7 @@ namespace FGEWelcomer
         public WelcomerForm()
         {
             SuspendLayout();
-            ComponentResourceManager resources = new ComponentResourceManager(typeof(Common));
+            ComponentResourceManager resources = new(typeof(Common));
             WelcomerIcon = Common.FGE_Icon;
             WelcomerExitIcon = Common.Exit_Icon;
             // TODO: Screen scaling oddities may occur here? (Fonts)
@@ -155,7 +157,7 @@ namespace FGEWelcomer
             if (Dragging)
             {
                 Point pos = Cursor.Position;
-                Point rel = new Point(pos.X - DragLast.X, pos.Y - DragLast.Y);
+                Point rel = new(pos.X - DragLast.X, pos.Y - DragLast.Y);
                 DragLast = pos;
                 Location = new Point(Location.X + rel.X, Location.Y + rel.Y);
             }
@@ -200,7 +202,7 @@ namespace FGEWelcomer
         /// <param name="args">The git command arguments.</param>
         public static void RunGitCommand(string folder, string gitExe, string args)
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            ProcessStartInfo psi = new()
             {
                 FileName = gitExe,
                 WorkingDirectory = folder,
@@ -214,7 +216,7 @@ namespace FGEWelcomer
         /// <param name="submodule">Whether it should be backed by a submodule (if not, use static dll files).</param>
         public void CreateGame(bool threed, bool submodule)
         {
-            FolderBrowserDialog fbd = new FolderBrowserDialog()
+            FolderBrowserDialog fbd = new()
             {
                 ShowNewFolderButton = true
             };
@@ -237,7 +239,7 @@ namespace FGEWelcomer
             string gitExe = "C:/Program Files/Git/cmd/git.exe";
             if (submodule && !File.Exists(gitExe))
             {
-                using OpenFileDialog ofd = new OpenFileDialog
+                using OpenFileDialog ofd = new()
                 {
                     InitialDirectory = "C:/",
                     Filter = "Git Executable File (*.exe)|*.exe",
@@ -258,7 +260,7 @@ namespace FGEWelcomer
             int ind = pfname.LastIndexOfAny(new char[] { '/', '\\' });
             string proj_name = pfname[(ind + 1)..];
             string baseFolder = folder + "/" + proj_name + "/";
-            List<KeyValuePair<string, string>> strs = new List<KeyValuePair<string, string>>() { };
+            List<KeyValuePair<string, string>> strs = new() { };
             strs.Add(new KeyValuePair<string, string>("name", proj_name));
             strs.Add(new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()));
             strs.Add(new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()));
@@ -442,19 +444,19 @@ namespace FGEWelcomer
         public const string NEWBUTTON_TEXT_3D_STATIC = "Create New Game Project (3D - Static Backed)";
 
         /// <summary>The 'create new game project (3D - Static)' message rectangle.</summary>
-        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_STATIC = new Rectangle(2, 38, 400, 25);
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_STATIC = new(2, 38, 400, 25);
 
         /// <summary>The 'create new game project (2D)' message text.</summary>
         public const string NEWBUTTON_TEXT_2D = "Create New Game Project (2D)";
 
         /// <summary>The 'create new game project (2D)' message rectangle.</summary>
-        public static readonly Rectangle NEWBUTTON_RECTANGLE_2D = new Rectangle(2 + 400 + 5, 38, 234, 25);
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_2D = new(2 + 400 + 5, 38, 234, 25);
 
         /// <summary>The 'create new game project (3D - Submodule Backed)' message text.</summary>
         public const string NEWBUTTON_TEXT_3D_GIT = "Create New Game Project (3D - Submodule Backed)";
 
         /// <summary>The 'create new game project (3D - Submodule Backed)' message rectangle.</summary>
-        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_GIT = new Rectangle(2, 38 + 25 + 5, 400, 25);
+        public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_GIT = new(2, 38 + 25 + 5, 400, 25);
 
         /// <summary>Handles redrawing the form.</summary>
         /// <param name="sender">The event sender.</param>
