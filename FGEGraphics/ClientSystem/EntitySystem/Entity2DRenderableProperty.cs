@@ -51,18 +51,14 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Render the entity as seen by a top-down map.
-        /// </summary>
+        /// <summary>Render the entity as seen by a top-down map.</summary>
         /// <param name="context">The render context.</param>
         public override void RenderForTopMap(RenderContext context)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Render the entity as seen normally.
-        /// </summary>
+        /// <summary>Render the entity as seen normally.</summary>
         /// <param name="context">The render context.</param>
         public override void RenderStandard(RenderContext context)
         {

@@ -114,9 +114,7 @@ namespace FGECore.CoreSystems
         }
     }
 
-    /// <summary>
-    /// Represents the common code shared by a server and client engine, with generic types refering the implementation type.
-    /// </summary>
+    /// <summary>Represents the common code shared by a server and client engine, with generic types refering the implementation type.</summary>
     public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
         /// <summary>The general-purpose physics world.</summary>
@@ -144,9 +142,7 @@ namespace FGECore.CoreSystems
         /// <summary>All entities currently spawned in the engine.</summary>
         public List<T> EntityList = new List<T>(8192);
 
-        /// <summary>
-        /// Returns a duplicate of the entity list, for when you expect the master list to change.
-        /// </summary>
+        /// <summary>Returns a duplicate of the entity list, for when you expect the master list to change.</summary>
         public IReadOnlyList<T> EntityListDuplicate()
         {
             return new List<T>(EntityList);
@@ -164,9 +160,7 @@ namespace FGECore.CoreSystems
             return false;
         }
 
-        /// <summary>
-        /// Removes an entity from the list, quick and deadly. Prefer <see cref="DespawnEntity(T)"/> over this.
-        /// </summary>
+        /// <summary>Removes an entity from the list, quick and deadly. Prefer <see cref="DespawnEntity(T)"/> over this.</summary>
         public void RemoveEntity(T entity)
         {
             EntityList.Remove(entity);

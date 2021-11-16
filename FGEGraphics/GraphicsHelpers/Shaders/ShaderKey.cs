@@ -20,9 +20,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
     /// </summary>
     public class ShaderKey : IEquatable<ShaderKey>
     {
-        /// <summary>
-        /// The filepath of the shader, excluding the "shaders/" prefix or the file extension suffix.
-        /// </summary>
+        /// <summary>The filepath of the shader, excluding the "shaders/" prefix or the file extension suffix.</summary>
         public string ShaderPath;
 
         /// <summary>
@@ -31,9 +29,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// </summary>
         public string GeometryShaderPath;
 
-        /// <summary>
-        /// An array of specially defined pre-compiler variable keys.
-        /// </summary>
+        /// <summary>An array of specially defined pre-compiler variable keys.</summary>
         public string[] Defines = new string[0];
 
         /// <summary>Gets a unique hash code for the instance.</summary>

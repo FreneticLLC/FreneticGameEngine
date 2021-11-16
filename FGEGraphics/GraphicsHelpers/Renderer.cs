@@ -31,9 +31,7 @@ namespace FGEGraphics.GraphicsHelpers
     /// </summary>
     public class Renderer
     {
-        /// <summary>
-        /// Prepare the renderer.
-        /// </summary>
+        /// <summary>Prepare the renderer.</summary>
         public void Init()
         {
             GenerateSquareVBO();
@@ -41,23 +39,15 @@ namespace FGEGraphics.GraphicsHelpers
             GenerateBoxVBO();
         }
 
-        /// <summary>
-        /// A square.
-        /// </summary>
+        /// <summary>A square.</summary>
         public Renderable Square;
 
-        /// <summary>
-        /// A line.
-        /// </summary>
+        /// <summary>A line.</summary>
         Renderable Line;
-        /// <summary>
-        /// A box.
-        /// </summary>
+        /// <summary>A box.</summary>
         Renderable Box;
 
-        /// <summary>
-        /// Generates a square.
-        /// </summary>
+        /// <summary>Generates a square.</summary>
         void GenerateSquareVBO()
         {
             Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
@@ -86,9 +76,7 @@ namespace FGEGraphics.GraphicsHelpers
             Square = builder.Generate();
         }
 
-        /// <summary>
-        /// Generates a line.
-        /// </summary>
+        /// <summary>Generates a line.</summary>
         void GenerateLineVBO()
         {
             Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
@@ -109,9 +97,7 @@ namespace FGEGraphics.GraphicsHelpers
             Line = builder.Generate();
         }
 
-        /// <summary>
-        /// Generates a box.
-        /// </summary>
+        /// <summary>Generates a box.</summary>
         void GenerateBoxVBO()
         {
             Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
@@ -156,9 +142,7 @@ namespace FGEGraphics.GraphicsHelpers
             Box = builder.Generate();
         }
 
-        /// <summary>
-        /// Constructs the renderer.
-        /// </summary>
+        /// <summary>Constructs the renderer.</summary>
         /// <param name="tengine">The relevant texture engine.</param>
         /// <param name="shaderdet">The relevant shader engine.</param>
         /// <param name="modelsdet">The relevant model engine.</param>
@@ -169,24 +153,16 @@ namespace FGEGraphics.GraphicsHelpers
             Models = modelsdet;
         }
 
-        /// <summary>
-        /// Texture engine.
-        /// </summary>
+        /// <summary>Texture engine.</summary>
         public TextureEngine TEngine;
 
-        /// <summary>
-        /// Shader engine.
-        /// </summary>
+        /// <summary>Shader engine.</summary>
         public ShaderEngine Shaders;
-        
-        /// <summary>
-        /// Model engine.
-        /// </summary>
+
+        /// <summary>Model engine.</summary>
         public ModelEngine Models;
 
-        /// <summary>
-        /// Renders a line box.
-        /// </summary>
+        /// <summary>Renders a line box.</summary>
         /// <param name="min">The minimum coordinate.</param>
         /// <param name="max">The maximmum coordinate.</param>
         /// <param name="view">The relevant view.</param>
@@ -227,9 +203,7 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("RenderLineBox: Pass");
         }
 
-        /// <summary>
-        /// Render a line between two points.
-        /// </summary>
+        /// <summary>Render a line between two points.</summary>
         /// <param name="start">The initial point.</param>
         /// <param name="end">The ending point.</param>
         /// <param name="view">The relevant view.</param>
@@ -248,9 +222,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.DrawElements(PrimitiveType.Lines, 2, DrawElementsType.UnsignedInt, IntPtr.Zero);
         }
 
-        /// <summary>
-        /// Render a cylinder between two points.
-        /// </summary>
+        /// <summary>Render a cylinder between two points.</summary>
         /// <param name="context">The sourcing render context.</param>
         /// <param name="start">The initial point.</param>
         /// <param name="end">The ending point.</param>
@@ -270,9 +242,7 @@ namespace FGEGraphics.GraphicsHelpers
             Models.Cylinder.Draw(context);
         }
 
-        /// <summary>
-        /// Set the color of rendered objects.
-        /// </summary>
+        /// <summary>Set the color of rendered objects.</summary>
         /// <param name="col">The color.</param>
         /// <param name="view">The relevant view.</param>
         public void SetColor(Vector4 col, View3D view)
@@ -283,9 +253,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Set the color of rendered objects.
-        /// </summary>
+        /// <summary>Set the color of rendered objects.</summary>
         /// <param name="c">The color.</param>
         /// <param name="view">The relevant view.</param>
         public void SetColor(Color4 c, View3D view)
@@ -293,9 +261,7 @@ namespace FGEGraphics.GraphicsHelpers
             SetColor(new Vector4(c.R, c.G, c.B, c.A), view);
         }
 
-        /// <summary>
-        /// Set the color of rendered objects.
-        /// </summary>
+        /// <summary>Set the color of rendered objects.</summary>
         /// <param name="c">The color.</param>
         /// <param name="view">The relevant view.</param>
         public void SetColor(Color4F c, View3D view)
@@ -303,9 +269,7 @@ namespace FGEGraphics.GraphicsHelpers
             SetColor(new Vector4(c.R, c.G, c.B, c.A), view);
         }
 
-        /// <summary>
-        /// Set the minimum light to 0.0, indicating that fog is disabled but minimum light is also disabled.
-        /// </summary>
+        /// <summary>Set the minimum light to 0.0, indicating that fog is disabled but minimum light is also disabled.</summary>
         /// <param name="view">Relevant view.</param>
         public void SetSpecialFoglessLight(View3D view)
         {
@@ -315,9 +279,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Set the minimum light.
-        /// </summary>
+        /// <summary>Set the minimum light.</summary>
         /// <param name="min">Minimum light.</param>
         /// <param name="view">Relevant view.</param>
         public void SetMinimumLight(float min, View3D view)
@@ -328,9 +290,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Enables shine effects.
-        /// </summary>
+        /// <summary>Enables shine effects.</summary>
         /// <param name="view">The relevant view.</param>
         /// <param name="defaultColor">Whether to default the color.</param>
         public void EnableShine(View3D view, bool defaultColor = true)
@@ -344,9 +304,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.Uniform1(8, 1.0f);
         }
 
-        /// <summary>
-        /// Disables shine effects.
-        /// </summary>
+        /// <summary>Disables shine effects.</summary>
         /// <param name="view">The relevant view.</param>
         public void DisableShine(View3D view)
         {
@@ -356,9 +314,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.Uniform1(8, 0.0f);
         }
 
-        /// <summary>
-        /// Renders a 3D rectangle.
-        /// </summary>
+        /// <summary>Renders a 3D rectangle.</summary>
         /// <param name="mat">The matrix.</param>
         public void RenderRectangle3D(Matrix4 mat)
         {
@@ -368,9 +324,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.BindVertexArray(0);
         }
 
-        /// <summary>
-        /// Renders a 2D rectangle.
-        /// </summary>
+        /// <summary>Renders a 2D rectangle.</summary>
         /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
         /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
         /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
@@ -385,9 +339,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.BindVertexArray(0);
         }
 
-        /// <summary>
-        /// Renders a 2D rectangle, with centered rotation.
-        /// </summary>
+        /// <summary>Renders a 2D rectangle, with centered rotation.</summary>
         /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
         /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
         /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
@@ -404,9 +356,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.BindVertexArray(0);
         }
 
-        /// <summary>
-        /// Renders a flat billboard (a sprite).
-        /// </summary>
+        /// <summary>Renders a flat billboard (a sprite).</summary>
         /// <param name="center">The center of it.</param>
         /// <param name="scale">The scale of it.</param>
         /// <param name="facing">Where it's facing.</param>
@@ -435,7 +385,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 throw new Exception("Unable to handle billboard: relang=" + relang);
             }
-            Matrix4d mat = 
+            Matrix4d mat =
                 Matrix4d.Scale(ClientUtilities.ConvertD(scale))
                 * Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f)
                 * Matrix4d.CreateRotationY((float)((relang.Y - 90) * Utilities.PI180))
@@ -448,9 +398,7 @@ namespace FGEGraphics.GraphicsHelpers
             */
         }
 
-        /// <summary>
-        /// Renders a billboard along a line.
-        /// </summary>
+        /// <summary>Renders a billboard along a line.</summary>
         /// <param name="pos">Start position.</param>
         /// <param name="p2">End position.</param>
         /// <param name="width">Width of the line.</param>

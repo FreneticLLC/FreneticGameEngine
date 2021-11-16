@@ -26,38 +26,26 @@ namespace FGECore.MathHelpers
     [StructLayout(LayoutKind.Explicit)]
     public struct Quaternion : IEquatable<Quaternion>
     {
-        /// <summary>
-        /// The identity Quaternion: one with no rotation applied.
-        /// </summary>
+        /// <summary>The identity Quaternion: one with no rotation applied.</summary>
         public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
 
-        /// <summary>
-        /// The X component of this Quaternion.
-        /// </summary>
+        /// <summary>The X component of this Quaternion.</summary>
         [FieldOffset(0)]
         public double X;
 
-        /// <summary>
-        /// The Y component of this Quaternion.
-        /// </summary>
+        /// <summary>The Y component of this Quaternion.</summary>
         [FieldOffset(8)]
         public double Y;
 
-        /// <summary>
-        /// The Z component of this Quaternion.
-        /// </summary>
+        /// <summary>The Z component of this Quaternion.</summary>
         [FieldOffset(16)]
         public double Z;
 
-        /// <summary>
-        /// The W component of this Quaternion.
-        /// </summary>
+        /// <summary>The W component of this Quaternion.</summary>
         [FieldOffset(24)]
         public double W;
 
-        /// <summary>
-        /// Returns X as a float.
-        /// </summary>
+        /// <summary>Returns X as a float.</summary>
         public float XF
         {
             get
@@ -66,9 +54,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns Y as a float.
-        /// </summary>
+        /// <summary>Returns Y as a float.</summary>
         public float YF
         {
             get
@@ -77,9 +63,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns Z as a float.
-        /// </summary>
+        /// <summary>Returns Z as a float.</summary>
         public float ZF
         {
             get
@@ -88,9 +72,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns W as a float.
-        /// </summary>
+        /// <summary>Returns W as a float.</summary>
         public float WF
         {
             get
@@ -99,9 +81,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Constructs a Quaternion with specific components.
-        /// </summary>
+        /// <summary>Constructs a Quaternion with specific components.</summary>
         /// <param name="_x">X.</param>
         /// <param name="_y">Y.</param>
         /// <param name="_z">Z.</param>
@@ -183,9 +163,7 @@ namespace FGECore.MathHelpers
             return Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
         }
 
-        /// <summary>
-        /// Returns the intermediate state between two Quaternions.
-        /// </summary>
+        /// <summary>Returns the intermediate state between two Quaternions.</summary>
         /// <param name="b">The second Quaternion.</param>
         /// <param name="lerp">The lerp amount.</param>
         /// <returns>The interpolated quaternion.</returns>
@@ -209,18 +187,14 @@ namespace FGECore.MathHelpers
                 );
         }
 
-        /// <summary>
-        /// Returns the conjugate of this Quaternion.
-        /// </summary>
+        /// <summary>Returns the conjugate of this Quaternion.</summary>
         /// <returns>The conjugate.</returns>
         public Quaternion Conjugate()
         {
             return new Quaternion(-X, -Y, -Z, W);
         }
 
-        /// <summary>
-        /// Returns the inverse of this Quaternion.
-        /// </summary>
+        /// <summary>Returns the inverse of this Quaternion.</summary>
         /// <returns>The inverse.</returns>
         public Quaternion Inverse()
         {
@@ -228,18 +202,14 @@ namespace FGECore.MathHelpers
             return new Quaternion(-X * len_sq, -Y * len_sq, -Z * len_sq, W * len_sq);
         }
 
-        /// <summary>
-        /// Returns the negative of this Quaternion.
-        /// </summary>
+        /// <summary>Returns the negative of this Quaternion.</summary>
         /// <returns>The negative.</returns>
         public Quaternion Negative()
         {
             return new Quaternion(-X, -Y, -Z, -W);
         }
 
-        /// <summary>
-        /// Returns whether the two Quaternions are equal.
-        /// </summary>
+        /// <summary>Returns whether the two Quaternions are equal.</summary>
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Equality.</returns>
@@ -248,9 +218,7 @@ namespace FGECore.MathHelpers
             return a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
         }
 
-        /// <summary>
-        /// Returns whether the two Quaternions are NOT equal.
-        /// </summary>
+        /// <summary>Returns whether the two Quaternions are NOT equal.</summary>
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Non-equality.</returns>
@@ -259,9 +227,7 @@ namespace FGECore.MathHelpers
             return a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;
         }
 
-        /// <summary>
-        /// Returns the Quaternion multiplied by another.
-        /// </summary>
+        /// <summary>Returns the Quaternion multiplied by another.</summary>
         /// <param name="a">First Quaternion.</param>
         /// <param name="b">Second Quaternion.</param>
         /// <returns>Multiplication result.</returns>
@@ -270,18 +236,14 @@ namespace FGECore.MathHelpers
             return a.MultipliedBy(b);
         }
 
-        /// <summary>
-        /// Returns a hash code for this Quaternion.
-        /// </summary>
+        /// <summary>Returns a hash code for this Quaternion.</summary>
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
             return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode() + W.GetHashCode();
         }
 
-        /// <summary>
-        /// Returns whether this Quaternion equals another object.
-        /// </summary>
+        /// <summary>Returns whether this Quaternion equals another object.</summary>
         /// <param name="obj">The object.</param>
         /// <returns>Equality.</returns>
         public override bool Equals(object obj)
@@ -293,9 +255,7 @@ namespace FGECore.MathHelpers
             return false;
         }
 
-        /// <summary>
-        /// Returns whether this Quaternion equals another Quaternion.
-        /// </summary>
+        /// <summary>Returns whether this Quaternion equals another Quaternion.</summary>
         /// <param name="b">The other Quaternion.</param>
         /// <returns>Equality.</returns>
         public bool Equals(Quaternion b)
@@ -303,18 +263,14 @@ namespace FGECore.MathHelpers
             return this == b;
         }
 
-        /// <summary>
-        /// Returns a simple string of this Quaternion.
-        /// </summary>
+        /// <summary>Returns a simple string of this Quaternion.</summary>
         /// <returns>The simple string.</returns>
         public override string ToString()
         {
             return "(" + X + ", " + Y + ", " + Z + ", " + W + ")";
         }
 
-        /// <summary>
-        /// Creates a Quaternion from an axis and an angle around the axis.
-        /// </summary>
+        /// <summary>Creates a Quaternion from an axis and an angle around the axis.</summary>
         /// <param name="axis">The axis.</param>
         /// <param name="angle">The angle (in radians).</param>
         /// <returns>The resultant Quaternion.</returns>
@@ -324,9 +280,7 @@ namespace FGECore.MathHelpers
             return new Quaternion(axis.X * s, axis.Y * s, axis.Z * s, Math.Cos(angle * 0.5));
         }
 
-        /// <summary>
-        /// Gets the quaternion between two normalized vector locations.
-        /// </summary>
+        /// <summary>Gets the quaternion between two normalized vector locations.</summary>
         /// <param name="v1">First vector location.</param>
         /// <param name="v2">Second vector location.</param>
         public static Quaternion GetQuaternionBetween(in Location v1, in Location v2)
@@ -369,9 +323,7 @@ namespace FGECore.MathHelpers
             return a.MultipliedBy(b.Conjugate());
         }
 
-        /// <summary>
-        /// Get the angle around an axis for a specific quaternion, in radians.
-        /// </summary>
+        /// <summary>Get the angle around an axis for a specific quaternion, in radians.</summary>
         /// <param name="axis">The relative axis.</param>
         public double AxisAngleForRadians(in Location axis)
         {
@@ -461,9 +413,7 @@ namespace FGECore.MathHelpers
             return toret;
         }
 
-        /// <summary>
-        /// Transforms a location vector by this Quaternion and returns the result.
-        /// </summary>
+        /// <summary>Transforms a location vector by this Quaternion and returns the result.</summary>
         /// <param name="v">The location vector.</param>
         /// <returns>The transformed location vector.</returns>
         public Location Transform(in Location v)
@@ -485,9 +435,7 @@ namespace FGECore.MathHelpers
                 v.X * (xz2 - wy2) + v.Y * (yz2 + wx2) + v.Z * (1f - xx2 - yy2));
         }
 
-        /// <summary>
-        /// Transform the normal X axis by this Quaternion.
-        /// </summary>
+        /// <summary>Transform the normal X axis by this Quaternion.</summary>
         /// <returns>The transformed axis.</returns>
         public Location TransformX()
         {
@@ -496,9 +444,7 @@ namespace FGECore.MathHelpers
             return new Location(1.0 - (Y * y2) - (Z * z2), (X * y2) + (W * z2), (X * z2) - (W * y2));
         }
 
-        /// <summary>
-        /// Gets or sets this Quaternion as a 2D angle.
-        /// </summary>
+        /// <summary>Gets or sets this Quaternion as a 2D angle.</summary>
         public double Angle2D
         {
             get

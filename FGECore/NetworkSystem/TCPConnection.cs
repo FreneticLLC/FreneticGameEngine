@@ -20,58 +20,38 @@ using FGECore.UtilitySystems;
 
 namespace FGECore.NetworkSystem
 {
-    /// <summary>
-    /// Represents a present TCP Connection.
-    /// </summary>
+    /// <summary>Represents a present TCP Connection.</summary>
     public class TCPConnection : IDisposable
     {
-        /// <summary>
-        /// The backing socket.
-        /// </summary>
+        /// <summary>The backing socket.</summary>
         public Socket RelevantSocket = null;
 
-        /// <summary>
-        /// The owning network system.
-        /// </summary>
+        /// <summary>The owning network system.</summary>
         public TCPGameNetwork Network;
 
-        /// <summary>
-        /// Whether the connection is fully ready to send and receive standard data.
-        /// </summary>
+        /// <summary>Whether the connection is fully ready to send and receive standard data.</summary>
         public bool IsReady = false;
 
-        /// <summary>
-        /// A temporary buffer for data handling.
-        /// </summary>
+        /// <summary>A temporary buffer for data handling.</summary>
         public DataStream ReadData = new DataStream();
 
         private readonly byte[] OneByteHolder = new byte[1];
 
         private readonly byte[] KiloByteHolder = new byte[1024];
 
-        /// <summary>
-        /// Any information used for the connection period.
-        /// </summary>
+        /// <summary>Any information used for the connection period.</summary>
         public string OpeningInformation;
 
-        /// <summary>
-        /// The static constant header value.
-        /// </summary>
+        /// <summary>The static constant header value.</summary>
         public const string HEADER = "FRENETIC_GAME_ENGINE__CLIENT_CONNECT\n";
 
-        /// <summary>
-        /// The channel this Connection is on.
-        /// </summary>
+        /// <summary>The channel this Connection is on.</summary>
         public int Channel;
 
-        /// <summary>
-        /// Any tag applied to this Object by the game.
-        /// </summary>
+        /// <summary>Any tag applied to this Object by the game.</summary>
         public Object Tag;
 
-        /// <summary>
-        /// Processes a received packet.
-        /// </summary>
+        /// <summary>Processes a received packet.</summary>
         /// <param name="pid">The packet ID.</param>
         /// <param name="reader">The data reader.</param>
         public void ProcessPacket(long pid, DataReader reader)
@@ -79,14 +59,10 @@ namespace FGECore.NetworkSystem
             // TODO
         }
 
-        /// <summary>
-        /// The number of bytes waiting to send.
-        /// </summary>
+        /// <summary>The number of bytes waiting to send.</summary>
         public int SentWaiting = 0;
 
-        /// <summary>
-        /// Sends a packet through the socket.
-        /// </summary>
+        /// <summary>Sends a packet through the socket.</summary>
         /// <param name="packID">The packet ID.</param>
         /// <param name="data">The data.</param>
         public void SendPacket(long packID, byte[] data)
@@ -114,18 +90,14 @@ namespace FGECore.NetworkSystem
             }
         }
 
-        /// <summary>
-        /// Called when a send operation completes.
-        /// </summary>
+        /// <summary>Called when a send operation completes.</summary>
         /// <param name="res"></param>
         public void SendComplete(IAsyncResult res)
         {
             SentWaiting -= (int)res.AsyncState;
         }
 
-        /// <summary>
-        /// Run every frame to tick any network updates.
-        /// </summary>
+        /// <summary>Run every frame to tick any network updates.</summary>
         public void Tick()
         {
             try
@@ -236,9 +208,7 @@ namespace FGECore.NetworkSystem
             }
         }
 
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -249,9 +219,7 @@ namespace FGECore.NetworkSystem
             }
         }
 
-        /// <summary>
-        /// Disposes the window client.
-        /// </summary>
+        /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);

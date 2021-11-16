@@ -22,7 +22,7 @@ namespace FGECore.CoreSystems
     {
         /// <summary>The current program instance.</summary>
         public static Program Instance;
-        
+
         /// <summary>The original system culture.</summary>
         public static CultureInfo SystemCulture;
 

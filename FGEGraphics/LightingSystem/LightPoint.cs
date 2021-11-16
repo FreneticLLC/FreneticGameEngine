@@ -21,14 +21,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a 3D point light.
-    /// </summary>
+    /// <summary>Represents a 3D point light.</summary>
     class LightPoint : Light
     {
-        /// <summary>
-        /// Sets up the 3D point light.
-        /// </summary>
+        /// <summary>Sets up the 3D point light.</summary>
         /// <param name="pos">Position.</param>
         /// <param name="targ">Target.</param>
         /// <param name="fov">Field of view.</param>

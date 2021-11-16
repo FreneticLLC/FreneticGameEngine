@@ -24,9 +24,7 @@ namespace FGECore.MathHelpers
     [StructLayout(LayoutKind.Explicit)]
     public struct Vector3i : IEquatable<Vector3i>
     {
-        /// <summary>
-        /// Construct the vec3i.
-        /// </summary>
+        /// <summary>Construct the vec3i.</summary>
         /// <param name="x">X coordinaate.</param>
         /// <param name="y">Y coordinate.</param>
         /// <param name="z">Z coordinate.</param>
@@ -37,9 +35,7 @@ namespace FGECore.MathHelpers
             Z = z;
         }
 
-        /// <summary>
-        /// Construct the vec3i.
-        /// </summary>
+        /// <summary>Construct the vec3i.</summary>
         /// <param name="xy">X and Y coordinaate.</param>
         /// <param name="z">Z coordinate.</param>
         public Vector3i(Vector2i xy, int z)
@@ -49,41 +45,29 @@ namespace FGECore.MathHelpers
             Z = z;
         }
 
-        /// <summary>
-        /// The zero vector.
-        /// </summary>
+        /// <summary>The zero vector.</summary>
         public static readonly Vector3i Zero = new Vector3i(0, 0, 0);
 
-        /// <summary>
-        /// The X coordinate.
-        /// </summary>
+        /// <summary>The X coordinate.</summary>
         [FieldOffset(0)]
         public int X;
 
-        /// <summary>
-        /// The Y coordinate.
-        /// </summary>
+        /// <summary>The Y coordinate.</summary>
         [FieldOffset(4)]
         public int Y;
 
-        /// <summary>
-        /// The Z coordinate.
-        /// </summary>
+        /// <summary>The Z coordinate.</summary>
         [FieldOffset(8)]
         public int Z;
 
-        /// <summary>
-        /// Gets a cheap hash code.
-        /// </summary>
+        /// <summary>Gets a cheap hash code.</summary>
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
             return X * 23 + Y * 77 + Z;
         }
 
-        /// <summary>
-        /// Compares equality between this and another vector.
-        /// </summary>
+        /// <summary>Compares equality between this and another vector.</summary>
         /// <param name="other">The other vector.</param>
         /// <returns>Whether they are equal.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,9 +80,7 @@ namespace FGECore.MathHelpers
             return Equals(vecForm);
         }
 
-        /// <summary>
-        /// Compares equality between this and another vector.
-        /// </summary>
+        /// <summary>Compares equality between this and another vector.</summary>
         /// <param name="other">The other vector.</param>
         /// <returns>Whether they are equal.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,9 +89,7 @@ namespace FGECore.MathHelpers
             return other.X == X && other.Y == Y && other.Z == Z;
         }
 
-        /// <summary>
-        /// Converts this vector a floating point <see cref="Location"/>.
-        /// </summary>
+        /// <summary>Converts this vector a floating point <see cref="Location"/>.</summary>
         /// <returns>The Location.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location ToLocation()
@@ -117,18 +97,14 @@ namespace FGECore.MathHelpers
             return new Location(X, Y, Z);
         }
 
-        /// <summary>
-        /// Gets a simple string of the vector.
-        /// </summary>
+        /// <summary>Gets a simple string of the vector.</summary>
         /// <returns>The string.</returns>
         public override string ToString()
         {
             return "(" + X + ", " + Y + ", " + Z + ")";
         }
 
-        /// <summary>
-        /// Logical comparison.
-        /// </summary>
+        /// <summary>Logical comparison.</summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
@@ -138,9 +114,7 @@ namespace FGECore.MathHelpers
             return !one.Equals(two);
         }
 
-        /// <summary>
-        /// Logical comparison.
-        /// </summary>
+        /// <summary>Logical comparison.</summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
@@ -150,9 +124,7 @@ namespace FGECore.MathHelpers
             return one.Equals(two);
         }
 
-        /// <summary>
-        /// Mathematical operation.
-        /// </summary>
+        /// <summary>Mathematical operation.</summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
@@ -162,9 +134,7 @@ namespace FGECore.MathHelpers
             return new Vector3i(one.X + two.X, one.Y + two.Y, one.Z + two.Z);
         }
 
-        /// <summary>
-        /// Mathematical operation.
-        /// </summary>
+        /// <summary>Mathematical operation.</summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Second vec.</param>
         /// <returns>Result.</returns>
@@ -174,9 +144,7 @@ namespace FGECore.MathHelpers
             return new Vector3i(one.X - two.X, one.Y - two.Y, one.Z - two.Z);
         }
 
-        /// <summary>
-        /// Mathematical operation.
-        /// </summary>
+        /// <summary>Mathematical operation.</summary>
         /// <param name="one">First vec.</param>
         /// <param name="two">Int scalar.</param>
         /// <returns>Result.</returns>
@@ -186,9 +154,7 @@ namespace FGECore.MathHelpers
             return new Vector3i(one.X * two, one.Y * two, one.Z * two);
         }
 
-        /// <summary>
-        /// Gets or set the XY 2D component of this <see cref="Vector3i"/>.
-        /// </summary>
+        /// <summary>Gets or set the XY 2D component of this <see cref="Vector3i"/>.</summary>
         public Vector2i XY
         {
             get

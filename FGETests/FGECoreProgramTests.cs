@@ -18,24 +18,18 @@ using NUnit.Framework;
 
 namespace FGETests
 {
-    /// <summary>
-    /// Tests expectations of the FGE Core program class.
-    /// </summary>
+    /// <summary>Tests expectations of the FGE Core program class.</summary>
     [TestFixture]
     public class FGECoreProgramTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
         }
 
-        /// <summary>
-        /// Confirm that the program provides the right string values.
-        /// </summary>
+        /// <summary>Confirm that the program provides the right string values.</summary>
         [Test]
         public static void TestIDs()
         {

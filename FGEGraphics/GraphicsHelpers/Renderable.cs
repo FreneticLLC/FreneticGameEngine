@@ -25,130 +25,80 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {
-    /// <summary>
-    /// Represents a Vertex Buffer/Array Object set.
-    /// </summary>
+    /// <summary>Represents a Vertex Buffer/Array Object set.</summary>
     public class Renderable
     {
-        /// <summary>
-        /// A structure of the internal GPU-side data for this <see cref="Renderable"/>.
-        /// </summary>
+        /// <summary>A structure of the internal GPU-side data for this <see cref="Renderable"/>.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// The vertices buffer.
-            /// </summary>
+            /// <summary>The vertices buffer.</summary>
             public uint VertexVBO;
 
-            /// <summary>
-            /// The indices buffer.
-            /// </summary>
+            /// <summary>The indices buffer.</summary>
             public uint IndexVBO;
 
-            /// <summary>
-            /// The normals buffer.
-            /// </summary>
+            /// <summary>The normals buffer.</summary>
             public uint NormalVBO;
 
-            /// <summary>
-            /// The texture coordinates buffer.
-            /// </summary>
+            /// <summary>The texture coordinates buffer.</summary>
             public uint TexCoordVBO;
 
-            /// <summary>
-            /// The colors buffer.
-            /// </summary>
+            /// <summary>The colors buffer.</summary>
             public uint ColorVBO;
 
-            /// <summary>
-            /// The tangents buffer.
-            /// </summary>
+            /// <summary>The tangents buffer.</summary>
             public uint TangentVBO;
 
-            /// <summary>
-            /// The bone IDs buffer.
-            /// </summary>
+            /// <summary>The bone IDs buffer.</summary>
             public uint BoneIDVBO;
 
-            /// <summary>
-            /// The bone weights buffer.
-            /// </summary>
+            /// <summary>The bone weights buffer.</summary>
             public uint BoneWeightVBO;
 
-            /// <summary>
-            /// The bone IDs (set 2) buffer.
-            /// </summary>
+            /// <summary>The bone IDs (set 2) buffer.</summary>
             public uint BoneID2VBO;
 
-            /// <summary>
-            /// The bone weights (set 2) buffer.
-            /// </summary>
+            /// <summary>The bone weights (set 2) buffer.</summary>
             public uint BoneWeight2VBO;
 
-            /// <summary>
-            /// The internal main Vertex Array Object.
-            /// </summary>
+            /// <summary>The internal main Vertex Array Object.</summary>
             public int VAO;
 
-            /// <summary>
-            /// How much VRAM this <see cref="Renderable"/> would consume at last generation.
-            /// </summary>
+            /// <summary>How much VRAM this <see cref="Renderable"/> would consume at last generation.</summary>
             public long LastVRAM;
 
-            /// <summary>
-            /// Whether this <see cref="Renderable"/> has colors.
-            /// </summary>
+            /// <summary>Whether this <see cref="Renderable"/> has colors.</summary>
             public bool HasColors;
 
-            /// <summary>
-            /// Whether this <see cref="Renderable"/> has bones.
-            /// </summary>
+            /// <summary>Whether this <see cref="Renderable"/> has bones.</summary>
             public bool HasBones;
 
-            /// <summary>
-            /// The number of indices in this <see cref="Renderable"/>.
-            /// </summary>
+            /// <summary>The number of indices in this <see cref="Renderable"/>.</summary>
             public int IndexCount;
 
-            /// <summary>
-            /// What buffer mode to use.
-            /// </summary>
+            /// <summary>What buffer mode to use.</summary>
             public BufferUsageHint BufferMode;
         }
 
-        /// <summary>
-        /// The internal (GPU) data for this <see cref="Renderable"/>.
-        /// </summary>
+        /// <summary>The internal (GPU) data for this <see cref="Renderable"/>.</summary>
         public InternalData Internal = new InternalData() { VAO = -1, BufferMode = BufferUsageHint.StaticDraw };
-        
-        /// <summary>
-        /// The primary texture.
-        /// </summary>
+
+        /// <summary>The primary texture.</summary>
         public Texture ColorTexture;
-        
-        /// <summary>
-        /// The specular texture.
-        /// </summary>
+
+        /// <summary>The specular texture.</summary>
         public Texture SpecularTexture;
-        
-        /// <summary>
-        /// The reflectivity texture.
-        /// </summary>
+
+        /// <summary>The reflectivity texture.</summary>
         public Texture ReflectivityTexture;
 
-        /// <summary>
-        /// The normal texture.
-        /// </summary>
+        /// <summary>The normal texture.</summary>
         public Texture NormalTexture;
 
-        /// <summary>
-        /// Represents a <see cref="Renderable"/> builder type object.
-        /// </summary>
+        /// <summary>Represents a <see cref="Renderable"/> builder type object.</summary>
         public abstract class Builder
         {
-            /// <summary>
-            /// Generates a VBO from this builder.
-            /// </summary>
+            /// <summary>Generates a VBO from this builder.</summary>
             /// <returns>The generated VBO.</returns>
             public Renderable Generate()
             {
@@ -158,64 +108,40 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// A way to build a <see cref="Renderable"/> from lists.
-        /// </summary>
+        /// <summary>A way to build a <see cref="Renderable"/> from lists.</summary>
         public class ListBuilder : Builder
         {
-            /// <summary>
-            /// The position vertices.
-            /// </summary>
+            /// <summary>The position vertices.</summary>
             public List<Vector3> Vertices;
 
-            /// <summary>
-            /// The indices.
-            /// </summary>
+            /// <summary>The indices.</summary>
             public List<uint> Indices;
 
-            /// <summary>
-            /// The normals.
-            /// </summary>
+            /// <summary>The normals.</summary>
             public List<Vector3> Normals;
 
-            /// <summary>
-            /// The normal tangents.
-            /// </summary>
+            /// <summary>The normal tangents.</summary>
             public List<Vector3> Tangents;
 
-            /// <summary>
-            /// The texture coordinates.
-            /// </summary>
+            /// <summary>The texture coordinates.</summary>
             public List<Vector3> TexCoords;
 
-            /// <summary>
-            /// The colors.
-            /// </summary>
+            /// <summary>The colors.</summary>
             public List<Vector4> Colors;
 
-            /// <summary>
-            /// The bone weight IDs.
-            /// </summary>
+            /// <summary>The bone weight IDs.</summary>
             public List<Vector4> BoneIDs;
 
-            /// <summary>
-            /// The bone weight levels.
-            /// </summary>
+            /// <summary>The bone weight levels.</summary>
             public List<Vector4> BoneWeights;
 
-            /// <summary>
-            /// The second bone weight IDs.
-            /// </summary>
+            /// <summary>The second bone weight IDs.</summary>
             public List<Vector4> BoneIDs2;
 
-            /// <summary>
-            /// The second bone weight levels.
-            /// </summary>
+            /// <summary>The second bone weight levels.</summary>
             public List<Vector4> BoneWeights2;
 
-            /// <summary>
-            /// Adds an empty bone info (1 vertex worth of pure zeroes).
-            /// </summary>
+            /// <summary>Adds an empty bone info (1 vertex worth of pure zeroes).</summary>
             public void AddEmptyBoneInfo()
             {
                 BoneIDs.Add(Vector4.Zero);
@@ -224,9 +150,7 @@ namespace FGEGraphics.GraphicsHelpers
                 BoneWeights2.Add(Vector4.Zero);
             }
 
-            /// <summary>
-            /// Sets the capacity of all lists.
-            /// </summary>
+            /// <summary>Sets the capacity of all lists.</summary>
             /// <param name="capacity">The capacity to set.</param>
             public void SetCapacity(int capacity)
             {
@@ -242,9 +166,7 @@ namespace FGEGraphics.GraphicsHelpers
                 BoneWeights2.Capacity = capacity;
             }
 
-            /// <summary>
-            /// Helper to add an axis-aligned side to this <see cref="Renderable"/> builder.
-            /// </summary>
+            /// <summary>Helper to add an axis-aligned side to this <see cref="Renderable"/> builder.</summary>
             /// <param name="normal">The normal.</param>
             /// <param name="tc">The texture coordinates.</param>
             /// <param name="offs">Whether to offset.</param>
@@ -415,64 +337,40 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// A way to build a <see cref="Renderable"/> from arrays.
-        /// </summary>
+        /// <summary>A way to build a <see cref="Renderable"/> from arrays.</summary>
         public class ArrayBuilder : Builder
         {
-            /// <summary>
-            /// The position vertices.
-            /// </summary>
+            /// <summary>The position vertices.</summary>
             public Vector3[] Vertices;
 
-            /// <summary>
-            /// The indices.
-            /// </summary>
+            /// <summary>The indices.</summary>
             public uint[] Indices;
 
-            /// <summary>
-            /// The normals.
-            /// </summary>
+            /// <summary>The normals.</summary>
             public Vector3[] Normals;
 
-            /// <summary>
-            /// The normal tangents.
-            /// </summary>
+            /// <summary>The normal tangents.</summary>
             public Vector3[] Tangents;
 
-            /// <summary>
-            /// The texture coordinates.
-            /// </summary>
+            /// <summary>The texture coordinates.</summary>
             public Vector3[] TexCoords;
 
-            /// <summary>
-            /// The colors.
-            /// </summary>
+            /// <summary>The colors.</summary>
             public Vector4[] Colors;
 
-            /// <summary>
-            /// The bone weight IDs.
-            /// </summary>
+            /// <summary>The bone weight IDs.</summary>
             public Vector4[] BoneIDs;
 
-            /// <summary>
-            /// The bone weight levels.
-            /// </summary>
+            /// <summary>The bone weight levels.</summary>
             public Vector4[] BoneWeights;
 
-            /// <summary>
-            /// The second bone weight IDs.
-            /// </summary>
+            /// <summary>The second bone weight IDs.</summary>
             public Vector4[] BoneIDs2;
 
-            /// <summary>
-            /// The second bone weight levels.
-            /// </summary>
+            /// <summary>The second bone weight levels.</summary>
             public Vector4[] BoneWeights2;
 
-            /// <summary>
-            /// Sets the bone info for a given vertex index to zero.
-            /// </summary>
+            /// <summary>Sets the bone info for a given vertex index to zero.</summary>
             /// <param name="index">The index in the arrays of the vertex to zero the bones for.</param>
             public void ZeroBoneInfo(uint index)
             {
@@ -517,9 +415,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Gets a somewhat accurate amount of vRAM usage, if any.
-        /// </summary>
+        /// <summary>Gets a somewhat accurate amount of vRAM usage, if any.</summary>
         /// <returns>The vRAM usage.</returns>
         public long GetVRAMUsage()
         {
@@ -530,14 +426,10 @@ namespace FGEGraphics.GraphicsHelpers
             return 0;
         }
 
-        /// <summary>
-        /// Whether the VBO has been generated on the GPU.
-        /// </summary>
+        /// <summary>Whether the VBO has been generated on the GPU.</summary>
         public bool Generated = false;
 
-        /// <summary>
-        /// Destroys GPU-side data.
-        /// </summary>
+        /// <summary>Destroys GPU-side data.</summary>
         public void Destroy()
         {
             if (Generated)
@@ -565,9 +457,7 @@ namespace FGEGraphics.GraphicsHelpers
             }
         }
 
-        /// <summary>
-        /// Gets the normal tangents for a VBO setup.
-        /// </summary>
+        /// <summary>Gets the normal tangents for a VBO setup.</summary>
         /// <param name="vecs">The vertices.</param>
         /// <param name="norms">The normals.</param>
         /// <param name="texs">The texture coordinates.</param>
@@ -601,9 +491,7 @@ namespace FGEGraphics.GraphicsHelpers
             return tangs;
         }
 
-        /// <summary>
-        /// Gets the normal tangents for a VBO setup.
-        /// </summary>
+        /// <summary>Gets the normal tangents for a VBO setup.</summary>
         /// <param name="vecs">The vertices.</param>
         /// <param name="norms">The normals.</param>
         /// <param name="texs">The texture coordinates.</param>
@@ -636,10 +524,8 @@ namespace FGEGraphics.GraphicsHelpers
             }
             return tangs;
         }
-        
-        /// <summary>
-        /// Generate this <see cref="Renderable"/> to the GPU.
-        /// </summary>
+
+        /// <summary>Generate this <see cref="Renderable"/> to the GPU.</summary>
         /// <param name="builder">The builder to use.</param>
         public void GenerateVBO(Builder builder)
         {
@@ -838,9 +724,7 @@ namespace FGEGraphics.GraphicsHelpers
 
         }
 
-        /// <summary>
-        /// Renders the VBO fully, without handling textures at all.
-        /// </summary>
+        /// <summary>Renders the VBO fully, without handling textures at all.</summary>
         /// <param name="context">The sourcing render context.</param>
         public void RenderWithoutTextures(RenderContext context)
         {
@@ -858,9 +742,7 @@ namespace FGEGraphics.GraphicsHelpers
             GL.BindVertexArray(0);
         }
 
-        /// <summary>
-        /// Render the VBO fully.
-        /// </summary>
+        /// <summary>Render the VBO fully.</summary>
         /// <param name="context">The sourcing render context.</param>
         /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
         public void Render(RenderContext context, bool fixafter)
@@ -912,14 +794,10 @@ namespace FGEGraphics.GraphicsHelpers
         }
     }
 
-    /// <summary>
-    /// Represents a set of texture coordinates.
-    /// </summary>
+    /// <summary>Represents a set of texture coordinates.</summary>
     public class TextureCoordinates
     {
-        /// <summary>
-        /// Construct a basic set of texture coordinates.
-        /// </summary>
+        /// <summary>Construct a basic set of texture coordinates.</summary>
         public TextureCoordinates()
         {
             XScale = 1;
@@ -930,48 +808,32 @@ namespace FGEGraphics.GraphicsHelpers
             YFlip = false;
         }
 
-        /// <summary>
-        /// The X-Scale.
-        /// </summary>
+        /// <summary>The X-Scale.</summary>
         public float XScale;
 
-        /// <summary>
-        /// The Y-Scale.
-        /// </summary>
+        /// <summary>The Y-Scale.</summary>
         public float YScale;
 
-        /// <summary>
-        /// The X-Shift.
-        /// </summary>
+        /// <summary>The X-Shift.</summary>
         public float XShift;
 
-        /// <summary>
-        /// The Y-Shift.
-        /// </summary>
+        /// <summary>The Y-Shift.</summary>
         public float YShift;
 
-        /// <summary>
-        /// The X-flip option.
-        /// </summary>
+        /// <summary>The X-flip option.</summary>
         public bool XFlip;
 
-        /// <summary>
-        /// The Y-flip option.
-        /// </summary>
+        /// <summary>The Y-flip option.</summary>
         public bool YFlip;
 
-        /// <summary>
-        /// Gets a quick string form of the Texture Coordinates.
-        /// </summary>
+        /// <summary>Gets a quick string form of the Texture Coordinates.</summary>
         /// <returns>The string form.</returns>
         public override string ToString()
         {
             return XScale + "/" + YScale + "/" + XShift + "/" + YShift + "/" + (XFlip ? "t" : "f") + "/" + (YFlip ? "t" : "f");
         }
 
-        /// <summary>
-        /// Converts a quick string of a Texture Coordinate set to an actual TextureCoordinates.
-        /// </summary>
+        /// <summary>Converts a quick string of a Texture Coordinate set to an actual TextureCoordinates.</summary>
         /// <param name="str">The string.</param>
         /// <returns>The texture coordinates.</returns>
         public static TextureCoordinates FromString(string str)

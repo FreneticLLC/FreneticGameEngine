@@ -21,14 +21,10 @@ using FGECore.UtilitySystems;
 
 namespace FGECore.ModelSystems
 {
-    /// <summary>
-    /// System for animations.
-    /// </summary>
+    /// <summary>System for animations.</summary>
     public class AnimationEngine
     {
-        /// <summary>
-        /// Constructs the animation helper.
-        /// </summary>
+        /// <summary>Constructs the animation helper.</summary>
         public AnimationEngine()
         {
             Animations = new Dictionary<string, SingleAnimation>();
@@ -54,24 +50,16 @@ namespace FGECore.ModelSystems
             }
         }
 
-        /// <summary>
-        /// The usual head bones.
-        /// </summary>
+        /// <summary>The usual head bones.</summary>
         public HashSet<string> HeadBones = new HashSet<string>();
         //public HashSet<string> TorsoBones = new HashSet<string>();
-        /// <summary>
-        /// The usual leg bones.
-        /// </summary>
+        /// <summary>The usual leg bones.</summary>
         public HashSet<string> LegBones = new HashSet<string>();
 
-        /// <summary>
-        /// All known animations.
-        /// </summary>
+        /// <summary>All known animations.</summary>
         public Dictionary<string, SingleAnimation> Animations;
 
-        /// <summary>
-        /// Gets an animation by name.
-        /// </summary>
+        /// <summary>Gets an animation by name.</summary>
         /// <param name="name">The name.</param>
         /// <param name="Files">The file system.</param>
         /// <returns>The animation.</returns>
@@ -97,9 +85,7 @@ namespace FGECore.ModelSystems
             }
         }
 
-        /// <summary>
-        /// Loads an animation by name.
-        /// </summary>
+        /// <summary>Loads an animation by name.</summary>
         /// <param name="name">The name.</param>
         /// <param name="Files">The file system.</param>
         /// <returns>The animation.</returns>
@@ -237,39 +223,25 @@ namespace FGECore.ModelSystems
         }
     }
 
-    /// <summary>
-    /// Represents one single animation.
-    /// </summary>
+    /// <summary>Represents one single animation.</summary>
     public class SingleAnimation
     {
-        /// <summary>
-        /// The name of the animation.
-        /// </summary>
+        /// <summary>The name of the animation.</summary>
         public string Name;
 
-        /// <summary>
-        /// The length in seconds.
-        /// </summary>
+        /// <summary>The length in seconds.</summary>
         public double Length;
 
-        /// <summary>
-        /// The backing engine.
-        /// </summary>
+        /// <summary>The backing engine.</summary>
         public AnimationEngine Engine;
 
-        /// <summary>
-        /// All nodes in the animation.
-        /// </summary>
+        /// <summary>All nodes in the animation.</summary>
         public List<SingleAnimationNode> Nodes = new List<SingleAnimationNode>();
 
-        /// <summary>
-        /// A mapping of nodes.
-        /// </summary>
+        /// <summary>A mapping of nodes.</summary>
         public Dictionary<string, SingleAnimationNode> node_map = new Dictionary<string, SingleAnimationNode>();
 
-        /// <summary>
-        /// Gets a node by name.
-        /// </summary>
+        /// <summary>Gets a node by name.</summary>
         /// <param name="name">The name of it.</param>
         /// <returns>The node.</returns>
         public SingleAnimationNode GetNode(string name)
@@ -282,54 +254,34 @@ namespace FGECore.ModelSystems
         }
     }
 
-    /// <summary>
-    /// A single node in an animation.
-    /// </summary>
+    /// <summary>A single node in an animation.</summary>
     public class SingleAnimationNode
     {
-        /// <summary>
-        /// Tne name of the node.
-        /// </summary>
+        /// <summary>Tne name of the node.</summary>
         public string Name;
 
-        /// <summary>
-        /// The parent node.
-        /// </summary>
+        /// <summary>The parent node.</summary>
         public SingleAnimationNode Parent = null;
 
-        /// <summary>
-        /// The name of the parent.
-        /// </summary>
+        /// <summary>The name of the parent.</summary>
         public string ParentName;
 
-        /// <summary>
-        /// The offset.
-        /// </summary>
+        /// <summary>The offset.</summary>
         public Location Offset;
 
-        /// <summary>
-        /// The position time stamps.
-        /// </summary>
+        /// <summary>The position time stamps.</summary>
         public List<double> PosTimes = new List<double>();
 
-        /// <summary>
-        /// The positions.
-        /// </summary>
+        /// <summary>The positions.</summary>
         public List<Location> Positions = new List<Location>();
 
-        /// <summary>
-        /// The rotation time stamps.
-        /// </summary>
+        /// <summary>The rotation time stamps.</summary>
         public List<double> RotTimes = new List<double>();
 
-        /// <summary>
-        /// The rotations.
-        /// </summary>
+        /// <summary>The rotations.</summary>
         public List<MathHelpers.Quaternion> Rotations = new List<MathHelpers.Quaternion>();
 
-        /// <summary>
-        /// Finds a position by time.
-        /// </summary>
+        /// <summary>Finds a position by time.</summary>
         /// <param name="time">The time.</param>
         /// <returns>The position.</returns>
         int FindPos(double time)
@@ -344,9 +296,7 @@ namespace FGECore.ModelSystems
             return 0;
         }
 
-        /// <summary>
-        /// Lerps a position by time.
-        /// </summary>
+        /// <summary>Lerps a position by time.</summary>
         /// <param name="aTime">The time.</param>
         /// <returns>The position.</returns>
         public Location LerpPos(double aTime)
@@ -378,9 +328,7 @@ namespace FGECore.ModelSystems
             return npos;
         }
 
-        /// <summary>
-        /// Finds a rotation by time.
-        /// </summary>
+        /// <summary>Finds a rotation by time.</summary>
         /// <param name="time">The time.</param>
         /// <returns>The rotation.</returns>
         int FindRotate(double time)
@@ -395,9 +343,7 @@ namespace FGECore.ModelSystems
             return 0;
         }
 
-        /// <summary>
-        /// Lerps a rotation by time.
-        /// </summary>
+        /// <summary>Lerps a rotation by time.</summary>
         /// <param name="aTime">The time.</param>
         /// <returns>The rotation.</returns>
         public MathHelpers.Quaternion LerpRotate(double aTime)
@@ -428,9 +374,7 @@ namespace FGECore.ModelSystems
             return res.Normalized();
         }
 
-        /// <summary>
-        /// Gets the final matrix for a bone.
-        /// </summary>
+        /// <summary>Gets the final matrix for a bone.</summary>
         /// <param name="aTime">The time.</param>
         /// <param name="adjs">The adjustments if any.</param>
         /// <returns>The resultant matrix.</returns>

@@ -18,10 +18,8 @@ using FGECore.PhysicsSystem;
 using FGECore.UtilitySystems;
 
 namespace FGECore.EntitySystem
-{   
-     /// <summary>
-     /// Attaches an entity to a character.
-     /// </summary>
+{
+     /// <summary>Attaches an entity to a character.</summary>
     public class EntityCharacterAttachProperty : EntitySimpleAttachProperty
     {
         /// <summary>The character entity the other entity is attached to.</summary>
@@ -68,18 +66,14 @@ namespace FGECore.EntitySystem
             return System.Numerics.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
 
-        /// <summary>
-        /// Gets the accurate location for this attachment.
-        /// </summary>
+        /// <summary>Gets the accurate location for this attachment.</summary>
         /// <param name="basePos">The base entity position of the character.</param>
         public Location GetAccuratePosition(Location basePos)
         {
             return basePos + GetCharacter().LocalUp.ToLocation() * (/*GetCharacter().StanceManager.StandingHeight * */ViewHeight * 0.5);
         }
 
-        /// <summary>
-        /// Gets the relative quaternion for this attachment.
-        /// </summary>
+        /// <summary>Gets the relative quaternion for this attachment.</summary>
         /// <param name="viewDir">The stand-in view direction.</param>
         /// <param name="downDir">The stand-in down direction.</param>
         public static MathHelpers.Quaternion GetRelativeQuaternion(Vector3 viewDir, Vector3 downDir)
@@ -89,9 +83,7 @@ namespace FGECore.EntitySystem
             return System.Numerics.Quaternion.CreateFromRotationMatrix(relative).ToCore().Inverse();
         }
 
-        /// <summary>
-        /// Gets the accurate location for this attachment.
-        /// </summary>
+        /// <summary>Gets the accurate location for this attachment.</summary>
         /// <param name="basePos">The base entity position of the character.</param>
         /// <param name="downDir">The stand-in down direction.</param>
         public Location GetAccuratePosition(Location basePos, Location downDir)
@@ -99,9 +91,7 @@ namespace FGECore.EntitySystem
             return basePos + downDir * (/*Character.StanceManager.StandingHeight * */ViewHeight * (-0.5));
         }
 
-        /// <summary>
-        /// Set relative offset, based on an entity's offsets from the default positioning.
-        /// </summary>
+        /// <summary>Set relative offset, based on an entity's offsets from the default positioning.</summary>
         /// <param name="relPos">The relative position.</param>
         /// <param name="relQuat">The relative quaternion.</param>
         public void SetRelativeForEntity(Location relPos, MathHelpers.Quaternion relQuat)
@@ -112,9 +102,7 @@ namespace FGECore.EntitySystem
             Tick();
         }
 
-        /// <summary>
-        /// Set the relative offset to the current relative locations and orientation.
-        /// </summary>
+        /// <summary>Set the relative offset to the current relative locations and orientation.</summary>
         /// <param name="viewDir">The stand-in view direction.</param>
         /// <param name="downDir">The stand-in down direction.</param>
         public void SetRelativeToCurrent(Vector3 viewDir, Location downDir)
@@ -122,9 +110,7 @@ namespace FGECore.EntitySystem
             SetRelativeBasedOn(GetRelativeQuaternion(viewDir, downDir.ToNumerics()), GetAccuratePosition(AttachedTo.LastKnownPosition, downDir));
         }
 
-        /// <summary>
-        /// Set the relative offset to the current relative locations and orientation.
-        /// </summary>
+        /// <summary>Set the relative offset to the current relative locations and orientation.</summary>
         public override void SetRelativeToCurrent()
         {
             SetRelativeBasedOn(GetRelativeQuaternion(), GetAccuratePosition(AttachedTo.LastKnownPosition));

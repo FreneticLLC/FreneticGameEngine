@@ -19,14 +19,10 @@ using FGECore.StackNoteSystem;
 
 namespace FGECore.CoreSystems
 {
-    /// <summary>
-    /// Watchdog thread manager for <see cref="GameInstance"/>.
-    /// </summary>
+    /// <summary>Watchdog thread manager for <see cref="GameInstance"/>.</summary>
     public class InstanceWatchdog
     {
-        /// <summary>
-        /// The watchdog SysConsole output type.
-        /// </summary>
+        /// <summary>The watchdog SysConsole output type.</summary>
         public static OutputType OUT_TYPE = new OutputType() { Name = "WATCHDOG", BaseColor = "^r^3" };
 
         /// <summary>Matcher for symbols to allow in thread names to reduce risk of errors.</summary>
@@ -44,45 +40,29 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// The relevant <see cref="GameInstance"/> being watched.
-        /// </summary>
+        /// <summary>The relevant <see cref="GameInstance"/> being watched.</summary>
         public GameInstance Instance;
 
-        /// <summary>
-        /// The primary <see cref="GameInstance"/> tick thread.
-        /// </summary>
+        /// <summary>The primary <see cref="GameInstance"/> tick thread.</summary>
         public Thread WatchedThread;
 
-        /// <summary>
-        /// The <see cref="StackNoteSet"/> for the <see cref="WatchedThread"/>.
-        /// </summary>
+        /// <summary>The <see cref="StackNoteSet"/> for the <see cref="WatchedThread"/>.</summary>
         public StackNoteSet NotesForWatchedThread;
 
-        /// <summary>
-        /// Internal data, do not touch.
-        /// </summary>
+        /// <summary>Internal data, do not touch.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// The async lock object for starts/stops.
-            /// </summary>
+            /// <summary>The async lock object for starts/stops.</summary>
             public LockObject Lock;
 
-            /// <summary>
-            /// Counter, incremented via <see cref="InstanceWatchdog.IsAlive"/>.
-            /// </summary>
+            /// <summary>Counter, incremented via <see cref="InstanceWatchdog.IsAlive"/>.</summary>
             public ulong Counter;
 
-            /// <summary>
-            /// The cancel token, to stop the watchdog.
-            /// </summary>
+            /// <summary>The cancel token, to stop the watchdog.</summary>
             public CancellationTokenSource CancelToken;
         }
 
-        /// <summary>
-        /// Internal data, do not touch.
-        /// </summary>
+        /// <summary>Internal data, do not touch.</summary>
         public InternalData Internal;
 
         /// <summary>
@@ -164,17 +144,13 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Signal to the watchdog that the original thread is still alive.
-        /// </summary>
+        /// <summary>Signal to the watchdog that the original thread is still alive.</summary>
         public void IsAlive()
         {
             Interlocked.Increment(ref Internal.Counter);
         }
 
-        /// <summary>
-        /// Stops the watchdog.
-        /// </summary>
+        /// <summary>Stops the watchdog.</summary>
         public void Stop()
         {
             lock (Internal.Lock)

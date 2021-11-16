@@ -31,9 +31,7 @@ namespace FGECore.MathHelpers
         /// <summary>The maximum coordinates.</summary>
         public Location Max;
 
-        /// <summary>
-        /// Returns whether the box intersects another box.
-        /// </summary>
+        /// <summary>Returns whether the box intersects another box.</summary>
         /// <param name="box2">The second box.</param>
         public bool Intersects(in AABB box2)
         {
@@ -42,17 +40,13 @@ namespace FGECore.MathHelpers
             return !(min2.X > Max.X || max2.X < Min.X || min2.Y > Max.Y || max2.Y < Min.Y || min2.Z > Max.Z || max2.Z < Min.Z);
         }
 
-        /// <summary>
-        /// Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)
-        /// </summary>
+        /// <summary>Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)</summary>
         public override string ToString()
         {
             return Min + "/" + Max;
         }
 
-        /// <summary>
-        /// Includes a Location into the box's space, expanding as needed (but not shrinking).
-        /// </summary>
+        /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking).</summary>
         /// <param name="pos">The position to include.</param>
         public void Include(in Location pos)
         {

@@ -50,9 +50,7 @@ namespace FGECore.PhysicsSystem
             Delta = dt;
         }
 
-        /// <summary>
-        /// Callback called for each active body within the simulation during body integration.
-        /// </summary>
+        /// <summary>Callback called for each active body within the simulation during body integration.</summary>
         /// <param name="bodyIndex">Index of the body being visited.</param>
         /// <param name="pose">Body's current pose.</param>
         /// <param name="localInertia">Body's current local inertia.</param>
@@ -102,9 +100,7 @@ namespace FGECore.PhysicsSystem
             return collidable.Mobility == CollidableMobility.Dynamic ? Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value] : null;
         }
 
-        /// <summary>
-        /// Chooses whether to allow contact generation to proceed for two overlapping collidables.
-        /// </summary>
+        /// <summary>Chooses whether to allow contact generation to proceed for two overlapping collidables.</summary>
         /// <param name="workerIndex">Index of the worker that identified the overlap.</param>
         /// <param name="a">Reference to the first collidable in the pair.</param>
         /// <param name="b">Reference to the second collidable in the pair.</param>
@@ -134,9 +130,7 @@ namespace FGECore.PhysicsSystem
             return aEntity.CGroup.DoesCollide(bEntity.CGroup);
         }
 
-        /// <summary>
-        /// Chooses whether to allow contact generation to proceed for the children of two overlapping collidables in a compound-including pair.
-        /// </summary>
+        /// <summary>Chooses whether to allow contact generation to proceed for the children of two overlapping collidables in a compound-including pair.</summary>
         /// <param name="workerIndex">Index of the worker that identified the overlap.</param>
         /// <param name="pair">Parent pair of the two child collidables.</param>
         /// <param name="childIndexA">Index of the child of collidable A in the pair. If collidable A is not compound, then this is always 0.</param>
@@ -144,16 +138,14 @@ namespace FGECore.PhysicsSystem
         /// <returns>True if collision detection should proceed, false otherwise.</returns>
         /// <remarks>This is called for each sub-overlap in a collidable pair involving compound collidables. If neither collidable in a pair is compound, this will not be called.
         /// For compound-including pairs, if the earlier call to AllowContactGeneration returns false for owning pair, this will not be called. Note that it is possible
-        /// for this function to be called twice for the same subpair if the pair has continuous collision detection enabled; 
+        /// for this function to be called twice for the same subpair if the pair has continuous collision detection enabled;
         /// the CCD sweep test that runs before the contact generation test also asks before performing child pair tests.</remarks>
         public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
         {
             return true;
         }
 
-        /// <summary>
-        /// Provides a notification that a manifold has been created for a pair. Offers an opportunity to change the manifold's details. 
-        /// </summary>
+        /// <summary>Provides a notification that a manifold has been created for a pair. Offers an opportunity to change the manifold's details.</summary>
         /// <param name="workerIndex">Index of the worker thread that created this manifold.</param>
         /// <param name="pair">Pair of collidables that the manifold was detected between.</param>
         /// <param name="manifold">Set of contacts detected between the collidables.</param>
@@ -199,7 +191,7 @@ namespace FGECore.PhysicsSystem
 
         /// <summary>
         /// Provides a notification that a manifold has been created between the children of two collidables in a compound-including pair.
-        /// Offers an opportunity to change the manifold's details. 
+        /// Offers an opportunity to change the manifold's details.
         /// </summary>
         /// <param name="workerIndex">Index of the worker thread that created this manifold.</param>
         /// <param name="pair">Pair of collidables that the manifold was detected between.</param>

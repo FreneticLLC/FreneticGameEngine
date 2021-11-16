@@ -21,54 +21,34 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a light from the sky.
-    /// </summary>
+    /// <summary>Represents a light from the sky.</summary>
     public class SkyLight : LightObject
     {
-        /// <summary>
-        /// The radius of the effect of the light (vertical).
-        /// </summary>
+        /// <summary>The radius of the effect of the light (vertical).</summary>
         public float Radius;
 
-        /// <summary>
-        /// The color of the light.
-        /// </summary>
+        /// <summary>The color of the light.</summary>
         public Location Color;
 
-        /// <summary>
-        /// The direction of the light.
-        /// </summary>
+        /// <summary>The direction of the light.</summary>
         public Location Direction;
 
-        /// <summary>
-        /// The width of effect of the light (horizontal).
-        /// </summary>
+        /// <summary>The width of effect of the light (horizontal).</summary>
         public float Width;
 
-        /// <summary>
-        /// The FrameBufferObject.
-        /// </summary>
+        /// <summary>The FrameBufferObject.</summary>
         public int FBO = -1;
 
-        /// <summary>
-        /// The FBO Texture.
-        /// </summary>
+        /// <summary>The FBO Texture.</summary>
         public int FBO_Tex = -1;
 
-        /// <summary>
-        /// The FBO Depth Texture.
-        /// </summary>
+        /// <summary>The FBO Depth Texture.</summary>
         public int FBO_DepthTex = -1;
 
-        /// <summary>
-        /// The width of the shadow texture.
-        /// </summary>
+        /// <summary>The width of the shadow texture.</summary>
         public int TexWidth = 0;
 
-        /// <summary>
-        /// Constructs the sky light.
-        /// </summary>
+        /// <summary>Constructs the sky light.</summary>
         /// <param name="pos">The position.</param>
         /// <param name="radius">The radius (vertical).</param>
         /// <param name="col">The color.</param>
@@ -117,9 +97,7 @@ namespace FGEGraphics.LightingSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        /// <summary>
-        /// Destroys the sky light.
-        /// </summary>
+        /// <summary>Destroys the sky light.</summary>
         public void Destroy()
         {
             InternalLights[0].Destroy();
@@ -128,9 +106,7 @@ namespace FGEGraphics.LightingSystem
             GL.DeleteTexture(FBO_DepthTex);
         }
 
-        /// <summary>
-        /// Repositions the sky light.
-        /// </summary>
+        /// <summary>Repositions the sky light.</summary>
         /// <param name="pos">New position.</param>
         public override void Reposition(Location pos)
         {

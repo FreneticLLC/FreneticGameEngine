@@ -212,9 +212,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             Engine.Fonts.Remove(this);
         }
 
-        /// <summary>
-        /// Gets the location of a symbol.
-        /// </summary>
+        /// <summary>Gets the location of a symbol.</summary>
         /// <param name="symbol">The symbol to find.</param>
         /// <returns>A rectangle containing the precise location of a symbol.</returns>
         public RectangleF RectForSymbol(string symbol)
@@ -230,9 +228,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return LowCodepointLocs['?'];
         }
 
-        /// <summary>
-        /// Gets the location of a symbol.
-        /// </summary>
+        /// <summary>Gets the location of a symbol.</summary>
         /// <param name="symbol">The symbol to find.</param>
         /// <returns>A rectangle containing the precise location of a symbol.</returns>
         public RectangleF RectForSymbol(char symbol)
@@ -248,9 +244,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return LowCodepointLocs['?'];
         }
 
-        /// <summary>
-        /// Draws a single symbol at a specified location.
-        /// </summary>
+        /// <summary>Draws a single symbol at a specified location.</summary>
         /// <param name="symbol">The symbol to draw.</param>
         /// <param name="X">The X location to draw it at.</param>
         /// <param name="Y">The Y location to draw it at.</param>
@@ -266,9 +260,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return rec.Width;
         }
 
-        /// <summary>
-        /// Draws a single character at a specified location.
-        /// </summary>
+        /// <summary>Draws a single character at a specified location.</summary>
         /// <param name="character">The character to draw.</param>
         /// <param name="X">The X location to draw it at.</param>
         /// <param name="Y">The Y location to draw it at.</param>
@@ -284,9 +276,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             return rec.Width;
         }
 
-        /// <summary>
-        /// Draws a string at a specified location.
-        /// </summary>
+        /// <summary>Draws a string at a specified location.</summary>
         /// <param name="str">The string to draw..</param>
         /// <param name="X">The X location to draw it at.</param>
         /// <param name="Y">The Y location to draw it at.</param>
@@ -368,7 +358,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             TestedEmoji[str] = result;
             return result;
         }
-        
+
         /// <summary>Returns 'true' if the string contains any high-order characters that require multiple 'char' instances per symbol, such as emoji or obscure languages. This is mainly used for opti reasons.</summary>
         public static bool StringHasHighOrderCharacters(string text)
         {

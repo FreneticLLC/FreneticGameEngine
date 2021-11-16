@@ -16,64 +16,40 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers
 {
-    /// <summary>
-    /// A rendering surface for deferred rendering logic (currently holds 5 RGBA components + depth).
-    /// </summary>
+    /// <summary>A rendering surface for deferred rendering logic (currently holds 5 RGBA components + depth).</summary>
     public class DeferredRenderTarget
     {
-        /// <summary>
-        /// The width.
-        /// </summary>
+        /// <summary>The width.</summary>
         public int Width;
 
-        /// <summary>
-        /// The height.
-        /// </summary>
+        /// <summary>The height.</summary>
         public int Height;
 
-        /// <summary>
-        /// OpenGL FBO.
-        /// </summary>
+        /// <summary>OpenGL FBO.</summary>
         public uint FBO;
 
-        /// <summary>
-        /// OpenGL diffuse texture.
-        /// </summary>
+        /// <summary>OpenGL diffuse texture.</summary>
         public uint DiffuseTexture;
 
-        /// <summary>
-        /// OpenGL position texture.
-        /// </summary>
+        /// <summary>OpenGL position texture.</summary>
         public uint PositionTexture;
 
-        /// <summary>
-        /// OpenGL normals texture.
-        /// </summary>
+        /// <summary>OpenGL normals texture.</summary>
         public uint NormalsTexture;
 
-        /// <summary>
-        /// OpenGL depth texture.
-        /// </summary>
+        /// <summary>OpenGL depth texture.</summary>
         public uint DepthTexture;
 
-        /// <summary>
-        /// OpenGL Render hint texture.
-        /// </summary>
+        /// <summary>OpenGL Render hint texture.</summary>
         public uint RenderhintTexture;
 
-        /// <summary>
-        /// OpenGL render hint (2) texture.
-        /// </summary>
+        /// <summary>OpenGL render hint (2) texture.</summary>
         public uint Rh2Texture;
 
-        /// <summary>
-        /// Render helper.
-        /// </summary>
+        /// <summary>Render helper.</summary>
         public Renderer Rendering;
 
-        /// <summary>
-        /// Constructs the <see cref="DeferredRenderTarget"/>.
-        /// </summary>
+        /// <summary>Constructs the <see cref="DeferredRenderTarget"/>.</summary>
         /// <param name="_width">Texture width.</param>
         /// <param name="_height">Texture height.</param>
         /// <param name="rendering">Render helper.</param>
@@ -136,9 +112,7 @@ namespace FGEGraphics.GraphicsHelpers
             view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        /// <summary>
-        /// Destroys the RS4P.
-        /// </summary>
+        /// <summary>Destroys the RS4P.</summary>
         public void Destroy()
         {
             GL.DeleteFramebuffer(FBO);
@@ -157,25 +131,19 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("RS4P - Destroy");
         }
 
-        /// <summary>
-        /// Whether this RS4P is bound.
-        /// </summary>
+        /// <summary>Whether this RS4P is bound.</summary>
         public bool IsBound = false;
 
         static readonly DrawBuffersEnum[] DRAW_BUFFERS_ARRAY = new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
                 DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3, DrawBuffersEnum.ColorAttachment4, DrawBuffersEnum.ColorAttachment5 };
 
-        /// <summary>
-        /// Sets the proper "GL.DrawBuffers(6, ..." for this object.
-        /// </summary>
+        /// <summary>Sets the proper "GL.DrawBuffers(6, ..." for this object.</summary>
         public static void SetDrawBuffers()
         {
             GL.DrawBuffers(6, DRAW_BUFFERS_ARRAY);
         }
 
-        /// <summary>
-        /// Binds the RS4P to OpenGL and a view.
-        /// </summary>
+        /// <summary>Binds the RS4P to OpenGL and a view.</summary>
         /// <param name="view">The view.</param>
         public void Bind(View3D view)
         {
@@ -190,26 +158,18 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("Deferred Target - Bind");
         }
 
-        /// <summary>
-        /// Internal data useful to <see cref="DeferredRenderTarget"/>.
-        /// </summary>
+        /// <summary>Internal data useful to <see cref="DeferredRenderTarget"/>.</summary>
         public static class Internal
         {
-            /// <summary>
-            /// Premade array of 4 zeroes, for <see cref="Clear"/>.
-            /// </summary>
+            /// <summary>Premade array of 4 zeroes, for <see cref="Clear"/>.</summary>
             public static float[] Zeroes = new float[] { 0f, 0f, 0f, 0f };
 
-            /// <summary>
-            /// Premade array of 1 one, for <see cref="Clear"/>.
-            /// </summary>
+            /// <summary>Premade array of 1 one, for <see cref="Clear"/>.</summary>
             public static float[] One = new float[] { 1f };
         }
 
 
-        /// <summary>
-        /// Clears the RS4P Buffers.
-        /// </summary>
+        /// <summary>Clears the RS4P Buffers.</summary>
         public static void Clear()
         {
             GL.ClearBuffer(ClearBuffer.Color, 0, Internal.Zeroes);
@@ -222,9 +182,7 @@ namespace FGEGraphics.GraphicsHelpers
             GraphicsUtil.CheckError("DeferredRenderTarget - Clear");
         }
 
-        /// <summary>
-        /// Unbinds the RS4P from OpenGL and a view.
-        /// </summary>
+        /// <summary>Unbinds the RS4P from OpenGL and a view.</summary>
         /// <param name="view">The view.</param>
         public void Unbind(View3D view)
         {
@@ -236,4 +194,3 @@ namespace FGEGraphics.GraphicsHelpers
         }
     }
 }
-

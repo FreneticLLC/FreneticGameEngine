@@ -14,50 +14,32 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// Represents shader target locations.
-    /// </summary>
+    /// <summary>Represents shader target locations.</summary>
     public static class ShaderLocations
     {
-        /// <summary>
-        /// Locations shared by most shaders (3D mainly).
-        /// </summary>
+        /// <summary>Locations shared by most shaders (3D mainly).</summary>
         public static class Common
         {
-            /// <summary>
-            /// The general screen projection and view together.
-            /// </summary>
+            /// <summary>The general screen projection and view together.</summary>
             public const int PROJECTION = 1;
 
-            /// <summary>
-            /// The general world offset.
-            /// </summary>
+            /// <summary>The general world offset.</summary>
             public const int WORLD = 2;
         }
 
-        /// <summary>
-        /// Locations shared by most 2D shaders.
-        /// </summary>
+        /// <summary>Locations shared by most 2D shaders.</summary>
         public static class Common2D
         {
-            /// <summary>
-            /// The scaler value.
-            /// </summary>
+            /// <summary>The scaler value.</summary>
             public const int SCALER = 1;
 
-            /// <summary>
-            /// The adder value.
-            /// </summary>
+            /// <summary>The adder value.</summary>
             public const int ADDER = 2;
 
-            /// <summary>
-            /// The color multiplier to add.
-            /// </summary>
+            /// <summary>The color multiplier to add.</summary>
             public const int COLOR = 3;
 
-            /// <summary>
-            /// The rotation effect to apply.
-            /// </summary>
+            /// <summary>The rotation effect to apply.</summary>
             public const int ROTATION = 4;
         }
     }

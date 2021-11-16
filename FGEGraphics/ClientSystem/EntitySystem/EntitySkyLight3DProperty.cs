@@ -44,49 +44,35 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         [PropertyAutoSavable]
         public bool AutoCorrectPlacement = true;
 
-        /// <summary>
-        /// The current position of the light.
-        /// </summary>
+        /// <summary>The current position of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location LightPosition = Location.Zero;
 
-        /// <summary>
-        /// The direction of the light.
-        /// </summary>
+        /// <summary>The direction of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location Direction = -Location.UnitZ;
 
-        /// <summary>
-        /// The vertical size of the sky light. How far it reaches.
-        /// </summary>
+        /// <summary>The vertical size of the sky light. How far it reaches.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float Radius = 512f;
 
-        /// <summary>
-        /// The horizontal radius of the sky light. How wide of an area it reaches.
-        /// </summary>
+        /// <summary>The horizontal radius of the sky light. How wide of an area it reaches.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float Size = 128f;
-        
-        /// <summary>
-        /// The current color of the light as (X,Y,Z) => (R,G,B).
-        /// </summary>
+
+        /// <summary>The current color of the light as (X,Y,Z) => (R,G,B).</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location LightColor = Location.One * 0.75;
 
-        /// <summary>
-        /// The represented 3D sky light.
-        /// </summary>
+        /// <summary>The represented 3D sky light.</summary>
         public SkyLight InternalLight;
 
-        /// <summary>
-        /// Ticks the sky light, correcting its position.
-        /// </summary>
+        /// <summary>Ticks the sky light, correcting its position.</summary>
         public void Tick()
         {
             if (AutoCorrectPlacement)
@@ -95,9 +81,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Fired when the entity is spawned.
-        /// </summary>
+        /// <summary>Fired when the entity is spawned.</summary>
         public override void OnSpawn()
         {
             if (Entity.Engine is GameEngine3D eng)
@@ -113,9 +97,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Fired when the entity is despawned.
-        /// </summary>
+        /// <summary>Fired when the entity is despawned.</summary>
         public override void OnDespawn()
         {
             if (Entity.Engine is GameEngine3D eng)

@@ -26,9 +26,7 @@ namespace FGECore.MathHelpers
     [StructLayout(LayoutKind.Explicit)]
     public struct Color4F
     {
-        /// <summary>
-        /// Constructs the color 4F with full alpha.
-        /// </summary>
+        /// <summary>Constructs the color 4F with full alpha.</summary>
         /// <param name="_r">Red.</param>
         /// <param name="_g">Green.</param>
         /// <param name="_b">Blue.</param>
@@ -40,9 +38,7 @@ namespace FGECore.MathHelpers
             A = 1;
         }
 
-        /// <summary>
-        /// Constructs the color 4F with specific alpha.
-        /// </summary>
+        /// <summary>Constructs the color 4F with specific alpha.</summary>
         /// <param name="_r">Red.</param>
         /// <param name="_g">Green.</param>
         /// <param name="_b">Blue.</param>
@@ -55,9 +51,7 @@ namespace FGECore.MathHelpers
             A = _a;
         }
 
-        /// <summary>
-        /// Constructs the color 4F with full alpha.
-        /// </summary>
+        /// <summary>Constructs the color 4F with full alpha.</summary>
         /// <param name="color">The 3-piece color.</param>
         public Color4F(Color3F color)
         {
@@ -67,9 +61,7 @@ namespace FGECore.MathHelpers
             A = 1;
         }
 
-        /// <summary>
-        /// Constructs the color 4F with specific alpha.
-        /// </summary>
+        /// <summary>Constructs the color 4F with specific alpha.</summary>
         /// <param name="color">The 3-piece color.</param>
         /// <param name="_a">Alpha.</param>
         public Color4F(Color3F color, float _a)
@@ -80,33 +72,23 @@ namespace FGECore.MathHelpers
             A = _a;
         }
 
-        /// <summary>
-        /// The red component.
-        /// </summary>
+        /// <summary>The red component.</summary>
         [FieldOffset(0)]
         public float R;
 
-        /// <summary>
-        /// The green component.
-        /// </summary>
+        /// <summary>The green component.</summary>
         [FieldOffset(4)]
         public float G;
 
-        /// <summary>
-        /// The blue component.
-        /// </summary>
+        /// <summary>The blue component.</summary>
         [FieldOffset(8)]
         public float B;
 
-        /// <summary>
-        /// The alpha component.
-        /// </summary>
+        /// <summary>The alpha component.</summary>
         [FieldOffset(12)]
         public float A;
 
-        /// <summary>
-        /// Integer R.
-        /// </summary>
+        /// <summary>Integer R.</summary>
         public int IR
         {
             get
@@ -119,9 +101,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Integer G.
-        /// </summary>
+        /// <summary>Integer G.</summary>
         public int IG
         {
             get
@@ -134,9 +114,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Integer B.
-        /// </summary>
+        /// <summary>Integer B.</summary>
         public int IB
         {
             get
@@ -149,9 +127,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Integer A.
-        /// </summary>
+        /// <summary>Integer A.</summary>
         public int IA
         {
             get
@@ -164,9 +140,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Gets or sets the RGB color object for this color.
-        /// </summary>
+        /// <summary>Gets or sets the RGB color object for this color.</summary>
         public Color3F RGB
         {
             get
@@ -181,18 +155,14 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns a string form of this color.
-        /// </summary>
+        /// <summary>Returns a string form of this color.</summary>
         /// <returns>The string form.</returns>
         public override string ToString()
         {
             return "(" + R + ", " + G + ", " + B + ", " + A + ")";
         }
 
-        /// <summary>
-        /// Returns a 16-byte set representation of this color (4 x 32-bit float).
-        /// </summary>
+        /// <summary>Returns a 16-byte set representation of this color (4 x 32-bit float).</summary>
         /// <returns>The color bytes.</returns>
         public byte[] ToBytes()
         {
@@ -231,9 +201,7 @@ namespace FGECore.MathHelpers
                 );
         }
 
-        /// <summary>
-        /// A float of 1/255.
-        /// </summary>
+        /// <summary>A float of 1/255.</summary>
         public const float BYTE_TO_FLOAT = 1f / 255f;
 
         /// <summary>
@@ -328,29 +296,19 @@ namespace FGECore.MathHelpers
             return null;
         }
 
-        /// <summary>
-        /// Sample Color4F (1, 1, 1).
-        /// </summary>
+        /// <summary>Sample Color4F (1, 1, 1).</summary>
         public static readonly Color4F White = new Color4F(1, 1, 1);
 
-        /// <summary>
-        /// Sample Color4F (0, 0, 0).
-        /// </summary>
+        /// <summary>Sample Color4F (0, 0, 0).</summary>
         public static readonly Color4F Black = new Color4F(0, 0, 0);
 
-        /// <summary>
-        /// Sample Color4F (1, 0, 0).
-        /// </summary>
+        /// <summary>Sample Color4F (1, 0, 0).</summary>
         public static readonly Color4F Red = new Color4F(1, 0, 0);
 
-        /// <summary>
-        /// Sample Color4F (0, 1, 0).
-        /// </summary>
+        /// <summary>Sample Color4F (0, 1, 0).</summary>
         public static readonly Color4F Green = new Color4F(0, 1, 0);
 
-        /// <summary>
-        /// Sample Color4F (0, 0, 1).
-        /// </summary>
+        /// <summary>Sample Color4F (0, 0, 1).</summary>
         public static readonly Color4F Blue = new Color4F(0, 0, 1);
     }
 }

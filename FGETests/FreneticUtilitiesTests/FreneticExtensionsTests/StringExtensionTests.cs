@@ -18,24 +18,18 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
 {
-    /// <summary>
-    /// Tests expectations of <see cref="StringExtensions"/>.
-    /// </summary>
+    /// <summary>Tests expectations of <see cref="StringExtensions"/>.</summary>
     [TestFixture]
     public class StringExtensionTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
         }
 
-        /// <summary>
-        /// Tests "ToLowerFast", "IsAllLowerFast", "ToUpperFast", "IsAllUpperFast", and "EqualsIgnoreCaseFast".
-        /// </summary>
+        /// <summary>Tests "ToLowerFast", "IsAllLowerFast", "ToUpperFast", "IsAllUpperFast", and "EqualsIgnoreCaseFast".</summary>
         [Test]
         public static void CapitalizationTests()
         {
@@ -56,9 +50,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.That(!"wow123hello".EqualsIgnoreCaseFast("WOW123hellothere"), "!EqualsIgnoreCaseFast isn't right");
         }
 
-        /// <summary>
-        /// Tests "Before" and "BeforeLast" string versions.
-        /// </summary>
+        /// <summary>Tests "Before" and "BeforeLast" string versions.</summary>
         [Test]
         public static void BeforeStringTests()
         {
@@ -68,9 +60,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("OneTwoThree", "OneTwoThreeTwo".BeforeLast("Two"), "BeforeLast 'OneTwoThreeTwo' isn't right");
         }
 
-        /// <summary>
-        /// Tests "Before" and "BeforeLast" character versions.
-        /// </summary>
+        /// <summary>Tests "Before" and "BeforeLast" character versions.</summary>
         [Test]
         public static void BeforeCharTests()
         {
@@ -80,9 +70,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("One2Three", "One2Three2".BeforeLast('2'), "BeforeLast char 'OneTwoThree2' isn't right");
         }
 
-        /// <summary>
-        /// Tests "After" and "AfterLast" string versions.
-        /// </summary>
+        /// <summary>Tests "After" and "AfterLast" string versions.</summary>
         [Test]
         public static void AfterStringTests()
         {
@@ -92,9 +80,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("Four", "OneTwoThreeTwoFour".AfterLast("Two"), "AfterLast 'OneTwoThreeTwoFour' isn't right");
         }
 
-        /// <summary>
-        /// Tests "After" and "AfterLast" character versions.
-        /// </summary>
+        /// <summary>Tests "After" and "AfterLast" character versions.</summary>
         [Test]
         public static void AfterCharTests()
         {
@@ -104,9 +90,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("Four", "One2Three2Four".AfterLast('2'), "AfterLast char 'One2Three2Four' isn't right");
         }
 
-        /// <summary>
-        /// Tests "BeforeAndAfter" and "BeforeAndAfterLast" string versions.
-        /// </summary>
+        /// <summary>Tests "BeforeAndAfter" and "BeforeAndAfterLast" string versions.</summary>
         [Test]
         public static void BeforeAndAfterStringTests()
         {
@@ -120,9 +104,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.That("OneTwoThreeTwoFour".BeforeAndAfterLast("Two") == ("OneTwoThree", "Four"), "BeforeAndAfterLast pair 'OneTwoThreeTwoFour' isn't right");
         }
 
-        /// <summary>
-        /// Tests "BeforeAndAfter" and "BeforeAndAfterLast" character versions.
-        /// </summary>
+        /// <summary>Tests "BeforeAndAfter" and "BeforeAndAfterLast" character versions.</summary>
         [Test]
         public static void BeforeAndAfterCharTests()
         {
@@ -136,9 +118,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.That("One2Three2Four".BeforeAndAfterLast('2') == ("One2Three", "Four"), "BeforeAndAfterLast pair 'One2Three2Four' isn't right");
         }
 
-        /// <summary>
-        /// Tests "IndexEquals", "StartsWillNull", "StartsWithFast", "EndsWithNull", and "EndsWithFast".
-        /// </summary>
+        /// <summary>Tests "IndexEquals", "StartsWillNull", "StartsWithFast", "EndsWithNull", and "EndsWithFast".</summary>
         [Test]
         public static void IndexBasedTests()
         {
@@ -154,18 +134,14 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.That(!"ABC123".EndsWithFast('C'), "!EndsWithFast broke");
         }
 
-        /// <summary>
-        /// Tests "CountCharacter".
-        /// </summary>
+        /// <summary>Tests "CountCharacter".</summary>
         [Test]
         public static void CountTest()
         {
             Assert.AreEqual(4, "CA BC132C 23C".CountCharacter('C'), "CountCharacter broke");
         }
 
-        /// <summary>
-        /// Tests "SplitFast".
-        /// </summary>
+        /// <summary>Tests "SplitFast".</summary>
         [Test]
         public static void SplitTest()
         {

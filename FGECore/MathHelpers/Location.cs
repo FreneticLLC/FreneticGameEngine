@@ -28,66 +28,44 @@ namespace FGECore.MathHelpers
     public struct Location : IEquatable<Location>
     {
         #region static reference fields
-        /// <summary>
-        /// A Location of (0, 0, 0).
-        /// </summary>
+        /// <summary>A Location of (0, 0, 0).</summary>
         public static readonly Location Zero = new Location(0);
 
-        /// <summary>
-        /// A Location of (1, 1, 1).
-        /// </summary>
+        /// <summary>A Location of (1, 1, 1).</summary>
         public static readonly Location One = new Location(1);
 
-        /// <summary>
-        /// A location of (1, 0, 0).
-        /// </summary>
+        /// <summary>A location of (1, 0, 0).</summary>
         public static readonly Location UnitX = new Location(1, 0, 0);
 
-        /// <summary>
-        /// A location of (0, 1, 0).
-        /// </summary>
+        /// <summary>A location of (0, 1, 0).</summary>
         public static readonly Location UnitY = new Location(0, 1, 0);
 
-        /// <summary>
-        /// A location of (0, 0, 1).
-        /// </summary>
+        /// <summary>A location of (0, 0, 1).</summary>
         public static readonly Location UnitZ = new Location(0, 0, 1);
 
-        /// <summary>
-        /// A location of (NaN, NaN, NaN).
-        /// </summary>
+        /// <summary>A location of (NaN, NaN, NaN).</summary>
         public static readonly Location NaN = new Location(double.NaN, double.NaN, double.NaN);
 
-        /// <summary>
-        /// A location of (Infinity, Infinity, Infinity).
-        /// </summary>
+        /// <summary>A location of (Infinity, Infinity, Infinity).</summary>
         public static readonly Location Infinity = new Location(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
         #endregion
 
         #region fields
-        /// <summary>
-        /// The X coordinate of this location.
-        /// </summary>
+        /// <summary>The X coordinate of this location.</summary>
         [FieldOffset(0)]
         public double X;
 
-        /// <summary>
-        /// The Y coordinate of this location.
-        /// </summary>
+        /// <summary>The Y coordinate of this location.</summary>
         [FieldOffset(8)]
         public double Y;
 
-        /// <summary>
-        /// The Z coordinate of this location.
-        /// </summary>
+        /// <summary>The Z coordinate of this location.</summary>
         [FieldOffset(16)]
         public double Z;
         #endregion
 
         #region coordinate accessors
-        /// <summary>
-        /// Returns <see cref="X"/> as a <see cref="float"/>.
-        /// </summary>
+        /// <summary>Returns <see cref="X"/> as a <see cref="float"/>.</summary>
         public float XF
         {
             get
@@ -96,9 +74,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns <see cref="Y"/> as a <see cref="float"/>.
-        /// </summary>
+        /// <summary>Returns <see cref="Y"/> as a <see cref="float"/>.</summary>
         public float YF
         {
             get
@@ -107,9 +83,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns <see cref="Z"/> as a <see cref="float"/>.
-        /// </summary>
+        /// <summary>Returns <see cref="Z"/> as a <see cref="float"/>.</summary>
         public float ZF
         {
             get
@@ -204,9 +178,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region constructors
-        /// <summary>
-        /// Constructs a Location, with all coordinates individually specified.
-        /// </summary>
+        /// <summary>Constructs a Location, with all coordinates individually specified.</summary>
         public Location(double _X, double _Y, double _Z)
         {
             X = _X;
@@ -214,9 +186,7 @@ namespace FGECore.MathHelpers
             Z = _Z;
         }
 
-        /// <summary>
-        /// Constructs a Location where all three coordinates are set to a single value.
-        /// </summary>
+        /// <summary>Constructs a Location where all three coordinates are set to a single value.</summary>
         public Location(double _Point)
         {
             X = _Point;
@@ -224,9 +194,7 @@ namespace FGECore.MathHelpers
             Z = _Point;
         }
 
-        /// <summary>
-        /// Constructs a Location, with all coordinates individually specified.
-        /// </summary>
+        /// <summary>Constructs a Location, with all coordinates individually specified.</summary>
         public Location(float _X, float _Y, float _Z)
         {
             X = _X;
@@ -234,9 +202,7 @@ namespace FGECore.MathHelpers
             Z = _Z;
         }
 
-        /// <summary>
-        /// Constructs a Location where all three coordinates are set to a single value.
-        /// </summary>
+        /// <summary>Constructs a Location where all three coordinates are set to a single value.</summary>
         public Location(float _Point)
         {
             X = _Point;
@@ -246,9 +212,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region vector math
-        /// <summary>
-        /// Returns the flat (X/Y) linear distance of the vector location to another vector location, squared for efficiency.
-        /// </summary>
+        /// <summary>Returns the flat (X/Y) linear distance of the vector location to another vector location, squared for efficiency.</summary>
         /// <returns>The squared distance.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double DistanceSquared_Flat(in Location two)
@@ -364,9 +328,7 @@ namespace FGECore.MathHelpers
             return Normalize(defaultValue) * len;
         }
 
-        /// <summary>
-        /// Returns the full linear length of the vector location, squared for efficiency.
-        /// </summary>
+        /// <summary>Returns the full linear length of the vector location, squared for efficiency.</summary>
         /// <returns>The squared length.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double LengthSquared()
@@ -374,18 +336,14 @@ namespace FGECore.MathHelpers
             return X * X + Y * Y + Z * Z;
         }
 
-        /// <summary>
-        /// Returns the full linear length of the vector location, which goes through a square-root operation (inefficient).
-        /// </summary>
+        /// <summary>Returns the full linear length of the vector location, which goes through a square-root operation (inefficient).</summary>
         /// <returns>The square-rooted length.</returns>
         public double Length()
         {
             return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
 
-        /// <summary>
-        /// Returns the dot product of this and another location.
-        /// </summary>
+        /// <summary>Returns the dot product of this and another location.</summary>
         /// <param name="two">The second location.</param>
         /// <returns>The dot product.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -427,9 +385,7 @@ namespace FGECore.MathHelpers
             return new Location(X * len, Y * len, Z * len);
         }
 
-        /// <summary>
-        /// Returns the cross product of this location with another.
-        /// </summary>
+        /// <summary>Returns the cross product of this location with another.</summary>
         /// <param name="two">The second location vector.</param>
         /// <returns>The cross product of the two.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -438,9 +394,7 @@ namespace FGECore.MathHelpers
             return new Location(Y * two.Z - two.Y * Z, two.X * Z - X * two.Z, X * two.Y - Y * two.X);
         }
 
-        /// <summary>
-        /// Reflect a location vector against a normal.
-        /// </summary>
+        /// <summary>Reflect a location vector against a normal.</summary>
         /// <param name="normal">The normal vector.</param>
         /// <returns>The reflected vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -449,9 +403,7 @@ namespace FGECore.MathHelpers
             return this - (2 * Dot(normal) * normal);
         }
 
-        /// <summary>
-        /// Projects this location onto another.
-        /// </summary>
+        /// <summary>Projects this location onto another.</summary>
         /// <param name="b">The other.</param>
         /// <returns>The projection.</returns>
         public Location Project(in Location b)
@@ -459,9 +411,7 @@ namespace FGECore.MathHelpers
             return b * (Dot(b) / b.LengthSquared());
         }
 
-        /// <summary>
-        /// Rotates this vector by a certain yaw (in radians).
-        /// </summary>
+        /// <summary>Rotates this vector by a certain yaw (in radians).</summary>
         /// <param name="yaw">The yaw to rotate by (in radians).</param>
         /// <returns>The rotated vector.</returns>
         public Location Rotate(double yaw)
@@ -471,9 +421,7 @@ namespace FGECore.MathHelpers
             return new Location((X * cos) - (Y * sin), (X * sin) + (Y * cos), Z);
         }
 
-        /// <summary>
-        /// Rotates this vector by a certain yaw and pitch (in radians).
-        /// </summary>
+        /// <summary>Rotates this vector by a certain yaw and pitch (in radians).</summary>
         /// <param name="yaw">The yaw to rotate by (in radians).</param>
         /// <param name="pitch">The pitch to rotate by (in radians).</param>
         /// <returns>The rotated vector.</returns>
@@ -490,9 +438,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region utilities
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different <see cref="X"/> coordinate value.
-        /// </summary>
+        /// <summary>A copy of this <see cref="Location"/> with a different <see cref="X"/> coordinate value.</summary>
         /// <param name="_x">The new X coordinate.</param>
         /// <returns>The updated location.</returns>
         public Location WithX(double _x)
@@ -500,9 +446,7 @@ namespace FGECore.MathHelpers
             return new Location(_x, Y, Z);
         }
 
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different <see cref="Y"/> coordinate value.
-        /// </summary>
+        /// <summary>A copy of this <see cref="Location"/> with a different <see cref="Y"/> coordinate value.</summary>
         /// <param name="_y">The new Y coordinate.</param>
         /// <returns>The updated location.</returns>
         public Location WithY(double _y)
@@ -510,9 +454,7 @@ namespace FGECore.MathHelpers
             return new Location(X, _y, Z);
         }
 
-        /// <summary>
-        /// A copy of this <see cref="Location"/> with a different <see cref="Z"/> coordinate value.
-        /// </summary>
+        /// <summary>A copy of this <see cref="Location"/> with a different <see cref="Z"/> coordinate value.</summary>
         /// <param name="_z">The new Z coordinate.</param>
         /// <returns>The updated location.</returns>
         public Location WithZ(double _z)
@@ -520,9 +462,7 @@ namespace FGECore.MathHelpers
             return new Location(X, Y, _z);
         }
 
-        /// <summary>
-        /// Returns a copy of this location.
-        /// </summary>
+        /// <summary>Returns a copy of this location.</summary>
         /// <returns>A copy of the location.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Location Duplicate()
@@ -532,9 +472,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region basic equality
-        /// <summary>
-        /// Returns whether this location matches any given generic object.
-        /// </summary>
+        /// <summary>Returns whether this location matches any given generic object.</summary>
         /// <param name="obj">The object.</param>
         /// <returns>Whether they are equal.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -547,9 +485,7 @@ namespace FGECore.MathHelpers
             return Equals(locationForm);
         }
 
-        /// <summary>
-        /// Returns wether this location equals another location.
-        /// </summary>
+        /// <summary>Returns wether this location equals another location.</summary>
         /// <param name="v">The second location.</param>
         /// <returns>Whether they are equal.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -558,18 +494,14 @@ namespace FGECore.MathHelpers
             return v.X == X && v.Y == Y && v.Z == Z;
         }
 
-        /// <summary>
-        /// Gets a quick generic hash code for the location data.
-        /// </summary>
+        /// <summary>Gets a quick generic hash code for the location data.</summary>
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
             return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
         }
 
-        /// <summary>
-        /// Returns whether the location is NaN.
-        /// </summary>
+        /// <summary>Returns whether the location is NaN.</summary>
         /// <returns>whether the location is NaN.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNaN()
@@ -577,9 +509,7 @@ namespace FGECore.MathHelpers
             return double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
         }
 
-        /// <summary>
-        /// Returns whether the location is infinite.
-        /// </summary>
+        /// <summary>Returns whether the location is infinite.</summary>
         /// <returns>whether the location is infinite.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInfinite()
@@ -589,9 +519,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region operators
-        /// <summary>
-        /// Returns whether two locations are equal.
-        /// </summary>
+        /// <summary>Returns whether two locations are equal.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -600,9 +528,7 @@ namespace FGECore.MathHelpers
             return v1.X == v2.X && v1.Y == v2.Y && v1.Z == v2.Z;
         }
 
-        /// <summary>
-        /// Returns whether two locations are not equal.
-        /// </summary>
+        /// <summary>Returns whether two locations are not equal.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -611,9 +537,7 @@ namespace FGECore.MathHelpers
             return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
         }
 
-        /// <summary>
-        /// Adds two locations.
-        /// </summary>
+        /// <summary>Adds two locations.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         public static Location operator +(in Location v1, in Location v2)
@@ -621,18 +545,14 @@ namespace FGECore.MathHelpers
             return new Location(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
         }
 
-        /// <summary>
-        /// Negates a location.
-        /// </summary>
+        /// <summary>Negates a location.</summary>
         /// <param name="v">The first location.</param>
         public static Location operator -(in Location v)
         {
             return new Location(-v.X, -v.Y, -v.Z);
         }
 
-        /// <summary>
-        /// Subtracts two locations.
-        /// </summary>
+        /// <summary>Subtracts two locations.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         public static Location operator -(in Location v1, in Location v2)
@@ -640,9 +560,7 @@ namespace FGECore.MathHelpers
             return new Location(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
         }
 
-        /// <summary>
-        /// Multiplies two locations.
-        /// </summary>
+        /// <summary>Multiplies two locations.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         public static Location operator *(in Location v1, in Location v2)
@@ -650,9 +568,7 @@ namespace FGECore.MathHelpers
             return new Location(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
         }
 
-        /// <summary>
-        /// Divides two locations.
-        /// </summary>
+        /// <summary>Divides two locations.</summary>
         /// <param name="v1">The first location.</param>
         /// <param name="v2">The second location.</param>
         public static Location operator /(in Location v1, in Location v2)
@@ -660,9 +576,7 @@ namespace FGECore.MathHelpers
             return new Location(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
         }
 
-        /// <summary>
-        /// Multiplies a location by a scalar.
-        /// </summary>
+        /// <summary>Multiplies a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator *(in Location v, double scale)
@@ -670,9 +584,7 @@ namespace FGECore.MathHelpers
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
-        /// <summary>
-        /// Multiplies a location by a scalar.
-        /// </summary>
+        /// <summary>Multiplies a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator *(double scale, in Location v)
@@ -680,9 +592,7 @@ namespace FGECore.MathHelpers
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
-        /// <summary>
-        /// Multiplies a location by a scalar.
-        /// </summary>
+        /// <summary>Multiplies a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator *(in Location v, float scale)
@@ -690,9 +600,7 @@ namespace FGECore.MathHelpers
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
-        /// <summary>
-        /// Multiplies a location by a scalar.
-        /// </summary>
+        /// <summary>Multiplies a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator *(float scale, in Location v)
@@ -700,9 +608,7 @@ namespace FGECore.MathHelpers
             return new Location(v.X * scale, v.Y * scale, v.Z * scale);
         }
 
-        /// <summary>
-        /// Divides a location by a scalar.
-        /// </summary>
+        /// <summary>Divides a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator /(in Location v, double scale)
@@ -711,9 +617,7 @@ namespace FGECore.MathHelpers
             return new Location(v.X * sc, v.Y * sc, v.Z * sc);
         }
 
-        /// <summary>
-        /// Divides a location by a scalar.
-        /// </summary>
+        /// <summary>Divides a location by a scalar.</summary>
         /// <param name="v">The location.</param>
         /// <param name="scale">The scalar.</param>
         public static Location operator /(in Location v, float scale)
@@ -744,9 +648,7 @@ namespace FGECore.MathHelpers
             return $"({X}, {Y}, {Z})";
         }
 
-        /// <summary>
-        /// The number format for <see cref="ToBasicString"/>.
-        /// </summary>
+        /// <summary>The number format for <see cref="ToBasicString"/>.</summary>
         public const string BasicFormat = "0.00";
 
         /// <summary>
@@ -840,9 +742,7 @@ namespace FGECore.MathHelpers
         #endregion
 
         #region min/max
-        /// <summary>
-        /// Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(double, double)"/> to each coordinate.
-        /// </summary>
+        /// <summary>Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(double, double)"/> to each coordinate.</summary>
         /// <param name="two">The second Location vector.</param>
         /// <returns>The bigger valued coordinates.</returns>
         public Location Max(in Location two)
@@ -850,9 +750,7 @@ namespace FGECore.MathHelpers
             return new Location(Math.Max(X, two.X), Math.Max(Y, two.Y), Math.Max(Z, two.Z));
         }
 
-        /// <summary>
-        /// Returns the smaller valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Min(double, double)"/> to each coordinate.
-        /// </summary>
+        /// <summary>Returns the smaller valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Min(double, double)"/> to each coordinate.</summary>
         /// <param name="two">The second Location vector.</param>
         /// <returns>The smaller valued coordinates.</returns>
         public Location Min(in Location two)

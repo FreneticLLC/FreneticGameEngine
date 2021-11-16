@@ -23,14 +23,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {
-    /// <summary>
-    /// Helper class for graphical systems.
-    /// </summary>
+    /// <summary>Helper class for graphical systems.</summary>
     public static class GraphicsUtil
     {
-        /// <summary>
-        /// Checks errors when debug is enabled.
-        /// </summary>
+        /// <summary>Checks errors when debug is enabled.</summary>
         /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
         /// <param name="context">An optional context object.</param>
         [Conditional("DEBUG")]

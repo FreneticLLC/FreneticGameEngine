@@ -25,9 +25,7 @@ namespace FGECore.MathHelpers
     [StructLayout(LayoutKind.Explicit)]
     public struct Color3F
     {
-        /// <summary>
-        /// Constructs the color 3F.
-        /// </summary>
+        /// <summary>Constructs the color 3F.</summary>
         /// <param name="_r">Red.</param>
         /// <param name="_g">Green.</param>
         /// <param name="_b">Blue.</param>
@@ -38,27 +36,19 @@ namespace FGECore.MathHelpers
             B = _b;
         }
 
-        /// <summary>
-        /// The red component.
-        /// </summary>
+        /// <summary>The red component.</summary>
         [FieldOffset(0)]
         public float R;
 
-        /// <summary>
-        /// The green component.
-        /// </summary>
+        /// <summary>The green component.</summary>
         [FieldOffset(4)]
         public float G;
 
-        /// <summary>
-        /// The blue component.
-        /// </summary>
+        /// <summary>The blue component.</summary>
         [FieldOffset(8)]
         public float B;
 
-        /// <summary>
-        /// Integer R.
-        /// </summary>
+        /// <summary>Integer R.</summary>
         public int IR
         {
             get
@@ -70,10 +60,8 @@ namespace FGECore.MathHelpers
                 R = value / 255f;
             }
         }
-        
-        /// <summary>
-        /// Integer G.
-        /// </summary>
+
+        /// <summary>Integer G.</summary>
         public int IG
         {
             get
@@ -85,10 +73,8 @@ namespace FGECore.MathHelpers
                 G = value / 255f;
             }
         }
-        
-        /// <summary>
-        /// Integer B.
-        /// </summary>
+
+        /// <summary>Integer B.</summary>
         public int IB
         {
             get
@@ -101,9 +87,7 @@ namespace FGECore.MathHelpers
             }
         }
 
-        /// <summary>
-        /// Returns a 12-byte set representation of this color.
-        /// </summary>
+        /// <summary>Returns a 12-byte set representation of this color.</summary>
         /// <returns>The color bytes.</returns>
         public byte[] ToBytes()
         {
@@ -112,9 +96,7 @@ namespace FGECore.MathHelpers
             return b;
         }
 
-        /// <summary>
-        /// Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.
-        /// </summary>
+        /// <summary>Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.</summary>
         /// <returns>The location value.</returns>
         public Location ToLocation()
         {
@@ -150,18 +132,14 @@ namespace FGECore.MathHelpers
                 );
         }
 
-        /// <summary>
-        /// Returns a string form of this color.
-        /// </summary>
+        /// <summary>Returns a string form of this color.</summary>
         /// <returns>The string form.</returns>
         public override string ToString()
         {
             return "(" + R + ", " + G + ", " + B + ")";
         }
 
-        /// <summary>
-        /// Multiplies a color by a scale.
-        /// </summary>
+        /// <summary>Multiplies a color by a scale.</summary>
         /// <param name="v">The color.</param>
         /// <param name="scale">The scale.</param>
         /// <returns>Result.</returns>
@@ -170,29 +148,19 @@ namespace FGECore.MathHelpers
             return new Color3F(v.R * scale, v.G * scale, v.B * scale);
         }
 
-        /// <summary>
-        /// Sample Color3F (1, 1, 1).
-        /// </summary>
+        /// <summary>Sample Color3F (1, 1, 1).</summary>
         public static readonly Color3F White = new Color3F(1, 1, 1);
 
-        /// <summary>
-        /// Sample Color3F (0, 0, 0).
-        /// </summary>
+        /// <summary>Sample Color3F (0, 0, 0).</summary>
         public static readonly Color3F Black = new Color3F(0, 0, 0);
 
-        /// <summary>
-        /// Sample Color3F (1, 0, 0).
-        /// </summary>
+        /// <summary>Sample Color3F (1, 0, 0).</summary>
         public static readonly Color3F Red = new Color3F(1, 0, 0);
 
-        /// <summary>
-        /// Sample Color3F (0, 1, 0).
-        /// </summary>
+        /// <summary>Sample Color3F (0, 1, 0).</summary>
         public static readonly Color3F Green = new Color3F(0, 1, 0);
 
-        /// <summary>
-        /// Sample Color3F (0, 0, 1).
-        /// </summary>
+        /// <summary>Sample Color3F (0, 0, 1).</summary>
         public static readonly Color3F Blue = new Color3F(0, 0, 1);
     }
 }

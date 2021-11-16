@@ -37,7 +37,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>The lower-level font system.</summary>
         public GLFontEngine GLFonts;
-        
+
         /// <summary>The general font used for all normal purposes.</summary>
         public FontSet Standard;
 

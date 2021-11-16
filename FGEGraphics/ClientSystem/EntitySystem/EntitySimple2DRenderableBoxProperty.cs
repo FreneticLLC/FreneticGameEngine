@@ -27,16 +27,12 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         [PropertyDebuggable]
         public Vector2 BoxUpLeft;
 
-        /// <summary>
-        /// How far the box extends down and right.
-        /// </summary>
+        /// <summary>How far the box extends down and right.</summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
         public Vector2 BoxDownRight;
 
-        /// <summary>
-        /// Get or set the size of the box. Setting will align the box to its own center.
-        /// </summary>
+        /// <summary>Get or set the size of the box. Setting will align the box to its own center.</summary>
         public Vector2 BoxSize
         {
             get
@@ -50,23 +46,17 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// The texture for this rendered box.
-        /// </summary>
+        /// <summary>The texture for this rendered box.</summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
         public Texture BoxTexture;
 
-        /// <summary>
-        /// What color to render the box as.
-        /// </summary>
+        /// <summary>What color to render the box as.</summary>
         [PropertyAutoSavable]
         [PropertyDebuggable]
         public Color4F BoxColor = Color4F.White;
 
-        /// <summary>
-        /// Render the entity as seen normally, in 2D.
-        /// </summary>
+        /// <summary>Render the entity as seen normally, in 2D.</summary>
         /// <param name="context">The render context.</param>
         public override void RenderStandard2D(RenderContext2D context)
         {

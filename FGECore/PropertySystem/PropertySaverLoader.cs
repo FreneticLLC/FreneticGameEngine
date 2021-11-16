@@ -14,24 +14,16 @@ using System.Threading.Tasks;
 
 namespace FGECore.PropertySystem
 {
-    /// <summary>
-    /// Represents a helper to save or load an object.
-    /// </summary>
+    /// <summary>Represents a helper to save or load an object.</summary>
     public class PropertySaverLoader
     {
-        /// <summary>
-        /// The save name.
-        /// </summary>
+        /// <summary>The save name.</summary>
         public string SaveString;
 
-        /// <summary>
-        /// The save method.
-        /// </summary>
+        /// <summary>The save method.</summary>
         public Func<object, byte[]> Saver;
 
-        /// <summary>
-        /// The load method.
-        /// </summary>
+        /// <summary>The load method.</summary>
         public Func<byte[], object> Loader;
     }
 

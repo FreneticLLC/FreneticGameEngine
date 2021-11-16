@@ -15,46 +15,30 @@ using System.Threading.Tasks;
 
 namespace FGECore.UtilitySystems
 {
-    /// <summary>
-    /// Helper for live-sorted queues of data.
-    /// </summary>
+    /// <summary>Helper for live-sorted queues of data.</summary>
     /// <typeparam name="T">The data type at hand.</typeparam>
     public class PriorityQueue<T>
     {
-        /// <summary>
-        /// Represents a single node in a queue.
-        /// </summary>
+        /// <summary>Represents a single node in a queue.</summary>
         private struct Node
         {
-            /// <summary>
-            /// The data at hand.
-            /// </summary>
+            /// <summary>The data at hand.</summary>
             public T Data;
 
-            /// <summary>
-            /// The priority of the data.
-            /// </summary>
+            /// <summary>The priority of the data.</summary>
             public double Priority;
         }
 
-        /// <summary>
-        /// Where the queue starts.
-        /// </summary>
+        /// <summary>Where the queue starts.</summary>
         private int start;
 
-        /// <summary>
-        /// How many nodes are actually in the queue.
-        /// </summary>
+        /// <summary>How many nodes are actually in the queue.</summary>
         private int numNodes;
 
-        /// <summary>
-        /// All current nodes.
-        /// </summary>
+        /// <summary>All current nodes.</summary>
         private Node[] nodes; // TODO: Array possibly isn't the most efficient way to store a priority queue, even when working with structs? Experiment!
 
-        /// <summary>
-        /// Constructs the priority queue.
-        /// </summary>
+        /// <summary>Constructs the priority queue.</summary>
         /// <param name="capacity">The capacity to prepare.</param>
         public PriorityQueue(int capacity = 512)
         {
@@ -63,9 +47,7 @@ namespace FGECore.UtilitySystems
             nodes = new Node[capacity];
         }
 
-        /// <summary>
-        /// Gets the number of items in the queue.
-        /// </summary>
+        /// <summary>Gets the number of items in the queue.</summary>
         public int Count
         {
             get
@@ -74,9 +56,7 @@ namespace FGECore.UtilitySystems
             }
         }
 
-        /// <summary>
-        /// Gets the present capacity already prepared.
-        /// </summary>
+        /// <summary>Gets the present capacity already prepared.</summary>
         public int Capacity
         {
             get
@@ -85,9 +65,7 @@ namespace FGECore.UtilitySystems
             }
         }
 
-        /// <summary>
-        /// Clears the queue quickly.
-        /// </summary>
+        /// <summary>Clears the queue quickly.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
@@ -95,9 +73,7 @@ namespace FGECore.UtilitySystems
             start = 0;
         }
 
-        /// <summary>
-        /// Enqueues a new item.
-        /// </summary>
+        /// <summary>Enqueues a new item.</summary>
         /// <param name="nodeData">The data.</param>
         /// <param name="priority">The priority.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,9 +132,7 @@ namespace FGECore.UtilitySystems
             return returnMe;
         }
 
-        /// <summary>
-        /// Internal method to resize the queue or move it sideways to fit new data.
-        /// </summary>
+        /// <summary>Internal method to resize the queue or move it sideways to fit new data.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize()
         {
@@ -176,9 +150,7 @@ namespace FGECore.UtilitySystems
             start = 0;
         }
 
-        /// <summary>
-        /// Gets the first item.
-        /// </summary>
+        /// <summary>Gets the first item.</summary>
         public T First
         {
             get

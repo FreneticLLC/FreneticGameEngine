@@ -125,7 +125,7 @@ namespace FGEGraphics.UISystem
         {
             return element.IsValid && ElementInternal.Children.Contains(element) && !ElementInternal.ToRemove.Contains(element);
         }
-        
+
         /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
         /// <param name="x">The X position to check for.</param>
         /// <param name="y">The Y position to check for.</param>

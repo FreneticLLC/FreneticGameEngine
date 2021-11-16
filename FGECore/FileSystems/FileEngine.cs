@@ -26,19 +26,13 @@ namespace FGECore.FileSystems
     public class FileEngine
     {
         #region Static utilities
-        /// <summary>
-        /// The file extension for package files: "ffp"
-        /// </summary>
+        /// <summary>The file extension for package files: "ffp"</summary>
         public const string PACKAGE_EXTENSION = "ffp";
 
-        /// <summary>
-        /// The search pattern for package files: "*.ffp"
-        /// </summary>
+        /// <summary>The search pattern for package files: "*.ffp"</summary>
         public const string PACKAGE_SEARCH_PATTERN = "*." + PACKAGE_EXTENSION;
 
-        /// <summary>
-        /// Cleans a string to only valid symbols for a file name to contain.
-        /// </summary>
+        /// <summary>Cleans a string to only valid symbols for a file name to contain.</summary>
         /// <param name="filename">The input filename.</param>
         /// <returns>The cleaned file name.</returns>
         public static string CleanFileName(string filename)
@@ -53,50 +47,32 @@ namespace FGECore.FileSystems
         #endregion
 
         #region Current data
-        /// <summary>
-        /// The internal data within this <see cref="FileEngine"/>.
-        /// </summary>
+        /// <summary>The internal data within this <see cref="FileEngine"/>.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// A mapping of all loaded packages by their file names.
-            /// </summary>
+            /// <summary>A mapping of all loaded packages by their file names.</summary>
             public Dictionary<string, FFPackage> Packages;
 
-            /// <summary>
-            /// A list of packages in order of being added.
-            /// </summary>
+            /// <summary>A list of packages in order of being added.</summary>
             public List<FFPackage> PackageList;
 
-            /// <summary>
-            /// A mapping of all available packaged files by their file names.
-            /// </summary>
+            /// <summary>A mapping of all available packaged files by their file names.</summary>
             public Dictionary<string, FFPFile> Files;
 
-            /// <summary>
-            /// A root folder for path management.
-            /// </summary>
+            /// <summary>A root folder for path management.</summary>
             public FFPFolder RootFolder;
 
-            /// <summary>
-            /// A set of all raw data folders used by the system.
-            /// </summary>
+            /// <summary>A set of all raw data folders used by the system.</summary>
             public HashSet<string> RawFolders;
 
-            /// <summary>
-            /// Names of all files in the saves folder.
-            /// </summary>
+            /// <summary>Names of all files in the saves folder.</summary>
             public HashSet<string> SavedFiles;
 
-            /// <summary>
-            /// The saves folder.
-            /// </summary>
+            /// <summary>The saves folder.</summary>
             public string SavesFolder;
         }
 
-        /// <summary>
-        /// The internal data within this <see cref="FileEngine"/>.
-        /// </summary>
+        /// <summary>The internal data within this <see cref="FileEngine"/>.</summary>
         public InternalData Internal = new InternalData()
         {
             Packages = new Dictionary<string, FFPackage>(64),
@@ -181,9 +157,7 @@ namespace FGECore.FileSystems
             Internal.SavedFiles.UnionWith(Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories));
         }
 
-        /// <summary>
-        /// Cleans up the <see cref="FileEngine"/>, closing all streams and any other data.
-        /// </summary>
+        /// <summary>Cleans up the <see cref="FileEngine"/>, closing all streams and any other data.</summary>
         public void Cleanup()
         {
             Internal.SavedFiles.Clear();
@@ -219,9 +193,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Returns whether a package with the given package file name is loaded.
-        /// </summary>
+        /// <summary>Returns whether a package with the given package file name is loaded.</summary>
         /// <param name="package">The package file name.</param>
         /// <returns>Whether it is already loaded.</returns>
         public bool IsPackageLoaded(string package)
@@ -229,9 +201,7 @@ namespace FGECore.FileSystems
             return Internal.Packages.ContainsKey(package);
         }
 
-        /// <summary>
-        /// Adds a package to the handler.
-        /// </summary>
+        /// <summary>Adds a package to the handler.</summary>
         /// <param name="filename">The package's file name on disk.</param>
         public void AddPackageFile(string filename)
         {
@@ -243,9 +213,7 @@ namespace FGECore.FileSystems
             AddPackage(filename, package);
         }
 
-        /// <summary>
-        /// Adds a package to the handler.
-        /// </summary>
+        /// <summary>Adds a package to the handler.</summary>
         /// <param name="packageName">The name of the package - usually a full filename.</param>
         /// <param name="package">The package to add.</param>
         public void AddPackage(string packageName, FFPackage package)
@@ -327,9 +295,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Removes a raw data folder from the engine, based on the folder path.
-        /// </summary>
+        /// <summary>Removes a raw data folder from the engine, based on the folder path.</summary>
         /// <param name="folder">The folder path to remove.</param>
         public void RemoveRawDataFolder(string folder)
         {
@@ -339,9 +305,7 @@ namespace FGECore.FileSystems
         #endregion
 
         #region File exist checks
-        /// <summary>
-        /// Returns whether a folder exists by the given name.
-        /// </summary>
+        /// <summary>Returns whether a folder exists by the given name.</summary>
         /// <param name="folder">The name of the folder.</param>
         /// <returns>A boolean indicating whether the folder exists.</returns>
         public bool FolderExists(string folder)
@@ -365,9 +329,7 @@ namespace FGECore.FileSystems
             return false;
         }
 
-        /// <summary>
-        /// Returns whether a file exists by the given name.
-        /// </summary>
+        /// <summary>Returns whether a file exists by the given name.</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>A boolean indicating whether the file exists.</returns>
         public bool FileExists(string filename)
@@ -391,9 +353,7 @@ namespace FGECore.FileSystems
             return false;
         }
 
-        /// <summary>
-        /// Returns whether a file exists within a package (overriding any raw files except the saves folder) by the given name.
-        /// </summary>
+        /// <summary>Returns whether a file exists within a package (overriding any raw files except the saves folder) by the given name.</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>A boolean indicating whether the file exists.</returns>
         public bool FileIsPackaged(string filename)
@@ -406,9 +366,7 @@ namespace FGECore.FileSystems
             return Internal.Files.ContainsKey(filename);
         }
 
-        /// <summary>
-        /// Returns whether a file exists as a raw file on disk (and NOT in any packages or the saves folder) by the given name.
-        /// </summary>
+        /// <summary>Returns whether a file exists as a raw file on disk (and NOT in any packages or the saves folder) by the given name.</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>A boolean indicating whether the file exists.</returns>
         public bool FileIsRaw(string filename)
@@ -432,9 +390,7 @@ namespace FGECore.FileSystems
             return false;
         }
 
-        /// <summary>
-        /// Returns whether a file exists within the saves folder (overriding any packages or other raw folders).
-        /// </summary>
+        /// <summary>Returns whether a file exists within the saves folder (overriding any packages or other raw folders).</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>A boolean indicating whether the file exists.</returns>
         public bool FileIsSaved(string filename)
@@ -445,9 +401,7 @@ namespace FGECore.FileSystems
         #endregion
 
         #region File reading
-        /// <summary>
-        /// Reads the data in a file, returning the full data as a byte array.
-        /// </summary>
+        /// <summary>Reads the data in a file, returning the full data as a byte array.</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>The file's raw data.</returns>
         /// <exception cref="FileNotFoundException">When the filename doesn't refer to a valid file.</exception>
@@ -460,9 +414,7 @@ namespace FGECore.FileSystems
             throw new FileNotFoundException("File not found", filename);
         }
 
-        /// <summary>
-        /// Reads the text in a file, returning the full data as a string.
-        /// </summary>
+        /// <summary>Reads the text in a file, returning the full data as a string.</summary>
         /// <param name="filename">The name of the file.</param>
         /// <returns>The file's text.</returns>
         /// <exception cref="FileNotFoundException">When the filename doesn't refer to a valid file.</exception>
@@ -499,10 +451,8 @@ namespace FGECore.FileSystems
             data = null;
             return false;
         }
-        
-        /// <summary>
-        /// Tries to read the data in a file, returning whether the read was successful (and if so, outputting the full data as a byte array).
-        /// </summary>
+
+        /// <summary>Tries to read the data in a file, returning whether the read was successful (and if so, outputting the full data as a byte array).</summary>
         /// <param name="filename">The name of the file.</param>
         /// <param name="data">The data in the file, if found.</param>
         /// <returns>Whether the file was found.</returns>
@@ -520,9 +470,7 @@ namespace FGECore.FileSystems
             return false;
         }
 
-        /// <summary>
-        /// Tries to read the text in a file, returning whether the read was successful (and if so, outputting the full data as a string).
-        /// </summary>
+        /// <summary>Tries to read the text in a file, returning whether the read was successful (and if so, outputting the full data as a string).</summary>
         /// <param name="filename">The name of the file.</param>
         /// <param name="data">The data in the file, if found.</param>
         /// <returns>Whether the file was found.</returns>

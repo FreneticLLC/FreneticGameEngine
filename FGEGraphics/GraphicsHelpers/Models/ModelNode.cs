@@ -14,34 +14,22 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.GraphicsHelpers.Models
 {
-    /// <summary>
-    /// Represents a node in a model.
-    /// </summary>
+    /// <summary>Represents a node in a model.</summary>
     public class ModelNode
     {
-        /// <summary>
-        /// The parent node.
-        /// </summary>
+        /// <summary>The parent node.</summary>
         public ModelNode Parent = null;
 
-        /// <summary>
-        /// All children nodes.
-        /// </summary>
+        /// <summary>All children nodes.</summary>
         public List<ModelNode> Children = new List<ModelNode>();
 
-        /// <summary>
-        /// All relevant bones.
-        /// </summary>
+        /// <summary>All relevant bones.</summary>
         public List<ModelBone> Bones = new List<ModelBone>();
 
-        /// <summary>
-        /// The mode ID.
-        /// </summary>
+        /// <summary>The mode ID.</summary>
         public byte Mode;
 
-        /// <summary>
-        /// The name of the node.
-        /// </summary>
+        /// <summary>The name of the node.</summary>
         public string Name;
     }
 }

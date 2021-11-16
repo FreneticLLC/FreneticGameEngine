@@ -27,64 +27,40 @@ using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// Represents a Three-Dimensional game engine.
-    /// </summary>
+    /// <summary>Represents a Three-Dimensional game engine.</summary>
     public class GameEngine3D : GameEngineBase
     {
-        /// <summary>
-        /// The list of common shaders for this engine.
-        /// </summary>
+        /// <summary>The list of common shaders for this engine.</summary>
         public GE3DShaders Shaders3D = new GE3DShaders();
 
-        /// <summary>
-        /// Whether to allow LL light helpers.
-        /// </summary>
+        /// <summary>Whether to allow LL light helpers.</summary>
         public bool AllowLL = false;
 
-        /// <summary>
-        /// Whether to enable forward lights.
-        /// </summary>
+        /// <summary>Whether to enable forward lights.</summary>
         public bool Forward_Lights = true;
 
-        /// <summary>
-        /// Whether to enable forward normal effects.
-        /// </summary>
+        /// <summary>Whether to enable forward normal effects.</summary>
         public bool Forward_Normals = true;
 
-        /// <summary>
-        /// Whether to enable forward shadows.
-        /// </summary>
+        /// <summary>Whether to enable forward shadows.</summary>
         public bool Forward_Shadows = false;
 
-        /// <summary>
-        /// Whether to enable deferred mode lights.
-        /// </summary>
+        /// <summary>Whether to enable deferred mode lights.</summary>
         public bool Deferred_Lights = true;
 
-        /// <summary>
-        /// Whether to enable deferred mode transparent-object-affecting lights.
-        /// </summary>
+        /// <summary>Whether to enable deferred mode transparent-object-affecting lights.</summary>
         public bool Deferred_TransparentLights = true;
 
-        /// <summary>
-        /// Whether to enable deferred mode transparent-object-affecting light shadows.
-        /// </summary>
+        /// <summary>Whether to enable deferred mode transparent-object-affecting light shadows.</summary>
         public bool Deferred_TransparentShadows = true;
 
-        /// <summary>
-        /// Whether to enable deferred mode shadows.
-        /// </summary>
+        /// <summary>Whether to enable deferred mode shadows.</summary>
         public bool Deferred_Shadows = true;
 
-        /// <summary>
-        /// Whether to enable deferred mode Dynamic Exposure.
-        /// </summary>
+        /// <summary>Whether to enable deferred mode Dynamic Exposure.</summary>
         public bool Deferred_DynamicExposure = true;
 
-        /// <summary>
-        /// Whether deferred mode should use SSAO effects.
-        /// </summary>
+        /// <summary>Whether deferred mode should use SSAO effects.</summary>
         public bool Deferred_SSAO = true;
 
         /// <summary>
@@ -93,47 +69,31 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public bool Deferred_MotionBlur = false;
 
-        /// <summary>
-        /// Whether deferred mode should use toonify effects.
-        /// </summary>
+        /// <summary>Whether deferred mode should use toonify effects.</summary>
         public bool Deferred_Toonify = false;
 
-        /// <summary>
-        /// Whether deferred mode should use grayscaling effects.
-        /// </summary>
+        /// <summary>Whether deferred mode should use grayscaling effects.</summary>
         public bool Deferred_Grayscale = false;
 
-        /// <summary>
-        /// Whether to have 'bright' transparent objects in deferred mode.
-        /// </summary>
+        /// <summary>Whether to have 'bright' transparent objects in deferred mode.</summary>
         public bool Deferred_BrightTransp = true;
 
-        /// <summary>
-        /// The (deferred mode) exposure value.
-        /// </summary>
+        /// <summary>The (deferred mode) exposure value.</summary>
         public float Exposure = 1;
 
-        /// <summary>
-        /// Loads all shaders for the standard Game Engine 3D.
-        /// </summary>
+        /// <summary>Loads all shaders for the standard Game Engine 3D.</summary>
         public override void GetShaders()
         {
             Shaders3D.LoadAll(Shaders, AllowLL, Forward_Normals, Forward_Lights, Forward_Shadows);
         }
 
-        /// <summary>
-        /// Whether forward mode should calculate reflection helpers.
-        /// </summary>
+        /// <summary>Whether forward mode should calculate reflection helpers.</summary>
         public bool ForwardReflections = false;
-        
-        /// <summary>
-        /// Whether to display decal effects.
-        /// </summary>
+
+        /// <summary>Whether to display decal effects.</summary>
         public bool DisplayDecals = true;
 
-        /// <summary>
-        /// Whether to render the view as a 3D side-by-side view.
-        /// </summary>
+        /// <summary>Whether to render the view as a 3D side-by-side view.</summary>
         public bool Render3DView = false;
 
         /// <summary>
@@ -153,72 +113,50 @@ namespace FGEGraphics.ClientSystem
         /// TODO: Camera attachment?
         /// </summary>
         public Func<float> ZFar = () => 1000;
-        
+
         /// <summary>
         /// Get the Z-Far (OUT-View) value (defaults to 10000 autoget).
         /// TODO: Camera attachment?
         /// </summary>
         public Func<float> ZFarOut = () => 10000;
 
-        /// <summary>
-        /// Get the maximum distance of fog. Defaults to match ZFar.
-        /// </summary>
+        /// <summary>Get the maximum distance of fog. Defaults to match ZFar.</summary>
         public Func<float> FogMaxDist = null;
 
-        /// <summary>
-        /// The "Sun adjustment" backup light color and value.
-        /// </summary>
+        /// <summary>The "Sun adjustment" backup light color and value.</summary>
         public Vector4 SunAdjustBackupLight = Vector4.One;
 
-        /// <summary>
-        /// The direction of the sun for backup light.
-        /// </summary>
+        /// <summary>The direction of the sun for backup light.</summary>
         public Location SunAdjustDirection = -Location.UnitZ;
 
-        /// <summary>
-        /// Whether dynamic shadows should be handled at all.
-        /// </summary>
+        /// <summary>Whether dynamic shadows should be handled at all.</summary>
         public bool EnableDynamicShadows = true;
 
-        /// <summary>
-        /// The main 3D view.
-        /// </summary>
+        /// <summary>The main 3D view.</summary>
         public View3D MainView;
 
-        /// <summary>
-        /// Constructs the <see cref="GameEngine3D"/>.
-        /// </summary>
+        /// <summary>Constructs the <see cref="GameEngine3D"/>.</summary>
         public GameEngine3D()
         {
             MainView = new View3D(this);
         }
 
-        /// <summary>
-        /// Reloads relevant 3D screen buffers.
-        /// </summary>
+        /// <summary>Reloads relevant 3D screen buffers.</summary>
         public override void ReloadScreenBuffers()
         {
             MainView.GenerationHelper.Generate(Window.Size.X, Window.Size.Y);
         }
 
-        /// <summary>
-        /// The main rendering context.
-        /// </summary>
+        /// <summary>The main rendering context.</summary>
         public RenderContext MainContext = new RenderContext();
 
-        /// <summary>
-        /// Whether this engine is a 'sub engine' (otherwise, it's the main engine).
-        /// </summary>
+        /// <summary>Whether this engine is a 'sub engine' (otherwise, it's the main engine).</summary>
         public bool IsSubEngine = false;
 
-        /// <summary>
-        /// The sub-view size, if a sub engine.
-        /// </summary>
+        /// <summary>The sub-view size, if a sub engine.</summary>
         public Vector2i SubSize = new Vector2i(1024, 768);
 
-        /// <summary>
-        /// Loads any additional final data.
-        /// </summary>
+        /// <summary>Loads any additional final data.</summary>
         public override void PostLoad()
         {
             MainContext.Engine = this;
@@ -247,26 +185,20 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("PostLoad - Post");
         }
 
-        /// <summary>
-        /// Sorts the entities according to distance from camera view.
-        /// </summary>
+        /// <summary>Sorts the entities according to distance from camera view.</summary>
         public void SortEntities()
         {
             Location pos = MainView.State.RenderRelative;
             EntityList = EntityList.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
         }
 
-        /// <summary>
-        /// Reverses the entity order for transparent rendering.
-        /// </summary>
+        /// <summary>Reverses the entity order for transparent rendering.</summary>
         public void ReverseEntities()
         {
             EntityList.Reverse();
         }
 
-        /// <summary>
-        /// Renders the standard view's 3D data.
-        /// </summary>
+        /// <summary>Renders the standard view's 3D data.</summary>
         /// <param name="view">The view object.</param>
         public void Render3D(View3D view)
         {
@@ -300,15 +232,11 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// The main default camera for the main view.
-        /// </summary>
+        /// <summary>The main default camera for the main view.</summary>
         public Camera3D MainCamera = new Camera3D();
 
 
-        /// <summary>
-        /// Gets the 3D renderer.
-        /// </summary>
+        /// <summary>Gets the 3D renderer.</summary>
         public Renderer Rendering
         {
             get
@@ -316,9 +244,7 @@ namespace FGEGraphics.ClientSystem
                 return Client.Rendering3D;
             }
         }
-        /// <summary>
-        /// Renders a single frame of the 3D game engine.
-        /// </summary>
+        /// <summary>Renders a single frame of the 3D game engine.</summary>
         public override void RenderSingleFrame()
         {
             // Prep

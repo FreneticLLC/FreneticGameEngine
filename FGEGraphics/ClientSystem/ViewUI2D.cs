@@ -52,9 +52,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>The default basic UI screen.</summary>
         public UIScreen DefaultScreen;
 
-        /// <summary>
-        /// Constructs the view.
-        /// </summary>
+        /// <summary>Constructs the view.</summary>
         /// <param name="gameClient">Backing client window.</param>
         public ViewUI2D(GameClientWindow gameClient)
         {

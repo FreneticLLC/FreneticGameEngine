@@ -120,9 +120,7 @@ namespace FGEGraphics.UISystem
         /// <summary>Internal data that should usually not be accessed directly.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// Sets an anchor.
-        /// </summary>
+        /// <summary>Sets an anchor.</summary>
         /// <param name="anchor">The anchor.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper Anchor(UIAnchor anchor)
@@ -131,9 +129,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant X value.
-        /// </summary>
+        /// <summary>Sets a constant X value.</summary>
         /// <param name="x">The X value.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantX(int x)
@@ -143,9 +139,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Y value.
-        /// </summary>
+        /// <summary>Sets a constant Y value.</summary>
         /// <param name="y">The Y value.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantY(int y)
@@ -155,9 +149,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant X and Y value.
-        /// </summary>
+        /// <summary>Sets a constant X and Y value.</summary>
         /// <param name="x">The X value.</param>
         /// <param name="y">The Y value.</param>
         /// <returns>This object.</returns>
@@ -170,9 +162,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Width value.
-        /// </summary>
+        /// <summary>Sets a constant Width value.</summary>
         /// <param name="width">The Width value.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantWidth(int width)
@@ -182,9 +172,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Height value.
-        /// </summary>
+        /// <summary>Sets a constant Height value.</summary>
         /// <param name="height">The Height value.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantHeight(int height)
@@ -194,9 +182,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Width and Height value.
-        /// </summary>
+        /// <summary>Sets a constant Width and Height value.</summary>
         /// <param name="width">The Width value.</param>
         /// <param name="height">The Height value.</param>
         /// <returns>This object.</returns>
@@ -209,9 +195,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Rotation value.
-        /// </summary>
+        /// <summary>Sets a constant Rotation value.</summary>
         /// <param name="rotation">The Rotation value.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantRotation(float rotation)
@@ -221,9 +205,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter X value.
-        /// </summary>
+        /// <summary>Sets a getter X value.</summary>
         /// <param name="x">The X getter.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper GetterX(Func<int> x)
@@ -233,9 +215,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter Y value.
-        /// </summary>
+        /// <summary>Sets a getter Y value.</summary>
         /// <param name="y">The Y getter.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper GetterY(Func<int> y)
@@ -245,9 +225,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter X and Y value.
-        /// </summary>
+        /// <summary>Sets a getter X and Y value.</summary>
         /// <param name="x">The X getter.</param>
         /// <param name="y">The Y getter.</param>
         /// <returns>This object.</returns>
@@ -260,9 +238,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter Width value.
-        /// </summary>
+        /// <summary>Sets a getter Width value.</summary>
         /// <param name="width">The Width getter.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper GetterWidth(Func<int> width)
@@ -272,9 +248,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter Height value.
-        /// </summary>
+        /// <summary>Sets a getter Height value.</summary>
         /// <param name="height">The Height getter.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper GetterHeight(Func<int> height)
@@ -284,9 +258,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a constant Width and Height value.
-        /// </summary>
+        /// <summary>Sets a constant Width and Height value.</summary>
         /// <param name="width">The Width getter.</param>
         /// <param name="height">The Height getter.</param>
         /// <returns>This object.</returns>
@@ -299,9 +271,7 @@ namespace FGEGraphics.UISystem
             return this;
         }
 
-        /// <summary>
-        /// Sets a getter Rotation value.
-        /// </summary>
+        /// <summary>Sets a getter Rotation value.</summary>
         /// <param name="rotation">The Rotation getter.</param>
         /// <returns>This object.</returns>
         public UIPositionHelper GetterRotation(Func<float> rotation)

@@ -15,29 +15,19 @@ using System.Threading.Tasks;
 
 namespace FGECore.FileSystems
 {
-    /// <summary>
-    /// A simplified in-memory stream object.
-    /// </summary>
+    /// <summary>A simplified in-memory stream object.</summary>
     public sealed class DataStream : Stream
     {
-        /// <summary>
-        /// Wrapped internal stream.
-        /// </summary>
+        /// <summary>Wrapped internal stream.</summary>
         public byte[] Wrapped;
 
-        /// <summary>
-        /// Current data length.
-        /// </summary>
+        /// <summary>Current data length.</summary>
         public long Len = 0;
 
-        /// <summary>
-        /// Current index.
-        /// </summary>
+        /// <summary>Current index.</summary>
         public long Ind = 0;
 
-        /// <summary>
-        /// Returns true.
-        /// </summary>
+        /// <summary>Returns true.</summary>
         public override bool CanRead
         {
             get
@@ -46,9 +36,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Returns true.
-        /// </summary>
+        /// <summary>Returns true.</summary>
         public override bool CanSeek
         {
             get
@@ -57,9 +45,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Returns true.
-        /// </summary>
+        /// <summary>Returns true.</summary>
         public override bool CanWrite
         {
             get
@@ -68,9 +54,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Get length.
-        /// </summary>
+        /// <summary>Get length.</summary>
         public override long Length
         {
             get
@@ -79,9 +63,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Get or set position index.
-        /// </summary>
+        /// <summary>Get or set position index.</summary>
         public override long Position
         {
             get
@@ -94,9 +76,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Constructs a data stream with bytes pre-loaded.
-        /// </summary>
+        /// <summary>Constructs a data stream with bytes pre-loaded.</summary>
         /// <param name="bytes">The bytes to pre-load.</param>
         public DataStream(byte[] bytes)
         {
@@ -105,9 +85,7 @@ namespace FGECore.FileSystems
             Ind = 0;
         }
 
-        /// <summary>
-        /// Constructs an empty data stream.
-        /// </summary>
+        /// <summary>Constructs an empty data stream.</summary>
         public DataStream()
         {
             Wrapped = Array.Empty<byte>();
@@ -115,9 +93,7 @@ namespace FGECore.FileSystems
             Ind = 0;
         }
 
-        /// <summary>
-        /// Constructs a datastream with a specific capacity.
-        /// </summary>
+        /// <summary>Constructs a datastream with a specific capacity.</summary>
         /// <param name="capacity">The capacity.</param>
         public DataStream(int capacity)
         {
@@ -126,16 +102,12 @@ namespace FGECore.FileSystems
             Ind = 0;
         }
 
-        /// <summary>
-        /// Does nothing!
-        /// </summary>
+        /// <summary>Does nothing!</summary>
         public override void Flush()
         {
         }
 
-        /// <summary>
-        /// Set to a specific location.
-        /// </summary>
+        /// <summary>Set to a specific location.</summary>
         /// <param name="offset">Where to move to.</param>
         /// <param name="origin">What position to seek relative to.</param>
         /// <returns>New index.</returns>
@@ -157,9 +129,7 @@ namespace FGECore.FileSystems
             return Ind;
         }
 
-        /// <summary>
-        /// Set the length of the stream.
-        /// </summary>
+        /// <summary>Set the length of the stream.</summary>
         /// <param name="res_len">The resultant length.</param>
         public override void SetLength(long res_len)
         {
@@ -170,9 +140,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Set the length of the underlying buffer.
-        /// </summary>
+        /// <summary>Set the length of the underlying buffer.</summary>
         /// <param name="res_len">The resultant length.</param>
         public void SetCapacity(long res_len)
         {
@@ -181,9 +149,7 @@ namespace FGECore.FileSystems
             Wrapped = t;
         }
 
-        /// <summary>
-        /// Reads a single byte, or returns -1.
-        /// </summary>
+        /// <summary>Reads a single byte, or returns -1.</summary>
         /// <returns>The byte read.</returns>
         public override int ReadByte()
         {
@@ -195,9 +161,7 @@ namespace FGECore.FileSystems
             return Wrapped[Ind++];
         }
 
-        /// <summary>
-        /// Read some data.
-        /// </summary>
+        /// <summary>Read some data.</summary>
         /// <param name="buffer">Data read buffer.</param>
         /// <param name="offset">Start index.</param>
         /// <param name="count">Length.</param>
@@ -226,9 +190,7 @@ namespace FGECore.FileSystems
             return (int)validlen;
         }
 
-        /// <summary>
-        /// Write some data.
-        /// </summary>
+        /// <summary>Write some data.</summary>
         /// <param name="buffer">Data to write.</param>
         /// <param name="offset">Start index.</param>
         /// <param name="count">Length.</param>
@@ -244,9 +206,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Returns a copy of the internal data array, trimmed to match the stream length.
-        /// </summary>
+        /// <summary>Returns a copy of the internal data array, trimmed to match the stream length.</summary>
         /// <returns>Bytes.</returns>
         public byte[] ToArray()
         {

@@ -17,24 +17,16 @@ using FGECore.FileSystems;
 
 namespace FGECore.CoreSystems
 {
-    /// <summary>
-    /// A special helper class to assist with live multithreaded asset streaming.
-    /// </summary>
+    /// <summary>A special helper class to assist with live multithreaded asset streaming.</summary>
     public class AssetStreamingEngine
     {
-        /// <summary>
-        /// The dedicated file reading thread (splitting across multiple threads is unlikely to benefit anything, and may even get in the way).
-        /// </summary>
+        /// <summary>The dedicated file reading thread (splitting across multiple threads is unlikely to benefit anything, and may even get in the way).</summary>
         public Thread FilesThread;
 
-        /// <summary>
-        /// The backing file engine.
-        /// </summary>
+        /// <summary>The backing file engine.</summary>
         public FileEngine Files;
 
-        /// <summary>
-        /// The backing scheduler.
-        /// </summary>
+        /// <summary>The backing scheduler.</summary>
         public Scheduler Schedule;
 
         /// <summary>
@@ -49,9 +41,7 @@ namespace FGECore.CoreSystems
         /// </summary>
         public AutoResetEvent GoalWaitingReset = new AutoResetEvent(false);
 
-        /// <summary>
-        /// Construct the <see cref="AssetStreamingEngine"/>. Call <see cref="Init"/> to actually start it.
-        /// </summary>
+        /// <summary>Construct the <see cref="AssetStreamingEngine"/>. Call <see cref="Init"/> to actually start it.</summary>
         /// <param name="_files">The backing file engine.</param>
         /// <param name="_schedule">The backing scheduler.</param>
         public AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
@@ -60,37 +50,27 @@ namespace FGECore.CoreSystems
             Schedule = _schedule;
         }
 
-        /// <summary>
-        /// The cancel token for <see cref="FilesThread"/>.
-        /// </summary>
+        /// <summary>The cancel token for <see cref="FilesThread"/>.</summary>
         public CancellationTokenSource FileThreadCancelToken = new CancellationTokenSource();
 
-        /// <summary>
-        /// Starts the asset streaming engine.
-        /// </summary>
+        /// <summary>Starts the asset streaming engine.</summary>
         public void Init()
         {
             FilesThread = new Thread(new ThreadStart(FilesMainLoop)) { Name = "assetstreamingfiles" };
             FilesThread.Start();
         }
 
-        /// <summary>
-        /// Shuts down the asset streaming engine.
-        /// </summary>
+        /// <summary>Shuts down the asset streaming engine.</summary>
         public void Shutdown()
         {
             FileThreadCancelToken.Cancel();
             GoalWaitingReset.Set();
         }
 
-        /// <summary>
-        /// The asset streaming goal to be executed.
-        /// </summary>
+        /// <summary>The asset streaming goal to be executed.</summary>
         public class StreamGoal
         {
-            /// <summary>
-            /// The name of the file to load. MUST be set.
-            /// </summary>
+            /// <summary>The name of the file to load. MUST be set.</summary>
             public string FileName;
 
             /// <summary>
@@ -99,14 +79,10 @@ namespace FGECore.CoreSystems
             /// </summary>
             public Action<string> OnError = null;
 
-            /// <summary>
-            /// Action to call if the file is not present. If unset, will become an error message.
-            /// </summary>
+            /// <summary>Action to call if the file is not present. If unset, will become an error message.</summary>
             public Action OnFileMissing = null;
 
-            /// <summary>
-            /// Called to process the file data once loaded. MUST be set.
-            /// </summary>
+            /// <summary>Called to process the file data once loaded. MUST be set.</summary>
             public Action<byte[]> ProcessData;
 
             /// <summary>
@@ -115,9 +91,7 @@ namespace FGECore.CoreSystems
             /// </summary>
             public bool ShouldSyncToMainThread = false;
 
-            /// <summary>
-            /// Handles a file-missing situation.
-            /// </summary>
+            /// <summary>Handles a file-missing situation.</summary>
             public void HandleFileMissing()
             {
                 try
@@ -137,9 +111,7 @@ namespace FGECore.CoreSystems
                 }
             }
 
-            /// <summary>
-            /// Handles an error message.
-            /// </summary>
+            /// <summary>Handles an error message.</summary>
             /// <param name="message">The error message.</param>
             public void HandleError(string message)
             {
@@ -161,9 +133,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Entry point of the Files thread.
-        /// </summary>
+        /// <summary>Entry point of the Files thread.</summary>
         public void FilesMainLoop()
         {
             while (true)
@@ -180,9 +150,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Process a single asset streaming goal.
-        /// </summary>
+        /// <summary>Process a single asset streaming goal.</summary>
         public void ProcessGoal(StreamGoal goal)
         {
             try
@@ -211,9 +179,7 @@ namespace FGECore.CoreSystems
             }
         }
 
-        /// <summary>
-        /// Adds a new goal to the system.
-        /// </summary>
+        /// <summary>Adds a new goal to the system.</summary>
         /// <param name="fileName">The name of the file to load.</param>
         /// <param name="processOnMainThread">Whether to sync the process result call to the main thread (if not, runs async).</param>
         /// <param name="processAction">Called to process the file data once loaded.</param>

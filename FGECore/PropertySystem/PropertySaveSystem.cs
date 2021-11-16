@@ -17,42 +17,28 @@ using FGECore.PhysicsSystem;
 
 namespace FGECore.PropertySystem
 {
-    /// <summary>
-    /// Helper class to manage property saving/loading.
-    /// </summary>
+    /// <summary>Helper class to manage property saving/loading.</summary>
     public class PropertySaveSystem
     {
-        /// <summary>
-        /// All type saver methods.
-        /// </summary>
+        /// <summary>All type saver methods.</summary>
         public static Dictionary<Type, PropertySaverLoader> TypeSavers = new Dictionary<Type, PropertySaverLoader>(1024);
 
-        /// <summary>
-        /// All type loader methods.
-        /// </summary>
+        /// <summary>All type loader methods.</summary>
         public static Dictionary<string, PropertySaverLoader> TypeLoaders = new Dictionary<string, PropertySaverLoader>(1024);
 
-        /// <summary>
-        /// Ensures initialization.
-        /// </summary>
+        /// <summary>Ensures initialization.</summary>
         static PropertySaveSystem()
         {
             Internal.EnsureInit();
         }
 
-        /// <summary>
-        /// Internal data used by the <see cref="PropertySaveSystem"/>.
-        /// </summary>
+        /// <summary>Internal data used by the <see cref="PropertySaveSystem"/>.</summary>
         public static class Internal
         {
-            /// <summary>
-            /// Whether the system is already inited.
-            /// </summary>
+            /// <summary>Whether the system is already inited.</summary>
             public static bool Initted = false;
 
-            /// <summary>
-            /// Configures the default set of savers and readers for the FGE core.
-            /// </summary>
+            /// <summary>Configures the default set of savers and readers for the FGE core.</summary>
             public static void EnsureInit()
             {
                 if (Initted)

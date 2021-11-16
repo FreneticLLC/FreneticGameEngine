@@ -17,23 +17,17 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
 {
-    /// <summary>
-    /// Tests expectations of <see cref="MathHelper"/>.
-    /// </summary>
+    /// <summary>Tests expectations of <see cref="MathHelper"/>.</summary>
     public class MathHelperTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
         }
 
-        /// <summary>
-        /// Tests "NextPowerOfTwo".
-        /// </summary>
+        /// <summary>Tests "NextPowerOfTwo".</summary>
         [Test]
         public static void NextPowerOfTwoTest()
         {
@@ -48,9 +42,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             }
         }
 
-        /// <summary>
-        /// Tests "StepTowards".
-        /// </summary>
+        /// <summary>Tests "StepTowards".</summary>
         [Test]
         public static void StepTowardsTest()
         {
@@ -66,9 +58,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             Assert.AreEqual(1.5, MathHelper.StepTowards(1.0, 2.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.0, 2.0, 0.5");
         }
 
-        /// <summary>
-        /// Tests "IsCloseTo".
-        /// </summary>
+        /// <summary>Tests "IsCloseTo".</summary>
         [Test]
         public static void IsCloseToTest()
         {

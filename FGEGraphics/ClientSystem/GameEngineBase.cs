@@ -24,14 +24,10 @@ using OpenTK.Windowing.Desktop;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// Represents the common functionality of a client Game Engine.
-    /// </summary>
+    /// <summary>Represents the common functionality of a client Game Engine.</summary>
     public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>, IDisposable
     {
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -42,9 +38,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Creates an entity.
-        /// </summary>
+        /// <summary>Creates an entity.</summary>
         /// <param name="ticks">Whether it ticks.</param>
         /// <returns>The entity.</returns>
         public override ClientEntity CreateEntity(bool ticks)
@@ -52,43 +46,29 @@ namespace FGEGraphics.ClientSystem
             return new ClientEntity(this, ticks);
         }
 
-        /// <summary>
-        /// Disposes the window client.
-        /// </summary>
+        /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
             Dispose(true);
         }
 
-        /// <summary>
-        /// The backing game client.
-        /// </summary>
+        /// <summary>The backing game client.</summary>
         public GameClientWindow Client => OwningInstance as GameClientWindow;
 
-        /// <summary>
-        /// Whether to use audio 'enforce' mode.
-        /// </summary>
+        /// <summary>Whether to use audio 'enforce' mode.</summary>
         public bool EnforceAudio = true;
 
-        /// <summary>
-        /// Whether to shut up when the game is deselected.
-        /// </summary>
+        /// <summary>Whether to shut up when the game is deselected.</summary>
         public bool QuietOnDeselect = true;
 
-        /// <summary>
-        /// The sound system.
-        /// </summary>
+        /// <summary>The sound system.</summary>
         public SoundEngine Sounds;
 
-        /// <summary>
-        /// The audio camera view.
-        /// </summary>
+        /// <summary>The audio camera view.</summary>
         public Camera3D AudioCamera = new Camera3D();
 
-        /// <summary>
-        /// Gets the client window.
-        /// </summary>
+        /// <summary>Gets the client window.</summary>
         public GameWindow Window
         {
             get
@@ -97,9 +77,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Gets the client shader system.
-        /// </summary>
+        /// <summary>Gets the client shader system.</summary>
         public ShaderEngine Shaders
         {
             get
@@ -108,9 +86,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Gets the client texture system.
-        /// </summary>
+        /// <summary>Gets the client texture system.</summary>
         public TextureEngine Textures
         {
             get
@@ -119,9 +95,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Gets the client model system.
-        /// </summary>
+        /// <summary>Gets the client model system.</summary>
         public ModelEngine Models
         {
             get
@@ -129,30 +103,20 @@ namespace FGEGraphics.ClientSystem
                 return Client.Models;
             }
         }
-        
-        /// <summary>
-        /// The title of the window.
-        /// </summary>
+
+        /// <summary>The title of the window.</summary>
         public readonly string StartingWindowTitle;
-        
-        /// <summary>
-        /// Run through a full single-frame render sequence.
-        /// </summary>
+
+        /// <summary>Run through a full single-frame render sequence.</summary>
         public abstract void RenderSingleFrame();
-        
-        /// <summary>
-        /// Get any relevant shaders.
-        /// </summary>
+
+        /// <summary>Get any relevant shaders.</summary>
         public abstract void GetShaders();
 
-        /// <summary>
-        /// Reload any relevant screen buffers.
-        /// </summary>
+        /// <summary>Reload any relevant screen buffers.</summary>
         public abstract void ReloadScreenBuffers();
 
-        /// <summary>
-        /// Loads the engine.
-        /// </summary>
+        /// <summary>Loads the engine.</summary>
         public void Load()
         {
             try
@@ -175,14 +139,10 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Any post-load actions.
-        /// </summary>
+        /// <summary>Any post-load actions.</summary>
         public abstract void PostLoad();
 
-        /// <summary>
-        /// Calculates whether a renderable should render.
-        /// </summary>
+        /// <summary>Calculates whether a renderable should render.</summary>
         /// <param name="render">The renderable.</param>
         /// <param name="cast_shadows">Whether currently casting shadows.</param>
         /// <returns>Whether it should render.</returns>
@@ -199,9 +159,7 @@ namespace FGEGraphics.ClientSystem
             return true;
         }
 
-        /// <summary>
-        /// Returns a string of this object.
-        /// </summary>
+        /// <summary>Returns a string of this object.</summary>
         /// <returns>The string.</returns>
         public override string ToString()
         {

@@ -14,19 +14,13 @@ using System.Threading.Tasks;
 
 namespace FGECore.NetworkSystem
 {
-    /// <summary>
-    /// Represents a game networking solution (Server).
-    /// </summary>
+    /// <summary>Represents a game networking solution (Server).</summary>
     public abstract class GameNetwork
     {
-        /// <summary>
-        /// Tick the network engine.
-        /// </summary>
+        /// <summary>Tick the network engine.</summary>
         public abstract void Tick();
 
-        /// <summary>
-        /// Start the network engine.
-        /// </summary>
+        /// <summary>Start the network engine.</summary>
         public abstract void Start();
 
         /// <summary>

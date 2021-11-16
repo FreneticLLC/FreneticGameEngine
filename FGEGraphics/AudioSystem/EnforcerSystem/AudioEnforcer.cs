@@ -58,9 +58,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         /// <summary>Whether the right channel is enabled.</summary>
         public bool Right = true;
 
-        /// <summary>
-        /// Add an audio instance to the enforcer.
-        /// </summary>
+        /// <summary>Add an audio instance to the enforcer.</summary>
         /// <param name="inst">The instance to add.</param>
         public void Add(ActiveSound inst)
         {
@@ -75,9 +73,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             }
         }
 
-        /// <summary>
-        /// Initialize and load the enforcer.
-        /// </summary>
+        /// <summary>Initialize and load the enforcer.</summary>
         /// <param name="acontext">The backing OpenAL context.</param>
         public void Init(ALContext acontext)
         {
@@ -144,9 +140,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             /// <summary>Actual byte space to load at once.</summary>
             public const int ACTUAL_SAMPLES = (int)((FREQUENCY * SAMPLE_LOAD) / 1000.0) * CHANNELS * BYTERATE;
 
-            /// <summary>
-            /// Relevant OpenAL audio context.
-            /// </summary>
+            /// <summary>Relevant OpenAL audio context.</summary>
             public ALContext Context;
 
             /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the enforcer to prevent GC thrash.</summary>
@@ -155,17 +149,13 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
             public int ByteBufferID;
 
-            /// <summary>
-            /// The OpenAL audio source ID.
-            /// </summary>
+            /// <summary>The OpenAL audio source ID.</summary>
             public int ALAudioSource;
 
             /// <summary>Cached reusable list of dead audio instances.</summary>
             public List<LiveAudioInstance> DeadInstances;
 
-            /// <summary>
-            /// Queue of reusable buffer IDs.
-            /// </summary>
+            /// <summary>Queue of reusable buffer IDs.</summary>
             public Queue<int> UsableBufferIDs;
 
             /// <summary>Gets and cleans the next byte buffer to use.</summary>

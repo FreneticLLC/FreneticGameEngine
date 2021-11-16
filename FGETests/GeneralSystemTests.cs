@@ -20,24 +20,18 @@ using NUnit.Framework;
 
 namespace FGETests
 {
-    /// <summary>
-    /// Tests general expectations of the C# language and the system running it.
-    /// </summary>
+    /// <summary>Tests general expectations of the C# language and the system running it.</summary>
     [TestFixture]
     public class GeneralSystemTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
         }
 
-        /// <summary>
-        /// Confirm that number translation locale is correct.
-        /// </summary>
+        /// <summary>Confirm that number translation locale is correct.</summary>
         [Test]
         public static void TestFloatStrings()
         {
@@ -45,9 +39,7 @@ namespace FGETests
             Assert.That((1.9f).ToString().Equals("1.9"), "Numbers (float) 1.9 != " + (1.9f).ToString() + ", possibly a locale issue?");
         }
 
-        /// <summary>
-        /// Confirms that bit endianness is correct.
-        /// </summary>
+        /// <summary>Confirms that bit endianness is correct.</summary>
         [Test]
         public static void TestEndianness()
         {
@@ -57,9 +49,7 @@ namespace FGETests
             }
         }
 
-        /// <summary>
-        /// Confirms that integer bit encoding is correct.
-        /// </summary>
+        /// <summary>Confirms that integer bit encoding is correct.</summary>
         [Test]
         public static void TestIntBits()
         {
@@ -71,9 +61,7 @@ namespace FGETests
             Assert.That(bI[3] == 0, "Bit contents (int->bytes)[3]");
         }
 
-        /// <summary>
-        /// Confirms that floating point bit encoding is correct.
-        /// </summary>
+        /// <summary>Confirms that floating point bit encoding is correct.</summary>
         [Test]
         public static void TestFloatBits()
         {
@@ -85,9 +73,7 @@ namespace FGETests
             Assert.That(bF[3] == 66, "Bit contents (float->bytes)[3]");
         }
 
-        /// <summary>
-        /// Confirms that double parseback is correct.
-        /// </summary>
+        /// <summary>Confirms that double parseback is correct.</summary>
         [Test]
         public static void TestDoubleParseback()
         {

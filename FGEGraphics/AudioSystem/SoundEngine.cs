@@ -29,14 +29,10 @@ using NVorbis;
 
 namespace FGEGraphics.AudioSystem
 {
-    /// <summary>
-    /// An audio sound system and engine for playing audio.
-    /// </summary>
+    /// <summary>An audio sound system and engine for playing audio.</summary>
     public class SoundEngine : IDisposable
     {
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -50,28 +46,20 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Disposes the window client.
-        /// </summary>
+        /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// A "noise" sound effect.
-        /// </summary>
+        /// <summary>A "noise" sound effect.</summary>
         public SoundEffect Noise;
 
-        /// <summary>
-        /// The audio context from OpenAL.
-        /// </summary>
+        /// <summary>The audio context from OpenAL.</summary>
         public ALContext Context = new ALContext(IntPtr.Zero);
 
-        /// <summary>
-        /// The internal audio enforcer, if used.
-        /// </summary>
+        /// <summary>The internal audio enforcer, if used.</summary>
         public AudioEnforcer EnforcerInternal;
 
         /// <summary>
@@ -82,24 +70,16 @@ namespace FGEGraphics.AudioSystem
 
         //public MicrophoneHandler Microphone = null;
 
-        /// <summary>
-        /// The backing game client.
-        /// </summary>
+        /// <summary>The backing game client.</summary>
         public GameEngineBase Client;
 
-        /// <summary>
-        /// Current global volume.
-        /// </summary>
+        /// <summary>Current global volume.</summary>
         public float GlobalVolume = 0.5f;
 
-        /// <summary>
-        /// Current global pitch.
-        /// </summary>
+        /// <summary>Current global pitch.</summary>
         public float GlobalPitch = 1.0f;
-        
-        /// <summary>
-        /// Initialize the sound engine.
-        /// </summary>
+
+        /// <summary>Initialize the sound engine.</summary>
         /// <param name="tclient">The backing client.</param>
         public void Init(GameEngineBase tclient)
         {
@@ -149,9 +129,7 @@ namespace FGEGraphics.AudioSystem
             //DeafLoop = GetSound("sfx/ringing/earring_loop");
         }
 
-        /// <summary>
-        /// Stop all sounds.
-        /// </summary>
+        /// <summary>Stop all sounds.</summary>
         public void StopAll()
         {
             for (int i = 0; i < PlayingNow.Count; i++)
@@ -161,9 +139,7 @@ namespace FGEGraphics.AudioSystem
             PlayingNow.Clear();
         }
 
-        /// <summary>
-        /// Shutdown the engine.
-        /// </summary>
+        /// <summary>Shutdown the engine.</summary>
         public void Shutdown()
         {
             StopAll();
@@ -179,18 +155,14 @@ namespace FGEGraphics.AudioSystem
             Context = new ALContext(IntPtr.Zero);
         }
 
-        /// <summary>
-        /// Whether the engine is 'selected' currently, and should play audio.
-        /// </summary>
+        /// <summary>Whether the engine is 'selected' currently, and should play audio.</summary>
         public bool Selected = true;
 
         //SoundEffect DeafLoop;
 
         //public ActiveSound DeafNoise = null;
 
-        /// <summary>
-        /// Checks for audio errors.
-        /// </summary>
+        /// <summary>Checks for audio errors.</summary>
         /// <param name="inp">The location.</param>
         [Conditional("AUDIO_ERROR_CHECK")]
         public void CheckError(string inp)
@@ -207,19 +179,13 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// The current position.
-        /// </summary>
+        /// <summary>The current position.</summary>
         public Location CPosition = Location.Zero;
 
-        /// <summary>
-        /// Time until the next clean up pass.
-        /// </summary>
+        /// <summary>Time until the next clean up pass.</summary>
         public double TimeTowardsNextClean = 0.0;
 
-        /// <summary>
-        /// Updates the sound engine.
-        /// </summary>
+        /// <summary>Updates the sound engine.</summary>
         /// <param name="position">Current position.</param>
         /// <param name="forward">Forward vector.</param>
         /// <param name="up">Up vcector.</param>
@@ -397,14 +363,10 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Effect names to remove.
-        /// </summary>
+        /// <summary>Effect names to remove.</summary>
         readonly List<string> ToRemove = new List<string>();
 
-        /// <summary>
-        /// Runs a full clean-up pass.
-        /// </summary>
+        /// <summary>Runs a full clean-up pass.</summary>
         public void CleanTick()
         {
             foreach (KeyValuePair<string, SoundEffect> effect in Effects)
@@ -426,19 +388,13 @@ namespace FGEGraphics.AudioSystem
             ToRemove.Clear();
         }
 
-        /// <summary>
-        /// Current effects.
-        /// </summary>
+        /// <summary>Current effects.</summary>
         public Dictionary<string, SoundEffect> Effects;
 
-        /// <summary>
-        /// Currently playing audio.
-        /// </summary>
+        /// <summary>Currently playing audio.</summary>
         public List<ActiveSound> PlayingNow;
 
-        /// <summary>
-        /// Try to clean things. Return whether anything was cleaned.
-        /// </summary>
+        /// <summary>Try to clean things. Return whether anything was cleaned.</summary>
         /// <returns>Whether successful.</returns>
         public bool CanClean()
         {
@@ -560,9 +516,7 @@ namespace FGEGraphics.AudioSystem
             playSound();
         }
 
-        /// <summary>
-        /// Play a sound (simple internal option).
-        /// </summary>
+        /// <summary>Play a sound (simple internal option).</summary>
         /// <param name="sfx">The effect.</param>
         /// <param name="loop">Whether to loop.</param>
         /// <returns>The sound played.</returns>
@@ -592,9 +546,7 @@ namespace FGEGraphics.AudioSystem
             return playSound();
         }
 
-        /// <summary>
-        /// Gets a sound by name.
-        /// </summary>
+        /// <summary>Gets a sound by name.</summary>
         /// <param name="name">The name.</param>
         /// <returns>The sound.</returns>
         public SoundEffect GetSound(string name)
@@ -620,9 +572,7 @@ namespace FGEGraphics.AudioSystem
             return sfx;
         }
 
-        /// <summary>
-        /// Gets the OpenAL sound format for some data.
-        /// </summary>
+        /// <summary>Gets the OpenAL sound format for some data.</summary>
         /// <param name="channels">Channel count.</param>
         /// <param name="bits">Bit count.</param>
         /// <returns>AL format.</returns>
@@ -638,14 +588,10 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Lock object to guarantee no simultaneous file reads.
-        /// </summary>
+        /// <summary>Lock object to guarantee no simultaneous file reads.</summary>
         public LockObject SoundFileLocker = new LockObject();
 
-        /// <summary>
-        /// Load a sound effect.
-        /// </summary>
+        /// <summary>Load a sound effect.</summary>
         /// <param name="name">The name of the effect.</param>
         /// <returns>The sound effect.</returns>
         public SoundEffect LoadSound(string name)
@@ -721,9 +667,7 @@ namespace FGEGraphics.AudioSystem
         public double TimeDeaf = 0.0;
         */
 
-        /// <summary>
-        /// Loads a sound effect from a .OGG stream.
-        /// </summary>
+        /// <summary>Loads a sound effect from a .OGG stream.</summary>
         /// <param name="stream">The data stream.</param>
         /// <param name="name">The name.</param>
         /// <returns>The sound effect.</returns>
@@ -761,9 +705,7 @@ namespace FGEGraphics.AudioSystem
             return sfx;
         }
 
-        /// <summary>
-        /// Loads a sound effect from a .WAV stream.
-        /// </summary>
+        /// <summary>Loads a sound effect from a .WAV stream.</summary>
         /// <param name="stream">The data stream.</param>
         /// <param name="name">The name.</param>
         /// <returns>The sound effect.</returns>
@@ -811,9 +753,7 @@ namespace FGEGraphics.AudioSystem
             return sfx;
         }
 
-        /// <summary>
-        /// Loads a WAVE (.wav) audio effect.
-        /// </summary>
+        /// <summary>Loads a WAVE (.wav) audio effect.</summary>
         /// <param name="stream">The stream.</param>
         /// <param name="channels">Channel count output.</param>
         /// <param name="bits">Bit count output.</param>
@@ -877,9 +817,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Estimates current audio levels (If enforcer enabled).
-        /// </summary>
+        /// <summary>Estimates current audio levels (If enforcer enabled).</summary>
         /// <returns>The audio level.</returns>
         public float EstimateAudioLevel()
         {

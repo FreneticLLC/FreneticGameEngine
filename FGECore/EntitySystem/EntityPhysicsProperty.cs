@@ -82,7 +82,7 @@ namespace FGECore.EntitySystem
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
-        
+
         /// <summary>Gets or sets the entity's mass.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
@@ -202,9 +202,7 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Gets or sets the entity's position.
-        /// </summary>
+        /// <summary>Gets or sets the entity's position.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location Position
@@ -336,7 +334,7 @@ namespace FGECore.EntitySystem
             IsSpawned = true;
             TickUpdates();
         }
-        
+
         /// <summary>Ticks the physics entity.</summary>
         public void Tick()
         {
@@ -380,7 +378,7 @@ namespace FGECore.EntitySystem
 
         /// <summary>Fired before the physics entity is despawned from the world.</summary>
         public Action DespawnEvent;
-        
+
         /// <summary>Handles the physics entity being de-spawned from a world.</summary>
         public void DespawnHandle()
         {

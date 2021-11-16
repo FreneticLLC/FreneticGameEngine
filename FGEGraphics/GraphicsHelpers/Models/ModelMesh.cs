@@ -17,24 +17,16 @@ using FGEGraphics.ClientSystem;
 namespace FGEGraphics.GraphicsHelpers.Models
 {
 
-    /// <summary>
-    /// Represents a mesh within a model.
-    /// </summary>
+    /// <summary>Represents a mesh within a model.</summary>
     public class ModelMesh
     {
-        /// <summary>
-        /// The name of this mesh.
-        /// </summary>
+        /// <summary>The name of this mesh.</summary>
         public string Name;
 
-        /// <summary>
-        /// The bones relevant to this mesh.
-        /// </summary>
+        /// <summary>The bones relevant to this mesh.</summary>
         public List<ModelBone> Bones = new List<ModelBone>();
 
-        /// <summary>
-        /// Constructs the model mesh.
-        /// </summary>
+        /// <summary>Constructs the model mesh.</summary>
         /// <param name="_name">The name of it.</param>
         public ModelMesh(string _name)
         {
@@ -46,22 +38,16 @@ namespace FGEGraphics.GraphicsHelpers.Models
             BaseRenderable = new Renderable();
         }
 
-        /// <summary>
-        /// The VBO for this mesh.
-        /// </summary>
+        /// <summary>The VBO for this mesh.</summary>
         public Renderable BaseRenderable;
 
-        /// <summary>
-        /// Destroys the backing <see cref="Renderable"/>.
-        /// </summary>
+        /// <summary>Destroys the backing <see cref="Renderable"/>.</summary>
         public void Destroy()
         {
             BaseRenderable.Destroy();
         }
 
-        /// <summary>
-        /// Renders the mesh.
-        /// </summary>
+        /// <summary>Renders the mesh.</summary>
         /// <param name="context">The sourcing render context.</param>
         public void Draw(RenderContext context)
         {

@@ -17,14 +17,10 @@ using FGECore.ServerSystem.EntitySystem;
 
 namespace FGECore.ServerSystem
 {
-    /// <summary>
-    /// Represents an engine on the server side.
-    /// </summary>
+    /// <summary>Represents an engine on the server side.</summary>
     public class ServerEngine : BasicEngine<ServerEntity, ServerEngine>
     {
-        /// <summary>
-        /// Creates an entity.
-        /// </summary>
+        /// <summary>Creates an entity.</summary>
         /// <param name="ticks">Whether it ticks.</param>
         /// <returns>The entity.</returns>
         public override ServerEntity CreateEntity(bool ticks)

@@ -50,14 +50,10 @@ namespace FGECore.UtilitySystems
     // mcmonkey - ORIGINAL HEADER END
 
     // This class all mcmonkey
-    /// <summary>
-    /// Simplex noise helper.
-    /// </summary>
+    /// <summary>Simplex noise helper.</summary>
     public static class SimplexNoise
     {
-        /// <summary>
-        /// Generate 2D simplex noise.
-        /// </summary>
+        /// <summary>Generate 2D simplex noise.</summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <returns>The noise value.</returns>
@@ -67,9 +63,7 @@ namespace FGECore.UtilitySystems
             return (SimplexNoiseInternal.Generate(Math.Abs(x), Math.Abs(y)) + 1.0) * 0.5;
         }
 
-        /// <summary>
-        /// Generate 3D simplex noise.
-        /// </summary>
+        /// <summary>Generate 3D simplex noise.</summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="z">The Z coordinate.</param>
@@ -90,9 +84,7 @@ namespace FGECore.UtilitySystems
     /// </summary>
     public class SimplexNoiseInternal // mcmonkey - class rename
     {
-        /// <summary>
-        /// 1D simplex noise.
-        /// </summary>
+        /// <summary>1D simplex noise.</summary>
         public static double Generate(double x)
         {
             long i0 = FastFloor(x);
@@ -114,9 +106,7 @@ namespace FGECore.UtilitySystems
             return 0.395f * (n0 + n1);
         }
 
-        /// <summary>
-        /// 2D simplex noise.
-        /// </summary>
+        /// <summary>2D simplex noise.</summary>
         public static double Generate(double x, double y)
         {
             const double F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
@@ -187,9 +177,7 @@ namespace FGECore.UtilitySystems
         }
 
 
-        /// <summary>
-        /// 3D simplex noise.
-        /// </summary>
+        /// <summary>3D simplex noise.</summary>
         public static double Generate(double x, double y, double z)
         {
             // Simple skewing factors for the 3D case

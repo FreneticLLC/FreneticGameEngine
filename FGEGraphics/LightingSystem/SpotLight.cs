@@ -19,34 +19,22 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a directed spot light in 3D.
-    /// </summary>
+    /// <summary>Represents a directed spot light in 3D.</summary>
     public class SpotLight : LightObject
     {
-        /// <summary>
-        /// The range of the light.
-        /// </summary>
+        /// <summary>The range of the light.</summary>
         public float Radius;
 
-        /// <summary>
-        /// Color of the light.
-        /// </summary>
+        /// <summary>Color of the light.</summary>
         public Location Color;
 
-        /// <summary>
-        /// Direction of the light.
-        /// </summary>
+        /// <summary>Direction of the light.</summary>
         public Location Direction;
 
-        /// <summary>
-        /// Width of the light (FOV).
-        /// </summary>
+        /// <summary>Width of the light (FOV).</summary>
         public float Width;
 
-        /// <summary>
-        /// Constructs the spot light.
-        /// </summary>
+        /// <summary>Constructs the spot light.</summary>
         /// <param name="pos">Position.</param>
         /// <param name="radius">Radius.</param>
         /// <param name="col">Color.</param>
@@ -72,17 +60,13 @@ namespace FGEGraphics.LightingSystem
             MaxDistance = radius;
         }
 
-        /// <summary>
-        /// Destroys the spot light.
-        /// </summary>
+        /// <summary>Destroys the spot light.</summary>
         public void Destroy()
         {
             InternalLights[0].Destroy();
         }
 
-        /// <summary>
-        /// Reposition the light.
-        /// </summary>
+        /// <summary>Reposition the light.</summary>
         /// <param name="pos">New position.</param>
         public override void Reposition(Location pos)
         {

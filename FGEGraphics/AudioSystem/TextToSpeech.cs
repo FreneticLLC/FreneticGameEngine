@@ -23,19 +23,13 @@ using System.Speech.Synthesis;
 
 namespace FGEGraphics.AudioSystem
 {
-    /// <summary>
-    /// Text-to-speech helper.
-    /// </summary>
+    /// <summary>Text-to-speech helper.</summary>
     public class TextToSpeech
     {
-        /// <summary>
-        /// Whether to try the Windows speech engine.
-        /// </summary>
+        /// <summary>Whether to try the Windows speech engine.</summary>
         public static bool TrySpeech = true;
 
-        /// <summary>
-        /// Speaks aloud some text.
-        /// </summary>
+        /// <summary>Speaks aloud some text.</summary>
         /// <param name="text">The text.</param>
         /// <param name="male">Whether to be male (if not, female).</param>
         /// <param name="rate">The rate at which to speak.</param>

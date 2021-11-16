@@ -26,138 +26,86 @@ namespace FGEWelcomer
     /// </summary>
     public partial class WelcomerForm : Form
     {
-        /// <summary>
-        /// possible things for the mouse to be over on this form.
-        /// </summary>
+        /// <summary>possible things for the mouse to be over on this form.</summary>
         public enum MouseOver
         {
-            /// <summary>
-            /// No item is under the mouse.
-            /// </summary>
+            /// <summary>No item is under the mouse.</summary>
             NONE = 0,
-            /// <summary>
-            /// The "Exit" button is under the mouse.
-            /// </summary>
+            /// <summary>The "Exit" button is under the mouse.</summary>
             EXIT = 1,
-            /// <summary>
-            /// The general top bar is under the mouse.
-            /// </summary>
+            /// <summary>The general top bar is under the mouse.</summary>
             TOPBAR = 2,
-            /// <summary>
-            /// The 'new project 3d static' button is under the mouse.
-            /// </summary>
+            /// <summary>The 'new project 3d static' button is under the mouse.</summary>
             NEW_BUTTON_3D_STATIC = 3,
-            /// <summary>
-            /// The 'new project (2D)' button is under the mouse.
-            /// </summary>
+            /// <summary>The 'new project (2D)' button is under the mouse.</summary>
             NEW_BUTTON_2D = 4,
-            /// <summary>
-            /// The 'new project 3d git' button is under the mouse.
-            /// </summary>
+            /// <summary>The 'new project 3d git' button is under the mouse.</summary>
             NEW_BUTTON_3D_GIT = 5
         }
 
-        /// <summary>
-        /// Enable double buffering.
-        /// </summary>
+        /// <summary>Enable double buffering.</summary>
         protected override CreateParams CreateParams
         {
             get
             {
                 CreateParams handleParam = base.CreateParams;
-                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED       
+                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
                 return handleParam;
             }
         }
 
-        /// <summary>
-        /// What the mouse is currently over.
-        /// </summary>
+        /// <summary>What the mouse is currently over.</summary>
         public MouseOver Hovered = MouseOver.NONE;
 
-        /// <summary>
-        /// What the mouse has clicked (NONE if mouse button is not pressed down).
-        /// </summary>
+        /// <summary>What the mouse has clicked (NONE if mouse button is not pressed down).</summary>
         public MouseOver Clicked = MouseOver.NONE;
 
-        /// <summary>
-        /// The main icon for the Welcomer form.
-        /// </summary>
+        /// <summary>The main icon for the Welcomer form.</summary>
         public Icon WelcomerIcon;
 
-        /// <summary>
-        /// The "Exit" button icon.
-        /// </summary>
+        /// <summary>The "Exit" button icon.</summary>
         public Icon WelcomerExitIcon;
 
-        /// <summary>
-        /// The background color for <see cref="WelcomerIcon"/>.
-        /// </summary>
+        /// <summary>The background color for <see cref="WelcomerIcon"/>.</summary>
         public Color WelcomerIconBackColor = Color.FromArgb(170, 190, 190);
 
-        /// <summary>
-        /// The outline color for <see cref="WelcomerIcon"/>.
-        /// </summary>
+        /// <summary>The outline color for <see cref="WelcomerIcon"/>.</summary>
         public Color WelcomerIconOutlineColor = Color.FromArgb(100, 230, 230);
 
-        /// <summary>
-        /// The main form background color.
-        /// </summary>
+        /// <summary>The main form background color.</summary>
         public Color WelcomerBackColor = Color.FromArgb(245, 255, 255);
 
-        /// <summary>
-        /// The color the <see cref="WelcomerExitIcon"/> shines behind when it is hovered over.
-        /// </summary>
+        /// <summary>The color the <see cref="WelcomerExitIcon"/> shines behind when it is hovered over.</summary>
         public Color WelcomerExitButtonOver = Color.FromArgb(255, 20, 20);
 
-        /// <summary>
-        /// The color new button shines normally.
-        /// </summary>
+        /// <summary>The color new button shines normally.</summary>
         public Color WelcomerNewButton = Color.FromArgb(100, 200, 200);
 
-        /// <summary>
-        /// The color new button is outlined in.
-        /// </summary>
+        /// <summary>The color new button is outlined in.</summary>
         public Color WelcomerNewButtonOutline = Color.FromArgb(100, 230, 230);
 
-        /// <summary>
-        /// The color new button shines behind when it is hovered over.
-        /// </summary>
+        /// <summary>The color new button shines behind when it is hovered over.</summary>
         public Color WelcomerNewButtonOver = Color.FromArgb(20, 200, 100);
 
-        /// <summary>
-        /// The picture box for rendering.
-        /// </summary>
+        /// <summary>The picture box for rendering.</summary>
         public PictureBox PicBox;
 
-        /// <summary>
-        /// Whether the form is currently being dragged.
-        /// </summary>
+        /// <summary>Whether the form is currently being dragged.</summary>
         public bool Dragging = false;
 
-        /// <summary>
-        /// The last position of the cursor when dragging.
-        /// </summary>
+        /// <summary>The last position of the cursor when dragging.</summary>
         public Point DragLast;
 
-        /// <summary>
-        /// Timer for general ticking.
-        /// </summary>
+        /// <summary>Timer for general ticking.</summary>
         public Timer TickTimer;
 
-        /// <summary>
-        /// The font for the title bar;
-        /// </summary>
+        /// <summary>The font for the title bar;</summary>
         public Font TitleBarFont;
 
-        /// <summary>
-        /// The font for the new button.
-        /// </summary>
+        /// <summary>The font for the new button.</summary>
         public Font NewButtonFont;
 
-        /// <summary>
-        /// Initialize the form.
-        /// </summary>
+        /// <summary>Initialize the form.</summary>
         public WelcomerForm()
         {
             SuspendLayout();
@@ -190,9 +138,7 @@ namespace FGEWelcomer
             TickTimer.Start();
         }
 
-        /// <summary>
-        /// Handles mouse leaving the form.
-        /// </summary>
+        /// <summary>Handles mouse leaving the form.</summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event data</param>
         private void WelcomerForm_MouseLeave(object sender, EventArgs e)
@@ -201,9 +147,7 @@ namespace FGEWelcomer
             PicBox.Invalidate();
         }
 
-        /// <summary>
-        /// Handles general ticking needs.
-        /// </summary>
+        /// <summary>Handles general ticking needs.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void TickTimer_Tick(object sender, EventArgs e)
@@ -227,9 +171,7 @@ namespace FGEWelcomer
             }
         }
 
-        /// <summary>
-        /// Handles form resizing.
-        /// </summary>
+        /// <summary>Handles form resizing.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void Form1_Resize(object sender, EventArgs e)
@@ -237,9 +179,7 @@ namespace FGEWelcomer
             PicBox.Size = new Size(Width, Height);
         }
 
-        /// <summary>
-        /// Copies over a text file to a new project.
-        /// </summary>
+        /// <summary>Copies over a text file to a new project.</summary>
         /// <param name="f_in">Input file name.</param>
         /// <param name="f_out">Output file name.</param>
         /// <param name="projectData">Any custom settings.</param>
@@ -254,9 +194,7 @@ namespace FGEWelcomer
             File.WriteAllText(f_out, inp);
         }
 
-        /// <summary>
-        /// Runs a git command automatically.
-        /// </summary>
+        /// <summary>Runs a git command automatically.</summary>
         /// <param name="folder">The folder to run it in.</param>
         /// <param name="gitExe">The git executable.</param>
         /// <param name="args">The git command arguments.</param>
@@ -270,10 +208,8 @@ namespace FGEWelcomer
             };
             Process.Start(psi).WaitForExit();
         }
-        
-        /// <summary>
-        /// Creates a game project.
-        /// </summary>
+
+        /// <summary>Creates a game project.</summary>
         /// <param name="threed">Whether it should be 3D.</param>
         /// <param name="submodule">Whether it should be backed by a submodule (if not, use static dll files).</param>
         public void CreateGame(bool threed, bool submodule)
@@ -369,9 +305,7 @@ namespace FGEWelcomer
             MessageBox.Show(this, "Created! Launching your editor... if it doesn't open, navigate to the folder and open the SLN file!", "Success");
         }
 
-        /// <summary>
-        /// Copies a directory and all child directories and files to a new location.
-        /// </summary>
+        /// <summary>Copies a directory and all child directories and files to a new location.</summary>
         /// <param name="dir">The directory.</param>
         /// <param name="newBase">The new base folder.</param>
         public void CopyDirectoryAndChildren(string dir, string newBase)
@@ -401,9 +335,7 @@ namespace FGEWelcomer
             "openvr_api.dll", "openvr_api.pdb"
         };
 
-        /// <summary>
-        /// Handles a mouse button being released.
-        /// </summary>
+        /// <summary>Handles a mouse button being released.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void Form1_MouseUp(object sender, MouseEventArgs e)
@@ -433,9 +365,7 @@ namespace FGEWelcomer
             PicBox.Invalidate();
         }
 
-        /// <summary>
-        /// Handles a mouse button being pressed.
-        /// </summary>
+        /// <summary>Handles a mouse button being pressed.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void Form1_MouseClick(object sender, MouseEventArgs e)
@@ -473,9 +403,7 @@ namespace FGEWelcomer
             PicBox.Invalidate();
         }
 
-        /// <summary>
-        /// Handles mouse movements over the form.
-        /// </summary>
+        /// <summary>Handles mouse movements over the form.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void Form1_MouseMove(object sender, MouseEventArgs e)
@@ -507,44 +435,28 @@ namespace FGEWelcomer
             PicBox.Invalidate();
         }
 
-        /// <summary>
-        /// The 'welcome' message topbar text.
-        /// </summary>
+        /// <summary>The 'welcome' message topbar text.</summary>
         public const string TOPBAR_TEXT = "Welcome | Frenetic Game Engine";
 
-        /// <summary>
-        /// The 'create new game project (3D - Static)' message text.
-        /// </summary>
+        /// <summary>The 'create new game project (3D - Static)' message text.</summary>
         public const string NEWBUTTON_TEXT_3D_STATIC = "Create New Game Project (3D - Static Backed)";
 
-        /// <summary>
-        /// The 'create new game project (3D - Static)' message rectangle.
-        /// </summary>
+        /// <summary>The 'create new game project (3D - Static)' message rectangle.</summary>
         public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_STATIC = new Rectangle(2, 38, 400, 25);
 
-        /// <summary>
-        /// The 'create new game project (2D)' message text.
-        /// </summary>
+        /// <summary>The 'create new game project (2D)' message text.</summary>
         public const string NEWBUTTON_TEXT_2D = "Create New Game Project (2D)";
 
-        /// <summary>
-        /// The 'create new game project (2D)' message rectangle.
-        /// </summary>
+        /// <summary>The 'create new game project (2D)' message rectangle.</summary>
         public static readonly Rectangle NEWBUTTON_RECTANGLE_2D = new Rectangle(2 + 400 + 5, 38, 234, 25);
 
-        /// <summary>
-        /// The 'create new game project (3D - Submodule Backed)' message text.
-        /// </summary>
+        /// <summary>The 'create new game project (3D - Submodule Backed)' message text.</summary>
         public const string NEWBUTTON_TEXT_3D_GIT = "Create New Game Project (3D - Submodule Backed)";
 
-        /// <summary>
-        /// The 'create new game project (3D - Submodule Backed)' message rectangle.
-        /// </summary>
+        /// <summary>The 'create new game project (3D - Submodule Backed)' message rectangle.</summary>
         public static readonly Rectangle NEWBUTTON_RECTANGLE_3D_GIT = new Rectangle(2, 38 + 25 + 5, 400, 25);
 
-        /// <summary>
-        /// Handles redrawing the form.
-        /// </summary>
+        /// <summary>Handles redrawing the form.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void Form1_Paint(object sender, PaintEventArgs e)

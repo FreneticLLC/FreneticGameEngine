@@ -18,30 +18,22 @@ using FGECore.UtilitySystems;
 
 namespace FGECore.FileSystems
 {
-    /// <summary>
-    /// Helper to read data from a stream.
-    /// </summary>
+    /// <summary>Helper to read data from a stream.</summary>
     public class DataReader
     {
-        /// <summary>
-        /// The internal stream.
-        /// </summary>
+        /// <summary>The internal stream.</summary>
         public DataStream Internal;
 
         private readonly byte[] HelperBytes = new byte[32];
 
-        /// <summary>
-        /// Constructs the data reader.
-        /// </summary>
+        /// <summary>Constructs the data reader.</summary>
         /// <param name="stream">The base stream.</param>
         public DataReader(DataStream stream)
         {
             Internal = stream;
         }
 
-        /// <summary>
-        /// Reads a single byte from the stream.
-        /// </summary>
+        /// <summary>Reads a single byte from the stream.</summary>
         public byte ReadByte()
         {
             int r = Internal.ReadByte();
@@ -52,9 +44,7 @@ namespace FGECore.FileSystems
             return (byte)r;
         }
 
-        /// <summary>
-        /// Gets the amount of data available.
-        /// </summary>
+        /// <summary>Gets the amount of data available.</summary>
         public int Available
         {
             get
@@ -63,9 +53,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Read a set of bytes.
-        /// </summary>
+        /// <summary>Read a set of bytes.</summary>
         /// <param name="count">The number of bytes.</param>
         /// <returns>The read bytes.</returns>
         public byte[] ReadBytes(int count)
@@ -78,9 +66,7 @@ namespace FGECore.FileSystems
             return b;
         }
 
-        /// <summary>
-        /// Read a set of bytes.
-        /// </summary>
+        /// <summary>Read a set of bytes.</summary>
         /// <param name="outputBytes">The byte array to read into.</param>
         /// <param name="offset">The starting offset.</param>
         /// <param name="count">The number of bytes.</param>
@@ -92,9 +78,7 @@ namespace FGECore.FileSystems
             }
         }
 
-        /// <summary>
-        /// Read a signed byte.
-        /// </summary>
+        /// <summary>Read a signed byte.</summary>
         /// <returns></returns>
         public sbyte ReadSByte()
         {
@@ -106,27 +90,21 @@ namespace FGECore.FileSystems
             return (sbyte)r;
         }
 
-        /// <summary>
-        /// Read a boolean (1 byte).
-        /// </summary>
+        /// <summary>Read a boolean (1 byte).</summary>
         /// <returns></returns>
         public bool ReadBool()
         {
             return ReadByte() == 1;
         }
 
-        /// <summary>
-        /// Read a location object (24 bytes).
-        /// </summary>
+        /// <summary>Read a location object (24 bytes).</summary>
         public Location ReadLocation()
         {
             ReadBytes(HelperBytes, 0, 24);
             return Location.FromDoubleBytes(HelperBytes, 0);
         }
 
-        /// <summary>
-        /// Read a location object (12 bytes).
-        /// </summary>
+        /// <summary>Read a location object (12 bytes).</summary>
         public Location ReadLocationFloat()
         {
             float x = ReadFloat();
@@ -135,18 +113,14 @@ namespace FGECore.FileSystems
             return new Location(x, y, z);
         }
 
-        /// <summary>
-        /// Read a quaternion object (32 bytes).
-        /// </summary>
+        /// <summary>Read a quaternion object (32 bytes).</summary>
         public Quaternion ReadQuaternion()
         {
             ReadBytes(HelperBytes, 0, 32);
             return Quaternion.FromDoubleBytes(HelperBytes, 0);
         }
 
-        /// <summary>
-        /// Read a quaternion object (16 bytes).
-        /// </summary>
+        /// <summary>Read a quaternion object (16 bytes).</summary>
         public Quaternion ReadQuaternionFloat()
         {
             float x = ReadFloat();
@@ -156,9 +130,7 @@ namespace FGECore.FileSystems
             return new Quaternion(x, y, z, w);
         }
 
-        /// <summary>
-        /// Read a view direction into a location object (4 bytes).
-        /// </summary>
+        /// <summary>Read a view direction into a location object (4 bytes).</summary>
         /// <returns>The view direction location.</returns>
         public Location ReadViewDirection()
         {
@@ -174,9 +146,7 @@ namespace FGECore.FileSystems
             };
         }
 
-        /// <summary>
-        /// Read a character (2 bytes).
-        /// </summary>
+        /// <summary>Read a character (2 bytes).</summary>
         /// <returns></returns>
         public char ReadChar()
         {
@@ -184,81 +154,63 @@ namespace FGECore.FileSystems
             return (char) PrimitiveConversionHelper.BytesToUShort16(HelperBytes);
         }
 
-        /// <summary>
-        /// Read a short integer (2 bytes).
-        /// </summary>
+        /// <summary>Read a short integer (2 bytes).</summary>
         public short ReadShort()
         {
             ReadBytes(HelperBytes, 0, 2);
             return PrimitiveConversionHelper.BytesToShort16(HelperBytes);
         }
 
-        /// <summary>
-        /// Read an unsigned short integer (2 bytes).
-        /// </summary>
+        /// <summary>Read an unsigned short integer (2 bytes).</summary>
         public ushort ReadUShort()
         {
             ReadBytes(HelperBytes, 0, 2);
             return PrimitiveConversionHelper.BytesToUShort16(HelperBytes);
         }
 
-        /// <summary>
-        /// Read an integer (4 bytes).
-        /// </summary>
+        /// <summary>Read an integer (4 bytes).</summary>
         public int ReadInt()
         {
             ReadBytes(HelperBytes, 0, 4);
             return PrimitiveConversionHelper.BytesToInt32(HelperBytes);
         }
 
-        /// <summary>
-        /// Read an unsigned integer (4 bytes).
-        /// </summary>
+        /// <summary>Read an unsigned integer (4 bytes).</summary>
         public uint ReadUInt()
         {
             ReadBytes(HelperBytes, 0, 4);
             return PrimitiveConversionHelper.BytesToUInt32(HelperBytes);
         }
 
-        /// <summary>
-        /// Read a long integer (8 bytes).
-        /// </summary>
+        /// <summary>Read a long integer (8 bytes).</summary>
         public long ReadLong()
         {
             ReadBytes(HelperBytes, 0, 8);
             return PrimitiveConversionHelper.BytesToLong64(HelperBytes);
         }
 
-        /// <summary>
-        /// Read an unsigned long integer (8 bytes).
-        /// </summary>
+        /// <summary>Read an unsigned long integer (8 bytes).</summary>
         public ulong ReadULong()
         {
             ReadBytes(HelperBytes, 0, 8);
             return PrimitiveConversionHelper.BytesToULong64(HelperBytes);
         }
 
-        /// <summary>
-        /// Read a float (4 bytes).
-        /// </summary>
+        /// <summary>Read a float (4 bytes).</summary>
         public float ReadFloat()
         {
             ReadBytes(HelperBytes, 0, 4);
             return PrimitiveConversionHelper.BytesToFloat32(HelperBytes);
         }
 
-        /// <summary>
-        /// Read a double (8 bytes).
-        /// </summary>
+        /// <summary>Read a double (8 bytes).</summary>
         public double ReadDouble()
         {
             ReadBytes(HelperBytes, 0, 8);
             return PrimitiveConversionHelper.BytesToDouble64(HelperBytes);
         }
 
-        /// <summary>
-        /// Read a string with a specified length.
-        /// </summary>
+        /// <summary>Read a string with a specified length.</summary>
         public string ReadString(int length)
         {
             if (length <= 32)
@@ -269,36 +221,28 @@ namespace FGECore.FileSystems
             return StringConversionHelper.UTF8Encoding.GetString(ReadBytes(length), 0, length);
         }
 
-        /// <summary>
-        /// Read a "full set" of bytes: specified by a 4-byte length at the start of data.
-        /// </summary>
+        /// <summary>Read a "full set" of bytes: specified by a 4-byte length at the start of data.</summary>
         public byte[] ReadFullBytesVar()
         {
             int len = (int)ReadVarInt();
             return ReadBytes(len);
         }
 
-        /// <summary>
-        /// Read a "full" string: specified by a 4-byte length at the start of data.
-        /// </summary>
+        /// <summary>Read a "full" string: specified by a 4-byte length at the start of data.</summary>
         public string ReadFullStringVar()
         {
             int len = (int)ReadVarInt();
             return ReadString(len);
         }
 
-        /// <summary>
-        /// Read a "full set" of bytes: specified by a 4-byte length at the start of data.
-        /// </summary>
+        /// <summary>Read a "full set" of bytes: specified by a 4-byte length at the start of data.</summary>
         public byte[] ReadFullBytes()
         {
             int len = ReadInt();
             return ReadBytes(len);
         }
 
-        /// <summary>
-        /// Read a "full" string: specified by a 4-byte length at the start of data.
-        /// </summary>
+        /// <summary>Read a "full" string: specified by a 4-byte length at the start of data.</summary>
         public string ReadFullString()
         {
             int len = ReadInt();
@@ -333,9 +277,7 @@ namespace FGECore.FileSystems
             return res;
         }
 
-        /// <summary>
-        /// Close the underlying stream.
-        /// </summary>
+        /// <summary>Close the underlying stream.</summary>
         public void Close()
         {
             Internal.Close();

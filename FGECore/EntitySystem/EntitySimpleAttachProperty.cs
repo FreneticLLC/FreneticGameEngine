@@ -21,31 +21,23 @@ using BepuUtilities;
 
 namespace FGECore.EntitySystem
 {
-    /// <summary>
-    /// Attaches an entity to another entity.
-    /// </summary>
+    /// <summary>Attaches an entity to another entity.</summary>
     public class EntitySimpleAttachProperty : BasicEntityProperty
     {
-        /// <summary>
-        /// The entity this entity is attached to.
-        /// </summary>
+        /// <summary>The entity this entity is attached to.</summary>
         public virtual BasicEntity AttachedTo
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Set the relative offset to the current relative locations and orientation.
-        /// </summary>
+        /// <summary>Set the relative offset to the current relative locations and orientation.</summary>
         public virtual void SetRelativeToCurrent()
         {
             SetRelativeBasedOn(AttachedTo.LastKnownOrientation, AttachedTo.LastKnownPosition);
         }
 
-        /// <summary>
-        /// Sets the relative offset based on the attached properties.
-        /// </summary>
+        /// <summary>Sets the relative offset based on the attached properties.</summary>
         /// <param name="orient">The attached orientation.</param>
         /// <param name="pos">The attached position.</param>
         public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
@@ -55,14 +47,10 @@ namespace FGECore.EntitySystem
             RelativeOffset = Matrix4x4.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix4x4.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
         }
 
-        /// <summary>
-        /// The relative offset matrix offset to maintain.
-        /// </summary>
+        /// <summary>The relative offset matrix offset to maintain.</summary>
         public Matrix4x4 RelativeOffset = Matrix4x4.Identity;
 
-        /// <summary>
-        /// Handles the spawn event.
-        /// </summary>
+        /// <summary>Handles the spawn event.</summary>
         public override void OnSpawn()
         {
             AttachedTo.OnPositionChanged += FixPosition;
@@ -71,25 +59,19 @@ namespace FGECore.EntitySystem
             FixOrientation(AttachedTo.LastKnownOrientation);
         }
 
-        /// <summary>
-        /// Fixes this entity's position based on its attachment.
-        /// </summary>
+        /// <summary>Fixes this entity's position based on its attachment.</summary>
         public virtual void FixPosition(Location position)
         {
             SetPositionOrientation(position, AttachedTo.LastKnownOrientation);
         }
 
-        /// <summary>
-        /// Fixes this entity's orientation based on its attachment.
-        /// </summary>
+        /// <summary>Fixes this entity's orientation based on its attachment.</summary>
         public virtual void FixOrientation(MathHelpers.Quaternion orientation)
         {
             SetPositionOrientation(AttachedTo.LastKnownPosition, orientation);
         }
-        
-        /// <summary>
-        /// Sets this entity's position and orientation relative to <see cref="AttachedTo"/>.
-        /// </summary>
+
+        /// <summary>Sets this entity's position and orientation relative to <see cref="AttachedTo"/>.</summary>
         /// <param name="position">The attached-to entity's position.</param>
         /// <param name="orient">The attached-to entity's orientation.</param>
         public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
@@ -102,9 +84,7 @@ namespace FGECore.EntitySystem
             Entity.SetOrientation(quat);
         }
 
-        /// <summary>
-        /// Handles the despawn event.
-        /// </summary>
+        /// <summary>Handles the despawn event.</summary>
         public override void OnDespawn()
         {
             AttachedTo.OnPositionChanged -= FixPosition;

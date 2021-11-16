@@ -14,29 +14,19 @@ using System.Threading.Tasks;
 
 namespace FGECore.MathHelpers
 {
-    /// <summary>
-    /// Represents a float-based rectangle.
-    /// </summary>
+    /// <summary>Represents a float-based rectangle.</summary>
     public class Rectangle2F
     {
-        /// <summary>
-        /// X coordinate.
-        /// </summary>
+        /// <summary>X coordinate.</summary>
         public float X;
 
-        /// <summary>
-        /// Y coordinate.
-        /// </summary>
+        /// <summary>Y coordinate.</summary>
         public float Y;
 
-        /// <summary>
-        /// The width.
-        /// </summary>
+        /// <summary>The width.</summary>
         public float Width;
 
-        /// <summary>
-        /// The height.
-        /// </summary>
+        /// <summary>The height.</summary>
         public float Height;
     }
 }

@@ -25,9 +25,7 @@ namespace FGECore.CoreSystems
     /// </summary>
     public class LanguageEngine
     {
-        /// <summary>
-        /// Used for <see cref="DefaultLanguage"/> and <see cref="CurrentLanguage"/>.
-        /// </summary>
+        /// <summary>Used for <see cref="DefaultLanguage"/> and <see cref="CurrentLanguage"/>.</summary>
         public const string AUTO_DEFAULT = "en_us";
 
         /// <summary>
@@ -44,14 +42,10 @@ namespace FGECore.CoreSystems
         /// </summary>
         public Dictionary<string, FDSSection> EnglishDocuments = new Dictionary<string, FDSSection>();
 
-        /// <summary>
-        /// All documents in the currently set language.
-        /// </summary>
+        /// <summary>All documents in the currently set language.</summary>
         public Dictionary<string, FDSSection> LanguageDocuments = new Dictionary<string, FDSSection>();
 
-        /// <summary>
-        /// The currently set language.
-        /// </summary>
+        /// <summary>The currently set language.</summary>
         public string CurrentLanguage = AUTO_DEFAULT;
 
         /// <summary>
@@ -65,9 +59,7 @@ namespace FGECore.CoreSystems
             LanguageDocuments.Clear();
         }
 
-        /// <summary>
-        /// Gets a language document for the specified parameters.
-        /// </summary>
+        /// <summary>Gets a language document for the specified parameters.</summary>
         /// <param name="id">The document ID.</param>
         /// <param name="Files">The file system.</param>
         /// <param name="lang">The language to enforce for this read, if any.</param>
@@ -107,9 +99,7 @@ namespace FGECore.CoreSystems
             return null;
         }
 
-        /// <summary>
-        /// The key that represents a missing key.
-        /// </summary>
+        /// <summary>The key that represents a missing key.</summary>
         public const string BADKEY = "common.languages.badkey";
 
         /// <summary>
@@ -129,9 +119,7 @@ namespace FGECore.CoreSystems
             return info;
         }
 
-        /// <summary>
-        /// Handles a list of texts against a var, similar to <see cref="Handle(string, string[])"/>.
-        /// </summary>
+        /// <summary>Handles a list of texts against a var, similar to <see cref="Handle(string, string[])"/>.</summary>
         /// <param name="infolist">The list of infos.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>Handled lists.</returns>
@@ -144,9 +132,7 @@ namespace FGECore.CoreSystems
             return infolist;
         }
 
-        /// <summary>
-        /// Gets a list of texts, in the default language.
-        /// </summary>
+        /// <summary>Gets a list of texts, in the default language.</summary>
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text list.</returns>
@@ -174,9 +160,7 @@ namespace FGECore.CoreSystems
             return GetTextListDefault(Files, "core", BADKEY);
         }
 
-        /// <summary>
-        /// Gets a text, in the default language.
-        /// </summary>
+        /// <summary>Gets a text, in the default language.</summary>
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text.</returns>
@@ -204,9 +188,7 @@ namespace FGECore.CoreSystems
             return GetTextDefault(Files, "core", BADKEY);
         }
 
-        /// <summary>
-        /// Gets a list of texts.
-        /// </summary>
+        /// <summary>Gets a list of texts.</summary>
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text list.</returns>
@@ -243,9 +225,7 @@ namespace FGECore.CoreSystems
             return GetTextList(Files, "core", BADKEY);
         }
 
-        /// <summary>
-        /// Gets a text.
-        /// </summary>
+        /// <summary>Gets a text.</summary>
         /// <param name="Files">The file system.</param>
         /// <param name="pathAndVars">The path and its vars.</param>
         /// <returns>The text.</returns>

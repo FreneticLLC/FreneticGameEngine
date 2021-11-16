@@ -75,9 +75,7 @@ namespace FGEGraphics.GraphicsHelpers
             return OpenVR.IsHmdPresent();
         }
 
-        /// <summary>
-        /// Tries to initialize VR - returns the VR support object, or null if loading failed.
-        /// </summary>
+        /// <summary>Tries to initialize VR - returns the VR support object, or null if loading failed.</summary>
         /// <param name="twindow">The game client window.</param>
         public static VRSupport TryInit(GameClientWindow twindow)
         {
@@ -95,7 +93,7 @@ namespace FGEGraphics.GraphicsHelpers
             vrs.Start();
             return vrs;
         }
-        
+
         /// <summary>Internal start call for VR setup.</summary>
         public void Start()
         {
@@ -129,9 +127,7 @@ namespace FGEGraphics.GraphicsHelpers
             Window.Engine3D.Render3DView = true;
         }
 
-        /// <summary>
-        /// Gets the eye view point (boolean to specify left or right).
-        /// </summary>
+        /// <summary>Gets the eye view point (boolean to specify left or right).</summary>
         /// <param name="lefteye">Left or right.</param>
         /// <param name="cameraCenter">The camera center position to be relative to.</param>
         /// <returns>The eye view point matrix.</returns>
@@ -144,9 +140,7 @@ namespace FGEGraphics.GraphicsHelpers
             return headMat * eye;
         }
 
-        /// <summary>
-        /// Gets the projection for an eye view point.
-        /// </summary>
+        /// <summary>Gets the projection for an eye view point.</summary>
         /// <param name="lefteye">Left or right.</param>
         /// <param name="znear">Near plane.</param>
         /// <param name="zfar">Far plane.</param>
@@ -167,9 +161,7 @@ namespace FGEGraphics.GraphicsHelpers
             RightTexture.Destroy();
         }
 
-        /// <summary>
-        /// Gets the current controller state.
-        /// </summary>
+        /// <summary>Gets the current controller state.</summary>
         /// <param name="left">Left or right hand controller.</param>
         /// <returns>The controller state.</returns>
         public VRController GetController(bool left)
@@ -331,9 +323,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>All currently pressed buttons, as a flag enum.</summary>
         public VRButtons Pressed;
 
-        /// <summary>
-        /// Retrusn a simple string of the buttons pressed and axial motions on this controller.
-        /// </summary>
+        /// <summary>Retrusn a simple string of the buttons pressed and axial motions on this controller.</summary>
         /// <returns>The buttons and axes as a string.</returns>
         public override string ToString()
         {
@@ -386,9 +376,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>Current time.</summary>
         double CTime;
 
-        /// <summary>
-        /// Calculates the texture update.
-        /// </summary>
+        /// <summary>Calculates the texture update.</summary>
         /// <param name="cont">The controller.</param>
         /// <param name="timeNow">The current time.</param>
         /// <param name="tclient">The game client.</param>
@@ -442,13 +430,9 @@ namespace FGEGraphics.GraphicsHelpers
         NONE = 0,
         /// <summary>Unknown button.</summary>
         __A__ONE = 1,
-        /// <summary>
-        /// The menu button (Or "B", or "Y").
-        /// </summary>
+        /// <summary>The menu button (Or "B", or "Y").</summary>
         MENU_BUTTON_BY = 2,
-        /// <summary>
-        /// The side grip.
-        /// </summary>
+        /// <summary>The side grip.</summary>
         SIDE_GRIP = 4,
         /// <summary>Unknown button.</summary>
         __A__EIGHT = 8,
@@ -458,9 +442,7 @@ namespace FGEGraphics.GraphicsHelpers
         __A__THIRTY_TWO = 32,
         /// <summary>Unknown button.</summary>
         __A__SIXTY_FOUR = 64,
-        /// <summary>
-        /// The "A" or "X" button.
-        /// </summary>
+        /// <summary>The "A" or "X" button.</summary>
         BUTTON_AX = 128,
         /// <summary>Unknown button.</summary>
         __A__TWO_FIFTY_SIX = 256,
@@ -510,13 +492,9 @@ namespace FGEGraphics.GraphicsHelpers
         __U__FOUR = 4 * 16384 * 16384ul,
         /// <summary>Unknown button.</summary>
         __U__EIGHT = 8 * 16384 * 16384ul,
-        /// <summary>
-        /// The track pad.
-        /// </summary>
+        /// <summary>The track pad.</summary>
         TRACKPAD = 16 * 16384 * 16384ul,
-        /// <summary>
-        /// The trigger.
-        /// </summary>
+        /// <summary>The trigger.</summary>
         TRIGGER = 32 * 16384 * 16384ul,
         /// <summary>Unknown button.</summary>
         __U__SIXTY_FOUR = 64 * 16384 * 16384ul,

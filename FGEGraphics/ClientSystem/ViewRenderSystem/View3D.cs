@@ -35,9 +35,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
     /// </summary>
     public class View3D : View3DCoreDataSet
     {
-        /// <summary>
-        /// Constructs this <see cref="View3D"/> instance.
-        /// </summary>
+        /// <summary>Constructs this <see cref="View3D"/> instance.</summary>
         /// <param name="_engine">The relevant game engine instance.</param>
         public View3D(GameEngine3D _engine)
         {
@@ -54,35 +52,25 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             DeferredRenderer.CopyDataFrom(this);
         }
 
-        /// <summary>
-        /// Internal forward renderer.
-        /// </summary>
+        /// <summary>Internal forward renderer.</summary>
         public View3DForwardRenderer ForwardRenderer = new View3DForwardRenderer();
 
-        /// <summary>
-        /// Internal deferred renderer.
-        /// </summary>
+        /// <summary>Internal deferred renderer.</summary>
         public View3DDeferredRenderer DeferredRenderer = new View3DDeferredRenderer();
 
-        /// <summary>
-        /// Sets the viewport to match the render target, but does not track the change.
-        /// </summary>
+        /// <summary>Sets the viewport to match the render target, but does not track the change.</summary>
         public void SetViewPortUntracked()
         {
             GL.Viewport(0, 0, Config.Width, Config.Height);
         }
 
-        /// <summary>
-        /// Sets the view port to the correct values, and tracks them.
-        /// </summary>
+        /// <summary>Sets the view port to the correct values, and tracks them.</summary>
         public void SetViewportTracked()
         {
             Viewport(0, 0, Config.Width, Config.Height);
         }
 
-        /// <summary>
-        /// Sets and tracks the draw buffer mode.
-        /// </summary>
+        /// <summary>Sets and tracks the draw buffer mode.</summary>
         /// <param name="dbm">The mode to set.</param>
         public void DrawBuffer(DrawBufferMode dbm)
         {
@@ -90,9 +78,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.DrawBuffer(dbm);
         }
 
-        /// <summary>
-        /// Causes a simple 'flash bang' effect.
-        /// </summary>
+        /// <summary>Causes a simple 'flash bang' effect.</summary>
         /// <param name="duration_add">The duration to add to the effect.</param>
         public void Flashbang(double duration_add)
         {
@@ -103,9 +89,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             State.Flash_DurationLeft += duration_add;
         }
 
-        /// <summary>
-        /// Renders the entire 3D viewport.
-        /// </summary>
+        /// <summary>Renders the entire 3D viewport.</summary>
         public void Render()
         {
             int pfbo = Internal.CurrentFBO;
@@ -174,9 +158,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             return mat4f;
         }
 
-        /// <summary>
-        /// Sets the view matrix. Will yield a modified matrix, according to world offset. Generally used for the WORLD matrix and not others.
-        /// </summary>
+        /// <summary>Sets the view matrix. Will yield a modified matrix, according to world offset. Generally used for the WORLD matrix and not others.</summary>
         /// <param name="mat_loc">The matrix target location.</param>
         /// <param name="mat">The matrix itself.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -186,9 +168,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.UniformMatrix4(mat_loc, false, ref mat4f);
         }
 
-        /// <summary>
-        /// Sets and tracks the viewport for trackable changes.
-        /// </summary>
+        /// <summary>Sets and tracks the viewport for trackable changes.</summary>
         /// <param name="x">X coordinate.</param>
         /// <param name="y">Y coordinate.</param>
         /// <param name="w">Width.</param>
@@ -202,26 +182,20 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Viewport(x, y, w, h);
         }
 
-        /// <summary>
-        /// Calculates the tranformation of the forward vector.
-        /// </summary>
+        /// <summary>Calculates the tranformation of the forward vector.</summary>
         /// <returns>Transformed forward vector.</returns>
         public Location CalcForward()
         {
             return Config.CameraModifier().Transform(Config.ForwardVec);
         }
 
-        /// <summary>
-        /// Fixes the viewport back to what was last set by <see cref="Viewport(int, int, int, int)"/>.
-        /// </summary>
+        /// <summary>Fixes the viewport back to what was last set by <see cref="Viewport(int, int, int, int)"/>.</summary>
         public void FixVP()
         {
             GL.Viewport(State.ViewportX, State.ViewportY, State.ViewportWidth, State.ViewportHeight);
         }
 
-        /// <summary>
-        /// Binds a framebuffer and tracks it. Generally used with DrawFB's.
-        /// </summary>
+        /// <summary>Binds a framebuffer and tracks it. Generally used with DrawFB's.</summary>
         /// <param name="fbt">The target (usually draw).</param>
         /// <param name="fbo">The object.</param>
         public void BindFramebuffer(FramebufferTarget fbt, int fbo)
@@ -230,25 +204,19 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             Internal.LastBoundFramebuffer = fbo;
         }
 
-        /// <summary>
-        /// Sets the blend to a standard ordered blend.
-        /// </summary>
+        /// <summary>Sets the blend to a standard ordered blend.</summary>
         public static void StandardBlend()
         {
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
-        /// <summary>
-        /// Sets the blend to additive (transparent) mode.
-        /// </summary>
+        /// <summary>Sets the blend to additive (transparent) mode.</summary>
         public static void TranspBlend()
         {
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
         }
 
-        /// <summary>
-        /// Set up the rendering engine.
-        /// </summary>
+        /// <summary>Set up the rendering engine.</summary>
         public void RenderPass_Setup()
         {
             FGECore.MathHelpers.Quaternion cameraRotationModifier = Config.CameraModifier();

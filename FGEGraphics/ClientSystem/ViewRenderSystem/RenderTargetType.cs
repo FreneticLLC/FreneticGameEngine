@@ -57,14 +57,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public bool IsStaticShadowMap;
 
-        /// <summary>
-        /// if this is true, the target is building refraction data.
-        /// </summary>
+        /// <summary>if this is true, the target is building refraction data.</summary>
         public bool IsRefractionPass;
 
-        /// <summary>
-        /// If this is true, the target is building decal data.
-        /// </summary>
+        /// <summary>If this is true, the target is building decal data.</summary>
         public bool IsDecalsPass;
 
         /// <summary>
@@ -73,14 +69,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         /// </summary>
         public bool IsLit;
 
-        /// <summary>
-        /// If this is true, and <see cref="IsLit"/> is true, the target is processing lighting in a way that includes application of shadow maps.
-        /// </summary>
+        /// <summary>If this is true, and <see cref="IsLit"/> is true, the target is processing lighting in a way that includes application of shadow maps.</summary>
         public bool HasShadows;
-        
-        /// <summary>
-        /// If this is true, extra detail linked-list transparency logic is applied.
-        /// </summary>
+
+        /// <summary>If this is true, extra detail linked-list transparency logic is applied.</summary>
         public bool UsesLLTransparency;
     }
 }

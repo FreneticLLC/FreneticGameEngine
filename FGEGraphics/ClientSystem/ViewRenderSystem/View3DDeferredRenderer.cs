@@ -21,19 +21,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {
-    /// <summary>
-    /// Handles deferred rendering logic for <see cref="View3D"/>.
-    /// </summary>
+    /// <summary>Handles deferred rendering logic for <see cref="View3D"/>.</summary>
     public class View3DDeferredRenderer : View3DCoreDataSet
     {
-        /// <summary>
-        /// Patches to apply (if any).
-        /// </summary>
+        /// <summary>Patches to apply (if any).</summary>
         public View3DPatchesDeferred Patches = new View3DPatchesDeferred();
 
-        /// <summary>
-        /// Calculate shadow maps for the later (lighting) render passes.
-        /// </summary>
+        /// <summary>Calculate shadow maps for the later (lighting) render passes.</summary>
         public void RenderPass_Shadows()
         {
             if (Config.ShouldRedrawShadows() && Config.ShadowingAllowed)
@@ -194,9 +188,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// Generate the G-Buffer ("FBO") for lighting and final passes.
-        /// </summary>
+        /// <summary>Generate the G-Buffer ("FBO") for lighting and final passes.</summary>
         public void RenderPass_GBuffer()
         {
             Statistics.FrameBuffer.Start();
@@ -264,9 +256,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Render - GBuffer - Final");
         }
 
-        /// <summary>
-        /// Adds decal data to the G-Buffer ("FBO").
-        /// </summary>
+        /// <summary>Adds decal data to the G-Buffer ("FBO").</summary>
         public void RenderPass_Decals()
         {
             Shaders.Deferred.GBuffer_Decals = Shaders.Deferred.GBuffer_Decals.Bind();
@@ -314,9 +304,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.ActiveTexture(TextureUnit.Texture0);
         }
 
-        /// <summary>
-        /// Adds refraction data to the G-Buffer ("FBO").
-        /// </summary>
+        /// <summary>Adds refraction data to the G-Buffer ("FBO").</summary>
         public void RenderPass_RefractionBuffer()
         {
             State.FBOid = FBOID.REFRACT;
@@ -362,9 +350,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             State.FBOid = FBOID.NONE;
         }
 
-        /// <summary>
-        /// Light source addition render passes.
-        /// </summary>
+        /// <summary>Light source addition render passes.</summary>
         public void RenderPass_Lights()
         {
             Statistics.Lights.Start();
@@ -531,9 +517,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("AtEnd");
         }
 
-        /// <summary>
-        /// Calculates the brightness value for High Dynamic Range rendering.
-        /// </summary>
+        /// <summary>Calculates the brightness value for High Dynamic Range rendering.</summary>
         public void RenderPass_HDR()
         {
             if (Engine.Deferred_Lights && Engine.Deferred_DynamicExposure)
@@ -555,9 +539,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// Applies lights to the base buffer.
-        /// </summary>
+        /// <summary>Applies lights to the base buffer.</summary>
         public void RenderPass_LightsToBase()
         {
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_GodRay_Main);
@@ -673,9 +655,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("AfterPostFirstRender");
         }
 
-        /// <summary>
-        /// Render transparent data.
-        /// </summary>
+        /// <summary>Render transparent data.</summary>
         public int RenderPass_Transparents()
         {
             float fogDist = 1.0f / Engine.FogMaxDist();
@@ -827,9 +807,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             return lightc;
         }
 
-        /// <summary>
-        /// Apply godrays, bloom, and transparent data to screen.
-        /// </summary>
+        /// <summary>Apply godrays, bloom, and transparent data to screen.</summary>
         public void RenderPass_Bloom(int lightc)
         {
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
@@ -900,9 +878,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             View.DrawBuffer(DrawBufferMode.Back);
         }
 
-        /// <summary>
-        /// Render transparent objects into a temporary buffer.
-        /// </summary>
+        /// <summary>Render transparent objects into a temporary buffer.</summary>
         void RenderTransp(ref int lightc, Frustum frustumToUse = null)
         {
             if (Engine.AllowLL)
@@ -951,9 +927,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// The actual internal transparency render method.
-        /// </summary>
+        /// <summary>The actual internal transparency render method.</summary>
         public void RenderTranspInt(ref int lightc, Frustum frustumToUse)
         {
             if (frustumToUse == null)
@@ -1103,9 +1077,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// Configures uniform variable data for a Particle Lights shader.
-        /// </summary>
+        /// <summary>Configures uniform variable data for a Particle Lights shader.</summary>
         /// <param name="dataMatrix">Matrix hacked to store data about current frame.</param>
         /// <param name="lightData">Array of data for each light.</param>
         /// <param name="shadowMatrices">Matrices of shadow perspectives.</param>
@@ -1123,9 +1095,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("PreRenderTranspLights - 2");
         }
 
-        /// <summary>
-        /// Reads the DynamicExposure result from the GPU.
-        /// </summary>
+        /// <summary>Reads the DynamicExposure result from the GPU.</summary>
         public void ReadDynamicExposure()
         {
             if (Engine.Deferred_DynamicExposure)
@@ -1164,9 +1134,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// Helper to find exposure from a result array.
-        /// </summary>
+        /// <summary>Helper to find exposure from a result array.</summary>
         /// <param name="inp">Exposure array input.</param>
         public static float FindExp(float[] inp)
         {

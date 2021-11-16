@@ -17,34 +17,22 @@ using BepuPhysics.Collidables;
 
 namespace FGECore.PhysicsSystem
 {
-    /// <summary>
-    /// Represents the results of a collision trace.
-    /// </summary>
+    /// <summary>Represents the results of a collision trace.</summary>
     public class CollisionResult
     {
-        /// <summary>
-        /// Whether it hit anything.
-        /// </summary>
+        /// <summary>Whether it hit anything.</summary>
         public bool Hit;
 
-        /// <summary>
-        /// The impact normal. Warning: not normalized!
-        /// </summary>
+        /// <summary>The impact normal. Warning: not normalized!</summary>
         public Location Normal;
 
-        /// <summary>
-        /// The end location.
-        /// </summary>
+        /// <summary>The end location.</summary>
         public Location Position;
 
-        /// <summary>
-        /// The hit entity, if any.
-        /// </summary>
+        /// <summary>The hit entity, if any.</summary>
         public EntityPhysicsProperty HitEnt;
 
-        /// <summary>
-        /// The time of hit, where 0 is colliding-at-the-start, up to the distance from start to target.
-        /// </summary>
+        /// <summary>The time of hit, where 0 is colliding-at-the-start, up to the distance from start to target.</summary>
         public float Time;
     }
 
@@ -94,49 +82,31 @@ namespace FGECore.PhysicsSystem
         }
     }
 
-    /// <summary>
-    /// Helper code for tracing collision.
-    /// </summary>
+    /// <summary>Helper code for tracing collision.</summary>
     public class CollisionUtil
     {
-        /// <summary>
-        /// The space associated with this utility.
-        /// </summary>
+        /// <summary>The space associated with this utility.</summary>
         public PhysicsSpace World;
 
-        /// <summary>
-        /// The non-solid group.
-        /// </summary>
+        /// <summary>The non-solid group.</summary>
         public static CollisionGroup NonSolid = new CollisionGroup("NonSolid");
 
-        /// <summary>
-        /// The solid entity group.
-        /// </summary>
+        /// <summary>The solid entity group.</summary>
         public static CollisionGroup Solid = new CollisionGroup("Solid");
 
-        /// <summary>
-        /// The player group.
-        /// </summary>
+        /// <summary>The player group.</summary>
         public static CollisionGroup Player = new CollisionGroup("Player");
 
-        /// <summary>
-        /// The item-entity group.
-        /// </summary>
+        /// <summary>The item-entity group.</summary>
         public static CollisionGroup Item = new CollisionGroup("Item");
 
-        /// <summary>
-        /// The water (or other liquid) group.
-        /// </summary>
+        /// <summary>The water (or other liquid) group.</summary>
         public static CollisionGroup Water = new CollisionGroup("Water");
 
-        /// <summary>
-        /// The world-solid group.
-        /// </summary>
+        /// <summary>The world-solid group.</summary>
         public static CollisionGroup WorldSolid = new CollisionGroup("WorldSolid");
 
-        /// <summary>
-        /// The non-player character group.
-        /// </summary>
+        /// <summary>The non-player character group.</summary>
         public static CollisionGroup Character = new CollisionGroup("Character");
 
         static CollisionUtil()
@@ -174,9 +144,7 @@ namespace FGECore.PhysicsSystem
             Item.SetNoCollide(Character, true);
         }
 
-        /// <summary>
-        /// Checks if an entry should collide at all ever.
-        /// </summary>
+        /// <summary>Checks if an entry should collide at all ever.</summary>
         /// <param name="entry">The entry.</param>
         /// <returns>Whether it should collide.</returns>
         public static bool ShouldCollide(EntityPhysicsProperty entry)
@@ -188,18 +156,14 @@ namespace FGECore.PhysicsSystem
             return true;
         }
 
-        /// <summary>
-        /// Constructs the utility.
-        /// </summary>
+        /// <summary>Constructs the utility.</summary>
         /// <param name="world">The physics world.</param>
         public CollisionUtil(PhysicsSpace world)
         {
             World = world;
         }
 
-        /// <summary>
-        /// Performs a cuboid line trace.
-        /// </summary>
+        /// <summary>Performs a cuboid line trace.</summary>
         /// <param name="halfsize">Half the size of the box.</param>
         /// <param name="start">The start location.</param>
         /// <param name="end">The end location.</param>
@@ -211,9 +175,7 @@ namespace FGECore.PhysicsSystem
             return CuboidLineTrace(shape, start, end, filter);
         }
 
-        /// <summary>
-        /// Returns information on what a cuboid-shaped line trace would collide with, if anything.
-        /// </summary>
+        /// <summary>Returns information on what a cuboid-shaped line trace would collide with, if anything.</summary>
         /// <param name="shape">The shape to trace with.</param>
         /// <param name="start">The start of the line.</param>
         /// <param name="end">The end of the line.</param>
@@ -225,9 +187,7 @@ namespace FGECore.PhysicsSystem
             return World.ConvexTraceSingle(shape, start, (end - start) / len, len, filter);
         }
 
-        /// <summary>
-        /// Returns information on what a line trace would collide with, if anything.
-        /// </summary>
+        /// <summary>Returns information on what a line trace would collide with, if anything.</summary>
         /// <param name="start">The start of the line.</param>
         /// <param name="end">The end of the line.</param>
         /// <param name="filter">The collision filter, input a BEPU BroadPhaseEntry and output whether collision should be allowed.</param>

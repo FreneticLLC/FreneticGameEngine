@@ -17,29 +17,19 @@ using FGECore.MathHelpers;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents any 3D light source.
-    /// </summary>
+    /// <summary>Represents any 3D light source.</summary>
     public abstract class LightObject
     {
-        /// <summary>
-        /// The actual lights making up this light.
-        /// </summary>
+        /// <summary>The actual lights making up this light.</summary>
         public List<Light> InternalLights = new List<Light>();
 
-        /// <summary>
-        /// The position of the light source.
-        /// </summary>
+        /// <summary>The position of the light source.</summary>
         public Location EyePos;
 
-        /// <summary>
-        /// The maximum radius this light can affect.
-        /// </summary>
+        /// <summary>The maximum radius this light can affect.</summary>
         public float MaxDistance;
 
-        /// <summary>
-        /// Repositions the light.
-        /// </summary>
+        /// <summary>Repositions the light.</summary>
         /// <param name="pos">Position.</param>
         public abstract void Reposition(Location pos);
     }

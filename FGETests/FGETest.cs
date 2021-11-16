@@ -17,22 +17,16 @@ using NUnit.Framework;
 
 namespace FGETests
 {
-    /// <summary>
-    /// Represents any test in Voxalia. Should be derived from.
-    /// </summary>
+    /// <summary>Represents any test in Voxalia. Should be derived from.</summary>
     public abstract class FGETest
     {
-        /// <summary>
-        /// ALWAYS call this in a test's static OneTimeSetUp!
-        /// </summary>
+        /// <summary>ALWAYS call this in a test's static OneTimeSetUp!</summary>
         public static void Setup()
         {
             Program.PreInit(new FGETestProgram());
         }
 
-        /// <summary>
-        /// Asserts that two normal-range doubles are approximately equal (down to 4 decimal places).
-        /// </summary>
+        /// <summary>Asserts that two normal-range doubles are approximately equal (down to 4 decimal places).</summary>
         /// <param name="expected">The expected value.</param>
         /// <param name="actual">The actual value.</param>
         /// <param name="message">The message to display if they aren't roughly equal.</param>
@@ -41,30 +35,20 @@ namespace FGETests
             Assert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
         }
     }
-	
-    /// <summary>
-    /// Represents a test program.
-    /// </summary>
+
+    /// <summary>Represents a test program.</summary>
 	public class FGETestProgram : Program
 	{
-        /// <summary>
-        /// Name of the program.
-        /// </summary>
+        /// <summary>Name of the program.</summary>
         public const string NAME = "FGE Tests";
 
-        /// <summary>
-        /// Version of the program.
-        /// </summary>
+        /// <summary>Version of the program.</summary>
         public const string VERSION = "1.0.0.0";
 
-        /// <summary>
-        /// Version-Description of the program.
-        /// </summary>
+        /// <summary>Version-Description of the program.</summary>
         public const string VERSDESC = "Test-Only";
 
-        /// <summary>
-        /// Construct the tester.
-        /// </summary>
+        /// <summary>Construct the tester.</summary>
         public FGETestProgram()
             : base(NAME, VERSION, VERSDESC)
         {

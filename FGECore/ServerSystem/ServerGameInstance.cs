@@ -19,14 +19,10 @@ using FGECore.StackNoteSystem;
 
 namespace FGECore.ServerSystem
 {
-    /// <summary>
-    /// An instance of a server game.
-    /// </summary>
+    /// <summary>An instance of a server game.</summary>
     public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
     {
-        /// <summary>
-        /// Constructs the server game instance.
-        /// </summary>
+        /// <summary>Constructs the server game instance.</summary>
         /// <param name="shouldDefaultEngine">True to pre-load a default engine, false to skip that step.</param>
         public ServerGameInstance(bool shouldDefaultEngine = true)
         {
@@ -48,19 +44,13 @@ namespace FGECore.ServerSystem
             }
         }
 
-        /// <summary>
-        /// Helper class for internal data related to the server instance.
-        /// </summary>
+        /// <summary>Helper class for internal data related to the server instance.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// Used to calculate the <see cref="GameInstance.Delta"/> value.
-            /// </summary>
+            /// <summary>Used to calculate the <see cref="GameInstance.Delta"/> value.</summary>
             public Stopwatch DeltaCounter;
 
-            /// <summary>
-            /// Used as part of accurate tick timing.
-            /// </summary>
+            /// <summary>Used as part of accurate tick timing.</summary>
             public double TotalDelta;
 
             /// <summary>
@@ -70,24 +60,16 @@ namespace FGECore.ServerSystem
             public double TargetDelta;
         }
 
-        /// <summary>
-        /// Internal data for this server instance.
-        /// </summary>
+        /// <summary>Internal data for this server instance.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// Target frames per second.
-        /// </summary>
+        /// <summary>Target frames per second.</summary>
         public double Target_FPS = 30;
 
-        /// <summary>
-        /// The current tick rate of the server.
-        /// </summary>
+        /// <summary>The current tick rate of the server.</summary>
         public int TPS = 0;
 
-        /// <summary>
-        /// Classifier term for the instance, for use in debug logs. Defaults to "server".
-        /// </summary>
+        /// <summary>Classifier term for the instance, for use in debug logs. Defaults to "server".</summary>
         public string InstanceClassification = "server";
 
         /// <summary>The <see cref="SysConsole"/> output type for "init" messages: <see cref="OutputType.SERVERINIT"/>.</summary>
@@ -183,9 +165,7 @@ namespace FGECore.ServerSystem
             }
         }
 
-        /// <summary>
-        /// Returns a simple output string for the server game instance.
-        /// </summary>
+        /// <summary>Returns a simple output string for the server game instance.</summary>
         /// <returns>The server game instance.</returns>
         public override string ToString()
         {

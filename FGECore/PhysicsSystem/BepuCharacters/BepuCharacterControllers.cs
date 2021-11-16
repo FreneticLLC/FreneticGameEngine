@@ -25,14 +25,10 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 {
     // The majority of code in this file came from the BEPUPhysicsv2 demos.
 
-    /// <summary>
-    /// System that manages all the characters in a simulation. Responsible for updating movement constraints based on character goals and contact states.
-    /// </summary>
+    /// <summary>System that manages all the characters in a simulation. Responsible for updating movement constraints based on character goals and contact states.</summary>
     public class CharacterControllers : IDisposable
     {
-        /// <summary>
-        /// Gets the simulation to which this set of chracters belongs.
-        /// </summary>
+        /// <summary>Gets the simulation to which this set of chracters belongs.</summary>
         public Simulation Simulation { get; private set; }
 
         readonly BufferPool pool;
@@ -40,14 +36,10 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         Buffer<int> bodyHandleToCharacterIndex;
         QuickList<CharacterController> characters;
 
-        /// <summary>
-        /// Gets the number of characters being controlled.
-        /// </summary>
+        /// <summary>Gets the number of characters being controlled.</summary>
         public int CharacterCount { get { return characters.Count; } }
 
-        /// <summary>
-        /// Creates a character controller systme.
-        /// </summary>
+        /// <summary>Creates a character controller systme.</summary>
         /// <param name="pool">Pool to allocate resources from.</param>
         /// <param name="initialCharacterCapacity">Number of characters to initially allocate space for.</param>
         /// <param name="initialBodyHandleCapacity">Number of body handles to initially allocate space for in the body handle->character mapping.</param>
@@ -60,9 +52,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             expandBoundingBoxesWorker = ExpandBoundingBoxesWorker;
         }
 
-        /// <summary>
-        /// Caches the simulation associated with the characters.
-        /// </summary>
+        /// <summary>Caches the simulation associated with the characters.</summary>
         /// <param name="simulation">Simulation to be associated with the characters.</param>
         public void Initialize(Simulation simulation)
         {
@@ -83,9 +73,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>
-        /// Gets the current memory slot index of a character using its associated body handle.
-        /// </summary>
+        /// <summary>Gets the current memory slot index of a character using its associated body handle.</summary>
         /// <param name="bodyHandle">Body handle associated with the character to look up the index of.</param>
         /// <returns>Index of the character associated with the body handle.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,9 +83,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return bodyHandleToCharacterIndex[bodyHandle];
         }
 
-        /// <summary>
-        /// Gets a reference to the character at the given memory slot index.
-        /// </summary>
+        /// <summary>Gets a reference to the character at the given memory slot index.</summary>
         /// <param name="index">Index of the character to retrieve.</param>
         /// <returns>Reference to the character at the given memory slot index.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,9 +92,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref characters[index];
         }
 
-        /// <summary>
-        /// Gets a reference to the character using the handle of the character's body.
-        /// </summary>
+        /// <summary>Gets a reference to the character using the handle of the character's body.</summary>
         /// <param name="bodyHandle">Body handle of the character to look up.</param>
         /// <returns>Reference to the character associated with the given body handle.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,9 +102,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref characters[bodyHandleToCharacterIndex[bodyHandle.Value]];
         }
 
-        /// <summary>
-        /// Allocates a character.
-        /// </summary>
+        /// <summary>Allocates a character.</summary>
         /// <param name="bodyHandle">Body handle associated with the character.</param>
         /// <returns>Reference to the allocated character.</returns>
         public ref CharacterController AllocateCharacter(BodyHandle bodyHandle)
@@ -137,9 +119,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref character;
         }
 
-        /// <summary>
-        /// Removes a character from the character controllers set by the character's index.
-        /// </summary>
+        /// <summary>Removes a character from the character controllers set by the character's index.</summary>
         /// <param name="characterIndex">Index of the character to remove.</param>
         public void RemoveCharacterByIndex(int characterIndex)
         {
@@ -156,9 +136,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>
-        /// Removes a character from the character controllers set by the body handle associated with the character.
-        /// </summary>
+        /// <summary>Removes a character from the character controllers set by the body handle associated with the character.</summary>
         /// <param name="bodyHandle">Body handle associated with the character to remove.</param>
         public void RemoveCharacterByBodyHandle(BodyHandle bodyHandle)
         {
@@ -398,9 +376,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>
-        /// Preallocates space for support data collected during the narrow phase. Should be called before the narrow phase executes.
-        /// </summary>
+        /// <summary>Preallocates space for support data collected during the narrow phase. Should be called before the narrow phase executes.</summary>
         void PrepareForContacts(float dt, IThreadDispatcher threadDispatcher = null)
         {
             Debug.Assert(!contactCollectionWorkerCaches.Allocated, "Worker caches were already allocated; did you forget to call AnalyzeContacts after collision detection to flush the previous frame's results?");
@@ -494,7 +470,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             for (int characterIndex = start; characterIndex < exclusiveEnd; ++characterIndex)
             {
                 //Note that this iterates over both active and inactive characters rather than segmenting inactive characters into their own collection.
-                //This demands branching, but the expectation is that the vast majority of characters will be active, so there is less value in copying them into stasis.                
+                //This demands branching, but the expectation is that the vast majority of characters will be active, so there is less value in copying them into stasis.
                 ref var character = ref characters[characterIndex];
                 ref var bodyLocation = ref Simulation.Bodies.HandleToLocation[character.BodyHandle.Value];
                 if (bodyLocation.SetIndex == 0)
@@ -509,10 +485,10 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         }
                     }
                     //We need to protect against one possible corner case: if the body supporting the character was removed, the associated motion constraint was also removed.
-                    //Arbitrarily un-support the character if we detect this.      
+                    //Arbitrarily un-support the character if we detect this.
                     if (character.Supported)
                     {
-                        //If the constraint no longer exists at all, 
+                        //If the constraint no longer exists at all,
                         if (!Simulation.Solver.ConstraintExists(character.MotionConstraintHandle) ||
                             //or if the constraint does exist but is now used by a different constraint type,
                             (Simulation.Solver.HandleToConstraint[character.MotionConstraintHandle.Value].TypeId != DynamicCharacterMotionTypeProcessor.BatchTypeId &&
@@ -695,7 +671,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
 
         /// <summary>
-        /// Updates all character support states and motion constraints based on the current character goals and all the contacts collected since the last call to AnalyzeContacts. 
+        /// Updates all character support states and motion constraints based on the current character goals and all the contacts collected since the last call to AnalyzeContacts.
         /// Attach to a simulation callback where the most recent contact is available and before the solver executes.
         /// </summary>
         void AnalyzeContacts(float dt, IThreadDispatcher threadDispatcher)
@@ -790,9 +766,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             //Console.WriteLine($"Time (ms): {(end - start) / (1e-3 * Stopwatch.Frequency)}");
         }
 
-        /// <summary>
-        /// Ensures that the internal structures of the character controllers system can handle the given number of characters and body handles, resizing if necessary.
-        /// </summary>
+        /// <summary>Ensures that the internal structures of the character controllers system can handle the given number of characters and body handles, resizing if necessary.</summary>
         /// <param name="characterCapacity">Minimum character capacity to require.</param>
         /// <param name="bodyHandleCapacity">Minimum number of body handles to allocate space for.</param>
         public void EnsureCapacity(int characterCapacity, int bodyHandleCapacity)
@@ -804,9 +778,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>
-        /// Resizes the internal structures of the character controllers system for the target sizes. Will not shrink below the currently active data size.
-        /// </summary>
+        /// <summary>Resizes the internal structures of the character controllers system for the target sizes. Will not shrink below the currently active data size.</summary>
         /// <param name="characterCapacity">Target character capacity to allocate space for.</param>
         /// <param name="bodyHandleCapacity">Target number of body handles to allocate space for.</param>
         public void Resize(int characterCapacity, int bodyHandleCapacity)
@@ -830,9 +802,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         }
 
         bool disposed;
-        /// <summary>
-        /// Returns pool-allocated resources.
-        /// </summary>
+        /// <summary>Returns pool-allocated resources.</summary>
         public void Dispose()
         {
             if (!disposed)

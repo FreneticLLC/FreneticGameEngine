@@ -15,34 +15,22 @@ using System.Threading.Tasks;
 
 namespace FGECore.PropertySystem
 {
-    /// <summary>
-    /// Holds an uncapped set of properties.
-    /// </summary>
+    /// <summary>Holds an uncapped set of properties.</summary>
     public class PropertyHolder
     {
-        /// <summary>
-        /// Internal data useful to <see cref="PropertyHolder"/> instances.
-        /// </summary>
+        /// <summary>Internal data useful to <see cref="PropertyHolder"/> instances.</summary>
         public struct Internal
         {
-            /// <summary>
-            /// All currently held properties on this object.
-            /// </summary>
+            /// <summary>All currently held properties on this object.</summary>
             public Dictionary<Type, Property> HeldProperties;
 
-            /// <summary>
-            /// All currently held interfaces on this object.
-            /// </summary>
+            /// <summary>All currently held interfaces on this object.</summary>
             public Dictionary<Type, List<object>> HeldInterfaces;
 
-            /// <summary>
-            /// Special helper: Default empty list for some returns.
-            /// </summary>
+            /// <summary>Special helper: Default empty list for some returns.</summary>
             public static readonly IReadOnlyList<object> DefaultReturnEmptyList = new List<object>();
 
-            /// <summary>
-            /// Notice a property (called when a property is added).
-            /// </summary>
+            /// <summary>Notice a property (called when a property is added).</summary>
             /// <param name="holder">The holder instance.</param>
             /// <param name="type">The property class type.</param>
             /// <param name="propObj">The property object instance.</param>
@@ -65,9 +53,7 @@ namespace FGECore.PropertySystem
                 holder.OnAdded(propObj);
             }
 
-            /// <summary>
-            /// forget a property from this property holder.
-            /// </summary>
+            /// <summary>forget a property from this property holder.</summary>
             /// <param name="holder">The holder instance.</param>
             /// <param name="type">The property class type.</param>
             /// <param name="prop">The property of relevance.</param>
@@ -87,9 +73,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Internal data useful to <see cref="PropertyHolder"/> instances.
-        /// </summary>
+        /// <summary>Internal data useful to <see cref="PropertyHolder"/> instances.</summary>
         public Internal PropertyInternals = new Internal()
         {
             HeldProperties = new Dictionary<Type, Property>(),
@@ -160,9 +144,7 @@ namespace FGECore.PropertySystem
             return new List<T>();
         }
 
-        /// <summary>
-        /// Sends a signal to all properties with a specific interface.
-        /// </summary>
+        /// <summary>Sends a signal to all properties with a specific interface.</summary>
         /// <typeparam name="T">The type of the interface.</typeparam>
         /// <param name="signal">The signal to send.</param>
         public void SignalAllInterfacedProperties<T>(Action<T> signal)
@@ -177,24 +159,20 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Gets all currently held property types.
-        /// </summary>
+        /// <summary>Gets all currently held property types.</summary>
         /// <returns>The set of property types.</returns>
         public IEnumerable<Type> EnumerateAllPropertyTypes()
         {
             return PropertyInternals.HeldProperties.Keys;
         }
 
-        /// <summary>
-        /// Gets all currently held properties.
-        /// </summary>
+        /// <summary>Gets all currently held properties.</summary>
         /// <returns>The set of properties.</returns>
         public IEnumerable<Property> EnumerateAllProperties()
         {
             return PropertyInternals.HeldProperties.Values;
         }
-        
+
         /// <summary>
         /// Gets all currently held property types in a safe copied container.
         /// <para>Generally, prefer <see cref="EnumerateAllPropertyTypes"/>.</para>
@@ -215,9 +193,7 @@ namespace FGECore.PropertySystem
             return new List<Property>(PropertyInternals.HeldProperties.Values);
         }
 
-        /// <summary>
-        /// Returns the number of properties held by this holder.
-        /// </summary>
+        /// <summary>Returns the number of properties held by this holder.</summary>
         public int PropertyCount
         {
             get
@@ -280,9 +256,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Gets all properties that are a sub-type of the given property type.
-        /// </summary>
+        /// <summary>Gets all properties that are a sub-type of the given property type.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <returns>The property set.</returns>
         public IEnumerable<T> GetAllSubTypes<T>() where T: Property
@@ -296,9 +270,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Checks whether a property of a specified type is held.
-        /// </summary>
+        /// <summary>Checks whether a property of a specified type is held.</summary>
         /// <param name="type">The property class type.</param>
         /// <returns>Whether it was removed.</returns>
         public bool HasProperty(Type type)
@@ -306,9 +278,7 @@ namespace FGECore.PropertySystem
             return PropertyInternals.HeldProperties.ContainsKey(type);
         }
 
-        /// <summary>
-        /// Checks whether a property of a specified type is held.
-        /// </summary>
+        /// <summary>Checks whether a property of a specified type is held.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <returns>Whether it is held.</returns>
         public bool HasProperty<T>() where T : Property
@@ -316,9 +286,7 @@ namespace FGECore.PropertySystem
             return PropertyInternals.HeldProperties.ContainsKey(typeof(T));
         }
 
-        /// <summary>
-        /// Removes the property by type, returning whether it was removed.
-        /// </summary>
+        /// <summary>Removes the property by type, returning whether it was removed.</summary>
         /// <param name="type">The property class type.</param>
         /// <returns>Whether it was removed.</returns>
         public bool RemoveProperty(Type type)
@@ -331,9 +299,7 @@ namespace FGECore.PropertySystem
             return false;
         }
 
-        /// <summary>
-        /// Removes the property by type, returning whether it was removed.
-        /// </summary>
+        /// <summary>Removes the property by type, returning whether it was removed.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <returns>Whether it was removed.</returns>
         public bool RemoveProperty<T>() where T : Property
@@ -346,9 +312,7 @@ namespace FGECore.PropertySystem
             return false;
         }
 
-        /// <summary>
-        /// Gets the property by type, or returns false.
-        /// </summary>
+        /// <summary>Gets the property by type, or returns false.</summary>
         /// <param name="type">The property class type.</param>
         /// <param name="outputProperty">The property result.</param>
         /// <returns>The property.</returns>
@@ -357,9 +321,7 @@ namespace FGECore.PropertySystem
             return PropertyInternals.HeldProperties.TryGetValue(type, out outputProperty);
         }
 
-        /// <summary>
-        /// Gets the property (with a typeparam-specified type), or returns false.
-        /// </summary>
+        /// <summary>Gets the property (with a typeparam-specified type), or returns false.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <param name="outputProperty">The property result.</param>
         /// <returns>The property.</returns>
@@ -374,9 +336,7 @@ namespace FGECore.PropertySystem
             return false;
         }
 
-        /// <summary>
-        /// Runs a set of code on a property, if the property is present.
-        /// </summary>
+        /// <summary>Runs a set of code on a property, if the property is present.</summary>
         /// <param name="type">The property class type.</param>
         /// <param name="logic">The logic to run.</param>
         public void InvokeIfPresent(Type type, Action<Property> logic)
@@ -387,9 +347,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Runs a set of code on a property, if the property is present.
-        /// </summary>
+        /// <summary>Runs a set of code on a property, if the property is present.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <param name="logic">The logic to run.</param>
         public void InvokeIfPresent<T>(Action<T> logic) where T: Property
@@ -400,9 +358,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Gets the property by type, or gives an exception.
-        /// </summary>
+        /// <summary>Gets the property by type, or gives an exception.</summary>
         /// <param name="type">The property class type.</param>
         /// <exception cref="ArgumentOutOfRangeException">If the property does not exist on the object.</exception>
         /// <returns>The property.</returns>
@@ -415,9 +371,7 @@ namespace FGECore.PropertySystem
             throw new ArgumentOutOfRangeException("Cannot find property of type: " + type.Name + ", but was required for object " + this);
         }
 
-        /// <summary>
-        /// Gets the property (with a typeparam-specified type), or gives an exception.
-        /// </summary>
+        /// <summary>Gets the property (with a typeparam-specified type), or gives an exception.</summary>
         /// <typeparam name="T">The property class type.</typeparam>
         /// <exception cref="ArgumentOutOfRangeException">If the property does not exist on the object.</exception>
         /// <returns>The property.</returns>
@@ -443,9 +397,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Adds the property, or gives an exception if a property of matching type already exists.
-        /// </summary>
+        /// <summary>Adds the property, or gives an exception if a property of matching type already exists.</summary>
         /// <param name="prop">The property itself.</param>
         /// <exception cref="InvalidOperationException">If the property is already held by a different object.</exception>
         /// <returns>The property.</returns>
@@ -512,17 +464,13 @@ namespace FGECore.PropertySystem
             return res;
         }
 
-        /// <summary>
-        /// Called when a property is added.
-        /// </summary>
+        /// <summary>Called when a property is added.</summary>
         /// <param name="prop">The property.</param>
         public virtual void OnAdded(Property prop)
         {
         }
 
-        /// <summary>
-        /// Called when a property is removed.
-        /// </summary>
+        /// <summary>Called when a property is removed.</summary>
         /// <param name="prop">The property.</param>
         public virtual void OnRemoved(Property prop)
         {

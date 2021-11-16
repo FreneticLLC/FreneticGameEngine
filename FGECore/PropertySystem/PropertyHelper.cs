@@ -18,9 +18,7 @@ using FGECore.FileSystems;
 
 namespace FGECore.PropertySystem
 {
-    /// <summary>
-    /// Helper for the systems on a property.
-    /// </summary>
+    /// <summary>Helper for the systems on a property.</summary>
     public abstract class PropertyHelper
     {
         /// <summary>
@@ -28,40 +26,26 @@ namespace FGECore.PropertySystem
         /// </summary>
         public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = new ConditionalWeakTable<Type, PropertyHelper>();
 
-        /// <summary>
-        /// Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.
-        /// </summary>
+        /// <summary>Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.</summary>
         public static class Internal
         {
-            /// <summary>
-            /// The ID of the last generated property ID.
-            /// </summary>
+            /// <summary>The ID of the last generated property ID.</summary>
             public static long CPropID = 1;
 
-            /// <summary>
-            /// A premade, reusable, empty array of <see cref="object"/>s.
-            /// </summary>
+            /// <summary>A premade, reusable, empty array of <see cref="object"/>s.</summary>
             public static readonly object[] NoObjects = new object[0];
         }
 
-        /// <summary>
-        /// Represents a field with a specific numeric priority.
-        /// </summary>
+        /// <summary>Represents a field with a specific numeric priority.</summary>
         public class PrioritizedField
         {
-            /// <summary>
-            /// The priority of the field.
-            /// </summary>
+            /// <summary>The priority of the field.</summary>
             public double Priority;
 
-            /// <summary>
-            /// The field itself.
-            /// </summary>
+            /// <summary>The field itself.</summary>
             public FieldInfo Field;
 
-            /// <summary>
-            /// Initialize the <see cref="PrioritizedField"/>.
-            /// </summary>
+            /// <summary>Initialize the <see cref="PrioritizedField"/>.</summary>
             public PrioritizedField(double _priority, FieldInfo _field)
             {
                 Priority = _priority;
@@ -69,24 +53,16 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Represents a C# property with a specific numeric priority.
-        /// </summary>
+        /// <summary>Represents a C# property with a specific numeric priority.</summary>
         public class PrioritizedSharpProperty
         {
-            /// <summary>
-            /// The priority of the field.
-            /// </summary>
+            /// <summary>The priority of the field.</summary>
             public double Priority;
 
-            /// <summary>
-            /// The C# property itself.
-            /// </summary>
+            /// <summary>The C# property itself.</summary>
             public PropertyInfo SharpProperty;
 
-            /// <summary>
-            /// Initialize the <see cref="PrioritizedSharpProperty"/>.
-            /// </summary>
+            /// <summary>Initialize the <see cref="PrioritizedSharpProperty"/>.</summary>
             public PrioritizedSharpProperty(double _priority, PropertyInfo _property)
             {
                 Priority = _priority;
@@ -94,9 +70,7 @@ namespace FGECore.PropertySystem
             }
         }
 
-        /// <summary>
-        /// Ensures a type is handled by the system, and returns the helper for the type.
-        /// </summary>
+        /// <summary>Ensures a type is handled by the system, and returns the helper for the type.</summary>
         /// <param name="propType">The type.</param>
         /// <returns>The helper for the type.</returns>
         public static PropertyHelper EnsureHandled(Type propType)
@@ -384,60 +358,38 @@ namespace FGECore.PropertySystem
             return true;
         }
 
-        /// <summary>
-        /// A class containing reflected method references, for code generation usage.
-        /// </summary>
+        /// <summary>A class containing reflected method references, for code generation usage.</summary>
         public static class ReflectedMethods
         {
-            /// <summary>
-            /// The <see cref="object.ToString"/> method.
-            /// </summary>
+            /// <summary>The <see cref="object.ToString"/> method.</summary>
             public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), new Type[0]);
 
-            /// <summary>
-            /// The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.
-            /// </summary>
+            /// <summary>The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.</summary>
             public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), new Type[] { typeof(string), typeof(string) });
 
-            /// <summary>
-            /// The <see cref="GetDebuggableInfoOutput"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GetDebuggableInfoOutput"/> method.</summary>
             public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutput));
 
-            /// <summary>
-            /// The <see cref="GetDebuggableInfoOutputTyped"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GetDebuggableInfoOutputTyped"/> method.</summary>
             public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutputTyped = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutputTyped));
 
-            /// <summary>
-            /// The <see cref="GeneratedCodeHelperMethods.StringifyDebuggable"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GeneratedCodeHelperMethods.StringifyDebuggable"/> method.</summary>
             public static readonly MethodInfo StringifyDebuggable = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyDebuggable));
 
-            /// <summary>
-            /// The <see cref="GeneratedCodeHelperMethods.StringifyDebuggableStruct"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GeneratedCodeHelperMethods.StringifyDebuggableStruct"/> method.</summary>
             public static readonly MethodInfo StringifyDebuggableStruct = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyDebuggableStruct));
 
-            /// <summary>
-            /// The <see cref="GeneratedCodeHelperMethods.Stringify"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GeneratedCodeHelperMethods.Stringify"/> method.</summary>
             public static readonly MethodInfo Stringify = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.Stringify));
 
-            /// <summary>
-            /// The <see cref="GeneratedCodeHelperMethods.StringifyStruct"/> method.
-            /// </summary>
+            /// <summary>The <see cref="GeneratedCodeHelperMethods.StringifyStruct"/> method.</summary>
             public static readonly MethodInfo StringifyStruct = typeof(GeneratedCodeHelperMethods).GetMethod(nameof(GeneratedCodeHelperMethods.StringifyStruct));
         }
 
-        /// <summary>
-        /// A class with a few methods to help the generated code work.
-        /// </summary>
+        /// <summary>A class with a few methods to help the generated code work.</summary>
         public static class GeneratedCodeHelperMethods
         {
-            /// <summary>
-            /// Safely converts a debuggable object to a string.
-            /// </summary>
+            /// <summary>Safely converts a debuggable object to a string.</summary>
             /// <param name="propObj">The object.</param>
             /// <returns>The string.</returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -464,9 +416,7 @@ namespace FGECore.PropertySystem
                 return output.ToString();
             }
 
-            /// <summary>
-            /// Safely converts a debuggable struct to a string.
-            /// </summary>
+            /// <summary>Safely converts a debuggable struct to a string.</summary>
             /// <param name="propObj">The object.</param>
             /// <returns>The string.</returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -489,9 +439,7 @@ namespace FGECore.PropertySystem
                 return output.ToString();
             }
 
-            /// <summary>
-            /// Safely converts a struct to a string.
-            /// </summary>
+            /// <summary>Safely converts a struct to a string.</summary>
             /// <param name="structInst">The struct.</param>
             /// <returns>The string.</returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -500,9 +448,7 @@ namespace FGECore.PropertySystem
                 return structInst.ToString();
             }
 
-            /// <summary>
-            /// Safely converts an object to a string.
-            /// </summary>
+            /// <summary>Safely converts an object to a string.</summary>
             /// <param name="obj">The object.</param>
             /// <returns>The string, or "null".</returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -530,34 +476,22 @@ namespace FGECore.PropertySystem
         /// <param name="vals">The string dictionary.</param>
         public abstract void GetDebuggableInfoOutputTyped<T>(T property, Dictionary<string, string> vals);
 
-        /// <summary>
-        /// The type of the property to monitor.
-        /// </summary>
+        /// <summary>The type of the property to monitor.</summary>
         public Type PropertyType;
 
-        /// <summary>
-        /// A list of all getter methods that are debuggable.
-        /// </summary>
+        /// <summary>A list of all getter methods that are debuggable.</summary>
         public readonly List<PrioritizedSharpProperty> GetterPropertiesDebuggable = new List<PrioritizedSharpProperty>();
 
-        /// <summary>
-        /// A list of all getter/setter method pairs that are autao-saveable.
-        /// </summary>
+        /// <summary>A list of all getter/setter method pairs that are autao-saveable.</summary>
         public readonly List<PrioritizedSharpProperty> GetterSetterSaveable = new List<PrioritizedSharpProperty>();
 
-        /// <summary>
-        /// A list of all fields that are debuggable.
-        /// </summary>
+        /// <summary>A list of all fields that are debuggable.</summary>
         public readonly List<PrioritizedField> FieldsDebuggable = new List<PrioritizedField>();
 
-        /// <summary>
-        /// A list of all fields that are auto-saveable.
-        /// </summary>
+        /// <summary>A list of all fields that are auto-saveable.</summary>
         public readonly List<PrioritizedField> FieldsAutoSaveable = new List<PrioritizedField>();
 
-        /// <summary>
-        /// A list of all "validity check" getter methods.
-        /// </summary>
+        /// <summary>A list of all "validity check" getter methods.</summary>
         public readonly List<PrioritizedSharpProperty> ValidityTestGetterProperties = new List<PrioritizedSharpProperty>();
     }
 }

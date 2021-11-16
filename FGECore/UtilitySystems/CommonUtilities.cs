@@ -18,9 +18,7 @@ using FGECore.MathHelpers;
 
 namespace FGECore.UtilitySystems
 {
-    /// <summary>
-    /// Helpful utilities for general usage.
-    /// </summary>
+    /// <summary>Helpful utilities for general usage.</summary>
     public static class CommonUtilities
     {
         /// <summary>
@@ -39,15 +37,11 @@ namespace FGECore.UtilitySystems
             }
         }
 
-        /// <summary>
-        /// A thread-static random provider.
-        /// </summary>
+        /// <summary>A thread-static random provider.</summary>
         [ThreadStatic]
         private static MTRandom intRandom;
-        
-        /// <summary>
-        /// Grabs a sub section of a byte array.
-        /// </summary>
+
+        /// <summary>Grabs a sub section of a byte array.</summary>
         /// <param name="full">The original byte array.</param>
         /// <param name="start">The start index.</param>
         /// <param name="length">The length.</param>
@@ -75,9 +69,7 @@ namespace FGECore.UtilitySystems
             }
         }
 
-        /// <summary>
-        /// Returns a peice of text copied a specified number of times.
-        /// </summary>
+        /// <summary>Returns a peice of text copied a specified number of times.</summary>
         /// <param name="text">What text to copy.</param>
         /// <param name="times">How many times to copy it.</param>
         /// <returns>The repeated text.</returns>
@@ -91,14 +83,10 @@ namespace FGECore.UtilitySystems
             return toret.ToString();
         }
 
-        /// <summary>
-        /// Alphabetical character matcher (a-z, A-Z).
-        /// </summary>
+        /// <summary>Alphabetical character matcher (a-z, A-Z).</summary>
         public static readonly AsciiMatcher AlphabetMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters);
 
-        /// <summary>
-        /// Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).
-        /// </summary>
+        /// <summary>Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).</summary>
         public static readonly AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
 
         /// <summary>
@@ -127,9 +115,7 @@ namespace FGECore.UtilitySystems
             return UsernameValidationMatcher.IsOnlyMatches(str);
         }
 
-        /// <summary>
-        /// Formats a <see cref="long"/> with comma-separated thousands ("123,456" style notation).
-        /// </summary>
+        /// <summary>Formats a <see cref="long"/> with comma-separated thousands ("123,456" style notation).</summary>
         /// <param name="input">The number.</param>
         /// <returns>The formatted string.</returns>
         public static string FormatThousands(long input)

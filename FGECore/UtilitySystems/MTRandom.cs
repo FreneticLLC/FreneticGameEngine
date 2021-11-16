@@ -20,62 +20,42 @@ namespace FGECore.UtilitySystems
     /// </summary>
     public class MTRandom
     {
-        /// <summary>
-        /// Holder for internal data for <see cref="MTRandom"/> instances.
-        /// </summary>
+        /// <summary>Holder for internal data for <see cref="MTRandom"/> instances.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// The default or reference buffer size.
-            /// </summary>
+            /// <summary>The default or reference buffer size.</summary>
             public const ulong REF_BUF_SIZE = 624;
 
-            /// <summary>
-            /// A lower integer bit mask.
-            /// </summary>
+            /// <summary>A lower integer bit mask.</summary>
             public const ulong LOWER_MASK = 0x7FFFFFFF;
 
-            /// <summary>
-            /// A higher integer bit mask.
-            /// </summary>
+            /// <summary>A higher integer bit mask.</summary>
             public const ulong UPPER_MASK = ~LOWER_MASK;
 
-            /// <summary>
-            /// The current buffer.
-            /// </summary>
+            /// <summary>The current buffer.</summary>
             public ulong[] Buffer;
 
-            /// <summary>
-            /// The current index in the buffer.
-            /// </summary>
+            /// <summary>The current index in the buffer.</summary>
             public ulong BufferIndex;
         }
 
-        /// <summary>
-        /// Internal data for this random instance.
-        /// </summary>
+        /// <summary>Internal data for this random instance.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// Constructs the MT Random with a current-time-based seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).
-        /// </summary>
+        /// <summary>Constructs the MT Random with a current-time-based seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).</summary>
         public MTRandom()
             : this(InternalData.REF_BUF_SIZE, (ulong)DateTime.UtcNow.ToBinary())
         {
         }
 
-        /// <summary>
-        /// Constructs the MT Random with a specific seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).
-        /// </summary>
+        /// <summary>Constructs the MT Random with a specific seed, and a default buffer size (of <see cref="InternalData.REF_BUF_SIZE"/>).</summary>
         /// <param name="seed">The seed.</param>
         public MTRandom(ulong seed)
             : this(InternalData.REF_BUF_SIZE, seed)
         {
         }
 
-        /// <summary>
-        /// Constructs the MT Random with a specific seed and specific buffer size, and a default buffer size.
-        /// </summary>
+        /// <summary>Constructs the MT Random with a specific seed and specific buffer size, and a default buffer size.</summary>
         /// <param name="bufferSize">The buffer size.</param>
         /// <param name="seed">The seed.</param>
         public MTRandom(ulong bufferSize, ulong seed)
@@ -89,67 +69,51 @@ namespace FGECore.UtilitySystems
             }
         }
 
-        /// <summary>
-        /// Gets a random positive integer (from 0 to <see cref="int.MaxValue"/>).
-        /// </summary>
+        /// <summary>Gets a random positive integer (from 0 to <see cref="int.MaxValue"/>).</summary>
         public int Next()
         {
             return (int)(NextUL() & InternalData.LOWER_MASK);
         }
 
-        /// <summary>
-        /// Gets a random integer from 0 (inclusive) up to a cap (exclusive).
-        /// </summary>
+        /// <summary>Gets a random integer from 0 (inclusive) up to a cap (exclusive).</summary>
         public int Next(int cap)
         {
             return Next() % cap;
         }
 
-        /// <summary>
-        /// Gets a random integer from a min (inclusive) up to a max (exclusive).
-        /// </summary>
+        /// <summary>Gets a random integer from a min (inclusive) up to a max (exclusive).</summary>
         public int Next(int min, int max)
         {
             return Next(max - min) + min;
         }
 
-        /// <summary>
-        /// Gets a random double, between 0 and 1.
-        /// </summary>
+        /// <summary>Gets a random double, between 0 and 1.</summary>
         public double NextDouble()
         {
             return NextUL() / ((double)ulong.MaxValue);
         }
 
-        /// <summary>
-        /// Gets a random float, between 0 and 1.
-        /// </summary>
+        /// <summary>Gets a random float, between 0 and 1.</summary>
         public float NextFloat()
         {
             return NextUL() / ((float)ulong.MaxValue);
         }
 
-        /// <summary>
-        /// Gets a random double, between 0 and cap.
-        /// </summary>
+        /// <summary>Gets a random double, between 0 and cap.</summary>
         /// <param name="cap">The upper limit.</param>
         public double NextDouble(double cap)
         {
             return NextUL() * (cap / ulong.MaxValue);
         }
 
-        /// <summary>
-        /// Gets a random float, between 0 and cap.
-        /// </summary>
+        /// <summary>Gets a random float, between 0 and cap.</summary>
         /// <param name="cap">The upper limit.</param>
         public float NextFloat(float cap)
         {
             return NextUL() * (cap / ulong.MaxValue);
         }
 
-        /// <summary>
-        /// Gets a random double, between two bounds.
-        /// </summary>
+        /// <summary>Gets a random double, between two bounds.</summary>
         /// <param name="min">The lower limit.</param>
         /// <param name="cap">The upper limit.</param>
         public double NextDouble(double min, double cap)
@@ -157,9 +121,7 @@ namespace FGECore.UtilitySystems
             return (NextUL() * ((cap - min) / ulong.MaxValue)) + min;
         }
 
-        /// <summary>
-        /// Gets a random float, between two bounds.
-        /// </summary>
+        /// <summary>Gets a random float, between two bounds.</summary>
         /// <param name="min">The lower limit.</param>
         /// <param name="cap">The upper limit.</param>
         public float NextFloat(float min, float cap)
@@ -212,9 +174,7 @@ namespace FGECore.UtilitySystems
             return result;
         }
 
-        /// <summary>
-        /// Gets a random unsigned long (from 0 to <see cref="ulong.MaxValue"/>).
-        /// </summary>
+        /// <summary>Gets a random unsigned long (from 0 to <see cref="ulong.MaxValue"/>).</summary>
         public ulong NextUL()
         {
             ulong n = (ulong)Internal.Buffer.LongLength;

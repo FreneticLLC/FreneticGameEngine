@@ -334,9 +334,7 @@ namespace FGECore.PhysicsSystem
     /// <summary>Represents a physical world (space), with generic types refering the implementation type.</summary>
     public class PhysicsSpace<T, T2> : PhysicsSpace where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
     {
-        /// <summary>
-        /// Construct the physics space.
-        /// </summary>
+        /// <summary>Construct the physics space.</summary>
         /// <param name="_engine">The backing engine.</param>
         /// <param name="construct">Set false to disable constructing the internal space.</param>
         public PhysicsSpace(BasicEngine _engine, bool construct = true)

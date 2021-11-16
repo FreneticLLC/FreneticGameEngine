@@ -13,14 +13,10 @@ using System.Text;
 
 namespace FGECore.StackNoteSystem
 {
-    /// <summary>
-    /// Static helper for getting the current stack note set for any thread.
-    /// </summary>
+    /// <summary>Static helper for getting the current stack note set for any thread.</summary>
     public static class StackNoteHelper
     {
-        /// <summary>
-        /// Gets the current note set for the current thread.
-        /// </summary>
+        /// <summary>Gets the current note set for the current thread.</summary>
         public static StackNoteSet Notes
         {
             get
@@ -34,15 +30,11 @@ namespace FGECore.StackNoteSystem
             }
         }
 
-        /// <summary>
-        /// The current internal set of current notes (thread-static).
-        /// </summary>
+        /// <summary>The current internal set of current notes (thread-static).</summary>
         [ThreadStatic]
         public static StackNoteSet InternalCurrentNotes;
 
-        /// <summary>
-        /// Pushes a new entry to the current note stack.
-        /// </summary>
+        /// <summary>Pushes a new entry to the current note stack.</summary>
         /// <param name="note">The note.</param>
         /// <param name="relatedObj">A related object, if any.</param>
         public static void Push(string note, object relatedObj)
@@ -50,9 +42,7 @@ namespace FGECore.StackNoteSystem
             Notes.Push(note, relatedObj);
         }
 
-        /// <summary>
-        /// Pops the current entry from the current note stack.
-        /// </summary>
+        /// <summary>Pops the current entry from the current note stack.</summary>
         public static void Pop()
         {
             Notes.Pop();

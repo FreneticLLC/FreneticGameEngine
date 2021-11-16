@@ -16,14 +16,10 @@ using FGEGraphics.GraphicsHelpers.Shaders;
 
 namespace FGEGraphics.ClientSystem
 {
-    /// <summary>
-    /// Holds the default shader references for a GameEngine3D.
-    /// </summary>
+    /// <summary>Holds the default shader references for a GameEngine3D.</summary>
     public class GE3DShaders
     {
-        /// <summary>
-        /// Loads all shaders from the backing engine given.
-        /// </summary>
+        /// <summary>Loads all shaders from the backing engine given.</summary>
         /// <param name="Shaders">The given backing shader engine.</param>
         /// <param name="AllowLL">Whether to allow and load the LL lighting helper.</param>
         /// <param name="forNorm">Whether to enable forward-mode normal effects.</param>
@@ -88,170 +84,104 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Shader objects for forward rendering.
-        /// </summary>
+        /// <summary>Shader objects for forward rendering.</summary>
         public struct ForwardShaders
         {
-            /// <summary>
-            /// The shader used for forward ('fast') rendering of data.
-            /// </summary>
+            /// <summary>The shader used for forward ('fast') rendering of data.</summary>
             public Shader BasicSolid;
 
-            /// <summary>
-            /// The shader used for forward ('fast') rendering of data, with no bones.
-            /// </summary>
+            /// <summary>The shader used for forward ('fast') rendering of data, with no bones.</summary>
             public Shader BasicSolid_NoBones;
 
-            /// <summary>
-            /// The shader used for forward ('fast') rendering of transparent data.
-            /// </summary>
+            /// <summary>The shader used for forward ('fast') rendering of transparent data.</summary>
             public Shader BasicTransparent;
 
-            /// <summary>
-            /// The shader for forward ('fast') post-processing calculations.
-            /// </summary>
+            /// <summary>The shader for forward ('fast') post-processing calculations.</summary>
             public Shader PostProcess;
 
-            /// <summary>
-            /// The shader used for forward ('fast') rendering of transparent data, with no bones.
-            /// </summary>
+            /// <summary>The shader used for forward ('fast') rendering of transparent data, with no bones.</summary>
             public Shader BasicTransparent_NoBones;
 
-            /// <summary>
-            /// The shader used for particles in forward rendering mode.
-            /// </summary>
+            /// <summary>The shader used for particles in forward rendering mode.</summary>
             public Shader Particles;
 
-            /// <summary>
-            /// The shader used for particles in forward rendering mode, without 'depth fade' logic.
-            /// </summary>
+            /// <summary>The shader used for particles in forward rendering mode, without 'depth fade' logic.</summary>
             public Shader ParticlesNoFade;
 
-            /// <summary>
-            /// The shader used for decal rendering in forward mode.
-            /// </summary>
+            /// <summary>The shader used for decal rendering in forward mode.</summary>
             public Shader Decals;
 
-            /// <summary>
-            /// The shader used for all-transparency rendering in forward mode (specifically not the skybox itself).
-            /// </summary>
+            /// <summary>The shader used for all-transparency rendering in forward mode (specifically not the skybox itself).</summary>
             public Shader AllTransparencies_Objects;
 
-            /// <summary>
-            /// The shader used for all-transparency rendering in forward mode (specifically those objects that shouldn't have fog).
-            /// </summary>
+            /// <summary>The shader used for all-transparency rendering in forward mode (specifically those objects that shouldn't have fog).</summary>
             public Shader AllTransparencies_NoFog;
 
-            /// <summary>
-            /// The shader used for all-transparency rendering in forward mode (primarily the skybox).
-            /// </summary>
+            /// <summary>The shader used for all-transparency rendering in forward mode (primarily the skybox).</summary>
             public Shader AllTransparencies_Sky;
         }
 
-        /// <summary>
-        /// Shader objects for forward rendering.
-        /// </summary>
+        /// <summary>Shader objects for forward rendering.</summary>
         public ForwardShaders Forward;
 
-        /// <summary>
-        /// Shader objects for deferred rendering.
-        /// </summary>
+        /// <summary>Shader objects for deferred rendering.</summary>
         public struct DeferredShaders
         {
-            /// <summary>
-            /// The Shadow Pass shader.
-            /// </summary>
+            /// <summary>The Shadow Pass shader.</summary>
             public Shader ShadowPass_Basic;
 
-            /// <summary>
-            /// The Shadow Pass shader, with bones off.
-            /// </summary>
+            /// <summary>The Shadow Pass shader, with bones off.</summary>
             public Shader ShadowPass_NoBones;
 
-            /// <summary>
-            /// The Shadow Pass shader, for particles.
-            /// </summary>
+            /// <summary>The Shadow Pass shader, for particles.</summary>
             public Shader ShadowPass_Particles;
 
-            /// <summary>
-            /// The final write + godrays shader.
-            /// </summary>
+            /// <summary>The final write + godrays shader.</summary>
             public Shader FinalPass_Basic;
 
-            /// <summary>
-            /// The final write + godrays shader, with lights on.
-            /// </summary>
+            /// <summary>The final write + godrays shader, with lights on.</summary>
             public Shader FinalPass_Lights;
 
-            /// <summary>
-            /// The final write + godrays shader, with toonify on.
-            /// </summary>
+            /// <summary>The final write + godrays shader, with toonify on.</summary>
             public Shader FinalPass_Toonify;
 
-            /// <summary>
-            /// The final write + godrays shader, with lights and toonify on.
-            /// </summary>
+            /// <summary>The final write + godrays shader, with lights and toonify on.</summary>
             public Shader FinalPass_Lights_Toonify;
 
-            /// <summary>
-            /// The final write + godrays shader, with lights and motion blur on.
-            /// </summary>
+            /// <summary>The final write + godrays shader, with lights and motion blur on.</summary>
             public Shader FinalPass_Lights_MotionBlur;
 
-            /// <summary>
-            /// The G-Buffer FBO shader.
-            /// </summary>
+            /// <summary>The G-Buffer FBO shader.</summary>
             public Shader GBufferSolid;
 
-            /// <summary>
-            /// The G-Buffer FBO shader, for alltransparents (Skybox mainly).
-            /// </summary>
+            /// <summary>The G-Buffer FBO shader, for alltransparents (Skybox mainly).</summary>
             public Shader GBuffer_SkyBox;
 
-            /// <summary>
-            /// The G-Buffer FBO shader, for the refraction pass.
-            /// </summary>
+            /// <summary>The G-Buffer FBO shader, for the refraction pass.</summary>
             public Shader GBuffer_Refraction;
 
-            /// <summary>
-            /// The shader that adds shadowed lights to a scene.
-            /// </summary>
+            /// <summary>The shader that adds shadowed lights to a scene.</summary>
             public Shader ShadowAdderPass;
 
-            /// <summary>
-            /// The shader that adds lights to a scene.
-            /// </summary>
+            /// <summary>The shader that adds lights to a scene.</summary>
             public Shader LightAdderPass;
 
-            /// <summary>
-            /// The shader that adds shadowed lights to a scene, with SSAO.
-            /// </summary>
+            /// <summary>The shader that adds shadowed lights to a scene, with SSAO.</summary>
             public Shader ShadowAdderPass_SSAO;
 
-            /// <summary>
-            /// The shader that adds lights to a scene, with SSAO.
-            /// </summary>
+            /// <summary>The shader that adds lights to a scene, with SSAO.</summary>
             public Shader LightAdderPass_SSAO;
 
-            /// <summary>
-            /// The shader used only for transparent data.
-            /// </summary>
+            /// <summary>The shader used only for transparent data.</summary>
             public Shader Transparents;
 
-            /// <summary>
-            /// The shader used only for transparent data with lighting.
-            /// </summary>
+            /// <summary>The shader used only for transparent data with lighting.</summary>
             public Shader Transparents_Lights;
 
-            /// <summary>
-            /// The shader used only for transparent data with shadowed lighting.
-            /// </summary>
+            /// <summary>The shader used only for transparent data with shadowed lighting.</summary>
             public Shader Transparents_Lights_Shadows;
 
-            /// <summary>
-            /// The shader used for calculating godrays.
-            /// </summary>
+            /// <summary>The shader used for calculating godrays.</summary>
             public Shader Godrays;
 
             /// <summary>
@@ -260,80 +190,50 @@ namespace FGEGraphics.ClientSystem
             /// </summary>
             public Shader TransparentAdderPass;
 
-            /// <summary>
-            /// The shader used for transparent data (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for transparent data (LinkedList Transparency version).</summary>
             public Shader Transparents_LL;
 
-            /// <summary>
-            /// The shader used for lit transparent data (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for lit transparent data (LinkedList Transparency version).</summary>
             public Shader Transparents_Lights_LL;
 
-            /// <summary>
-            /// The shader used for shadowed lit transparent data (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for shadowed lit transparent data (LinkedList Transparency version).</summary>
             public Shader Transparents_Lights_Shadows_LL;
 
-            /// <summary>
-            /// The shader used to clear LL data.
-            /// </summary>
+            /// <summary>The shader used to clear LL data.</summary>
             public Shader LLClearerPass;
 
-            /// <summary>
-            /// The shader used to finally apply LL data.
-            /// </summary>
+            /// <summary>The shader used to finally apply LL data.</summary>
             public Shader LLFinalPass;
 
-            /// <summary>
-            /// The shader used to assist in HDR calculation acceleration.
-            /// </summary>
+            /// <summary>The shader used to assist in HDR calculation acceleration.</summary>
             public Shader HDRPass;
 
-            /// <summary>
-            /// The shader used only for g-buffer particles.
-            /// </summary>
+            /// <summary>The shader used only for g-buffer particles.</summary>
             public Shader Solid_Particles;
 
-            /// <summary>
-            /// The shader used only for transparent particles.
-            /// </summary>
+            /// <summary>The shader used only for transparent particles.</summary>
             public Shader Transparents_Particles;
 
-            /// <summary>
-            /// The shader used only for transparent particles with lighting.
-            /// </summary>
+            /// <summary>The shader used only for transparent particles with lighting.</summary>
             public Shader Transparents_Particles_Lights;
 
-            /// <summary>
-            /// The shader used only for transparent particles with shadowed lighting.
-            /// </summary>
+            /// <summary>The shader used only for transparent particles with shadowed lighting.</summary>
             public Shader Transparents_Particles_Lights_Shadows;
 
-            /// <summary>
-            /// The shader used for transparent particles (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for transparent particles (LinkedList Transparency version).</summary>
             public Shader Transparents_Particles_LL;
 
-            /// <summary>
-            /// The shader used for lit transparent particles (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for lit transparent particles (LinkedList Transparency version).</summary>
             public Shader Transparents_Particles_Lights_LL;
 
-            /// <summary>
-            /// The shader used for shadowed lit transparent particles (LinkedList Transparency version).
-            /// </summary>
+            /// <summary>The shader used for shadowed lit transparent particles (LinkedList Transparency version).</summary>
             public Shader Transparents_Particles_Lights_Shadows_LL;
 
-            /// <summary>
-            /// The shader used for decal rendering in deferred rendering mode.
-            /// </summary>
+            /// <summary>The shader used for decal rendering in deferred rendering mode.</summary>
             public Shader GBuffer_Decals;
         }
 
-        /// <summary>
-        /// Shader objects for deferred rendering.
-        /// </summary>
+        /// <summary>Shader objects for deferred rendering.</summary>
         public DeferredShaders Deferred;
     }
 }

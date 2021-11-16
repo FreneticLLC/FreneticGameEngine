@@ -18,30 +18,22 @@ using FGECore.UtilitySystems;
 
 namespace FGECore.FileSystems
 {
-    /// <summary>
-    /// Helper for writing data to a stream.
-    /// </summary>
+    /// <summary>Helper for writing data to a stream.</summary>
     public class DataWriter
     {
-        /// <summary>
-        /// The internal stream.
-        /// </summary>
+        /// <summary>The internal stream.</summary>
         public DataStream Internal;
 
         private readonly byte[] HelperBytes = new byte[32];
 
-        /// <summary>
-        /// Constructs the data writer.
-        /// </summary>
+        /// <summary>Constructs the data writer.</summary>
         /// <param name="stream">The base stream.</param>
         public DataWriter(DataStream stream)
         {
             Internal = stream;
         }
 
-        /// <summary>
-        /// Write a location object (24 bytes).
-        /// </summary>
+        /// <summary>Write a location object (24 bytes).</summary>
         /// <param name="loc">The data.</param>
         public void WriteLocation(Location loc)
         {
@@ -49,9 +41,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 24);
         }
 
-        /// <summary>
-        /// Write a location object (12 bytes).
-        /// </summary>
+        /// <summary>Write a location object (12 bytes).</summary>
         /// <param name="loc">The data.</param>
         public void WriteLocationFloat(Location loc)
         {
@@ -60,9 +50,7 @@ namespace FGECore.FileSystems
             WriteFloat(loc.ZF);
         }
 
-        /// <summary>
-        /// Write a quaternion object (32 bytes).
-        /// </summary>
+        /// <summary>Write a quaternion object (32 bytes).</summary>
         /// <param name="quat">The data.</param>
         public void WriteQuaternion(Quaternion quat)
         {
@@ -70,9 +58,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 32);
         }
 
-        /// <summary>
-        /// Write a quaternion object (16 bytes).
-        /// </summary>
+        /// <summary>Write a quaternion object (16 bytes).</summary>
         /// <param name="quat">The data.</param>
         public void WriteQuaternionFloat(Quaternion quat)
         {
@@ -82,9 +68,7 @@ namespace FGECore.FileSystems
             WriteFloat(quat.WF);
         }
 
-        /// <summary>
-        /// Write a view direction from a location object (4 bytes).
-        /// </summary>
+        /// <summary>Write a view direction from a location object (4 bytes).</summary>
         /// <param name="loc">The data.</param>
         public void WriteViewDirection(Location loc)
         {
@@ -111,36 +95,28 @@ namespace FGECore.FileSystems
             WriteUShort((ushort)((ushort.MaxValue / 180f) * pitch));
         }
 
-        /// <summary>
-        /// Write a byte.
-        /// </summary>
+        /// <summary>Write a byte.</summary>
         /// <param name="x">The data.</param>
         public void WriteByte(byte x)
         {
             Internal.WriteByte(x);
         }
 
-        /// <summary>
-        /// Write a signed byte.
-        /// </summary>
+        /// <summary>Write a signed byte.</summary>
         /// <param name="x">The data.</param>
         public void WriteSByte(sbyte x)
         {
             Internal.WriteByte((byte)x);
         }
 
-        /// <summary>
-        /// Write a bool.
-        /// </summary>
+        /// <summary>Write a bool.</summary>
         /// <param name="x">The data.</param>
         public void WriteBool(bool x)
         {
             WriteByte((byte)(x ? 1 : 0));
         }
 
-        /// <summary>
-        /// Write a character (2 bytes).
-        /// </summary>
+        /// <summary>Write a character (2 bytes).</summary>
         /// <param name="x"></param>
         public void WriteChar(char x)
         {
@@ -148,9 +124,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 2);
         }
 
-        /// <summary>
-        /// Write a short integer (2 bytes).
-        /// </summary>
+        /// <summary>Write a short integer (2 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteShort(short x)
         {
@@ -158,9 +132,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 2);
         }
 
-        /// <summary>
-        /// Write an unsigned short integer (2 bytes).
-        /// </summary>
+        /// <summary>Write an unsigned short integer (2 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteUShort(ushort x)
         {
@@ -168,9 +140,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 2);
         }
 
-        /// <summary>
-        /// Write an integer (4 bytes).
-        /// </summary>
+        /// <summary>Write an integer (4 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteInt(int x)
         {
@@ -178,9 +148,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 4);
         }
 
-        /// <summary>
-        /// Write an unsigned integer (4 bytes).
-        /// </summary>
+        /// <summary>Write an unsigned integer (4 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteUInt(uint x)
         {
@@ -188,9 +156,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 4);
         }
 
-        /// <summary>
-        /// Write a float (4 bytes).
-        /// </summary>
+        /// <summary>Write a float (4 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteFloat(float x)
         {
@@ -198,9 +164,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 4);
         }
 
-        /// <summary>
-        /// Write a double (8 bytes).
-        /// </summary>
+        /// <summary>Write a double (8 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteDouble(double x)
         {
@@ -208,9 +172,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 8);
         }
 
-        /// <summary>
-        /// Write a long integer (8 bytes).
-        /// </summary>
+        /// <summary>Write a long integer (8 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteLong(long x)
         {
@@ -218,9 +180,7 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 8);
         }
 
-        /// <summary>
-        /// Write an unsigned long integer (8 bytes).
-        /// </summary>
+        /// <summary>Write an unsigned long integer (8 bytes).</summary>
         /// <param name="x">The data.</param>
         public void WriteULong(ulong x)
         {
@@ -228,18 +188,14 @@ namespace FGECore.FileSystems
             Internal.Write(HelperBytes, 0, 8);
         }
 
-        /// <summary>
-        /// Write a set of bytes directly to the stream.
-        /// </summary>
+        /// <summary>Write a set of bytes directly to the stream.</summary>
         /// <param name="bits">The bytes.</param>
         public void WriteBytes(byte[] bits)
         {
             Internal.Write(bits, 0, bits.Length);
         }
 
-        /// <summary>
-        /// Writes a partial set of bytes directly to the stream.
-        /// </summary>
+        /// <summary>Writes a partial set of bytes directly to the stream.</summary>
         /// <param name="bits">They bytes.</param>
         /// <param name="start">Starting index.</param>
         /// <param name="len">Length in bytes to write.</param>
@@ -248,9 +204,7 @@ namespace FGECore.FileSystems
             Internal.Write(bits, start, len);
         }
 
-        /// <summary>
-        /// Write a "full set" of bytes to the stream: prefixing the bytes with a var int length indicator.
-        /// </summary>
+        /// <summary>Write a "full set" of bytes to the stream: prefixing the bytes with a var int length indicator.</summary>
         /// <param name="data">The data.</param>
         public void WriteFullBytesVar(byte[] data)
         {
@@ -258,9 +212,7 @@ namespace FGECore.FileSystems
             WriteBytes(data);
         }
 
-        /// <summary>
-        /// Write a "full" string to the stream: prefixing the string with a var int length indicator.
-        /// </summary>
+        /// <summary>Write a "full" string to the stream: prefixing the string with a var int length indicator.</summary>
         /// <param name="str">The data.</param>
         public void WriteFullStringVar(string str)
         {
@@ -269,9 +221,7 @@ namespace FGECore.FileSystems
             WriteBytes(data);
         }
 
-        /// <summary>
-        /// Write a "full set" of bytes to the stream: prefixing the bytes with a 4-byte length indicator.
-        /// </summary>
+        /// <summary>Write a "full set" of bytes to the stream: prefixing the bytes with a 4-byte length indicator.</summary>
         /// <param name="data">The data.</param>
         public void WriteFullBytes(byte[] data)
         {
@@ -279,9 +229,7 @@ namespace FGECore.FileSystems
             WriteBytes(data);
         }
 
-        /// <summary>
-        /// Write a "full" string to the stream: prefixing the string with a 4-byte length indicator.
-        /// </summary>
+        /// <summary>Write a "full" string to the stream: prefixing the string with a 4-byte length indicator.</summary>
         /// <param name="str">The data.</param>
         public void WriteFullString(string str)
         {

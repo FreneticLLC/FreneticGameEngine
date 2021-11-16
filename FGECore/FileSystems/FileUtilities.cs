@@ -17,14 +17,10 @@ using LZ4;
 
 namespace FGECore.FileSystems
 {
-    /// <summary>
-    /// Utilities related to file handling.
-    /// </summary>
+    /// <summary>Utilities related to file handling.</summary>
     public static class FileUtilities
     {
-        /// <summary>
-        /// Compresses a byte array using LZ4.
-        /// </summary>
+        /// <summary>Compresses a byte array using LZ4.</summary>
         /// <param name="input">Non-compressed data.</param>
         /// <returns>Compressed data.</returns>
         public static byte[] Compress(byte[] input)
@@ -35,9 +31,7 @@ namespace FGECore.FileSystems
             lzstream.Flush();
             return memstream.ToArray();
         }
-        /// <summary>
-        /// Compresses a byte array using LZ4.
-        /// </summary>
+        /// <summary>Compresses a byte array using LZ4.</summary>
         /// <param name="input">Non-compressed data.</param>
         /// <param name="start">Starting index.</param>
         /// <param name="length">Length to compress.</param>
@@ -51,9 +45,7 @@ namespace FGECore.FileSystems
             return memstream.ToArray();
         }
 
-        /// <summary>
-        /// Decompresses a byte array using LZ4.
-        /// </summary>
+        /// <summary>Decompresses a byte array using LZ4.</summary>
         /// <param name="input">Compressed data.</param>
         /// <returns>Non-compressed data.</returns>
         public static byte[] Decompress(byte[] input)
@@ -66,9 +58,7 @@ namespace FGECore.FileSystems
             return output.ToArray();
         }
 
-        /// <summary>
-        /// Compresses a byte array using the GZip algorithm.
-        /// </summary>
+        /// <summary>Compresses a byte array using the GZip algorithm.</summary>
         /// <param name="input">Non-compressed data.</param>
         /// <returns>Compressed data.</returns>
         public static byte[] GZip(byte[] input)
@@ -80,9 +70,7 @@ namespace FGECore.FileSystems
             return memstream.ToArray();
         }
 
-        /// <summary>
-        /// Decompress a byte array using the GZip algorithm.
-        /// </summary>
+        /// <summary>Decompress a byte array using the GZip algorithm.</summary>
         /// <param name="input">Compressed data.</param>
         /// <returns>Non-compressed data.</returns>
         public static byte[] UnGZip(byte[] input)

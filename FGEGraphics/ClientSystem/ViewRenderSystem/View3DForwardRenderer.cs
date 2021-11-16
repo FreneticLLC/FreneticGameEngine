@@ -20,19 +20,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {
-    /// <summary>
-    /// Handles forward rendering logic for <see cref="View3D"/>.
-    /// </summary>
+    /// <summary>Handles forward rendering logic for <see cref="View3D"/>.</summary>
     public class View3DForwardRenderer : View3DCoreDataSet
     {
-        /// <summary>
-        /// Patches to apply (if any).
-        /// </summary>
+        /// <summary>Patches to apply (if any).</summary>
         public View3DPatchesForward Patches = new View3DPatchesForward();
 
-        /// <summary>
-        /// Render everything as quickly as possible: a simple forward renderer.
-        /// </summary>
+        /// <summary>Render everything as quickly as possible: a simple forward renderer.</summary>
         public void RenderPass_FAST()
         {
             GraphicsUtil.CheckError("Render/Fast - Prep");

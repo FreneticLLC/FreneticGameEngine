@@ -24,14 +24,10 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers.Textures
 {
-    /// <summary>
-    /// The primary engine for textures.
-    /// </summary>
+    /// <summary>The primary engine for textures.</summary>
     public class TextureEngine : IDisposable
     {
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -42,68 +38,44 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Disposes the window client.
-        /// </summary>
+        /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
             Dispose(true);
         }
 
-        /// <summary>
-        /// A full list of currently loaded textures.
-        /// </summary>
+        /// <summary>A full list of currently loaded textures.</summary>
         public Dictionary<string, Texture> LoadedTextures;
 
-        /// <summary>
-        /// A default white texture.
-        /// </summary>
+        /// <summary>A default white texture.</summary>
         public Texture White = null;
 
-        /// <summary>
-        /// A default clear texture.
-        /// </summary>
+        /// <summary>A default clear texture.</summary>
         public Texture Clear = null;
 
-        /// <summary>
-        /// A default black texture.
-        /// </summary>
+        /// <summary>A default black texture.</summary>
         public Texture Black = null;
 
-        /// <summary>
-        /// A default normal plane texture.
-        /// </summary>
+        /// <summary>A default normal plane texture.</summary>
         public Texture NormalDef = null;
 
-        /// <summary>
-        /// An empty bitmap, for regular use.
-        /// </summary>
+        /// <summary>An empty bitmap, for regular use.</summary>
         public Bitmap EmptyBitmap = null;
 
-        /// <summary>
-        /// A single graphics object for regular use.
-        /// </summary>
+        /// <summary>A single graphics object for regular use.</summary>
         public Graphics GenericGraphicsObject = null;
 
-        /// <summary>
-        /// The relevant file helper.
-        /// </summary>
+        /// <summary>The relevant file helper.</summary>
         public FileEngine Files;
 
-        /// <summary>
-        /// The relevant asset streaming helper.
-        /// </summary>
+        /// <summary>The relevant asset streaming helper.</summary>
         public AssetStreamingEngine AssetStreaming;
 
-        /// <summary>
-        /// The relevant scheduler.
-        /// </summary>
+        /// <summary>The relevant scheduler.</summary>
         public Scheduler Schedule;
 
-        /// <summary>
-        /// Starts or restarts the texture system.
-        /// </summary>
+        /// <summary>Starts or restarts the texture system.</summary>
         /// <param name="files">The relevant file helper.</param>
         /// <param name="assetStreaming">The relevant asset streaming helper.</param>
         /// <param name="schedule">The relevant scheduler.</param>
@@ -128,9 +100,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             LoadedTextures.Add("normal_def", NormalDef);
         }
 
-        /// <summary>
-        /// Clears away all current textures.
-        /// </summary>
+        /// <summary>Clears away all current textures.</summary>
         public void Empty()
         {
             foreach (Texture texture in LoadedTextures.Values)
@@ -142,18 +112,14 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             LoadedTextures.Clear();
         }
 
-        /// <summary>
-        /// Updates the timestamp on the engine.
-        /// </summary>
+        /// <summary>Updates the timestamp on the engine.</summary>
         /// <param name="time">The current time stamp.</param>
         public void Update(double time)
         {
             cTime = time;
         }
 
-        /// <summary>
-        /// The current game tick time.
-        /// </summary>
+        /// <summary>The current game tick time.</summary>
         public double cTime = 1.0;
 
         /// <summary>
@@ -190,9 +156,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             return loaded;
         }
 
-        /// <summary>
-        /// Dynamically loads a texture (returns a temporary copy of 'White', then fills it in when possible).
-        /// </summary>
+        /// <summary>Dynamically loads a texture (returns a temporary copy of 'White', then fills it in when possible).</summary>
         /// <param name="textureName">The texture name to load.</param>
         /// <returns>The texture object.</returns>
         public Texture DynamicLoadTexture(string textureName)
@@ -272,9 +236,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             return output;
         }
 
-        /// <summary>
-        /// Gets a <see cref="Bitmap"/> for some data, with size correction.
-        /// </summary>
+        /// <summary>Gets a <see cref="Bitmap"/> for some data, with size correction.</summary>
         /// <param name="data">The raw file data.</param>
         /// <param name="textureWidth">The texture width (or 0 for any-valid).</param>
         /// <returns>The bitmap.</returns>
@@ -299,9 +261,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Gets the a bitmap object for a texture by name.
-        /// </summary>
+        /// <summary>Gets the a bitmap object for a texture by name.</summary>
         /// <param name="texturename">The name of the texture.</param>
         /// <param name="twidth">The texture width, if any.</param>
         /// <returns>A valid bitmap object, or null.</returns>
@@ -318,19 +278,13 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             return LoadBitmapForTexture(texturename, twidth);
         }
 
-        /// <summary>
-        /// Fired when a texture is loaded.
-        /// </summary>
+        /// <summary>Fired when a texture is loaded.</summary>
         public event EventHandler<TextureLoadedEventArgs> OnTextureLoaded;
 
-        /// <summary>
-        /// Whether textures should use linear mode usually.
-        /// </summary>
+        /// <summary>Whether textures should use linear mode usually.</summary>
         public bool DefaultLinear = true;
 
-        /// <summary>
-        /// Loads a texture's bitmap from file.
-        /// </summary>
+        /// <summary>Loads a texture's bitmap from file.</summary>
         /// <param name="filename">The name of the file to use.</param>
         /// <param name="twidth">The texture width, if any.</param>
         /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
@@ -387,9 +341,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             LockBitmapToTexture(bmp, DefaultLinear);
         }
 
-        /// <summary>
-        /// loads a texture by name and puts it into a texture array.
-        /// </summary>
+        /// <summary>loads a texture by name and puts it into a texture array.</summary>
         /// <param name="filename">The texture array.</param>
         /// <param name="depth">The depth in the array.</param>
         /// <param name="twidth">The texture width.</param>
@@ -414,9 +366,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Creates a Texture object for a specific color.
-        /// </summary>
+        /// <summary>Creates a Texture object for a specific color.</summary>
         /// <param name="c">The color to use.</param>
         /// <param name="name">The name of the texture.</param>
         /// <returns>The generated texture.</returns>
@@ -444,9 +394,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             return texture;
         }
 
-        /// <summary>
-        /// Locks a bitmap file's data to a GL texture.
-        /// </summary>
+        /// <summary>Locks a bitmap file's data to a GL texture.</summary>
         /// <param name="bmp">The bitmap to use.</param>
         /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
         public static void LockBitmapToTexture(Bitmap bmp, bool linear)
@@ -462,9 +410,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         }
 
-        /// <summary>
-        /// Locks a bitmap file's data to a GL texture array.
-        /// </summary>
+        /// <summary>Locks a bitmap file's data to a GL texture array.</summary>
         /// <param name="bmp">The bitmap to use.</param>
         /// <param name="depth">The depth in a 3D texture.</param>
         public static void LockBitmapToTexture(Bitmap bmp, int depth)

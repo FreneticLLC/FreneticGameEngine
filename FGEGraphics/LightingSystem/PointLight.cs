@@ -21,29 +21,19 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a 3D point light.
-    /// </summary>
+    /// <summary>Represents a 3D point light.</summary>
     public class PointLight : LightObject
     {
-        /// <summary>
-        /// Radius of the light.
-        /// </summary>
+        /// <summary>Radius of the light.</summary>
         public float Radius;
 
-        /// <summary>
-        /// Color of the light.
-        /// </summary>
+        /// <summary>Color of the light.</summary>
         Color3F Color;
 
-        /// <summary>
-        /// Gets whether it should cast shadows.
-        /// </summary>
+        /// <summary>Gets whether it should cast shadows.</summary>
         public bool CastShadows = true;
 
-        /// <summary>
-        /// Sets whether it should cast shadows properly.
-        /// </summary>
+        /// <summary>Sets whether it should cast shadows properly.</summary>
         /// <param name="shad">Shadow cast mode.</param>
         public void SetCastShadows(bool shad)
         {
@@ -54,9 +44,7 @@ namespace FGEGraphics.LightingSystem
             }
         }
 
-        /// <summary>
-        /// Constructs the point light.
-        /// </summary>
+        /// <summary>Constructs the point light.</summary>
         /// <param name="pos">The position.</param>
         /// <param name="radius">The radius.</param>
         /// <param name="col">The color.</param>
@@ -78,16 +66,12 @@ namespace FGEGraphics.LightingSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        /// <summary>
-        /// Destroys the light.
-        /// </summary>
+        /// <summary>Destroys the light.</summary>
         public void Destroy()
         {
         }
 
-        /// <summary>
-        /// Repositions the light.
-        /// </summary>
+        /// <summary>Repositions the light.</summary>
         /// <param name="pos">The new position.</param>
         public sealed override void Reposition(Location pos)
         {

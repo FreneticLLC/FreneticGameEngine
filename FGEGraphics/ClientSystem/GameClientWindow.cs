@@ -145,9 +145,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
         public InternalData Internal = new InternalData() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = new[] { 0f, 1f, 1f, 1f }, DepthClear = new[] { 1f }, Loaded = false };
 
-        /// <summary>
-        /// Constructs the game client window.
-        /// </summary>
+        /// <summary>Constructs the game client window.</summary>
         /// <param name="_sWindowTitle">The starting window title.</param>
         /// <param name="threed">Whether the game is 3D.</param>
         public GameClientWindow(string _sWindowTitle = null, bool threed = true)
@@ -416,9 +414,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Converts the window into VR mode, if possible.
-        /// </summary>
+        /// <summary>Converts the window into VR mode, if possible.</summary>
         /// <returns>True if VR is enabled, false if not (there was an error, or there is no VR support on the client system).</returns>
         public bool ActivateVR()
         {
@@ -429,9 +425,7 @@ namespace FGEGraphics.ClientSystem
             return VRSupport.TryInit(this) != null;
         }
 
-        /// <summary>
-        /// Dumb MS logic dispose method.
-        /// </summary>
+        /// <summary>Dumb MS logic dispose method.</summary>
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -443,7 +437,7 @@ namespace FGEGraphics.ClientSystem
                 Window.Dispose();
             }
         }
-        
+
         /// <summary>Disposes the window client.</summary>
         public void Dispose()
         {

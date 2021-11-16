@@ -19,14 +19,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem
 {
-    /// <summary>
-    /// Class that helps with basic data generation for <see cref="View3D"/>.
-    /// </summary>
+    /// <summary>Class that helps with basic data generation for <see cref="View3D"/>.</summary>
     public class View3DGenerationHelper : View3DCoreDataSet
     {
-        /// <summary>
-        /// Generates the <see cref="View3D"/>.
-        /// </summary>
+        /// <summary>Generates the <see cref="View3D"/>.</summary>
         /// <param name="w">Width.</param>
         /// <param name="h">Height.</param>
         public void Generate(int w, int h)
@@ -41,9 +37,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Load - View3D - OV");
         }
 
-        /// <summary>
-        /// Generate helpers to deal with out-view depth logic.
-        /// </summary>
+        /// <summary>Generate helpers to deal with out-view depth logic.</summary>
         public void GenerateOutDepthHelpers()
         {
             if (Internal.FBO_OutView_Main != 0)
@@ -66,9 +60,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        /// <summary>
-        /// (Re-)Generate transparent helpers, internal call.
-        /// </summary>
+        /// <summary>(Re-)Generate transparent helpers, internal call.</summary>
         public void GenerateTranspHelpers()
         {
             if (Internal.FBO_Transparents_Main != 0)
@@ -120,9 +112,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             }
         }
 
-        /// <summary>
-        /// Internal call to generate a texture.
-        /// </summary>
+        /// <summary>Internal call to generate a texture.</summary>
         /// <returns>The texture.</returns>
         public int GenTexture()
         {
@@ -138,9 +128,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             return temp;
         }
 
-        /// <summary>
-        /// Internal call to generate a buffer, for the Linked-List Transparency trick.
-        /// </summary>
+        /// <summary>Internal call to generate a buffer, for the Linked-List Transparency trick.</summary>
         /// <param name="c">The ID.</param>
         /// <param name="flip">Whether it needs to be flipped.</param>
         /// <returns>The buffer.</returns>
@@ -159,9 +147,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             return temp;
         }
 
-        /// <summary>
-        /// Internal call to generate light helpers.
-        /// </summary>
+        /// <summary>Internal call to generate light helpers.</summary>
         public void GenerateLightHelpers()
         {
             GraphicsUtil.CheckError("Load - View3D - Pre");
@@ -292,9 +278,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Load - View3D - Decal");
         }
 
-        /// <summary>
-        /// Helper to generate an FBO backend for the view, if not a main-screen view.
-        /// </summary>
+        /// <summary>Helper to generate an FBO backend for the view, if not a main-screen view.</summary>
         public void GenerateFBO()
         {
             if (Internal.CurrentFBO != 0)
@@ -328,9 +312,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GraphicsUtil.CheckError("Load - View3D - GenFBO");
         }
 
-        /// <summary>
-        /// Converts the next frame to a texture.
-        /// </summary>
+        /// <summary>Converts the next frame to a texture.</summary>
         /// <returns>The texture.</returns>
         public int NextFrameToTexture()
         {
@@ -368,9 +350,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             return Internal.FBO_NextFrame_Texture;
         }
 
-        /// <summary>
-        /// Internal call to end a 'next frame' effect on any given render tick.
-        /// </summary>
+        /// <summary>Internal call to end a 'next frame' effect on any given render tick.</summary>
         /// <param name="pfbo">The previous FBO.</param>
         public void EndNF(int pfbo)
         {

@@ -24,29 +24,19 @@ namespace FGEGraphics.ClientSystem.EntitySystem
     /// <summary>Renders a 3D model.</summary>
     public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
     {
-        /// <summary>
-        /// The model for this entity.
-        /// </summary>
+        /// <summary>The model for this entity.</summary>
         public Model EntityModel;
 
-        /// <summary>
-        /// The render scale.
-        /// </summary>
+        /// <summary>The render scale.</summary>
         public Location Scale;
 
-        /// <summary>
-        /// The diffuse color texture.
-        /// </summary>
+        /// <summary>The diffuse color texture.</summary>
         public Texture DiffuseTexture;
 
-        /// <summary>
-        /// The color of the model.
-        /// </summary>
+        /// <summary>The color of the model.</summary>
         public Color4F Color = Color4F.White;
 
-        /// <summary>
-        /// Render the entity as seen by a top-down map.
-        /// </summary>
+        /// <summary>Render the entity as seen by a top-down map.</summary>
         /// <param name="context">The render context.</param>
         public override void RenderForTopMap(RenderContext context)
         {
@@ -84,9 +74,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Render the entity as seen normally, in 3D.
-        /// </summary>
+        /// <summary>Render the entity as seen normally, in 3D.</summary>
         /// <param name="context">The render context.</param>
         public override void RenderStandard(RenderContext context)
         {
@@ -109,9 +97,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Non-implemented 2D option.
-        /// </summary>
+        /// <summary>Non-implemented 2D option.</summary>
         /// <param name="context">The 2D render context.</param>
         public override void RenderStandard2D(RenderContext2D context)
         {

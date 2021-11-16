@@ -39,71 +39,51 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// The current position of the light.
-        /// </summary>
+        /// <summary>The current position of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Vector2 LightPosition;
 
 
-        /// <summary>
-        /// The current strength of the light.
-        /// </summary>
+        /// <summary>The current strength of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LightStrength = 256;
 
-        /// <summary>
-        /// The current color of the light.
-        /// </summary>
+        /// <summary>The current color of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Color4F LightColor = Color4F.White;
 
-        /// <summary>
-        /// The current subdivider-scale of the light.
-        /// </summary>
+        /// <summary>The current subdivider-scale of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LightSDScale = 0.5f;
 
-        /// <summary>
-        /// How deep into an object the light should go.
-        /// </summary>
+        /// <summary>How deep into an object the light should go.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LightExtraDist = 50.0f;
 
-        /// <summary>
-        /// The lowest layer that can present a shadow.
-        /// </summary>
+        /// <summary>The lowest layer that can present a shadow.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public double ShadowMinLayer = -10E10;
 
-        /// <summary>
-        /// The highest layer that can present a shadow.
-        /// </summary>
+        /// <summary>The highest layer that can present a shadow.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public double ShadowMaxLayer = 10E10;
 
-        /// <summary>
-        /// Whether the light source is a 'sky' light.
-        /// </summary>
+        /// <summary>Whether the light source is a 'sky' light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public bool IsSkyLight = false;
 
-        /// <summary>
-        /// The actual light object.
-        /// </summary>
+        /// <summary>The actual light object.</summary>
         public PointLight2D ActualLight;
 
-        /// <summary>
-        /// Whether an entity will cast shadows from this light.
-        /// </summary>
+        /// <summary>Whether an entity will cast shadows from this light.</summary>
         /// <param name="ent">The entity in question.</param>
         /// <returns>Whether to cast shadows.</returns>
         public bool CastShadow(ClientEntity ent)
@@ -111,9 +91,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             return ent.EID != Entity.EID && ent.Renderer != null && ent.Renderer.CastShadows && ent.Renderer.RenderingPriorityOrder >= ShadowMinLayer && ent.Renderer.RenderingPriorityOrder <= ShadowMaxLayer;
         }
 
-        /// <summary>
-        /// Fired when the entity is spawned.
-        /// </summary>
+        /// <summary>Fired when the entity is spawned.</summary>
         public override void OnSpawn()
         {
             if (Entity.Engine is GameEngine2D eng)
@@ -134,9 +112,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Fired when the entity is despawned.
-        /// </summary>
+        /// <summary>Fired when the entity is despawned.</summary>
         public override void OnDespawn()
         {
             if (Entity.Engine is GameEngine2D eng)

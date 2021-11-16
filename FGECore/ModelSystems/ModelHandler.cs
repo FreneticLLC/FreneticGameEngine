@@ -20,14 +20,10 @@ using BepuUtilities.Memory;
 
 namespace FGECore.ModelSystems
 {
-    /// <summary>
-    /// Handles abstract 3D models. Can be purposed for both collision systems and rendering.
-    /// </summary>
+    /// <summary>Handles abstract 3D models. Can be purposed for both collision systems and rendering.</summary>
     public class ModelHandler
     {
-        /// <summary>
-        /// Loads a model from .FMD (Frenetic Model Data) input.
-        /// </summary>
+        /// <summary>Loads a model from .FMD (Frenetic Model Data) input.</summary>
         /// <param name="data">The input FMD data.</param>
         public Model3D LoadModel(byte[] data)
         {
@@ -114,9 +110,7 @@ namespace FGECore.ModelSystems
             return mod;
         }
 
-        /// <summary>
-        /// Reads a single node from a model.
-        /// </summary>
+        /// <summary>Reads a single node from a model.</summary>
         /// <param name="root">The root node.</param>
         /// <param name="dr">The data reader.</param>
         /// <returns>The node.</returns>
@@ -135,9 +129,7 @@ namespace FGECore.ModelSystems
             return n;
         }
 
-        /// <summary>
-        /// Reads a matrix.
-        /// </summary>
+        /// <summary>Reads a matrix.</summary>
         /// <param name="reader">The data reader.</param>
         /// <returns>The matrix.</returns>
         public static Matrix4x4 ReadMat(DataReader reader)
@@ -162,9 +154,7 @@ namespace FGECore.ModelSystems
             //return new Matrix(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4);
         }
 
-        /// <summary>
-        /// Iterates over all COLLISION ENABLED vertices of a model (if "collision" is used).
-        /// </summary>
+        /// <summary>Iterates over all COLLISION ENABLED vertices of a model (if "collision" is used).</summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
         public static IEnumerable<Vector3[]> IterateCollisionVertices(Model3D input)
@@ -178,9 +168,7 @@ namespace FGECore.ModelSystems
             }
         }
 
-        /// <summary>
-        /// Iterates over all COLLISION ENABLED vertices of a model (if "collision" isn't used).
-        /// </summary>
+        /// <summary>Iterates over all COLLISION ENABLED vertices of a model (if "collision" isn't used).</summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
         public static IEnumerable<Vector3[]> IteratePossibleCollisionVertices(Model3D input)
@@ -194,9 +182,7 @@ namespace FGECore.ModelSystems
             }
         }
 
-        /// <summary>
-        /// Gets all COLLISION ENABLED vertices of a model.
-        /// </summary>
+        /// <summary>Gets all COLLISION ENABLED vertices of a model.</summary>
         /// <param name="input">The model.</param>
         /// <returns>The collision vertices.</returns>
         public static Vector3[] GetCollisionVertices(Model3D input)
@@ -225,9 +211,7 @@ namespace FGECore.ModelSystems
             return resultVertices;
         }
 
-        /// <summary>
-        /// Converts a mesh to a BEPU perfect mesh.
-        /// </summary>
+        /// <summary>Converts a mesh to a BEPU perfect mesh.</summary>
         /// <param name="space">The relevant physics space.</param>
         /// <param name="input">The model.</param>
         /// <param name="verts">The vertice count if needed.</param>
@@ -245,9 +229,7 @@ namespace FGECore.ModelSystems
             return new Mesh(triangles, Vector3.One, space.Internal.Pool);
         }
 
-        /// <summary>
-        /// Converts a mesh to a BEPU convex mesh.
-        /// </summary>
+        /// <summary>Converts a mesh to a BEPU convex mesh.</summary>
         /// <param name="space">The relevant physics space.</param>
         /// <param name="input">The model.</param>
         /// <param name="verts">The vertice count if needed.</param>

@@ -18,59 +18,37 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a 3D light source.
-    /// </summary>
+    /// <summary>Represents a 3D light source.</summary>
     public class Light
     {
-        /// <summary>
-        /// The light's position.
-        /// </summary>
+        /// <summary>The light's position.</summary>
         public Vector3d EyePosition;
 
-        /// <summary>
-        /// The light's target.
-        /// </summary>
+        /// <summary>The light's target.</summary>
         public Vector3d TargetPosition;
 
-        /// <summary>
-        /// The light's up vector.
-        /// </summary>
+        /// <summary>The light's up vector.</summary>
         public Vector3 UpVector = Vector3.UnitZ;
 
-        /// <summary>
-        /// The light's field-of-view.
-        /// </summary>
+        /// <summary>The light's field-of-view.</summary>
         public float FOV;
 
-        /// <summary>
-        /// The maximum range (Effective distance) of the light.
-        /// </summary>
+        /// <summary>The maximum range (Effective distance) of the light.</summary>
         public float MaxRange;
 
-        /// <summary>
-        /// The color of the light.
-        /// </summary>
+        /// <summary>The color of the light.</summary>
         public Vector3 Color;
 
-        /// <summary>
-        /// Whether this light needs an update.
-        /// </summary>
+        /// <summary>Whether this light needs an update.</summary>
         public bool NeedsUpdate = true;
 
-        /// <summary>
-        /// Whether transparents cast shadows.
-        /// </summary>
+        /// <summary>Whether transparents cast shadows.</summary>
         public bool TransparentShadows = false;
 
-        /// <summary>
-        /// Whether anything casts shadows.
-        /// </summary>
+        /// <summary>Whether anything casts shadows.</summary>
         public bool CastShadows = true;
 
-        /// <summary>
-        /// Creates the light object.
-        /// </summary>
+        /// <summary>Creates the light object.</summary>
         /// <param name="pos">Position.</param>
         /// <param name="targ">Target.</param>
         /// <param name="fov">Field of view.</param>
@@ -85,16 +63,12 @@ namespace FGEGraphics.LightingSystem
             Color = col;
         }
 
-        /// <summary>
-        /// Destroys the light object.
-        /// </summary>
+        /// <summary>Destroys the light object.</summary>
         public void Destroy()
         {
         }
 
-        /// <summary>
-        /// Sets the projection for rendering light shadows.
-        /// </summary>
+        /// <summary>Sets the projection for rendering light shadows.</summary>
         /// <param name="view">The relevant view system.</param>
         public void SetProj(View3D view)
         {
@@ -102,9 +76,7 @@ namespace FGEGraphics.LightingSystem
             GL.UniformMatrix4(1, false, ref mat);
         }
 
-        /// <summary>
-        /// Gets the matrix of the light.
-        /// </summary>
+        /// <summary>Gets the matrix of the light.</summary>
         /// <param name="view">The relevant view system.</param>
         /// <returns>The relevant matrix.</returns>
         public virtual Matrix4 GetMatrix(View3D view)

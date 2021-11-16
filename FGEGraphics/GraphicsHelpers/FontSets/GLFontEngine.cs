@@ -52,7 +52,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
 
         /// <summary>Set this to modify the DPI scaling (Particularly if the user screen has a non-100% DPI).</summary>
         public float DPIScale = 1f;
-        
+
         /// <summary>The default width of the GLFont mega texture.</summary>
         public const int DEFAULT_TEXTURE_SIZE_WIDTH = 2048;
 

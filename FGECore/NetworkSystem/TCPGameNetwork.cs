@@ -17,39 +17,25 @@ using FGECore.CoreSystems;
 
 namespace FGECore.NetworkSystem
 {
-    /// <summary>
-    /// A TCP-based game network engine (Server).
-    /// </summary>
+    /// <summary>A TCP-based game network engine (Server).</summary>
     public class TCPGameNetwork : GameNetwork
     {
-        /// <summary>
-        /// The TCP listening backend.
-        /// </summary>
+        /// <summary>The TCP listening backend.</summary>
         public TcpListener Listening = null;
 
-        /// <summary>
-        /// A mapping of packet names to their packet data.
-        /// </summary>
+        /// <summary>A mapping of packet names to their packet data.</summary>
         public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = new Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>>();
 
-        /// <summary>
-        /// Packets, listed by ID number.
-        /// </summary>
+        /// <summary>Packets, listed by ID number.</summary>
         public List<Func<ServerTCPDataPacketIn>> Packets = new List<Func<ServerTCPDataPacketIn>>();
 
-        /// <summary>
-        /// All present connections.
-        /// </summary>
+        /// <summary>All present connections.</summary>
         public List<TCPConnection> Connections = new List<TCPConnection>();
 
-        /// <summary>
-        /// All presently registered channels.
-        /// </summary>
+        /// <summary>All presently registered channels.</summary>
         public HashSet<int> Channels = new HashSet<int>() { 0 };
 
-        /// <summary>
-        /// Start the network engine.
-        /// </summary>
+        /// <summary>Start the network engine.</summary>
         public override void Start()
         {
             if (Socket.OSSupportsIPv6)
@@ -72,9 +58,7 @@ namespace FGECore.NetworkSystem
             Listening.Start(100);
         }
 
-        /// <summary>
-        /// Tick the network engine.
-        /// </summary>
+        /// <summary>Tick the network engine.</summary>
         public override void Tick()
         {
             while (Listening.Pending())
@@ -102,17 +86,13 @@ namespace FGECore.NetworkSystem
             Channels.Add(id);
         }
 
-        /// <summary>
-        /// Constructs the TCP Game Network (server).
-        /// </summary>
+        /// <summary>Constructs the TCP Game Network (server).</summary>
         public TCPGameNetwork()
         {
             // TODO: Register default packets.
         }
 
-        /// <summary>
-        /// Registers a packet, returning the new ID. May not register the same name twice!
-        /// </summary>
+        /// <summary>Registers a packet, returning the new ID. May not register the same name twice!</summary>
         /// <param name="name">The name of the packet.</param>
         /// <param name="packetGetter">The packet getter function.</param>
         /// <returns>The ID.</returns>
@@ -124,14 +104,10 @@ namespace FGECore.NetworkSystem
             return id;
         }
 
-        /// <summary>
-        /// Maximum size of a header data.
-        /// </summary>
+        /// <summary>Maximum size of a header data.</summary>
         public int HeaderLimit = 1024 * 10;
 
-        /// <summary>
-        /// Maximum size of a waiting packet.
-        /// </summary>
+        /// <summary>Maximum size of a waiting packet.</summary>
         public int MaxPacketWaiting = 1024 * 1024 * 10;
 
         /// <summary>

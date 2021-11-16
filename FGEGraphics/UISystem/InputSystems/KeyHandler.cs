@@ -138,9 +138,7 @@ namespace FGEGraphics.UISystem.InputSystems
             Window.Window.MouseUp -= Mouse_ButtonUp;
         }
 
-        /// <summary>
-        /// Called every time a key is pressed, adds to the Keyboard String.
-        /// </summary>
+        /// <summary>Called every time a key is pressed, adds to the Keyboard String.</summary>
         /// <param name="e">Holds the pressed Keys.</param>
         public void PrimaryGameWindow_KeyPress(TextInputEventArgs e)
         {
@@ -229,9 +227,7 @@ namespace FGEGraphics.UISystem.InputSystems
             }
         }
 
-        /// <summary>
-        /// Called every time a key is pressed down, handles control codes for the Keyboard String.
-        /// </summary>
+        /// <summary>Called every time a key is pressed down, handles control codes for the Keyboard String.</summary>
         /// <param name="e">Holds the pressed Keys.</param>
         public void PrimaryGameWindow_KeyDown(KeyboardKeyEventArgs e)
         {
@@ -324,9 +320,7 @@ namespace FGEGraphics.UISystem.InputSystems
             KeyPresses.Enqueue(e.Key);
         }
 
-        /// <summary>
-        /// Called every time a key is released, handles control codes for the Keyboard String.
-        /// </summary>
+        /// <summary>Called every time a key is released, handles control codes for the Keyboard String.</summary>
         /// <param name="e">Holds the pressed Keys.</param>
         public void PrimaryGameWindow_KeyUp(KeyboardKeyEventArgs e)
         {

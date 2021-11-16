@@ -48,7 +48,7 @@ namespace FGEGraphics.UISystem
                 return InternalClient;
             }
         }
-        
+
         /// <summary>
         /// Whether to erase the screen at the beginning of each render call.
         /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>

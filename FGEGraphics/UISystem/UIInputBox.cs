@@ -39,7 +39,7 @@ namespace FGEGraphics.UISystem
 
         /// <summary>Whether this input box is currently selected.</summary>
         public bool Selected = false;
-        
+
         /// <summary>Whether this input box is multi-line.</summary>
         public bool MultiLine = false;
 

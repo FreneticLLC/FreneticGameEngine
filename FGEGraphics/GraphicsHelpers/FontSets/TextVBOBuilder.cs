@@ -19,59 +19,37 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
-    /// <summary>
-    /// Handles Text rendering.
-    /// </summary>
+    /// <summary>Handles Text rendering.</summary>
     public struct TextVBOBuilder
     {
-        /// <summary>
-        /// The position VBO (Vertex Buffer Object).
-        /// </summary>
+        /// <summary>The position VBO (Vertex Buffer Object).</summary>
         public uint VBO;
 
-        /// <summary>
-        /// The texture coordinate VBO (Vertex Buffer Object).
-        /// </summary>
+        /// <summary>The texture coordinate VBO (Vertex Buffer Object).</summary>
         public uint VBOTexCoords;
 
-        /// <summary>
-        /// The colors VBO (Vertex Buffer Object).
-        /// </summary>
+        /// <summary>The colors VBO (Vertex Buffer Object).</summary>
         public uint VBOColors;
 
-        /// <summary>
-        /// The indices VBO (Vertex Buffer Object).
-        /// </summary>
+        /// <summary>The indices VBO (Vertex Buffer Object).</summary>
         public uint VBOIndices;
 
-        /// <summary>
-        /// The VAO (VertexArrayObject).
-        /// </summary>
+        /// <summary>The VAO (VertexArrayObject).</summary>
         public uint VAO;
 
-        /// <summary>
-        /// An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.
-        /// </summary>
+        /// <summary>An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
         public static ResizableArray<Vector4> ReusableVertexArray = new ResizableArray<Vector4>();
 
-        /// <summary>
-        /// An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.
-        /// </summary>
+        /// <summary>An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
         public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new ResizableArray<Vector4>();
 
-        /// <summary>
-        /// An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.
-        /// </summary>
+        /// <summary>An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
         public static ResizableArray<Vector4> ReusableColorArray = new ResizableArray<Vector4>();
 
-        /// <summary>
-        /// An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.
-        /// </summary>
+        /// <summary>An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
         public static ResizableArray<uint> ReusableIndexArray = new ResizableArray<uint>();
 
-        /// <summary>
-        /// Adds a quadrilateral (rectangle) to the VBO.
-        /// </summary>
+        /// <summary>Adds a quadrilateral (rectangle) to the VBO.</summary>
         /// <param name="minX">The minimum X.</param>
         /// <param name="minY">The minimum Y.</param>
         /// <param name="maxX">The maximum X.</param>
@@ -88,9 +66,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             ReusableColorArray.Add(color.ToOpenTK());
         }
 
-        /// <summary>
-        /// Destroys the internal VBO, so this can be safely deleted.
-        /// </summary>
+        /// <summary>Destroys the internal VBO, so this can be safely deleted.</summary>
         public void Destroy()
         {
             GL.DeleteBuffer(VBO);
@@ -101,9 +77,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             hasBuffers = false;
         }
 
-        /// <summary>
-        /// Builds the buffers pre-emptively.
-        /// </summary>
+        /// <summary>Builds the buffers pre-emptively.</summary>
         public void BuildBuffers()
         {
             GL.GenBuffers(1, out VBO);
@@ -114,19 +88,13 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             hasBuffers = true;
         }
 
-        /// <summary>
-        /// The number of indices in the VBO.
-        /// </summary>
+        /// <summary>The number of indices in the VBO.</summary>
         public int Length;
 
-        /// <summary>
-        /// Whether this VBO has buffers already.
-        /// </summary>
+        /// <summary>Whether this VBO has buffers already.</summary>
         bool hasBuffers;
 
-        /// <summary>
-        /// Turns the local VBO build information into an actual internal GPU-side VBO.
-        /// </summary>
+        /// <summary>Turns the local VBO build information into an actual internal GPU-side VBO.</summary>
         public void Build()
         {
             if (!hasBuffers)
@@ -174,9 +142,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             ReusableIndexArray.Clear();
         }
 
-        /// <summary>
-        /// Renders the internal VBO to screen.
-        /// </summary>
+        /// <summary>Renders the internal VBO to screen.</summary>
         public void Render(GLFontEngine engine)
         {
             if (Length == 0)

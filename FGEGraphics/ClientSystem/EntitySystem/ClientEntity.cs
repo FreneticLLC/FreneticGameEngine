@@ -27,10 +27,8 @@ namespace FGEGraphics.ClientSystem.EntitySystem
 
         /// <summary>Gets the client window associated with this entity.</summary>
         public GameClientWindow Window => Engine.Client;
-        
-        /// <summary>
-        /// Constructs a client-side entity.
-        /// </summary>
+
+        /// <summary>Constructs a client-side entity.</summary>
         /// <param name="_engine">The owning game engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
         public ClientEntity(GameEngineBase _engine, bool _ticks)
@@ -57,7 +55,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
                 Renderer = null;
             }
         }
-        
+
         /// <summary>Gets a string debug helper for this entity.</summary>
         public override string ToString()
         {

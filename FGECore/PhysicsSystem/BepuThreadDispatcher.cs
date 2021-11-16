@@ -23,9 +23,7 @@ namespace FGECore.PhysicsSystem
     /// </summary>
     public class BepuThreadDispatcher : IThreadDispatcher, IDisposable
     {
-        /// <summary>
-        /// Gets the number of workers available in the thread dispatcher.
-        /// </summary>
+        /// <summary>Gets the number of workers available in the thread dispatcher.</summary>
         /// <remarks>
         /// Note that some systems (like the solver) expect the ThreadCount to be backed by truly independent threads capable of progression even when one is blocked.
         /// If the ThreadCount doesn't represent independent threads, deadlocks will occur.
@@ -96,9 +94,7 @@ namespace FGECore.PhysicsSystem
             }
         }
 
-        /// <summary>
-        /// Dispatches all the available workers.
-        /// </summary>
+        /// <summary>Dispatches all the available workers.</summary>
         /// <param name="workerBody">Delegate to be invoked on for every worker.</param>
         public void DispatchWorkers(Action<int> workerBody)
         {
@@ -140,7 +136,7 @@ namespace FGECore.PhysicsSystem
         /// </summary>
         /// <remarks>
         /// All usages of the memory pool within the simulation are guaranteed to return thread pool memory before the function returns. In other words,
-        /// thread memory pools are used for strictly ephemeral memory, and it will never be held by the simulation outside the scope of a function that 
+        /// thread memory pools are used for strictly ephemeral memory, and it will never be held by the simulation outside the scope of a function that
         /// takes the IThreadDispatcher as input.
         /// </remarks>
         /// <param name="workerIndex">Index of the worker to grab the pool for.</param>

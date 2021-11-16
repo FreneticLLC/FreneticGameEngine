@@ -18,15 +18,11 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests
 {
-    /// <summary>
-    /// Tests expectations of the Frenetic Data Syntax.
-    /// </summary>
+    /// <summary>Tests expectations of the Frenetic Data Syntax.</summary>
     [TestFixture]
     public class FDSReparsingTests : FGETest
     {
-        /// <summary>
-        /// The primary test file.
-        /// </summary>
+        /// <summary>The primary test file.</summary>
         public const string TEST_FILE =
             "# MyTestFile.fds\r\n"
             + "my root section 1:\r\n"
@@ -46,9 +42,7 @@ namespace FGETests.FreneticUtilitiesTests
             + "  - two\r\n"
             ;
 
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
@@ -61,9 +55,7 @@ namespace FGETests.FreneticUtilitiesTests
         /// </summary>
         public static FDSSection TestSection;
 
-        /// <summary>
-        /// Confirm that the FDS section parsed has the correct set of keys.
-        /// </summary>
+        /// <summary>Confirm that the FDS section parsed has the correct set of keys.</summary>
         [Test]
         public static void TestKeyPresence()
         {
@@ -71,9 +63,7 @@ namespace FGETests.FreneticUtilitiesTests
             Assert.That(!TestSection.HasKey("my root section"), "Key shouldn't exist!");
         }
 
-        /// <summary>
-        /// Confirm that the FDS section parsed has the proper object types where they should be.
-        /// </summary>
+        /// <summary>Confirm that the FDS section parsed has the proper object types where they should be.</summary>
         [Test]
         public static void TestExpectedObjects()
         {
@@ -84,9 +74,7 @@ namespace FGETests.FreneticUtilitiesTests
                 "Hello world, and all who inhabit it!", "Key string from binary check!");
         }
 
-        /// <summary>
-        /// Confirm that the FDS section parsed has the proper list values.
-        /// </summary>
+        /// <summary>Confirm that the FDS section parsed has the proper list values.</summary>
         [Test]
         public static void TestList()
         {
@@ -96,9 +84,7 @@ namespace FGETests.FreneticUtilitiesTests
             Assert.AreEqual("two", list[1], "Key->List[1] yields two!");
         }
 
-        /// <summary>
-        /// Confirm that the FDS section parsed has the proper comments.
-        /// </summary>
+        /// <summary>Confirm that the FDS section parsed has the proper comments.</summary>
         [Test]
         public static void TestComments()
         {

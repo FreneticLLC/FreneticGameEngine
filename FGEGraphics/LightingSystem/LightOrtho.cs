@@ -17,14 +17,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents an orthographic light.
-    /// </summary>
+    /// <summary>Represents an orthographic light.</summary>
     public class LightOrtho : Light
     {
-        /// <summary>
-        /// Gets the matrix of the light.
-        /// </summary>
+        /// <summary>Gets the matrix of the light.</summary>
         /// <param name="view">The relevant view system.</param>
         /// <returns>The relevant matrix.</returns>
         public override Matrix4 GetMatrix(View3D view)

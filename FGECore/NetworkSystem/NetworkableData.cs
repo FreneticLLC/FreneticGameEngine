@@ -14,21 +14,15 @@ using System.Threading.Tasks;
 
 namespace FGECore.NetworkSystem
 {
-    /// <summary>
-    /// Indicates that a field is to be handled by the network.
-    /// </summary>
+    /// <summary>Indicates that a field is to be handled by the network.</summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class NetworkableData : Attribute
     {
-        /// <summary>
-        /// When to update the data.
-        /// </summary>
+        /// <summary>When to update the data.</summary>
         public NetworkTime NetUsage;
     }
 
-    /// <summary>
-    /// Indicates that a property class is to be handled by the network.
-    /// </summary>
+    /// <summary>Indicates that a property class is to be handled by the network.</summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class NetworkableProperty : Attribute
     {
@@ -39,9 +33,7 @@ namespace FGECore.NetworkSystem
         /// </summary>
         public double UpdateImportance;
 
-        /// <summary>
-        /// The smallest amount of time (in seconds) before an update may be sent.
-        /// </summary>
+        /// <summary>The smallest amount of time (in seconds) before an update may be sent.</summary>
         public double MinimumUpdateDelay = 0.01;
 
         /// <summary>
@@ -75,23 +67,15 @@ namespace FGECore.NetworkSystem
     {
     }
 
-    /// <summary>
-    /// An enumeration of times to network a value.
-    /// </summary>
+    /// <summary>An enumeration of times to network a value.</summary>
     [Flags]
     public enum NetworkTime
     {
-        /// <summary>
-        /// Never network the value.
-        /// </summary>
+        /// <summary>Never network the value.</summary>
         NEVER = 0,
-        /// <summary>
-        /// Network the value during existence transmission. (Existence transmission generally include an update!)
-        /// </summary>
+        /// <summary>Network the value during existence transmission. (Existence transmission generally include an update!)</summary>
         EXISTENCE = 1,
-        /// <summary>
-        /// network the value during update transmission. (Will generally also run from existence transmission!)
-        /// </summary>
+        /// <summary>network the value during update transmission. (Will generally also run from existence transmission!)</summary>
         UPDATE = 1 << 1
     }
 }

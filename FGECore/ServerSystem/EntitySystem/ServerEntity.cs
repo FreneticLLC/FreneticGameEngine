@@ -23,7 +23,7 @@ namespace FGECore.ServerSystem.EntitySystem
     {
         /// <summary>Whether this entity should be sent over the network.</summary>
         public bool ShouldNetwork;
-        
+
         /// <summary>Gets the backing server engine.</summary>
         public ServerEngine Server
         {
@@ -32,14 +32,12 @@ namespace FGECore.ServerSystem.EntitySystem
                 return Engine as ServerEngine;
             }
         }
-        
-        /// <summary>
-        /// Constructs a server-side entity.
-        /// </summary>
+
+        /// <summary>Constructs a server-side entity.</summary>
         /// <param name="engine">The owning engine.</param>
         /// <param name="_ticks">Whether it should tick.</param>
         /// <param name="_shouldNetwork">Whether it should network.</param>
-        public ServerEntity(ServerEngine engine, bool _ticks, bool _shouldNetwork = false) 
+        public ServerEntity(ServerEngine engine, bool _ticks, bool _shouldNetwork = false)
             : base(engine, _ticks)
         {
             ShouldNetwork = _shouldNetwork;

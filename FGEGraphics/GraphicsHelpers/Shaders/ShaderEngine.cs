@@ -22,44 +22,28 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers.Shaders
 {
-    /// <summary>
-    /// The primary engine for shaders.
-    /// </summary>
+    /// <summary>The primary engine for shaders.</summary>
     public class ShaderEngine
     {
-        /// <summary>
-        /// A full list of currently loaded shaders.
-        /// </summary>
+        /// <summary>A full list of currently loaded shaders.</summary>
         public Dictionary<string, Shader> LoadedShaders;
 
-        /// <summary>
-        /// A cache of shader file text (post-includes).
-        /// </summary>
+        /// <summary>A cache of shader file text (post-includes).</summary>
         public Dictionary<string, string> ShaderFilesCache;
 
-        /// <summary>
-        /// A common shader that multiplies colors.
-        /// </summary>
+        /// <summary>A common shader that multiplies colors.</summary>
         public Shader ColorMultShader;
 
-        /// <summary>
-        /// A common shader that multiplies colors, explicitly for 2D usage.
-        /// </summary>
+        /// <summary>A common shader that multiplies colors, explicitly for 2D usage.</summary>
         public Shader ColorMult2DShader;
 
-        /// <summary>
-        /// A common shader that removes black color.
-        /// </summary>
+        /// <summary>A common shader that removes black color.</summary>
         public Shader TextCleanerShader;
 
-        /// <summary>
-        /// The backing file engine.
-        /// </summary>
+        /// <summary>The backing file engine.</summary>
         public FileEngine Files;
 
-        /// <summary>
-        /// Starts or restarts the shader system.
-        /// </summary>
+        /// <summary>Starts or restarts the shader system.</summary>
         /// <param name="files">The backing file engine.</param>
         public void InitShaderSystem(FileEngine files)
         {
@@ -82,18 +66,14 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         /// </summary>
         public bool MCM_GOOD_GRAPHICS = true;
 
-        /// <summary>
-        /// Updates the shader engine to the new timestamp.
-        /// </summary>
+        /// <summary>Updates the shader engine to the new timestamp.</summary>
         /// <param name="time">The current timestamp.</param>
         public void Update(double time)
         {
             cTime = time;
         }
 
-        /// <summary>
-        /// Clears away all shaders.
-        /// </summary>
+        /// <summary>Clears away all shaders.</summary>
         public void Clear()
         {
             foreach (Shader shader in LoadedShaders.Values)
@@ -106,9 +86,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             ShaderFilesCache.Clear();
         }
 
-        /// <summary>
-        /// Tries to get the text of a shader file, automatically handling the file cache.
-        /// </summary>
+        /// <summary>Tries to get the text of a shader file, automatically handling the file cache.</summary>
         /// <param name="filename">The name of the shader file.</param>
         /// <param name="text">The text gotten (or null if none).</param>
         /// <returns>True if successful, false if file does not exist.</returns>
@@ -133,9 +111,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             return true;
         }
 
-        /// <summary>
-        /// The current tick time.
-        /// </summary>
+        /// <summary>The current tick time.</summary>
         public double cTime = 1.0;
 
         /// <summary>
@@ -217,9 +193,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             }
         }
 
-        /// <summary>
-        /// Creates a full Shader object for a VS/FS input.
-        /// </summary>
+        /// <summary>Creates a full Shader object for a VS/FS input.</summary>
         /// <param name="VS">The input VertexShader code.</param>
         /// <param name="FS">The input FragmentShader code.</param>
         /// <param name="name">The name of the shader.</param>
@@ -240,9 +214,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             };
         }
 
-        /// <summary>
-        /// Processes "#define" lines in a shader.
-        /// </summary>
+        /// <summary>Processes "#define" lines in a shader.</summary>
         /// <param name="originalText">The shader text.</param>
         /// <param name="defValues">The define-value map.</param>
         /// <returns>The processed shader text.</returns>
@@ -278,9 +250,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             return fullFileText.ToString();
         }
 
-        /// <summary>
-        /// Modifies the shader code string to include any external shaders.
-        /// </summary>
+        /// <summary>Modifies the shader code string to include any external shaders.</summary>
         /// <param name="filename">The name of the shader file processing includes.</param>
         /// <param name="str">The shader code.</param>
         /// <returns>The include-modified shader code.</returns>
@@ -315,9 +285,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
 
         const string FILE_START = "#version 430 core\n";
 
-        /// <summary>
-        /// Compiles a compute shader by name to a shader.
-        /// </summary>
+        /// <summary>Compiles a compute shader by name to a shader.</summary>
         /// <param name="fileName">The file name.</param>
         /// <param name="specialadder">Special additions (EG defines)</param>
         /// <returns>The shader program.</returns>
@@ -366,9 +334,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
 
         private readonly Dictionary<string, string> ReusableDefValues = new Dictionary<string, string>(128);
 
-        /// <summary>
-        /// Compiles a VertexShader and FragmentShader to a usable shader program.
-        /// </summary>
+        /// <summary>Compiles a VertexShader and FragmentShader to a usable shader program.</summary>
         /// <param name="VS">The input VertexShader code.</param>
         /// <param name="FS">The input FragmentShader code.</param>
         /// <param name="vars">All variables to include.</param>

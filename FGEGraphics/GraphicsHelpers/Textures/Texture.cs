@@ -23,54 +23,34 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers.Textures
 {
-    /// <summary>
-    /// Wraps an OpenGL texture.
-    /// </summary>
+    /// <summary>Wraps an OpenGL texture.</summary>
     public class Texture
     {
-        /// <summary>
-        /// The texture engine that owns this texture.
-        /// </summary>
+        /// <summary>The texture engine that owns this texture.</summary>
         public TextureEngine Engine;
 
-        /// <summary>
-        /// The full name of the texture.
-        /// </summary>
+        /// <summary>The full name of the texture.</summary>
         public string Name;
 
-        /// <summary>
-        /// The texture that this texture was remapped to, if any.
-        /// </summary>
+        /// <summary>The texture that this texture was remapped to, if any.</summary>
         public Texture RemappedTo;
 
-        /// <summary>
-        /// The internal OpenGL texture ID.
-        /// </summary>
+        /// <summary>The internal OpenGL texture ID.</summary>
         public int InternalTexture = 0;
 
-        /// <summary>
-        /// The original OpenGL texture ID that formed this texture.
-        /// </summary>
+        /// <summary>The original OpenGL texture ID that formed this texture.</summary>
         public int OriginalInternalID = 0;
 
-        /// <summary>
-        /// Whether the texture loaded properly.
-        /// </summary>
+        /// <summary>Whether the texture loaded properly.</summary>
         public bool LoadedProperly = false;
 
-        /// <summary>
-        /// The width of the texture.
-        /// </summary>
+        /// <summary>The width of the texture.</summary>
         public int Width;
 
-        /// <summary>
-        /// The height of the texture.
-        /// </summary>
+        /// <summary>The height of the texture.</summary>
         public int Height;
 
-        /// <summary>
-        /// Removes the texture from OpenGL.
-        /// </summary>
+        /// <summary>Removes the texture from OpenGL.</summary>
         public void Destroy()
         {
             if (LoadedProperly && OriginalInternalID > -1 && GL.IsTexture(OriginalInternalID))
@@ -79,9 +59,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Removes the texture from the system.
-        /// </summary>
+        /// <summary>Removes the texture from the system.</summary>
         public void Remove()
         {
             Destroy();
@@ -91,9 +69,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Saves the texture to a bitmap.
-        /// </summary>
+        /// <summary>Saves the texture to a bitmap.</summary>
         /// <param name="flip">Whether to flip the Y.</param>
         public Bitmap SaveToBMP(bool flip = false)
         {
@@ -109,14 +85,10 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             return bmp;
         }
 
-        /// <summary>
-        /// The tick time this texture was last bound.
-        /// </summary>
+        /// <summary>The tick time this texture was last bound.</summary>
         public double LastBindTime = 0;
 
-        /// <summary>
-        /// Checks if the texture is valid, and replaces it if needed.
-        /// </summary>
+        /// <summary>Checks if the texture is valid, and replaces it if needed.</summary>
         public void CheckValid()
         {
             if (InternalTexture == -1)
@@ -133,9 +105,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             }
         }
 
-        /// <summary>
-        /// Binds this texture to OpenGL.
-        /// </summary>
+        /// <summary>Binds this texture to OpenGL.</summary>
         public void Bind()
         {
             LastBindTime = Engine.cTime;
@@ -143,9 +113,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             GL.BindTexture(TextureTarget.Texture2D, InternalTexture);
         }
 
-        /// <summary>
-        /// Gets the name of the texture.
-        /// </summary>
+        /// <summary>Gets the name of the texture.</summary>
         /// <returns>The name.</returns>
         public override string ToString()
         {

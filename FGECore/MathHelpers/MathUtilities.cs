@@ -15,19 +15,13 @@ using System.Threading.Tasks;
 
 namespace FGECore.MathHelpers
 {
-    /// <summary>
-    /// Common utilities relating to mathematics.
-    /// </summary>
+    /// <summary>Common utilities relating to mathematics.</summary>
     public static class MathUtilities
     {
-        /// <summary>
-        /// Represents the constant PI / 180. (Which is the conversion from Degrees to Radians).
-        /// </summary>
+        /// <summary>Represents the constant PI / 180. (Which is the conversion from Degrees to Radians).</summary>
         public const double PI180 = Math.PI / 180.0;
 
-        /// <summary>
-        /// Returns a one-length vector of the Yaw/Pitch angle input (in radians).
-        /// </summary>
+        /// <summary>Returns a one-length vector of the Yaw/Pitch angle input (in radians).</summary>
         /// <param name="yaw">The yaw angle, in radians.</param>
         /// <param name="pitch">The pitch angle, in radians.</param>
         /// <returns>.</returns>
@@ -37,9 +31,7 @@ namespace FGECore.MathHelpers
             return new Location(-(cp * Math.Cos(yaw)), -(cp * Math.Sin(yaw)), (Math.Sin(pitch)));
         }
 
-        /// <summary>
-        /// Returns a one-length vector of the Yaw/Pitch angle input in degrees.
-        /// </summary>
+        /// <summary>Returns a one-length vector of the Yaw/Pitch angle input in degrees.</summary>
         /// <param name="yaw">The yaw angle, in radians.</param>
         /// <param name="pitch">The pitch angle, in radians.</param>
         /// <returns>.</returns>
@@ -48,9 +40,7 @@ namespace FGECore.MathHelpers
             return ForwardVector(yaw * PI180, pitch * PI180);
         }
 
-        /// <summary>
-        /// Converts a forward vector to a yaw angle, in radians.
-        /// </summary>
+        /// <summary>Converts a forward vector to a yaw angle, in radians.</summary>
         /// <param name="input">The forward vector.</param>
         /// <returns>The yaw angle.</returns>
         public static double VectorToAnglesYawRad(Location input)
@@ -70,9 +60,7 @@ namespace FGECore.MathHelpers
             return Math.PI;
         }
 
-        /// <summary>
-        /// Converts a forward vector to yaw/pitch angles, in degrees.
-        /// </summary>
+        /// <summary>Converts a forward vector to yaw/pitch angles, in degrees.</summary>
         /// <param name="input">The forward vector.</param>
         /// <returns>The yaw/pitch angle vector (in degrees).</returns>
         public static Location VectorToAngles(Location input)

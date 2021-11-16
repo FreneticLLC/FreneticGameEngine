@@ -22,14 +22,10 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers
 {
-    /// <summary>
-    /// 2D render helper.
-    /// </summary>
+    /// <summary>2D render helper.</summary>
     public class Renderer2D
     {
-        /// <summary>
-        /// Prepare the renderer.
-        /// </summary>
+        /// <summary>Prepare the renderer.</summary>
         public void Init()
         {
             GenerateSquareVBO();
@@ -37,19 +33,13 @@ namespace FGEGraphics.GraphicsHelpers
             GenerateLineVBO();
         }
 
-        /// <summary>
-        /// Square mesh.
-        /// </summary>
+        /// <summary>Square mesh.</summary>
         public Renderable Square;
 
-        /// <summary>
-        /// Square-of-lines mesh.
-        /// </summary>
+        /// <summary>Square-of-lines mesh.</summary>
         public Renderable SquareOfLines;
 
-        /// <summary>
-        /// Line mesh.
-        /// </summary>
+        /// <summary>Line mesh.</summary>
         public Renderable Line;
 
         void GenerateSquareVBO()
@@ -113,9 +103,7 @@ namespace FGEGraphics.GraphicsHelpers
             Line = builder.Generate();
         }
 
-        /// <summary>
-        /// Constructs the renderer - Init() it after!
-        /// </summary>
+        /// <summary>Constructs the renderer - Init() it after!</summary>
         /// <param name="tengine">Texture engine.</param>
         /// <param name="shaderdet">Shader engine.</param>
         public Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
@@ -124,19 +112,13 @@ namespace FGEGraphics.GraphicsHelpers
             Shaders = shaderdet;
         }
 
-        /// <summary>
-        /// Texture system.
-        /// </summary>
+        /// <summary>Texture system.</summary>
         public TextureEngine Engine;
 
-        /// <summary>
-        /// Shader system.
-        /// </summary>
+        /// <summary>Shader system.</summary>
         public ShaderEngine Shaders;
 
-        /// <summary>
-        /// Render a line between two points.
-        /// </summary>
+        /// <summary>Render a line between two points.</summary>
         /// <param name="start">The initial point.</param>
         /// <param name="end">The ending point.</param>
         public void RenderLine(Vector2 start, Vector2 end)
@@ -155,36 +137,28 @@ namespace FGEGraphics.GraphicsHelpers
             */
         }
 
-        /// <summary>
-        /// Sets the color of the next rendered objects.
-        /// </summary>
+        /// <summary>Sets the color of the next rendered objects.</summary>
         /// <param name="c">The color.</param>
         public static void SetColor(Color4F c)
         {
             SetColor(new Vector4(c.R, c.G, c.B, c.A));
         }
 
-        /// <summary>
-        /// Sets the color of the next rendered objects.
-        /// </summary>
+        /// <summary>Sets the color of the next rendered objects.</summary>
         /// <param name="col">The color.</param>
         public static void SetColor(Vector4 col)
         {
             GL.Uniform4(ShaderLocations.Common2D.COLOR, ref col);
         }
 
-        /// <summary>
-        /// Sets the color of the next rendered objects.
-        /// </summary>
+        /// <summary>Sets the color of the next rendered objects.</summary>
         /// <param name="c">The color.</param>
         public static void SetColor(Color4 c)
         {
             SetColor(new Vector4(c.R, c.G, c.B, c.A));
         }
 
-        /// <summary>
-        /// Renders a 2D rectangle.
-        /// </summary>
+        /// <summary>Renders a 2D rectangle.</summary>
         /// <param name="rc">The render context.</param>
         /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
         /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>

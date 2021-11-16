@@ -36,35 +36,25 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// The current position of the light.
-        /// </summary>
+        /// <summary>The current position of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Location LightPosition;
-        
-        /// <summary>
-        /// The current strength of the light.
-        /// </summary>
+
+        /// <summary>The current strength of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public float LightStrength = 16;
 
-        /// <summary>
-        /// The current color of the light.
-        /// </summary>
+        /// <summary>The current color of the light.</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public Color3F LightColor = Color3F.White;
 
-        /// <summary>
-        /// The represented 3D point light.
-        /// </summary>
+        /// <summary>The represented 3D point light.</summary>
         public PointLight InternalLight;
 
-        /// <summary>
-        /// Fired when the entity is spawned.
-        /// </summary>
+        /// <summary>Fired when the entity is spawned.</summary>
         public override void OnSpawn()
         {
             if (Entity.Engine is GameEngine3D eng)
@@ -79,9 +69,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Fired when the entity is despawned.
-        /// </summary>
+        /// <summary>Fired when the entity is despawned.</summary>
         public override void OnDespawn()
         {
             if (Entity.Engine is GameEngine3D eng)

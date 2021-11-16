@@ -14,9 +14,7 @@ using FGECore.CoreSystems;
 
 namespace FGECore.ConsoleHelpers
 {
-    /// <summary>
-    /// Holds all common text styles to be used by the <see cref="SysConsole"/> or FGEGraphic's FontSetEngine.
-    /// </summary>
+    /// <summary>Holds all common text styles to be used by the <see cref="SysConsole"/> or FGEGraphic's FontSetEngine.</summary>
     public static class TextStyle
     {
         /// <summary>Default style, default value: ^r^7</summary>

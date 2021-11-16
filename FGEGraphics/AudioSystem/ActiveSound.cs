@@ -22,78 +22,50 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.AudioSystem
 {
-    /// <summary>
-    /// Represents a currently playing sound effect.
-    /// </summary>
+    /// <summary>Represents a currently playing sound effect.</summary>
     public class ActiveSound
     {
-        /// <summary>
-        /// The backing sound engine.
-        /// </summary>
+        /// <summary>The backing sound engine.</summary>
         public SoundEngine Engine;
 
-        /// <summary>
-        /// The represented sound effect.
-        /// </summary>
+        /// <summary>The represented sound effect.</summary>
         public SoundEffect Effect;
 
-        /// <summary>
-        /// The 3D space position of the sound effect.
-        /// </summary>
+        /// <summary>The 3D space position of the sound effect.</summary>
         public Location Position;
 
-        /// <summary>
-        /// Constructs the active sound.
-        /// </summary>
+        /// <summary>Constructs the active sound.</summary>
         /// <param name="sfx">The backing sound effect.</param>
         public ActiveSound(SoundEffect sfx)
         {
             Effect = sfx;
         }
 
-        /// <summary>
-        /// Whether to loop the sound.
-        /// </summary>
+        /// <summary>Whether to loop the sound.</summary>
         public bool Loop = false;
 
-        /// <summary>
-        /// The pitch of the sound.
-        /// </summary>
+        /// <summary>The pitch of the sound.</summary>
         public float Pitch = 1f;
 
-        /// <summary>
-        /// The gain of the sound.
-        /// </summary>
+        /// <summary>The gain of the sound.</summary>
         public float Gain = 1f;
 
-        /// <summary>
-        /// The OpenAL source value, if relevant.
-        /// </summary>
+        /// <summary>The OpenAL source value, if relevant.</summary>
         public int Src = -1;
 
-        /// <summary>
-        /// The internal enforcer instance, if relevant.
-        /// </summary>
+        /// <summary>The internal enforcer instance, if relevant.</summary>
         public LiveAudioInstance AudioInternal = null;
 
-        /// <summary>
-        /// Whether the effect exists already in the backing systems.
-        /// </summary>
+        /// <summary>Whether the effect exists already in the backing systems.</summary>
         public bool Exists = false;
 
-        /// <summary>
-        /// Whether the sound effect is considered a background effect.
-        /// </summary>
+        /// <summary>Whether the sound effect is considered a background effect.</summary>
         public bool IsBackground = false;
 
-        /// <summary>
-        /// Whether the sound effect has been forced into the background and quieted due to user focus need.
-        /// </summary>
+        /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
         public bool Backgrounded = false;
 
-        /// <summary>
-        /// Creates the sound into the backing engines.
-        /// </summary>
+        /// <summary>Creates the sound into the backing engines.</summary>
         public void Create()
         {
             if (!Exists)
@@ -154,9 +126,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Updates the pitch to the backing engine.
-        /// </summary>
+        /// <summary>Updates the pitch to the backing engine.</summary>
         public void UpdatePitch()
         {
             if (AudioInternal != null)
@@ -169,14 +139,10 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Whether the audio has been deafened.
-        /// </summary>
+        /// <summary>Whether the audio has been deafened.</summary>
         public bool IsDeafened = false;
 
-        /// <summary>
-        /// Updates the gain to the backing systems.
-        /// </summary>
+        /// <summary>Updates the gain to the backing systems.</summary>
         public void UpdateGain()
         {
             bool sel = Engine.Selected;
@@ -208,9 +174,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Plays the audio.
-        /// </summary>
+        /// <summary>Plays the audio.</summary>
         public void Play()
         {
             if (AudioInternal != null)
@@ -227,9 +191,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Seeks to a location in the clip (From 0.0 to 1.0).
-        /// </summary>
+        /// <summary>Seeks to a location in the clip (From 0.0 to 1.0).</summary>
         /// <param name="f">The location.</param>
         public void Seek(float f)
         {
@@ -247,9 +209,7 @@ namespace FGEGraphics.AudioSystem
             AL.Source(Src, ALSourcef.SecOffset, f);
         }
 
-        /// <summary>
-        /// Pauses the audio.
-        /// </summary>
+        /// <summary>Pauses the audio.</summary>
         public void Pause()
         {
             if (AudioInternal != null)
@@ -266,9 +226,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Stops the audio from playing further.
-        /// </summary>
+        /// <summary>Stops the audio from playing further.</summary>
         public void Stop()
         {
             if (AudioInternal != null)
@@ -285,9 +243,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Returns whether the audio is currently playing.
-        /// </summary>
+        /// <summary>Returns whether the audio is currently playing.</summary>
         /// <returns>Whether it is playing.</returns>
         public bool IsPlaying()
         {
@@ -305,9 +261,7 @@ namespace FGEGraphics.AudioSystem
             }
         }
 
-        /// <summary>
-        /// Destroys the audio instance.
-        /// </summary>
+        /// <summary>Destroys the audio instance.</summary>
         public void Destroy()
         {
             if (AudioInternal != null)

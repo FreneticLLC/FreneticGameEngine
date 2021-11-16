@@ -24,19 +24,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.LightingSystem
 {
-    /// <summary>
-    /// Represents a point-light in 2D spaces.
-    /// </summary>
+    /// <summary>Represents a point-light in 2D spaces.</summary>
     public class PointLight2D
     {
-        /// <summary>
-        /// The powering 2D game engine.
-        /// </summary>
+        /// <summary>The powering 2D game engine.</summary>
         public GameEngine2D Engine;
 
-        /// <summary>
-        /// Constructs the point light 2D.
-        /// </summary>
+        /// <summary>Constructs the point light 2D.</summary>
         /// <param name="pos">Its starting position.</param>
         /// <param name="str">Its strength.</param>
         /// <param name="sdscale">The subdivision scale.</param>
@@ -94,10 +88,8 @@ namespace FGEGraphics.LightingSystem
             SubDivider = Math.Max((float)Math.Sqrt(Strength) * sdscale, 1f);
             GraphicsUtil.CheckError("PointLight2D init");
         }
-        
-        /// <summary>
-        /// Destroys the light object.
-        /// </summary>
+
+        /// <summary>Destroys the light object.</summary>
         public void Destroy()
         {
             GL.DeleteTexture(FBO_Tex);
@@ -109,64 +101,40 @@ namespace FGEGraphics.LightingSystem
             GraphicsUtil.CheckError("PointLight2D destroy");
         }
 
-        /// <summary>
-        /// The position of the point light 2D, in 2D world space.
-        /// </summary>
+        /// <summary>The position of the point light 2D, in 2D world space.</summary>
         public Vector2 Position;
-        
-        /// <summary>
-        /// The strength (how far it goes) of the point light 2D.
-        /// </summary>
+
+        /// <summary>The strength (how far it goes) of the point light 2D.</summary>
         public float Strength;
 
-        /// <summary>
-        /// The FrameBufferObject used by this Point Light 2D.
-        /// </summary>
+        /// <summary>The FrameBufferObject used by this Point Light 2D.</summary>
         public int FBO;
 
-        /// <summary>
-        /// The FrameBufferObject texture used by this Point Light 2D.
-        /// </summary>
+        /// <summary>The FrameBufferObject texture used by this Point Light 2D.</summary>
         public int FBO_Tex;
 
-        /// <summary>
-        /// The FrameBufferObject depth-texture used by this point light 1d_2d.
-        /// </summary>
+        /// <summary>The FrameBufferObject depth-texture used by this point light 1d_2d.</summary>
         public int FBO_DTex;
 
-        /// <summary>
-        /// The maximum width of this point light 2D's effects.
-        /// </summary>
+        /// <summary>The maximum width of this point light 2D's effects.</summary>
         public int Width;
 
-        /// <summary>
-        /// The subdivider to affect the render detail of this point light 2D.
-        /// </summary>
+        /// <summary>The subdivider to affect the render detail of this point light 2D.</summary>
         public float SubDivider = 4;
-        
-        /// <summary>
-        /// Extra light distance (affects how deep into an object a light will still show at).
-        /// </summary>
+
+        /// <summary>Extra light distance (affects how deep into an object a light will still show at).</summary>
         public float ExtraLightDist = 50.0f;
 
-        /// <summary>
-        /// Whether this is a 'sky' light.
-        /// </summary>
+        /// <summary>Whether this is a 'sky' light.</summary>
         public bool IsSkyLight = false;
 
-        /// <summary>
-        /// Set to configure whether an entity should cast a shadow from this light.
-        /// </summary>
+        /// <summary>Set to configure whether an entity should cast a shadow from this light.</summary>
         public Func<ClientEntity, bool> ShouldShadow;
 
-        /// <summary>
-        /// The color of this point light 2D.
-        /// </summary>
+        /// <summary>The color of this point light 2D.</summary>
         public Color4F Color = Color4F.White;
-        
-        /// <summary>
-        /// Prepares the point light 2D for rendering.
-        /// </summary>
+
+        /// <summary>Prepares the point light 2D for rendering.</summary>
         public void PrepareLightmap()
         {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
@@ -174,9 +142,7 @@ namespace FGEGraphics.LightingSystem
             GL.Viewport(0, 0, Width, Engine.OneDLights ? 1 : Width);
         }
 
-        /// <summary>
-        /// Gets the scaler value of this Point Light 2D.
-        /// </summary>
+        /// <summary>Gets the scaler value of this Point Light 2D.</summary>
         /// <returns>The scaler.</returns>
         public Vector2 GetScaler()
         {
@@ -188,9 +154,7 @@ namespace FGEGraphics.LightingSystem
             return new Vector2(sc, sc);
         }
 
-        /// <summary>
-        /// Gets the adder value of this Point Light 2D.
-        /// </summary>
+        /// <summary>Gets the adder value of this Point Light 2D.</summary>
         /// <returns>The adder.</returns>
         public Vector2 GetAdder()
         {
@@ -201,9 +165,7 @@ namespace FGEGraphics.LightingSystem
             return new Vector2(-Position.X, -Position.Y);
         }
 
-        /// <summary>
-        /// Gets the secondary scaler value of this Point Light 2D.
-        /// </summary>
+        /// <summary>Gets the secondary scaler value of this Point Light 2D.</summary>
         /// <returns>The second scaler.</returns>
         public Vector2 GetSecondScaler(RenderContext2D rc)
         {
@@ -212,9 +174,7 @@ namespace FGEGraphics.LightingSystem
             return new Vector2(sc_over_str, sc_over_str);
         }
 
-        /// <summary>
-        /// Gets the secondary adder value of this Point Light 2D.
-        /// </summary>
+        /// <summary>Gets the secondary adder value of this Point Light 2D.</summary>
         /// <returns>The second adder.</returns>
         public Vector2 GetSecondAdder(RenderContext2D rc)
         {

@@ -103,9 +103,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             OnDespawn();
         }
 
-        /// <summary>
-        /// Fixes the location of the renderable.
-        /// </summary>
+        /// <summary>Fixes the location of the renderable.</summary>
         /// <param name="location">The new location.</param>
         public void FixLocation(Location location)
         {
@@ -117,9 +115,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
         }
 
-        /// <summary>
-        /// Fixes the orientation of the renderable.
-        /// </summary>
+        /// <summary>Fixes the orientation of the renderable.</summary>
         /// <param name="orientation">The new orientation.</param>
         public void FixOrientation(Quaternion orientation)
         {
@@ -131,21 +127,15 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         {
         }
 
-        /// <summary>
-        /// Render the entity as seen by a top-down map.
-        /// </summary>
+        /// <summary>Render the entity as seen by a top-down map.</summary>
         /// <param name="context">The render context.</param>
         public abstract void RenderForTopMap(RenderContext context);
 
-        /// <summary>
-        /// Render the entity as seen normally, in 3D.
-        /// </summary>
+        /// <summary>Render the entity as seen normally, in 3D.</summary>
         /// <param name="context">The render context.</param>
         public abstract void RenderStandard(RenderContext context);
 
-        /// <summary>
-        /// Render the entity as seen normally, in 2D.
-        /// </summary>
+        /// <summary>Render the entity as seen normally, in 2D.</summary>
         /// <param name="context">The render context.</param>
         public abstract void RenderStandard2D(RenderContext2D context);
     }

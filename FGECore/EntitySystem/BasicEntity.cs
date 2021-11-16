@@ -20,9 +20,7 @@ using FGECore.PropertySystem;
 
 namespace FGECore.EntitySystem
 {
-    /// <summary>
-    /// The base most class of an entity in the FreneticGameEngine.
-    /// </summary>
+    /// <summary>The base most class of an entity in the FreneticGameEngine.</summary>
     public abstract class BasicEntity : PropertyHolder
     {
         /// <summary>
@@ -92,18 +90,14 @@ namespace FGECore.EntitySystem
             Rotate(Quaternion.FromAxisAngle(axis, angle));
         }
 
-        /// <summary>
-        /// Rotates the entity relative to its current orientation (based on <see cref="LastKnownOrientation"/>).
-        /// </summary>
+        /// <summary>Rotates the entity relative to its current orientation (based on <see cref="LastKnownOrientation"/>).</summary>
         /// <param name="rotation">The rotation to take, described as a relative offset quaternion.</param>
         public void Rotate(Quaternion rotation)
         {
             SetOrientation(LastKnownOrientation * rotation);
         }
 
-        /// <summary>
-        /// Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).
-        /// </summary>
+        /// <summary>Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).</summary>
         /// <param name="x">X motion.</param>
         /// <param name="y">Y motion.</param>
         /// <param name="z">Z motion, if any.</param>
@@ -112,18 +106,14 @@ namespace FGECore.EntitySystem
             SetPosition(LastKnownPosition + new Location(x, y, z));
         }
 
-        /// <summary>
-        /// Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).
-        /// </summary>
+        /// <summary>Moves the entity relative to its current position (based on <see cref="LastKnownPosition"/>).</summary>
         /// <param name="motion">The motion to make, described as a relative offset vector.</param>
         public void MoveRelative(Location motion)
         {
             SetPosition(LastKnownPosition + motion);
         }
 
-        /// <summary>
-        /// Sets the orientation of the entity.
-        /// </summary>
+        /// <summary>Sets the orientation of the entity.</summary>
         /// <param name="orientation">The new orientation quaternion.</param>
         public void SetOrientation(Quaternion orientation)
         {
@@ -131,9 +121,7 @@ namespace FGECore.EntitySystem
             OnOrientationChanged?.Invoke(orientation);
         }
 
-        /// <summary>
-        /// Sets the position of the entity.
-        /// </summary>
+        /// <summary>Sets the position of the entity.</summary>
         /// <param name="position">New position.</param>
         public void SetPosition(Location position)
         {

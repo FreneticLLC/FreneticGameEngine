@@ -19,24 +19,18 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
 {
-    /// <summary>
-    /// Tests expectations of <see cref="EnumerableExtensions"/>.
-    /// </summary>
+    /// <summary>Tests expectations of <see cref="EnumerableExtensions"/>.</summary>
     [TestFixture]
     public class EnumerableExtensionTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
         }
 
-        /// <summary>
-        /// Tests "SwapKeyValue".
-        /// </summary>
+        /// <summary>Tests "SwapKeyValue".</summary>
         [Test]
         public static void SwapKeyValueTest()
         {
@@ -51,9 +45,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("test", resultDict[-5], "SwapKeyValueTest resultDict[-5] wrong");
         }
 
-        /// <summary>
-        /// Tests "PairsToDictionary".
-        /// </summary>
+        /// <summary>Tests "PairsToDictionary".</summary>
         [Test]
         public static void PairsToDictionary()
         {
@@ -65,9 +57,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.Throws<ArgumentException>(() => new[] { ("a", 1), ("b", 2), ("c", 3), ("b", 4), ("d", 5) }.PairsToDictionary(), "PairsToDictionary allowed a dup");
         }
 
-        /// <summary>
-        /// Tests "ToDictionaryWithNoDup".
-        /// </summary>
+        /// <summary>Tests "ToDictionaryWithNoDup".</summary>
         [Test]
         public static void ToDictNoDupTest()
         {
@@ -79,9 +69,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.Throws<ArgumentException>(() => new[] { "a", "b", "c", "b", "d" }.ToDictionaryWithNoDup(new[] { 1, 2, 3, 4, 5 }), "ToDictNoDupTest allowed a dup");
         }
 
-        /// <summary>
-        /// Tests "ToDictionaryWith".
-        /// </summary>
+        /// <summary>Tests "ToDictionaryWith".</summary>
         [Test]
         public static void ToDictTest()
         {
@@ -92,9 +80,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual(3, resultDict["c"], "ToDictTest resultDict['c'] wrong");
         }
 
-        /// <summary>
-        /// Tests "AddAll".
-        /// </summary>
+        /// <summary>Tests "AddAll".</summary>
         [Test]
         public static void AddAllTest()
         {
@@ -108,9 +94,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.Throws<ArgumentException>(() => resultDict.AddAll(new Dictionary<string, int>() { { "b", 3 } }), "AddAllTest allowed a dup");
         }
 
-        /// <summary>
-        /// Tests "UnionWith".
-        /// </summary>
+        /// <summary>Tests "UnionWith".</summary>
         [Test]
         public static void UnionWithTest()
         {
@@ -122,9 +106,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual(3, resultDict["c"], "UnionWithTest resultDict['c'] wrong");
         }
 
-        /// <summary>
-        /// Tests "StopWhen".
-        /// </summary>
+        /// <summary>Tests "StopWhen".</summary>
         [Test]
         public static void StopWhenTest()
         {
@@ -133,9 +115,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual(2, stoppedEarly.Count(), "StopWhenTest stopped at wrong spot");
         }
 
-        /// <summary>
-        /// Tests "GetOrCreate".
-        /// </summary>
+        /// <summary>Tests "GetOrCreate".</summary>
         [Test]
         public static void GetOrCreateTest()
         {
@@ -149,9 +129,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.DoesNotThrow(() => resultDict.GetOrCreate("c", () => throw new ArgumentException("bork")), "GetOrCreateTest ran func at wrong time");
         }
 
-        /// <summary>
-        /// Tests "JoinWith".
-        /// </summary>
+        /// <summary>Tests "JoinWith".</summary>
         [Test]
         public static void JoinWithTest()
         {
@@ -165,9 +143,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
             Assert.AreEqual("delta", resultArray[3], "JoinWithTest resultArray[3] wrong");
         }
 
-        /// <summary>
-        /// Tests "IsEmpty".
-        /// </summary>
+        /// <summary>Tests "IsEmpty".</summary>
         [Test]
         public static void IsEmptyTest()
         {

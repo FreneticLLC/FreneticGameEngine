@@ -54,9 +54,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <summary>Backing animation engine.</summary>
         public AnimationEngine AnimEngine;
 
-        /// <summary>
-        /// Prepares the model system.
-        /// </summary>
+        /// <summary>Prepares the model system.</summary>
         /// <param name="engine">Animation engine.</param>
         /// <param name="tclient">Backing client.</param>
         public void Init(AnimationEngine engine, GameClientWindow tclient)
@@ -73,9 +71,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             LoadedModels.Add("clear", Clear);
         }
 
-        /// <summary>
-        /// Generates a cube model.
-        /// </summary>
+        /// <summary>Generates a cube model.</summary>
         /// <returns>The cube model.</returns>
         public Model GenerateCube()
         {
@@ -111,9 +107,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return m;
         }
 
-        /// <summary>
-        /// Update delta time tracker.
-        /// </summary>
+        /// <summary>Update delta time tracker.</summary>
         /// <param name="time">The new noted time.</param>
         public void Update(double time)
         {
@@ -178,9 +172,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return Loaded;
         }
 
-        /// <summary>
-        /// Dynamically loads a model (returns a temporary copy of 'Cube', then fills it in when possible).
-        /// </summary>
+        /// <summary>Dynamically loads a model (returns a temporary copy of 'Cube', then fills it in when possible).</summary>
         /// <param name="modelName">The model name to load.</param>
         /// <returns>The model object.</returns>
         public Model DynamicLoadModel(string modelName)
@@ -223,9 +215,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return model;
         }
 
-        /// <summary>
-        /// loads a model from a file byte array.
-        /// </summary>
+        /// <summary>loads a model from a file byte array.</summary>
         /// <param name="name">The name of the model.</param>
         /// <param name="data">The .obj file string.</param>
         /// <returns>A valid model.</returns>
@@ -235,9 +225,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return FromScene(scene, name);
         }
 
-        /// <summary>
-        /// Converts a core Scene to a renderable model.
-        /// </summary>
+        /// <summary>Converts a core Scene to a renderable model.</summary>
         /// <param name="scene">The backing model.</param>
         /// <param name="name">The name to use.</param>
         /// <returns>The model.</returns>
@@ -253,9 +241,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return mod;
         }
 
-        /// <summary>
-        /// Converts a core Scene to a renderable model, without running the VBO generate step.
-        /// </summary>
+        /// <summary>Converts a core Scene to a renderable model, without running the VBO generate step.</summary>
         /// <param name="scene">The backing model.</param>
         /// <param name="name">The name to use.</param>
         /// <param name="vboBuilders">The VBO builders for output.</param>
@@ -375,9 +361,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return model;
         }
 
-        /// <summary>
-        /// Populates the children of a node.
-        /// </summary>
+        /// <summary>Populates the children of a node.</summary>
         /// <param name="node">The node.</param>
         /// <param name="orin">The original node.</param>
         /// <param name="model">The model.</param>
@@ -406,9 +390,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
         }
 
-        /// <summary>
-        /// Foce-sets a vector subindex in a list.
-        /// </summary>
+        /// <summary>Foce-sets a vector subindex in a list.</summary>
         /// <param name="vecs">The vector list.</param>
         /// <param name="ind">The index.</param>
         /// <param name="subind">The vector subindex.</param>

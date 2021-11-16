@@ -15,24 +15,16 @@ using System.Threading.Tasks;
 namespace FGECore.PropertySystem
 {
 
-    /// <summary>
-    /// Represents a set of custom data attached to an object.
-    /// </summary>
+    /// <summary>Represents a set of custom data attached to an object.</summary>
     public abstract class Property
     {
-        /// <summary>
-        /// The holder of this property. Modifying this value could lead to errors!
-        /// </summary>
+        /// <summary>The holder of this property. Modifying this value could lead to errors!</summary>
         public PropertyHolder Holder = null;
 
-        /// <summary>
-        /// The system that helps this property's field information.
-        /// </summary>
+        /// <summary>The system that helps this property's field information.</summary>
         public PropertyHelper Helper = null;
 
-        /// <summary>
-        /// Gets the debug output for this property.
-        /// </summary>
+        /// <summary>Gets the debug output for this property.</summary>
         /// <returns>The debuggable data.</returns>
         public Dictionary<string, string> GetDebuggable()
         {
@@ -41,18 +33,14 @@ namespace FGECore.PropertySystem
             return strs;
         }
 
-        /// <summary>
-        /// Returns whether this property is currently held by something.
-        /// </summary>
+        /// <summary>Returns whether this property is currently held by something.</summary>
         /// <returns>Whether it is held.</returns>
         public bool IsHeld()
         {
             return Holder != null;
         }
 
-        /// <summary>
-        /// Returns whether this property is currently held by something, and outputs the holder if so (otherwise, outputs null).
-        /// </summary>
+        /// <summary>Returns whether this property is currently held by something, and outputs the holder if so (otherwise, outputs null).</summary>
         /// <param name="outholder">The holder output.</param>
         /// <returns>Whether it is held.</returns>
         public bool IsHeld(out PropertyHolder outholder)
@@ -80,25 +68,19 @@ namespace FGECore.PropertySystem
             return p;
         }
 
-        /// <summary>
-        /// This is fired when the property is added to a system.
-        /// </summary>
+        /// <summary>This is fired when the property is added to a system.</summary>
         public virtual void OnAdded()
         {
             // Do nothing by default.
         }
 
-        /// <summary>
-        /// This is fired when the property is removed from a system.
-        /// </summary>
+        /// <summary>This is fired when the property is removed from a system.</summary>
         public virtual void OnRemoved()
         {
             // Do nothing by default.
         }
 
-        /// <summary>
-        /// Gets a string-ified version of this property.
-        /// </summary>
+        /// <summary>Gets a string-ified version of this property.</summary>
         /// <returns>The property string.</returns>
         public override string ToString()
         {

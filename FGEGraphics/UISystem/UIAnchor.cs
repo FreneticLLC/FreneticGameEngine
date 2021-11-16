@@ -40,7 +40,7 @@ namespace FGEGraphics.UISystem
 
         /// <summary>Top left UI Anchor. See <see cref="UIAnchor"/>.</summary>
         public static readonly UIAnchor TOP_LEFT = new UIAnchor(LEFT_X, TOP_Y);
-        
+
         /// <summary>Top center UI Anchor. See <see cref="UIAnchor"/>.</summary>
         public static readonly UIAnchor TOP_CENTER = new UIAnchor(CENTER_X, TOP_Y);
 

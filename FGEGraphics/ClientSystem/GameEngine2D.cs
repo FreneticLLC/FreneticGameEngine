@@ -42,9 +42,7 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public const float MAX_COORD = 1000000.0f;
 
-        /// <summary>
-        /// Helps with rendering.
-        /// </summary>
+        /// <summary>Helps with rendering.</summary>
         public Renderer2D RenderHelper;
 
         /// <summary>
@@ -54,74 +52,46 @@ namespace FGEGraphics.ClientSystem
         /// </summary>
         public Action<bool> RenderAllObjectsPre;
 
-        /// <summary>
-        /// Fires AFTER standard render path. See <see cref="RenderAllObjectsPre"/>.
-        /// </summary>
+        /// <summary>Fires AFTER standard render path. See <see cref="RenderAllObjectsPre"/>.</summary>
         public Action<bool> RenderAllObjectsPost;
 
-        /// <summary>
-        /// First shader stage: computes a 'light map' for each light source.
-        /// </summary>
+        /// <summary>First shader stage: computes a 'light map' for each light source.</summary>
         public Shader Shader_Lightmap;
 
-        /// <summary>
-        /// Second shader stage: combines various light map inputs into a buffer.
-        /// </summary>
+        /// <summary>Second shader stage: combines various light map inputs into a buffer.</summary>
         public Shader Shader_Combine;
 
-        /// <summary>
-        /// Final shader stage: adds light buffer to the scene.
-        /// </summary>
+        /// <summary>Final shader stage: adds light buffer to the scene.</summary>
         public Shader Shader_Addlighttoscene;
 
-        /// <summary>
-        /// First shader stage: computes a 'light map' for each light source.
-        /// </summary>
+        /// <summary>First shader stage: computes a 'light map' for each light source.</summary>
         public Shader Shader_Lightmap1D;
 
-        /// <summary>
-        /// Final shader stage: applies a 2D/1D light to the scene.
-        /// </summary>
+        /// <summary>Final shader stage: applies a 2D/1D light to the scene.</summary>
         public Shader Shader_ApplyLights1D;
 
-        /// <summary>
-        /// Whether to use the 2D lighting engine.
-        /// </summary>
+        /// <summary>Whether to use the 2D lighting engine.</summary>
         public bool UseLightEngine = true;
 
-        /// <summary>
-        /// Whether to use the 1D lighting trick when lighting is enabled.
-        /// </summary>
+        /// <summary>Whether to use the 1D lighting trick when lighting is enabled.</summary>
         public bool OneDLights = true;
 
-        /// <summary>
-        /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
-        /// </summary>
+        /// <summary>Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.</summary>
         public float OriginalZoom = 1f;
 
-        /// <summary>
-        /// Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.
-        /// </summary>
+        /// <summary>Current zoom. Smaller numbers = zoomed in. Bigger numbers = zoomed out. Defaults to 1.</summary>
         public float Zoom = 1f;
 
-        /// <summary>
-        /// How much the zoom value is multiplied by to get pixel size.
-        /// </summary>
+        /// <summary>How much the zoom value is multiplied by to get pixel size.</summary>
         public float ZoomMultiplier = 1024.0f;
 
-        /// <summary>
-        /// Minimum zoom value (Most zoomed in).
-        /// </summary>
+        /// <summary>Minimum zoom value (Most zoomed in).</summary>
         public float MinimumZoom = 0.01f;
 
-        /// <summary>
-        /// Maximum zoom value (most zoomed out).
-        /// </summary>
+        /// <summary>Maximum zoom value (most zoomed out).</summary>
         public float MaximumZoom = 100.0f;
 
-        /// <summary>
-        /// Center location of the view, in world coordinates.
-        /// </summary>
+        /// <summary>Center location of the view, in world coordinates.</summary>
         public Vector2 ViewCenter
         {
             get
@@ -134,19 +104,13 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Center location of the view, in negative world coordinates. Primarily for internal usage.
-        /// </summary>
+        /// <summary>Center location of the view, in negative world coordinates. Primarily for internal usage.</summary>
         public Vector2 ViewCenterInverse = Vector2.Zero;
 
-        /// <summary>
-        /// How much to pixelate the view. 1 = no pixelation.
-        /// </summary>
+        /// <summary>How much to pixelate the view. 1 = no pixelation.</summary>
         public int Pixelation = 1;
 
-        /// <summary>
-        /// Loads all shaders for the standard Game Engine 2D.
-        /// </summary>
+        /// <summary>Loads all shaders for the standard Game Engine 2D.</summary>
         public override void GetShaders()
         {
             Shader_Lightmap = Shaders.GetShader("lightmap2d");
@@ -157,9 +121,7 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("GetShaders");
         }
 
-        /// <summary>
-        /// Loads light helpers.
-        /// </summary>
+        /// <summary>Loads light helpers.</summary>
         public override void PostLoad()
         {
             GraphicsUtil.CheckError("PostLoad - Pre");
@@ -172,9 +134,7 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("PostLoad - Post");
         }
 
-        /// <summary>
-        /// All current lights.
-        /// </summary>
+        /// <summary>All current lights.</summary>
         public List<PointLight2D> Lights = new List<PointLight2D>();
 
         int c_FBO;
@@ -185,9 +145,7 @@ namespace FGEGraphics.ClientSystem
 
         int l_FBO_Tex;
 
-        /// <summary>
-        /// Calculates and loads some light helper information.
-        /// </summary>
+        /// <summary>Calculates and loads some light helper information.</summary>
         public void LoadLightHelpers()
         {
             c_FBO = GL.GenFramebuffer();
@@ -215,9 +173,7 @@ namespace FGEGraphics.ClientSystem
             GraphicsUtil.CheckError("LoadLightHelpers");
         }
 
-        /// <summary>
-        /// Reloads the 2D engine screen buffers.
-        /// </summary>
+        /// <summary>Reloads the 2D engine screen buffers.</summary>
         public override void ReloadScreenBuffers()
         {
             GL.DeleteFramebuffer(c_FBO);
@@ -227,39 +183,25 @@ namespace FGEGraphics.ClientSystem
             LoadLightHelpers();
         }
 
-        /// <summary>
-        /// The primary render context for this game engine 2D.
-        /// </summary>
+        /// <summary>The primary render context for this game engine 2D.</summary>
         public RenderContext2D MainRenderContext = new RenderContext2D();
 
-        /// <summary>
-        /// The current view scaler.
-        /// </summary>
+        /// <summary>The current view scaler.</summary>
         public Vector2 Scaler = Vector2.One;
 
-        /// <summary>
-        /// The current view adder.
-        /// </summary>
+        /// <summary>The current view adder.</summary>
         public Vector2 Adder = Vector2.Zero;
 
-        /// <summary>
-        /// The original scaler value for any given frame.
-        /// </summary>
+        /// <summary>The original scaler value for any given frame.</summary>
         public Vector2 OriginalScaler = Vector2.One;
 
-        /// <summary>
-        /// The original adder value for any given frame.
-        /// </summary>
+        /// <summary>The original adder value for any given frame.</summary>
         public Vector2 OriginalAdder = Vector2.Zero;
 
-        /// <summary>
-        /// The current world-space mouse coordinates.
-        /// </summary>
+        /// <summary>The current world-space mouse coordinates.</summary>
         public Vector2 MouseCoords;
 
-        /// <summary>
-        /// Renders a single frame of the 2D game engine.
-        /// </summary>
+        /// <summary>Renders a single frame of the 2D game engine.</summary>
         public override void RenderSingleFrame()
         {
             GraphicsUtil.CheckError("RenderSingleFrame");
@@ -336,9 +278,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Gets the 2D renderer.
-        /// </summary>
+        /// <summary>Gets the 2D renderer.</summary>
         public Renderer2D Rendering
         {
             get
@@ -347,9 +287,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Renders all entities and render helpers.
-        /// </summary>
+        /// <summary>Renders all entities and render helpers.</summary>
         /// <param name="lights">Whether to include things that don't cast shadows.</param>
         /// <param name="shouldShadow">The method to determine if an object should cast a shadow.</param>
         private void RenderAll(bool lights, Func<ClientEntity, bool> shouldShadow)
@@ -384,9 +322,7 @@ namespace FGEGraphics.ClientSystem
             }
         }
 
-        /// <summary>
-        /// Renders the entire GameEngine2D.
-        /// </summary>
+        /// <summary>Renders the entire GameEngine2D.</summary>
         private void Render()
         {
             GraphicsUtil.CheckError("Render - Pre");

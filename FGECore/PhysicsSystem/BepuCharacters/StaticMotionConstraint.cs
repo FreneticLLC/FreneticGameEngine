@@ -28,26 +28,16 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
     //Constraint descriptions provide an explicit mapping from the array-of-structures format to the internal array-of-structures-of-arrays format used by the solver.
     //Note that there is a separate description for the one and two body case- constraint implementations take advantage of the lack of a second body to reduce data gathering requirements.
-    /// <summary>
-    /// Description of a character motion constraint where the support is static.
-    /// </summary>
+    /// <summary>Description of a character motion constraint where the support is static.</summary>
     public struct StaticCharacterMotionConstraint : IOneBodyConstraintDescription<StaticCharacterMotionConstraint>
     {
-        /// <summary>
-        /// Maximum force that the horizontal motion constraint can apply to reach the current velocity goal.
-        /// </summary>
+        /// <summary>Maximum force that the horizontal motion constraint can apply to reach the current velocity goal.</summary>
         public float MaximumHorizontalForce;
-        /// <summary>
-        /// Maximum force that the vertical motion constraint can apply to fight separation.
-        /// </summary>
+        /// <summary>Maximum force that the vertical motion constraint can apply to fight separation.</summary>
         public float MaximumVerticalForce;
-        /// <summary>
-        /// Target horizontal velocity in terms of the basis X and -Z axes.
-        /// </summary>
+        /// <summary>Target horizontal velocity in terms of the basis X and -Z axes.</summary>
         public Vector2 TargetVelocity;
-        /// <summary>
-        /// Depth of the supporting contact. The vertical motion constraint permits separating velocity if, after a frame, the objects will still be touching.
-        /// </summary>
+        /// <summary>Depth of the supporting contact. The vertical motion constraint permits separating velocity if, after a frame, the objects will still be touching.</summary>
 		public float Depth;
         /// <summary>
         /// Stores the quaternion-packed orthonormal basis for the motion constraint. When expanded into a matrix, X and Z will represent the Right and Backward directions respectively. Y will represent Up.
@@ -55,23 +45,17 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         /// All motion moving along the (0, 1, 0) * Basis axis will be fought against by the vertical motion constraint.
         /// </summary>
         public Quaternion SurfaceBasis;
-        /// <summary>
-        /// World space offset from the character's center to apply impulses at.
-        /// </summary>
+        /// <summary>World space offset from the character's center to apply impulses at.</summary>
         public Vector3 OffsetFromCharacterToSupportPoint;
 
 
         //It's possible to create multiple descriptions for the same underlying constraint type id which can update different parts of the constraint data.
         //This functionality isn't used very often, though- you'll notice that the engine has a 1:1 mapping (at least at the time of this writing).
         //But in principle, it doesn't have to be that way. So, the description must provide information about the type and type id.
-        /// <summary>
-        /// Gets the constraint type id that this description is associated with. 
-        /// </summary>
+        /// <summary>Gets the constraint type id that this description is associated with.</summary>
         public int ConstraintTypeId => StaticCharacterMotionTypeProcessor.BatchTypeId;
 
-        /// <summary>
-        /// Gets the TypeProcessor type that is associated with this description.
-        /// </summary>
+        /// <summary>Gets the TypeProcessor type that is associated with this description.</summary>
         public Type TypeProcessorType => typeof(StaticCharacterMotionTypeProcessor);
 
         //Note that these mapping functions use a "GetOffsetInstance" function. Each CharacterMotionPrestep is a bundle of multiple constraints;
@@ -107,13 +91,11 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
     //Note that all the solver-side data is in terms of 'Wide' data types- the solver never works on just one constraint at a time. Instead,
     //it executes them in bundles of width equal to the runtime/hardware exposed SIMD unit width. This lets the solver scale with wider compute units.
-    //(This is important for machines that can perform 8 or more operations per instruction- there's no good way to map a single constraint instance's 
+    //(This is important for machines that can perform 8 or more operations per instruction- there's no good way to map a single constraint instance's
     //computation onto such a wide instruction, so if the solver tried to do such a thing, it would leave a huge amount of performance on the table.)
 
     //"Prestep" data can be thought of as the input to the solver. It describes everything the solver needs to know about.
-    /// <summary>
-    /// AOSOA formatted bundle of prestep data for multiple static-supported character motion constraints.
-    /// </summary>
+    /// <summary>AOSOA formatted bundle of prestep data for multiple static-supported character motion constraints.</summary>
     public struct StaticCharacterMotionPrestep
     {
         //Note that the prestep data layout is important. The solver tends to be severely memory bandwidth bound, so using a minimal representation is valuable.
@@ -175,7 +157,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             //Both of the motion constraints are velocity motors, like tangent friction. They don't actually have a position level goal.
             //But if we did want to make such a position level goal, it could be expressed as:
             //dot(basis.X, constrainedPointOnA - constrainedPointOnB) = 0
-            //dot(basis.Y, constrainedPointOnA - constrainedPointOnB) <= 0 
+            //dot(basis.Y, constrainedPointOnA - constrainedPointOnB) <= 0
             //dot(basis.Z, constrainedPointOnA - constrainedPointOnB) = 0
             //Note that the Y axis, corresponding to the vertical motion constraint, is an inequality. It pulls toward the surface, but never pushes away.
             //It also has a separate maximum force and acts on an independent axis; that's why we solve it as a separate constraint.
@@ -185,7 +167,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             //Throwing some algebra and identities at it:
             //dot(basis.X, a.LinearVelocity) + dot(basis.X, a.AngularVelocity x offsetToConstrainedPointOnA) + dot(-basis.X, b.LinearVelocity) + dot(basis.X, offsetToConstrainedPointOnB x b.AngularVelocity)
             //dot(basis.X, a.LinearVelocity) + dot(a.AngularVelocity, offsetToConstrainedPointOnA x basis.X) + dot(-basis.X, b.LinearVelocity) + dot(b.AngularVelocity, basis.X x offsetToConstrainedPointOnB)
-            //The (transpose) jacobian is the transform that pulls the body velocity into constraint space- 
+            //The (transpose) jacobian is the transform that pulls the body velocity into constraint space-
             //and here, we can see that we have an axis being dotted with each component of the velocity. That's gives us the jacobian for that degree of freedom.
             //The same form applies to all three axes of the basis, since they're all doing the same thing (just on different directions and with different force bounds).
             //Note that we don't explicitly output linear jacobians- they are just the axes of the basis, and the linear jacobians of B are just the negated linear jacobians of A.
@@ -228,11 +210,11 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
             //Note that we still use the packed representation in the projection information, even though we unpacked it in the prestep.
             //The solver iterations will redo that math rather than storing the full jacobians. This saves quite a bit of memory bandwidth.
-            //Storing every jacobian (except duplicate linear jacobians) would require 2x3 * 3 + 1x3 * 3 = 27 wide scalars, 
+            //Storing every jacobian (except duplicate linear jacobians) would require 2x3 * 3 + 1x3 * 3 = 27 wide scalars,
             //while storing the quaternion basis and two offsets requires only 4 + 3 + 3 = 10 scalars.
 
             //(That might sound irrelevant, but on an AVX2 system, 17 extra scalars means 544 extra bytes per solve iteration.
-            //If a machine has 40GBps of main memory bandwidth, those extra bytes require ~13.5 nanoseconds. 
+            //If a machine has 40GBps of main memory bandwidth, those extra bytes require ~13.5 nanoseconds.
             //A quad core AVX2 processor could easily perform over 300 instructions in that time. The story only gets more bandwidth-limited
             //as the core count scales up on pretty much all modern processors.)
 

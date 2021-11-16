@@ -20,14 +20,10 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
     /// </summary>
     public class LiveAudioClip
     {
-        /// <summary>
-        /// The data for this clip.
-        /// </summary>
+        /// <summary>The data for this clip.</summary>
         public byte[] Data;
 
-        /// <summary>
-        /// The number of channels in this clip.
-        /// </summary>
+        /// <summary>The number of channels in this clip.</summary>
         public byte Channels;
     }
 }

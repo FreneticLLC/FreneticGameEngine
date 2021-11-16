@@ -24,19 +24,13 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.Models
 {
-    /// <summary>
-    /// Represents a 3D model.
-    /// </summary>
+    /// <summary>Represents a 3D model.</summary>
     public class Model
     {
-        /// <summary>
-        /// The original core model.
-        /// </summary>
+        /// <summary>The original core model.</summary>
         public Model3D Original;
 
-        /// <summary>
-        /// Constructs the model.
-        /// </summary>
+        /// <summary>Constructs the model.</summary>
         /// <param name="_name">The name.</param>
         public Model(string _name)
         {
@@ -45,64 +39,40 @@ namespace FGEGraphics.GraphicsHelpers.Models
             MeshMap = new Dictionary<string, ModelMesh>();
         }
 
-        /// <summary>
-        /// The root transform.
-        /// </summary>
+        /// <summary>The root transform.</summary>
         public Matrix4 Root;
 
-        /// <summary>
-        /// The name of  this model.
-        /// </summary>
+        /// <summary>The name of  this model.</summary>
         public string Name;
 
-        /// <summary>
-        /// LOD helper data.
-        /// </summary>
+        /// <summary>LOD helper data.</summary>
         public KeyValuePair<int, int>[] LODHelper = null;
 
-        /// <summary>
-        /// The LOD box.
-        /// </summary>
+        /// <summary>The LOD box.</summary>
         public AABB LODBox = default;
 
-        /// <summary>
-        /// All the meshes this model has.
-        /// </summary>
+        /// <summary>All the meshes this model has.</summary>
         public List<ModelMesh> Meshes;
 
-        /// <summary>
-        /// A map of mesh names to meshes for this model.
-        /// </summary>
+        /// <summary>A map of mesh names to meshes for this model.</summary>
         public Dictionary<string, ModelMesh> MeshMap;
 
-        /// <summary>
-        /// The root node.
-        /// </summary>
+        /// <summary>The root node.</summary>
         public ModelNode RootNode;
 
-        /// <summary>
-        /// Whether the model bounds are set and known.
-        /// </summary>
+        /// <summary>Whether the model bounds are set and known.</summary>
         public bool ModelBoundsSet = false;
 
-        /// <summary>
-        /// The minimum model bound.
-        /// </summary>
+        /// <summary>The minimum model bound.</summary>
         public Location ModelMin;
 
-        /// <summary>
-        /// The maximum model bound.
-        /// </summary>
+        /// <summary>The maximum model bound.</summary>
         public Location ModelMax;
 
-        /// <summary>
-        /// Whether the model is loaded yet.
-        /// </summary>
+        /// <summary>Whether the model is loaded yet.</summary>
         public bool IsLoaded = false;
 
-        /// <summary>
-        /// Adds a mesh to this model.
-        /// </summary>
+        /// <summary>Adds a mesh to this model.</summary>
         /// <param name="mesh">The mesh to add.</param>
         public void AddMesh(ModelMesh mesh)
         {
@@ -110,9 +80,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             MeshMap[mesh.Name] = mesh;
         }
 
-        /// <summary>
-        /// Automatically builds the <see cref="MeshMap"/>.
-        /// </summary>
+        /// <summary>Automatically builds the <see cref="MeshMap"/>.</summary>
         public void AutoMapMeshes()
         {
             MeshMap = new Dictionary<string, ModelMesh>(Meshes.Count * 2);
@@ -122,9 +90,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
         }
 
-        /// <summary>
-        /// Gets a mesh by name.
-        /// </summary>
+        /// <summary>Gets a mesh by name.</summary>
         /// <param name="name">The name.</param>
         /// <returns>The mesh.</returns>
         public ModelMesh MeshFor(string name)
@@ -145,9 +111,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return null;
         }
 
-        /// <summary>
-        /// Sets the bones to an array value.
-        /// </summary>
+        /// <summary>Sets the bones to an array value.</summary>
         /// <param name="mats">The relevant array.</param>
         public static void SetBones(Matrix4[] mats)
         {
@@ -165,9 +129,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             GL.UniformMatrix4(101, mats.Length, false, set);
         }
 
-        /// <summary>
-        /// Clears up the bones to identity.
-        /// </summary>
+        /// <summary>Clears up the bones to identity.</summary>
         public static void BoneSafe()
         {
             Matrix4 ident = Matrix4.Identity;
@@ -176,19 +138,13 @@ namespace FGEGraphics.GraphicsHelpers.Models
             SetBones(mats);
         }
 
-        /// <summary>
-        /// Any custom animation adjustments on this model.
-        /// </summary>
+        /// <summary>Any custom animation adjustments on this model.</summary>
         public Dictionary<string, Matrix4> CustomAnimationAdjustments = new Dictionary<string, Matrix4>();
 
-        /// <summary>
-        /// Force bones not to offset.
-        /// </summary>
+        /// <summary>Force bones not to offset.</summary>
         public bool ForceBoneNoOffset = false;
 
-        /// <summary>
-        /// Update transformations on the model.
-        /// </summary>
+        /// <summary>Update transformations on the model.</summary>
         /// <param name="pNode">The previous node.</param>
         /// <param name="transf">The current transform.</param>
         public void UpdateTransforms(ModelNode pNode, Matrix4 transf)
@@ -237,14 +193,10 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
         }
 
-        /// <summary>
-        /// The backing model engine.
-        /// </summary>
+        /// <summary>The backing model engine.</summary>
         public ModelEngine Engine = null;
 
-        /// <summary>
-        /// Finds an animation node.
-        /// </summary>
+        /// <summary>Finds an animation node.</summary>
         /// <param name="nodeName">The node name.</param>
         /// <param name="mode">The mode.</param>
         /// <param name="time">The time stamp result.</param>
@@ -274,44 +226,28 @@ namespace FGEGraphics.GraphicsHelpers.Models
             return nodes.GetNode(nodeName);
         }
 
-        /// <summary>
-        /// Head animation.
-        /// </summary>
+        /// <summary>Head animation.</summary>
         SingleAnimation hAnim;
 
-        /// <summary>
-        /// Torso animation.
-        /// </summary>
+        /// <summary>Torso animation.</summary>
         SingleAnimation tAnim;
 
-        /// <summary>
-        /// Legs animation.
-        /// </summary>
+        /// <summary>Legs animation.</summary>
         SingleAnimation lAnim;
 
-        /// <summary>
-        /// Head animation time.
-        /// </summary>
+        /// <summary>Head animation time.</summary>
         double aTHead;
 
-        /// <summary>
-        /// Torso animation time.
-        /// </summary>
+        /// <summary>Torso animation time.</summary>
         double aTTorso;
 
-        /// <summary>
-        /// Legs animation time.
-        /// </summary>
+        /// <summary>Legs animation time.</summary>
         double aTLegs;
 
-        /// <summary>
-        /// The timestamp this model was last drawn at.
-        /// </summary>
+        /// <summary>The timestamp this model was last drawn at.</summary>
         public double LastDrawTime;
 
-        /// <summary>
-        /// Draws the model with low level of detail.
-        /// </summary>
+        /// <summary>Draws the model with low level of detail.</summary>
         /// <param name="pos">The position.</param>
         /// <param name="view">The relevant view helper.</param>
         public void DrawLOD(Location pos, View3D view)
@@ -363,9 +299,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             //Engine.Client.Rendering.SetMinimumLight(0f);
         }
 
-        /// <summary>
-        /// Draws the model.
-        /// </summary>
+        /// <summary>Draws the model.</summary>
         /// <param name="context">The sourcing render context.</param>
         /// <param name="aTimeHead">Animation time, head.</param>
         /// <param name="aTimeLegs">Animation time, legs.</param>
@@ -405,14 +339,10 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
         }
 
-        /// <summary>
-        /// Whether this model has a skin already.
-        /// </summary>
+        /// <summary>Whether this model has a skin already.</summary>
         public bool Skinned = false;
 
-        /// <summary>
-        /// Loads the skin for this model.
-        /// </summary>
+        /// <summary>Loads the skin for this model.</summary>
         /// <param name="texs">Texture engine.</param>
         public void LoadSkin(TextureEngine texs)
         {

@@ -15,39 +15,25 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.MathHelpers
 {
-    /// <summary>
-    /// Represents a plane in 3D space, using a triangle representation.
-    /// </summary>
+    /// <summary>Represents a plane in 3D space, using a triangle representation.</summary>
     public class Plane
     {
-        /// <summary>
-        /// The normal of the plane.
-        /// </summary>
+        /// <summary>The normal of the plane.</summary>
         public Location Normal;
 
-        /// <summary>
-        /// The first corner.
-        /// </summary>
+        /// <summary>The first corner.</summary>
         public Location Vertex1;
 
-        /// <summary>
-        /// The second corner.
-        /// </summary>
+        /// <summary>The second corner.</summary>
         public Location Vertex2;
 
-        /// <summary>
-        /// The third corner.
-        /// </summary>
+        /// <summary>The third corner.</summary>
         public Location Vertex3;
 
-        /// <summary>
-        /// The distance from the origin.
-        /// </summary>
+        /// <summary>The distance from the origin.</summary>
         public double NormalDistance;
 
-        /// <summary>
-        /// Constructs a plane, calculating a normal.
-        /// </summary>
+        /// <summary>Constructs a plane, calculating a normal.</summary>
         /// <param name="v1">Vertex one.</param>
         /// <param name="v2">Vertex two.</param>
         /// <param name="v3">Vertex three.</param>
@@ -60,9 +46,7 @@ namespace FGECore.MathHelpers
             NormalDistance = -(Normal.Dot(Vertex1));
         }
 
-        /// <summary>
-        /// Constructs a plane, with a known normal.
-        /// </summary>
+        /// <summary>Constructs a plane, with a known normal.</summary>
         /// <param name="v1">Vertex one.</param>
         /// <param name="v2">Vertex two.</param>
         /// <param name="v3">Vertex three.</param>
@@ -76,9 +60,7 @@ namespace FGECore.MathHelpers
             NormalDistance = -(Normal.Dot(Vertex1));
         }
 
-        /// <summary>
-        /// Constructs a plane from a normal and its distance from the origin (no vertices calculated).
-        /// </summary>
+        /// <summary>Constructs a plane from a normal and its distance from the origin (no vertices calculated).</summary>
         /// <param name="_normal">The normal.</param>
         /// <param name="_d">The distance.</param>
         public Plane(Location _normal, double _d)
@@ -88,9 +70,7 @@ namespace FGECore.MathHelpers
             NormalDistance = _d * fact;
         }
 
-        /// <summary>
-        /// Finds where a line hits the plane, if anywhere.
-        /// </summary>
+        /// <summary>Finds where a line hits the plane, if anywhere.</summary>
         /// <param name="start">The start of the line.</param>
         /// <param name="end">The end of the line.</param>
         /// <returns>A location of the hit, or NaN if none.</returns>
@@ -107,18 +87,14 @@ namespace FGECore.MathHelpers
             return start + t * ba;
         }
 
-        /// <summary>
-        /// Flips the normal, returned as a new object.
-        /// </summary>
+        /// <summary>Flips the normal, returned as a new object.</summary>
         /// <returns></returns>
         public Plane FlipNormal()
         {
             return new Plane(Vertex3, Vertex2, Vertex1, -Normal);
         }
 
-        /// <summary>
-        /// Returns the distance between a point and the plane.
-        /// </summary>
+        /// <summary>Returns the distance between a point and the plane.</summary>
         /// <param name="point">The point.</param>
         /// <returns>The distance.</returns>
         public double Distance(Location point)

@@ -345,7 +345,7 @@ namespace FGECore.CoreSystems
 
         /// <summary>Event fired when the console is written to.</summary>
         public static EventHandler<ConsoleWrittenEventArgs> Written;
-        
+
         /// <summary>Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.</summary>
         public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
             "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");

@@ -18,21 +18,15 @@ using BepuPhysics.Constraints;
 
 namespace FGECore.EntitySystem
 {
-    /// <summary>
-    /// Restricts a physics entity to 2D only.
-    /// </summary>
+    /// <summary>Restricts a physics entity to 2D only.</summary>
     public class EntityPhysics2DLimitProperty : BasicEntityProperty
     {
-        /// <summary>
-        /// Whether to force the position (in addition to rotation).
-        /// </summary>
+        /// <summary>Whether to force the position (in addition to rotation).</summary>
         [PropertyDebuggable]
         [PropertyAutoSavable]
         public bool ForcePosition = true;
 
-        /// <summary>
-        /// Handles the spawn event.
-        /// </summary>
+        /// <summary>Handles the spawn event.</summary>
         public override void OnSpawn()
         {
             PhysEnt = Entity.GetProperty<EntityPhysicsProperty>();
@@ -46,9 +40,7 @@ namespace FGECore.EntitySystem
 
         //private RevoluteAngularJoint RAJ;
 
-        /// <summary>
-        /// Post-spawn handling.
-        /// </summary>
+        /// <summary>Post-spawn handling.</summary>
         /// <param name="e">The event.</param>
         public void SpawnHandle(EntitySpawnEventArgs e)
         {
@@ -61,9 +53,7 @@ namespace FGECore.EntitySystem
             //PhysEnt.PhysicsWorld.Internal.Add(RAJ);
         }
 
-        /// <summary>
-        /// Handles the tick event.
-        /// </summary>
+        /// <summary>Handles the tick event.</summary>
         public void TickHandle()
         {
             if (ForcePosition && Math.Abs(PhysEnt.SpawnedBody.Pose.Position.Z) > 0.1)
@@ -72,9 +62,7 @@ namespace FGECore.EntitySystem
             }
         }
 
-        /// <summary>
-        /// Removes the joints from the physics world.
-        /// </summary>
+        /// <summary>Removes the joints from the physics world.</summary>
         public void RemoveJoints()
         {
             if (ForcePosition)
@@ -86,18 +74,14 @@ namespace FGECore.EntitySystem
             //RAJ = null;
         }
 
-        /// <summary>
-        /// Handles the despawn event.
-        /// </summary>
+        /// <summary>Handles the despawn event.</summary>
         public override void OnDespawn()
         {
             Entity.OnSpawnEvent.RemoveBySource(this);
             Entity.OnTick -= TickHandle;
         }
-        
-        /// <summary>
-        /// The relevant physics entity.
-        /// </summary>
+
+        /// <summary>The relevant physics entity.</summary>
         public EntityPhysicsProperty PhysEnt;
     }
 }

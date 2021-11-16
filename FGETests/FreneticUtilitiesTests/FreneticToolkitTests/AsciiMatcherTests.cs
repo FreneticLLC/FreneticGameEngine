@@ -17,39 +17,27 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
 {
-    /// <summary>
-    /// Tests expectations of <see cref="AsciiMatcher"/>.
-    /// </summary>
+    /// <summary>Tests expectations of <see cref="AsciiMatcher"/>.</summary>
     public class AsciiMatcherTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {
             Setup();
             ReferenceMatcher = new AsciiMatcher(ReferenceMatchChars);
         }
-        
-        /// <summary>
-        /// Matched characters reference.
-        /// </summary>
+
+        /// <summary>Matched characters reference.</summary>
         public const string ReferenceMatchChars = "AaBCcDDDDDDDDDDDdeeF12215490lMO!?@#$%";
 
-        /// <summary>
-        /// Non-matched characters reference.
-        /// </summary>
+        /// <summary>Non-matched characters reference.</summary>
         public const string ReferenceNonMatchedChars = "bEf3mZz()*&\0";
 
-        /// <summary>
-        /// Reference matcher constructed from <see cref="ReferenceMatchChars"/>.
-        /// </summary>
+        /// <summary>Reference matcher constructed from <see cref="ReferenceMatchChars"/>.</summary>
         public static AsciiMatcher ReferenceMatcher;
 
-        /// <summary>
-        /// Tests "IsMatch".
-        /// </summary>
+        /// <summary>Tests "IsMatch".</summary>
         [Test]
         public static void IsMatchTest()
         {
@@ -64,9 +52,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             Assert.That(!ReferenceMatcher.IsMatch((char)1000), "!IsMatch failed for char 1000");
         }
 
-        /// <summary>
-        /// Tests "ContainsAnyMatch".
-        /// </summary>
+        /// <summary>Tests "ContainsAnyMatch".</summary>
         [Test]
         public static void ContainsAnyMatchTest()
         {
@@ -75,9 +61,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars + ReferenceNonMatchedChars), $"ContainsAnyMatch failed.");
         }
 
-        /// <summary>
-        /// Tests "IsOnlyMatches".
-        /// </summary>
+        /// <summary>Tests "IsOnlyMatches".</summary>
         [Test]
         public static void IsOnlyMatchesTest()
         {
@@ -86,9 +70,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             Assert.That(!ReferenceMatcher.IsOnlyMatches(ReferenceMatchChars + ReferenceNonMatchedChars), $"!IsOnlyMatches failed.");
         }
 
-        /// <summary>
-        /// Tests "TrimToMatches".
-        /// </summary>
+        /// <summary>Tests "TrimToMatches".</summary>
         [Test]
         public static void TrimToMatchesTest()
         {
@@ -97,9 +79,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
             Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars + ReferenceMatchChars + ReferenceNonMatchedChars), $"TrimToMatches mixed-match failed.");
         }
 
-        /// <summary>
-        /// Tests "TrimToNonMatches".
-        /// </summary>
+        /// <summary>Tests "TrimToNonMatches".</summary>
         [Test]
         public static void TrimToNonMatchesTest()
         {

@@ -19,15 +19,11 @@ using NUnit.Framework;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
 {
-    /// <summary>
-    /// Tests expectations of <see cref="OtherExtensions"/>.
-    /// </summary>
+    /// <summary>Tests expectations of <see cref="OtherExtensions"/>.</summary>
     [TestFixture]
     public class OtherExtensionTests : FGETest
     {
-        /// <summary>
-        /// Prepares the basics.
-        /// </summary>
+        /// <summary>Prepares the basics.</summary>
         [OneTimeSetUp]
         public static void PreInit()
         {

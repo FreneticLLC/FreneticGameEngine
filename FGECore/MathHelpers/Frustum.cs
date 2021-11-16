@@ -23,39 +23,25 @@ namespace FGECore.MathHelpers
     /// </summary>
     public class Frustum
     {
-        /// <summary>
-        /// Near plane.
-        /// </summary>
+        /// <summary>Near plane.</summary>
         public Plane Near;
 
-        /// <summary>
-        /// Far plane.
-        /// </summary>
+        /// <summary>Far plane.</summary>
         public Plane Far;
 
-        /// <summary>
-        /// Left plane.
-        /// </summary>
+        /// <summary>Left plane.</summary>
         public Plane Left;
 
-        /// <summary>
-        /// Right plane.
-        /// </summary>
+        /// <summary>Right plane.</summary>
         public Plane Right;
 
-        /// <summary>
-        /// Top plane.
-        /// </summary>
+        /// <summary>Top plane.</summary>
         public Plane Top;
 
-        /// <summary>
-        /// Bottom plane.
-        /// </summary>
+        /// <summary>Bottom plane.</summary>
         public Plane Bottom;
 
-        /// <summary>
-        /// Constructs the Frustum from a Matrix.
-        /// </summary>
+        /// <summary>Constructs the Frustum from a Matrix.</summary>
         /// <param name="matrix">The matrix.</param>
         public Frustum(Matrix4x4 matrix)
         {
@@ -67,9 +53,7 @@ namespace FGECore.MathHelpers
             Far = new Plane(new Location(matrix.M13 - matrix.M14, matrix.M23 - matrix.M24, matrix.M33 - matrix.M34), matrix.M43 - matrix.M44);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether an AABB is contained by the Frustum.
-        /// </summary>
+        /// <summary>Returns a boolean indicating whether an AABB is contained by the Frustum.</summary>
         /// <param name="min">The lower coord of the AABB.</param>
         /// <param name="max">The higher coord of the AABB.</param>
         /// <returns>Whether it is contained.</returns>
@@ -117,9 +101,7 @@ namespace FGECore.MathHelpers
             return true;
         }
 
-        /// <summary>
-        /// Returns whether the frustum contains a sphere.
-        /// </summary>
+        /// <summary>Returns whether the frustum contains a sphere.</summary>
         /// <param name="point">The center of the sphere.</param>
         /// <param name="radius">The radius of the sphere.</param>
         /// <returns>Whether it intersects.</returns>
@@ -145,9 +127,7 @@ namespace FGECore.MathHelpers
             return ContainsBox(point - new Location(radius), point + new Location(radius));
         }
 
-        /// <summary>
-        /// Gets the plane associated with an index.
-        /// </summary>
+        /// <summary>Gets the plane associated with an index.</summary>
         public Plane GetFor(int i)
         {
             return i switch
@@ -162,9 +142,7 @@ namespace FGECore.MathHelpers
             };
         }
 
-        /// <summary>
-        /// Returns whether the Frustum contains a point.
-        /// </summary>
+        /// <summary>Returns whether the Frustum contains a point.</summary>
         /// <param name="point">The point.</param>
         /// <returns>Whether it's contained.</returns>
         public bool Contains(Location point)

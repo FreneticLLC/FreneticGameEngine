@@ -14,17 +14,13 @@ using System.Threading.Tasks;
 
 namespace FGECore.PropertySystem
 {
-    /// <summary>
-    /// Used to indicate that a property field is debuggable (if not marked, the property field is not debuggable).
-    /// </summary>
+    /// <summary>Used to indicate that a property field is debuggable (if not marked, the property field is not debuggable).</summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class PropertyDebuggable : Attribute
     {
     }
 
-    /// <summary>
-    /// Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).
-    /// </summary>
+    /// <summary>Used to indicate that a property field is auto-saveable (if not marked, the property field is not auto-saveable).</summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class PropertyAutoSavable : Attribute
     {
@@ -45,14 +41,10 @@ namespace FGECore.PropertySystem
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class PropertyPriority : Attribute
     {
-        /// <summary>
-        /// The priority.
-        /// </summary>
+        /// <summary>The priority.</summary>
         public double Priority;
 
-        /// <summary>
-        /// Construct the priority.
-        /// </summary>
+        /// <summary>Construct the priority.</summary>
         /// <param name="_prio">The priority value.</param>
         public PropertyPriority(double _prio)
         {
