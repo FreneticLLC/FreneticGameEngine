@@ -80,7 +80,7 @@ namespace FGECore.PhysicsSystem
         public InternalData Internal;
 
         /// <summary>The default gravity value (which is later configurable on a per-entity basis).</summary>
-        public Location Gravity = new Location(0, 0, -9.8);
+        public Location Gravity = new(0, 0, -9.8);
 
         /// <summary>The delta value to use for all non-lagging physics updates.</summary>
         public double UpdateDelta = 1.0 / 60.0;
@@ -105,7 +105,7 @@ namespace FGECore.PhysicsSystem
                         for (int h = 0; h < handles.Length; h++)
                         {
                             BodyHandle handle = handles[h];
-                            BodyReference body = new BodyReference(handle, Internal.CoreSimulation.Bodies);
+                            BodyReference body = new(handle, Internal.CoreSimulation.Bodies);
                             if (body.Exists)
                             {
                                 // convert to doubles before doing the addition, then convert back. The hope is that this will avoid numerical precision issues from the repositioning.
@@ -122,7 +122,7 @@ namespace FGECore.PhysicsSystem
                 for (int h = 0; h < staticHandles.Length; h++)
                 {
                     StaticHandle handle = staticHandles[h];
-                    StaticReference staticRef = new StaticReference(handle, Internal.CoreSimulation.Statics);
+                    StaticReference staticRef = new(handle, Internal.CoreSimulation.Statics);
                     if (staticRef.Exists)
                     {
                         staticRef.Pose.Position = (staticRef.Pose.Position.ToLocation() + relative).ToNumerics();
@@ -200,7 +200,7 @@ namespace FGECore.PhysicsSystem
         /// <returns>The list of entities found.</returns>
         public IEnumerable<EntityPhysicsProperty> GetEntitiesInBox(AABB box)
         {
-            EntitiesInBoxHelper helper = new EntitiesInBoxHelper() { Entities = new List<EntityPhysicsProperty>(), Space = this };
+            EntitiesInBoxHelper helper = new() { Entities = new List<EntityPhysicsProperty>(), Space = this };
             Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
             return helper.Entities;
         }
@@ -253,7 +253,7 @@ namespace FGECore.PhysicsSystem
         /// <param name="filter">The filter, if any.</param>
         public CollisionResult RayTraceSingle(Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null)
         {
-            RayTraceHelper helper = new RayTraceHelper() { Space = this, Filter = filter };
+            RayTraceHelper helper = new() { Space = this, Filter = filter };
             Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, ref helper);
             return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
         }
@@ -304,7 +304,7 @@ namespace FGECore.PhysicsSystem
         /// <param name="filter">The filter, if any.</param>
         public CollisionResult ConvexTraceSingle<TShape>(TShape shape, Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null) where TShape : unmanaged, IConvexShape
         {
-            ConvexTraceHelper helper = new ConvexTraceHelper() { Space = this, Filter = filter, Start = start };
+            ConvexTraceHelper helper = new() { Space = this, Filter = filter, Start = start };
             Internal.CoreSimulation.Sweep(shape, new RigidPose(start.ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(dir.ToNumerics(), Vector3.Zero), (float)dist, Internal.Pool, ref helper);
             return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
         }

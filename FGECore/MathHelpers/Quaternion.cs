@@ -27,7 +27,7 @@ namespace FGECore.MathHelpers
     public struct Quaternion : IEquatable<Quaternion>
     {
         /// <summary>The identity Quaternion: one with no rotation applied.</summary>
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public static readonly Quaternion Identity = new(0, 0, 0, 1);
 
         /// <summary>The X component of this Quaternion.</summary>
         [FieldOffset(0)]
@@ -194,7 +194,8 @@ namespace FGECore.MathHelpers
             return new Quaternion(-X, -Y, -Z, W);
         }
 
-        /// <summary>Returns the inverse of this Quaternion.</summary>
+        /// <summary>Returns the inverse of this Quaternion.
+        /// The inverse is the same amount of rotation, in the opposite direction.</summary>
         /// <returns>The inverse.</returns>
         public Quaternion Inverse()
         {
@@ -202,7 +203,8 @@ namespace FGECore.MathHelpers
             return new Quaternion(-X * len_sq, -Y * len_sq, -Z * len_sq, W * len_sq);
         }
 
-        /// <summary>Returns the negative of this Quaternion.</summary>
+        /// <summary>Returns the negative of this Quaternion.
+        /// This is not just a backwards rotation - for that, use <see cref="Inverse"/>.</summary>
         /// <returns>The negative.</returns>
         public Quaternion Negative()
         {
@@ -327,7 +329,7 @@ namespace FGECore.MathHelpers
         /// <param name="axis">The relative axis.</param>
         public double AxisAngleForRadians(in Location axis)
         {
-            Location ra = new Location(X, Y, Z);
+            Location ra = new(X, Y, Z);
             Location p = ra.Project(axis);
             Quaternion twist = new Quaternion(p.X, p.Y, p.Z, W).Normalized();
             Location new_forward = twist.TransformX();
