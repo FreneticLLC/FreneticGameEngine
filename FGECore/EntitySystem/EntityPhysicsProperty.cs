@@ -78,7 +78,7 @@ namespace FGECore.EntitySystem
         }
 
         /// <summary>Internal data for this physics property.</summary>
-        public InternalData Internal = new InternalData() { Mass = 1f, Orientation = Quaternion.Identity };
+        public InternalData Internal = new() { Mass = 1f, Orientation = Quaternion.Identity };
 
         // TODO: Shape save/debug
         // TODO: Maybe point to the correct physics space somehow in saves/debug? Needs a space ID.
@@ -314,10 +314,10 @@ namespace FGECore.EntitySystem
             {
                 CGroup = CollisionUtil.Solid;
             }
-            RigidPose pose = new RigidPose((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
-            BodyVelocity velocity = new BodyVelocity(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
+            RigidPose pose = new((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
+            BodyVelocity velocity = new(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
             Shape = Shape.Register();
-            CollidableDescription collidable = new CollidableDescription(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-4f, 1e-4f));
+            CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-4f, 1e-4f));
             BodyDescription description;
             if (Mass == 0)
             {

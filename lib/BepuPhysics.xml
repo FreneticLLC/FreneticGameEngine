@@ -778,6 +778,12 @@
             Gets a reference to the list of the body's connected constraints.
             </summary>
         </member>
+        <member name="P:BepuPhysics.BodyReference.CollidableReference">
+            <summary>
+            <para>Gets a CollidableReference for this body. CollidableReferences uniquely identify a collidable object in a simulation by including both the dynamic/kinematic/static state of the object and its handle.</para>
+            <para>Despite an unfortunate naming collision, CollidableReferences are distinct from a direct reference to a body's collidable data, which you can get from the Collidable property.</para>
+            </summary>
+        </member>
         <member name="P:BepuPhysics.BodyReference.Kinematic">
             <summary>
             Gets whether the body is kinematic, meaning its inverse inertia and mass are all zero.
@@ -1495,7 +1501,7 @@
         </member>
         <member name="F:BepuPhysics.Collidables.ConvexHull.BoundingPlanes">
             <summary>
-            Bundled bounding planes of the convex hull. 
+            Bundled bounding planes associated with the convex hull's faces.
             </summary>
         </member>
         <member name="F:BepuPhysics.Collidables.ConvexHull.FaceVertexIndices">
@@ -1614,6 +1620,34 @@
             <param name="pool">Buffer pool used for temporary allocations and the output data structures.</param>
             <param name="center">Computed center of mass of the convex hull before its points were recentered onto the origin.</param>
             <param name="convexHull">Convex hull shape of the input point set.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateTransformedCopy(BepuPhysics.Collidables.ConvexHull@,BepuUtilities.Matrix3x3@,BepuUtilities.Memory.Buffer{BepuUtilities.Vector3Wide},BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.HullBoundingPlanes})">
+            <summary>
+            Creates a transformed copy of a convex hull.
+            </summary>
+            <param name="source">Source convex hull to copy.</param>
+            <param name="transform">Transform to apply to the hull points.</param>
+            <param name="targetPoints">Transformed points in the copy target hull.</param>
+            <param name="targetBoundingPlanes">Transformed bounding planes in the copy target hull.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateTransformedShallowCopy(BepuPhysics.Collidables.ConvexHull@,BepuUtilities.Matrix3x3@,BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.ConvexHull@)">
+            <summary>
+            Creates a transformed copy of a convex hull. FaceVertexIndices and FaceToVertexIndicesStart buffers from the source are reused in the copy target.
+            Note that disposing two convex hulls with the same buffers will cause errors; disposal must be handled carefully to avoid double freeing the shared buffers.
+            </summary>
+            <param name="source">Source convex hull to copy.</param>
+            <param name="transform">Transform to apply to the hull points.</param>
+            <param name="pool">Pool from which to allocate the new hull's points and bounding planes buffers.</param>
+            <param name="target">Target convex hull to copy into. FaceVertexIndices and FaceToVertexIndicesStart buffers are reused from the source.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateTransformedCopy(BepuPhysics.Collidables.ConvexHull@,BepuUtilities.Matrix3x3@,BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.ConvexHull@)">
+            <summary>
+            Creates a transformed copy of a convex hull. Unique FaceVertexIndices and FaceToVertexIndicesStart buffers are allocated for the copy target.
+            </summary>
+            <param name="source">Source convex hull to copy.</param>
+            <param name="transform">Transform to apply to the hull points.</param>
+            <param name="pool">Pool from which to allocate the new hull's buffers.</param>
+            <param name="target">Target convex hull to copy into.</param>
         </member>
         <member name="T:BepuPhysics.Collidables.Cylinder">
             <summary>
@@ -2140,11 +2174,15 @@
             Type id of triangle shapes.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.TriangleWide.EstimateEpsilonScale(System.Numerics.Vector{System.Single}@)">
+        <member name="F:BepuPhysics.Collidables.TriangleWide.BackfaceNormalDotRejectionThreshold">
             <summary>
-            Provides an estimate of the scale of a shape. 
+            Minimum dot product between the detected local normal and the face normal of a triangle necessary to create contacts.
             </summary>
-            <param name="epsilonScale">Approximate scale of the shape for use in epsilons.</param>
+        </member>
+        <member name="F:BepuPhysics.Collidables.TriangleWide.DegenerateTriangleEpsilon">
+            <summary>
+            Epsilon to apply to testing triangles for degeneracy (which will be scaled by a pair-determined epsilon scale). Degenerate triangles do not have well defined normals and should not contribute 
+            </summary>
         </member>
         <member name="F:BepuPhysics.Collidables.TypedIndex.Packed">
             <summary>
@@ -2904,6 +2942,15 @@
             <param name="constraintTypeId">Id of the constraint to check.</param>
             <returns>True if the type id refers to a contact constraint. False otherwise.</returns>
         </member>
+        <member name="M:BepuPhysics.CollisionDetection.NarrowPhase.SortCollidableReferencesForPair(BepuPhysics.Collidables.CollidableReference,BepuPhysics.Collidables.CollidableReference,BepuPhysics.Collidables.CollidableMobility@,BepuPhysics.Collidables.CollidableMobility@,BepuPhysics.Collidables.CollidableReference@,BepuPhysics.Collidables.CollidableReference@)">
+            <summary>
+            Sorts references to guarantee that two collidables in the same pair will always be in the same order.
+            </summary>
+            <param name="a">First collidable reference to sort.</param>
+            <param name="b">First collidable reference to sort.</param>
+            <param name="aMobility">Mobility extracted from collidable A.</param>
+            <param name="bMobility">Mobility extracted from collidable B.</param>
+        </member>
         <member name="T:BepuPhysics.CollisionDetection.NarrowPhase`1">
             <summary>
             Turns broad phase overlaps into contact manifolds and uses them to manage constraints in the solver.
@@ -3274,9 +3321,30 @@
             Gets whether this constraint set is allocated. 
             </summary>
         </member>
+        <member name="T:BepuPhysics.Constraints.AngularAxisGearMotor">
+            <summary>
+            Constrains body B's angular velocity around an axis anchored to body A to equal body A's velocity around that axis with a scaling factor applied.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Constraints.AngularAxisGearMotor.LocalAxisA">
+            <summary>
+            Axis of rotation in body A's local space.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Constraints.AngularAxisGearMotor.VelocityScale">
+            <summary>
+            <para>Scale to apply to body A's velocity around the axis to get body B's target velocity.</para>
+            <para>In other words, a VelocityScale of 2 means that body A could have a velocity of 3 while body B has a velocity of 6.</para>
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Constraints.AngularAxisGearMotor.Settings">
+            <summary>
+            Motor control parameters.
+            </summary>
+        </member>
         <member name="T:BepuPhysics.Constraints.AngularAxisMotor">
             <summary>
-            Constrains two bodies to rotate around a local axis attached to body A at a target velocity.
+            Constrains the relative angular velocity of two bodies around a local axis attached to body A to a target velocity.
             </summary>
         </member>
         <member name="F:BepuPhysics.Constraints.AngularAxisMotor.LocalAxisA">
@@ -4352,7 +4420,7 @@
         </member>
         <member name="T:BepuPhysics.Constraints.ThreeBodyTypeProcessor`4">
             <summary>
-            Shared implementation across all four body constraints.
+            Shared implementation across all three body constraints.
             </summary>
         </member>
         <member name="T:BepuPhysics.Constraints.TwistLimit">
@@ -5738,6 +5806,12 @@
             Gets a reference to the static's collidable.
             </summary>
         </member>
+        <member name="P:BepuPhysics.StaticReference.CollidableReference">
+            <summary>
+            <para>Gets a CollidableReference for this static. CollidableReferences uniquely identify a collidable object in a simulation by including both the dynamic/kinematic/static state of the object and its handle.</para>
+            <para>Despite an unfortunate naming collision, CollidableReferences are distinct from a direct reference to a static's collidable data, which you can get from the Collidable property.</para>
+            </summary>
+        </member>
         <member name="M:BepuPhysics.StaticReference.GetDescription(BepuPhysics.StaticDescription@)">
             <summary>
             Gets a description of the static.
@@ -5775,6 +5849,33 @@
             <remarks>Can be useful if you made modifications to the static's state that you want reflected in the broad phase before the next timestep.
             For example, if you want to perform ray casts against the broad phase after moving objects around directly, their bounds must be updated or else the broad phase bounds will be out of date and the ray will likely miss.</remarks>
         </member>
+        <member name="T:BepuPhysics.IStaticChangeAwakeningFilter">
+            <summary>
+            Defines a type that determines which bodies should be awoken in the bounding box of a static when the static's state changes.
+            </summary>
+            <remarks>We cannot find bodies depending on a static through constraints, since statics do not maintain constraint lists.
+            When a static is added, removed, has SetShape or has ApplyDescription called on it, 
+            it looks up bodies in its bounding box that could possibly be affected by change and considers waking them up.
+            This filter can be used to ignore some bodies.</remarks>
+        </member>
+        <member name="P:BepuPhysics.IStaticChangeAwakeningFilter.AllowAwakening">
+            <summary>
+            Gets whether to allow awakening for any body. If true, candidates will have the ShouldAwaken function called for them. 
+            If false, ShouldAwaken will not be called, and no bodies will be awoken.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.IStaticChangeAwakeningFilter.ShouldAwaken(BepuPhysics.BodyReference)">
+            <summary>
+            Determines whether a body should be forced awake by the state change of a static.
+            </summary>
+            <param name="body">Sleeping body under consideration for awakening.</param>
+            <returns>True if the body should be forced awake, false otherwise.</returns>
+        </member>
+        <member name="T:BepuPhysics.StaticsShouldntAwakenKinematics">
+            <summary>
+            Default awakening filter that only wakes up dynamic bodies. Kinematic bodies do not respond to any kind of dynamic simulation, so they won't respond to the change in statics.
+            </summary>
+        </member>
         <member name="T:BepuPhysics.Statics">
             <summary>
             Collection of allocated static collidables.
@@ -5804,15 +5905,31 @@
             <param name="handle">Handle to check for.</param>
             <returns>True if the handle exists in the collection, false otherwise.</returns>
         </member>
+        <member name="M:BepuPhysics.Statics.RemoveAt``1(System.Int32,``0@)">
+            <summary>
+            Removes a static from the set by index. Any sleeping bodies with bounding boxes overlapping the removed static's bounding box and passing the given filter will be forced awake.
+            </summary>
+            <param name="index">Index of the static to remove.</param>
+            <param name="filter">Filter to apply to sleeping bodies near the removed static to see if they should be awoken.</param>
+            <typeparam name="TAwakeningFilter">Type of the filter to apply to sleeping bodies.</typeparam>
+        </member>
         <member name="M:BepuPhysics.Statics.RemoveAt(System.Int32)">
             <summary>
-            Removes a static from the set by index. Any inactive bodies with bounding boxes overlapping the removed static's bounding box will be forced active.
+            Removes a static from the set by index. Any sleeping dynamic bodies with bounding boxes overlapping the removed static's bounding box will be forced active.
             </summary>
             <param name="index">Index of the static to remove.</param>
         </member>
+        <member name="M:BepuPhysics.Statics.Remove``1(BepuPhysics.StaticHandle,``0@)">
+            <summary>
+            Removes a static from the set. Any sleeping bodies with bounding boxes overlapping the removed static's bounding box and passing the given filter will be forced active.
+            </summary>
+            <param name="handle">Handle of the static to remove.</param>
+            <param name="filter">Filter to apply to sleeping bodies near the removed static to see if they should be awoken.</param>
+            <typeparam name="TAwakeningFilter">Type of the filter to apply to sleeping bodies.</typeparam>
+        </member>
         <member name="M:BepuPhysics.Statics.Remove(BepuPhysics.StaticHandle)">
             <summary>
-            Removes a static from the set. Any inactive bodies with bounding boxes overlapping the removed static's bounding box will be forced active.
+            Removes a static from the set. Any sleeping dynamic bodies with bounding boxes overlapping the removed static's bounding box will be forced active.
             </summary>
             <param name="handle">Handle of the static to remove.</param>
         </member>
@@ -5821,23 +5938,51 @@
             Updates the bounds held within the broad phase for the static's current state.
             </summary>
         </member>
+        <member name="M:BepuPhysics.Statics.Add``1(BepuPhysics.StaticDescription@,``0@)">
+            <summary>
+            Adds a new static body to the simulation. All sleeping bodies whose bounding boxes overlap the new static and pass the given filter are forced active.
+            </summary>
+            <param name="description">Description of the static to add.</param>
+            <param name="filter">Filter to apply to sleeping bodies near the new static to see if they should be awoken.</param>
+            <typeparam name="TAwakeningFilter">Type of the filter to apply to sleeping bodies.</typeparam>
+            <returns>Handle of the new static.</returns>
+        </member>
         <member name="M:BepuPhysics.Statics.Add(BepuPhysics.StaticDescription@)">
             <summary>
-            Adds a new static body to the simulation. All inactive bodies whose bounding boxes overlap the new static are forced active.
+            Adds a new static body to the simulation. All sleeping dynamic bodies whose bounding boxes overlap the new static are forced active.
             </summary>
             <param name="description">Description of the static to add.</param>
             <returns>Handle of the new static.</returns>
         </member>
+        <member name="M:BepuPhysics.Statics.SetShape``1(BepuPhysics.StaticHandle,BepuPhysics.Collidables.TypedIndex,``0@)">
+            <summary>
+            Changes the shape of a static and updates its bounds in the broad phase. All sleeping bodies with bounding boxes overlapping the old or new static collidable and pass the given filter are forced active.
+            </summary>
+            <param name="handle">Handle of the static to change the shape of.</param>
+            <param name="newShape">Index of the new shape to use for the static.</param>
+            <param name="filter">Filter to apply to sleeping bodies near the static to see if they should be awoken.</param>
+            <typeparam name="TAwakeningFilter">Type of the filter to apply to sleeping bodies.</typeparam>
+        </member>
         <member name="M:BepuPhysics.Statics.SetShape(BepuPhysics.StaticHandle,BepuPhysics.Collidables.TypedIndex)">
             <summary>
-            Changes the shape of a static and updates its bounds in the broad phase.
+            Changes the shape of a static and updates its bounds in the broad phase. All sleeping dyanmic bodies with bounding boxes overlapping the old or new static collidable are forced active.
             </summary>
             <param name="handle">Handle of the static to change the shape of.</param>
             <param name="newShape">Index of the new shape to use for the static.</param>
         </member>
+        <member name="M:BepuPhysics.Statics.ApplyDescription``1(BepuPhysics.StaticHandle,BepuPhysics.StaticDescription@,``0@)">
+            <summary>
+            Applies a new description to an existing static object. All sleeping bodies with bounding boxes overlapping the old or new static collidable and pass the given filter are forced active.
+            Updates the bounds of the static in the broad phase.
+            </summary>
+            <param name="handle">Handle of the static to apply the description to.</param>
+            <param name="description">Description to apply to the static.</param>
+            <param name="filter">Filter to apply to sleeping bodies near the static to see if they should be awoken.</param>
+            <typeparam name="TAwakeningFilter">Type of the filter to apply to sleeping bodies.</typeparam>
+        </member>
         <member name="M:BepuPhysics.Statics.ApplyDescription(BepuPhysics.StaticHandle,BepuPhysics.StaticDescription@)">
             <summary>
-            Applies a new description to an existing static object. All inactive bodies with bounding boxes overlapping the old or new static collidable are forced active.
+            Applies a new description to an existing static object. All sleeping bodies with bounding boxes overlapping the old or new static collidable and pass the given filter are forced active.
             Updates the bounds of the static in the broad phase.
             </summary>
             <param name="handle">Handle of the static to apply the description to.</param>

@@ -151,14 +151,14 @@ namespace FGECore.PhysicsSystem
         /// <param name="manifold">Set of contacts detected between the collidables.</param>
         /// <param name="pairMaterial">Material properties of the manifold.</param>
         /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
-        public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
+        public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
         {
             EntityPhysicsProperty aEntity = PhysPropForCollidable(pair.A);
             EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
-            if (aEntity == null || bEntity == null)
+            if (aEntity is null || bEntity is null)
             {
                 EntityPhysicsProperty validOne = (aEntity ?? bEntity);
-                if (validOne != null)
+                if (validOne is not null)
                 {
                     pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
                     pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 2;
@@ -175,7 +175,7 @@ namespace FGECore.PhysicsSystem
                 pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
             }
             pairMaterial.SpringSettings = ContactSpringiness;
-            if (aEntity?.CollisionHandler != null || bEntity?.CollisionHandler != null)
+            if (aEntity?.CollisionHandler is not null || bEntity?.CollisionHandler is not null)
             {
                 CollisionEvent evt = new CollisionEvent<TManifold>() { One = aEntity, Two = bEntity, Manifold = manifold };
                 aEntity?.CollisionHandler?.Invoke(evt);

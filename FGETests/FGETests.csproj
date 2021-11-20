@@ -35,6 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit.Extension.VSProjectLoader" Version="3.9.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
   </ItemGroup>
 </Project>
