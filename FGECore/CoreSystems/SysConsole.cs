@@ -20,6 +20,7 @@ using FGECore.ConsoleHelpers;
 using FGECore.FileSystems;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.CoreSystems
 {
@@ -39,10 +40,7 @@ namespace FGECore.CoreSystems
                     Internal.ConsoleOutputCanceller.Cancel();
                     if (Internal.Waiting.Count > 0)
                     {
-                        foreach (KeyValuePair<string, string> message in Internal.Waiting)
-                        {
-                            Internal.WriteInternal(message.Value, message.Key);
-                        }
+                        Internal.WriteInternal(Internal.GatherText());
                         Internal.Waiting.Clear();
                     }
                 }
@@ -87,8 +85,8 @@ namespace FGECore.CoreSystems
             Internal.ConsoleLock = new LockObject();
             Internal.WriteLock = new LockObject();
             Internal.ConsoleOutputCanceller = new CancellationTokenSource();
-            Internal.ConsoleOutputThread = new Thread(new ParameterizedThreadStart(Internal.ConsoleLoop));
-            Internal.ConsoleOutputThread.Start(Internal.ConsoleOutputCanceller);
+            Internal.ConsoleOutputThread = new Thread(Internal.ConsoleLoop) { Name = "FGE_SysConsole" };
+            Internal.ConsoleOutputThread.Start();
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(LogFileName));
@@ -107,7 +105,7 @@ namespace FGECore.CoreSystems
         public static class Internal
         {
             /// <summary>All currently waiting messages.</summary>
-            public readonly static List<KeyValuePair<string, string>> Waiting = new List<KeyValuePair<string, string>>();
+            public readonly static List<(string, string)> Waiting = new();
 
             /// <summary>Locker for the console.</summary>
             public static LockObject ConsoleLock;
@@ -124,34 +122,44 @@ namespace FGECore.CoreSystems
             /// <summary>Log file output stream.</summary>
             public static FileStream FSOUT = null;
 
-            /// <summary>Central loop thread for for the console handler.</summary>
-            /// <param name="obj">Loop context object: a <see cref="CancellationTokenSource"/>.</param>
-            public static void ConsoleLoop(object obj)
+            /// <summary>Reusable <see cref="StringBuilder"/> for <see cref="GatherText"/>.</summary>
+            public static StringBuilder ReusableBuilder = new();
+
+            /// <summary>Converts <see cref="Waiting"/> text to writeable text.</summary>
+            public static string GatherText()
             {
-                CancellationTokenSource cts = obj as CancellationTokenSource;
+                ReusableBuilder.Clear();
+                foreach ((string text, string bcolor) in Waiting)
+                {
+                    ReusableBuilder.Append(bcolor).Append(text.ApplyBaseColor(bcolor));
+                }
+                return ReusableBuilder.ToString();
+            }
+
+            /// <summary>Central loop thread for for the console handler.</summary>
+            public static void ConsoleLoop()
+            {
                 while (true)
                 {
-                    List<KeyValuePair<string, string>> twaiting;
+                    Thread.Sleep(100);
+                    string toWrite;
                     lock (ConsoleLock)
                     {
-                        if (cts.IsCancellationRequested)
+                        if (ConsoleOutputCanceller.IsCancellationRequested)
                         {
                             return;
                         }
-                        twaiting = new List<KeyValuePair<string, string>>(Waiting);
+                        if (Waiting.IsEmpty())
+                        {
+                            continue;
+                        }
+                        toWrite = GatherText();
                         Waiting.Clear();
                     }
-                    if (twaiting.Count > 0)
+                    lock (WriteLock)
                     {
-                        lock (WriteLock)
-                        {
-                            foreach (KeyValuePair<string, string> message in twaiting)
-                            {
-                                WriteInternal(message.Value, message.Key);
-                            }
-                        }
+                        WriteInternal(toWrite);
                     }
-                    Thread.Sleep(100);
                 }
             }
 
@@ -163,16 +171,14 @@ namespace FGECore.CoreSystems
                 lock (ConsoleLock)
                 {
                     Written?.Invoke(null, new ConsoleWrittenEventArgs() { Text = text, BaseColor = bcolor });
-                    Waiting.Add(new KeyValuePair<string, string>(bcolor, text));
+                    Waiting.Add((text, bcolor));
                 }
             }
 
             /// <summary>Writes some colored text to the system console.</summary>
             /// <param name="text">The text to write.</param>
-            /// <param name="bcolor">The base color.</param>
-            public static void WriteInternal(string text, string bcolor)
+            public static void WriteInternal(string text)
             {
-                text = bcolor + text.ApplyBaseColor(bcolor);
                 if (FSOUT != null)
                 {
                     byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
@@ -186,7 +192,7 @@ namespace FGECore.CoreSystems
                 else
                 {
                     byte[] t = StringConversionHelper.UTF8Encoding.GetBytes(text);
-                    StringBuilder outp = new StringBuilder(t.Length);
+                    StringBuilder outp = new(t.Length);
                     for (int i = 0; i < t.Length; i++)
                     {
                         outp.Append((char)t[i]);
@@ -194,7 +200,7 @@ namespace FGECore.CoreSystems
                     Console.Write(outp.ToString());
                     return;
                 }
-                StringBuilder outme = new StringBuilder();
+                StringBuilder outme = new();
                 for (int i = 0; i < text.Length; i++)
                 {
                     if (text[i] == '^' && i + 1 < text.Length && IsColorSymbol(text[i + 1]))
@@ -347,8 +353,7 @@ namespace FGECore.CoreSystems
         public static EventHandler<ConsoleWrittenEventArgs> Written;
 
         /// <summary>Color symbols ASCII matcher, for <see cref="IsColorSymbol(char)"/>.</summary>
-        public static AsciiMatcher ColorSymbolMatcher = new AsciiMatcher(
-            "0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
+        public static AsciiMatcher ColorSymbolMatcher = new("0123456789" + "ab" + "def" + "hijkl" + "nopqrstu" + "RST" + "#$%&" + "()*" + "A" + "O" + "-" + "!" + "@");
 
         /// <summary>Used to identify if an input character is a valid color symbol (generally the character that follows a '^'), for use by RenderColoredText.</summary>
         /// <param name="c">The character to check.</param>
@@ -417,25 +422,25 @@ namespace FGECore.CoreSystems
     public class OutputType
     {
         /// <summary>When the client is sending information to console.</summary>
-        public static OutputType CLIENTINFO = new OutputType() { Name = "INFO/CLIENT", BaseColor = TextStyle.Simple };
+        public static OutputType CLIENTINFO = new() { Name = "INFO/CLIENT", BaseColor = TextStyle.Simple };
 
         /// <summary>General information.</summary>
-        public static OutputType SERVERINFO = new OutputType() { Name = "INFO/SERVER", BaseColor = TextStyle.Simple };
+        public static OutputType SERVERINFO = new() { Name = "INFO/SERVER", BaseColor = TextStyle.Simple };
 
         /// <summary>During the server startup sequence.</summary>
-        public static OutputType SERVERINIT = new OutputType() { Name = "INIT/SERVER", BaseColor = "^r^2" };
+        public static OutputType SERVERINIT = new() { Name = "INIT/SERVER", BaseColor = "^r^2" };
 
         /// <summary>Initialization from the client.</summary>
-        public static OutputType CLIENTINIT = new OutputType() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
+        public static OutputType CLIENTINIT = new() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
 
         /// <summary>A (probably) ignorable error.</summary>
-        public static OutputType WARNING = new OutputType() { Name = "WARNING", BaseColor = "^r^3" };
+        public static OutputType WARNING = new() { Name = "WARNING", BaseColor = "^r^3" };
 
         /// <summary>A major error.</summary>
-        public static OutputType ERROR = new OutputType() { Name = "ERROR", BaseColor = "^r^7^h^0" };
+        public static OutputType ERROR = new() { Name = "ERROR", BaseColor = "^r^7^h^0" };
 
         /// <summary>Disable-able minor debug information.</summary>
-        public static OutputType DEBUG = new OutputType() { Name = "DEBUG", BaseColor = "^7^&" };
+        public static OutputType DEBUG = new() { Name = "DEBUG", BaseColor = "^7^&" };
         // TODO: More?
 
         /// <summary>The name of the output type.</summary>

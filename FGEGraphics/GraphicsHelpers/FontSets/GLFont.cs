@@ -174,7 +174,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     {
                         Engine.CX = X;
                         Engine.CY = Y;
-                        List<string> toret = new List<string>();
+                        List<string> toret = new();
                         return input.Skip(processed);
                     }
                 }
@@ -189,7 +189,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     gfx.DrawString(chr, fnt, brush, new PointF(X, Y), RenderFormat);
                 }
                 processed++;
-                RectangleF rect = new RectangleF(X, Y, nwidth, rawHeight);
+                RectangleF rect = new(X, Y, nwidth, rawHeight);
                 SymbolLocations[inputSymbol] = rect;
                 if (chr.Length == 1)
                 {
@@ -343,7 +343,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>Already-tested emoji names, with a boolean indicating whether they are valid.</summary>
-        public Dictionary<string, bool> TestedEmoji = new Dictionary<string, bool>();
+        public Dictionary<string, bool> TestedEmoji = new();
 
         /// <summary>Returns whether the string is an emoji name.</summary>
         /// <param name="str">The string.</param>

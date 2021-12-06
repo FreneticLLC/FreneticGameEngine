@@ -74,7 +74,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         public Bitmap SaveToBMP(bool flip = false)
         {
             GL.BindTexture(TextureTarget.Texture2D, OriginalInternalID);
-            Bitmap bmp = new Bitmap(Width, Height);
+            Bitmap bmp = new(Width, Height);
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             bmp.UnlockBits(data);

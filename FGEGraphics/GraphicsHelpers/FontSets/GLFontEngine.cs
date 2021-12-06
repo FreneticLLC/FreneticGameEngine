@@ -63,7 +63,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public void Expand()
         {
             CurrentHeight *= 2;
-            Bitmap bmp2 = new Bitmap(DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight);
+            Bitmap bmp2 = new(DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight);
             using (Graphics gfx = Graphics.FromImage(bmp2))
             {
                 gfx.Clear(Color.Transparent);
@@ -196,7 +196,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     OutputType.WARNING.Output($"Loading {CoreFontPreference}: {ex}");
                 }
             }
-            Font def = new Font(family, 12);
+            Font def = new(family, 12);
             Standard = new GLFont(def, this);
             Fonts.Add(Standard);
             OutputType.CLIENTINIT.Output($"Select main font: {family.Name}");
@@ -276,8 +276,8 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>A valid font object, or null if there was no match.</returns>
         public GLFont LoadFont(string name, bool bold, bool italic, int size)
         {
-            Font font = new Font(name, size / DPIScale, (bold ? FontStyle.Bold : 0) | (italic ? FontStyle.Italic : 0));
-            GLFont f = new GLFont(font, this);
+            Font font = new(name, size / DPIScale, (bold ? FontStyle.Bold : 0) | (italic ? FontStyle.Italic : 0));
+            GLFont f = new(font, this);
             UpdateTexture();
             return f;
         }

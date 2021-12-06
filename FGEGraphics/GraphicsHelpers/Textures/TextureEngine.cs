@@ -162,7 +162,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         public Texture DynamicLoadTexture(string textureName)
         {
             textureName = FileEngine.CleanFileName(textureName);
-            Texture texture = new Texture()
+            Texture texture = new()
             {
                 Engine = this,
                 Name = textureName,
@@ -222,10 +222,10 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <returns>The resized image.</returns>
         public static Bitmap RescaleBitmap(Bitmap bmp, int width, int height)
         {
-            Bitmap output = new Bitmap(width, height);
+            Bitmap output = new(width, height);
             using (Graphics graphics = Graphics.FromImage(output))
             {
-                using ImageAttributes ia = new ImageAttributes();
+                using ImageAttributes ia = new();
                 ia.SetWrapMode(WrapMode.TileFlipXY);
                 graphics.SmoothingMode = SmoothingMode.None;
                 graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -242,7 +242,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <returns>The bitmap.</returns>
         public static Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
         {
-            Bitmap bmp = new Bitmap(new MemoryStream(data));
+            Bitmap bmp = new(new MemoryStream(data));
 #if DEBUG
             if (bmp.Width <= 0 || bmp.Height <= 0)
             {
@@ -316,7 +316,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <returns>The loaded texture, or null if it does not exist.</returns>
         public Texture LoadTexture(string filename, int twidth = 0)
         {
-            Texture texture = new Texture()
+            Texture texture = new()
             {
                 Engine = this,
                 Name = filename
@@ -372,7 +372,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
         /// <returns>The generated texture.</returns>
         public Texture GenerateForColor(Color c, string name)
         {
-            Texture texture = new Texture()
+            Texture texture = new()
             {
                 Engine = this,
                 Name = name,
@@ -382,7 +382,7 @@ namespace FGEGraphics.GraphicsHelpers.Textures
             GL.GenTextures(1, out texture.OriginalInternalID);
             texture.InternalTexture = texture.OriginalInternalID;
             texture.Bind();
-            using (Bitmap bmp = new Bitmap(2, 2))
+            using (Bitmap bmp = new(2, 2))
             {
                 bmp.SetPixel(0, 0, c);
                 bmp.SetPixel(0, 1, c);

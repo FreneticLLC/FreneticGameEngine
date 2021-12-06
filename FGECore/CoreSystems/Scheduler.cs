@@ -22,7 +22,7 @@ namespace FGECore.CoreSystems
     public class Scheduler
     {
         /// <summary>Current set of tasks.</summary>
-        public ConcurrentQueue<SyncScheduleItem> Tasks = new ConcurrentQueue<SyncScheduleItem>();
+        public ConcurrentQueue<SyncScheduleItem> Tasks = new();
 
         /// <summary>Removes all pending items from the scheduler.</summary>
         public void Clear()
@@ -84,7 +84,7 @@ namespace FGECore.CoreSystems
         /// <returns>A schedule item.</returns>
         public SyncScheduleItem GetSyncTask(Action act, double delay = 0)
         {
-            return new SyncScheduleItem() { MyAction = act, Time = delay, OwningEngine = this };
+            return new() { MyAction = act, Time = delay, OwningEngine = this };
         }
 
         /// <summary>Creates and schedules a sync task.</summary>
@@ -93,12 +93,12 @@ namespace FGECore.CoreSystems
         /// <returns>The scheduled item.</returns>
         public SyncScheduleItem ScheduleSyncTask(Action act, double delay = 0)
         {
-            SyncScheduleItem item = new SyncScheduleItem() { MyAction = act, Time = delay, OwningEngine = this };
+            SyncScheduleItem item = new() { MyAction = act, Time = delay, OwningEngine = this };
             Tasks.Enqueue(item);
             return item;
         }
 
-        private static readonly SyncScheduleItem END_ITEM = new SyncScheduleItem();
+        private static readonly SyncScheduleItem END_ITEM = new();
 
         /// <summary>Ran every frame to cause all sync tasks to be processed.</summary>
         /// <param name="time">The delta time.</param>
@@ -138,7 +138,7 @@ namespace FGECore.CoreSystems
         /// <returns>The scheduled item.</returns>
         public ASyncScheduleItem StartAsyncTask(Action action, bool isImportant = false)
         {
-            ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = action, UnImportant = !isImportant };
+            ASyncScheduleItem asyncer = new() { OwningEngine = this, MyAction = action, UnImportant = !isImportant };
             asyncer.RunMe();
             return asyncer;
         }
@@ -149,7 +149,7 @@ namespace FGECore.CoreSystems
         /// <returns>The created schedule item.</returns>
         public ASyncScheduleItem AddAsyncTask(Action a, ASyncScheduleItem followUp = null)
         {
-            ASyncScheduleItem asyncer = new ASyncScheduleItem() { OwningEngine = this, MyAction = a, FollowUp = followUp };
+            ASyncScheduleItem asyncer = new() { OwningEngine = this, MyAction = a, FollowUp = followUp };
             return asyncer;
         }
     }
@@ -190,7 +190,7 @@ namespace FGECore.CoreSystems
         public ASyncScheduleItem FollowUp = null;
 
         /// <summary>Locker to prevent thread issues.</summary>
-        readonly LockObject Locker = new LockObject();
+        readonly LockObject Locker = new();
 
         /// <summary>Whether the item has been started.</summary>
         public bool Started = false;
