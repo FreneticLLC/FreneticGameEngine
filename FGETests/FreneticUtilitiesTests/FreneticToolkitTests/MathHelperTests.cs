@@ -31,7 +31,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
         [Test]
         public static void NextPowerOfTwoTest()
         {
-            SortedDictionary<int, int> testPairs = new SortedDictionary<int, int>() {
+            SortedDictionary<int, int> testPairs = new() {
                 { 1, 1 }, { 2, 2 }, { 3, 4 }, { 4, 4 }, { 5, 8 }, { 6, 8 }, { 7, 8 }, { 8, 8 }, { 9, 16 },
                 { 10, 16 }, { 11, 16 }, { 12, 16 }, { 13, 16 }, { 14, 16 }, { 15, 16 }, { 16, 16 }, { 17, 32 }, { 18, 32 },
                 { 20, 32 }, { 30, 32 }, { 40, 64 }, { 50, 64 }, { 60, 64 }, { 63, 64 }, { 64, 64 }, { 65, 128 },

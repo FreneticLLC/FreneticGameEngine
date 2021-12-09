@@ -34,7 +34,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void SwapKeyValueTest()
         {
-            Dictionary<string, int> testDict = new Dictionary<string, int>()
+            Dictionary<string, int> testDict = new()
             {
                 { "hello", 5 }, { "wow", 3 }, { "test", -5 }
             };
@@ -84,7 +84,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void AddAllTest()
         {
-            Dictionary<string, int> resultDict = new Dictionary<string, int>() { { "a", 1 }, { "b", 2 } };
+            Dictionary<string, int> resultDict = new() { { "a", 1 }, { "b", 2 } };
             resultDict.AddAll(new Dictionary<string, int>() { { "c", 3 }, { "d", 4 } });
             Assert.AreEqual(4, resultDict.Count, "AddAllTest resultDict Count wrong");
             Assert.AreEqual(1, resultDict["a"], "AddAllTest resultDict['a'] wrong");
@@ -98,7 +98,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void UnionWithTest()
         {
-            Dictionary<string, int> resultDict = new Dictionary<string, int>() { { "a", 1 }, { "b", 2 } };
+            Dictionary<string, int> resultDict = new() { { "a", 1 }, { "b", 2 } };
             resultDict.UnionWith(new Dictionary<string, int>() { { "c", 3 }, { "b", 4 } });
             Assert.AreEqual(3, resultDict.Count, "UnionWithTest resultDict Count wrong");
             Assert.AreEqual(1, resultDict["a"], "UnionWithTest resultDict['a'] wrong");
@@ -119,7 +119,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void GetOrCreateTest()
         {
-            Dictionary<string, int> resultDict = new Dictionary<string, int>() { { "a", 1 }, { "b", 2} };
+            Dictionary<string, int> resultDict = new() { { "a", 1 }, { "b", 2} };
             int resultThree = resultDict.GetOrCreate("c", () => 3);
             Assert.AreEqual(3, resultDict.Count, "GetOrCreateTest resultDict Count wrong");
             Assert.AreEqual(3, resultThree, "GetOrCreateTest resultThree wrong");

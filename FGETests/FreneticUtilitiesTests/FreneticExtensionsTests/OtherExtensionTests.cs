@@ -37,7 +37,7 @@ namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
         [Test]
         public static void NextGaussian()
         {
-            Random random = new Random(12345);
+            Random random = new(12345);
             AssertAreRoughlyEqual(0.992784877525018, random.NextGaussian(), "Gaussian first try failed");
             AssertAreRoughlyEqual(-0.0499612497007243, random.NextGaussian(), "Gaussian second try failed");
             AssertAreRoughlyEqual(-0.594917629112312, random.NextGaussian(), "Gaussian third try failed");
