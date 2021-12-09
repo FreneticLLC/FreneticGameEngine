@@ -31,7 +31,7 @@ namespace FGEGraphics.ClientSystem
     public class GameEngine3D : GameEngineBase
     {
         /// <summary>The list of common shaders for this engine.</summary>
-        public GE3DShaders Shaders3D = new GE3DShaders();
+        public GE3DShaders Shaders3D = new();
 
         /// <summary>Whether to allow LL light helpers.</summary>
         public bool AllowLL = false;
@@ -148,13 +148,13 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>The main rendering context.</summary>
-        public RenderContext MainContext = new RenderContext();
+        public RenderContext MainContext = new();
 
         /// <summary>Whether this engine is a 'sub engine' (otherwise, it's the main engine).</summary>
         public bool IsSubEngine = false;
 
         /// <summary>The sub-view size, if a sub engine.</summary>
-        public Vector2i SubSize = new Vector2i(1024, 768);
+        public Vector2i SubSize = new(1024, 768);
 
         /// <summary>Loads any additional final data.</summary>
         public override void PostLoad()
@@ -168,7 +168,7 @@ namespace FGEGraphics.ClientSystem
             OutputType.CLIENTINIT.Output("GameEngine loading main 3D view...");
             if (!IsSubEngine)
             {
-                SubSize = new Vector2i(Window.Size.X, Window.Size.Y);
+                SubSize = new(Window.Size.X, Window.Size.Y);
             }
             MainView.Config.Width = SubSize.X;
             MainView.Config.Height = SubSize.Y;
@@ -233,7 +233,7 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>The main default camera for the main view.</summary>
-        public Camera3D MainCamera = new Camera3D();
+        public Camera3D MainCamera = new();
 
 
         /// <summary>Gets the 3D renderer.</summary>

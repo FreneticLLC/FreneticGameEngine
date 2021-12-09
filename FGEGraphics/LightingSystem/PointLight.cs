@@ -55,7 +55,7 @@ namespace FGEGraphics.LightingSystem
             Color = col;
             for (int i = 0; i < 6; i++)
             {
-                Light li = new Light();
+                Light li = new();
                 li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color.ToOpenTK());
                 InternalLights.Add(li);
             }

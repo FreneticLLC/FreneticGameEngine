@@ -24,7 +24,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         public string Name;
 
         /// <summary>The bones relevant to this mesh.</summary>
-        public List<ModelBone> Bones = new List<ModelBone>();
+        public List<ModelBone> Bones = new();
 
         /// <summary>Constructs the model mesh.</summary>
         /// <param name="_name">The name of it.</param>
@@ -33,7 +33,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             Name = _name.ToLowerFast();
             if (Name.EndsWith(".001"))
             {
-                Name = Name.Substring(0, Name.Length - ".001".Length);
+                Name = Name[..^".001".Length];
             }
             BaseRenderable = new Renderable();
         }

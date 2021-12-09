@@ -49,7 +49,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
         /// PRIMARILY FOR INTERNAL USAGE.
         /// Caps to disable for this render.
         /// </summary>
-        public HashSet<EnableCap> DisabledCaps = new HashSet<EnableCap>();
+        public HashSet<EnableCap> DisabledCaps = new();
 
         /// <summary>
         /// Gets or sets whether the object is always visible through walls.

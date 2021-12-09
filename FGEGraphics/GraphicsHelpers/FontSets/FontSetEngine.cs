@@ -33,7 +33,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public Shader FixToShader;
 
         /// <summary>Random helper object.</summary>
-        public MTRandom RandomHelper = new MTRandom();
+        public MTRandom RandomHelper = new();
 
         /// <summary>The lower-level font system.</summary>
         public GLFontEngine GLFonts;
@@ -48,7 +48,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public FontSet DoubleSize;
 
         /// <summary>A list of all currently loaded font sets.</summary>
-        public Dictionary<(string, int), FontSet> Fonts = new Dictionary<(string, int), FontSet>();
+        public Dictionary<(string, int), FontSet> Fonts = new();
 
         /// <summary>Helper function to get a language data.</summary>
         public Func<string[], string> GetLanguageHelper;

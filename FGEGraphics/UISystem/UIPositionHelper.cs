@@ -369,10 +369,10 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>Gets the X/Y coordinate pair.</summary>
-        public Vector2i Position => new Vector2i(X, Y);
+        public Vector2i Position => new(X, Y);
 
         /// <summary>Gets the Width/Height coordinate pair.</summary>
-        public Vector2i Size => new Vector2i(Width, Height);
+        public Vector2i Size => new(Width, Height);
 
         /// <summary>Converts this position helper's present data to a simplified debug string.</summary>
         public override string ToString()

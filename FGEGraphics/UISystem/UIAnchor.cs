@@ -39,30 +39,30 @@ namespace FGEGraphics.UISystem
             BOTTOM_Y = (element) => (int)(element.Parent.Position.Height - element.Position.Height);
 
         /// <summary>Top left UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor TOP_LEFT = new UIAnchor(LEFT_X, TOP_Y);
+        public static readonly UIAnchor TOP_LEFT = new(LEFT_X, TOP_Y);
 
         /// <summary>Top center UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor TOP_CENTER = new UIAnchor(CENTER_X, TOP_Y);
+        public static readonly UIAnchor TOP_CENTER = new(CENTER_X, TOP_Y);
 
         /// <summary>Top right UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor TOP_RIGHT = new UIAnchor(RIGHT_X, TOP_Y);
+        public static readonly UIAnchor TOP_RIGHT = new(RIGHT_X, TOP_Y);
 
         /// <summary>Center left UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor CENTER_LEFT = new UIAnchor(LEFT_X, CENTER_Y);
+        public static readonly UIAnchor CENTER_LEFT = new(LEFT_X, CENTER_Y);
 
         /// <summary>Center UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor CENTER = new UIAnchor(CENTER_X, CENTER_Y);
+        public static readonly UIAnchor CENTER = new(CENTER_X, CENTER_Y);
 
         /// <summary>Center right UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor CENTER_RIGHT = new UIAnchor(RIGHT_X, CENTER_Y);
+        public static readonly UIAnchor CENTER_RIGHT = new(RIGHT_X, CENTER_Y);
 
         /// <summary>Bottom left UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor BOTTOM_LEFT = new UIAnchor(LEFT_X, BOTTOM_Y);
+        public static readonly UIAnchor BOTTOM_LEFT = new(LEFT_X, BOTTOM_Y);
 
         /// <summary>Bottom center UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor BOTTOM_CENTER = new UIAnchor(CENTER_X, BOTTOM_Y);
+        public static readonly UIAnchor BOTTOM_CENTER = new(CENTER_X, BOTTOM_Y);
 
         /// <summary>Bottom right UI Anchor. See <see cref="UIAnchor"/>.</summary>
-        public static readonly UIAnchor BOTTOM_RIGHT = new UIAnchor(RIGHT_X, BOTTOM_Y);
+        public static readonly UIAnchor BOTTOM_RIGHT = new(RIGHT_X, BOTTOM_Y);
     }
 }

@@ -224,7 +224,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 return originalText;
             }
-            StringBuilder fullFileText = new StringBuilder(originalText.Length + defValues.Count);
+            StringBuilder fullFileText = new(originalText.Length + defValues.Count);
             string[] dat = originalText.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
@@ -260,7 +260,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             {
                 return str;
             }
-            StringBuilder fullFileText = new StringBuilder(str.Length * 2);
+            StringBuilder fullFileText = new(str.Length * 2);
             string[] dat = str.Replace("\r", "").Split('\n');
             for (int i = 0; i < dat.Length; i++)
             {
@@ -332,7 +332,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
             return program;
         }
 
-        private readonly Dictionary<string, string> ReusableDefValues = new Dictionary<string, string>(128);
+        private readonly Dictionary<string, string> ReusableDefValues = new(128);
 
         /// <summary>Compiles a VertexShader and FragmentShader to a usable shader program.</summary>
         /// <param name="VS">The input VertexShader code.</param>

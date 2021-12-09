@@ -75,17 +75,17 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <returns>The cube model.</returns>
         public Model GenerateCube()
         {
-            Model m = new Model("cube")
+            Model m = new("cube")
             {
                 Engine = this,
                 Skinned = true,
                 ModelMin = new Location(-0.5),
                 ModelMax = new Location(0.5)
             };
-            ModelMesh mm = new ModelMesh("cube");
-            Renderable.ListBuilder builder = new Renderable.ListBuilder();
+            ModelMesh mm = new("cube");
+            Renderable.ListBuilder builder = new();
             builder.Prepare();
-            TextureCoordinates tc = new TextureCoordinates();
+            TextureCoordinates tc = new();
             builder.AddSide(Location.UnitX, tc, offs: true, scale: 0.5f);
             builder.AddSide(Location.UnitY, tc, offs: true, scale: 0.5f);
             builder.AddSide(Location.UnitZ, tc, offs: true, scale: 0.5f);
@@ -93,7 +93,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             builder.AddSide(-Location.UnitY, tc, offs: true, scale: 0.5f);
             builder.AddSide(-Location.UnitZ, tc, offs: true, scale: 0.5f);
             m.Original = new Model3D();
-            Model3DMesh m3m = new Model3DMesh()
+            Model3DMesh m3m = new()
             {
                 Name = "cube"
             };
@@ -178,11 +178,11 @@ namespace FGEGraphics.GraphicsHelpers.Models
         public Model DynamicLoadModel(string modelName)
         {
             modelName = FileEngine.CleanFileName(modelName);
-            Model model = new Model(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+            Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
             void processLoad(byte[] data)
             {
                 Model3D scene = Handler.LoadModel(data);
-                List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
+                List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new();
                 Model mod = FromSceneNoGenerate(scene, modelName, builders);
                 Window.Schedule.ScheduleSyncTask(() =>
                 {
@@ -231,7 +231,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <returns>The model.</returns>
         public Model FromScene(Model3D scene, string name)
         {
-            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>>();
+            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new();
             Model mod = FromSceneNoGenerate(scene, name, builders);
             foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
             {
@@ -248,7 +248,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         /// <returns>The model.</returns>
         public Model FromSceneNoGenerate(Model3D scene, string name, List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> vboBuilders)
         {
-            Model model = new Model(name)
+            Model model = new(name)
             {
                 Engine = this,
                 Original = scene,
@@ -264,7 +264,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 {
                     continue;
                 }
-                ModelMesh modmesh = new ModelMesh(mesh.Name);
+                ModelMesh modmesh = new(mesh.Name);
                 bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
                 bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
                 if (!hasn)
@@ -275,7 +275,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 {
                     OutputType.WARNING.Output("Mesh has no texcoords! (" + name + ")");
                 }
-                Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+                Renderable.ArrayBuilder builder = new();
                 builder.Prepare(mesh.Vertices.Length, mesh.Indices.Length);
                 for (int i = 0; i < mesh.Vertices.Length; i++)
                 {
@@ -337,7 +337,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                 model.AddMesh(modmesh);
             }
             model.RootNode = new ModelNode() { Parent = null, Name = scene.RootNode.Name.ToLowerFast() };
-            List<ModelNode> allNodes = new List<ModelNode>();
+            List<ModelNode> allNodes = new();
             PopulateChildren(model.RootNode, scene.RootNode, model, AnimEngine, allNodes);
             for (int i = 0; i < model.Meshes.Count; i++)
             {
@@ -353,7 +353,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                             break;
                         }
                     }
-                    ModelBone mb = new ModelBone() { Offset = scene.Meshes[i].Bones[x].MatrixA.Convert() };
+                    ModelBone mb = new() { Offset = scene.Meshes[i].Bones[x].MatrixA.Convert() };
                     nodet.Bones.Add(mb);
                     model.Meshes[i].Bones.Add(mb);
                 }
@@ -384,7 +384,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             for (int i = 0; i < orin.Children.Length; i++)
             {
-                ModelNode child = new ModelNode() { Parent = node, Name = orin.Children[i].Name.ToLowerFast() };
+                ModelNode child = new() { Parent = node, Name = orin.Children[i].Name.ToLowerFast() };
                 PopulateChildren(child, orin.Children[i], model, engine, allNodes);
                 node.Children.Add(child);
             }

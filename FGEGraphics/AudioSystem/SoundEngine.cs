@@ -57,7 +57,7 @@ namespace FGEGraphics.AudioSystem
         public SoundEffect Noise;
 
         /// <summary>The audio context from OpenAL.</summary>
-        public ALContext Context = new ALContext(IntPtr.Zero);
+        public ALContext Context = new(IntPtr.Zero);
 
         /// <summary>The internal audio enforcer, if used.</summary>
         public AudioEnforcer EnforcerInternal;
@@ -364,7 +364,7 @@ namespace FGEGraphics.AudioSystem
         }
 
         /// <summary>Effect names to remove.</summary>
-        readonly List<string> ToRemove = new List<string>();
+        readonly List<string> ToRemove = new();
 
         /// <summary>Runs a full clean-up pass.</summary>
         public void CleanTick()
@@ -463,7 +463,7 @@ namespace FGEGraphics.AudioSystem
                     //OutputType.DEBUG.Output("Audio / clip");
                     return;
                 }
-                ActiveSound actsfx = new ActiveSound(sfx)
+                ActiveSound actsfx = new(sfx)
                 {
                     Engine = this,
                     Position = pos,
@@ -524,7 +524,7 @@ namespace FGEGraphics.AudioSystem
         {
             ActiveSound playSound()
             {
-                ActiveSound actsfx = new ActiveSound(sfx)
+                ActiveSound actsfx = new(sfx)
                 {
                     Engine = this,
                     Position = Location.NaN,
@@ -589,7 +589,7 @@ namespace FGEGraphics.AudioSystem
         }
 
         /// <summary>Lock object to guarantee no simultaneous file reads.</summary>
-        public LockObject SoundFileLocker = new LockObject();
+        public LockObject SoundFileLocker = new();
 
         /// <summary>Load a sound effect.</summary>
         /// <param name="name">The name of the effect.</param>
@@ -604,7 +604,7 @@ namespace FGEGraphics.AudioSystem
                     OutputType.WARNING.Output($"Cannot load audio '{name}': file does not exist.");
                     return null;
                 }
-                SoundEffect tsfx = new SoundEffect()
+                SoundEffect tsfx = new()
                 {
                     Name = name,
                     Internal = -1,
@@ -673,8 +673,8 @@ namespace FGEGraphics.AudioSystem
         /// <returns>The sound effect.</returns>
         public SoundEffect LoadVorbisSound(Stream stream, string name)
         {
-            using VorbisReader oggReader = new VorbisReader(stream);
-            SoundEffect sfx = new SoundEffect()
+            using VorbisReader oggReader = new(stream);
+            SoundEffect sfx = new()
             {
                 Name = name,
                 LastUse = Client.GlobalTickTime
@@ -690,7 +690,7 @@ namespace FGEGraphics.AudioSystem
             }
             if (EnforcerInternal != null)
             {
-                LiveAudioClip clip = new LiveAudioClip()
+                LiveAudioClip clip = new()
                 {
                     Data = data
                 };
@@ -711,7 +711,7 @@ namespace FGEGraphics.AudioSystem
         /// <returns>The sound effect.</returns>
         public SoundEffect LoadWaveSound(DataStream stream, string name)
         {
-            SoundEffect sfx = new SoundEffect()
+            SoundEffect sfx = new()
             {
                 Name = name,
                 LastUse = Client.GlobalTickTime
@@ -719,7 +719,7 @@ namespace FGEGraphics.AudioSystem
             byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out int rate);
             if (EnforcerInternal != null)
             {
-                LiveAudioClip clip = new LiveAudioClip()
+                LiveAudioClip clip = new()
                 {
                     Data = data
                 };
@@ -761,7 +761,7 @@ namespace FGEGraphics.AudioSystem
         /// <returns>The wave data.</returns>
         public static byte[] ProcessWAVEData(DataStream stream, out int channels, out int bits, out int rate)
         {
-            DataReader dr = new DataReader(stream);
+            DataReader dr = new(stream);
             string signature = dr.ReadString(4);
             if (signature != "RIFF")
             {

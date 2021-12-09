@@ -153,7 +153,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// Key is (baseColor, text), value is renderable text.
         /// TODO: This should be auto-cleaned somehow to avoid wasting RAM.
         /// </summary>
-        public Dictionary<(string, string), RenderableText> FancyTextCache = new Dictionary<(string, string), RenderableText>();
+        public Dictionary<(string, string), RenderableText> FancyTextCache = new();
 
         /// <summary>
         /// Parses fancy text from raw fancy-text input to renderable data objects.
@@ -201,12 +201,12 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                 string text = AutoTranslateFancyText(originalText.ApplyBaseColor(baseColor));
                 string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
                 RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
-                RenderableTextPart currentPart = new RenderableTextPart() { Font = FontDefault };
+                RenderableTextPart currentPart = new() { Font = FontDefault };
                 int maxWidth = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
-                    List<RenderableTextPart> parts = new List<RenderableTextPart>(line.CountCharacter('^') + 1);
+                    List<RenderableTextPart> parts = new(line.CountCharacter('^') + 1);
                     int start = 0;
                     float X = 0;
                     for (int x = 0; x < line.Length; x++)
@@ -400,7 +400,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     };
                     maxWidth = Math.Max(maxWidth, outLines[i].Width);
                 }
-                RenderableText result = new RenderableText() { Lines = outLines, Width = maxWidth };
+                RenderableText result = new() { Lines = outLines, Width = maxWidth };
                 FancyTextCache[(baseColor, originalText)] = result;
                 return result;
             }
@@ -540,14 +540,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>The <see cref="TextVBOBuilder"/> that's reused for text rendering.</summary>
-        public TextVBOBuilder ReusableTextVBO = new TextVBOBuilder();
+        public TextVBOBuilder ReusableTextVBO = new();
 
         /// <summary>Grabs a string containing only formats/colors from the string containing text.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>The color set.</returns>
         public static string GrabAllFormats(string input)
         {
-            StringBuilder res = new StringBuilder();
+            StringBuilder res = new();
             int cap = input.Length - 1;
             for (int i = 0; i < cap; i++)
             {
@@ -641,7 +641,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         /// <returns>The split string.</returns>
         public static List<string> CSplit(string input)
         {
-            List<string> temp = new List<string>();
+            List<string> temp = new();
             int start = 0;
             int c = 0;
             for (int i = 0; i < input.Length; i++)
@@ -672,8 +672,8 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             {
                 return text;
             }
-            StringBuilder sb = new StringBuilder();
-            List<string> parts = new List<string>();
+            StringBuilder sb = new();
+            List<string> parts = new();
             int c = 0;
             int i;
             for (i = index + "^[lang=".Length; i < text.Length; i++)
@@ -741,7 +741,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
             {
                 return text;
             }
-            List<RenderableTextLine> outLines = new List<RenderableTextLine>(text.Lines.Length * 2);
+            List<RenderableTextLine> outLines = new(text.Lines.Length * 2);
             foreach (RenderableTextLine fullLine in text.Lines)
             {
                 RenderableTextLine line = fullLine;
@@ -782,7 +782,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                                 newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
                                 newFirstParts = newFirstParts.Append(newFirstPart).ToArray();
                             }
-                            RenderableTextLine newFirstLine = new RenderableTextLine() { Parts = newFirstParts, Width = (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
+                            RenderableTextLine newFirstLine = new() { Parts = newFirstParts, Width = (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
                             outLines.Add(newFirstLine);
                             string nextLine = part.Text[lastSpace..];
                             RenderableTextPart newNextPart = part.Clone();
@@ -810,7 +810,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         /// <summary>Matcher object to recognize color/format codes.</summary>
-        public static AsciiMatcher FORMAT_CODES_MATCHER = new AsciiMatcher("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTUO" + "!@#$%&*()-");
+        public static AsciiMatcher FORMAT_CODES_MATCHER = new("0123456789" + "ab" + "def" + "hij" + "l" + "nopqrstu" + "AB" + "RSTUO" + "!@#$%&*()-");
 
         /// <summary>
         /// Used to identify if an input character is a valid color/format symbol (generally the character that follows a '^'), for use by <see cref="DrawFancyText(string, Location, int, float, bool, string)"/>.

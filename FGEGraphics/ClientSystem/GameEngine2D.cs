@@ -135,7 +135,7 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>All current lights.</summary>
-        public List<PointLight2D> Lights = new List<PointLight2D>();
+        public List<PointLight2D> Lights = new();
 
         int c_FBO;
 
@@ -184,7 +184,7 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>The primary render context for this game engine 2D.</summary>
-        public RenderContext2D MainRenderContext = new RenderContext2D();
+        public RenderContext2D MainRenderContext = new();
 
         /// <summary>The current view scaler.</summary>
         public Vector2 Scaler = Vector2.One;

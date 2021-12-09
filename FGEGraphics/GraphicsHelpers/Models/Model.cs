@@ -139,7 +139,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
         }
 
         /// <summary>Any custom animation adjustments on this model.</summary>
-        public Dictionary<string, Matrix4> CustomAnimationAdjustments = new Dictionary<string, Matrix4>();
+        public Dictionary<string, Matrix4> CustomAnimationAdjustments = new();
 
         /// <summary>Force bones not to offset.</summary>
         public bool ForceBoneNoOffset = false;
@@ -156,7 +156,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             {
                 Location vec = pNodeAnim.LerpPos(time);
                 FGECore.MathHelpers.Quaternion quat = pNodeAnim.LerpRotate(time);
-                OpenTK.Mathematics.Quaternion oquat = new OpenTK.Mathematics.Quaternion((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
+                OpenTK.Mathematics.Quaternion oquat = new((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
                 Matrix4.CreateTranslation((float)vec.X, (float)vec.Y, (float)vec.Z, out Matrix4 trans);
                 trans.Transpose();
                 Matrix4.CreateFromQuaternion(oquat, out Matrix4 rot);
@@ -258,7 +258,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
             }
             Vector3 wid = (LODBox.Max - LODBox.Min).ToOpenTK();
             Vector3 vpos = (pos - view.State.RenderRelative).ToOpenTK() + new Vector3(0f, 0f, wid.Z * 0.5f);
-            Vector3 offs = new Vector3(-0.5f, -0.5f, 0f);
+            Vector3 offs = new(-0.5f, -0.5f, 0f);
             Matrix4 off1 = Matrix4.CreateTranslation(offs);
             //Matrix4 off2 = Matrix4.CreateTranslation(-offs);
             //Engine.Client.Rendering.SetMinimumLight(1f);
@@ -397,7 +397,7 @@ namespace FGEGraphics.GraphicsHelpers.Models
                             if (!success)
                             {
                                 OutputType.WARNING.Output("Unknown skin entry " + datums[0]);
-                                StringBuilder all = new StringBuilder(Meshes.Count * 100);
+                                StringBuilder all = new(Meshes.Count * 100);
                                 for (int i = 0; i < Meshes.Count; i++)
                                 {
                                     all.Append(Meshes[i].Name + ", ");

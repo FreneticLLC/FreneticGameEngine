@@ -38,7 +38,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public Action<View3D> Render3D = null;
 
         /// <summary>All lights known to this view.</summary>
-        public List<LightObject> Lights = new List<LightObject>();
+        public List<LightObject> Lights = new();
 
         /// <summary>Whether shadows are allowed to be rendered.</summary>
         public bool ShadowingAllowed = true;
@@ -50,7 +50,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public int Height;
 
         /// <summary>Current fog color.</summary>
-        public Location FogCol = new Location(0.7);
+        public Location FogCol = new(0.7);
 
         /// <summary>Minimum sun light value.</summary>
         public float SunLight_Minimum = 0;
@@ -98,7 +98,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public float DesaturationAmount = 0f;
 
         /// <summary>Desaturation color to apply to the screen.</summary>
-        public Vector3 DesaturationColor = new Vector3(0.95f, 0.77f, 0.55f);
+        public Vector3 DesaturationColor = new(0.95f, 0.77f, 0.55f);
 
         /// <summary>The camera's current position.</summary>
         public Location CameraPos;

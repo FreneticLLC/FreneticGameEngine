@@ -107,13 +107,13 @@ namespace FGEGraphics.UISystem.InputSystems
         public GameClientWindow Window;
 
         /// <summary>The <see cref="KeyHandlerState"/> currently being built.</summary>
-        public KeyHandlerState BuildingState = new KeyHandlerState();
+        public KeyHandlerState BuildingState = new();
 
         /// <summary>The set of keys pressed since last tick.</summary>
-        public Queue<Keys> KeyPresses = new Queue<Keys>();
+        public Queue<Keys> KeyPresses = new();
 
         /// <summary>The set of keys released since last tick.</summary>
-        public Queue<Keys> KeyUps = new Queue<Keys>();
+        public Queue<Keys> KeyUps = new();
 
         /// <summary>Initialize and register the key handler into the window.</summary>
         public KeyHandler(GameClientWindow _window)
@@ -307,7 +307,7 @@ namespace FGEGraphics.UISystem.InputSystems
                         {
                             if (BuildingState.KeyboardString[i] < 32 && BuildingState.KeyboardString[i] != '\n')
                             {
-                                BuildingState.KeyboardString = BuildingState.KeyboardString.Substring(0, i) +
+                                BuildingState.KeyboardString = BuildingState.KeyboardString[..i] +
                                     BuildingState.KeyboardString[(i + 1)..];
                                 i--;
                             }

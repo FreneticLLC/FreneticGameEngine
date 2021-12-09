@@ -53,10 +53,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         }
 
         /// <summary>Internal forward renderer.</summary>
-        public View3DForwardRenderer ForwardRenderer = new View3DForwardRenderer();
+        public View3DForwardRenderer ForwardRenderer = new();
 
         /// <summary>Internal deferred renderer.</summary>
-        public View3DDeferredRenderer DeferredRenderer = new View3DDeferredRenderer();
+        public View3DDeferredRenderer DeferredRenderer = new();
 
         /// <summary>Sets the viewport to match the render target, but does not track the change.</summary>
         public void SetViewPortUntracked()
@@ -153,7 +153,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
         public Matrix4 GetMat4f(Matrix4d mat)
         {
             Matrix4d temp = mat * State.OffsetWorld;
-            Matrix4 mat4f = new Matrix4((float)temp.M11, (float)temp.M12, (float)temp.M13, (float)temp.M14, (float)temp.M21, (float)temp.M22, (float)temp.M23, (float)temp.M24,
+            Matrix4 mat4f = new((float)temp.M11, (float)temp.M12, (float)temp.M13, (float)temp.M14, (float)temp.M21, (float)temp.M22, (float)temp.M23, (float)temp.M24,
                 (float)temp.M31, (float)temp.M32, (float)temp.M33, (float)temp.M34, (float)temp.M41, (float)temp.M42, (float)temp.M43, (float)temp.M44);
             return mat4f;
         }

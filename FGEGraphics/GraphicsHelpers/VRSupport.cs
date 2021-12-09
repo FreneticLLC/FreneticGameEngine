@@ -84,7 +84,7 @@ namespace FGEGraphics.GraphicsHelpers
                 return null;
             }
             EVRInitError err = EVRInitError.None;
-            VRSupport vrs = new VRSupport() { Window = twindow, VR = OpenVR.Init(ref err) };
+            VRSupport vrs = new() { Window = twindow, VR = OpenVR.Init(ref err) };
             if (err != EVRInitError.None)
             {
                 OutputType.CLIENTINFO.Output($"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
@@ -107,7 +107,7 @@ namespace FGEGraphics.GraphicsHelpers
             w *= 2;
             Window.Engine3D.MainView.GenerationHelper.Generate((int)w, (int)h);
             Window.Engine3D.MainView.GenerationHelper.GenerateFBO();
-            StringBuilder val = new StringBuilder(256);
+            StringBuilder val = new(256);
             ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
             VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
             OutputType.CLIENTINIT.Output("Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
@@ -134,7 +134,7 @@ namespace FGEGraphics.GraphicsHelpers
         public Matrix4 Eye(bool lefteye, Vector3 cameraCenter)
         {
             HmdMatrix34_t temp = VR.GetEyeToHeadTransform(lefteye ? EVREye.Eye_Left : EVREye.Eye_Right);
-            Matrix4 eye = new Matrix4(temp.m0, temp.m1, temp.m2, temp.m3, temp.m4, temp.m5, temp.m6, temp.m7, temp.m8, temp.m9, temp.m10, temp.m11, 0, 0, 0, 1);
+            Matrix4 eye = new(temp.m0, temp.m1, temp.m2, temp.m3, temp.m4, temp.m5, temp.m6, temp.m7, temp.m8, temp.m9, temp.m10, temp.m11, 0, 0, 0, 1);
             eye.Transpose();
             eye = eye.ClearTranslation() * Matrix4.CreateTranslation(eye.ExtractTranslation() * VRScale + cameraCenter);
             return headMat * eye;
@@ -148,7 +148,7 @@ namespace FGEGraphics.GraphicsHelpers
         public Matrix4 GetProjection(bool lefteye, float znear, float zfar)
         {
             HmdMatrix44_t temp = VR.GetProjectionMatrix(!lefteye ? EVREye.Eye_Left : EVREye.Eye_Right, znear, zfar, EGraphicsAPIConvention.API_OpenGL);
-            Matrix4 proj = new Matrix4(temp.m0, temp.m1, temp.m2, temp.m3, temp.m4, temp.m5, temp.m6, temp.m7, temp.m8, temp.m9, temp.m10, temp.m11, temp.m12, temp.m13, temp.m14, temp.m15);
+            Matrix4 proj = new(temp.m0, temp.m1, temp.m2, temp.m3, temp.m4, temp.m5, temp.m6, temp.m7, temp.m8, temp.m9, temp.m10, temp.m11, temp.m12, temp.m13, temp.m14, temp.m15);
             proj.Transpose();
             return proj;
         }
@@ -166,8 +166,8 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>The controller state.</returns>
         public VRController GetController(bool left)
         {
-            VRControllerState_t vrcont = new VRControllerState_t();
-            TrackedDevicePose_t vrpose = new TrackedDevicePose_t();
+            VRControllerState_t vrcont = new();
+            TrackedDevicePose_t vrpose = new();
 
             bool valid = VR.GetControllerStateWithPose(ETrackingUniverseOrigin.TrackingUniverseStanding, VR.GetTrackedDeviceIndexForControllerRole(left ? ETrackedControllerRole.LeftHand : ETrackedControllerRole.RightHand), ref vrcont, ref vrpose);
             if (!valid || !vrpose.bPoseIsValid)
@@ -175,11 +175,11 @@ namespace FGEGraphics.GraphicsHelpers
                 return null;
             }
             HmdMatrix34_t tmat = vrpose.mDeviceToAbsoluteTracking;
-            Matrix4 resp = new Matrix4(tmat.m0, tmat.m1, tmat.m2, tmat.m3, tmat.m4, tmat.m5, tmat.m6, tmat.m7, tmat.m8, tmat.m9, tmat.m10, tmat.m11, 0, 0, 0, 1);
+            Matrix4 resp = new(tmat.m0, tmat.m1, tmat.m2, tmat.m3, tmat.m4, tmat.m5, tmat.m6, tmat.m7, tmat.m8, tmat.m9, tmat.m10, tmat.m11, 0, 0, 0, 1);
             resp.Transpose();
             resp = resp.ClearTranslation() * Matrix4.CreateTranslation(resp.ExtractTranslation() * VRScale);
             resp *= Matrix4.CreateRotationX((float)(Math.PI * 0.5));
-            VRController res = new VRController()
+            VRController res = new()
             {
                 Position = resp,
                 Touched = (VRButtons)vrcont.ulButtonTouched,
@@ -196,7 +196,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>Submits the VR view to the screen.</summary>
         public void Submit()
         {
-            VREvent_t evt = new VREvent_t();
+            VREvent_t evt = new();
             while (VR.PollNextEvent(ref evt, (uint)Marshal.SizeOf(typeof(VREvent_t))))
             {
                 // No need to do anything here!
@@ -224,13 +224,13 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 OutputType.WARNING.Output("Can't render VR scene!");
             }
-            Texture_t left = new Texture_t()
+            Texture_t left = new()
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
                 handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
-            VRTextureBounds_t bounds = new VRTextureBounds_t()
+            VRTextureBounds_t bounds = new()
             {
                 uMin = 0f,
                 uMax = 0.5f,
@@ -242,13 +242,13 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 OutputType.WARNING.Output("Left eye error: " + lerr);
             }
-            Texture_t right = new Texture_t()
+            Texture_t right = new()
             {
                 eColorSpace = EColorSpace.Auto,
                 eType = EGraphicsAPIConvention.API_OpenGL,
                 handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
             };
-            VRTextureBounds_t rbounds = new VRTextureBounds_t()
+            VRTextureBounds_t rbounds = new()
             {
                 uMin = 0.5f,
                 uMax = 1f,
@@ -350,10 +350,10 @@ namespace FGEGraphics.GraphicsHelpers
         public Color4 PressSpotColor = Color4.DarkRed;
 
         /// <summary>The half-size of the touched spot.</summary>
-        public Vector2 TouchSpotHalfSize = new Vector2(0.05f, 0.05f);
+        public Vector2 TouchSpotHalfSize = new(0.05f, 0.05f);
 
         /// <summary>The half-size of the pressed spot.</summary>
-        public Vector2 PressSpotHalfSize = new Vector2(0.1f, 0.1f);
+        public Vector2 PressSpotHalfSize = new(0.1f, 0.1f);
 
         /// <summary>Initial set up and generation.</summary>
         public void GenerateFirst()

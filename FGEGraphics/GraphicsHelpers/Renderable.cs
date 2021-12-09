@@ -81,7 +81,7 @@ namespace FGEGraphics.GraphicsHelpers
         }
 
         /// <summary>The internal (GPU) data for this <see cref="Renderable"/>.</summary>
-        public InternalData Internal = new InternalData() { VAO = -1, BufferMode = BufferUsageHint.StaticDraw };
+        public InternalData Internal = new() { VAO = -1, BufferMode = BufferUsageHint.StaticDraw };
 
         /// <summary>The primary texture.</summary>
         public Texture ColorTexture;
@@ -102,7 +102,7 @@ namespace FGEGraphics.GraphicsHelpers
             /// <returns>The generated VBO.</returns>
             public Renderable Generate()
             {
-                Renderable vbo = new Renderable();
+                Renderable vbo = new();
                 vbo.GenerateVBO(this);
                 return vbo;
             }
@@ -838,7 +838,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <returns>The texture coordinates.</returns>
         public static TextureCoordinates FromString(string str)
         {
-            TextureCoordinates tc = new TextureCoordinates();
+            TextureCoordinates tc = new();
             string[] data = str.SplitFast('/');
             tc.XScale = StringConversionHelper.StringToFloat(data[0]);
             tc.YScale = StringConversionHelper.StringToFloat(data[1]);

@@ -66,7 +66,7 @@ namespace FGEGraphics.ClientSystem
         public SoundEngine Sounds;
 
         /// <summary>The audio camera view.</summary>
-        public Camera3D AudioCamera = new Camera3D();
+        public Camera3D AudioCamera = new();
 
         /// <summary>Gets the client window.</summary>
         public GameWindow Window

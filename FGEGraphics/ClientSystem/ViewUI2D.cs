@@ -151,7 +151,7 @@ namespace FGEGraphics.ClientSystem
         public bool SortToPriority = false;
 
         /// <summary>The last set of elements that were rendered (not sorted).</summary>
-        public List<UIElement> LastRenderedSet = new List<UIElement>();
+        public List<UIElement> LastRenderedSet = new();
 
         /// <summary>Ticks all elements attached to this view.</summary>
         public void Tick()

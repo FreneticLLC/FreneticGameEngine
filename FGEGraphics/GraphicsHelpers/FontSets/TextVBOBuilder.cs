@@ -38,16 +38,16 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         public uint VAO;
 
         /// <summary>An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableVertexArray = new ResizableArray<Vector4>();
+        public static ResizableArray<Vector4> ReusableVertexArray = new();
 
         /// <summary>An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new ResizableArray<Vector4>();
+        public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new();
 
         /// <summary>An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableColorArray = new ResizableArray<Vector4>();
+        public static ResizableArray<Vector4> ReusableColorArray = new();
 
         /// <summary>An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<uint> ReusableIndexArray = new ResizableArray<uint>();
+        public static ResizableArray<uint> ReusableIndexArray = new();
 
         /// <summary>Adds a quadrilateral (rectangle) to the VBO.</summary>
         /// <param name="minX">The minimum X.</param>

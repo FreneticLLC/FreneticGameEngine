@@ -97,7 +97,7 @@ namespace FGEGraphics.UISystem
             int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Window.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
                 {
                     MinCursor = i;
                     MaxCursor = i;
@@ -138,7 +138,7 @@ namespace FGEGraphics.UISystem
             int xs = LastAbsolutePosition.X;
             for (int i = 0; i < Text.Length; i++)
             {
-                if (xs + Fonts.MeasureFancyText(Text.Substring(0, i)) > Window.MouseX)
+                if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
                 {
                     MinCursor = Math.Min(i, Internal.MStart);
                     MaxCursor = Math.Max(i, Internal.MStart);
@@ -185,21 +185,21 @@ namespace FGEGraphics.UISystem
                     {
                         end = MinCursor;
                     }
-                    Text = Text.Substring(0, end) + Text[MaxCursor..];
+                    Text = Text[..end] + Text[MaxCursor..];
                     MinCursor = end;
                     MaxCursor = end;
                     modified = true;
                 }
                 if (khs.KeyboardString.Length > 0)
                 {
-                    Text = Text.Substring(0, MinCursor) + khs.KeyboardString + Text[MaxCursor..];
+                    Text = Text[..MinCursor] + khs.KeyboardString + Text[MaxCursor..];
                     MinCursor += khs.KeyboardString.Length;
                     MaxCursor = MinCursor;
                     modified = true;
                 }
                 if (!MultiLine && Text.Contains('\n'))
                 {
-                    Text = Text.Substring(0, Text.IndexOf('\n'));
+                    Text = Text[..Text.IndexOf('\n')];
                     if (MaxCursor > Text.Length)
                     {
                         MaxCursor = Text.Length;
@@ -255,8 +255,8 @@ namespace FGEGraphics.UISystem
             GL.Scissor(x, engine.Window.Size.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
             if (Selected)
             {
-                float textw = Fonts.MeasureFancyText(typed.Substring(0, MinCursor + c));
-                float textw2 = Fonts.MeasureFancyText(typed.Substring(0, MaxCursor + cmax));
+                float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
+                float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);
                 Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
                 view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             }

@@ -143,7 +143,7 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
-        public InternalData Internal = new InternalData() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = new[] { 0f, 1f, 1f, 1f }, DepthClear = new[] { 1f }, Loaded = false };
+        public InternalData Internal = new() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = new[] { 0f, 1f, 1f, 1f }, DepthClear = new[] { 1f }, Loaded = false };
 
         /// <summary>Constructs the game client window.</summary>
         /// <param name="_sWindowTitle">The starting window title.</param>

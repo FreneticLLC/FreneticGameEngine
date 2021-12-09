@@ -25,7 +25,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
     public class View3DDeferredRenderer : View3DCoreDataSet
     {
         /// <summary>Patches to apply (if any).</summary>
-        public View3DPatchesDeferred Patches = new View3DPatchesDeferred();
+        public View3DPatchesDeferred Patches = new();
 
         /// <summary>Calculate shadow maps for the later (lighting) render passes.</summary>
         public void RenderPass_Shadows()
@@ -427,7 +427,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                 Matrix4 smat = Matrix4.Identity;
                                 Vector3d eyep = pl.EyePos.ToOpenTK3D() - Config.CameraPos.ToOpenTK3D();
                                 Vector3 col = light.InternalLights[0].Color * (float)maxrangemult;
-                                Matrix4 light_data = new Matrix4(
+                                Matrix4 light_data = new(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                     0.7f, // diffuse_albedo
                                     0.7f, // specular_albedo
@@ -464,7 +464,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                                     Matrix4 smat = subLight.GetMatrix(View);
                                     Vector3d eyep = light is SkyLight se ? -se.Direction.ToOpenTK3D() : subLight.EyePosition - Config.CameraPos.ToOpenTK3D();
                                     Vector3 col = subLight.Color * (float)maxrangemult;
-                                    Matrix4 light_data = new Matrix4(
+                                    Matrix4 light_data = new(
                                         (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                         0.7f, // diffuse_albedo
                                         0.7f, // specular_albedo
@@ -582,7 +582,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             GL.Uniform1(10, State.CurrentExposure * Engine.Exposure);
             float fogDist = 1.0f / Engine.FogMaxDist();
             fogDist *= fogDist;
-            Vector2 zfar_rel = new Vector2(Engine.ZNear, Engine.ZFar());
+            Vector2 zfar_rel = new(Engine.ZNear, Engine.ZFar());
             GL.Uniform3(14, State.CameraRelativePosition);
             GL.Uniform1(16, fogDist);
             GL.Uniform2(17, ref zfar_rel);
@@ -955,7 +955,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
                         {
                             Matrix4 lightProjMatrix = subLight.GetMatrix(View);
                             float maxrange = (subLight is LightOrtho) ? View3DInternalData.LIGHT_MAXIUM_RADIUS : subLight.MaxRange;
-                            Matrix4 lightDataMatrix = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+                            Matrix4 lightDataMatrix = new(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
                             lightDataMatrix[0, 0] = maxrange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : maxrange;
                             lightDataMatrix[0, 1] = (float)(light.EyePos.X - State.RenderRelative.X);
                             lightDataMatrix[0, 2] = (float)(light.EyePos.Y - State.RenderRelative.Y);
@@ -990,7 +990,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             lights_apply:
                 State.TransparentLightCount = lightCount;
                 GraphicsUtil.CheckError("PreRenderTranspLights");
-                Matrix4 dataMatrix = new Matrix4(lightCount, Engine.ZNear, Engine.ZFar(), Config.Width, Config.Height, 0, 0, 0, 0, 0, 0, 0, (float)Config.FogCol.X, (float)Config.FogCol.Y, (float)Config.FogCol.Z, Config.FogAlpha);
+                Matrix4 dataMatrix = new(lightCount, Engine.ZNear, Engine.ZFar(), Config.Width, Config.Height, 0, 0, 0, 0, 0, 0, 0, (float)Config.FogCol.X, (float)Config.FogCol.Y, (float)Config.FogCol.Z, Config.FogAlpha);
                 if (Engine.Deferred_Shadows)
                 {
                     if (Engine.AllowLL)
@@ -1057,7 +1057,7 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
             {
                 if (Engine.AllowLL)
                 {
-                    Matrix4 matabc = new Matrix4(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+                    Matrix4 matabc = new(Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
                     matabc[0, 3] = (float)Config.Width;
                     matabc[1, 3] = (float)Config.Height;
                     Patches.LLPatch?.Invoke(matabc);

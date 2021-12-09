@@ -50,7 +50,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>Generates a square.</summary>
         void GenerateSquareVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare(6, 6);
             builder.Tangents = new Vector3[6];
             for (uint n = 0; n < 6; n++)
@@ -79,7 +79,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>Generates a line.</summary>
         void GenerateLineVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare(2, 2);
             builder.Tangents = new Vector3[2];
             for (uint n = 0; n < 2; n++)
@@ -100,7 +100,7 @@ namespace FGEGraphics.GraphicsHelpers
         /// <summary>Generates a box.</summary>
         void GenerateBoxVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare(24, 24);
             builder.Tangents = new Vector3[24];
             // TODO: Optimize?
@@ -368,7 +368,7 @@ namespace FGEGraphics.GraphicsHelpers
             Location right = lookdir.CrossProduct(Location.UnitZ); // TODO: Camera up vector!
             Location updir = right.CrossProduct(lookdir);
             Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)scale.X, (float)scale.Y, (float)scale.Z);
-            Matrix4d m2 = new Matrix4d(right.X, updir.X, lookdir.X, center.X,
+            Matrix4d m2 = new(right.X, updir.X, lookdir.X, center.X,
                 right.Y, updir.Y, lookdir.Y, center.Y,
                 right.Z, updir.Z, lookdir.Z, center.Z,
                 0, 0, 0, 1);
@@ -417,7 +417,7 @@ namespace FGEGraphics.GraphicsHelpers
             Location updir = (p2 - pos) / len2;
             Location right = updir.CrossProduct(lookdir);
             Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)len2 * 0.5f, width, 1f);
-            Matrix4d m2 = new Matrix4d(right.X, updir.X, lookdir.X, center.X,
+            Matrix4d m2 = new(right.X, updir.X, lookdir.X, center.X,
                 right.Y, updir.Y, lookdir.Y, center.Y,
                 right.Z, updir.Z, lookdir.Z, center.Z,
                 0, 0, 0, 1);

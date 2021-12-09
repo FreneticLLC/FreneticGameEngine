@@ -20,10 +20,10 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem
     public class View3DStats
     {
         /// <summary>Time contributed by the named specific part of performance processing.</summary>
-        public PerformanceTimer Shadows = new PerformanceTimer("Shadows"),
-            FrameBuffer = new PerformanceTimer("FrameBuffer"),
-            Lights = new PerformanceTimer("Lights"),
-            Total = new PerformanceTimer("RenderTotal");
+        public PerformanceTimer Shadows = new("Shadows"),
+            FrameBuffer = new("FrameBuffer"),
+            Lights = new("Lights"),
+            Total = new("RenderTotal");
 
         /// <summary>How much delta time has accumulated since the last spike reset.</summary>
         public double TimeSinceSpikeReset = 0;

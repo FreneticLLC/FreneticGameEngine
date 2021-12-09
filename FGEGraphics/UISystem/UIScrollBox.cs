@@ -57,7 +57,7 @@ namespace FGEGraphics.UISystem
         /// <returns>A list of visible child elements containing the position.</returns>
         public override List<UIElement> GetAllAt(int x, int y)
         {
-            List<UIElement> found = new List<UIElement>();
+            List<UIElement> found = new();
             if (SelfContains(x, y))
             {
                 foreach (UIElement element in ElementInternal.Children)
@@ -90,7 +90,7 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>The color of the background of the scroll box (set to Alpha 0 to remove).</summary>
-        public Color4F Color = new Color4F(0f, 0.5f, 0.6f, 0.3f);
+        public Color4F Color = new(0f, 0.5f, 0.6f, 0.3f);
 
         /// <summary>Renders this scroll box on the screen.</summary>
         /// <param name="view">The UI view.</param>

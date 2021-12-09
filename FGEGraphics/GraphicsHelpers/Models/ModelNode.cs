@@ -21,10 +21,10 @@ namespace FGEGraphics.GraphicsHelpers.Models
         public ModelNode Parent = null;
 
         /// <summary>All children nodes.</summary>
-        public List<ModelNode> Children = new List<ModelNode>();
+        public List<ModelNode> Children = new();
 
         /// <summary>All relevant bones.</summary>
-        public List<ModelBone> Bones = new List<ModelBone>();
+        public List<ModelBone> Bones = new();
 
         /// <summary>The mode ID.</summary>
         public byte Mode;

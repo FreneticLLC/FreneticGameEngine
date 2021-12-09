@@ -176,7 +176,7 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-        public ElementInternalData ElementInternal = new ElementInternalData()
+        public ElementInternalData ElementInternal = new()
         {
             ToAdd = new List<UIElement>(),
             ToRemove = new List<UIElement>(),

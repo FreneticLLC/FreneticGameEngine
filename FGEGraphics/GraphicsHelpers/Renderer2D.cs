@@ -44,62 +44,62 @@ namespace FGEGraphics.GraphicsHelpers
 
         void GenerateSquareVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare2D(4, 4);
             for (uint n = 0; n < 4; n++)
             {
                 builder.Indices[n] = n;
-                builder.Colors[n] = new Vector4(1, 1, 1, 1);
-                builder.Normals[n] = new Vector3(0, 0, 1);
+                builder.Colors[n] = new(1, 1, 1, 1);
+                builder.Normals[n] = new(0, 0, 1);
             }
-            builder.Vertices[0] = new Vector3(1, 0, 0);
-            builder.TexCoords[0] = new Vector3(1, 0, 0);
-            builder.Vertices[1] = new Vector3(1, 1, 0);
-            builder.TexCoords[1] = new Vector3(1, 1, 0);
-            builder.Vertices[2] = new Vector3(0, 0, 0);
-            builder.TexCoords[2] = new Vector3(0, 0, 0);
-            builder.Vertices[3] = new Vector3(0, 1, 0);
-            builder.TexCoords[3] = new Vector3(0, 1, 0);
+            builder.Vertices[0] = new(1, 0, 0);
+            builder.TexCoords[0] = new(1, 0, 0);
+            builder.Vertices[1] = new(1, 1, 0);
+            builder.TexCoords[1] = new(1, 1, 0);
+            builder.Vertices[2] = new(0, 0, 0);
+            builder.TexCoords[2] = new(0, 0, 0);
+            builder.Vertices[3] = new(0, 1, 0);
+            builder.TexCoords[3] = new(0, 1, 0);
             Square = builder.Generate();
         }
 
         void GenerateSquareOfLinesVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare2D(5, 5);
             for (uint n = 0; n < 5; n++)
             {
                 builder.Indices[n] = n;
-                builder.Colors[n] = new Vector4(1, 1, 1, 1);
-                builder.Normals[n] = new Vector3(0, 0, 1);
+                builder.Colors[n] = new(1, 1, 1, 1);
+                builder.Normals[n] = new(0, 0, 1);
             }
-            builder.Vertices[0] = new Vector3(1, 0, 0);
-            builder.TexCoords[0] = new Vector3(1, 0, 0);
-            builder.Vertices[1] = new Vector3(1, 1, 0);
-            builder.TexCoords[1] = new Vector3(1, 1, 0);
-            builder.Vertices[2] = new Vector3(0, 1, 0);
-            builder.TexCoords[2] = new Vector3(0, 1, 0);
-            builder.Vertices[3] = new Vector3(0, 0, 0);
-            builder.TexCoords[3] = new Vector3(0, 0, 0);
-            builder.Vertices[4] = new Vector3(1, 0, 0);
-            builder.TexCoords[4] = new Vector3(1, 0, 0);
+            builder.Vertices[0] = new(1, 0, 0);
+            builder.TexCoords[0] = new(1, 0, 0);
+            builder.Vertices[1] = new(1, 1, 0);
+            builder.TexCoords[1] = new(1, 1, 0);
+            builder.Vertices[2] = new(0, 1, 0);
+            builder.TexCoords[2] = new(0, 1, 0);
+            builder.Vertices[3] = new(0, 0, 0);
+            builder.TexCoords[3] = new(0, 0, 0);
+            builder.Vertices[4] = new(1, 0, 0);
+            builder.TexCoords[4] = new(1, 0, 0);
             SquareOfLines = builder.Generate();
         }
 
         void GenerateLineVBO()
         {
-            Renderable.ArrayBuilder builder = new Renderable.ArrayBuilder();
+            Renderable.ArrayBuilder builder = new();
             builder.Prepare2D(2, 2);
             for (uint n = 0; n < 2; n++)
             {
                 builder.Indices[n] = n;
-                builder.Colors[n] = new Vector4(1, 1, 1, 1);
-                builder.Normals[n] = new Vector3(0, 0, 1);
+                builder.Colors[n] = new(1, 1, 1, 1);
+                builder.Normals[n] = new(0, 0, 1);
             }
-            builder.Vertices[0] = new Vector3(0, 0, 0);
-            builder.TexCoords[0] = new Vector3(0, 0, 0);
-            builder.Vertices[1] = new Vector3(1, 0, 0);
-            builder.TexCoords[1] = new Vector3(1, 0, 0);
+            builder.Vertices[0] = new(0, 0, 0);
+            builder.TexCoords[0] = new(0, 0, 0);
+            builder.Vertices[1] = new(1, 0, 0);
+            builder.TexCoords[1] = new(1, 0, 0);
             Line = builder.Generate();
         }
 
@@ -167,11 +167,11 @@ namespace FGEGraphics.GraphicsHelpers
         /// <param name="rot">The rotation, if any applies.</param>
         public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null)
         {
-            Vector2 scaler = new Vector2(xmax - xmin, ymax - ymin);
+            Vector2 scaler = new(xmax - xmin, ymax - ymin);
             //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
-            Vector2 adder = new Vector2(xmin, ymin);
+            Vector2 adder = new(xmin, ymin);
             Vector2 tscaler = rc.Scaler * scaler;
-            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new(tscaler.X, tscaler.Y, rc.AspectHelper));
             Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
             GL.Uniform2(ShaderLocations.Common2D.ADDER, tadder);
             if (rot != null)

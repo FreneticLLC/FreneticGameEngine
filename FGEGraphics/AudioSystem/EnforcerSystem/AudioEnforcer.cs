@@ -38,10 +38,10 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         public float Volume = 0.5f;
 
         /// <summary>All currently playing audio.</summary>
-        public List<LiveAudioInstance> Playing = new List<LiveAudioInstance>();
+        public List<LiveAudioInstance> Playing = new();
 
         /// <summary>Locker for interaction with the enforcer.</summary>
-        public LockObject Locker = new LockObject();
+        public LockObject Locker = new();
 
         /// <summary>3D Position of the audio "camera".</summary>
         public Location Position;
@@ -99,7 +99,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
         }
 
         /// <summary>Current level (of audio) locker.</summary>
-        public LockObject CLelLock = new LockObject();
+        public LockObject CLelLock = new();
 
         /// <summary>Current audio levels. Use <see cref="CLelLock"/>.</summary>
         public float CurrentLevel = 0.0f;
@@ -285,7 +285,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             {
                 try
                 {
-                    Stopwatch stopwatch = new Stopwatch();
+                    Stopwatch stopwatch = new();
                     stopwatch.Start();
                     ALC.MakeContextCurrent(Context);
                     ALAudioSource = AL.GenSource();

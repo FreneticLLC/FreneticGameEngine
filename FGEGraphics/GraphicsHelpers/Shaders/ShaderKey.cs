@@ -30,7 +30,7 @@ namespace FGEGraphics.GraphicsHelpers.Shaders
         public string GeometryShaderPath;
 
         /// <summary>An array of specially defined pre-compiler variable keys.</summary>
-        public string[] Defines = new string[0];
+        public string[] Defines = Array.Empty<string>();
 
         /// <summary>Gets a unique hash code for the instance.</summary>
         public override int GetHashCode()
