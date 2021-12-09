@@ -69,7 +69,7 @@ namespace FGECore.EntitySystem
         public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent;
 
         /// <summary>All joints attached to this entity.</summary>
-        public HashSet<GenericBaseJoint> Joints = new HashSet<GenericBaseJoint>();
+        public HashSet<GenericBaseJoint> Joints = new();
 
         /// <summary>The owning engine.</summary>
         public abstract BasicEngine EngineGeneric { get; }

@@ -25,7 +25,7 @@ namespace FGECore.CoreSystems
     {
 
         /// <summary>Whether the instance is marked for shutdown as soon as possible.</summary>
-        public readonly CancellationTokenSource NeedShutdown = new CancellationTokenSource();
+        public readonly CancellationTokenSource NeedShutdown = new();
 
         /// <summary>The name of the data folder. By default, "data".</summary>
         public string Folder_Data = "data";
@@ -61,13 +61,13 @@ namespace FGECore.CoreSystems
         /// Lock this object to prevent collision with the instance tick.
         /// Only lock on this if the scheduler does not fit your needs. (Consider requesting new scheduler features if that is the case!)
         /// </summary>
-        public LockObject TickLock = new LockObject();
+        public LockObject TickLock = new();
 
         /// <summary>The scheduling system for this game instance.</summary>
-        public Scheduler Schedule = new Scheduler();
+        public Scheduler Schedule = new();
 
         /// <summary>Helper for files.</summary>
-        public FileEngine Files = new FileEngine();
+        public FileEngine Files = new();
 
         /// <summary>The source object for this instance. Set to any tag style constant reference you find most helpful to keep!</summary>
         public Object Source;
@@ -76,7 +76,7 @@ namespace FGECore.CoreSystems
         public AssetStreamingEngine AssetStreaming;
 
         /// <summary>Random helper object.</summary>
-        public MTRandom RandomHelper = new MTRandom();
+        public MTRandom RandomHelper = new();
 
         /// <summary>The watchdog handler for this game instance.</summary>
         public InstanceWatchdog Watchdog;
@@ -153,7 +153,7 @@ namespace FGECore.CoreSystems
     public abstract class GameInstance<T, T2> : GameInstance where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
     {
         /// <summary>Any and all engines running in this instance on the main level.</summary>
-        public List<T2> Engines = new List<T2>();
+        public List<T2> Engines = new();
 
         /// <summary>Gets the "default" engine: the first in the <see cref="Engines"/> list!</summary>
         public T2 DefaultEngine

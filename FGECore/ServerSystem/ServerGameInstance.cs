@@ -85,7 +85,7 @@ namespace FGECore.ServerSystem
         public void StartAndRun()
         {
             double TARGETFPS;
-            Stopwatch Counter = new Stopwatch();
+            Stopwatch Counter = new();
             Internal.DeltaCounter = new Stopwatch();
             Internal.DeltaCounter.Start();
             Internal.TotalDelta = 0;

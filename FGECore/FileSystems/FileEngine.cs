@@ -73,7 +73,7 @@ namespace FGECore.FileSystems
         }
 
         /// <summary>The internal data within this <see cref="FileEngine"/>.</summary>
-        public InternalData Internal = new InternalData()
+        public InternalData Internal = new()
         {
             Packages = new Dictionary<string, FFPackage>(64),
             PackageList = new List<FFPackage>(64),
@@ -209,7 +209,7 @@ namespace FGECore.FileSystems
             {
                 return;
             }
-            FFPackage package = new FFPackage(File.OpenRead(filename), PackageWarningMethod);
+            FFPackage package = new(File.OpenRead(filename), PackageWarningMethod);
             AddPackage(filename, package);
         }
 
@@ -531,7 +531,7 @@ namespace FGECore.FileSystems
         /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
         public string[] ListFiles(string folder, string extension = null, bool deep = false)
         {
-            HashSet<string> files = new HashSet<string>();
+            HashSet<string> files = new();
             string fullExtension = extension == null ? null : "." + extension;
             foreach (IEnumerable<string> fileSet in EnumerateFileSets(folder, deep))
             {
@@ -579,7 +579,7 @@ namespace FGECore.FileSystems
         /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
         public string[] ListFolders(string folder)
         {
-            HashSet<string> folders = new HashSet<string>();
+            HashSet<string> folders = new();
             foreach (IEnumerable<string> folderSet in EnumerateFolderSets(folder))
             {
                 folders.UnionWith(folderSet);

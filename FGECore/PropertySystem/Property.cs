@@ -28,7 +28,7 @@ namespace FGECore.PropertySystem
         /// <returns>The debuggable data.</returns>
         public Dictionary<string, string> GetDebuggable()
         {
-            Dictionary<string, string> strs = new Dictionary<string, string>();
+            Dictionary<string, string> strs = new();
             Helper.GetDebuggableInfoOutput(this, strs);
             return strs;
         }

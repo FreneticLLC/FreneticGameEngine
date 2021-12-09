@@ -109,7 +109,7 @@ namespace FGECore.MathHelpers
                 {
                     yaw -= 360;
                 }
-                Location loc = new Location()
+                Location loc = new()
                 {
                     Yaw = yaw,
                     Pitch = pitch

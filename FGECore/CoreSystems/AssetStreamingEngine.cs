@@ -33,13 +33,13 @@ namespace FGECore.CoreSystems
         /// All currently waiting asset streaming goals.
         /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
         /// </summary>
-        public ConcurrentQueue<StreamGoal> Goals = new ConcurrentQueue<StreamGoal>();
+        public ConcurrentQueue<StreamGoal> Goals = new();
 
         /// <summary>
         /// Reset event for when the files thread has more goals to process.
         /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
         /// </summary>
-        public AutoResetEvent GoalWaitingReset = new AutoResetEvent(false);
+        public AutoResetEvent GoalWaitingReset = new(false);
 
         /// <summary>Construct the <see cref="AssetStreamingEngine"/>. Call <see cref="Init"/> to actually start it.</summary>
         /// <param name="_files">The backing file engine.</param>
@@ -51,7 +51,7 @@ namespace FGECore.CoreSystems
         }
 
         /// <summary>The cancel token for <see cref="FilesThread"/>.</summary>
-        public CancellationTokenSource FileThreadCancelToken = new CancellationTokenSource();
+        public CancellationTokenSource FileThreadCancelToken = new();
 
         /// <summary>Starts the asset streaming engine.</summary>
         public void Init()
@@ -188,7 +188,7 @@ namespace FGECore.CoreSystems
         /// <returns>The created <see cref="StreamGoal"/>.</returns>
         public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null)
         {
-            StreamGoal goal = new StreamGoal()
+            StreamGoal goal = new()
             {
                 FileName = fileName,
                 ShouldSyncToMainThread = processOnMainThread,

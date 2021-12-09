@@ -244,7 +244,7 @@ namespace FGECore.MathHelpers
             return FromArgb(a, r, g, b);
         }
 
-        private static readonly AsciiMatcher HexMatcher = new AsciiMatcher("0123456789ABCDEFabcdef");
+        private static readonly AsciiMatcher HexMatcher = new(AsciiMatcher.Digits + "ABCDEFabcdef");
 
         private static int GetHexVal(char chr)
         {
@@ -297,18 +297,18 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>Sample Color4F (1, 1, 1).</summary>
-        public static readonly Color4F White = new Color4F(1, 1, 1);
+        public static readonly Color4F White = new(1, 1, 1);
 
         /// <summary>Sample Color4F (0, 0, 0).</summary>
-        public static readonly Color4F Black = new Color4F(0, 0, 0);
+        public static readonly Color4F Black = new(0, 0, 0);
 
         /// <summary>Sample Color4F (1, 0, 0).</summary>
-        public static readonly Color4F Red = new Color4F(1, 0, 0);
+        public static readonly Color4F Red = new(1, 0, 0);
 
         /// <summary>Sample Color4F (0, 1, 0).</summary>
-        public static readonly Color4F Green = new Color4F(0, 1, 0);
+        public static readonly Color4F Green = new(0, 1, 0);
 
         /// <summary>Sample Color4F (0, 0, 1).</summary>
-        public static readonly Color4F Blue = new Color4F(0, 0, 1);
+        public static readonly Color4F Blue = new(0, 0, 1);
     }
 }

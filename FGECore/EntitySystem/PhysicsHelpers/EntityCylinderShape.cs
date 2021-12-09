@@ -44,7 +44,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
             Space.Internal.Pool.Take(1, out dup.CompoundBuffer);
             dup.CompoundBuffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
             dup.CompoundBuffer[0].ShapeIndex = dup.CylinderIndex;
-            Compound compound = new Compound(dup.CompoundBuffer);
+            Compound compound = new(dup.CompoundBuffer);
             dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(compound);
             return dup;
         }

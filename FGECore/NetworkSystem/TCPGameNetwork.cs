@@ -24,16 +24,16 @@ namespace FGECore.NetworkSystem
         public TcpListener Listening = null;
 
         /// <summary>A mapping of packet names to their packet data.</summary>
-        public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = new Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>>();
+        public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = new();
 
         /// <summary>Packets, listed by ID number.</summary>
-        public List<Func<ServerTCPDataPacketIn>> Packets = new List<Func<ServerTCPDataPacketIn>>();
+        public List<Func<ServerTCPDataPacketIn>> Packets = new();
 
         /// <summary>All present connections.</summary>
-        public List<TCPConnection> Connections = new List<TCPConnection>();
+        public List<TCPConnection> Connections = new();
 
         /// <summary>All presently registered channels.</summary>
-        public HashSet<int> Channels = new HashSet<int>() { 0 };
+        public HashSet<int> Channels = new() { 0 };
 
         /// <summary>Start the network engine.</summary>
         public override void Start()

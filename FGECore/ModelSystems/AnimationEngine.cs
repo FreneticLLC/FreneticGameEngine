@@ -51,10 +51,10 @@ namespace FGECore.ModelSystems
         }
 
         /// <summary>The usual head bones.</summary>
-        public HashSet<string> HeadBones = new HashSet<string>();
+        public HashSet<string> HeadBones = new();
         //public HashSet<string> TorsoBones = new HashSet<string>();
         /// <summary>The usual leg bones.</summary>
-        public HashSet<string> LegBones = new HashSet<string>();
+        public HashSet<string> LegBones = new();
 
         /// <summary>All known animations.</summary>
         public Dictionary<string, SingleAnimation> Animations;
@@ -79,7 +79,7 @@ namespace FGECore.ModelSystems
             catch (Exception ex)
             {
                 OutputType.ERROR.Output("Loading an animation: " + ex.ToString());
-                sa = new SingleAnimation() { Name = namelow, Length = 1, Engine = this };
+                sa = new() { Name = namelow, Length = 1, Engine = this };
                 Animations.Add(sa.Name, sa);
                 return sa;
             }
@@ -93,7 +93,7 @@ namespace FGECore.ModelSystems
         {
             if (Files.TryReadFileText("animations/" + name + ".anim", out string fileText))
             {
-                SingleAnimation created = new SingleAnimation() { Name = name };
+                SingleAnimation created = new() { Name = name };
                 string[] data = fileText.SplitFast('\n');
                 int entr = 0;
                 for (int i = 0; i < data.Length; i++)
@@ -107,7 +107,7 @@ namespace FGECore.ModelSystems
                     {
                         break;
                     }
-                    List<KeyValuePair<string, string>> entries = new List<KeyValuePair<string, string>>();
+                    List<(string, string)> entries = new();
                     for (i += 2; i < data.Length; i++)
                     {
                         if (data[i].Trim().StartsWith("//"))
@@ -127,7 +127,7 @@ namespace FGECore.ModelSystems
                         {
                             string key = dat[0].Trim();
                             string value = dat[1][0..^1].Trim();
-                            entries.Add(new KeyValuePair<string, string>(key, value));
+                            entries.Add((key, value));
                         }
                     }
                     bool isgeneral = type == "general" && entr == 0;
@@ -136,24 +136,24 @@ namespace FGECore.ModelSystems
                     {
                         node = new SingleAnimationNode() { Name = type.ToLowerFast() };
                     }
-                    foreach (KeyValuePair<string, string> entry in entries)
+                    foreach ((string key, string value) in entries)
                     {
                         if (isgeneral)
                         {
-                            if (entry.Key == "length")
+                            if (key == "length")
                             {
-                                created.Length = StringConversionHelper.StringToDouble(entry.Value);
+                                created.Length = StringConversionHelper.StringToDouble(value);
                             }
                             else
                             {
-                                OutputType.WARNING.Output("Unknown GENERAL key: " + entry.Key);
+                                OutputType.WARNING.Output("Unknown GENERAL key: " + key);
                             }
                         }
                         else
                         {
-                            if (entry.Key == "positions")
+                            if (key == "positions")
                             {
-                                string[] poses = entry.Value.SplitFast(' ');
+                                string[] poses = value.SplitFast(' ');
                                 for (int x = 0; x < poses.Length; x++)
                                 {
                                     if (poses[x].Length > 0)
@@ -165,9 +165,9 @@ namespace FGECore.ModelSystems
                                     }
                                 }
                             }
-                            else if (entry.Key == "rotations")
+                            else if (key == "rotations")
                             {
-                                string[] rots = entry.Value.SplitFast(' ');
+                                string[] rots = value.SplitFast(' ');
                                 for (int x = 0; x < rots.Length; x++)
                                 {
                                     if (rots[x].Length > 0)
@@ -179,19 +179,19 @@ namespace FGECore.ModelSystems
                                     }
                                 }
                             }
-                            else if (entry.Key == "parent")
+                            else if (key == "parent")
                             {
-                                node.ParentName = entry.Value.ToLowerFast();
+                                node.ParentName = value.ToLowerFast();
                             }
-                            else if (entry.Key == "offset")
+                            else if (key == "offset")
                             {
-                                string[] posdata = entry.Value.SplitFast('=');
+                                string[] posdata = value.SplitFast('=');
                                 node.Offset = new Location(StringConversionHelper.StringToFloat(posdata[0]),
                                     StringConversionHelper.StringToFloat(posdata[1]), StringConversionHelper.StringToFloat(posdata[2]));
                             }
                             else
                             {
-                                OutputType.WARNING.Output("Unknown NODE key: " + entry.Key);
+                                OutputType.WARNING.Output("Unknown NODE key: " + key);
                             }
                         }
                     }
@@ -236,10 +236,10 @@ namespace FGECore.ModelSystems
         public AnimationEngine Engine;
 
         /// <summary>All nodes in the animation.</summary>
-        public List<SingleAnimationNode> Nodes = new List<SingleAnimationNode>();
+        public List<SingleAnimationNode> Nodes = new();
 
         /// <summary>A mapping of nodes.</summary>
-        public Dictionary<string, SingleAnimationNode> node_map = new Dictionary<string, SingleAnimationNode>();
+        public Dictionary<string, SingleAnimationNode> node_map = new();
 
         /// <summary>Gets a node by name.</summary>
         /// <param name="name">The name of it.</param>
@@ -270,16 +270,16 @@ namespace FGECore.ModelSystems
         public Location Offset;
 
         /// <summary>The position time stamps.</summary>
-        public List<double> PosTimes = new List<double>();
+        public List<double> PosTimes = new();
 
         /// <summary>The positions.</summary>
-        public List<Location> Positions = new List<Location>();
+        public List<Location> Positions = new();
 
         /// <summary>The rotation time stamps.</summary>
-        public List<double> RotTimes = new List<double>();
+        public List<double> RotTimes = new();
 
         /// <summary>The rotations.</summary>
-        public List<MathHelpers.Quaternion> Rotations = new List<MathHelpers.Quaternion>();
+        public List<MathHelpers.Quaternion> Rotations = new();
 
         /// <summary>Finds a position by time.</summary>
         /// <param name="time">The time.</param>

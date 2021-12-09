@@ -25,8 +25,8 @@ namespace FGECore.FileSystems
         /// <returns>Compressed data.</returns>
         public static byte[] Compress(byte[] input)
         {
-            MemoryStream memstream = new MemoryStream();
-            using LZ4Stream lzstream = new LZ4Stream(memstream, LZ4StreamMode.Compress);
+            using MemoryStream memstream = new();
+            using LZ4Stream lzstream = new(memstream, LZ4StreamMode.Compress);
             lzstream.Write(input, 0, input.Length);
             lzstream.Flush();
             return memstream.ToArray();
@@ -38,8 +38,8 @@ namespace FGECore.FileSystems
         /// <returns>Compressed data.</returns>
         public static byte[] CompressPartial(byte[] input, int start, int length)
         {
-            MemoryStream memstream = new MemoryStream();
-            using LZ4Stream lzstream = new LZ4Stream(memstream, LZ4StreamMode.Compress);
+            using MemoryStream memstream = new();
+            using LZ4Stream lzstream = new(memstream, LZ4StreamMode.Compress);
             lzstream.Write(input, start, length);
             lzstream.Flush();
             return memstream.ToArray();
@@ -50,9 +50,9 @@ namespace FGECore.FileSystems
         /// <returns>Non-compressed data.</returns>
         public static byte[] Decompress(byte[] input)
         {
-            using MemoryStream output = new MemoryStream();
-            MemoryStream memstream = new MemoryStream(input);
-            using LZ4Stream LZStream = new LZ4Stream(memstream, LZ4StreamMode.Decompress);
+            using MemoryStream output = new();
+            using MemoryStream memstream = new(input);
+            using LZ4Stream LZStream = new(memstream, LZ4StreamMode.Decompress);
             LZStream.CopyTo(output);
             LZStream.Flush();
             return output.ToArray();
@@ -63,8 +63,8 @@ namespace FGECore.FileSystems
         /// <returns>Compressed data.</returns>
         public static byte[] GZip(byte[] input)
         {
-            MemoryStream memstream = new MemoryStream();
-            using GZipStream GZStream = new GZipStream(memstream, CompressionMode.Compress);
+            using MemoryStream memstream = new();
+            using GZipStream GZStream = new(memstream, CompressionMode.Compress);
             GZStream.Write(input, 0, input.Length);
             GZStream.Flush();
             return memstream.ToArray();
@@ -75,9 +75,9 @@ namespace FGECore.FileSystems
         /// <returns>Non-compressed data.</returns>
         public static byte[] UnGZip(byte[] input)
         {
-            using MemoryStream output = new MemoryStream();
-            MemoryStream memstream = new MemoryStream(input);
-            using GZipStream GZStream = new GZipStream(memstream, CompressionMode.Decompress);
+            using MemoryStream output = new();
+            using MemoryStream memstream = new(input);
+            using GZipStream GZStream = new(memstream, CompressionMode.Decompress);
             GZStream.CopyTo(output);
             GZStream.Flush();
             return output.ToArray();

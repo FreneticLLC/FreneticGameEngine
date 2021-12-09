@@ -31,7 +31,7 @@ namespace FGECore.UtilitySystems
         }
 
         /// <summary>The actual internal <see cref="Stopwatch"/> instance used for timing things.</summary>
-        public Stopwatch Internal = new Stopwatch();
+        public Stopwatch Internal = new();
 
         /// <summary>Last frame's millisecond time.</summary>
         public long LastMS;

@@ -23,7 +23,7 @@ namespace FGECore.CoreSystems
     public abstract class BasicEngine
     {
         /// <summary>Random helper object.</summary>
-        public MTRandom RandomHelper = new MTRandom();
+        public MTRandom RandomHelper = new();
 
         /// <summary>The source object for this engine.</summary>
         public Object Source => OwningInstanceGeneric.Source;
@@ -50,10 +50,10 @@ namespace FGECore.CoreSystems
         public Scheduler Schedule => OwningInstanceGeneric.Schedule;
 
         /// <summary>Any/all joints currently registered into this engine.</summary>
-        public Dictionary<long, GenericBaseJoint> Joints = new Dictionary<long, GenericBaseJoint>(512);
+        public Dictionary<long, GenericBaseJoint> Joints = new(512);
 
         /// <summary>Any/all non-physics joints currently registered into this engine.</summary>
-        public List<NonPhysicalJointBase> NonPhysicalJoints = new List<NonPhysicalJointBase>(64);
+        public List<NonPhysicalJointBase> NonPhysicalJoints = new(64);
 
         /// <summary>Add and activate a joint into this engine.</summary>
         public void AddJoint(GenericBaseJoint joint)
@@ -137,10 +137,10 @@ namespace FGECore.CoreSystems
         }
 
         /// <summary>All entities currently spawned in this engine.</summary>
-        public Dictionary<long, T> Entities = new Dictionary<long, T>(8192);
+        public Dictionary<long, T> Entities = new(8192);
 
         /// <summary>All entities currently spawned in the engine.</summary>
-        public List<T> EntityList = new List<T>(8192);
+        public List<T> EntityList = new(8192);
 
         /// <summary>Returns a duplicate of the entity list, for when you expect the master list to change.</summary>
         public IReadOnlyList<T> EntityListDuplicate()

@@ -40,10 +40,10 @@ namespace FGECore.CoreSystems
         /// The default documents in English (or, in whatever language <see cref="DefaultLanguage"/> is set to).
         /// Considered the root-most document, should be the best-written document samples most likely to be updated by developers.
         /// </summary>
-        public Dictionary<string, FDSSection> EnglishDocuments = new Dictionary<string, FDSSection>();
+        public Dictionary<string, FDSSection> EnglishDocuments = new();
 
         /// <summary>All documents in the currently set language.</summary>
-        public Dictionary<string, FDSSection> LanguageDocuments = new Dictionary<string, FDSSection>();
+        public Dictionary<string, FDSSection> LanguageDocuments = new();
 
         /// <summary>The currently set language.</summary>
         public string CurrentLanguage = AUTO_DEFAULT;

@@ -33,7 +33,7 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>The zero vector.</summary>
-        public static readonly Vector2i Zero = new Vector2i(0, 0);
+        public static readonly Vector2i Zero = new(0, 0);
 
         /// <summary>The x coordinate.</summary>
         [FieldOffset(0)]

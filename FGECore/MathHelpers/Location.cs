@@ -29,25 +29,25 @@ namespace FGECore.MathHelpers
     {
         #region static reference fields
         /// <summary>A Location of (0, 0, 0).</summary>
-        public static readonly Location Zero = new Location(0);
+        public static readonly Location Zero = new(0);
 
         /// <summary>A Location of (1, 1, 1).</summary>
-        public static readonly Location One = new Location(1);
+        public static readonly Location One = new(1);
 
         /// <summary>A location of (1, 0, 0).</summary>
-        public static readonly Location UnitX = new Location(1, 0, 0);
+        public static readonly Location UnitX = new(1, 0, 0);
 
         /// <summary>A location of (0, 1, 0).</summary>
-        public static readonly Location UnitY = new Location(0, 1, 0);
+        public static readonly Location UnitY = new(0, 1, 0);
 
         /// <summary>A location of (0, 0, 1).</summary>
-        public static readonly Location UnitZ = new Location(0, 0, 1);
+        public static readonly Location UnitZ = new(0, 0, 1);
 
         /// <summary>A location of (NaN, NaN, NaN).</summary>
-        public static readonly Location NaN = new Location(double.NaN, double.NaN, double.NaN);
+        public static readonly Location NaN = new(double.NaN, double.NaN, double.NaN);
 
         /// <summary>A location of (Infinity, Infinity, Infinity).</summary>
-        public static readonly Location Infinity = new Location(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+        public static readonly Location Infinity = new(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
         #endregion
 
         #region fields

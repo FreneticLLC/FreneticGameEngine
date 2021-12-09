@@ -75,7 +75,7 @@ namespace FGECore.ConsoleHelpers
             {
                 return color + text;
             }
-            StringBuilder result = new StringBuilder(text.Length * 2);
+            StringBuilder result = new(text.Length * 2);
             int brackets = 0;
             for (int i = 0; i < text.Length; i++)
             {

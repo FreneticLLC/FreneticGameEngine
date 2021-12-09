@@ -74,7 +74,7 @@ namespace FGECore.PropertySystem
         }
 
         /// <summary>Internal data useful to <see cref="PropertyHolder"/> instances.</summary>
-        public Internal PropertyInternals = new Internal()
+        public Internal PropertyInternals = new()
         {
             HeldProperties = new Dictionary<Type, Property>(),
             HeldInterfaces = new Dictionary<Type, List<object>>(),

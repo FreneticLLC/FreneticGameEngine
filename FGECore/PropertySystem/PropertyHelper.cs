@@ -24,7 +24,7 @@ namespace FGECore.PropertySystem
         /// <summary>
         /// A mapping of types to their property maps. Do note: if a type object is lost (Assembly is collected and dropped), the properties on that type are also lost.
         /// </summary>
-        public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = new ConditionalWeakTable<Type, PropertyHelper>();
+        public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = new();
 
         /// <summary>Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.</summary>
         public static class Internal
@@ -33,7 +33,7 @@ namespace FGECore.PropertySystem
             public static long CPropID = 1;
 
             /// <summary>A premade, reusable, empty array of <see cref="object"/>s.</summary>
-            public static readonly object[] NoObjects = new object[0];
+            public static readonly object[] NoObjects = Array.Empty<object>();
         }
 
         /// <summary>Represents a field with a specific numeric priority.</summary>
@@ -84,8 +84,8 @@ namespace FGECore.PropertySystem
                 return EnsureHandled(typeof(object));
             }
             Internal.CPropID++;
-            List<PrioritizedField> fieldsDebuggable = new List<PrioritizedField>();
-            List<PrioritizedField> fieldsAutoSaveable = new List<PrioritizedField>();
+            List<PrioritizedField> fieldsDebuggable = new();
+            List<PrioritizedField> fieldsAutoSaveable = new();
             FieldInfo[] fields = propType.GetFields(BindingFlags.Public | BindingFlags.Instance);
             for (int i = 0; i < fields.Length; i++)
             {
@@ -111,9 +111,9 @@ namespace FGECore.PropertySystem
                     fieldsAutoSaveable.Add(new PrioritizedField(prio, fields[i]));
                 }
             }
-            List<PrioritizedSharpProperty> getterPropertiesDebuggable = new List<PrioritizedSharpProperty>();
-            List<PrioritizedSharpProperty> getterSetterPropertiesSaveable = new List<PrioritizedSharpProperty>();
-            List<PrioritizedSharpProperty> validityTestProperties = new List<PrioritizedSharpProperty>();
+            List<PrioritizedSharpProperty> getterPropertiesDebuggable = new();
+            List<PrioritizedSharpProperty> getterSetterPropertiesSaveable = new();
+            List<PrioritizedSharpProperty> validityTestProperties = new();
             PropertyInfo[] sharpProperties = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (PropertyInfo sharpProperty in sharpProperties)
             {
@@ -149,7 +149,7 @@ namespace FGECore.PropertySystem
             getterSetterPropertiesSaveable = getterSetterPropertiesSaveable.OrderBy((k) => k.Priority).ToList();
             validityTestProperties = validityTestProperties.OrderBy((k) => k.Priority).ToList();
             string newTypeID = $"__FGE_Property_{Internal.CPropID}__{propType.Name} __";
-            AssemblyName asmName = new AssemblyName(newTypeID);
+            AssemblyName asmName = new(newTypeID);
             AssemblyBuilder asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(newTypeID);
             TypeBuilder generatedType = moduleBuilder.DefineType(newTypeID + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
@@ -362,7 +362,7 @@ namespace FGECore.PropertySystem
         public static class ReflectedMethods
         {
             /// <summary>The <see cref="object.ToString"/> method.</summary>
-            public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), new Type[0]);
+            public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), Array.Empty<Type>());
 
             /// <summary>The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.</summary>
             public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), new Type[] { typeof(string), typeof(string) });
@@ -400,10 +400,10 @@ namespace FGECore.PropertySystem
                     return "null";
                 }
                 PropertyHelper propHelper = EnsureHandled(propObj.GetType());
-                Dictionary<string, string> debugInfo = new Dictionary<string, string>();
+                Dictionary<string, string> debugInfo = new();
                 propHelper.GetDebuggableInfoOutputTyped(propObj, debugInfo);
-                StringBuilder output = new StringBuilder();
-                output.Append("{");
+                StringBuilder output = new();
+                output.Append('{');
                 foreach (KeyValuePair<string, string> infoVal in debugInfo)
                 {
                     output.Append(infoVal.Key).Append(": ").Append(infoVal.Value).Append(", ");
@@ -412,7 +412,7 @@ namespace FGECore.PropertySystem
                 {
                     output.Length -= 2;
                 }
-                output.Append("}");
+                output.Append('}');
                 return output.ToString();
             }
 
@@ -423,10 +423,10 @@ namespace FGECore.PropertySystem
             public static string StringifyDebuggableStruct<T>(T propObj) where T : struct
             {
                 PropertyHelper propHelper = EnsureHandled(typeof(T));
-                Dictionary<string, string> debugInfo = new Dictionary<string, string>();
+                Dictionary<string, string> debugInfo = new();
                 propHelper.GetDebuggableInfoOutputTyped(propObj, debugInfo);
-                StringBuilder output = new StringBuilder();
-                output.Append("{");
+                StringBuilder output = new();
+                output.Append('{');
                 foreach (KeyValuePair<string, string> infoVal in debugInfo)
                 {
                     output.Append(infoVal.Key).Append(": ").Append(infoVal.Value).Append(", ");
@@ -435,7 +435,7 @@ namespace FGECore.PropertySystem
                 {
                     output.Length -= 2;
                 }
-                output.Append("}");
+                output.Append('}');
                 return output.ToString();
             }
 
@@ -480,18 +480,18 @@ namespace FGECore.PropertySystem
         public Type PropertyType;
 
         /// <summary>A list of all getter methods that are debuggable.</summary>
-        public readonly List<PrioritizedSharpProperty> GetterPropertiesDebuggable = new List<PrioritizedSharpProperty>();
+        public readonly List<PrioritizedSharpProperty> GetterPropertiesDebuggable = new();
 
         /// <summary>A list of all getter/setter method pairs that are autao-saveable.</summary>
-        public readonly List<PrioritizedSharpProperty> GetterSetterSaveable = new List<PrioritizedSharpProperty>();
+        public readonly List<PrioritizedSharpProperty> GetterSetterSaveable = new();
 
         /// <summary>A list of all fields that are debuggable.</summary>
-        public readonly List<PrioritizedField> FieldsDebuggable = new List<PrioritizedField>();
+        public readonly List<PrioritizedField> FieldsDebuggable = new();
 
         /// <summary>A list of all fields that are auto-saveable.</summary>
-        public readonly List<PrioritizedField> FieldsAutoSaveable = new List<PrioritizedField>();
+        public readonly List<PrioritizedField> FieldsAutoSaveable = new();
 
         /// <summary>A list of all "validity check" getter methods.</summary>
-        public readonly List<PrioritizedSharpProperty> ValidityTestGetterProperties = new List<PrioritizedSharpProperty>();
+        public readonly List<PrioritizedSharpProperty> ValidityTestGetterProperties = new();
     }
 }

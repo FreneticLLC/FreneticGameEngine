@@ -43,7 +43,7 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
         /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
         public override DistanceLimit CreateJointDescription()
         {
-            DistanceLimit dl = new DistanceLimit(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
+            DistanceLimit dl = new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
             return dl;
         }
     }

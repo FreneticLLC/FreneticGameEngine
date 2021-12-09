@@ -75,7 +75,7 @@ namespace FGECore.UtilitySystems
         /// <returns>The repeated text.</returns>
         public static string CopyText(string text, int times)
         {
-            StringBuilder toret = new StringBuilder(text.Length * times);
+            StringBuilder toret = new(text.Length * times);
             for (int i = 0; i < times; i++)
             {
                 toret.Append(text);
@@ -84,10 +84,10 @@ namespace FGECore.UtilitySystems
         }
 
         /// <summary>Alphabetical character matcher (a-z, A-Z).</summary>
-        public static readonly AsciiMatcher AlphabetMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters);
+        public static readonly AsciiMatcher AlphabetMatcher = new(AsciiMatcher.BothCaseLetters);
 
         /// <summary>Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).</summary>
-        public static readonly AsciiMatcher UsernameValidationMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
+        public static readonly AsciiMatcher UsernameValidationMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
 
         /// <summary>
         /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII (a-z, A-Z, 0-9, _).

@@ -23,10 +23,10 @@ namespace FGECore.CoreSystems
     public class InstanceWatchdog
     {
         /// <summary>The watchdog SysConsole output type.</summary>
-        public static OutputType OUT_TYPE = new OutputType() { Name = "WATCHDOG", BaseColor = "^r^3" };
+        public static OutputType OUT_TYPE = new() { Name = "WATCHDOG", BaseColor = "^r^3" };
 
         /// <summary>Matcher for symbols to allow in thread names to reduce risk of errors.</summary>
-        public static AsciiMatcher ThreadNameSafetyMatcher = new AsciiMatcher(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_.");
+        public static AsciiMatcher ThreadNameSafetyMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_.");
 
         /// <summary>Incremental thread ID to ensure thread names are unique.</summary>
         public static long CurrentThreadNameID = 0;
@@ -90,7 +90,7 @@ namespace FGECore.CoreSystems
                 Internal.CancelToken = new CancellationTokenSource();
                 WatchedThread = Thread.CurrentThread;
                 NotesForWatchedThread = StackNoteHelper.Notes;
-                Thread thread = new Thread(MainWatchdogLoop);
+                Thread thread = new(MainWatchdogLoop);
                 NameThread(thread, "fge_instance_watchdog" + (WatchedThread.Name is null ? "" : "_for_" + WatchedThread.Name));
                 thread.Start();
             }

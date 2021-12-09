@@ -33,7 +33,7 @@ namespace FGECore.NetworkSystem
         public bool IsReady = false;
 
         /// <summary>A temporary buffer for data handling.</summary>
-        public DataStream ReadData = new DataStream();
+        public DataStream ReadData = new();
 
         private readonly byte[] OneByteHolder = new byte[1];
 
@@ -49,7 +49,7 @@ namespace FGECore.NetworkSystem
         public int Channel;
 
         /// <summary>Any tag applied to this Object by the game.</summary>
-        public Object Tag;
+        public object Tag;
 
         /// <summary>Processes a received packet.</summary>
         /// <param name="pid">The packet ID.</param>
@@ -71,8 +71,8 @@ namespace FGECore.NetworkSystem
             {
                 return;
             }
-            DataStream outp = new DataStream();
-            DataWriter dw = new DataWriter(outp);
+            DataStream outp = new();
+            DataWriter dw = new(outp);
             dw.WriteInt(data.Length);
             dw.WriteVarInt(packID);
             dw.WriteBytes(data);
@@ -121,7 +121,7 @@ namespace FGECore.NetworkSystem
                             }
                             str = str[HEADER.Length..];
                             int nextLine = str.IndexOf('\n', StringComparison.Ordinal);
-                            string FGEData = str.Substring(0, nextLine);
+                            string FGEData = str[..nextLine];
                             string[] keys = FGEData.Split(':');
                             int chan = int.Parse(keys[0]);
                             if (!Network.Channels.Contains(chan))
@@ -182,8 +182,8 @@ namespace FGECore.NetworkSystem
                                 }
                                 rd += trd;
                             }
-                            DataStream packStr = new DataStream(packet);
-                            DataReader reader = new DataReader(packStr);
+                            DataStream packStr = new(packet);
+                            DataReader reader = new(packStr);
                             long pid = reader.ReadVarInt();
                             ProcessPacket(pid, reader);
                             if (ReadData.Length == 0)

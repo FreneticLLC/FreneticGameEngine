@@ -149,18 +149,18 @@ namespace FGECore.MathHelpers
         }
 
         /// <summary>Sample Color3F (1, 1, 1).</summary>
-        public static readonly Color3F White = new Color3F(1, 1, 1);
+        public static readonly Color3F White = new(1, 1, 1);
 
         /// <summary>Sample Color3F (0, 0, 0).</summary>
-        public static readonly Color3F Black = new Color3F(0, 0, 0);
+        public static readonly Color3F Black = new(0, 0, 0);
 
         /// <summary>Sample Color3F (1, 0, 0).</summary>
-        public static readonly Color3F Red = new Color3F(1, 0, 0);
+        public static readonly Color3F Red = new(1, 0, 0);
 
         /// <summary>Sample Color3F (0, 1, 0).</summary>
-        public static readonly Color3F Green = new Color3F(0, 1, 0);
+        public static readonly Color3F Green = new(0, 1, 0);
 
         /// <summary>Sample Color3F (0, 0, 1).</summary>
-        public static readonly Color3F Blue = new Color3F(0, 0, 1);
+        public static readonly Color3F Blue = new(0, 0, 1);
     }
 }

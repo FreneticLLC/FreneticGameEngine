@@ -89,25 +89,25 @@ namespace FGECore.PhysicsSystem
         public PhysicsSpace World;
 
         /// <summary>The non-solid group.</summary>
-        public static CollisionGroup NonSolid = new CollisionGroup("NonSolid");
+        public static CollisionGroup NonSolid = new("NonSolid");
 
         /// <summary>The solid entity group.</summary>
-        public static CollisionGroup Solid = new CollisionGroup("Solid");
+        public static CollisionGroup Solid = new("Solid");
 
         /// <summary>The player group.</summary>
-        public static CollisionGroup Player = new CollisionGroup("Player");
+        public static CollisionGroup Player = new("Player");
 
         /// <summary>The item-entity group.</summary>
-        public static CollisionGroup Item = new CollisionGroup("Item");
+        public static CollisionGroup Item = new("Item");
 
         /// <summary>The water (or other liquid) group.</summary>
-        public static CollisionGroup Water = new CollisionGroup("Water");
+        public static CollisionGroup Water = new("Water");
 
         /// <summary>The world-solid group.</summary>
-        public static CollisionGroup WorldSolid = new CollisionGroup("WorldSolid");
+        public static CollisionGroup WorldSolid = new("WorldSolid");
 
         /// <summary>The non-player character group.</summary>
-        public static CollisionGroup Character = new CollisionGroup("Character");
+        public static CollisionGroup Character = new("Character");
 
         static CollisionUtil()
         {
@@ -171,7 +171,7 @@ namespace FGECore.PhysicsSystem
         /// <returns>Results.</returns>
         public CollisionResult CuboidLineTrace(in Location halfsize, in Location start, in Location end, Func<EntityPhysicsProperty, bool> filter = null)
         {
-            Box shape = new Box((float)halfsize.X * 2f, (float)halfsize.Y * 2f, (float)halfsize.Z * 2f);
+            Box shape = new((float)halfsize.X * 2f, (float)halfsize.Y * 2f, (float)halfsize.Z * 2f);
             return CuboidLineTrace(shape, start, end, filter);
         }
 

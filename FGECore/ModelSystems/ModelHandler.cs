@@ -44,16 +44,16 @@ namespace FGECore.ModelSystems
             byte[] dat_filt = new byte[data.Length - "FMD001".Length];
             Array.ConstrainedCopy(data, "FMD001".Length, dat_filt, 0, dat_filt.Length);
             dat_filt = FileUtilities.UnGZip(dat_filt);
-            DataStream ds = new DataStream(dat_filt);
-            DataReader dr = new DataReader(ds);
-            Model3D mod = new Model3D();
+            DataStream ds = new(dat_filt);
+            DataReader dr = new(ds);
+            Model3D mod = new();
             Matrix4x4 matA = ReadMat(dr);
             mod.MatrixA = matA;
             int meshCount = dr.ReadInt();
             mod.Meshes = new Model3DMesh[meshCount];
             for (int m = 0; m < meshCount; m++)
             {
-                Model3DMesh mesh = new Model3DMesh();
+                Model3DMesh mesh = new();
                 mod.Meshes[m] = mesh;
                 mesh.Name = dr.ReadFullString();
                 int vertexCount = dr.ReadInt();
@@ -92,7 +92,7 @@ namespace FGECore.ModelSystems
                 mesh.Bones = new Model3DBone[boneCount];
                 for (int b = 0; b < boneCount; b++)
                 {
-                    Model3DBone bone = new Model3DBone();
+                    Model3DBone bone = new();
                     mesh.Bones[b] = bone;
                     bone.Name = dr.ReadFullString();
                     int weights = dr.ReadInt();
@@ -116,7 +116,7 @@ namespace FGECore.ModelSystems
         /// <returns>The node.</returns>
         public Model3DNode ReadSingleNode(Model3DNode root, DataReader dr)
         {
-            Model3DNode n = new Model3DNode() { Parent = root };
+            Model3DNode n = new() { Parent = root };
             string nname = dr.ReadFullString();
             n.Name = nname;
             n.MatrixA = ReadMat(dr);
@@ -237,7 +237,7 @@ namespace FGECore.ModelSystems
         /// <returns>The BEPU mesh.</returns>
         public static ConvexHull MeshToBepuConvex(PhysicsSpace space, Model3D input, out int verts, out Vector3 center)
         {
-            Span<Vector3> vertices = new Span<Vector3>(GetCollisionVertices(input));
+            Span<Vector3> vertices = new(GetCollisionVertices(input));
             verts = vertices.Length;
             ConvexHullHelper.CreateShape(vertices, space.Internal.Pool, out center, out ConvexHull hull);
             return hull;
