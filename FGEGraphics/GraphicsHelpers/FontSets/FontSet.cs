@@ -21,6 +21,7 @@ using FGECore.UtilitySystems;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets
 {
@@ -199,7 +200,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     return ParseFancyText("{{Recursion error}}", "");
                 }
                 string text = AutoTranslateFancyText(originalText.ApplyBaseColor(baseColor));
-                string[] lines = text.Replace('\r', ' ').Replace(' ', (char)0x00A0).Replace("^q", "\"").SplitFast('\n');
+                string[] lines = text.Replace('\r', ' ').Replace("^q", "\"").SplitFast('\n');
                 RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
                 RenderableTextPart currentPart = new() { Font = FontDefault };
                 int maxWidth = 0;
@@ -755,14 +756,15 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                     float x = 0;
                     for (int i = 0; i < line.Parts.Length; i++)
                     {
+                        float priorX = x;
                         x += line.Parts[i].Width;
                         if (x >= maxX)
                         {
                             RenderableTextPart part = line.Parts[i];
-                            int target = part.Text.Length - 1;
-                            for (int j = target; j >= 0; j--)
+                            int target = 0;
+                            for (int j = part.Text.Length - 1; j >= 0; j--)
                             {
-                                if (part.Font.MeasureString(part.Text[..j]) <= maxX)
+                                if (part.Font.MeasureString(part.Text[..j]) + priorX <= maxX)
                                 {
                                     target = j;
                                     break;
@@ -771,7 +773,14 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                             int lastSpace = part.Text.LastIndexOf(' ', target);
                             if (lastSpace == -1)
                             {
-                                lastSpace = target;
+                                if (i > 0)
+                                {
+                                    lastSpace = 0;
+                                }
+                                else
+                                {
+                                    lastSpace = target;
+                                }
                             }
                             RenderableTextPart[] newFirstParts = line.Parts[..i];
                             string firstLine = part.Text[..lastSpace];
@@ -788,7 +797,9 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
                             RenderableTextPart newNextPart = part.Clone();
                             newNextPart.Text = nextLine;
                             newNextPart.Width = newNextPart.Font.MeasureString(newNextPart.Text);
-                            RenderableTextPart[] newNextParts = line.Parts[(i + 1)..].Append(newNextPart).ToArray();
+                            RenderableTextPart[] newNextParts = new RenderableTextPart[line.Parts.Length - i];
+                            newNextParts[0] = newNextPart;
+                            Array.Copy(line.Parts, i + 1, newNextParts, 1, newNextParts.Length - 1);
                             line = new RenderableTextLine() { Parts = newNextParts, Width = (int)Math.Ceiling(newNextParts.Max(p => p.Width)) };
                         }
                     }
