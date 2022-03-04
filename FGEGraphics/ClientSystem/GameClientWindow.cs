@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -236,12 +237,11 @@ namespace FGEGraphics.ClientSystem
             {
                 StackNoteHelper.Push("GameClientWindow - Start, run", this);
                 OutputType.CLIENTINIT.Output("GameEngine loading...");
-                Window = new GameWindow(new GameWindowSettings() { IsMultiThreaded = false }, new NativeWindowSettings()
+                Window = new GameWindow(new GameWindowSettings(), new NativeWindowSettings()
                 {
                     Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
                     Title = StartingWindowTitle,
                     Flags = ContextFlags.ForwardCompatible,
-                    IsFullscreen = false,
                     WindowState = WindowState.Normal,
                     API = ContextAPI.OpenGL,
                     APIVersion = new Version(4, 3),
@@ -253,7 +253,7 @@ namespace FGEGraphics.ClientSystem
                 Window.Load += Window_Load;
                 Window.RenderFrame += Window_RenderFrame;
                 Window.MouseMove += Mouse_Move;
-                Window.Closed += Window_Closed;
+                Window.Closing += Window_Closed;
                 Window.Resize += Window_Resize;
                 OutputType.CLIENTINIT.Output("GameEngine calling SetUp event...");
                 OnWindowSetUp?.Invoke();
@@ -326,7 +326,7 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>Called when the window is closed.</summary>
-        private void Window_Closed()
+        private void Window_Closed(CancelEventArgs args)
         {
             OnWindowClosed?.Invoke();
             if (ExitOnClose)
