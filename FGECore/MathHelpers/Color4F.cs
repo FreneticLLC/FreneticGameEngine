@@ -310,5 +310,17 @@ namespace FGECore.MathHelpers
 
         /// <summary>Sample Color4F (0, 0, 1).</summary>
         public static readonly Color4F Blue = new(0, 0, 1);
+
+        /// <summary>Sample Color4F (0, 1, 1).</summary>
+        public static readonly Color4F Cyan = new(0, 1, 1);
+
+        /// <summary>Sample Color4F (1, 1, 0).</summary>
+        public static readonly Color4F Yellow = new(1, 1, 0);
+
+        /// <summary>Sample Color4F (1, 0, 1).</summary>
+        public static readonly Color4F Magenta = new(1, 0, 1);
+
+        /// <summary>Sample Color4F (0, 0, 0, 0).</summary>
+        public static readonly Color4F Transparent = new(0, 0, 0, 0);
     }
 }
