@@ -123,7 +123,7 @@ namespace FGEGraphics.UISystem
         /// <param name="element">The possible child.</param>
         public bool HasChild(UIElement element)
         {
-            return element.IsValid && ElementInternal.Children.Contains(element) && !ElementInternal.ToRemove.Contains(element);
+            return (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
         }
 
         /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
