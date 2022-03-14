@@ -131,7 +131,10 @@ namespace FGEGraphics.ClientSystem
                     StackNoteHelper.Push("Draw UI Element", elem);
                     try
                     {
-                        elem.Render(this, Client.Delta);
+                        if (elem.IsValid)
+                        {
+                            elem.Render(this, Client.Delta);
+                        }
                     }
                     finally
                     {

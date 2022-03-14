@@ -79,12 +79,22 @@ namespace FGEGraphics.UISystem
             }
             if (!ElementInternal.Children.Contains(child))
             {
-                ElementInternal.ToAdd.Add(child);
+                if (!ElementInternal.ToAdd.Contains(child))
+                {
+                    ElementInternal.ToAdd.Add(child);
+                }
+            }
+            else if (ElementInternal.ToRemove.Contains(child))
+            {
+                ElementInternal.ToRemove.Remove(child);
             }
             else
             {
                 throw new Exception("Tried to add a child that already belongs to this element!");
             }
+            child.Parent = this;
+            child.IsValid = true;
+            child.Init();
         }
 
         /// <summary>Removes a child from this element.</summary>
@@ -96,7 +106,6 @@ namespace FGEGraphics.UISystem
                 if (!ElementInternal.ToRemove.Contains(child))
                 {
                     ElementInternal.ToRemove.Add(child);
-                    child.IsValid = false;
                 }
             }
             else if (ElementInternal.ToAdd.Contains(child))
@@ -107,6 +116,9 @@ namespace FGEGraphics.UISystem
             {
                 throw new Exception("Tried to remove a child that does not belong to this element!");
             }
+            child.IsValid = false;
+            child.Parent = null;
+            child.Destroy();
         }
 
         /// <summary>Removes all children from this element.</summary>
@@ -123,7 +135,7 @@ namespace FGEGraphics.UISystem
         /// <param name="element">The possible child.</param>
         public bool HasChild(UIElement element)
         {
-            return (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
+            return element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
         }
 
         /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
@@ -191,9 +203,6 @@ namespace FGEGraphics.UISystem
                 if (!ElementInternal.Children.Contains(element))
                 {
                     ElementInternal.Children.Add(element);
-                    element.Parent = this;
-                    element.IsValid = true;
-                    element.Init();
                 }
                 else
                 {
@@ -202,12 +211,7 @@ namespace FGEGraphics.UISystem
             }
             foreach (UIElement element in ElementInternal.ToRemove)
             {
-                if (ElementInternal.Children.Remove(element))
-                {
-                    element.Destroy();
-                    element.Parent = null;
-                }
-                else
+                if (!ElementInternal.Children.Remove(element))
                 {
                     throw new Exception($"UIElement: Failed to remove a child element {element}!");
                 }
