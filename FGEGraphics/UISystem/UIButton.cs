@@ -70,19 +70,70 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>The render style to use when the button is not being interacted with.</summary>
-        public Style StyleNormal;
+        public Style StyleNormal
+        {
+            get
+            {
+                return Internal.StyleNormal;
+            }
+            set
+            {
+                Internal.StyleNormal = new Style(value);
+                if (Internal.RawText is not null)
+                {
+                    Internal.StyleNormal.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleNormal.TextBaseColor);
+                }
+            }
+        }
 
         /// <summary>The render style to use when the user is hovering their mouse cursor over this button.</summary>
-        public Style StyleHover;
+        public Style StyleHover
+        {
+            get
+            {
+                return Internal.StyleHover;
+            }
+            set
+            {
+                Internal.StyleHover = new Style(value);
+                if (Internal.RawText is not null)
+                {
+                    Internal.StyleHover.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleHover.TextBaseColor);
+                }
+            }
+        }
 
         /// <summary>The render style to use when the user is clicking on this button.</summary>
-        public Style StyleClick;
+        public Style StyleClick
+        {
+            get
+            {
+                return Internal.StyleClick;
+            }
+            set
+            {
+                Internal.StyleClick = new Style(value);
+                if (Internal.RawText is not null)
+                {
+                    Internal.StyleClick.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleClick.TextBaseColor);
+                }
+            }
+        }
 
         /// <summary>Holds internal data for <see cref="UIButton"/>.</summary>
         public struct InternalData
         {
             /// <summary>The raw text of the button as input by the user.</summary>
             public string RawText;
+
+            /// <summary>The render style to use when the button is not being interacted with.</summary>
+            public Style StyleNormal;
+
+            /// <summary>The render style to use when the user is hovering their mouse cursor over this button.</summary>
+            public Style StyleHover;
+
+            /// <summary>The render style to use when the user is clicking on this button.</summary>
+            public Style StyleClick;
         }
 
         /// <summary>Internal data for this button.</summary>
@@ -95,9 +146,9 @@ namespace FGEGraphics.UISystem
             set
             {
                 Internal.RawText = value;
-                StyleNormal.Internal_ActualText = TextFont.ParseFancyText(value, StyleNormal.TextBaseColor);
-                StyleHover.Internal_ActualText = TextFont.ParseFancyText(value, StyleHover.TextBaseColor);
-                StyleClick.Internal_ActualText = TextFont.ParseFancyText(value, StyleClick.TextBaseColor);
+                Internal.StyleNormal.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleNormal.TextBaseColor);
+                Internal.StyleHover.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleHover.TextBaseColor);
+                Internal.StyleClick.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleClick.TextBaseColor);
             }
         }
 
