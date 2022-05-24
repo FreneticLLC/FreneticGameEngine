@@ -648,9 +648,6 @@ namespace FGECore.MathHelpers
             return $"({X}, {Y}, {Z})";
         }
 
-        /// <summary>The number format for <see cref="ToBasicString"/>.</summary>
-        public const string BasicFormat = "0.00";
-
         /// <summary>
         /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
         /// Inverts <see cref="FromString(string)"/>.
@@ -658,7 +655,39 @@ namespace FGECore.MathHelpers
         /// <returns>The basic location string.</returns>
         public string ToBasicString()
         {
-            return "(" + X.ToString(BasicFormat) + ", " + Y.ToString(BasicFormat) + ", " + Z.ToString(BasicFormat) + ")";
+            return $"({X:0.00}, {Y:0.00}, {Z:0.00})";
+        }
+
+        private static string FormatStable(double num, int len)
+        {
+            return (num >= 0 ? "+" : "") + (num.ToString(new string('0', len) + ".00"));
+        }
+
+        /// <summary>
+        /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places) and the specified number of prepended zeroes, with a + or - in front.
+        /// Designed to avoid changing in character length between multiple calls.
+        /// Inverts <see cref="FromString(string)"/>.
+        /// </summary>
+        /// <returns>The stable location string.</returns>
+        public string ToStableString(int len)
+        {
+            return $"({FormatStable(X, len)}, {FormatStable(Y, len)}, {FormatStable(Z, len)})";
+        }
+
+        private static string FormatStableInt(double num, int len)
+        {
+            return (num >= 0 ? "+" : "") + (num.ToString(new string('0', len)));
+        }
+
+        /// <summary>
+        /// Returns the location as a string in the form (X, Y, Z) with no decimals and the specified number of prepended zeroes, with a + or - in front.
+        /// Designed to avoid changing in character length between multiple calls.
+        /// Inverts <see cref="FromString(string)"/>.
+        /// </summary>
+        /// <returns>The stable integer location string.</returns>
+        public string ToStableIntString(int len)
+        {
+            return $"({FormatStableInt(X, len)}, {FormatStableInt(Y, len)}, {FormatStableInt(Z, len)})";
         }
 
         /// <summary>
