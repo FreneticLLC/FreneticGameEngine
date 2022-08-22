@@ -27,7 +27,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FGECore\FGECore.csproj" />
-    <ProjectReference Include="$(SolutionDir)FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />

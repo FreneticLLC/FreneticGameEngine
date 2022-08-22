@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FGEGraphics", "FGEGraphics\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FGETests", "FGETests\FGETests.csproj", "{BC791A53-E852-4E99-90F9-4E9CF3138C14}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreneticUtilities", "FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj", "{1DB47D6A-4225-4F25-8559-2C6292496953}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,14 +51,6 @@ Global
 		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Release|x64.ActiveCfg = Release|x64
 		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Release|x64.Build.0 = Release|x64
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|Any CPU.ActiveCfg = ReleaseNet461|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|Any CPU.Build.0 = ReleaseNet461|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|x64.ActiveCfg = ReleaseNet461|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|x64.Build.0 = ReleaseNet461|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|x64.ActiveCfg = ReleaseNet461|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|x64.Build.0 = ReleaseNet461|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

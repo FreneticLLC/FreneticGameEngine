@@ -61,6 +61,5 @@
   <ItemGroup>
     <ProjectReference Include="..\FGECore\FGECore.csproj" />
     <ProjectReference Include="..\FGEGraphics\FGEGraphics.csproj" />
-    <ProjectReference Include="..\FreneticUtilities\FreneticUtilities\FreneticUtilities.csproj" />
   </ItemGroup>
 </Project>
