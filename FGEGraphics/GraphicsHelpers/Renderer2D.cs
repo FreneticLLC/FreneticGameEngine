@@ -171,7 +171,7 @@ namespace FGEGraphics.GraphicsHelpers
             //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
             Vector2 adder = new(xmin, ymin);
             Vector2 tscaler = rc.Scaler * scaler;
-            GL.Uniform3(ShaderLocations.Common2D.SCALER, new(tscaler.X, tscaler.Y, rc.AspectHelper));
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));
             Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
             GL.Uniform2(ShaderLocations.Common2D.ADDER, tadder);
             if (rot != null)

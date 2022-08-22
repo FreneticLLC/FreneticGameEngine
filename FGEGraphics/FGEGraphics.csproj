@@ -44,13 +44,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="4.7.1" />
+    <PackageReference Include="OpenTK" Version="4.7.4" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NVorbis" Version="0.10.4" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
