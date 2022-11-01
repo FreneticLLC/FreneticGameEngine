@@ -163,30 +163,6 @@ namespace FGECore.MathHelpers
             return Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
         }
 
-        /// <summary>Returns the intermediate state between two Quaternions.</summary>
-        /// <param name="b">The second Quaternion.</param>
-        /// <param name="lerp">The lerp amount.</param>
-        /// <returns>The interpolated quaternion.</returns>
-        public Quaternion Interpolate(Quaternion b, double lerp)
-        {
-            double cosHalfAngle = X * b.X + Y * b.Y + Z * b.Z + W * b.W;
-            if (cosHalfAngle < 0)
-            {
-                b = new Quaternion(-b.X, -b.Y, -b.Z, -b.W);
-                cosHalfAngle = -cosHalfAngle;
-            }
-            double halfAngle = Math.Acos(cosHalfAngle);
-            double sinHalfAngle = Math.Sqrt(1.0 - cosHalfAngle * cosHalfAngle);
-            double fracA = Math.Sin(((1 - lerp) * halfAngle)) / sinHalfAngle;
-            double fracB = Math.Sin(lerp * halfAngle) / sinHalfAngle;
-            return new Quaternion(
-                X * fracA + b.X * fracB,
-                Y * fracA + b.Y * fracB,
-                Z * fracA + b.Z * fracB,
-                W * fracA + b.W * fracB
-                );
-        }
-
         /// <summary>Returns the conjugate of this Quaternion.</summary>
         /// <returns>The conjugate.</returns>
         public Quaternion Conjugate()
