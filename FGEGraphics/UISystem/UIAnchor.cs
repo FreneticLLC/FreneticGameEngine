@@ -64,5 +64,8 @@ namespace FGEGraphics.UISystem
 
         /// <summary>Bottom right UI Anchor. See <see cref="UIAnchor"/>.</summary>
         public static readonly UIAnchor BOTTOM_RIGHT = new(RIGHT_X, BOTTOM_Y);
+
+        /// <summary>Relative UI Anchor. See <see cref="UIAnchor"/>.</summary>
+        public static readonly UIAnchor RELATIVE = new((_) => 0, (_) => 0);
     }
 }

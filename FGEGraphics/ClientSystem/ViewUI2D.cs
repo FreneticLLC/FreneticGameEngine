@@ -92,6 +92,9 @@ namespace FGEGraphics.ClientSystem
         /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
         public bool DirectToScreen = true;
 
+        /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
+        public int RelativeYLast = 0;
+
         /// <summary>Draw the menu to the relevant back buffer.</summary>
         public void Draw()
         {
@@ -124,6 +127,7 @@ namespace FGEGraphics.ClientSystem
                 Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
                 GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
                 LastRenderedSet.Clear();
+                RelativeYLast = 0;
                 CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
                 GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
                 foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))

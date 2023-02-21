@@ -292,18 +292,20 @@ namespace FGEGraphics.UISystem
         {
             if (Parent == null || !Parent.ElementInternal.ToRemove.Contains(this))
             {
-                int x;
-                int y;
+                int x = Position.X;
+                int y = Position.Y;
+                if (Position.MainAnchor == UIAnchor.RELATIVE)
+                {
+                    y += Position.View.RelativeYLast;
+                }
                 if (Math.Abs(lastRot.Z) < 0.001f)
                 {
-                    x = Position.X + xoff;
-                    y = Position.Y + yoff;
+                    x += xoff;
+                    y += yoff;
                     lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
                 }
                 else
                 {
-                    x = Position.X;
-                    y = Position.Y;
                     int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
                     int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
                     float half_wid = Position.Width * 0.5f;
@@ -323,6 +325,7 @@ namespace FGEGraphics.UISystem
                 LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
                 LastAbsoluteRotation = lastRot.Z;
                 LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
+                Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
                 output.Add(this);
                 UpdateChildPositions(output, delta, x, y, lastRot);
             }
