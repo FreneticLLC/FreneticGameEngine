@@ -29,6 +29,14 @@ namespace FGEGraphics.UISystem
             ConstantRotation(0f);
         }
 
+        /// <summary>Returns a <see cref="UIPositionHelper"/> that is automatically below another one, by adding to the Y value, with an optional additional padding.</summary>
+        public static UIPositionHelper Below(UIPositionHelper prior, int yPad)
+        {
+            UIPositionHelper newPos = new UIPositionHelper(prior.View).Anchor(prior.MainAnchor).GetterY(() => prior.Y + prior.Height + yPad);
+            newPos.Internal.X = prior.Internal.X;
+            return newPos;
+        }
+
         /// <summary>The view backing this element's positioning logic.</summary>
         public ViewUI2D View;
 
@@ -41,80 +49,52 @@ namespace FGEGraphics.UISystem
         /// <summary>Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.</summary>
         public struct InternalData
         {
-            /// <summary>Position mode for X.</summary>
-            public UIPosMode PM_X;
+            /// <summary>
+            /// Helper to represent the data for a single coordinate, dynamically as a constant or getter.
+            /// </summary>
+            public struct Coordinate<T> where T : unmanaged
+            {
+                /// <summary>
+                /// What mode this coordinate uses (eg constant or getter).
+                /// </summary>
+                public UIPosMode Mode;
+
+                /// <summary>
+                /// Constant value, if <see cref="Mode"/> is set to <see cref="UIPosMode.CONSTANT"/>.
+                /// </summary>
+                public T ConstVal;
+
+                /// <summary>
+                /// Getter value, if <see cref="Mode"/> is set to <see cref="UIPosMode.GETTER"/>.
+                /// </summary>
+                public Func<T> GetterVal;
+
+                /// <summary>
+                /// Gets the current value for this coordinate.
+                /// </summary>
+                public T Get()
+                {
+                    if (Mode == UIPosMode.CONSTANT)
+                    {
+                        return ConstVal;
+                    }
+                    if (Mode == UIPosMode.GETTER)
+                    {
+                        return GetterVal();
+                    }
+                    return default;
+                }
+            }
 
             /// <summary>
-            /// Constant value for X, if <see cref="PM_X"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// Generally, instead of reading this, use <see cref="X"/>. Instead of setting this, use <see cref="ConstantX(int)"/>.
+            /// Internal coordinate data. Generally, do not use.
             /// </summary>
-            public int Const_X;
+            public Coordinate<int> X, Y, Width, Height;
 
             /// <summary>
-            /// Getter value for X, if <see cref="PM_X"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// Generally, instead of reading this, use <see cref="X"/>. Instead of setting this, use <see cref="GetterX(Func{int})"/>.
+            /// Internal coordinate data. Generally, do not use.
             /// </summary>
-            public Func<int> Getter_X;
-
-            /// <summary>Position mode for Y.</summary>
-            public UIPosMode PM_Y;
-
-            /// <summary>
-            /// Constant value for Y, if <see cref="PM_Y"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// Generally, instead of reading this, use <see cref="Y"/>. Instead of setting this, use <see cref="ConstantY(int)"/>.
-            /// </summary>
-            public int Const_Y;
-
-            /// <summary>
-            /// Getter value for Y, if <see cref="PM_Y"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// Generally, instead of reading this, use <see cref="Y"/>. Instead of setting this, use <see cref="GetterY(Func{int})"/>.
-            /// </summary>
-            public Func<int> Getter_Y;
-
-            /// <summary>Position mode for Width.</summary>
-            public UIPosMode PM_Width;
-
-            /// <summary>
-            /// Constant value for Width, if <see cref="PM_Width"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// Generally, instead of reading this, use <see cref="Width"/>. Instead of setting this, use <see cref="ConstantWidth(int)"/>.
-            /// </summary>
-            public int Const_Width;
-
-            /// <summary>
-            /// Getter value for Width, if <see cref="PM_Width"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// Generally, instead of reading this, use <see cref="Width"/>. Instead of setting this, use <see cref="GetterWidth(Func{int})"/>.
-            /// </summary>
-            public Func<int> Getter_Width;
-
-            /// <summary>Position mode for Height.</summary>
-            public UIPosMode PM_Height;
-
-            /// <summary>
-            /// Constant value for Height, if <see cref="PM_Height"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// Generally, instead of reading this, use <see cref="Height"/>. Instead of setting this, use <see cref="ConstantHeight(int)"/>.
-            /// </summary>
-            public int Const_Height;
-
-            /// <summary>
-            /// Getter value for Height, if <see cref="PM_Height"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// Generally, instead of reading this, use <see cref="Height"/>. Instead of setting this, use <see cref="GetterHeight(Func{int})"/>.
-            /// </summary>
-            public Func<int> Getter_Height;
-
-            /// <summary>Position mode for Rotation.</summary>
-            public UIPosMode PM_Rot;
-
-            /// <summary>
-            /// Constant value for Rotation, if <see cref="PM_Rot"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// Generally, instead of reading this, use <see cref="Rotation"/>. Instead of setting this, use <see cref="ConstantRotation(float)"/>.
-            /// </summary>
-            public float Const_Rot;
-
-            /// <summary>
-            /// Getter value for Rotation, if <see cref="PM_Rot"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// Generally, instead of reading this, use <see cref="Rotation"/>. Instead of setting this, use <see cref="GetterRotation(Func{float})"/>.
-            /// </summary>
-            public Func<float> Getter_Rot;
+            public Coordinate<float> Rotation;
         }
 
         /// <summary>Internal data that should usually not be accessed directly.</summary>
@@ -134,8 +114,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantX(int x)
         {
-            Internal.PM_X = UIPosMode.CONSTANT;
-            Internal.Const_X = x;
+            Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
             return this;
         }
 
@@ -144,8 +123,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantY(int y)
         {
-            Internal.PM_Y = UIPosMode.CONSTANT;
-            Internal.Const_Y = y;
+            Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
             return this;
         }
 
@@ -155,10 +133,8 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantXY(int x, int y)
         {
-            Internal.PM_X = UIPosMode.CONSTANT;
-            Internal.Const_X = x;
-            Internal.PM_Y = UIPosMode.CONSTANT;
-            Internal.Const_Y = y;
+            Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
+            Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
             return this;
         }
 
@@ -167,8 +143,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantWidth(int width)
         {
-            Internal.PM_Width = UIPosMode.CONSTANT;
-            Internal.Const_Width = width;
+            Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
             return this;
         }
 
@@ -177,8 +152,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantHeight(int height)
         {
-            Internal.PM_Height = UIPosMode.CONSTANT;
-            Internal.Const_Height = height;
+            Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
             return this;
         }
 
@@ -188,10 +162,8 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantWidthHeight(int width, int height)
         {
-            Internal.PM_Width = UIPosMode.CONSTANT;
-            Internal.Const_Width = width;
-            Internal.PM_Height = UIPosMode.CONSTANT;
-            Internal.Const_Height = height;
+            Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
+            Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
             return this;
         }
 
@@ -200,8 +172,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper ConstantRotation(float rotation)
         {
-            Internal.PM_Rot = UIPosMode.CONSTANT;
-            Internal.Const_Rot = rotation;
+            Internal.Rotation = new() { Mode = UIPosMode.CONSTANT, ConstVal = rotation };
             return this;
         }
 
@@ -210,8 +181,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterX(Func<int> x)
         {
-            Internal.PM_X = UIPosMode.GETTER;
-            Internal.Getter_X = x;
+            Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
             return this;
         }
 
@@ -220,8 +190,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterY(Func<int> y)
         {
-            Internal.PM_Y = UIPosMode.GETTER;
-            Internal.Getter_Y = y;
+            Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
             return this;
         }
 
@@ -231,10 +200,8 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterXY(Func<int> x, Func<int> y)
         {
-            Internal.PM_X = UIPosMode.GETTER;
-            Internal.Getter_X = x;
-            Internal.PM_Y = UIPosMode.GETTER;
-            Internal.Getter_Y = y;
+            Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
+            Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
             return this;
         }
 
@@ -243,8 +210,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterWidth(Func<int> width)
         {
-            Internal.PM_Width = UIPosMode.GETTER;
-            Internal.Getter_Width = width;
+            Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
             return this;
         }
 
@@ -253,8 +219,7 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterHeight(Func<int> height)
         {
-            Internal.PM_Height = UIPosMode.GETTER;
-            Internal.Getter_Height = height;
+            Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
             return this;
         }
 
@@ -264,10 +229,8 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterWidthHeight(Func<int> width, Func<int> height)
         {
-            Internal.PM_Width = UIPosMode.GETTER;
-            Internal.Getter_Width = width;
-            Internal.PM_Height = UIPosMode.GETTER;
-            Internal.Getter_Height = height;
+            Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
+            Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
             return this;
         }
 
@@ -276,97 +239,24 @@ namespace FGEGraphics.UISystem
         /// <returns>This object.</returns>
         public UIPositionHelper GetterRotation(Func<float> rotation)
         {
-            Internal.PM_Rot = UIPosMode.GETTER;
-            Internal.Getter_Rot = rotation;
+            Internal.Rotation = new() { Mode = UIPosMode.GETTER, GetterVal = rotation };
             return this;
         }
 
         /// <summary>Gets the X coordinate.</summary>
-        public int X
-        {
-            get
-            {
-                int anch = For.Parent != null ? MainAnchor.GetX(For) : 0;
-                if (Internal.PM_X == UIPosMode.CONSTANT)
-                {
-                    return anch + Internal.Const_X;
-                }
-                if (Internal.PM_X == UIPosMode.GETTER)
-                {
-                    return anch + Internal.Getter_X();
-                }
-                return anch;
-            }
-        }
+        public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);
 
         /// <summary>Gets the Y coordinate.</summary>
-        public int Y
-        {
-            get
-            {
-                int anch = For.Parent != null ? MainAnchor.GetY(For) : 0;
-                if (Internal.PM_Y == UIPosMode.CONSTANT)
-                {
-                    return anch + Internal.Const_Y;
-                }
-                if (Internal.PM_Y == UIPosMode.GETTER)
-                {
-                    return anch + Internal.Getter_Y();
-                }
-                return anch;
-            }
-        }
+        public int Y => Internal.Y.Get() + (For.Parent != null ? MainAnchor.GetY(For) : 0);
 
         /// <summary>Gets the width.</summary>
-        public int Width
-        {
-            get
-            {
-                if (Internal.PM_Width == UIPosMode.CONSTANT)
-                {
-                    return Internal.Const_Width;
-                }
-                if (Internal.PM_Width == UIPosMode.GETTER)
-                {
-                    return Internal.Getter_Width();
-                }
-                return 0;
-            }
-        }
+        public int Width => Internal.Width.Get();
 
         /// <summary>Gets the height.</summary>
-        public int Height
-        {
-            get
-            {
-                if (Internal.PM_Height == UIPosMode.CONSTANT)
-                {
-                    return Internal.Const_Height;
-                }
-                if (Internal.PM_Height == UIPosMode.GETTER)
-                {
-                    return Internal.Getter_Height();
-                }
-                return 0;
-            }
-        }
+        public int Height => Internal.Height.Get();
 
         /// <summary>Gets the local Rotation value.</summary>
-        public float Rotation
-        {
-            get
-            {
-                if (Internal.PM_Rot == UIPosMode.CONSTANT)
-                {
-                    return Internal.Const_Rot;
-                }
-                if (Internal.PM_Rot == UIPosMode.GETTER)
-                {
-                    return Internal.Getter_Rot();
-                }
-                return 0f;
-            }
-        }
+        public float Rotation => Internal.Rotation.Get();
 
         /// <summary>Gets the X/Y coordinate pair.</summary>
         public Vector2i Position => new(X, Y);
@@ -388,6 +278,6 @@ namespace FGEGraphics.UISystem
         CONSTANT = 0,
         /// <summary>A getter function.</summary>
         GETTER = 1
-        // TODO: More modes!
+        // TODO: More modes?
     }
 }
