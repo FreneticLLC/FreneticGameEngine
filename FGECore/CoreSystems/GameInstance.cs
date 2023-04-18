@@ -23,7 +23,6 @@ namespace FGECore.CoreSystems
     /// <summary>Represents one game instance - that is, one program, which contains an arbitrary number of engines within it.</summary>
     public abstract class GameInstance
     {
-
         /// <summary>Whether the instance is marked for shutdown as soon as possible.</summary>
         public readonly CancellationTokenSource NeedShutdown = new();
 
