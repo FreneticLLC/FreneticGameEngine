@@ -93,7 +93,11 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         /// <summary>
         /// Gets the TypeProcessor type that is associated with this description.
         /// </summary>
-        public readonly Type TypeProcessorType => typeof(<#=prefix#>CharacterMotionTypeProcessor);
+        public readonly Type TypeProcessorType => typeof(<#=prefix#>CharacterMotionTypeProcessor);    
+        /// <summary>
+        /// Creates a type processor for this constraint type.
+        /// </summary>
+        public readonly TypeProcessor CreateTypeProcessor() => new <#=prefix#>CharacterMotionTypeProcessor();
 
         //Note that these mapping functions use a "GetOffsetInstance" function. Each CharacterMotionPrestep is a bundle of multiple constraints;
         //by grabbing an offset instance, we're selecting a specific slot in the bundle to modify. For simplicity and to guarantee consistency of field strides,
@@ -381,4 +385,4 @@ namespace FGECore.PhysicsSystem.BepuCharacters
     }
 <#}#>
 }
-#pragma warning enable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

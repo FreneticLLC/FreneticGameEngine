@@ -26,7 +26,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
     // The majority of code in this file came from the BEPUPhysicsv2 demos.
 
     /// <summary>System that manages all the characters in a simulation. Responsible for updating movement constraints based on character goals and contact states.</summary>
-    public class CharacterControllers : IDisposable
+    public unsafe class CharacterControllers : IDisposable
     {
         /// <summary>
         /// Gets the simulation to which this set of chracters belongs.
@@ -224,7 +224,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                     //Have to take into account the current potentially inactive location.
                     ref var bodyLocation = ref Simulation.Bodies.HandleToLocation[character.BodyHandle.Value];
                     ref var set = ref Simulation.Bodies.Sets[bodyLocation.SetIndex];
-                    ref var pose = ref set.SolverStates[bodyLocation.Index].Motion.Pose;
+                    ref var pose = ref set.DynamicsState[bodyLocation.Index].Motion.Pose;
                     QuaternionEx.Transform(character.LocalUp, pose.Orientation, out var up);
                     //Note that this branch is compiled out- the generic constraints force type specialization.
                     if (manifold.Convex)
@@ -379,7 +379,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
         int boundingBoxExpansionJobIndex;
         readonly Action<int> expandBoundingBoxesWorker;
-        void ExpandBoundingBoxesWorker(int workerIndex)
+        unsafe void ExpandBoundingBoxesWorker(int workerIndex)
         {
             while (true)
             {
@@ -539,16 +539,16 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                     //If the character is jumping, don't create a constraint.
                     if (supportCandidate.Depth > float.MinValue && character.TryJump)
                     {
-                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Pose.Orientation, out var characterUp);
+                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.DynamicsState[bodyLocation.Index].Motion.Pose.Orientation, out var characterUp);
                         //Note that we assume that character orientations are constant. This isn't necessarily the case in all uses, but it's a decent approximation.
-                        var characterUpVelocity = Vector3.Dot(Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Velocity.Linear, characterUp);
+                        var characterUpVelocity = Vector3.Dot(Simulation.Bodies.ActiveSet.DynamicsState[bodyLocation.Index].Motion.Velocity.Linear, characterUp);
                         //We don't want the character to be able to 'superboost' by simply adding jump speed on top of horizontal motion.
                         //Instead, jumping targets a velocity change necessary to reach character.JumpVelocity along the up axis.
                         if (character.Support.Mobility != CollidableMobility.Static)
                         {
                             ref var supportingBodyLocation = ref Simulation.Bodies.HandleToLocation[character.Support.BodyHandle.Value];
                             Debug.Assert(supportingBodyLocation.SetIndex == 0, "If the character is active, any support should be too.");
-                            ref var supportVelocity = ref Simulation.Bodies.ActiveSet.SolverStates[supportingBodyLocation.Index].Motion.Velocity;
+                            ref var supportVelocity = ref Simulation.Bodies.ActiveSet.DynamicsState[supportingBodyLocation.Index].Motion.Velocity;
                             var wxr = Vector3.Cross(supportVelocity.Angular, supportCandidate.OffsetFromSupport);
                             var supportContactVelocity = supportVelocity.Linear + wxr;
                             var supportUpVelocity = Vector3.Dot(supportContactVelocity, characterUp);
@@ -589,7 +589,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         Matrix3x3 surfaceBasis;
                         surfaceBasis.Y = supportCandidate.Normal;
                         //Note negation: we're using a right handed basis where -Z is forward, +Z is backward.
-                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Pose.Orientation, out var up);
+                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.DynamicsState[bodyLocation.Index].Motion.Pose.Orientation, out var up);
                         var rayDistance = Vector3.Dot(character.ViewDirection, surfaceBasis.Y);
                         var rayVelocity = Vector3.Dot(up, surfaceBasis.Y);
                         Debug.Assert(rayVelocity > 0,
@@ -681,7 +681,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         int analysisJobCount;
         Buffer<AnalyzeContactsJob> jobs;
         readonly Action<int> analyzeContactsWorker;
-        void AnalyzeContactsWorker(int workerIndex)
+        unsafe void AnalyzeContactsWorker(int workerIndex)
         {
             int jobIndex;
             while ((jobIndex = Interlocked.Increment(ref analysisJobIndex)) < analysisJobCount)
@@ -773,10 +773,10 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                     for (int i = 0; i < workerCache.Jumps.Count; ++i)
                     {
                         ref var jump = ref workerCache.Jumps[i];
-                        activeSet.SolverStates[jump.CharacterBodyIndex].Motion.Velocity.Linear += jump.CharacterVelocityChange;
+                        activeSet.DynamicsState[jump.CharacterBodyIndex].Motion.Velocity.Linear += jump.CharacterVelocityChange;
                         if (jump.SupportBodyIndex >= 0)
                         {
-                            BodyReference.ApplyImpulse(Simulation.Bodies.ActiveSet, jump.SupportBodyIndex, jump.CharacterVelocityChange / -activeSet.SolverStates[jump.CharacterBodyIndex].Inertia.Local.InverseMass, jump.SupportImpulseOffset);
+                            BodyReference.ApplyImpulse(Simulation.Bodies.ActiveSet, jump.SupportBodyIndex, jump.CharacterVelocityChange / -activeSet.DynamicsState[jump.CharacterBodyIndex].Inertia.Local.InverseMass, jump.SupportImpulseOffset);
                         }
                     }
                     workerCache.Dispose(pool);

@@ -234,7 +234,7 @@ namespace FGECore.PhysicsSystem
                 return AllowTest(collidable);
             }
 
-            public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable, int childIndex)
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex)
             {
                 if (Hit == null || t < Hit.Time)
                 {
@@ -279,7 +279,7 @@ namespace FGECore.PhysicsSystem
                 return AllowTest(collidable);
             }
 
-            public void OnHit(ref float maximumT, float t, in Vector3 hitLocation, in Vector3 hitNormal, CollidableReference collidable)
+            public void OnHit(ref float maximumT, float t, Vector3 hitLocation, Vector3 hitNormal, CollidableReference collidable)
             {
                 if (Hit == null || t < Hit.Time)
                 {

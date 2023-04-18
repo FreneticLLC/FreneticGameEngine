@@ -42,7 +42,8 @@ namespace FGECore.EntitySystem.PhysicsHelpers
             EntityCylinderShape dup = MemberwiseClone() as EntityCylinderShape;
             dup.CylinderIndex = Space.Internal.CoreSimulation.Shapes.Add((Cylinder)BepuShape);
             Space.Internal.Pool.Take(1, out dup.CompoundBuffer);
-            dup.CompoundBuffer[0].LocalPose = new RigidPose(Vector3.Zero, Quaternion_Y2Z);
+            dup.CompoundBuffer[0].LocalPosition = Vector3.Zero;
+            dup.CompoundBuffer[0].LocalOrientation = Quaternion_Y2Z;
             dup.CompoundBuffer[0].ShapeIndex = dup.CylinderIndex;
             Compound compound = new(dup.CompoundBuffer);
             dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(compound);

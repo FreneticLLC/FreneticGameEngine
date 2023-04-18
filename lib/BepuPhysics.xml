@@ -304,7 +304,11 @@
             </summary>
             <remarks>The object can be reused if it is reinitialized by using EnsureCapacity or Resize.</remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "F:BepuPhysics.Bodies.DynamicLimit" -->
+        <member name="F:BepuPhysics.Bodies.DynamicLimit">
+            <summary>
+            Constraint body references greater than a given unsigned value are either kinematic (bit 30 set) or correspond to an empty lane (bit 31 set).
+            </summary>
+        </member>
         <member name="F:BepuPhysics.Bodies.BodyReferenceMask">
             <summary>
             Mask of bits containing the decoded body reference in a constraint body reference. For active constraints this would be the body index bits, for sleeping constraints this would be the body handle bits.
@@ -358,7 +362,13 @@
             <param name="minimumTimestepCountUnderThreshold">The number of time steps that the body must be under the sleep threshold before the body becomes a sleep candidate.
             Note that the body is not guaranteed to go to sleep immediately after meeting this minimum.</param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:BepuPhysics.BodyActivityDescription.op_Implicit(System.Single)~BepuPhysics.BodyActivityDescription" -->
+        <member name="M:BepuPhysics.BodyActivityDescription.op_Implicit(System.Single)~BepuPhysics.BodyActivityDescription">
+            <summary>
+            Creates a body activity description. Uses a <see cref="F:BepuPhysics.BodyActivityDescription.MinimumTimestepCountUnderThreshold"/> of 32.
+            </summary>
+            <param name="sleepThreshold">Threshold of squared velocity under which the body is allowed to go to sleep. This is compared against dot(linearVelocity, linearVelocity) + dot(angularVelocity, angularVelocity).
+            Note that the body is not guaranteed to go to sleep immediately after meeting this minimum.</param>
+        </member>
         <member name="T:BepuPhysics.BodyDescription">
             <summary>
             Describes a body's state.
@@ -555,7 +565,7 @@
             </summary>
             <param name="poseComponents">Position and orientation to use in the pose.</param>
         </member>
-        <member name="M:BepuPhysics.RigidPose.Transform(System.Numerics.Vector3@,BepuPhysics.RigidPose@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.RigidPose.Transform(System.Numerics.Vector3,BepuPhysics.RigidPose@,System.Numerics.Vector3@)">
             <summary>
             Transforms a vector by the rigid pose: v * pose.Orientation + pose.Position.
             </summary>
@@ -563,7 +573,7 @@
             <param name="pose">Pose to transform the vector with.</param>
             <param name="result">Transformed vector.</param>
         </member>
-        <member name="M:BepuPhysics.RigidPose.TransformByInverse(System.Numerics.Vector3@,BepuPhysics.RigidPose@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.RigidPose.TransformByInverse(System.Numerics.Vector3,BepuPhysics.RigidPose@,System.Numerics.Vector3@)">
             <summary>
             Transforms a vector by the inverse of a rigid pose: (v - pose.Position) * pose.Orientation^-1.
             </summary>
@@ -661,7 +671,7 @@
             We cache this here because velocity integration wants both the local and world inertias, and any integration happening within the solver will do so without the benefit of sequential loads.
             In that context, being able to load a single cache line to grab both local and world inertia helps quite a lot.</remarks>
         </member>
-        <member name="T:BepuPhysics.SolverState">
+        <member name="T:BepuPhysics.BodyDynamics">
             <summary>
             Stores all body information needed by the solver together.
             </summary>
@@ -672,12 +682,12 @@
             Note that this goes along with a change to the buffer pool's default alignment to 128 bytes.
             </remarks>
         </member>
-        <member name="F:BepuPhysics.SolverState.Motion">
+        <member name="F:BepuPhysics.BodyDynamics.Motion">
             <summary>
             Pose and velocity information for the body.
             </summary>
         </member>
-        <member name="F:BepuPhysics.SolverState.Inertia">
+        <member name="F:BepuPhysics.BodyDynamics.Inertia">
             <summary>
             Inertia information for the body.
             </summary>
@@ -763,9 +773,9 @@
             Gets a reference to the body's motion state, including both pose and velocity.
             </summary>
         </member>
-        <member name="P:BepuPhysics.BodyReference.SolverState">
+        <member name="P:BepuPhysics.BodyReference.Dynamics">
             <summary>
-            Gets a reference to the body's solver-relevant state, including both pose, velocity, and inertia.
+            Gets a reference to the body's solver-relevant state, including pose, velocity, and inertia.
             </summary>
         </member>
         <member name="P:BepuPhysics.BodyReference.Collidable">
@@ -861,7 +871,7 @@
             <remarks>Can be useful if you made modifications to the body's state that you want reflected in the broad phase before the next timestep.
             For example, if you want to perform ray casts against the broad phase after moving objects around directly, their bounds must be updated or else the broad phase bounds will be out of date and the ray will likely miss.</remarks>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(System.Numerics.Vector3@,System.Numerics.Vector3@,BepuPhysics.BodyInertia@,BepuPhysics.RigidPose@,BepuPhysics.BodyVelocity@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(System.Numerics.Vector3,System.Numerics.Vector3,BepuPhysics.BodyInertia@,BepuPhysics.RigidPose@,BepuPhysics.BodyVelocity@)">
             <summary>
             Applies an impulse to a body by index. Does not wake the body up.
             </summary>
@@ -871,7 +881,7 @@
             <param name="impulse">Impulse to apply to the body.</param>
             <param name="impulseOffset">World space offset from the center of the body to apply the impulse at.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(BepuPhysics.BodySet@,System.Int32,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(BepuPhysics.BodySet@,System.Int32,System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
             Applies an impulse to a body by index. Does not wake the body up.
             </summary>
@@ -880,7 +890,7 @@
             <param name="impulse">Impulse to apply to the body.</param>
             <param name="impulseOffset">World space offset from the center of the body to apply the impulse at.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyAngularImpulse(System.Numerics.Vector3@,BepuUtilities.Symmetric3x3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyAngularImpulse(System.Numerics.Vector3,BepuUtilities.Symmetric3x3@,System.Numerics.Vector3@)">
             <summary>
             Applies an angular impulse to an angular velocity. Does not wake the body up.
             </summary>
@@ -888,7 +898,7 @@
             <param name="inverseInertiaTensor">Inverse inertia tensor to transform the impulse with.</param>
             <param name="angularVelocity">Angular velocity to be modified.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyLinearImpulse(System.Numerics.Vector3@,System.Single,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyLinearImpulse(System.Numerics.Vector3,System.Single,System.Numerics.Vector3@)">
             <summary>
             Applies an impulse to a linear velocity. Does not wake the body up.
             </summary>
@@ -896,27 +906,27 @@
             <param name="inverseMass">Inverse mass to transform the impulse with.</param>
             <param name="linearVelocity">Linear velocity to be modified.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyImpulse(System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
             Applies an impulse to a body at the given world space position. Does not modify activity states.
             </summary>
             <param name="impulse">Impulse to apply to the body.</param>
             <param name="impulseOffset">World space offset to apply the impulse at.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyLinearImpulse(System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyLinearImpulse(System.Numerics.Vector3)">
             <summary>
             Applies an impulse to a linear velocity. Does not wake the body up.
             </summary>
             <param name="impulse">Impulse to apply to the velocity.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.GetVelocityForOffset(System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.GetVelocityForOffset(System.Numerics.Vector3,System.Numerics.Vector3@)">
             <summary>
             Computes the velocity of an offset point attached to the body.
             </summary>
             <param name="offset">Offset from the body's center to </param>
             <param name="velocity">Effective velocity of the point if it were attached to the body.</param>
         </member>
-        <member name="M:BepuPhysics.BodyReference.ApplyAngularImpulse(System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BodyReference.ApplyAngularImpulse(System.Numerics.Vector3)">
             <summary>
             Applies an angular impulse to an angular velocity. Does not wake the body up.
             </summary>
@@ -938,7 +948,7 @@
             Remaps a body index to its handle.
             </summary>
         </member>
-        <member name="F:BepuPhysics.BodySet.SolverStates">
+        <member name="F:BepuPhysics.BodySet.DynamicsState">
             <summary>
             Stores all data involved in solving constraints for a body, including pose, velocity, and inertia.
             </summary>
@@ -991,12 +1001,12 @@
             Expands the bounding box surrounding a shape A in the local space of some other collidable B.
             </summary>
         </member>
-        <member name="M:BepuPhysics.BoundingBoxHelpers.GetLocalBoundingBoxForSweep(BepuPhysics.Collidables.TypedIndex,BepuPhysics.Collidables.Shapes,BepuPhysics.RigidPose@,System.Numerics.Quaternion@,BepuPhysics.BodyVelocity@,System.Numerics.Vector3@,System.Numerics.Quaternion@,BepuPhysics.BodyVelocity@,System.Single,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BoundingBoxHelpers.GetLocalBoundingBoxForSweep(BepuPhysics.Collidables.TypedIndex,BepuPhysics.Collidables.Shapes,BepuPhysics.RigidPose@,System.Numerics.Quaternion,BepuPhysics.BodyVelocity@,System.Numerics.Vector3,System.Numerics.Quaternion,BepuPhysics.BodyVelocity@,System.Single,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
             <summary>
             Computes the bounding box of a child shape A in the local space of some other collidable B with a sweep direction representing the net linear motion.
             </summary>
         </member>
-        <member name="M:BepuPhysics.BoundingBoxHelpers.GetLocalBoundingBoxForSweep``1(``0@,System.Numerics.Quaternion@,BepuPhysics.BodyVelocity@,System.Numerics.Vector3@,System.Numerics.Quaternion@,BepuPhysics.BodyVelocity@,System.Single,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.BoundingBoxHelpers.GetLocalBoundingBoxForSweep``1(``0@,System.Numerics.Quaternion,BepuPhysics.BodyVelocity@,System.Numerics.Vector3,System.Numerics.Quaternion,BepuPhysics.BodyVelocity@,System.Single,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
             <summary>
             Computes the bounding box of shape A in the local space of some other collidable B with a sweep direction representing the net linear motion.
             </summary>
@@ -1025,8 +1035,7 @@
             <summary>
             Initializes the property collection if the Bodies/Statics-less constructor was used.
             </summary>
-            <param name="bodies">Bodies collection to track.</param>
-            <param name="statics">Statics collection to track.</param>
+            <param name="simulation">Simulation whose bodies and statics will be tracked.</param>
         </member>
         <member name="P:BepuPhysics.CollidableProperty`1.Item(BepuPhysics.BodyHandle)">
             <summary>
@@ -1119,6 +1128,44 @@
             <param name="children">Set of children in the compound.</param>
             <param name="shapes">Shapes set in which child shapes are allocated.</param>
             <param name="pool">Pool to use to allocate acceleration structures.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.Add(BepuPhysics.Collidables.CompoundChild,BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.Shapes)">
+            <summary>
+            Adds a child to the compound.
+            </summary>
+            <param name="child">Child to add to the compound.</param>
+            <param name="pool">Pool to use to resize the compound's children buffer if necessary.</param>
+            <param name="shapes">Shapes collection containing the compound's children.</param>
+            <remarks><para>This function keeps the <see cref="F:BepuPhysics.Collidables.BigCompound.Tree"/> in a valid state, but significant changes over time may degrade the tree's quality and result in reduced collision/query performance.
+            If this happens, consider calling <see cref="M:BepuPhysics.Trees.Tree.RefitAndRefine(BepuUtilities.Memory.BufferPool,System.Int32,System.Single)"/> with a refinementIndex that changes with each call (to prioritize different parts of the tree).
+            Incrementing a counter with each call would work fine. The ideal frequency of refinement depends on the kind of modifications being made, but it's likely to be rare.</para></remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.RemoveAt(System.Int32,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Removes a child from the compound by index. The last child is pulled to fill the gap left by the removed child.
+            </summary>
+            <param name="childIndex">Index of the child to remove from the compound.</param>
+            <param name="pool">Pool to use to resize the compound's children buffer if necessary.</param>
+            <remarks>This function keeps the <see cref="F:BepuPhysics.Collidables.BigCompound.Tree"/> in a valid state, but significant changes over time may degrade the tree's quality and result in reduced collision/query performance.
+            If this happens, consider calling <see cref="M:BepuPhysics.Trees.Tree.RefitAndRefine(BepuUtilities.Memory.BufferPool,System.Int32,System.Single)"/> with a refinementIndex that changes with each call (to prioritize different parts of the tree).
+            Incrementing a counter with each call would work fine. The ideal frequency of refinement depends on the kind of modifications being made, but it's likely to be rare.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.ComputeInertia(System.Span{System.Single},BepuPhysics.Collidables.Shapes)">
+            <summary>
+            Computes the inertia of a compound. Does not recenter the child poses.
+            </summary>
+            <param name="childMasses">Masses of the children.</param>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <returns>Inertia of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.ComputeInertia(System.Span{System.Single},BepuPhysics.Collidables.Shapes,System.Numerics.Vector3@)">
+            <summary>
+            Computes the inertia of a compound. Recenters the child poses around the calculated center of mass.
+            </summary>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <param name="childMasses">Masses of the children.</param>
+            <param name="centerOfMass">Calculated center of mass of the compound. Subtracted from all the compound child poses.</param>
+            <returns>Inertia of the compound.</returns>
         </member>
         <member name="F:BepuPhysics.Collidables.BigCompound.Id">
             <summary>
@@ -1260,7 +1307,16 @@
             Gets whether the continuous collision detection configuration will permit bounding box expansion beyond the calculated speculative margin.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "P:BepuPhysics.Collidables.ContinuousDetection.Discrete" -->
+        <member name="P:BepuPhysics.Collidables.ContinuousDetection.Discrete">
+            <summary>
+            <para>No sweep tests are performed. Default speculative contact generation will occur within the speculative margin.</para>
+            <para>The collidable's bounding box will not be expanded by velocity beyond the speculative margin.</para>
+            <para>This can be marginally cheaper than Passive modes if using a limited maximum speculative margin. If a Discrete mode collidable is moving quickly and the maximum speculative margin is limited,
+            the fact that its bounding box is not expanded may cause it to miss a collision even with a non-Discrete collidable.</para>
+            <para>Note that Discrete and Passive only differ if maximum speculative margin is restricted.</para>
+            </summary>
+            <returns>Detection settings for the given discrete configuration.</returns>
+        </member>
         <member name="P:BepuPhysics.Collidables.ContinuousDetection.Passive">
             <summary>
             <para>No sweep tests are performed. Default speculative contact generation will occur within the speculative margin.</para>
@@ -1487,6 +1543,33 @@
             </summary>
             <param name="handle">Handle of the owner of the collidable.</param>
         </member>
+        <member name="T:BepuPhysics.Collidables.CompoundChild">
+            <summary>
+            Shape and pose of a child within a compound shape.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Collidables.CompoundChild.LocalOrientation">
+            <summary>
+            Local orientation of the child in the compound.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Collidables.CompoundChild.LocalPosition">
+            <summary>
+            Local position of the child in the compound.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Collidables.CompoundChild.ShapeIndex">
+            <summary>
+            Index of the shape within whatever shape collection holds the compound's child shape data.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundChild.AsPose(BepuPhysics.Collidables.CompoundChild@)">
+            <summary>
+            Reintreprets the 32 bytes of a compound child as a pose.
+            </summary>
+            <param name="child">Child to reinterpret.</param>
+            <returns>Reference to the child as a pose.</returns>
+        </member>
         <member name="T:BepuPhysics.Collidables.Compound">
             <summary>
             Minimalist compound shape containing a list of child shapes. Does not make use of any internal acceleration structure; should be used only with small groups of shapes.
@@ -1519,6 +1602,37 @@
             <param name="shapeBatches">Shape collection into which the children index.</param>
             <returns>True if all child indices are valid, false otherwise.</returns>
         </member>
+        <member name="M:BepuPhysics.Collidables.Compound.Add(BepuPhysics.Collidables.CompoundChild,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Adds a child to the compound.
+            </summary>
+            <param name="child">Child to add to the compound.</param>
+            <param name="pool">Pool to use to resize the compound's children buffer if necessary.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Compound.RemoveAt(System.Int32,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Removes a child from the compound by index. The last child is pulled to fill the gap left by the removed child.
+            </summary>
+            <param name="childIndex">Index of the child to remove from the compound.</param>
+            <param name="pool">Pool to use to resize the compound's children buffer if necessary.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Compound.ComputeInertia(System.Span{System.Single},BepuPhysics.Collidables.Shapes)">
+            <summary>
+            Computes the inertia of a compound. Does not recenter the child poses.
+            </summary>
+            <param name="childMasses">Masses of the children.</param>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <returns>Inertia of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Compound.ComputeInertia(System.Span{System.Single},BepuPhysics.Collidables.Shapes,System.Numerics.Vector3@)">
+            <summary>
+            Computes the inertia of a compound. Recenters the child poses around the calculated center of mass.
+            </summary>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <param name="childMasses">Masses of the children.</param>
+            <param name="centerOfMass">Calculated center of mass of the compound. Subtracted from all the compound child poses.</param>
+            <returns>Inertia of the compound.</returns>
+        </member>
         <member name="F:BepuPhysics.Collidables.Compound.Id">
             <summary>
             Type id of list based compound shapes.
@@ -1535,10 +1649,35 @@
             When interpreted as kinematic with recentering, it is used as a local pose weight to compute the center of rotation.
             </summary>
         </member>
-        <member name="F:BepuPhysics.Collidables.CompoundBuilder.Child.Inertia">
+        <member name="F:BepuPhysics.Collidables.CompoundBuilder.Child.LocalInverseInertia">
             <summary>
-            Inertia tensor associated with the child. If inertia is all zeroes, it is interpreted as infinite.
+            Inverse inertia tensor of the child in its local space.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.#ctor(BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.Shapes,System.Int32)">
+            <summary>
+            Creates a compound builder.
+            </summary>
+            <param name="pool">Buffer pool to allocate memory from when necessary.</param>
+            <param name="shapes">Shapes collection to access when constructing the compound children.</param>
+            <param name="initialBuilderCapacity">Number of children the compound builder can hold without resizing.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.Add(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,BepuUtilities.Symmetric3x3@,System.Single)">
+            <summary>
+            Adds a new shape to the accumulator.
+            </summary>
+            <param name="shape">Index of the shape to add.</param>
+            <param name="localPose">Pose of the shape in the compound's local space.</param>
+            <param name="weight">Weight of the shape. If the compound is interpreted as a dynamic, this will be used as the mass. Otherwise, it is used for recentering.</param>
+            <param name="localInverseInertia">Inverse inertia tensor of the shape being added in its local space. This is assumed to already be scaled as desired by the weight.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.AddForKinematic(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,System.Single)">
+            <summary>
+            Adds a new shape to the accumulator, assuming it has infinite inertia.
+            </summary>
+            <param name="shape">Index of the shape to add.</param>
+            <param name="localPose">Pose of the shape in the compound's local space.</param>
+            <param name="weight">Weight of the shape used for computing the center of rotation.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.Add``1(``0@,BepuPhysics.RigidPose@,System.Single)">
             <summary>
@@ -1559,22 +1698,13 @@
             <param name="localPose">Pose of the shape in the compound's local space.</param>
             <param name="weight">Weight of the shape. If the compound is interpreted as a dynamic, this will be used as the mass. Otherwise, it is used for recentering.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.CompoundBuilder.Add(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,BepuUtilities.Symmetric3x3@,System.Single)">
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.GetOffsetInertiaContribution(System.Numerics.Vector3,System.Single,BepuUtilities.Symmetric3x3@)">
             <summary>
-            Adds a new shape to the accumulator.
+            Gets the contribution to an inertia tensor of a point mass at the given offset from the center of mass.
             </summary>
-            <param name="shape">Index of the shape to add.</param>
-            <param name="localPose">Pose of the shape in the compound's local space.</param>
-            <param name="weight">Weight of the shape. If the compound is interpreted as a dynamic, this will be used as the mass. Otherwise, it is used for recentering.</param>
-            <param name="inverseInertia">Inverse inertia tensor of the shape being added. This is assumed to already be scaled as desired by the weight.</param>
-        </member>
-        <member name="M:BepuPhysics.Collidables.CompoundBuilder.AddForKinematic(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,System.Single)">
-            <summary>
-            Adds a new shape to the accumulator, assuming it has infinite inertia.
-            </summary>
-            <param name="shape">Index of the shape to add.</param>
-            <param name="localPose">Pose of the shape in the compound's local space.</param>
-            <param name="weight">Weight of the shape used for computing the center of rotation.</param>
+            <param name="offset">Offset from the center of mass.</param>
+            <param name="mass">Mass of the point.</param>
+            <param name="contribution">Contribution to the inertia tensor.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.BuildDynamicCompound(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild}@,BepuPhysics.BodyInertia@,System.Numerics.Vector3@)">
             <summary>
@@ -1592,13 +1722,122 @@
             <param name="children">List of children created from the accumulated set.</param>
             <param name="inertia">Combined inertia of the compound.</param>
         </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInertiaForChild(BepuPhysics.RigidPose@,BepuUtilities.Symmetric3x3,System.Single)">
+            <summary>
+            Computes the uninverted inertia contribution of a child.
+            </summary>
+            <param name="pose">Pose of the child.</param>
+            <param name="inverseLocalInertia">Inverse inertia tensor of the child in its local space.</param>
+            <param name="mass">Mass of the child.</param>
+            <returns>Inertia contribution of the child to a compound given its relative pose.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInertiaForChild(System.Numerics.Vector3,System.Numerics.Quaternion,BepuUtilities.Symmetric3x3,System.Single)">
+            <summary>
+            Computes the uninverted inertia contribution of a child.
+            </summary>
+            <param name="position">Position of the child.</param>
+            <param name="orientation">Orientation of the child.</param>
+            <param name="inverseLocalInertia">Inverse inertia tensor of the child in its local space.</param>
+            <param name="mass">Mass of the child.</param>
+            <returns>Inertia contribution of the child to a compound given its relative pose.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInverseInertia(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{BepuUtilities.Symmetric3x3},System.Span{System.Single})">
+            <summary>
+            Computes the inertia for a set of compound children based on their poses and the provided inverse inertias. Does not recenter the children.
+            </summary>
+            <param name="children">Children and their associated poses.</param>
+            <param name="inverseLocalInertias">Inverse inertias of the children, each in the child's local space. Assumed to have already been premultiplied by the mass of the child.</param>
+            <param name="childMasses">Masses of each child in the compound.</param>
+            <returns><see cref="T:BepuPhysics.BodyInertia"/> of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInverseInertia(System.Span{BepuPhysics.RigidPose},System.Span{BepuUtilities.Symmetric3x3},System.Span{System.Single})">
+            <summary>
+            Computes the inverse inertia for a set of compound children based on their poses and the provided inverse inertias. Does not recenter the children.
+            </summary>
+            <param name="childPoses">Poses of the compound's children.</param>
+            <param name="inverseLocalInertias">Inverse inertias of the children, each in the child's local space. Assumed to have already been premultiplied by the mass of the child.</param>
+            <param name="childMasses">Masses of each child in the compound.</param>
+            <returns><see cref="T:BepuPhysics.BodyInertia"/> of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeCenterOfMass(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{System.Single},System.Single@)">
+            <summary>
+            Computes the center of mass of a compound.
+            </summary>
+            <param name="children">Children of the compound.</param>
+            <param name="childMasses">Masses of the children in the compound.</param>
+            <param name="inverseMass">Inverse of the sum of all child masses.</param>
+            <returns>The compound's center of mass.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeCenterOfMass(System.Span{BepuPhysics.RigidPose},System.Span{System.Single},System.Single@)">
+            <summary>
+            Computes the center of mass of a compound.
+            </summary>
+            <param name="childPoses">Poses of the children in the compound.</param>
+            <param name="childMasses">Masses of the children in the compound.</param>
+            <param name="inverseMass">Inverse of the sum of all child masses.</param>
+            <returns>The compound's center of mass.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeCenterOfMass(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{System.Single})">
+            <summary>
+            Computes the center of mass of a compound.
+            </summary>
+            <param name="children">Children of the compound.</param>
+            <param name="childMasses">Masses of the children in the compound.</param>
+            <returns>The compound's center of mass.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeCenterOfMass(System.Span{BepuPhysics.RigidPose},System.Span{System.Single})">
+            <summary>
+            Computes the center of mass of a compound.
+            </summary>
+            <param name="childPoses">Poses of the children in the compound.</param>
+            <param name="childMasses">Masses of the children in the compound.</param>
+            <returns>The compound's center of mass.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInverseInertia(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{BepuUtilities.Symmetric3x3},System.Span{System.Single},System.Numerics.Vector3@)">
+            <summary>
+            Computes the inertia for a set of compound children based on their poses and the provided inverse inertias. Recenters the children onto the computed center of mass.
+            </summary>
+            <param name="children">Children and their associated poses. Center of mass will be subtracted from the child position.</param>
+            <param name="inverseLocalInertias">Inverse inertias of the children, each in the child's local space. Assumed to have already been premultiplied by the mass of the child.</param>
+            <param name="childMasses">Masses of each child in the compound.</param>
+            <param name="centerOfMass">Computed center of mass that was subtracted from the child positions.</param>
+            <returns><see cref="T:BepuPhysics.BodyInertia"/> of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInverseInertia(System.Span{BepuPhysics.RigidPose},System.Span{BepuUtilities.Symmetric3x3},System.Span{System.Single},System.Numerics.Vector3@)">
+            <summary>
+            Computes the inertia for a set of compound children based on their poses and the provided inverse inertias. Recenters the children onto the computed center of mass.
+            </summary>
+            <param name="childPoses">Poses of the compound's children. Center of mass will be subtracted from the child position.</param>
+            <param name="inverseLocalInertias">Inverse inertias of the children, each in the child's local space. Assumed to have already been premultiplied by the mass of the child.</param>
+            <param name="childMasses">Masses of each child in the compound.</param>
+            <param name="centerOfMass">Computed center of mass that was subtracted from the child positions.</param>
+            <returns><see cref="T:BepuPhysics.BodyInertia"/> of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInertia(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{System.Single},BepuPhysics.Collidables.Shapes)">
+            <summary>
+            Computes the inertia of a compound. Does not recenter the child poses.
+            </summary>
+            <param name="children">Children of the compound.</param>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <param name="childMasses">Masses of the children.</param>
+            <returns>Inertia of the compound.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.ComputeInertia(System.Span{BepuPhysics.Collidables.CompoundChild},System.Span{System.Single},BepuPhysics.Collidables.Shapes,System.Numerics.Vector3@)">
+            <summary>
+            Computes the inertia of a compound. Recenters the child poses around the calculated center of mass.
+            </summary>
+            <param name="children">Children of the compound. Child local positions will have the calculated center of mass subtracted from them.</param>
+            <param name="shapes">Shapes collection containing the data for the compound child shapes.</param>
+            <param name="childMasses">Masses of the children.</param>
+            <param name="centerOfMass">Calculated center of mass of the compound. Subtracted from all the compound child poses.</param>
+            <returns>Inertia of the compound.</returns>
+        </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.BuildKinematicCompound(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild}@,System.Numerics.Vector3@)">
             <summary>
             Builds a buffer of compound children from the accumulated set for a kinematic compound.
             Computes a center of mass and recenters child shapes relative to it. Does not reset the accumulator.
             </summary>
             <param name="children">List of children created from the accumulated set.</param>
-            <param name="inertia">Combined inertia of the compound.</param>
             <param name="center">Computed center of rotation based on the poses and weights of accumulated children.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.BuildKinematicCompound(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild}@)">
@@ -1606,8 +1845,6 @@
             Builds a buffer of compound children from the accumulated set for a kinematic compound. Does not recenter children. Does not reset the accumulator.
             </summary>
             <param name="children">List of children created from the accumulated set.</param>
-            <param name="inertia">Combined inertia of the compound.</param>
-            <param name="center">Computed center of rotation based on the poses and weights of accumulated children.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.Reset">
             <summary>
@@ -1710,6 +1947,17 @@
         <member name="T:BepuPhysics.Collidables.ConvexHullHelper">
             <summary>
             Helper methods to create and process convex hulls from point clouds.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.Collidables.ConvexHullHelper.EdgeFaceIndices">
+            <summary>
+            Tracks the faces associated with a detected surface edge. 
+            During hull calculation, surface edges that have only one face associated with them should have an outstanding entry in the edges to visit set.
+            Surface edges can never validly have more than two faces associated with them. Two means that an edge is 'complete', or should be.
+            Detecting a third edge implies an error condition. By tracking *which* faces were associated with an edge, we can attempt to fix the error.
+            This type of error tends to occur when there is a numerical disagreement about what vertices are coplanar with a face.
+            One iteration could find what it thinks is a complete face, and a later iteration ends up finding more vertices *including* the ones already contained in the previous face.
+            That's a recipe for excessive edge faces, but it's also a direct indicator that we should merge the involved faces for being close enough to coplanar that the error happened in the first place.
             </summary>
         </member>
         <member name="M:BepuPhysics.Collidables.ConvexHullHelper.ComputeHull(System.Span{System.Numerics.Vector3},BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.HullData@)">
@@ -1827,14 +2075,15 @@
             <param name="initialCapacity">Initial capacity to allocate within the batch.</param>
             <param name="shapeBatches">The set of shapes to contain this batch.</param>
             <returns>Shape batch for the shape type.</returns>
-            <remarks>This is typically used internally to initialize new shape collections in response to shapes being added. It is not likely to be useful outside of the engine.</remarks>
+            <remarks>This is typically used internally to initialize new shape collections in response to shapes being added. It is not likely to be useful outside of the engine.
+            Ideally, this would be implemented as a static abstract, but those aren't available yet.</remarks>
         </member>
         <member name="T:BepuPhysics.Collidables.IConvexShape">
             <summary>
             Defines functions available on all convex shapes. Convex shapes have no hollowed out regions; any line passing through a convex shape will never enter and exit more than once.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.IConvexShape.ComputeBounds(System.Numerics.Quaternion@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.Collidables.IConvexShape.ComputeBounds(System.Numerics.Quaternion,System.Numerics.Vector3@,System.Numerics.Vector3@)">
             <summary>
             Computes the bounding box of a shape given an orientation.
             </summary>
@@ -1862,10 +2111,77 @@
             <remarks>Note that the <see cref="T:BepuPhysics.BodyInertia"/> returned by this stores the inverse mass and inverse inertia tensor. 
             This is because the most high frequency use of body inertia most naturally uses the inverse.</remarks>
         </member>
+        <member name="M:BepuPhysics.Collidables.IConvexShape.RayTest(BepuPhysics.RigidPose@,System.Numerics.Vector3,System.Numerics.Vector3,System.Single@,System.Numerics.Vector3@)">
+            <summary>
+            Tests a ray against the shape.
+            </summary>
+            <param name="pose">Pose of the shape during the ray test.</param>
+            <param name="origin">Origin of the ray to test against the shape relative to the shape.</param>
+            <param name="direction">Direction of the ray to test against the shape.</param>
+            <param name="t">Distance along the ray direction to the hit point, if any, in units of the ray direction's length. In other words, hitLocation = origin + direction * t.</param>
+            <param name="normal">Normal of the impact surface, if any.</param>
+            <returns>True if the ray intersected the shape, false otherwise.</returns>
+        </member>
         <member name="T:BepuPhysics.Collidables.ICompoundShape">
             <summary>
             Defines a compound shape type that has children of potentially different types.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.ComputeBounds(System.Numerics.Quaternion,BepuPhysics.Collidables.Shapes,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+            <summary>
+            Computes the bounding box of a compound shape.
+            </summary>
+            <param name="orientation">Orientation of the compound.</param>
+            <param name="shapeBatches">Shape batches to look up child shape information in.</param>
+            <param name="min">Minimum of the compound's bounding box.</param>
+            <param name="max">Maximum of the compound's bounding box.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.AddChildBoundsToBatcher(BepuPhysics.BoundingBoxBatcher@,BepuPhysics.RigidPose@,BepuPhysics.BodyVelocity@,System.Int32)">
+            <summary>
+            Submits child shapes to a bounding box batcher for vectorized bounds calculation.
+            </summary>
+            <remarks>This is used internally for bounding box calculation, but it is unlikely to be useful externally.</remarks>
+            <param name="batcher">Batcher to accumulate children in.</param>
+            <param name="pose">Pose of the compound.</param>
+            <param name="velocity">Velocity of the compound used to expand child bounds.</param>
+            <param name="bodyIndex">Index of the body in the active body set; used to accumulate child bounds results.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuPhysics.Collidables.Shapes,``0@)">
+            <summary>
+            Tests a ray against the shape.
+            </summary>
+            <param name="pose">Pose of the shape during the ray test.</param>
+            <param name="ray">Ray to test against the shape.</param>
+            <param name="maximumT">Maximum distance along the ray, in units of the ray direction's length, that the ray will test.</param>
+            <param name="shapeBatches">Shape batches to look up child shapes in if necessary.</param>
+            <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuPhysics.Collidables.Shapes,``0@)">
+            <summary>
+            Tests multiple rays against the shape.
+            </summary>
+            <param name="pose">Pose of the shape during the ray test.</param>
+            <param name="rays">Rays to test against the shape.</param>
+            <param name="shapeBatches">Shape batches to look up child shapes in if necessary.</param>
+            <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
+        </member>
+        <member name="P:BepuPhysics.Collidables.ICompoundShape.ChildCount">
+            <summary>
+            Gets the number of children in the compound shape.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.GetChild(System.Int32)">
+            <summary>
+            Gets a child from the compound by index.
+            </summary>
+            <param name="compoundChildIndex">Index of the child to look up.</param>
+            <returns>Reference to the requested compound child.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.Dispose(BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Returns all resources used by the shape instance to the given pool.
+            </summary>
+            <param name="pool">Pool to return shape resources to.</param>
         </member>
         <member name="T:BepuPhysics.Collidables.IHomogeneousCompoundShape`2">
             <summary>
@@ -1873,6 +2189,71 @@
             </summary>
             <typeparam name="TChildShape">Type of the child shapes.</typeparam>
             <typeparam name="TChildShapeWide">Type of the child shapes, formatted in AOSOA layout.</typeparam>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.ComputeBounds(System.Numerics.Quaternion,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+            <summary>
+            Computes the bounding box of a compound shape.
+            </summary>
+            <param name="orientation">Orientation of the compound.</param>
+            <param name="min">Minimum of the compound's bounding box.</param>
+            <param name="max">Maximum of the compound's bounding box.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,``0@)">
+            <summary>
+            Tests a ray against the shape.
+            </summary>
+            <param name="pose">Pose of the shape during the ray test.</param>
+            <param name="ray">Ray to test against the shape.</param>
+            <param name="maximumT">Maximum distance along the ray, in units of the ray direction's length, that the ray will test.</param>
+            <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,``0@)">
+            <summary>
+            Tests multiple rays against the shape.
+            </summary>
+            <param name="pose">Pose of the shape during the ray test.</param>
+            <param name="rays">Rays to test against the shape.</param>
+            <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
+        </member>
+        <member name="P:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.ChildCount">
+            <summary>
+            Gets the number of children in the compound shape.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.GetLocalChild(System.Int32,`0@)">
+            <summary>
+            Gets a child shape as it appears in the compound's local space.
+            </summary>
+            <param name="childIndex">Index of the child in the compound parent.</param>
+            <param name="childData">Data representing the child.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.GetPosedLocalChild(System.Int32,`0@,BepuPhysics.RigidPose@)">
+            <summary>
+            Gets a child shape from the compound and compounds a pose for it in the local space of the compound parent.
+            Useful for processes which require a child shape (like a triangle in a mesh) to have their center of mass at zero in the child's own local space.
+            </summary>
+            <param name="childIndex">Index of the child.</param>
+            <param name="childData">Shape of the child.</param>
+            <param name="childPose">Pose in the compound's local space that brings the child shape as described to the proper location in the parent compound's local space.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.GetLocalChild(System.Int32,`1@)">
+            <summary>
+            Gets a child shape as it appears in the compound's local space.
+            </summary>
+            <param name="childIndex">Index of the child in the compound parent.</param>
+            <param name="childData">Reference to an AOSOA slot.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.Dispose(BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Returns all resources used by the shape instance to the given pool.
+            </summary>
+            <param name="pool">Pool to return shape resources to.</param>
+        </member>
+        <member name="T:BepuPhysics.Collidables.IShapeWide`1">
+            <summary>
+            Defines a widely vectorized bundle representation of a shape.
+            </summary>
+            <typeparam name="TShape">Scalar type of the shape.</typeparam>
         </member>
         <member name="P:BepuPhysics.Collidables.IShapeWide`1.AllowOffsetMemoryAccess">
             <summary>
@@ -1906,10 +2287,37 @@
             <param name="index">Index of the slot to put the data into.</param>
             <param name="source">Source of the data to insert.</param>
         </member>
+        <member name="M:BepuPhysics.Collidables.IShapeWide`1.Broadcast(`0@)">
+            <summary>
+            Broadcasts a scalar shape into a bundle containing the same shape in every lane.
+            </summary>
+            <param name="shape">Scalar shape to broadcast.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IShapeWide`1.GetBounds(BepuUtilities.QuaternionWide@,System.Int32,System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Computes the bounds of all shapes in the bundle.
+            </summary>
+            <param name="orientations">Orientations of the shapes in the bundle.</param>
+            <param name="countInBundle">Number of lanes filled in the bundle.</param>
+            <param name="maximumRadius">Computed maximum radius of the shapes in the bundle.</param>
+            <param name="maximumAngularExpansion">Computed maximum bounds expansion that can be caused by angular motion.</param>
+            <param name="min">Minimum bounds of the shapes.</param>
+            <param name="max">Maximum bounds of the shapes.</param>
+        </member>
         <member name="P:BepuPhysics.Collidables.IShapeWide`1.MinimumWideRayCount">
             <summary>
             Gets the lower bound on the number of rays to execute in a wide fashion. Ray bundles with fewer rays will fall back to the single ray code path.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IShapeWide`1.RayTest(BepuPhysics.RigidPoseWide@,BepuPhysics.Collidables.RayWide@,System.Numerics.Vector{System.Int32}@,System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Tests a ray against the shape.
+            </summary>
+            <param name="poses">Poses of the shape bundle during the ray test.</param>
+            <param name="rayWide">Ray to test against the shape bundle.</param>
+            <param name="intersected">Mask representing hit state in each lane. -1 means the ray in that lane hit, 0 means a miss.</param>
+            <param name="t">Distance along the ray direction to the hit point, if any, in units of the ray direction's length. In other words, hitLocation = origin + direction * t.</param>
+            <param name="normal">Normal of the impact surface, if any.</param>
         </member>
         <member name="T:BepuPhysics.Collidables.Mesh">
             <summary>
@@ -1931,7 +2339,7 @@
             Gets or sets the scale of the mesh.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.Mesh.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3@,BepuUtilities.Memory.BufferPool)">
+        <member name="M:BepuPhysics.Collidables.Mesh.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3,BepuUtilities.Memory.BufferPool)">
             <summary>
             Creates a mesh shape.
             </summary>
@@ -2071,7 +2479,7 @@
             Provides helpers for computing the inertia of objects with triangular surfaces.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTetrahedronVolume(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTetrahedronVolume(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
             Computes the signed volume of a tetrahedron where the fourth vertex is at the origin.
             Triangles visible from outside the shape are assumed to have clockwise winding in right handed coordinates or counterclockwise winding in left handed coordinates.
@@ -2081,7 +2489,7 @@
             <param name="c">Third vertex of the tetrahedron.</param>
             <returns>Volume of the tetrahedron.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTetrahedronContribution(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single@,BepuUtilities.Symmetric3x3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTetrahedronContribution(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single@,BepuUtilities.Symmetric3x3@)">
             <summary>
             Integrates the inertia contribution of a tetrahedron with vertices at a, b, c, and (0,0,0) assuming a density of 1.
             </summary>
@@ -2123,7 +2531,7 @@
             <param name="volume">Volume of the mesh.</param>
             <param name="center">Center of mass of the mesh.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleContribution(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,BepuUtilities.Symmetric3x3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleContribution(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuUtilities.Symmetric3x3@)">
             <summary>
             Integrates the inertia contribution from a single triangle.
             </summary>
@@ -2133,7 +2541,7 @@
             <param name="mass">Mass of the triangle.</param>
             <param name="inertiaTensor">Inertia tensor of the triangle.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleArea(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleArea(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
             Computes the area of a triangle.
             </summary>
@@ -2142,7 +2550,7 @@
             <param name="c">Third vertex in the triangle.</param>
             <returns>Area of the triangle.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleContribution(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single@,BepuUtilities.Symmetric3x3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.ComputeTriangleContribution(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single@,BepuUtilities.Symmetric3x3@)">
             <summary>
             Integrates the inertia contribution from a single triangle assuming a density of 1.
             </summary>
@@ -2179,7 +2587,7 @@
             <param name="triangleSource">Source from which to retrieve a sequence of triangles.</param>
             <returns>Center of mass of the mesh.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.GetInertiaOffset(System.Single,System.Numerics.Vector3@,BepuUtilities.Symmetric3x3@)">
+        <member name="M:BepuPhysics.Collidables.MeshInertiaHelper.GetInertiaOffset(System.Single,System.Numerics.Vector3,BepuUtilities.Symmetric3x3@)">
             <summary>
             Computes an offset for an inertia tensor based on an offset frame of reference.
             </summary>
@@ -2251,11 +2659,35 @@
             <param name="shapeIndex">Index of the shape reference to retrieve.</param>
             <returns>Reference to the shape at the given index.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.Shapes.UpdateBounds(BepuPhysics.RigidPose@,BepuPhysics.Collidables.TypedIndex@,BepuUtilities.BoundingBox@)">
+        <member name="T:BepuPhysics.Collidables.IConvexShapeBatch">
+            <summary>
+            Defines a shape batch containing convex objects that support simple inertia calculations.
+            </summary>
+            <remarks>This interface gives compounds a way to compute inertia despite not having direct typed access to the child shapes.
+            It's a layer of overhead that can usually be avoided, but it's sometimes convenient to be able to just enumerate child inertias.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.IConvexShapeBatch.ComputeInertia(System.Int32,System.Single)">
+            <summary>
+            Computes the inertia of a shape.
+            </summary>
+            <param name="shapeIndex">Index of the shape to compute the inertia of.</param>
+            <param name="mass">Mass to use to compute the inertia.</param>
+            <returns>Inertia of the shape.</returns>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Shapes.UpdateBounds(BepuPhysics.RigidPose,BepuPhysics.Collidables.TypedIndex,BepuUtilities.BoundingBox@)">
             <summary>
             Computes a bounding box for a single shape.
             </summary>
             <param name="pose">Pose to calculate the bounding box of.</param>
+            <param name="shapeIndex">Index of the shape.</param>
+            <param name="bounds">Bounding box of the specified shape with the specified pose.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Shapes.UpdateBounds(System.Numerics.Vector3,System.Numerics.Quaternion,BepuPhysics.Collidables.TypedIndex,BepuUtilities.BoundingBox@)">
+            <summary>
+            Computes a bounding box for a single shape.
+            </summary>
+            <param name="position">Position of the shape.</param>
+            <param name="orientation">Orientation of the shape.</param>
             <param name="shapeIndex">Index of the shape.</param>
             <param name="bounds">Bounding box of the specified shape with the specified pose.</param>
         </member>
@@ -2337,7 +2769,7 @@
             Third vertex of the triangle in local space.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.Triangle.#ctor(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+        <member name="M:BepuPhysics.Collidables.Triangle.#ctor(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
             Creates a triangle shape.
             </summary>
@@ -2358,6 +2790,11 @@
         <member name="F:BepuPhysics.Collidables.TriangleWide.DegenerateTriangleEpsilon">
             <summary>
             Epsilon to apply to testing triangles for degeneracy (which will be scaled by a pair-determined epsilon scale). Degenerate triangles do not have well defined normals and should not contribute 
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.Collidables.TypedIndex">
+            <summary>
+            Represents an index with an associated type packed into a single integer.
             </summary>
         </member>
         <member name="F:BepuPhysics.Collidables.TypedIndex.Packed">
@@ -2406,6 +2843,36 @@
             <summary>
             The number of bodies to accumulate per type before executing an AABB update. The more bodies per batch, the less virtual overhead and execution divergence.
             However, this should be kept low enough such that the data that has to be gathered by the bounding box update is still usually in L1.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.BroadPhase">
+            <summary>
+            Manages scene acceleration structures for collision detection and queries.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.BroadPhase.ActiveLeaves">
+            <summary>
+            Collidable references contained within the <see cref="F:BepuPhysics.CollisionDetection.BroadPhase.ActiveTree"/>. Note that values at or beyond the <see cref="F:BepuPhysics.CollisionDetection.BroadPhase.ActiveTree"/>.LeafCount are not defined.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.BroadPhase.StaticLeaves">
+            <summary>
+            Collidable references contained within the <see cref="F:BepuPhysics.CollisionDetection.BroadPhase.StaticTree"/>. Note that values at or beyond <see cref="F:BepuPhysics.CollisionDetection.BroadPhase.StaticTree"/>.LeafCount are not defined.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.CollisionDetection.BroadPhase.Pool">
+            <summary>
+            Pool used by the broad phase.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.BroadPhase.ActiveTree">
+            <summary>
+            Tree containing wakeful bodies.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.BroadPhase.StaticTree">
+            <summary>
+            Tree containing sleeping bodies and statics.
             </summary>
         </member>
         <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetActiveBoundsPointers(System.Int32,System.Numerics.Vector3*@,System.Numerics.Vector3*@)">
@@ -2464,7 +2931,7 @@
             Releases memory used by the broad phase. Leaves the broad phase unusable.
             </summary>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.RayCast``1(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,``0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@,System.Int32)">
             <summary>
             Finds any intersections between a ray and leaf bounding boxes.
             </summary>
@@ -2475,7 +2942,7 @@
             <param name="rayTester">Callback to execute on ray-leaf bounding box intersections.</param>
             <param name="id">User specified id of the ray.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@)">
             <summary>
             Finds any intersections between a swept bounding box and leaf bounding boxes.
             </summary>
@@ -2486,7 +2953,7 @@
             <param name="maximumT">Maximum length of the sweep in units of the direction's length.</param>
             <param name="sweepTester">Callback to execute on sweep-leaf bounding box intersections.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(BepuUtilities.BoundingBox@,System.Numerics.Vector3@,System.Single,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(BepuUtilities.BoundingBox@,System.Numerics.Vector3,System.Single,``0@)">
             <summary>
             Finds any intersections between a swept bounding box and leaf bounding boxes.
             </summary>
@@ -2496,7 +2963,7 @@
             <param name="maximumT">Maximum length of the sweep in units of the direction's length.</param>
             <param name="sweepTester">Callback to execute on sweep-leaf bounding box intersections.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(System.Numerics.Vector3@,System.Numerics.Vector3@,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(System.Numerics.Vector3,System.Numerics.Vector3,``0@)">
             <summary>
             Finds any overlaps between a bounding box and leaf bounding boxes.
             </summary>
@@ -2523,6 +2990,71 @@
             Timestep duration used by pairs which rely on velocity to compute local bounding boxes for pruning.
             </summary>
         </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionBatcher`1.Flush">
+            <summary>
+            Forces any remaining partial batches to execute and disposes the batcher.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionBatcher`1.ProcessConvexResult(BepuPhysics.CollisionDetection.ConvexContactManifold@,BepuPhysics.CollisionDetection.PairContinuation@)">
+            <summary>
+            Reports the result of a convex collision test to the callbacks and, if necessary, to any continuations for postprocessing.
+            </summary>
+            <remarks>Unless you're building custom compound collision pairs or adding new contact processing continuations, you can safely ignore this.</remarks>
+            <param name="manifold">Contacts detected for the pair.</param>
+            <param name="continuation">Continuation describing the pair and what to do with it.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionBatcher`1.ProcessEmptyResult(BepuPhysics.CollisionDetection.PairContinuation@)">
+            <summary>
+            Reports the zero result of a convex collision test to the callbacks and, if necessary, to any continuations for postprocessing.
+            </summary>
+            <remarks>Unless you're building custom compound collision pairs or adding new contact processing continuations, you can safely ignore this.</remarks>
+            <param name="continuation">Continuation describing the pair and what to do with it.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionBatcher`1.ProcessUntestedSubpairConvexResult(BepuPhysics.CollisionDetection.PairContinuation@)">
+            <summary>
+            Submits a subpair whose testing was blocked by user callback as complete to any relevant continuations.
+            </summary>
+            <remarks>Unless you're building custom compound collision pairs or adding new contact processing continuations, you can safely ignore this.</remarks>
+            <param name="continuation">Continuation describing the pair and what to do with it.</param>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.ICollisionTestContinuation">
+            <summary>
+            Defines a type which includes information necessary to apply some form of post processing to a collision test result.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.ICollisionTestContinuation.Create(System.Int32,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Creates a collision test continuation with the given number of slots for subpairs.
+            </summary>
+            <param name="slots">Number of subpair slots to include in the continuation.</param>
+            <param name="pool">Pool to take resources from.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.ICollisionTestContinuation.OnChildCompleted``1(BepuPhysics.CollisionDetection.PairContinuation@,BepuPhysics.CollisionDetection.ConvexContactManifold@,BepuPhysics.CollisionDetection.CollisionBatcher{``0}@)">
+            <summary>
+            Handles what to do next when the child pair has finished execution and the resulting manifold is available.
+            </summary>
+            <typeparam name="TCallbacks">Type of the callbacks used in the batcher.</typeparam>
+            <param name="report">Continuation instance being considered.</param>
+            <param name="manifold">Contact manifold for the child pair.</param>
+            <param name="batcher">Collision batcher processing the pair.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.ICollisionTestContinuation.OnUntestedChildCompleted``1(BepuPhysics.CollisionDetection.PairContinuation@,BepuPhysics.CollisionDetection.CollisionBatcher{``0}@)">
+            <summary>
+            Handles what to do next when the child pair was rejected for testing, and no manifold exists.
+            </summary>
+            <typeparam name="TCallbacks">Type of the callbacks used in the batcher.</typeparam>
+            <param name="report">Continuation instance being considered.</param>
+            <param name="batcher">Collision batcher processing the pair.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.ICollisionTestContinuation.TryFlush``1(System.Int32,BepuPhysics.CollisionDetection.CollisionBatcher{``0}@)">
+            <summary>
+            Checks if the parent pair is complete and should be flushed.
+            </summary>
+            <typeparam name="TCallbacks">Type of the callbacks used in the batcher.</typeparam>
+            <param name="pairId">Id of the pair to attempt to flush.</param>
+            <param name="batcher">Collision batcher processing the pair.</param>
+            <returns>True if the pair was done and got flushed, false otherwise.</returns>
+        </member>
         <member name="T:BepuPhysics.CollisionDetection.CollisionContinuationType">
             <summary>
             Describes the flow control to apply to a convex-convex pair report.
@@ -2548,6 +3080,35 @@
             Marks a pair as a part of a set of mesh-convex collisions spawned by a mesh-compound pair, potentially requiring mesh boundary smoothing.
             </summary>
         </member>
+        <member name="F:BepuPhysics.CollisionDetection.PairContinuation.ChildIndexBits">
+            <summary>
+            Covers bits [0, 20) in the packed representation. Refers to the child pair index in a subtask generating collision task that generated this continuation.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.PairContinuation.ContinuationIndexBits">
+            <summary>
+            Covers bits [20, 30) in the packed representation. Refers to the index of a subpair in a continuation processor.
+            Maximum number should be equal to the sum of the batch sizes subtask generating collision tasks, which as of this writing is 384, but we'll include a little buffer.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.PairContinuation.ContinuationTypeBits">
+            <summary>
+            Covers bits [30, 32) in the packed representation. Refers to which continuation processor should be used for this subpair.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.ICollisionCallbacks">
+            <summary>
+            Callbacks invoked by a <see cref="T:BepuPhysics.CollisionDetection.CollisionBatcher`1"/>.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.ICollisionCallbacks.OnPairCompleted``1(System.Int32,``0@)">
+            <summary>
+            Called when a pair submitted to a collision batcher has finished collision detection.
+            </summary>
+            <typeparam name="TManifold">Type of the contact manifold generated by collision detection.</typeparam>
+            <param name="pairId">Id of the pair that completed.</param>
+            <param name="manifold">Contact manifold generated by collision testing.</param>
+        </member>
         <member name="M:BepuPhysics.CollisionDetection.ICollisionCallbacks.OnChildPairCompleted(System.Int32,System.Int32,System.Int32,BepuPhysics.CollisionDetection.ConvexContactManifold@)">
             <summary>
             Provides control over subtask generated results before they are reported to the parent task.
@@ -2565,6 +3126,11 @@
             <param name="childA">Index of the child belonging to collidable A in the subpair under consideration.</param>
             <param name="childB">Index of the child belonging to collidable B in the subpair under consideration.</param>
             <returns>True if testing should proceed, false otherwise.</returns>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.CollisionTask">
+            <summary>
+            Parent type of tasks which handle collision tests between batches of shapes of a particular type.
+            </summary>
         </member>
         <member name="P:BepuPhysics.CollisionDetection.CollisionTask.BatchSize">
             <summary>
@@ -2600,8 +3166,11 @@
             <typeparam name="TCallbacks">Type of the callbacks used to handle results of collision tasks.</typeparam>
             <param name="batcher">Batcher responsible for the invocation.</param>
             <param name="batch">Batch of pairs to test.</param>
-            <param name="continuations">Continuations to invoke upon completion of a top level pair.</param>
-            <param name="filters">Filters to use to influence execution of the collision tasks.</param>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.CollisionTaskPairType">
+            <summary>
+            Describes the data requirements for a collision pair type in a <see cref="T:BepuPhysics.CollisionDetection.CollisionBatcher`1"/>.
+            </summary>
         </member>
         <member name="F:BepuPhysics.CollisionDetection.CollisionTaskPairType.StandardPair">
             <summary>
@@ -2627,6 +3196,72 @@
             <summary>
             Pair that requires computing local bounding boxes, and so requires extra information like velocity.
             </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.CollisionTaskReference">
+            <summary>
+            Metadata about a collision task.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.CollisionTaskReference.TaskIndex">
+            <summary>
+            Index of the task in the registry.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.CollisionTaskReference.BatchSize">
+            <summary>
+            Number of pairs to accumulate in a batch before dispatching tests.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.CollisionTaskReference.ExpectedFirstTypeId">
+            <summary>
+            The type id that is expected to come first in the collision pair.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.CollisionTaskReference.PairType">
+            <summary>
+            Data requirements for the collision pair type in a <see cref="T:BepuPhysics.CollisionDetection.CollisionBatcher`1"/>.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.CollisionTaskRegistry">
+            <summary>
+            Registry of collision tasks used to handle various shape pair types.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.CollisionDetection.CollisionTaskRegistry.Item(System.Int32)">
+            <summary>
+            Gets the collision task associated with a task index.
+            </summary>
+            <param name="taskIndex">Task index to look up.</param>
+            <returns>Task associated with the task index.</returns>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionTaskRegistry.#ctor(System.Int32)">
+            <summary>
+            Creates a new collision task registry.
+            </summary>
+            <param name="initialShapeCount">Initial number of shape types to allocate space for in the registry.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionTaskRegistry.Register(BepuPhysics.CollisionDetection.CollisionTask)">
+            <summary>
+            Registers a collision task.
+            </summary>
+            <param name="task">Task to register.</param>
+            <returns>Index of the task in the registry.</returns>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionTaskRegistry.GetTaskReference(System.Int32,System.Int32)">
+            <summary>
+            Gets metadata about the task associated with a shape type pair.
+            </summary>
+            <param name="topLevelTypeA">Type index of the first shape.</param>
+            <param name="topLevelTypeB">Type index of the second shape.</param>
+            <returns>Reference to the metadata for the task.</returns>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionTaskRegistry.GetTaskReference``2">
+            <summary>
+            Gets metadata about the task associated with a shape type pair.
+            </summary>
+            <typeparam name="TShapeA">Type of the first shape.</typeparam>
+            <typeparam name="TShapeB">Type of the second shape.</typeparam>
+            <returns>Reference to the metadata for the task.</returns>
         </member>
         <member name="P:BepuPhysics.CollisionDetection.CollisionTasks.IPairTester`3.BatchSize">
             <summary>
@@ -2659,12 +3294,6 @@
             </summary>
             <typeparam name="TA">Type of the first shape in the pair.</typeparam>
             <typeparam name="TB">Type of the second shape in the pair.</typeparam>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.IPairCacheEntry.CacheTypeId">
-            <summary>
-            Gets the cache's type id. 
-            Note that this is not the same as a constraint type id or other type ids; it only refers to the type of the caches for storage within the PairCache's structures.
-            </summary>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.ConstraintRemover">
             <summary>
@@ -2985,6 +3614,21 @@
             Gets whether this index actually refers to anything. The Type and Index should only be used if this is true.
             </summary>
         </member>
+        <member name="T:BepuPhysics.CollisionDetection.DepthRefiner`6">
+            <summary>
+            Incrementally refines a sample direction to approach a local minimum depth between two convex bodies.
+            </summary>
+            <remarks>
+            The DepthRefiner implements a Tootbird search: an incremental algorithm that takes steps towards the Tootbird.
+            The Tootbird is the origin projected on the support plane of the best(lowest depth) support direction observed so far.
+            This uses a simplex that updates with rules similar to a simplified version of GJK.The Tootbird is definitionally not inside the minkowski sum.</remarks>
+            <typeparam name="TShapeA">Type of the first shape.</typeparam>
+            <typeparam name="TShapeWideA">SIMD type of the first shape.</typeparam>
+            <typeparam name="TSupportFinderA">Type providing support sampling for the first shape.</typeparam>
+            <typeparam name="TShapeB">Type of the second shape.</typeparam>
+            <typeparam name="TShapeWideB">SIMD type of the second shape.</typeparam>
+            <typeparam name="TSupportFinderB">Type providing support sampling for the second shape.</typeparam>
+        </member>
         <member name="T:BepuPhysics.CollisionDetection.PairMaterialProperties">
             <summary>
             Material properties governing the interaction between colliding bodies. Used by the narrow phase to create constraints of the appropriate configuration.
@@ -3191,11 +3835,6 @@
             Associated with a pair of two collidables that each are controlled by bodies.
             </summary>
         </member>
-        <member name="T:BepuPhysics.CollisionDetection.EmptyCollisionCache">
-            <summary>
-            Special type for collision pairs that do not need to store any supplementary information.
-            </summary>
-        </member>
         <member name="F:BepuPhysics.CollisionDetection.PreflushJobType.AwakenerPhaseOne">
             <summary>
             Phase one job in the awakener. JobIndex used to identify sub-job.
@@ -3277,16 +3916,54 @@
             Offset from the origin of the second shape's parent to the child's location in world space. If there is no parent, this is the zero vector.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.CollidablePairPointers.ConstraintCache">
+        <member name="T:BepuPhysics.CollisionDetection.PairCacheChangeIndex">
             <summary>
-            A narrowphase-specific type and index into the pair cache's constraint data set. Collision pairs which have no associated constraint, either 
-            because no contacts were generated or because the constraint was filtered, will have a nonexistent ConstraintCache.
+            Refers to a change in a <see cref="T:BepuPhysics.CollisionDetection.PairCache"/>.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.CollidablePairPointers.CollisionDetectionCache">
+        <member name="F:BepuPhysics.CollisionDetection.PairCacheChangeIndex.WorkerIndex">
             <summary>
-            A narrowphase-specific type and index into a batch of custom data for the pair. Many types do not use any supplementary data, but some make use of temporal coherence
-            to accelerate contact generation.
+            Index of the <see cref="T:BepuPhysics.CollisionDetection.WorkerPendingPairChanges"/> storing the pending change, if any. If -1, then this pair cache change refers to a change directly to the mapping.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.PairCacheChangeIndex.Index">
+            <summary>
+            Index of the change in the cache. For pending changes, refers to the index within the pending cache; for a direct mapping changes, refers to the pair index.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.CollisionDetection.PairCacheChangeIndex.IsPending">
+            <summary>
+            Gets whether this change is in the <see cref="T:BepuPhysics.CollisionDetection.PairCache"/>
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.ConstraintCache">
+            <summary>
+            Stores information about a contact constraint from the previous timestep.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.ConstraintCache.ConstraintHandle">
+            <summary>
+            Handle of the contact constraint associated with this cache.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.ConstraintCache.FeatureId0">
+            <summary>
+            Feature id of the first contact in the constraint associated with this cache.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.ConstraintCache.FeatureId1">
+            <summary>
+            Feature id of the second contact in the constraint associated with this cache.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.ConstraintCache.FeatureId2">
+            <summary>
+            Feature id of the third contact in the constraint associated with this cache.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.CollisionDetection.ConstraintCache.FeatureId3">
+            <summary>
+            Feature id of the fourth contact in the constraint associated with this cache.
             </summary>
         </member>
         <member name="F:BepuPhysics.CollisionDetection.PairCache.PairFreshness">
@@ -3304,7 +3981,7 @@
             Flush all deferred changes from the last narrow phase execution.
             </summary>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.PairCache.CompleteConstraintAdd``1(BepuPhysics.CollisionDetection.NarrowPhase,BepuPhysics.Solver,``0@,BepuPhysics.CollisionDetection.PairCacheIndex,BepuPhysics.ConstraintHandle,BepuPhysics.CollisionDetection.CollidablePair@)">
+        <member name="M:BepuPhysics.CollisionDetection.PairCache.CompleteConstraintAdd``1(BepuPhysics.CollisionDetection.NarrowPhase,BepuPhysics.Solver,``0@,BepuPhysics.CollisionDetection.PairCacheChangeIndex,BepuPhysics.ConstraintHandle,BepuPhysics.CollisionDetection.CollidablePair@)">
             <summary>
             Completes the addition of a constraint by filling in the narrowphase's pointer to the constraint and by distributing accumulated impulses.
             </summary>
@@ -3312,43 +3989,13 @@
             <param name="narrowPhase">Narrow phase that triggered the constraint add.</param>
             <param name="solver">Solver containing the constraint to set the impulses of.</param>
             <param name="impulses">Warm starting impulses to apply to the contact constraint.</param>
-            <param name="constraintCacheIndex">Index of the constraint cache to update.</param>
+            <param name="pairCacheChangeIndex">Index of the change associated with this constraint in the <see cref="T:BepuPhysics.CollisionDetection.PairCache"/>.</param>
             <param name="constraintHandle">Constraint handle associated with the constraint cache being updated.</param>
             <param name="pair">Collidable pair associated with the new constraint.</param>
         </member>
         <member name="F:BepuPhysics.CollisionDetection.PairCache.ConstraintHandleToPair">
             <summary>
             Mapping from constraint handle back to collision detection pair cache locations.
-            </summary>
-        </member>
-        <member name="T:BepuPhysics.CollisionDetection.PairCacheIndex">
-            <summary>
-            Packed indirection to data associated with a pair cache entry.
-            </summary>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.PairCacheIndex.Exists">
-            <summary>
-            Gets whether this index actually refers to anything. The Type and Index should only be used if this is true.
-            </summary>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.PairCacheIndex.Active">
-            <summary>
-            Gets whether this index refers to an active cache entry. If false, the entry exists in an inactive set.
-            </summary>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.PairCacheIndex.Cache">
-            <summary>
-            Gets the index of the cache that owns the entry.
-            </summary>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.PairCacheIndex.Type">
-            <summary>
-            Gets the type index of the object.
-            </summary>
-        </member>
-        <member name="P:BepuPhysics.CollisionDetection.PairCacheIndex.Index">
-            <summary>
-            Gets the index of the object within the type specific list.
             </summary>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.BroadPhaseRayBatcher`1">
@@ -3362,6 +4009,7 @@
             Constructs a ray batcher for the broad phase and initializes its backing resources.
             </summary>
             <param name="pool">Pool to pull resources from.</param>
+            <param name="broadPhase">Broad phase to be tested.</param>
             <param name="rayTester">Ray tester used to test leaves found by the broad phase tree traversals.</param>
             <param name="batcherRayCapacity">Maximum number of rays to execute in each traversal.
             This should typically be chosen as the highest value which avoids spilling data out of L2 cache.</param>
@@ -3407,7 +4055,14 @@
             Tests any accumulated rays against the broad phase trees and then resets the batcher.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:BepuPhysics.CollisionDetection.ISweepFilter.AllowTest(System.Int32,System.Int32)" -->
+        <member name="M:BepuPhysics.CollisionDetection.ISweepFilter.AllowTest(System.Int32,System.Int32)">
+            <summary>
+            Checks whether a swept test should be performed for children of swept shapes.
+            </summary>
+            <param name="childA">Index of the child belonging to collidable A.</param>
+            <param name="childB">Index of the child belonging to collidable B.</param>
+            <returns>True if testing should proceed, false otherwise.</returns>
+        </member>
         <member name="P:BepuPhysics.CollisionDetection.SweepTask.ShapeTypeIndexA">
             <summary>
             Gets the first shape type index associated with the task.
@@ -3432,17 +4087,17 @@
             Helper class for creating runtime specialized vectorized ray intersection tests with shapes that support broadcasting.
             </summary>
         </member>
-        <member name="T:BepuPhysics.CollisionDetection.WorkerPairCache">
+        <member name="T:BepuPhysics.CollisionDetection.WorkerPendingPairChanges">
             <summary>
-            The cached pair data created by a single worker during the last execution of narrow phase pair processing.
+            Contains the pending pair cache changes created by a single worker during the last execution of narrow phase pair processing.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.WorkerPairCache.PendingAdds">
+        <member name="F:BepuPhysics.CollisionDetection.WorkerPendingPairChanges.PendingAdds">
             <summary>
             The set of pair-pointer associations created by this worker that should be added to the pair mapping.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.WorkerPairCache.PendingRemoves">
+        <member name="F:BepuPhysics.CollisionDetection.WorkerPendingPairChanges.PendingRemoves">
             <summary>
             The set of pairs to remove from the pair cache generated by the worker.
             </summary>
@@ -3679,7 +4334,7 @@
             Spring frequency and damping parameters.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Constraints.AreaConstraint.#ctor(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,BepuPhysics.Constraints.SpringSettings)">
+        <member name="M:BepuPhysics.Constraints.AreaConstraint.#ctor(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,BepuPhysics.Constraints.SpringSettings)">
             <summary>
             Creates a new area constraint, initializing the target area using a set of initial positions.
             </summary>
@@ -4087,7 +4742,7 @@
             Spring frequency and damping parameters.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Constraints.DistanceLimit.#ctor(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,System.Single,BepuPhysics.Constraints.SpringSettings@)">
+        <member name="M:BepuPhysics.Constraints.DistanceLimit.#ctor(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,System.Single,BepuPhysics.Constraints.SpringSettings@)">
             <summary>
             Creates a distance limit description.
             </summary>
@@ -4132,7 +4787,7 @@
             Spring frequency and damping parameters.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Constraints.DistanceServo.#ctor(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,BepuPhysics.Constraints.SpringSettings@,BepuPhysics.Constraints.ServoSettings@)">
+        <member name="M:BepuPhysics.Constraints.DistanceServo.#ctor(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuPhysics.Constraints.SpringSettings@,BepuPhysics.Constraints.ServoSettings@)">
             <summary>
             Creates a distance servo description.
             </summary>
@@ -4314,6 +4969,11 @@
         <member name="P:BepuPhysics.Constraints.IConstraintDescription`1.TypeProcessorType">
             <summary>
             Gets the type of the type batch which contains described constraints.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Constraints.IConstraintDescription`1.CreateTypeProcessor">
+            <summary>
+            Creates a type processor for this constraint type.
             </summary>
         </member>
         <member name="T:BepuPhysics.Constraints.IOneBodyConstraintDescription`1">
@@ -5000,7 +5660,7 @@
             Spring frequency and damping parameters.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Constraints.VolumeConstraint.#ctor(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Numerics.Vector3@,BepuPhysics.Constraints.SpringSettings)">
+        <member name="M:BepuPhysics.Constraints.VolumeConstraint.#ctor(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,BepuPhysics.Constraints.SpringSettings)">
             <summary>
             Creates a new volume constraint, initializing the target volume using a set of initial positions.
             </summary>
@@ -5559,7 +6219,7 @@
             Clears the simulation of every object and returns all pooled memory to the buffer pool. Leaves the simulation in an unusable state.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Simulation.RayCast``1(System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single,``0@,System.Int32)">
+        <member name="M:BepuPhysics.Simulation.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@,System.Int32)">
             <summary>
             Intersects a ray against the simulation.
             </summary>
@@ -5650,7 +6310,7 @@
             Constructs a description of simulation allocations.
             </summary>
             <param name="bodies">The number of bodies to allocate space for.</param>
-            <param name="statics">The number of inactive islands to allocate space for.</param>
+            <param name="statics">The number of statics to allocate space for.</param>
             <param name="islands">The number of inactive islands to allocate space for.</param>
             <param name="shapesPerType">Minimum number of shapes to allocate space for in each shape type batch.</param>
             <param name="constraints">The number of constraints to allocate bookkeeping space for. This does not affect actual type batch allocation sizes, only the solver-level constraint handle storage.</param>
@@ -5680,7 +6340,7 @@
             <param name="childIndex">Index of the candidate in the parent collidable.</param>
             <returns>True if the child should be tested by the ray, false otherwise.</returns>
         </member>
-        <member name="M:BepuPhysics.IShapeRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3@,System.Int32)">
+        <member name="M:BepuPhysics.IShapeRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3,System.Int32)">
             <summary>
             Called when a ray impact has been found.
             </summary>
@@ -5710,7 +6370,7 @@
             <param name="childIndex">Index of the candidate in the parent collidable.</param>
             <returns>True if the child should be tested by the ray, false otherwise.</returns>
         </member>
-        <member name="M:BepuPhysics.IRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3@,BepuPhysics.Collidables.CollidableReference,System.Int32)">
+        <member name="M:BepuPhysics.IRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3,BepuPhysics.Collidables.CollidableReference,System.Int32)">
             <summary>
             Called when a ray impact has been found.
             </summary>
@@ -5741,7 +6401,7 @@
             <param name="child">Index of the child in the collidable to check.</param>
             <returns>True if the sweep test should be attempted, false otherwise.</returns>
         </member>
-        <member name="M:BepuPhysics.ISweepHitHandler.OnHit(System.Single@,System.Single,System.Numerics.Vector3@,System.Numerics.Vector3@,BepuPhysics.Collidables.CollidableReference)">
+        <member name="M:BepuPhysics.ISweepHitHandler.OnHit(System.Single@,System.Single,System.Numerics.Vector3,System.Numerics.Vector3,BepuPhysics.Collidables.CollidableReference)">
             <summary>
             Called when a sweep test detects a hit with nonzero T value.
             </summary>
@@ -6427,6 +7087,12 @@
             </summary>
             <param name="description">Description of the static.</param>
         </member>
+        <member name="M:BepuPhysics.StaticReference.GetDescription">
+            <summary>
+            Gets a description of the static.
+            </summary>
+            <returns>Description of the static.</returns>
+        </member>
         <member name="M:BepuPhysics.StaticReference.ApplyDescription(BepuPhysics.StaticDescription@)">
             <summary>
             Sets a static's properties according to a description.
@@ -6657,6 +7323,13 @@
             <param name="handle">Handle of the static to look up the description of.</param>
             <param name="description">Gathered description of the handle-referenced static.</param>
         </member>
+        <member name="M:BepuPhysics.Statics.GetDescription(BepuPhysics.StaticHandle)">
+            <summary>
+            Gets the current description of the static referred to by a given handle.
+            </summary>
+            <param name="handle">Handle of the static to look up the description of.</param>
+            <returns>Gathered description of the handle-referenced static.</returns>
+        </member>
         <member name="M:BepuPhysics.Statics.GetStaticReference(BepuPhysics.StaticHandle)">
             <summary>
             Gets a reference to a static by its handle.
@@ -6761,6 +7434,11 @@
             This should typically be chosen as the highest value which avoids spilling data out of L2 cache.</param>
             <param name="treeDepthForPreallocation">Tree depth to preallocate ray stack space for. If a traversal finds nodes deeper than this, a dynamic resize will be triggered.</param>
         </member>
+        <member name="M:BepuPhysics.Trees.RayBatcher.Dispose">
+            <summary>
+            Disposes all the resources backing the ray batcher.
+            </summary>
+        </member>
         <member name="T:BepuPhysics.Trees.RayBatcher.TreeRayWide">
             <summary>
             Ray representation designed for quicker intersection against axis aligned bounding boxes.
@@ -6787,11 +7465,6 @@
             Resets the accumulated ray count to zero.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Trees.RayBatcher.Dispose">
-            <summary>
-            Disposes all the resources backing the ray batcher.
-            </summary>
-        </member>
         <member name="F:BepuPhysics.Trees.Tree.Nodes">
             <summary>
             Buffer of nodes in the tree.
@@ -6802,19 +7475,19 @@
             Buffer of metanodes in the tree. Metanodes contain metadata that aren't read during most query operations but are useful for bookkeeping.
             </summary>
         </member>
-        <member name="P:BepuPhysics.Trees.Tree.NodeCount">
-            <summary>
-            Gets or sets the number of nodes in the tree.
-            </summary>
-        </member>
         <member name="F:BepuPhysics.Trees.Tree.Leaves">
             <summary>
             Buffer of leaves in the tree.
             </summary>
         </member>
-        <member name="P:BepuPhysics.Trees.Tree.LeafCount">
+        <member name="F:BepuPhysics.Trees.Tree.NodeCount">
             <summary>
-            Gets or sets the number of leaves in the tree.
+            Number of nodes in the tree.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.LeafCount">
+            <summary>
+            Number of leaves in the tree.
             </summary>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.GetBoundsPointers(System.Int32,System.Numerics.Vector3*@,System.Numerics.Vector3*@)">
@@ -6896,13 +7569,161 @@
             <param name="merged">Bounding box holding both the new and existing leaves.</param>
             <returns>Index of the leaf </returns>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox@,BepuUtilities.Memory.BufferPool)">
+        <member name="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)">
             <summary>
             Adds a leaf to the tree with the given bounding box and returns the index of the added leaf.
             </summary>
             <param name="bounds">Extents of the leaf bounds.</param>
             <param name="pool">Resource pool to use if resizing is required.</param>
             <returns>Index of the leaf allocated in the tree's leaf array.</returns>
+        </member>
+        <member name="T:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext">
+            <summary>
+            Stores resources required by a worker to dispatch and manage multithreaded work.
+            </summary>
+            <remarks>
+            Some of the resources cached here are technically redundant with the storage used for workers and ends up involving an extra bin scan on a multithreaded test,
+            but the cost associated with doing so is... low. The complexity cost of trying to use the memory allocated for workers is not low.
+            </remarks>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext.BinBoundingBoxes">
+            <summary>
+            Bins associated with this worker for the duration of a node. This allocation will persist across the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext.BinCentroidBoundingBoxes">
+            <summary>
+            Centroid bound bins associated with this worker for the duration of a node. This allocation will persist across the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext.BinBoundingBoxesScan">
+            <summary>
+            Bins associated with this worker for use in the SAH scan. This allocation will persist across the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext.BinCentroidBoundingBoxesScan">
+            <summary>
+            Centroid bound bins associated with this worker for use in the SAH scan. This allocation will persist across the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext.BinLeafCounts">
+            <summary>
+            Bin leaf counts associated with this worker for the duration of a node. This allocation will persist across the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.MultithreadBinnedBuildContext.OriginalSubtreeCount">
+            <summary>
+            The number of subtrees present at the root of the build.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.MultithreadBinnedBuildContext.TopLevelTargetTaskCount">
+            <summary>
+            The target number of tasks that would be used for the root node. Later nodes will tend to target smaller numbers of tasks on the assumption that other parallel nodes will provide enough work to fill in the gaps.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.CentroidPrepassTaskContext.PrepassWorkers">
+            <summary>
+            Stores per-worker prepass bounds accumulated over multiple tasks. If there are less tasks than workers, then only the lower contiguous region of these bounds are used.
+            This allocation is ephemeral; it is allocated from the current worker when needed. 
+            Note that the allocation occurs on the loop dispatching thread: the workers that help with the loop do not have to allocate anything themselves.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.CentroidPrepassTaskContext.Subtrees">
+            <summary>
+            Buffer containing all subtrees in the node.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinSubtreesTaskContext.BinSubtreesWorkers">
+            <summary>
+            Bins associated with any workers that end up contributing to this worker's dispatch of a binning loop. If there are less tasks than workers, then only the lower contiguous region of these bounds are used.
+            This allocation is ephemeral; it is allocated from the current worker when needed. 
+            Note that the allocation occurs on the loop dispatching thread: the workers that help with the loop do not have to allocate anything themselves.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinSubtreesTaskContext.WorkerHelpedWithBinning">
+            <summary>
+            Whether a given worker contributed to the subtree binning process. If this worker did not contribute, there's no reason to merge its bins.
+            This allocation is ephemeral; it is allocated from the current worker when needed. 
+            Note that the allocation occurs on the loop dispatching thread: the workers that help with the loop do not have to allocate anything themselves.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinSubtreesTaskContext.Subtrees">
+            <summary>
+            Buffer containing all subtrees in this node.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.BinSubtreesTaskContext.BinIndices">
+            <summary>
+            Stores the bin indices of all subtrees in the node.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.Trees.Tree.DoWriteBinIndices">
+            <summary>
+            Marks a <see cref="M:BepuPhysics.Trees.Tree.BinSubtrees``1(System.Numerics.Vector4,System.Boolean,System.Boolean,System.Runtime.Intrinsics.Vector128{System.Int32},System.Int32,System.Numerics.Vector4,System.Numerics.Vector4,BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuUtilities.BoundingBox4},BepuUtilities.Memory.Buffer{BepuUtilities.BoundingBox4},BepuUtilities.Memory.Buffer{System.Int32},BepuUtilities.Memory.Buffer{System.Byte})"/> call as requiring the bin indices to be written to the binIndices buffer.
+            </summary>
+        </member>
+        <member name="T:BepuPhysics.Trees.Tree.DoNotWriteBinIndices">
+            <summary>
+            Marks a <see cref="M:BepuPhysics.Trees.Tree.BinSubtrees``1(System.Numerics.Vector4,System.Boolean,System.Boolean,System.Runtime.Intrinsics.Vector128{System.Int32},System.Int32,System.Numerics.Vector4,System.Numerics.Vector4,BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuUtilities.BoundingBox4},BepuUtilities.Memory.Buffer{BepuUtilities.BoundingBox4},BepuUtilities.Memory.Buffer{System.Int32},BepuUtilities.Memory.Buffer{System.Byte})"/> call as not allowing the bin indices to be written to the binIndices buffer.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.PartitionTaskContext.Subtrees">
+            <summary>
+            Buffer containing all subtrees in this node.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.PartitionTaskContext.SubtreesNext">
+            <summary>
+            Buffer that will contain the partitioned subtrees pulled from <see cref="F:BepuPhysics.Trees.Tree.PartitionTaskContext.Subtrees"/>.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.PartitionTaskContext.BinIndices">
+            <summary>
+            Buffer containing bin indices for all subtrees in the node (encoded with one byte per subtree).
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.BinnedBuilderInternal(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.Buffer{System.Byte},BepuUtilities.IThreadDispatcher,BepuUtilities.TestLinkedTaskStack.LinkedTaskStack*,System.Int32,BepuUtilities.Memory.BufferPool,System.Int32,System.Int32,System.Single,System.Int32)">
+            <summary>
+            Runs a binned build across the input <see cref="T:BepuPhysics.Trees.NodeChild"/> buffer.
+            </summary>
+            <param name="subtrees">Subtrees (either leaves or nodes) to run the builder over. The builder may make in-place modifications to the input buffer; the input buffer should not be assumed to be in a valid state after the builder runs.</param>
+            <param name="subtreesPong">A parallel buffer to subtrees which is used as a scratch buffer during execution. If a default initialized buffer is provided, a slower sequential in-place fallback will be used.</param>
+            <param name="nodes">Buffer holding the nodes created by the build process.<para/>
+            Nodes are created in a depth first ordering with respect to the input buffer.</param>
+            <param name="metanodes">Buffer holding the metanodes created by the build process.<para/>
+            Metanodes, like nodes, are created in a depth first ordering with respect to the input buffer.
+            Metanodes are in the same order and in the same slots; they simply contain data about nodes that most traversals don't need to know about.</param>
+            <param name="leaves">Buffer holding the leaf references created by the build process.<para/>
+            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.</param>
+            <param name="binIndices">Buffer to be used for caching bin indices during execution. If subtreesPong is defined, binIndices must also be defined, and vice versa.</param>
+            <param name="dispatcher">Thread dispatcher used to accelerate the build process.</param>
+            <param name="taskStackPointer">Task stack used to accelerate the build process. Can be null; one will be created if not provided.</param>
+            <param name="workerCount">Number of workers to be used in the builder.</param>
+            <param name="pool">Buffer pool used to preallocate temporary resources for building.</param>
+            <param name="minimumBinCount">Minimum number of bins the builder should use per node.</param>
+            <param name="maximumBinCount">Maximum number of bins the builder should use per node. Must be no higher than 255.</param>
+            <param name="leafToBinMultiplier">Multiplier to apply to the subtree count within a node to decide the bin count. Resulting value will then be clamped by the minimum/maximum bin counts.</param>
+            <param name="microsweepThreshold">Threshold at or under which the binned builder resorts to local counting sort sweeps.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.BinnedBuilder(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.BufferPool,System.Int32,System.Int32,System.Int32,System.Single,System.Int32)">
+            <summary>
+            Runs a binned build across the subtrees buffer.
+            </summary>
+            <param name="subtrees">Subtrees (either leaves or nodes) to run the builder over. The builder may make in-place modifications to the input buffer; the input buffer should not be assumed to be in a valid state after the builder runs.</param>
+            <param name="nodes">Buffer holding the nodes created by the build process.<para/>
+            Nodes are created in a depth first ordering with respect to the input buffer.</param>
+            <param name="metanodes">Buffer holding the metanodes created by the build process.<para/>
+            Metanodes, like nodes, are created in a depth first ordering with respect to the input buffer.
+            Metanodes are in the same order and in the same slots; they simply contain data about nodes that most traversals don't need to know about.</param>
+            <param name="leaves">Buffer holding the leaf references created by the build process.<para/>
+            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.</param>
+            <param name="pool">Buffer pool used to preallocate a pingpong buffer if the number of subtrees exceeds maximumSubtreeStackAllocationCount. If null, stack allocation or a slower in-place partitioning will be used.</param>
+            <param name="maximumSubtreeStackAllocationCount">Maximum number of subtrees to try putting on the stack for the binned builder's pong buffers.<para/>
+            Subtree counts larger than this threshold will either resort to a buffer pool allocation (if available) or slower in-place partition operations.</param>
+            <param name="minimumBinCount">Minimum number of bins the builder should use per node.</param>
+            <param name="maximumBinCount">Maximum number of bins the builder should use per node.</param>
+            <param name="leafToBinMultiplier">Multiplier to apply to the subtree count within a node to decide the bin count. Resulting value will then be clamped by the minimum/maximum bin counts.</param>
+            <param name="microsweepThreshold">Threshold at or under which the binned builder resorts to local counting sort sweeps.</param>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.TrySwapNodesThreadSafe(System.Int32@,System.Int32@)">
             <summary>
@@ -6960,6 +7781,11 @@
             <param name="nodeIndex">Node to propagate a node change for.</param>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.Refit">
+            <summary>
+            Updates the bounding boxes of all internal nodes in the tree.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2">
             <summary>
             Updates the bounding boxes of all internal nodes in the tree.
             </summary>
