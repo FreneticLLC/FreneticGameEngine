@@ -38,10 +38,24 @@
     <None Update="data\info\text\core_en_us.fds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="PhysicsSystem\BepuCharacters\CharacterMotionConstraint.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CharacterMotionConstraint.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FreneticLLC.FreneticUtilities" Version="1.0.1" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="PhysicsSystem\BepuCharacters\CharacterMotionConstraint.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CharacterMotionConstraint.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

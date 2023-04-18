@@ -35,7 +35,7 @@ namespace FGECore.PhysicsSystem
             public Simulation CoreSimulation;
 
             /// <summary>The <see cref="IThreadDispatcher"/> used by this simulation.</summary>
-            public BepuThreadDispatcher ThreadDispatcher;
+            public ThreadDispatcher BepuThreadDispatcher;
 
             /// <summary>The pose handler, with gravity and all.</summary>
             public BepuPoseIntegratorCallbacks PoseHandler;
@@ -64,12 +64,12 @@ namespace FGECore.PhysicsSystem
                 EntitiesByPhysicsID = new EntityPhysicsProperty[128];
                 // TODO: Add user configurability to the thread count.
                 int targetThreadCount = Math.Max(1, Environment.ProcessorCount > 4 ? Environment.ProcessorCount - 2 : Environment.ProcessorCount - 1);
-                ThreadDispatcher = new BepuThreadDispatcher(targetThreadCount);
+                BepuThreadDispatcher = new ThreadDispatcher(targetThreadCount);
                 PoseHandler = new BepuPoseIntegratorCallbacks() { Space = space };
                 NarrowPhaseHandler = new BepuNarrowPhaseCallbacks() { Space = space };
                 Pool = new BufferPool();
                 Characters = new BepuCharacters.CharacterControllers(Pool);
-                CoreSimulation = Simulation.Create(Pool, NarrowPhaseHandler, PoseHandler, new PositionLastTimestepper());
+                CoreSimulation = Simulation.Create(Pool, NarrowPhaseHandler, PoseHandler, new SolveDescription(velocityIterationCount: 1, substepCount: 8));
             }
         }
 
@@ -175,7 +175,7 @@ namespace FGECore.PhysicsSystem
                     updateBy *= 3;
                 }
                 Internal.DeltaAccumulator -= updateBy;
-                Internal.CoreSimulation.Timestep((float)updateBy, Internal.ThreadDispatcher);
+                Internal.CoreSimulation.Timestep((float)updateBy, Internal.BepuThreadDispatcher);
             }
         }
 
@@ -316,8 +316,8 @@ namespace FGECore.PhysicsSystem
             Internal.CoreSimulation = null;
             Internal.Characters.Dispose();
             Internal.Characters = null;
-            Internal.ThreadDispatcher.Dispose();
-            Internal.ThreadDispatcher = null;
+            Internal.BepuThreadDispatcher.Dispose();
+            Internal.BepuThreadDispatcher = null;
             Internal.EntitiesByPhysicsID = null;
             Internal.NarrowPhaseHandler.Dispose();
             Internal.Pool.Clear();

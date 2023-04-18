@@ -38,6 +38,23 @@ namespace FGECore.PhysicsSystem
         {
         }
 
+        /// <summary>
+        /// (FROM BEPU SOURCE)
+        /// Gets whether the integrator should use substepping for unconstrained bodies when using a substepping solver.
+        /// If true, unconstrained bodies will be integrated with the same number of substeps as the constrained bodies in the solver.
+        /// If false, unconstrained bodies use a single step of length equal to the dt provided to Simulation.Timestep. 
+        /// </summary>
+        public readonly bool AllowSubstepsForUnconstrainedBodies => false;
+
+        /// <summary>
+        /// (FROM BEPU SOURCE)
+        /// Gets whether the velocity integration callback should be called for kinematic bodies.
+        /// If true, IntegrateVelocity will be called for bundles including kinematic bodies.
+        /// If false, kinematic bodies will just continue using whatever velocity they have set.
+        /// Most use cases should set this to false.
+        /// </summary>
+        public readonly bool IntegrateVelocityForKinematics => false;
+
         /// <summary>Current delta time value.</summary>
         public float Delta;
 
@@ -51,23 +68,39 @@ namespace FGECore.PhysicsSystem
         }
 
         /// <summary>Callback called for each active body within the simulation during body integration.</summary>
-        /// <param name="bodyIndex">Index of the body being visited.</param>
-        /// <param name="pose">Body's current pose.</param>
+        /// <param name="bodyIndices">Indices of the bodies being integrated in this bundle.</param>
+        /// <param name="position">Current body positions.</param>
+        /// <param name="orientation">Current body orientations.</param>
         /// <param name="localInertia">Body's current local inertia.</param>
-        /// <param name="workerIndex">Index of the worker thread processing this body.</param>
-        /// <param name="velocity">Reference to the body's current velocity to integrate.</param>
-        public void IntegrateVelocity(int bodyIndex, in RigidPose pose, in BodyInertia localInertia, int workerIndex, ref BodyVelocity velocity)
+        /// <param name="integrationMask">Mask indicating which lanes are active in the bundle. Active lanes will contain 0xFFFFFFFF, inactive lanes will contain 0.</param>
+        /// <param name="workerIndex">Index of the worker thread processing this bundle.</param>
+        /// <param name="dt">Durations to integrate the velocity over. Can vary over lanes.</param>
+        /// <param name="velocity">Velocity of bodies in the bundle. Any changes to lanes which are not active by the integrationMask will be discarded.</param>
+        public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
         {
-            if (localInertia.InverseMass > 0)
+            // Note: this is terrifying because the input is SIMD vectors that need to be decomposed and recomposed. Blame BEPU.
+            for (int i = 0; i < Vector<int>.Count; i++)
             {
-                EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
-                if (physicsEntity != null)
+                if (integrationMask[i] == 0)
                 {
-                    velocity.Linear += physicsEntity.ActualGravity.ToNumerics() * Delta;
-                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
-                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
-                    velocity.Linear *= linearDampingDt;
-                    velocity.Angular *= angularDampingDt;
+                    continue;
+                }
+                if (localInertia.InverseMass[i] > 0)
+                {
+                    int bodyIndex = bodyIndices[i];
+                    EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
+                    if (physicsEntity != null)
+                    {
+                        Vector3Wide.ReadSlot(ref velocity.Linear, i, out Vector3 velLinear);
+                        Vector3Wide.ReadSlot(ref velocity.Angular, i, out Vector3 velAngular);
+                        velLinear += physicsEntity.ActualGravity.ToNumerics() * Delta;
+                        float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
+                        float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
+                        velLinear *= linearDampingDt;
+                        velAngular *= angularDampingDt;
+                        Vector3Wide.WriteSlot(velLinear, i, ref velocity.Linear);
+                        Vector3Wide.WriteSlot(velAngular, i, ref velocity.Angular);
+                    }
                 }
             }
         }
@@ -104,8 +137,9 @@ namespace FGECore.PhysicsSystem
         /// <param name="workerIndex">Index of the worker that identified the overlap.</param>
         /// <param name="a">Reference to the first collidable in the pair.</param>
         /// <param name="b">Reference to the second collidable in the pair.</param>
+        /// <param name="speculativeMargin">Reference to the speculative margin used by the pair.</param>
         /// <returns>True if collision detection should proceed, false otherwise.</returns>
-        public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
+        public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
         {
             if (a.Mobility != CollidableMobility.Dynamic && b.Mobility != CollidableMobility.Dynamic)
             {

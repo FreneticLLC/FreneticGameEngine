@@ -28,7 +28,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
     /// <summary>System that manages all the characters in a simulation. Responsible for updating movement constraints based on character goals and contact states.</summary>
     public class CharacterControllers : IDisposable
     {
-        /// <summary>Gets the simulation to which this set of chracters belongs.</summary>
+        /// <summary>
+        /// Gets the simulation to which this set of chracters belongs.
+        /// </summary>
         public Simulation Simulation { get; private set; }
 
         readonly BufferPool pool;
@@ -36,14 +38,18 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         Buffer<int> bodyHandleToCharacterIndex;
         QuickList<CharacterController> characters;
 
-        /// <summary>Gets the number of characters being controlled.</summary>
+        /// <summary>
+        /// Gets the number of characters being controlled.
+        /// </summary>
         public int CharacterCount { get { return characters.Count; } }
 
-        /// <summary>Creates a character controller systme.</summary>
+        /// <summary>
+        /// Creates a character controller systme.
+        /// </summary>
         /// <param name="pool">Pool to allocate resources from.</param>
         /// <param name="initialCharacterCapacity">Number of characters to initially allocate space for.</param>
         /// <param name="initialBodyHandleCapacity">Number of body handles to initially allocate space for in the body handle->character mapping.</param>
-        public CharacterControllers(BufferPool pool, int initialCharacterCapacity = 1024, int initialBodyHandleCapacity = 1024)
+        public CharacterControllers(BufferPool pool, int initialCharacterCapacity = 4096, int initialBodyHandleCapacity = 4096)
         {
             this.pool = pool;
             characters = new QuickList<CharacterController>(initialCharacterCapacity, pool);
@@ -52,7 +58,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             expandBoundingBoxesWorker = ExpandBoundingBoxesWorker;
         }
 
-        /// <summary>Caches the simulation associated with the characters.</summary>
+        /// <summary>
+        /// Caches the simulation associated with the characters.
+        /// </summary>
         /// <param name="simulation">Simulation to be associated with the characters.</param>
         public void Initialize(Simulation simulation)
         {
@@ -73,7 +81,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>Gets the current memory slot index of a character using its associated body handle.</summary>
+        /// <summary>
+        /// Gets the current memory slot index of a character using its associated body handle.
+        /// </summary>
         /// <param name="bodyHandle">Body handle associated with the character to look up the index of.</param>
         /// <returns>Index of the character associated with the body handle.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,7 +93,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return bodyHandleToCharacterIndex[bodyHandle];
         }
 
-        /// <summary>Gets a reference to the character at the given memory slot index.</summary>
+        /// <summary>
+        /// Gets a reference to the character at the given memory slot index.
+        /// </summary>
         /// <param name="index">Index of the character to retrieve.</param>
         /// <returns>Reference to the character at the given memory slot index.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -92,7 +104,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref characters[index];
         }
 
-        /// <summary>Gets a reference to the character using the handle of the character's body.</summary>
+        /// <summary>
+        /// Gets a reference to the character using the handle of the character's body.
+        /// </summary>
         /// <param name="bodyHandle">Body handle of the character to look up.</param>
         /// <returns>Reference to the character associated with the given body handle.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,7 +116,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref characters[bodyHandleToCharacterIndex[bodyHandle.Value]];
         }
 
-        /// <summary>Allocates a character.</summary>
+        /// <summary>
+        /// Allocates a character.
+        /// </summary>
         /// <param name="bodyHandle">Body handle associated with the character.</param>
         /// <returns>Reference to the allocated character.</returns>
         public ref CharacterController AllocateCharacter(BodyHandle bodyHandle)
@@ -119,7 +135,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             return ref character;
         }
 
-        /// <summary>Removes a character from the character controllers set by the character's index.</summary>
+        /// <summary>
+        /// Removes a character from the character controllers set by the character's index.
+        /// </summary>
         /// <param name="characterIndex">Index of the character to remove.</param>
         public void RemoveCharacterByIndex(int characterIndex)
         {
@@ -136,7 +154,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>Removes a character from the character controllers set by the body handle associated with the character.</summary>
+        /// <summary>
+        /// Removes a character from the character controllers set by the body handle associated with the character.
+        /// </summary>
         /// <param name="bodyHandle">Body handle associated with the character to remove.</param>
         public void RemoveCharacterByBodyHandle(BodyHandle bodyHandle)
         {
@@ -158,7 +178,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         {
             public Buffer<SupportCandidate> SupportCandidates;
 
-            public ContactCollectionWorkerCache(int maximumCharacterCount, BufferPool pool)
+            public unsafe ContactCollectionWorkerCache(int maximumCharacterCount, BufferPool pool)
             {
                 pool.Take(maximumCharacterCount, out SupportCandidates);
                 for (int i = 0; i < maximumCharacterCount; ++i)
@@ -204,7 +224,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                     //Have to take into account the current potentially inactive location.
                     ref var bodyLocation = ref Simulation.Bodies.HandleToLocation[character.BodyHandle.Value];
                     ref var set = ref Simulation.Bodies.Sets[bodyLocation.SetIndex];
-                    ref var pose = ref set.Poses[bodyLocation.Index];
+                    ref var pose = ref set.SolverStates[bodyLocation.Index].Motion.Pose;
                     QuaternionEx.Transform(character.LocalUp, pose.Orientation, out var up);
                     //Note that this branch is compiled out- the generic constraints force type specialization.
                     if (manifold.Convex)
@@ -345,7 +365,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             for (int i = start; i < end; ++i)
             {
                 ref var character = ref characters[i];
-                var characterBody = Simulation.Bodies.GetBodyReference(character.BodyHandle);
+                var characterBody = Simulation.Bodies[character.BodyHandle];
                 if (characterBody.Awake)
                 {
                     Simulation.BroadPhase.GetActiveBoundsPointers(characterBody.Collidable.BroadPhaseIndex, out var min, out var max);
@@ -376,7 +396,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>Preallocates space for support data collected during the narrow phase. Should be called before the narrow phase executes.</summary>
+        /// <summary>
+        /// Preallocates space for support data collected during the narrow phase. Should be called before the narrow phase executes.
+        /// </summary>
         void PrepareForContacts(float dt, IThreadDispatcher threadDispatcher = null)
         {
             Debug.Assert(!contactCollectionWorkerCaches.Allocated, "Worker caches were already allocated; did you forget to call AnalyzeContacts after collision detection to flush the previous frame's results?");
@@ -411,7 +433,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                 }
 
                 boundingBoxExpansionJobIndex = -1;
-                threadDispatcher.DispatchWorkers(expandBoundingBoxesWorker);
+                threadDispatcher.DispatchWorkers(expandBoundingBoxesWorker, boundingBoxExpansionJobs.Length);
                 pool.Return(ref boundingBoxExpansionJobs);
 
             }
@@ -470,7 +492,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             for (int characterIndex = start; characterIndex < exclusiveEnd; ++characterIndex)
             {
                 //Note that this iterates over both active and inactive characters rather than segmenting inactive characters into their own collection.
-                //This demands branching, but the expectation is that the vast majority of characters will be active, so there is less value in copying them into stasis.
+                //This demands branching, but the expectation is that the vast majority of characters will be active, so there is less value in copying them into stasis.                
                 ref var character = ref characters[characterIndex];
                 ref var bodyLocation = ref Simulation.Bodies.HandleToLocation[character.BodyHandle.Value];
                 if (bodyLocation.SetIndex == 0)
@@ -485,10 +507,10 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         }
                     }
                     //We need to protect against one possible corner case: if the body supporting the character was removed, the associated motion constraint was also removed.
-                    //Arbitrarily un-support the character if we detect this.
+                    //Arbitrarily un-support the character if we detect this.      
                     if (character.Supported)
                     {
-                        //If the constraint no longer exists at all,
+                        //If the constraint no longer exists at all, 
                         if (!Simulation.Solver.ConstraintExists(character.MotionConstraintHandle) ||
                             //or if the constraint does exist but is now used by a different constraint type,
                             (Simulation.Solver.HandleToConstraint[character.MotionConstraintHandle.Value].TypeId != DynamicCharacterMotionTypeProcessor.BatchTypeId &&
@@ -517,16 +539,16 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                     //If the character is jumping, don't create a constraint.
                     if (supportCandidate.Depth > float.MinValue && character.TryJump)
                     {
-                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.Poses[bodyLocation.Index].Orientation, out var characterUp);
+                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Pose.Orientation, out var characterUp);
                         //Note that we assume that character orientations are constant. This isn't necessarily the case in all uses, but it's a decent approximation.
-                        var characterUpVelocity = Vector3.Dot(Simulation.Bodies.ActiveSet.Velocities[bodyLocation.Index].Linear, characterUp);
+                        var characterUpVelocity = Vector3.Dot(Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Velocity.Linear, characterUp);
                         //We don't want the character to be able to 'superboost' by simply adding jump speed on top of horizontal motion.
                         //Instead, jumping targets a velocity change necessary to reach character.JumpVelocity along the up axis.
                         if (character.Support.Mobility != CollidableMobility.Static)
                         {
                             ref var supportingBodyLocation = ref Simulation.Bodies.HandleToLocation[character.Support.BodyHandle.Value];
                             Debug.Assert(supportingBodyLocation.SetIndex == 0, "If the character is active, any support should be too.");
-                            ref var supportVelocity = ref Simulation.Bodies.ActiveSet.Velocities[supportingBodyLocation.Index];
+                            ref var supportVelocity = ref Simulation.Bodies.ActiveSet.SolverStates[supportingBodyLocation.Index].Motion.Velocity;
                             var wxr = Vector3.Cross(supportVelocity.Angular, supportCandidate.OffsetFromSupport);
                             var supportContactVelocity = supportVelocity.Linear + wxr;
                             var supportUpVelocity = Vector3.Dot(supportContactVelocity, characterUp);
@@ -567,7 +589,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         Matrix3x3 surfaceBasis;
                         surfaceBasis.Y = supportCandidate.Normal;
                         //Note negation: we're using a right handed basis where -Z is forward, +Z is backward.
-                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.Poses[bodyLocation.Index].Orientation, out var up);
+                        QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.SolverStates[bodyLocation.Index].Motion.Pose.Orientation, out var up);
                         var rayDistance = Vector3.Dot(character.ViewDirection, surfaceBasis.Y);
                         var rayVelocity = Vector3.Dot(up, surfaceBasis.Y);
                         Debug.Assert(rayVelocity > 0,
@@ -601,7 +623,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                             if (character.Supported && !shouldRemove)
                             {
                                 //Already exists, update it.
-                                Simulation.Solver.ApplyDescriptionWithoutWaking(character.MotionConstraintHandle, ref motionConstraint);
+                                Simulation.Solver.ApplyDescriptionWithoutWaking(character.MotionConstraintHandle, motionConstraint);
                             }
                             else
                             {
@@ -626,7 +648,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                             if (character.Supported && !shouldRemove)
                             {
                                 //Already exists, update it.
-                                Simulation.Solver.ApplyDescriptionWithoutWaking(character.MotionConstraintHandle, ref motionConstraint);
+                                Simulation.Solver.ApplyDescriptionWithoutWaking(character.MotionConstraintHandle, motionConstraint);
                             }
                             else
                             {
@@ -671,7 +693,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
 
 
         /// <summary>
-        /// Updates all character support states and motion constraints based on the current character goals and all the contacts collected since the last call to AnalyzeContacts.
+        /// Updates all character support states and motion constraints based on the current character goals and all the contacts collected since the last call to AnalyzeContacts. 
         /// Attach to a simulation callback where the most recent contact is available and before the solver executes.
         /// </summary>
         void AnalyzeContacts(float dt, IThreadDispatcher threadDispatcher)
@@ -707,7 +729,7 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         previousEnd = job.ExclusiveEnd;
                     }
                     analysisJobIndex = -1;
-                    threadDispatcher.DispatchWorkers(analyzeContactsWorker);
+                    threadDispatcher.DispatchWorkers(analyzeContactsWorker, analysisJobCount);
                     pool.Return(ref jobs);
                 }
             }
@@ -738,23 +760,23 @@ namespace FGECore.PhysicsSystem.BepuCharacters
                         ref var pendingConstraint = ref workerCache.StaticConstraintsToAdd[i];
                         ref var character = ref characters[pendingConstraint.CharacterIndex];
                         Debug.Assert(character.Support.Mobility == CollidableMobility.Static);
-                        character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, ref pendingConstraint.Description);
+                        character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, pendingConstraint.Description);
                     }
                     for (int i = 0; i < workerCache.DynamicConstraintsToAdd.Count; ++i)
                     {
                         ref var pendingConstraint = ref workerCache.DynamicConstraintsToAdd[i];
                         ref var character = ref characters[pendingConstraint.CharacterIndex];
                         Debug.Assert(character.Support.Mobility != CollidableMobility.Static);
-                        character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, character.Support.BodyHandle, ref pendingConstraint.Description);
+                        character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, character.Support.BodyHandle, pendingConstraint.Description);
                     }
                     ref var activeSet = ref Simulation.Bodies.ActiveSet;
                     for (int i = 0; i < workerCache.Jumps.Count; ++i)
                     {
                         ref var jump = ref workerCache.Jumps[i];
-                        activeSet.Velocities[jump.CharacterBodyIndex].Linear += jump.CharacterVelocityChange;
+                        activeSet.SolverStates[jump.CharacterBodyIndex].Motion.Velocity.Linear += jump.CharacterVelocityChange;
                         if (jump.SupportBodyIndex >= 0)
                         {
-                            BodyReference.ApplyImpulse(Simulation.Bodies.ActiveSet, jump.SupportBodyIndex, jump.CharacterVelocityChange / -activeSet.LocalInertias[jump.CharacterBodyIndex].InverseMass, jump.SupportImpulseOffset);
+                            BodyReference.ApplyImpulse(Simulation.Bodies.ActiveSet, jump.SupportBodyIndex, jump.CharacterVelocityChange / -activeSet.SolverStates[jump.CharacterBodyIndex].Inertia.Local.InverseMass, jump.SupportImpulseOffset);
                         }
                     }
                     workerCache.Dispose(pool);
@@ -766,7 +788,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             //Console.WriteLine($"Time (ms): {(end - start) / (1e-3 * Stopwatch.Frequency)}");
         }
 
-        /// <summary>Ensures that the internal structures of the character controllers system can handle the given number of characters and body handles, resizing if necessary.</summary>
+        /// <summary>
+        /// Ensures that the internal structures of the character controllers system can handle the given number of characters and body handles, resizing if necessary.
+        /// </summary>
         /// <param name="characterCapacity">Minimum character capacity to require.</param>
         /// <param name="bodyHandleCapacity">Minimum number of body handles to allocate space for.</param>
         public void EnsureCapacity(int characterCapacity, int bodyHandleCapacity)
@@ -778,7 +802,9 @@ namespace FGECore.PhysicsSystem.BepuCharacters
             }
         }
 
-        /// <summary>Resizes the internal structures of the character controllers system for the target sizes. Will not shrink below the currently active data size.</summary>
+        /// <summary>
+        /// Resizes the internal structures of the character controllers system for the target sizes. Will not shrink below the currently active data size.
+        /// </summary>
         /// <param name="characterCapacity">Target character capacity to allocate space for.</param>
         /// <param name="bodyHandleCapacity">Target number of body handles to allocate space for.</param>
         public void Resize(int characterCapacity, int bodyHandleCapacity)
@@ -802,17 +828,19 @@ namespace FGECore.PhysicsSystem.BepuCharacters
         }
 
         bool disposed;
-        /// <summary>Returns pool-allocated resources.</summary>
+        /// <summary>
+        /// Returns pool-allocated resources.
+        /// </summary>
         public void Dispose()
         {
             if (!disposed)
             {
-                GC.SuppressFinalize(this);
                 disposed = true;
                 Simulation.Timestepper.BeforeCollisionDetection -= PrepareForContacts;
                 Simulation.Timestepper.CollisionsDetected -= AnalyzeContacts;
                 characters.Dispose(pool);
                 pool.Return(ref bodyHandleToCharacterIndex);
+                GC.SuppressFinalize(this);
             }
         }
     }

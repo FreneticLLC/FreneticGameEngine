@@ -45,7 +45,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         /// <summary>Implements <see cref="EntityShapeHelper.ComputeInertia(float, out BodyInertia)"/>.</summary>
         public override void ComputeInertia(float mass, out BodyInertia inertia)
         {
-            ((Mesh) BepuShape).ComputeClosedInertia(mass, out inertia);
+            inertia = ((Mesh) BepuShape).ComputeClosedInertia(mass);
         }
     }
 }

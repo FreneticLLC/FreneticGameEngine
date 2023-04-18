@@ -212,6 +212,13 @@
             </summary>
             <remarks>The JIT recognizes that this value is constant!</remarks>
         </member>
+        <member name="M:BepuUtilities.BundleIndexing.GetLastSetLaneCount(System.Numerics.Vector{System.Int32})">
+            <summary>
+            Gets the number of lanes that occur at or before the last set lane. In other words, if the lanes in the vector are (-1, 0, -1, 0), then this will return 3.
+            </summary>
+            <param name="v">Vector to examine.</param>
+            <returns>Number of lanes that occur at or before the last set lane.</returns>
+        </member>
         <member name="T:BepuUtilities.Collections.ArrayEnumerable`1">
             <summary>
             Enumerable wrapper of an array interval.
@@ -279,6 +286,41 @@
             </summary>
             <param name="indexList">List of indices to check for in the batch.</param>
             <returns>True if none of the indices are present in the set, false otherwise.</returns>
+        </member>
+        <member name="M:BepuUtilities.Collections.IndexSet.SetUnsafely(System.Int32)">
+            <summary>
+            Sets an index in the set to contained without checking capacity or whether it is already set.
+            </summary>
+            <param name="index">Index to add.</param>
+            <remarks>This is functionally identical to the AddUnsafely method, but it doesn't include the same debug assertions. Just a way to make intent clear so that the assert can catch errors.</remarks>
+        </member>
+        <member name="M:BepuUtilities.Collections.IndexSet.Set(System.Int32,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Sets an index in the set to contained without checking whether it is already set.
+            </summary>
+            <param name="index">Index to add.</param>
+            <param name="pool">Pool to reuse the set if necessary.</param>
+            <remarks>This is functionally identical to the Add method, but it doesn't include the same debug assertions. Just a way to make intent clear so that the assert can catch errors.</remarks>
+        </member>
+        <member name="M:BepuUtilities.Collections.IndexSet.Unset(System.Int32)">
+            <summary>
+            Marks an index in the set as uncontained without checking whether it is already set.
+            </summary>
+            <param name="index">Index to add.</param>
+            <remarks>This is functionally identical to the Remove method, but it doesn't include the same debug assertions. Just a way to make intent clear so that the assert can catch errors.</remarks>
+        </member>
+        <member name="M:BepuUtilities.Collections.IndexSet.AddUnsafely(System.Int32)">
+            <summary>
+            Adds an index to the set without checking capacity.
+            </summary>
+            <param name="index">Index to add.</param>
+        </member>
+        <member name="M:BepuUtilities.Collections.IndexSet.Add(System.Int32,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Adds an index to the set.
+            </summary>
+            <param name="index">Index to add.</param>
+            <param name="pool">Pool to use to resize the set if necessary.</param>
         </member>
         <member name="M:BepuUtilities.Collections.IndexSet.Dispose(BepuUtilities.Memory.BufferPool)">
             <summary>
@@ -488,8 +530,7 @@
             <summary>
             Shrinks the internal buffers to the smallest acceptable size and releases the old buffers to the pools.
             </summary>
-            <param name="pool">Pool used for spans.</param>   
-            <param name="element">Element to add.</param>
+            <param name="pool">Pool used for spans.</param>
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.GetTableIndices(`0@,System.Int32@,System.Int32@)">
             <summary>
@@ -1671,11 +1712,12 @@
             If the ThreadCount doesn't represent independent threads, deadlocks will occur.
             </remarks>
         </member>
-        <member name="M:BepuUtilities.IThreadDispatcher.DispatchWorkers(System.Action{System.Int32})">
+        <member name="M:BepuUtilities.IThreadDispatcher.DispatchWorkers(System.Action{System.Int32},System.Int32)">
             <summary>
             Dispatches all the available workers.
             </summary>
-            <param name="loopBody">Delegate to be invoked on for every worker.</param>
+            <param name="workerBody">Delegate to be invoked on every worker.</param>
+            <param name="maximumWorkerCount">Maximum number of workers to dispatch.</param>
         </member>
         <member name="M:BepuUtilities.IThreadDispatcher.GetThreadMemoryPool(System.Int32)">
             <summary>
@@ -1701,73 +1743,73 @@
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(System.Single)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(System.Numerics.Vector2)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(System.Numerics.Vector3)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(System.Numerics.Vector4)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.Matrix3x3)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.Matrix)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(System.Numerics.Quaternion)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.ValidateOrientation(System.Numerics.Quaternion)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.Symmetric3x3)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.AffineTransform)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.BoundingBox)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
         <member name="M:BepuUtilities.MathChecker.Validate(BepuUtilities.BoundingSphere)">
             <summary>
-            Checks the value to see if it is a NaN or infinite.  If it is, an exception is thrown.
+            Checks the value to see if it is a NaN or infinite.  If it is, a debug assertion will fail.
             This is only run when the CHECKMATH symbol is defined.
             </summary>
         </member>
@@ -1894,38 +1936,45 @@
         </member>
         <member name="M:BepuUtilities.MathHelper.Cos(System.Single)">
             <summary>
-            Computes an approximation of cosine. Maximum error a little above 3e-6.
+            Computes an approximation of cosine. Maximum error a little below 8e-7 for the interval -2 * Pi to 2 * Pi. Values further from the interval near zero have gracefully degrading error.
             </summary>
             <param name="x">Value to take the cosine of.</param>
             <returns>Approximate cosine of the input value.</returns>
         </member>
         <member name="M:BepuUtilities.MathHelper.Sin(System.Single)">
             <summary>
-            Computes an approximation of sine. Maximum error a little above 3e-6.
+            Computes an approximation of sine. Maximum error a little below 5e-7 for the interval -2 * Pi to 2 * Pi. Values further from the interval near zero have gracefully degrading error.
             </summary>
             <param name="x">Value to take the sine of.</param>
             <returns>Approximate sine of the input value.</returns>
         </member>
-        <member name="M:BepuUtilities.MathHelper.Cos(System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@)">
+        <member name="M:BepuUtilities.MathHelper.Acos(System.Single)">
             <summary>
-            Computes an approximation of cosine. Maximum error a little above 3e-6.
+            Computes an approximation of arccos. Inputs outside of [-1, 1] are clamped. Maximum error less than 5.17e-07.
+            </summary>
+            <param name="x">Input value to the arccos function.</param>
+            <returns>Result of the arccos function.</returns>
+        </member>
+        <member name="M:BepuUtilities.MathHelper.Cos(System.Numerics.Vector{System.Single})">
+            <summary>
+            Computes an approximation of cosine. Maximum error a little below 8e-7 for the interval -2 * Pi to 2 * Pi. Values further from the interval near zero have gracefully degrading error.
             </summary>
             <param name="x">Values to take the cosine of.</param>
             <returns>Approximate cosine of the input values.</returns>
         </member>
-        <member name="M:BepuUtilities.MathHelper.Sin(System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@)">
+        <member name="M:BepuUtilities.MathHelper.Sin(System.Numerics.Vector{System.Single})">
             <summary>
-            Computes an approximation of sine. Maximum error a little above 3e-6.
+            Computes an approximation of sine. Maximum error a little below 5e-7 for the interval -2 * Pi to 2 * Pi. Values further from the interval near zero have gracefully degrading error.
             </summary>
             <param name="x">Value to take the sine of.</param>
             <returns>Approximate sine of the input value.</returns>
         </member>
-        <member name="M:BepuUtilities.MathHelper.ApproximateAcos(System.Numerics.Vector{System.Single},System.Numerics.Vector{System.Single}@)">
+        <member name="M:BepuUtilities.MathHelper.Acos(System.Numerics.Vector{System.Single})">
             <summary>
-            Computes an approximation of arccos. Maximum error less than 6.8e-5.
+            Computes an approximation of arccos. Inputs outside of [-1, 1] are clamped. Maximum error less than 5.17e-07.
             </summary>
             <param name="x">Input value to the arccos function.</param>
-            <param name="acos">Result of the arccos function.</param>
+            <returns>Result of the arccos function.</returns>
         </member>
         <member name="M:BepuUtilities.MathHelper.GetSignedAngleDifference(System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@)">
             <summary>
@@ -2537,7 +2586,21 @@
             <param name="index">Index of the element to grab a reference of.</param>
             <returns>Reference to the element at the given index.</returns>
         </member>
+        <member name="P:BepuUtilities.Memory.Buffer`1.Item(System.UInt32)">
+            <summary>
+            Gets a reference to the element at the given index.
+            </summary>
+            <param name="index">Index of the element to grab a reference of.</param>
+            <returns>Reference to the element at the given index.</returns>
+        </member>
         <member name="M:BepuUtilities.Memory.Buffer`1.GetPointer(System.Int32)">
+            <summary>
+            Gets a pointer to the element at the given index.
+            </summary>
+            <param name="index">Index of the element to retrieve a pointer for.</param>
+            <returns>Pointer to the element at the given index.</returns>
+        </member>
+        <member name="M:BepuUtilities.Memory.Buffer`1.GetPointer(System.UInt32)">
             <summary>
             Gets a pointer to the element at the given index.
             </summary>
@@ -2654,22 +2717,18 @@
             <param name="count">Number of elements to scan beyond the start index.</param>
             <returns>Index of the first matching element in the buffer if any, -1 otherwise.</returns>
         </member>
-        <member name="M:BepuUtilities.Memory.Buffer`1.AsRaw">
+        <member name="M:BepuUtilities.Memory.Buffer`1.As``1">
             <summary>
-            Creates an untyped buffer containing the same data as the Buffer<typeparamref name="T"/>.
+            Creates a typed region from the raw buffer with the largest capacity that can fit within the allocated bytes.
             </summary>
-            <returns>Untyped buffer containing the same data as the source buffer.</returns>
+            <typeparam name="TCast">Type of the buffer.</typeparam>
+            <returns>Typed buffer of maximum extent within the current buffer.</returns>
         </member>
         <member name="T:BepuUtilities.Memory.BufferPool">
             <summary>
             Unmanaged memory pool that creates pinned blocks of memory for use in spans.
             </summary>
             <remarks>This currently works by allocating large managed arrays and pinning them under the assumption that they'll end up in the large object heap.</remarks>
-        </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.Block.Clear">
-            <summary>
-            Unpins and drops the reference to the underlying array.
-            </summary>
         </member>
         <member name="F:BepuUtilities.Memory.BufferPool.PowerPool.Slots">
             <summary>
@@ -2682,9 +2741,7 @@
             </summary>
             <param name="minimumBlockAllocationSize">Minimum size of individual block allocations. Must be a power of 2.
             Pools with single allocations larger than the minimum will use the minimum value necessary to hold one element.
-            Buffers will be suballocated from blocks.
-            Use a value larger than the large object heap cutoff (85000 bytes as of this writing in the microsoft runtime)
-            to avoid interfering with generational garbage collection.</param>
+            Buffers will be suballocated from blocks.</param>
             <param name="expectedPooledResourceCount">Number of suballocations to preallocate reference space for.
             This does not preallocate actual blocks, just the space to hold references that are waiting in the pool.</param>
         </member>
@@ -2702,20 +2759,6 @@
             <param name="power">Power to check.</param>
             <returns>Allocated capacity for the given power.</returns>
         </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.TakeAtLeast(System.Int32,BepuUtilities.Memory.RawBuffer@)">
-            <summary>
-            Takes a buffer large enough to contain a number of bytes. Capacity may be larger than requested.
-            </summary>
-            <param name="count">Desired minimum capacity of the buffer in bytes.</param>
-            <param name="buffer">Buffer that can hold the bytes.</param>
-        </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.Take(System.Int32,BepuUtilities.Memory.RawBuffer@)">
-            <summary>
-            Takes a buffer of the requested size from the pool.
-            </summary>
-            <param name="count">Desired capacity of the buffer in bytes.</param>
-            <param name="buffer">Buffer of the requested size.</param>
-        </member>
         <member name="M:BepuUtilities.Memory.BufferPool.TakeAtLeast``1(System.Int32,BepuUtilities.Memory.Buffer{``0}@)">
             <summary>
             Takes a buffer large enough to contain a number of elements of a given type. Capacity may be larger than requested.
@@ -2732,50 +2775,27 @@
             <param name="count">Desired capacity of the buffer in typed elements.</param>
             <param name="buffer">Typed buffer of the requested size.</param>
         </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.TakeForPower(System.Int32,BepuUtilities.Memory.RawBuffer@)">
+        <member name="M:BepuUtilities.Memory.BufferPool.TakeForPower(System.Int32,BepuUtilities.Memory.Buffer{System.Byte}@)">
             <summary>
             Takes a buffer large enough to contain a number of bytes given by a power, where the number of bytes is 2^power.
             </summary>
-            <param name="count">Number of bytes that should fit within the buffer as an exponent, where the number of bytes is 2^power.</param>
+            <param name="power">Number of bytes that should fit within the buffer as an exponent, where the number of bytes is 2^power.</param>
             <param name="buffer">Buffer that can hold the bytes.</param>
         </member>
         <member name="M:BepuUtilities.Memory.BufferPool.ReturnUnsafely(System.Int32)">
             <summary>
             Returns a buffer to the pool by id.
             </summary>
-            <param name="buffer">Buffer to return to the pool.</param>
+            <param name="id">Id of the buffer to return to the pool.</param>
             <remarks>Typed buffer pools zero out the passed-in buffer by convention.
             This costs very little and avoids a wide variety of bugs (either directly or by forcing fast failure). For consistency, BufferPool.Return does the same thing.
             This "Unsafe" overload should be used only in cases where there's a reason to bypass the clear; the naming is intended to dissuade casual use.</remarks>
-        </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.Return(BepuUtilities.Memory.RawBuffer@)">
-            <summary>
-            Returns a buffer to the pool.
-            </summary>
-            <param name="buffer">Buffer to return to the pool.</param>
         </member>
         <member name="M:BepuUtilities.Memory.BufferPool.Return``1(BepuUtilities.Memory.Buffer{``0}@)">
             <summary>
             Returns a buffer to the pool.
             </summary>
             <param name="buffer">Buffer to return to the pool.</param>
-        </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.ResizeToAtLeast(BepuUtilities.Memory.RawBuffer@,System.Int32,System.Int32)">
-            <summary>
-            Resizes a buffer to the smallest size available in the pool which contains the target size. Copies a subset of elements into the new buffer.
-            Final buffer size is at least as large as the target size and may be larger.
-            </summary>
-            <param name="buffer">Buffer reference to resize.</param>
-            <param name="targetSize">Number of bytes to resize the buffer for.</param>
-            <param name="copyCount">Number of bytes to copy into the new buffer from the old buffer.</param>
-        </member>
-        <member name="M:BepuUtilities.Memory.BufferPool.Resize(BepuUtilities.Memory.RawBuffer@,System.Int32,System.Int32)">
-            <summary>
-            Resizes a buffer to the target size. Copies a subset of elements into the new buffer.
-            </summary>
-            <param name="buffer">Buffer reference to resize.</param>
-            <param name="targetSize">Number of bytes to resize the buffer for.</param>
-            <param name="copyCount">Number of bytes to copy into the new buffer from the old buffer.</param>
         </member>
         <member name="M:BepuUtilities.Memory.BufferPool.ResizeToAtLeast``1(BepuUtilities.Memory.Buffer{``0}@,System.Int32,System.Int32)">
             <summary>
@@ -2795,13 +2815,6 @@
             <param name="buffer">Buffer reference to resize.</param>
             <param name="targetSize">Number of elements to resize the buffer for.</param>
             <param name="copyCount">Number of elements to copy into the new buffer from the old buffer.</param>
-        </member>
-        <member name="P:BepuUtilities.Memory.BufferPool.Pinned">
-            <summary>
-            Gets or sets whether the BufferPool's backing resources are pinned. If no blocks are allocated internally, this returns true.
-            Setting this to false invalidates all outstanding pointers, and any attempt to take or return buffers while unpinned will fail (though not necessarily immediately).
-            The only valid operations while unpinned are setting Pinned to true and clearing the pool.
-            </summary>
         </member>
         <member name="M:BepuUtilities.Memory.BufferPool.Clear">
             <summary>
@@ -2869,7 +2882,7 @@
         </member>
         <member name="T:BepuUtilities.Memory.IUnmanagedMemoryPool">
             <summary>
-            Defines a type that is capable of pooling blocks of unmanaged memory.
+            Defines a type that is capable of rapidly serving requests for allocation and deallocation of unmanaged memory.
             </summary>
         </member>
         <member name="M:BepuUtilities.Memory.IUnmanagedMemoryPool.TakeAtLeast``1(System.Int32,BepuUtilities.Memory.Buffer{``0}@)">
@@ -3004,51 +3017,10 @@
             </summary>
             <param name="item">Item to give back to the pool.</param>
         </member>
-        <member name="T:BepuUtilities.Memory.RawBuffer">
-            <summary>
-            Raw byte buffer with some helpers for interoperating with typed spans.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.Memory.RawBuffer.Id">
-            <summary>
-            Implementation specific identifier of the raw buffer set by its source. If taken from a BufferPool, Id represents the packed power and internal power pool index from which it was taken.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.Memory.RawBuffer.Interpret``1(System.Int32)">
-            <summary>
-            Interprets the bytes at the memory location as a given type.
-            </summary>
-            <typeparam name="T">Type to interpret the memory as.</typeparam>
-            <param name="byteIndex">Memory location to interpret.</param>
-            <returns>Reference to the memory as a given type.</returns>
-        </member>
-        <member name="M:BepuUtilities.Memory.RawBuffer.Slice``1(System.Int32,System.Int32)">
-            <summary>
-            Takes a region of the raw buffer as a typed buffer.
-            </summary>
-            <typeparam name="T">Type to interpret the region as.</typeparam>
-            <param name="start">Start of the region in terms of the type's size.</param>
-            <param name="count">Number of elements in the region in terms of the type.</param>
-            <returns>A typed buffer.</returns>
-        </member>
-        <member name="M:BepuUtilities.Memory.RawBuffer.As``1">
-            <summary>
-            Creates a typed region from the raw buffer with the largest capacity that can fit within the allocated bytes.
-            </summary>
-            <typeparam name="T">Type of the buffer.</typeparam>
-            <returns>Typed buffer of maximum extent within the current raw buffer.</returns>
-        </member>
         <member name="F:BepuUtilities.Memory.SpanHelper.MaximumSpanSizePower">
             <summary>
             The highest size span exponent. The largest span is 2^MaximumSpanSizePower. This avoids overflow.
             </summary>
-        </member>
-        <member name="M:BepuUtilities.Memory.SpanHelper.GetPowerOf2(System.Int32)">
-            <summary>
-            Computes the largest integer N such that 2^N is less than or equal to i.
-            </summary>
-            <param name="i">Integer to compute the power of.</param>
-            <returns>Lowest integer N such that 2^N is less than or equal to i.</returns>
         </member>
         <member name="M:BepuUtilities.Memory.SpanHelper.GetContainingPowerOf2(System.Int32)">
             <summary>
@@ -3420,13 +3392,21 @@
             <param name="v2">Second unit-length vector.</param>
             <param name="q">Quaternion representing the rotation from v1 to v2.</param>
         </member>
-        <member name="M:BepuUtilities.QuaternionWide.GetApproximateAxisAngleFromQuaternion(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+        <member name="M:BepuUtilities.QuaternionWide.GetQuaternionBetweenNormalizedVectors(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
             <summary>
-            Gets an axis and angle representation of the rotation stored in a quaternion. Angle is approximated.
+            Computes the quaternion rotation between two normalized vectors.
+            </summary>
+            <param name="v1">First unit-length vector.</param>
+            <param name="v2">Second unit-length vector.</param>
+            <returns>Quaternion representing the rotation from v1 to v2.</returns>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.GetAxisAngleFromQuaternion(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Gets an axis and angle representation of the rotation stored in a quaternion.
             </summary>
             <param name="q">Quaternion to extract an axis-angle representation from.</param>
             <param name="axis">Axis of rotation extracted from the quaternion.</param>
-            <param name="angle">Approximated angle of rotation extracted from the quaternion.</param>
+            <param name="angle">Angle of rotation extracted from the quaternion.</param>
         </member>
         <member name="M:BepuUtilities.QuaternionWide.TransformWithoutOverlap(BepuUtilities.Vector3Wide@,BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@)">
             <summary>
@@ -3444,26 +3424,42 @@
             <param name="rotation">Rotation to apply to the vector.</param>
             <param name="result">Transformed vector.</param>
         </member>
-        <member name="M:BepuUtilities.QuaternionWide.TransformUnitX(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@)">
+        <member name="M:BepuUtilities.QuaternionWide.Transform(BepuUtilities.Vector3Wide,BepuUtilities.QuaternionWide)">
+            <summary>
+            Transforms the vector using a quaternion.
+            </summary>
+            <param name="v">Vector to transform.</param>
+            <param name="rotation">Rotation to apply to the vector.</param>
+            <returns>Transformed vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.TransformByConjugate(BepuUtilities.Vector3Wide,BepuUtilities.QuaternionWide)">
+            <summary>
+            Transforms the vector using a quaternion.
+            </summary>
+            <param name="v">Vector to transform.</param>
+            <param name="rotation">Rotation to apply to the vector.</param>
+            <returns>Transformed vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.TransformUnitX(BepuUtilities.QuaternionWide)">
             <summary>
             Transforms the unit X direction using a quaternion.
             </summary>
             <param name="rotation">Rotation to apply to the vector.</param>
-            <param name="result">Transformed vector.</param>
+            <returns>Transformed vector.</returns>
         </member>
-        <member name="M:BepuUtilities.QuaternionWide.TransformUnitY(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@)">
+        <member name="M:BepuUtilities.QuaternionWide.TransformUnitY(BepuUtilities.QuaternionWide)">
             <summary>
             Transforms the unit Y vector using a quaternion.
             </summary>
             <param name="rotation">Rotation to apply to the vector.</param>
-            <param name="result">Transformed vector.</param>
+            <returns>Transformed vector.</returns>
         </member>
-        <member name="M:BepuUtilities.QuaternionWide.TransformUnitZ(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@)">
+        <member name="M:BepuUtilities.QuaternionWide.TransformUnitZ(BepuUtilities.QuaternionWide)">
             <summary>
             Transforms the unit Z vector using a quaternion.
             </summary>
             <param name="rotation">Rotation to apply to the vector.</param>
-            <param name="result">Transformed vector.</param>
+            <returns>Transformed vector.</returns>
         </member>
         <member name="M:BepuUtilities.QuaternionWide.TransformUnitXY(BepuUtilities.QuaternionWide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
             <summary>
@@ -3499,12 +3495,28 @@
             <param name="b">Second quaternion to concatenate.</param>
             <param name="result">Product of the concatenation.</param>
         </member>
+        <member name="M:BepuUtilities.QuaternionWide.op_Multiply(BepuUtilities.QuaternionWide,BepuUtilities.QuaternionWide)">
+            <summary>
+            Concatenates the transforms of two quaternions together such that the resulting quaternion, applied as an orientation to a vector v, is equivalent to
+            transformed = (v * a) * b.
+            </summary>
+            <param name="a">First quaternion to concatenate.</param>
+            <param name="b">Second quaternion to concatenate.</param>
+            <returns>Product of the concatenation.</returns>
+        </member>
         <member name="M:BepuUtilities.QuaternionWide.Conjugate(BepuUtilities.QuaternionWide@,BepuUtilities.QuaternionWide@)">
             <summary>
             Computes the conjugate of the quaternion.
             </summary>
             <param name="quaternion">Quaternion to conjugate.</param>
             <param name="result">Conjugated quaternion.</param>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.Conjugate(BepuUtilities.QuaternionWide@)">
+            <summary>
+            Computes the conjugate of the quaternion.
+            </summary>
+            <param name="quaternion">Quaternion to conjugate.</param>
+            <returns>Conjugated quaternion.</returns>
         </member>
         <member name="M:BepuUtilities.QuaternionWide.ReadFirst(BepuUtilities.QuaternionWide@,System.Numerics.Quaternion@)">
             <summary>
@@ -3519,6 +3531,22 @@
             </summary>
             <param name="source">Quaternion to copy values from.</param>
             <param name="targetSlot">Wide quaternion to place values into.</param>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.WriteSlot(System.Numerics.Quaternion@,System.Int32,BepuUtilities.QuaternionWide@)">
+            <summary>
+            Writes a value into a slot of the target bundle.
+            </summary>
+            <param name="source">Source of the value to write.</param>
+            <param name="slotIndex">Index of the slot to write into.</param>
+            <param name="target">Bundle to write the value into.</param>
+        </member>
+        <member name="M:BepuUtilities.QuaternionWide.ReadSlot(BepuUtilities.QuaternionWide@,System.Int32,System.Numerics.Quaternion@)">
+            <summary>
+            Pulls one lane out of the wide representation.
+            </summary>
+            <param name="wide">Source of the lane.</param>
+            <param name="slotIndex">Index of the lane within the wide representation to read.</param>
+            <param name="narrow">Non-SIMD type to store the lane in.</param>
         </member>
         <member name="T:BepuUtilities.Symmetric2x2Wide">
             <summary>
@@ -3587,11 +3615,11 @@
         </member>
         <member name="M:BepuUtilities.Symmetric3x3.RotationSandwich(BepuUtilities.Matrix3x3@,BepuUtilities.Symmetric3x3@,BepuUtilities.Symmetric3x3@)">
             <summary>
-            Computes rT * m * r for a symmetric matrix m and a rotation matrix R.
+            Computes rT * m * r for a symmetric matrix m and a rotation matrix r.
             </summary>
             <param name="r">Rotation matrix to use as the sandwich bread.</param>
             <param name="m">Succulent interior symmetric matrix.</param>
-            <param name="sandwich">Result of v * m * transpose(v) for a symmetric matrix m.</param>
+            <param name="sandwich">Result of transpose(r) * m * r.</param>
         </member>
         <member name="M:BepuUtilities.Symmetric3x3.Determinant(BepuUtilities.Symmetric3x3@)">
             <summary>
@@ -3721,6 +3749,14 @@
             <param name="b">Second matrix to add.</param>
             <param name="result">Sum of the two input matrices.</param>
         </member>
+        <member name="M:BepuUtilities.Symmetric3x3Wide.op_Addition(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
+            <summary>
+            Adds the components of two symmetric matrices together.
+            </summary>
+            <param name="a">First matrix to add.</param>
+            <param name="b">Second matrix to add.</param>
+            <returns>Sum of the two input matrices.</returns>
+        </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.Subtract(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
             <summary>
             Subtracts one symmetric matrix's components from another.
@@ -3728,6 +3764,14 @@
             <param name="a">Matrix to be subtracted from.</param>
             <param name="b">Matrix to subtract from the first matrix.</param>
             <param name="result">Result of a - b.</param>
+        </member>
+        <member name="M:BepuUtilities.Symmetric3x3Wide.op_Subtraction(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
+            <summary>
+            Subtracts one symmetric matrix's components from another.
+            </summary>
+            <param name="a">Matrix to be subtracted from.</param>
+            <param name="b">Matrix to subtract from the first matrix.</param>
+            <returns>Result of a - b.</returns>
         </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.SkewSandwichWithoutOverlap(BepuUtilities.Vector3Wide@,BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
             <summary>
@@ -3763,6 +3807,14 @@
             <param name="b">Matrix to be reinterpreted as symmetric for the multiply.</param>
             <param name="result">Result of multiplying a * b.</param>
         </member>
+        <member name="M:BepuUtilities.Symmetric3x3Wide.op_Multiply(BepuUtilities.Matrix2x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
+            <summary>
+            Computes result = a * b, assuming that b represents a symmetric 3x3 matrix. Assumes that input parameters and output result do not overlap.
+            </summary>
+            <param name="a">First matrix of the pair to multiply.</param>
+            <param name="b">Matrix to be reinterpreted as symmetric for the multiply.</param>
+            <returns>Result of multiplying a * b.</returns>
+        </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.MultiplyWithoutOverlap(BepuUtilities.Matrix3x3Wide@,BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Matrix3x3Wide@)">
             <summary>
             Computes result = a * b, assuming that b represents a symmetric 3x3 matrix. Assumes that input parameters and output result do not overlap.
@@ -3771,7 +3823,23 @@
             <param name="b">Matrix to be reinterpreted as symmetric for the multiply.</param>
             <param name="result">Result of multiplying a * b.</param>
         </member>
+        <member name="M:BepuUtilities.Symmetric3x3Wide.op_Multiply(BepuUtilities.Matrix3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
+            <summary>
+            Computes result = a * b, assuming that b represents a symmetric 3x3 matrix. Assumes that input parameters and output result do not overlap.
+            </summary>
+            <param name="a">First matrix of the pair to multiply.</param>
+            <param name="b">Matrix to be reinterpreted as symmetric for the multiply.</param>
+            <returns>Result of multiplying a * b.</returns>
+        </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.Multiply(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Matrix3x3Wide@,BepuUtilities.Matrix3x3Wide@)">
+            <summary>
+            Computes result = a * b, assuming that a represents a symmetric 3x3 matrix. Assumes that input parameters and output result do not overlap.
+            </summary>
+            <param name="a">Matrix to be reinterpreted as symmetric for the multiply.</param>
+            <param name="b">Second matrix of the pair to multiply.</param>
+            <param name="result">Result of multiplying a * b.</param>
+        </member>
+        <member name="M:BepuUtilities.Symmetric3x3Wide.op_Multiply(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Matrix3x3Wide@)">
             <summary>
             Computes result = a * b, assuming that a represents a symmetric 3x3 matrix. Assumes that input parameters and output result do not overlap.
             </summary>
@@ -3916,6 +3984,88 @@
             <param name="result0">First half of the result.</param>
             <param name="result1">Second half of the result.</param>
         </member>
+        <member name="M:BepuUtilities.Symmetric6x6Wide.LDLTSolve(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Matrix3x3Wide@,BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Solves [vLower, vUpper] = [resultLower, resultUpper] * [[a, b], [bT, d]] for [resultLower, resultUpper] using LDLT decomposition.
+            [[a, b], [bT, d]] should be positive semidefinite.
+            </summary>
+            <param name="v0">First 3 values of the 6 component input vector.</param>
+            <param name="v1">Second 3 values of the 6 component input vector.</param>
+            <param name="a">Upper left 3x3 region of the matrix.</param>
+            <param name="b">Upper right 3x3 region of the matrix. Also the lower left 3x3 region of the matrix, transposed.</param>
+            <param name="d">Lower right 3x3 region of the matrix.</param>
+            <param name="result0">First 3 values of the result vector.</param>
+            <param name="result1">Second 3 values of the result vector.</param>
+        </member>
+        <member name="T:BepuUtilities.ThreadDispatcher">
+            <summary>
+            Provides a <see cref="T:BepuUtilities.IThreadDispatcher"/> implementation. Not reentrant.
+            </summary>
+        </member>
+        <member name="P:BepuUtilities.ThreadDispatcher.ThreadCount">
+            <summary>
+            Gets the number of threads to dispatch work on.
+            </summary>
+        </member>
+        <member name="M:BepuUtilities.ThreadDispatcher.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Creates a new thread dispatcher with the given number of threads.
+            </summary>
+            <param name="threadCount">Number of threads to dispatch on each invocation.</param>
+            <param name="threadPoolBlockAllocationSize">Size of memory blocks to allocate for thread pools.</param>
+        </member>
+        <member name="M:BepuUtilities.ThreadDispatcher.Dispose">
+            <summary>
+            Waits for all pending work to complete and then disposes all workers.
+            </summary>
+        </member>
+        <member name="T:BepuUtilities.Vector2Wide">
+            <summary>
+            Two dimensional vector with <see cref="P:System.Numerics.Vector`1.Count"/> (with generic type argument of <see cref="T:System.Single"/>) SIMD lanes.
+            </summary>
+        </member>
+        <member name="F:BepuUtilities.Vector2Wide.X">
+            <summary>
+            First component of the vector.
+            </summary>
+        </member>
+        <member name="F:BepuUtilities.Vector2Wide.Y">
+            <summary>
+            Second component of the vector.
+            </summary>
+        </member>
+        <member name="M:BepuUtilities.Vector2Wide.Add(BepuUtilities.Vector2Wide@,BepuUtilities.Vector2Wide@,BepuUtilities.Vector2Wide@)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <param name="result">Sum of a and b.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector2Wide.op_Addition(BepuUtilities.Vector2Wide,BepuUtilities.Vector2Wide)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <returns>Sum of a and b.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector2Wide.op_Addition(BepuUtilities.Vector2Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector2Wide.op_Addition(System.Numerics.Vector{System.Single},BepuUtilities.Vector2Wide)">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
+        </member>
         <member name="M:BepuUtilities.Vector2Wide.ReadFirst(BepuUtilities.Vector2Wide@,System.Numerics.Vector2@)">
             <summary>
             Pulls one lane out of the wide representation.
@@ -3946,6 +4096,46 @@
             <param name="slotIndex">Index of the slot to write into.</param>
             <param name="target">Bundle to write the value into.</param>
         </member>
+        <member name="T:BepuUtilities.Vector3Wide">
+            <summary>
+            Three dimensional vector with <see cref="P:System.Numerics.Vector`1.Count"/> (with generic type argument of <see cref="T:System.Single"/>) SIMD lanes.
+            </summary>
+        </member>
+        <member name="F:BepuUtilities.Vector3Wide.X">
+            <summary>
+            First component of the vector.
+            </summary>
+        </member>
+        <member name="F:BepuUtilities.Vector3Wide.Y">
+            <summary>
+            Second component of the vector.
+            </summary>
+        </member>
+        <member name="F:BepuUtilities.Vector3Wide.Z">
+            <summary>
+            Third component of the vector.
+            </summary>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.#ctor(System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Creates a vector by populating each component with the given scalar.
+            </summary>
+            <param name="s">Scalar to copy into all lanes of the vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.#ctor(System.Numerics.Vector{System.Single})">
+            <summary>
+            Creates a vector by populating each component with the given scalar.
+            </summary>
+            <param name="s">Scalar to copy into all lanes of the vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Add(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <param name="result">Sum of a and b.</param>
+        </member>
         <member name="M:BepuUtilities.Vector3Wide.Add(BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@)">
             <summary>
             Finds the result of adding a scalar to every component of a vector.
@@ -3953,6 +4143,38 @@
             <param name="v">Vector to add to.</param>
             <param name="s">Scalar to add to every component of the vector.</param>
             <param name="result">Vector with components equal to the input vector added to the input scalar.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Addition(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <returns>Sum of a and b.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Addition(BepuUtilities.Vector3Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Addition(System.Numerics.Vector{System.Single},BepuUtilities.Vector3Wide)">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Subtract(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Subtracts one vector from another.
+            </summary>
+            <param name="a">Vector to subtract from.</param>
+            <param name="b">Vector to subtract from the first vector.</param>
+            <param name="result">Vector with components equal the input scalar subtracted from the input vector.</param>
         </member>
         <member name="M:BepuUtilities.Vector3Wide.Subtract(BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@)">
             <summary>
@@ -3962,6 +4184,14 @@
             <param name="s">Scalar to subtract from every component of the vector.</param>
             <param name="result">Vector with components equal the input scalar subtracted from the input vector.</param>
         </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Subtraction(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Subtracts one vector from another.
+            </summary>
+            <param name="a">Vector to subtract from.</param>
+            <param name="b">Vector to subtract from the first vector.</param>
+            <returns>Vector with components equal the input scalar subtracted from the input vector.</returns>
+        </member>
         <member name="M:BepuUtilities.Vector3Wide.Subtract(System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
             <summary>
             Finds the result of subtracting the components of a vector from a scalar.
@@ -3969,6 +4199,30 @@
             <param name="v">Vector to subtract from the scalar.</param>
             <param name="s">Scalar to subtract from.</param>
             <param name="result">Vector with components equal the input vector subtracted from the input scalar.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Subtraction(BepuUtilities.Vector3Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Finds the result of subtracting the components of a vector from a scalar.
+            </summary>
+            <param name="v">Vector to subtract from the scalar.</param>
+            <param name="s">Scalar to subtract from.</param>
+            <returns>Vector with components equal the input vector subtracted from the input scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Dot(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Computes the inner product between two vectors.
+            </summary>
+            <param name="a">First vector to dot.</param>
+            <param name="b">Second vector to dot.</param>
+            <param name="result">Dot product of a and b.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Dot(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the inner product between two vectors.
+            </summary>
+            <param name="a">First vector to dot.</param>
+            <param name="b">Second vector to dot.</param>
+            <returns>Dot product of a and b.</returns>
         </member>
         <member name="M:BepuUtilities.Vector3Wide.Min(System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
             <summary>
@@ -3986,6 +4240,22 @@
             <param name="b">Second vector whose components will be compared.</param>
             <param name="result">Vector with components matching the smaller of the two input vectors.</param>
         </member>
+        <member name="M:BepuUtilities.Vector3Wide.Min(System.Numerics.Vector{System.Single},BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the per-component minimum between a scalar value and the components of a vector.
+            </summary>
+            <param name="s">Scalar to compare to each vector component.</param>
+            <param name="v">Vector whose components will be compared.</param>
+            <returns>Vector with components matching the smaller of the scalar value and the input vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Min(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the per-component minimum of two vectors.
+            </summary>
+            <param name="a">First vector whose components will be compared.</param>
+            <param name="b">Second vector whose components will be compared.</param>
+            <returns>Vector with components matching the smaller of the two input vectors.</returns>
+        </member>
         <member name="M:BepuUtilities.Vector3Wide.Max(System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
             <summary>
             Computes the per-component maximum between a scalar value and the components of a vector.
@@ -4002,6 +4272,240 @@
             <param name="b">Second vector whose components will be compared.</param>
             <param name="result">Vector with components matching the larger of the two input vectors.</param>
         </member>
+        <member name="M:BepuUtilities.Vector3Wide.Max(System.Numerics.Vector{System.Single},BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the per-component maximum between a scalar value and the components of a vector.
+            </summary>
+            <param name="s">Scalar to compare to each vector component.</param>
+            <param name="v">Vector whose components will be compared.</param>
+            <returns>Vector with components matching the larger of the scalar value and the input vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Max(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the per-component maximum of two vectors.
+            </summary>
+            <param name="a">First vector whose components will be compared.</param>
+            <param name="b">Second vector whose components will be compared.</param>
+            <returns>Vector with components matching the larger of the two input vectors.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Scale(BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Scales a vector by a scalar.
+            </summary>
+            <param name="vector">Vector to scale.</param>
+            <param name="scalar">Scalar to apply to the vector.</param>
+            <param name="result">Scaled result vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Division(BepuUtilities.Vector3Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Divides each component of the vector by the scalar.
+            </summary>
+            <param name="vector">Vector to divide.</param>
+            <param name="scalar">Scalar to divide the vector by.</param>
+            <returns>Value of the vector divided by the scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Multiply(BepuUtilities.Vector3Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Scales a vector by a scalar.
+            </summary>
+            <param name="vector">Vector to scale.</param>
+            <param name="scalar">Scalar to apply to the vector.</param>
+            <returns>Scaled result vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Multiply(System.Numerics.Vector{System.Single},BepuUtilities.Vector3Wide)">
+            <summary>
+            Scales a vector by a scalar.
+            </summary>
+            <param name="vector">Vector to scale.</param>
+            <param name="scalar">Scalar to apply to the vector.</param>
+            <returns>Scaled result vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Abs(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Computes the absolute value of a vector.
+            </summary>
+            <param name="vector">Vector to take the absolute value of.</param>
+            <param name="result">Absolute value of the input vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Abs(BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the absolute value of a vector.
+            </summary>
+            <param name="vector">Vector to take the absolute value of.</param>
+            <returns>Absolute value of the input vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Negate(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Negates a vector.
+            </summary>
+            <param name="v">Vector to negate.</param>
+            <param name="result">Negated vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Negate(BepuUtilities.Vector3Wide@)">
+            <summary>
+            Negates a vector in place and returns a reference to it.
+            </summary>
+            <param name="v">Vector to negate.</param>
+            <returns>Reference to the input parameter, mutated.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_UnaryNegation(BepuUtilities.Vector3Wide)">
+            <summary>
+            Negates a vector.
+            </summary>
+            <param name="v">Vector to negate.</param>
+            <returns>Negated vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.ConditionallyNegate(System.Numerics.Vector{System.Int32}@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Conditionally negates lanes of the vector.
+            </summary>
+            <param name="shouldNegate">Mask indicating which lanes should be negated.</param>
+            <param name="v">Reference to the vector to be conditionally negated.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.ConditionallyNegate(System.Numerics.Vector{System.Int32}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Conditionally negates lanes of the vector.
+            </summary>
+            <param name="shouldNegate">Mask indicating which lanes should be negated.</param>
+            <param name="v">Vector to be conditionally negated.</param>
+            <param name="negated">Conditionally negated result.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.ConditionallyNegate(System.Numerics.Vector{System.Int32},BepuUtilities.Vector3Wide)">
+            <summary>
+            Conditionally negates lanes of the vector.
+            </summary>
+            <param name="shouldNegate">Mask indicating which lanes should be negated.</param>
+            <param name="v">Vector to be conditionally negated.</param>
+            <returns>Conditionally negated vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.CrossWithoutOverlap(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Computes the cross product between two vectors, assuming that the vector references are not aliased.
+            </summary>
+            <param name="a">First vector to cross.</param>
+            <param name="b">Second vector to cross.</param>
+            <param name="result">Result of the cross product.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Cross(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Computes the cross product between two vectors.
+            </summary>
+            <param name="a">First vector to cross.</param>
+            <param name="b">Second vector to cross.</param>
+            <param name="result">Result of the cross product.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Cross(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the cross product between two vectors.
+            </summary>
+            <param name="a">First vector to cross.</param>
+            <param name="b">Second vector to cross.</param>
+            <returns>Result of the cross product.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.LengthSquared(BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Computes the squared length of a vector.
+            </summary>
+            <param name="v">Vector to compute the squared length of.</param>
+            <param name="lengthSquared">Squared length of the input vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Length(BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Computes the length of a vector.
+            </summary>
+            <param name="v">Vector to compute the length of.</param>
+            <param name="length">Length of the input vector.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.LengthSquared(BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the squared length of a vector.
+            </summary>
+            <param name="v">Vector to compute the squared length of.</param>
+            <returns>Squared length of the input vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Length(BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the length of a vector.
+            </summary>
+            <param name="v">Vector to compute the length of.</param>
+            <returns>Length of the input vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.LengthSquared">
+            <summary>
+            Computes the squared length of the vector.
+            </summary>
+            <returns>Squared length of this vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Length">
+            <summary>
+            Computes the length of the vector.
+            </summary>
+            <returns>Length of this vector.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Distance(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Computes the distance between two vectors.
+            </summary>
+            <param name="a">First vector in the pair.</param>
+            <param name="b">Second vector in the pair.</param>
+            <param name="distance">Distance between a and b.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.DistanceSquared(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">
+            <summary>
+            Computes the squared distance between two vectors.
+            </summary>
+            <param name="a">First vector in the pair.</param>
+            <param name="b">Second vector in the pair.</param>
+            <param name="distanceSquared">Squared distance between a and b.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Distance(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the distance between two vectors.
+            </summary>
+            <param name="a">First vector in the pair.</param>
+            <param name="b">Second vector in the pair.</param>
+            <returns>Distance between a and b.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.DistanceSquared(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes the squared distance between two vectors.
+            </summary>
+            <param name="a">First vector in the pair.</param>
+            <param name="b">Second vector in the pair.</param>
+            <returns>Squared distance between a and b.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Normalize(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Computes a unit length vector pointing in the same direction as the input.
+            </summary>
+            <param name="v">Vector to normalize.</param>
+            <param name="result">Vector pointing in the same direction as the input, but with unit length.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Normalize(BepuUtilities.Vector3Wide)">
+            <summary>
+            Computes a unit length vector pointing in the same direction as the input.
+            </summary>
+            <param name="v">Vector to normalize.</param>
+            <returns>Vector pointing in the same direction as the input, but with unit length.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.ConditionalSelect(System.Numerics.Vector{System.Int32}@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
+            <summary>
+            Selects the left or right input for each lane depending on a mask.
+            </summary>
+            <param name="condition">Mask to use to decide between the left and right value for each lane..</param>
+            <param name="left">Value to choose if the condition mask is set.</param>
+            <param name="right">Value to choose if the condition mask is unset.</param>
+            <param name="result">Blended result.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.ConditionalSelect(System.Numerics.Vector{System.Int32},BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Selects the left or right input for each lane depending on a mask.
+            </summary>
+            <param name="condition">Mask to use to decide between the left and right value for each lane..</param>
+            <param name="left">Value to choose if the condition mask is set.</param>
+            <param name="right">Value to choose if the condition mask is unset.</param>
+            <returns>Blended result.</returns>
+        </member>
         <member name="M:BepuUtilities.Vector3Wide.Multiply(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@)">
             <summary>
             Multiplies the components of one vector with another.
@@ -4009,6 +4513,14 @@
             <param name="a">First vector to multiply.</param>
             <param name="b">Second vector to multiply.</param>
             <param name="result">Result of the multiplication.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.op_Multiply(BepuUtilities.Vector3Wide,BepuUtilities.Vector3Wide)">
+            <summary>
+            Multiplies the components of one vector with another.
+            </summary>
+            <param name="a">First vector to multiply.</param>
+            <param name="b">Second vector to multiply.</param>
+            <returns>Result of the multiplication.</returns>
         </member>
         <member name="M:BepuUtilities.Vector3Wide.ReadSlot(BepuUtilities.Vector3Wide@,System.Int32,System.Numerics.Vector3@)">
             <summary>
@@ -4047,6 +4559,13 @@
             <param name="source">Source value to write to every bundle slot.</param>
             <param name="broadcasted">Bundle containing the source's components in every slot.</param>
         </member>
+        <member name="M:BepuUtilities.Vector3Wide.Broadcast(System.Numerics.Vector3)">
+            <summary>
+            Expands each scalar value to every slot of the bundle.
+            </summary>
+            <param name="source">Source value to write to every bundle slot.</param>
+            <returns>Bundle containing the source's components in every slot.</returns>
+        </member>
         <member name="M:BepuUtilities.Vector3Wide.Rebroadcast(BepuUtilities.Vector3Wide@,System.Int32,BepuUtilities.Vector3Wide@)">
             <summary>
             Takes a slot from the source vector and broadcasts it into all slots of the target vector.
@@ -4054,6 +4573,14 @@
             <param name="source">Vector to pull values from.</param>
             <param name="slotIndex">Slot in the source vectors to pull values from.</param>
             <param name="broadcasted">Target vector to be filled with the selected data.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector3Wide.Rebroadcast(BepuUtilities.Vector3Wide,System.Int32)">
+            <summary>
+            Takes a slot from the source vector and broadcasts it into all slots of the target vector.
+            </summary>
+            <param name="source">Vector to pull values from.</param>
+            <param name="slotIndex">Slot in the source vectors to pull values from.</param>
+            <returns>Target vector to be filled with the selected data.</returns>
         </member>
         <member name="M:BepuUtilities.Vector3Wide.CopySlot(BepuUtilities.Vector3Wide@,System.Int32,BepuUtilities.Vector3Wide@,System.Int32)">
             <summary>
@@ -4063,6 +4590,51 @@
             <param name="sourceSlotIndex">Slot in the source vectors to pull values from.</param>
             <param name="target">Target vector whose slot will be filled with the selected data.</param>
             <param name="targetSlotIndex">Slot in the target vectors to write values into.</param>
+        </member>
+        <member name="T:BepuUtilities.Vector4Wide">
+            <summary>
+            Four dimensional vector with <see cref="P:System.Numerics.Vector`1.Count"/> (with generic type argument of <see cref="T:System.Single"/>) SIMD lanes.
+            </summary>
+        </member>
+        <member name="M:BepuUtilities.Vector4Wide.Add(BepuUtilities.Vector4Wide,BepuUtilities.Vector4Wide,BepuUtilities.Vector4Wide@)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <param name="result">Sum of a and b.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector4Wide.Add(BepuUtilities.Vector4Wide,System.Numerics.Vector{System.Single},BepuUtilities.Vector4Wide@)">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <param name="result">Vector with components equal to the input vector added to the input scalar.</param>
+        </member>
+        <member name="M:BepuUtilities.Vector4Wide.op_Addition(BepuUtilities.Vector4Wide,BepuUtilities.Vector4Wide)">
+            <summary>
+            Performs a componentwise add between two vectors.
+            </summary>
+            <param name="a">First vector to add.</param>
+            <param name="b">Second vector to add.</param>
+            <returns>Sum of a and b.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector4Wide.op_Addition(BepuUtilities.Vector4Wide,System.Numerics.Vector{System.Single})">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
+        </member>
+        <member name="M:BepuUtilities.Vector4Wide.op_Addition(System.Numerics.Vector{System.Single},BepuUtilities.Vector4Wide)">
+            <summary>
+            Finds the result of adding a scalar to every component of a vector.
+            </summary>
+            <param name="v">Vector to add to.</param>
+            <param name="s">Scalar to add to every component of the vector.</param>
+            <returns>Vector with components equal to the input vector added to the input scalar.</returns>
         </member>
         <member name="M:BepuUtilities.Vector4Wide.Min(BepuUtilities.Vector4Wide@,BepuUtilities.Vector4Wide@,BepuUtilities.Vector4Wide@)">
             <summary>

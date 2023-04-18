@@ -58,7 +58,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         {
             if (BepuShape is IConvexShape convex)
             {
-                convex.ComputeInertia(mass, out inertia);
+                inertia = convex.ComputeInertia(mass);
             }
             else
             {

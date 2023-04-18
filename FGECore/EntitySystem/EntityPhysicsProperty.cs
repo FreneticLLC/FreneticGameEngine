@@ -252,10 +252,7 @@ namespace FGECore.EntitySystem
             {
                 return;
             }
-            if (PhysicsWorld == null)
-            {
-                PhysicsWorld = Engine.PhysicsWorldGeneric;
-            }
+            PhysicsWorld ??= Engine.PhysicsWorldGeneric;
             if (Shape == null)
             {
                 return;
@@ -310,14 +307,11 @@ namespace FGECore.EntitySystem
                 Internal.Gravity = PhysicsWorld.Gravity;
                 GravityIsSet = true;
             }
-            if (CGroup == null)
-            {
-                CGroup = CollisionUtil.Solid;
-            }
+            CGroup ??= CollisionUtil.Solid;
             RigidPose pose = new((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
             BodyVelocity velocity = new(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
             Shape = Shape.Register();
-            CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetectionSettings.Continuous(1e-4f, 1e-4f));
+            CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetection.Continuous(1e-4f, 1e-4f));
             BodyDescription description;
             if (Mass == 0)
             {
