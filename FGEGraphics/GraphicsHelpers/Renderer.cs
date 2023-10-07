@@ -180,18 +180,6 @@ namespace FGEGraphics.GraphicsHelpers
             TEngine.White.Bind();
             GraphicsUtil.CheckError("RenderLineBox: BindTexture");
             Location halfsize = (max - min) * 0.5;
-            if ((min + halfsize) == Location.Zero)
-            {
-                return; // ???
-            }
-            if (Math.Abs(min.X + halfsize.X) < 1 || Math.Abs(min.Y + halfsize.Y) < 1 || Math.Abs(min.Z + halfsize.Z) < 1)
-            {
-                return; // ???
-            }
-            if (Math.Abs(min.X) < 1 || Math.Abs(min.Y) < 1 || Math.Abs(min.Z) < 1)
-            {
-                return; // ???
-            }
             Matrix4d mat = Matrix4d.Scale(halfsize.ToOpenTK3D())
                 * (rot != null && rot.HasValue ? rot.Value : Matrix4d.Identity)
                 * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());

@@ -82,7 +82,7 @@ namespace FGEGraphics.ClientSystem.EntitySystem
             {
                 GL.Disable(ec);
             }
-            if (DiffuseTexture != null)
+            if (DiffuseTexture is not null)
             {
                 GL.ActiveTexture(TextureUnit.Texture0);
                 DiffuseTexture.Bind();
