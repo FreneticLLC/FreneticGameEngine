@@ -38,6 +38,10 @@ namespace FGECore.CoreSystems
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, e) =>
+            {
+                Console.WriteLine($"Unhandled exception: {e}");
+            });
         }
 
         /// <summary>The name of this program.</summary>
