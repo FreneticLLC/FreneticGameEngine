@@ -13,7 +13,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LZ4;
+using K4os.Compression.LZ4.Streams;
 
 namespace FGECore.FileSystems
 {
@@ -25,11 +25,7 @@ namespace FGECore.FileSystems
         /// <returns>Compressed data.</returns>
         public static byte[] Compress(byte[] input)
         {
-            using MemoryStream memstream = new();
-            using LZ4Stream lzstream = new(memstream, LZ4StreamMode.Compress);
-            lzstream.Write(input, 0, input.Length);
-            lzstream.Flush();
-            return memstream.ToArray();
+            return CompressPartial(input, 0, input.Length);
         }
         /// <summary>Compresses a byte array using LZ4.</summary>
         /// <param name="input">Non-compressed data.</param>
@@ -38,11 +34,13 @@ namespace FGECore.FileSystems
         /// <returns>Compressed data.</returns>
         public static byte[] CompressPartial(byte[] input, int start, int length)
         {
-            using MemoryStream memstream = new();
-            using LZ4Stream lzstream = new(memstream, LZ4StreamMode.Compress);
-            lzstream.Write(input, start, length);
-            lzstream.Flush();
-            return memstream.ToArray();
+            using MemoryStream outStream = new();
+            using (MemoryStream inStream = new(input, start, length))
+            using (LZ4EncoderStream encodeStream = LZ4Stream.Encode(outStream))
+            {
+                inStream.CopyTo(encodeStream);
+            }
+            return outStream.ToArray();
         }
 
         /// <summary>Decompresses a byte array using LZ4.</summary>
@@ -50,12 +48,13 @@ namespace FGECore.FileSystems
         /// <returns>Non-compressed data.</returns>
         public static byte[] Decompress(byte[] input)
         {
-            using MemoryStream output = new();
-            using MemoryStream memstream = new(input);
-            using LZ4Stream LZStream = new(memstream, LZ4StreamMode.Decompress);
-            LZStream.CopyTo(output);
-            LZStream.Flush();
-            return output.ToArray();
+            using MemoryStream outStream = new();
+            using (MemoryStream inStream = new(input))
+            using (LZ4DecoderStream decodeStream = LZ4Stream.Decode(inStream))
+            {
+                decodeStream.CopyTo(outStream);
+            }
+            return outStream.ToArray();
         }
 
         /// <summary>Compresses a byte array using the GZip algorithm.</summary>
