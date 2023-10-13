@@ -147,7 +147,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets
         }
 
         [ThreadStatic]
-        private static int ParseDepth = 0;
+        private static int ParseDepth;
 
         /// <summary>
         /// Helper cache to reduce over-parsing of reused fancy text.

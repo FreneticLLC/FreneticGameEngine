@@ -182,14 +182,14 @@ namespace FGEGraphics.ClientSystem
         {
             get
             {
-                return Window == null ? Internal.WindowWidth : Window.Size.X;
+                return Window == null ? Internal.WindowWidth : Window.ClientSize.X;
             }
             set
             {
                 Internal.WindowWidth = value;
                 if (Window != null)
                 {
-                    Window.Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
+                    Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
                 }
             }
         }
@@ -199,14 +199,14 @@ namespace FGEGraphics.ClientSystem
         {
             get
             {
-                return Window == null ? Internal.WindowHeight : Window.Size.Y;
+                return Window == null ? Internal.WindowHeight : Window.ClientSize.Y;
             }
             set
             {
                 Internal.WindowHeight = value;
                 if (Window != null)
                 {
-                    Window.Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
+                    Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
                 }
             }
         }
@@ -216,7 +216,7 @@ namespace FGEGraphics.ClientSystem
         {
             get
             {
-                return Window == null ? new FGECore.MathHelpers.Vector2i(Internal.WindowWidth, Internal.WindowHeight) : new FGECore.MathHelpers.Vector2i(Window.Size.X, Window.Size.Y);
+                return Window == null ? new FGECore.MathHelpers.Vector2i(Internal.WindowWidth, Internal.WindowHeight) : new FGECore.MathHelpers.Vector2i(Window.ClientSize.X, Window.ClientSize.Y);
             }
             set
             {
@@ -224,7 +224,7 @@ namespace FGEGraphics.ClientSystem
                 Internal.WindowHeight = value.Y;
                 if (Window != null)
                 {
-                    Window.Size = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
+                    Window.ClientSize = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
                 }
             }
         }
@@ -280,7 +280,7 @@ namespace FGEGraphics.ClientSystem
         {
             Window.Focus();
             OutputType.CLIENTINIT.Output("GameClient starting load sequence...");
-            GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
+            GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -402,10 +402,7 @@ namespace FGEGraphics.ClientSystem
                 GraphicsUtil.CheckError("GameClient - PostTick");
                 // Final non-VR step: Swap the render buffer onto the screen!
                 Window.SwapBuffers();
-                if (VR != null) // VR Push-To-HMD
-                {
-                    VR.Submit();
-                }
+                VR?.Submit(); // VR Push-To-HMD
                 GraphicsUtil.CheckError("GameClient - Post");
             }
             finally

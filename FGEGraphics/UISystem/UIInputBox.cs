@@ -160,9 +160,7 @@ namespace FGEGraphics.UISystem
             {
                 if (MinCursor > MaxCursor)
                 {
-                    int min = MinCursor;
-                    MinCursor = MaxCursor;
-                    MaxCursor = min;
+                    (MaxCursor, MinCursor) = (MinCursor, MaxCursor);
                 }
                 bool modified = false;
                 KeyHandlerState khs = Window.Keyboard.BuildingState;
@@ -252,7 +250,7 @@ namespace FGEGraphics.UISystem
             Renderer2D.SetColor(Color);
             view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.FontDefault.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             GL.Enable(EnableCap.ScissorTest);
-            GL.Scissor(x, engine.Window.Size.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
+            GL.Scissor(x, engine.Window.ClientSize.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
             if (Selected)
             {
                 float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
@@ -262,7 +260,7 @@ namespace FGEGraphics.UISystem
             }
             Renderer2D.SetColor(Color4.White);
             Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));
-            GL.Scissor(0, 0, engine.Window.Size.X, engine.Window.Size.Y); // TODO: Bump around a stack, for embedded scroll groups?
+            GL.Scissor(0, 0, engine.Window.ClientSize.X, engine.Window.ClientSize.Y); // TODO: Bump around a stack, for embedded scroll groups?
             GL.Disable(EnableCap.ScissorTest);
         }
     }

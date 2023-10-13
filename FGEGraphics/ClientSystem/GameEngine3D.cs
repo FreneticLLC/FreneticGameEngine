@@ -144,7 +144,7 @@ namespace FGEGraphics.ClientSystem
         /// <summary>Reloads relevant 3D screen buffers.</summary>
         public override void ReloadScreenBuffers()
         {
-            MainView.GenerationHelper.Generate(Window.Size.X, Window.Size.Y);
+            MainView.GenerationHelper.Generate(Window.ClientSize.X, Window.ClientSize.Y);
         }
 
         /// <summary>The main rendering context.</summary>
@@ -168,7 +168,7 @@ namespace FGEGraphics.ClientSystem
             OutputType.CLIENTINIT.Output("GameEngine loading main 3D view...");
             if (!IsSubEngine)
             {
-                SubSize = new(Window.Size.X, Window.Size.Y);
+                SubSize = new(Window.ClientSize.X, Window.ClientSize.Y);
             }
             MainView.Config.Width = SubSize.X;
             MainView.Config.Height = SubSize.Y;

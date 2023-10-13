@@ -152,7 +152,7 @@ namespace FGEGraphics.ClientSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
             c_FBO_Tex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, c_FBO_Tex);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.Size.X / Pixelation, Window.Size.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
@@ -162,7 +162,7 @@ namespace FGEGraphics.ClientSystem
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
             l_FBO_Tex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, l_FBO_Tex);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.Size.X / Pixelation, Window.Size.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
@@ -208,8 +208,8 @@ namespace FGEGraphics.ClientSystem
             // Audio handling
             Sounds.Update(AudioCamera.Position, AudioCamera.Direction, AudioCamera.Up, Location.Zero, Window.IsFocused);
             // First step: setup
-            MainRenderContext.Width = Window.Size.X / Pixelation;
-            MainRenderContext.Height = Window.Size.Y / Pixelation;
+            MainRenderContext.Width = Window.ClientSize.X / Pixelation;
+            MainRenderContext.Height = Window.ClientSize.Y / Pixelation;
             MainRenderContext.Zoom = OriginalZoom;
             MainRenderContext.ZoomMultiplier = ZoomMultiplier;
             MainRenderContext.ViewCenter = ViewCenterInverse;
@@ -226,15 +226,15 @@ namespace FGEGraphics.ClientSystem
                 Zoom = MinimumZoom;
             }
             OriginalZoom = Zoom;
-            float aspect = Window.Size.X / (float)Window.Size.Y;
+            float aspect = Window.ClientSize.X / (float)Window.ClientSize.Y;
             float sc = 1.0f / (OriginalZoom * ZoomMultiplier);
             OriginalScaler = new Vector2(sc, sc * aspect);
             OriginalAdder = ViewCenterInverse;
             Client.Ortho = Matrix4.CreateOrthographicOffCenter(OriginalAdder.X - OriginalScaler.X, OriginalAdder.X + OriginalScaler.X, OriginalAdder.Y + OriginalScaler.Y, OriginalAdder.Y - OriginalScaler.Y, -1, 1);
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
-            float wx = Client.MouseX / (float)Window.Size.X;
-            float wy = 1.0f - (Client.MouseY / (float)Window.Size.Y);
+            float wx = Client.MouseX / (float)Window.ClientSize.X;
+            float wy = 1.0f - (Client.MouseY / (float)Window.ClientSize.Y);
             wx -= 0.5f;
             wy -= 0.5f;
             wx *= 2f;
@@ -331,7 +331,7 @@ namespace FGEGraphics.ClientSystem
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Disable(EnableCap.DepthTest);
                 GL.DepthMask(false);
-                GL.Viewport(0, 0, Window.Size.X / Pixelation, Window.Size.Y / Pixelation);
+                GL.Viewport(0, 0, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation);
                 Shaders.ColorMult2DShader.Bind();
                 MainRenderContext.CalcShadows = false;
                 Scaler = OriginalScaler;
@@ -388,7 +388,7 @@ namespace FGEGraphics.ClientSystem
             }
             MainRenderContext.CalcShadows = false;
             GraphicsUtil.CheckError("Render - Lights precalced");
-            GL.Viewport(0, 0, Window.Size.X / Pixelation, Window.Size.Y / Pixelation);
+            GL.Viewport(0, 0, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation);
             Shaders.ColorMult2DShader.Bind();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
             GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
@@ -452,7 +452,7 @@ namespace FGEGraphics.ClientSystem
             GL.Uniform2(2, ref Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
-            GL.Viewport(0, 0, Window.Size.X, Window.Size.Y);
+            GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
             RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
             GraphicsUtil.CheckError("Render - Added");
             GL.BindTexture(TextureTarget.Texture2D, 0);
