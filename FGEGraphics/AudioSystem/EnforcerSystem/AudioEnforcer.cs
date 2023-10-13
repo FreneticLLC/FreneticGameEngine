@@ -187,7 +187,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
             /// <summary>Completely closes and stops the audio enforcer system.</summary>
             public void CloseAndStop()
             {
-                if (AL.GetSourceState(ALAudioSource) == ALSourceState.Playing)
+                if ((ALSourceState)AL.GetSource(ALAudioSource, ALGetSourcei.SourceState) == ALSourceState.Playing)
                 {
                     AL.SourceStop(ALAudioSource);
                 }
@@ -274,7 +274,7 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem
                 int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
                 AL.BufferData(bufferID, ALFormat.Stereo16, buffer, FREQUENCY);
                 AL.SourceQueueBuffer(ALAudioSource, bufferID);
-                if (AL.GetSourceState(ALAudioSource) != ALSourceState.Playing)
+                if ((ALSourceState)AL.GetSource(ALAudioSource, ALGetSourcei.SourceState) != ALSourceState.Playing)
                 {
                     AL.SourcePlay(ALAudioSource);
                 }

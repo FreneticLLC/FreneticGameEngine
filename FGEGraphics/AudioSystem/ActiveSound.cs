@@ -257,7 +257,7 @@ namespace FGEGraphics.AudioSystem
                 {
                     return false;
                 }
-                return (AL.GetSourceState(Src) == ALSourceState.Playing);
+                return ((ALSourceState)AL.GetSource(Src, ALGetSourcei.SourceState) == ALSourceState.Playing);
             }
         }
 

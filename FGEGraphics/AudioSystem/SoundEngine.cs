@@ -83,10 +83,7 @@ namespace FGEGraphics.AudioSystem
         /// <param name="tclient">The backing client.</param>
         public void Init(GameEngineBase tclient)
         {
-            if (EnforcerInternal != null)
-            {
-                EnforcerInternal.Shutdown();
-            }
+            EnforcerInternal?.Shutdown();
             if (Context.Handle != IntPtr.Zero)
             {
                 ALC.DestroyContext(Context);
@@ -246,7 +243,7 @@ namespace FGEGraphics.AudioSystem
             for (int i = 0; i < PlayingNow.Count; i++)
             {
                 ActiveSound sound = PlayingNow[i];
-                if (!sound.Exists || (sound.AudioInternal == null && sound.Src < 0) || (sound.AudioInternal == null ? AL.GetSourceState(sound.Src) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
+                if (!sound.Exists || (sound.AudioInternal == null && sound.Src < 0) || (sound.AudioInternal == null ? (ALSourceState)AL.GetSource(sound.Src, ALGetSourcei.SourceState) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
                 {
                     sound.Destroy();
                     if (sound.AudioInternal == null)
@@ -630,10 +627,7 @@ namespace FGEGraphics.AudioSystem
                         {
                             Client.Schedule.ScheduleSyncTask(() =>
                             {
-                                if (tsfx.Loaded != null)
-                                {
-                                    tsfx.Loaded.Invoke(tsfx, null);
-                                }
+                                tsfx.Loaded?.Invoke(tsfx, null);
                             });
                         }
                     }
@@ -692,9 +686,9 @@ namespace FGEGraphics.AudioSystem
             {
                 LiveAudioClip clip = new()
                 {
-                    Data = data
+                    Data = data,
+                    Channels = (byte)oggReader.Channels
                 };
-                clip.Channels = (byte)oggReader.Channels;
                 sfx.Clip = clip;
             }
             if (EnforcerInternal == null || MaxBeforeEnforce != 0)
