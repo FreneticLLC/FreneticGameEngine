@@ -399,8 +399,6 @@
             </summary>
             <remarks>Only one invocation of the sort can be running at a time on a given instance of the sorter.</remarks>
             <typeparam name="TValue">Type of the values to sort.</typeparam>
-            <typeparam name="TKeySpan">Type of the span that holds the keys to sort.</typeparam>
-            <typeparam name="TValueSpan">Type of the span that holds the values to sort.</typeparam>
             <param name="inputKeys">Span containing the keys to sort.</param>
             <param name="inputValues">Span containing the values to sort.</param>
             <param name="scratchKeys">Scratch array to write temporary results into.</param>
@@ -516,7 +514,6 @@
             <param name="initialKeySpan">Span to use as backing memory of the dictionary keys.</param>
             <param name="initialValueSpan">Span to use as backing memory of the dictionary values.</param>
             <param name="initialTableSpan">Span to use as backing memory of the table. Must be zeroed.</param>
-            <param name="comparer">Comparer to use for the dictionary.</param>
             <param name="tablePowerOffset">Target size of the table relative to the number of stored elements.</param>
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.#ctor(System.Int32,System.Int32,BepuUtilities.Memory.IUnmanagedMemoryPool,`2)">
@@ -534,7 +531,6 @@
             </summary>
             <param name="initialCapacity">Initial target size of the key and value spans. The size of the initial buffer will be at least as large as the initialCapacity.</param>
             <param name="tableSizePower">Target capacity relative to the initial capacity in terms of a power of 2. The size of the initial table buffer will be at least 2^tableSizePower times larger than the initial capacity.</param>
-            <param name="comparer">Comparer to use in the dictionary.</param>
             <param name="pool">Pool used for spans.</param>   
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.#ctor(System.Int32,BepuUtilities.Memory.IUnmanagedMemoryPool)">
@@ -542,7 +538,6 @@
             Creates a new dictionary with a default constructed comparer.
             </summary>
             <param name="initialCapacity">Initial target size of the key and value spans. The size of the initial buffer will be at least as large as the initialCapacity.</param>
-            <param name="comparer">Comparer to use in the dictionary.</param>
             <param name="pool">Pool used for spans.</param>   
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.Resize(BepuUtilities.Memory.Buffer{`0}@,BepuUtilities.Memory.Buffer{`1}@,BepuUtilities.Memory.Buffer{System.Int32}@,BepuUtilities.Memory.Buffer{`0}@,BepuUtilities.Memory.Buffer{`1}@,BepuUtilities.Memory.Buffer{System.Int32}@)">
@@ -570,12 +565,6 @@
             <summary>
             Returns the resources associated with the dictionary to pools.
             </summary>
-            <param name="keyPool">Pool used for key spans.</param>   
-            <param name="valuePool">Pool used for value spans.</param>   
-            <param name="tablePool">Pool used for table spans.</param>
-            <typeparam name="TKeyPool">Type of the pool used for key spans.</typeparam>
-            <typeparam name="TValuePool">Type of the pool used for value spans.</typeparam>
-            <typeparam name="TTablePool">Type of the pool used for table spans.</typeparam>
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.EnsureCapacity(System.Int32,BepuUtilities.Memory.IUnmanagedMemoryPool)">
             <summary>
@@ -742,7 +731,6 @@
             <param name="key">Key of the pair to add.</param>
             <param name="value">Value of the pair to add.</param>
             <param name="pool">Pool used for spans.</param>   
-            <typeparam name="TPool">Type of the pool used for spans.</typeparam>
             <returns>True if the pair was added to the dictionary, false if the key was already present.</returns>
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.Add(`0,`1@,BepuUtilities.Memory.IUnmanagedMemoryPool)">
@@ -752,7 +740,6 @@
             <param name="key">Key of the pair to add.</param>
             <param name="value">Value of the pair to add.</param>
             <param name="pool">Pool to pull resources from and to return resources to.</param>   
-            <typeparam name="TPool">Type of the pool to use.</typeparam>
             <returns>True if the pair was added to the dictionary, false if the key was already present.</returns>
         </member>
         <member name="M:BepuUtilities.Collections.QuickDictionary`3.FastRemove(System.Int32,System.Int32)">
@@ -1195,7 +1182,7 @@
             <param name="index">Index to grab an element from.</param>
             <returns>Element at the given index in the queue.</returns>
         </member>
-        <member name="M:BepuUtilities.Collections.QuickQueue`1.#ctor(BepuUtilities.Memory.Buffer{`0}@)">
+        <member name="M:BepuUtilities.Collections.QuickQueue`1.#ctor(BepuUtilities.Memory.Buffer{`0})">
             <summary>
             Creates a new queue.
             </summary>
@@ -1494,7 +1481,6 @@
             <summary>
             Shrinks the internal buffers to the smallest acceptable size and releases the old buffers to the pools.
             </summary>
-            <param name="element">Element to add.</param>
             <param name="pool">Pool used for spans.</param>   
         </member>
         <member name="M:BepuUtilities.Collections.QuickSet`2.GetTableIndices(`0@,System.Int32@,System.Int32@)">
@@ -1872,460 +1858,6 @@
             <remarks>All usages of these worker pools within the simulation are guaranteed to return thread pool memory before the function returns. In other words,
             thread memory pools are used for strictly ephemeral memory, and it will never be held by the simulation outside the scope of a function that 
             takes the IThreadDispatcher as input.</remarks>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.Task">
-            <summary>
-            Description of a task to be submitted to a <see cref="T:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.Task.Function">
-            <summary>
-            Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Id"/>, <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Context"/> pointer, and executing worker index.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.Task.Context">
-            <summary>
-            Context to be passed into the <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Function"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.Task.Continuation">
-            <summary>
-            Continuation to be notified after this task completes, if any.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.Task.Id">
-            <summary>
-            User-provided identifier of this task.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Task.#ctor(,System.Void*,System.Int64,BepuUtilities.TestLinkedTaskStack.ContinuationHandle)">
-            <summary>
-            Creates a new task.
-            </summary>
-            <param name="function">Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Id"/>, <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Context"/> pointer, executing worker index, and executing <see cref="T:BepuUtilities.IThreadDispatcher"/>.</param>
-            <param name="context">Context pointer to pass to the <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Function"/>.</param>
-            <param name="taskId">Id of this task to be passed into the <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Function"/>.</param>
-            <param name="continuation">Continuation to notify after the completion of this task, if any.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Task.op_Implicit()~BepuUtilities.TestLinkedTaskStack.Task">
-            <summary>
-            Creates a task from a function.
-            </summary>
-            <param name="function">Function to turn into a task.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Task.Run(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Runs the task and, if necessary, notifies the associated continuation of its completion.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the function.</param> 
-            <param name="dispatcher">Dispatcher running this task.</param>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.PopTaskResult">
-            <summary>
-            Describes the result status of a pop attempt.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.PopTaskResult.Success">
-            <summary>
-            A task was successfully popped.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.PopTaskResult.Empty">
-            <summary>
-            The stack was empty, but may have more tasks in the future.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.PopTaskResult.Stop">
-            <summary>
-            The stack has been terminated and all threads seeking work should stop.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.ContinuationHandle">
-            <summary>
-            Refers to a continuation within a <see cref="T:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack"/>.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.ContinuationHandle.Completed">
-            <summary>
-            Gets whether the tasks associated with this continuation have completed. If the continuation has not been initialized, this will always return false.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.ContinuationHandle.Continuation">
-            <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestLinkedTaskStack.ContinuationHandle"/>.
-            </summary>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.ContinuationHandle.Null">
-            <summary>
-            Gets a null continuation handle.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.ContinuationHandle.Initialized">
-            <summary>
-            Gets whether this handle ever represented an allocated handle. This does not guarantee that the continuation's associated tasks are active in the <see cref="T:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack"/> that it was allocated from.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.ContinuationHandle.NotifyTaskCompleted(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Notifies the continuation that one task was completed.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the continuation's delegate, if any.</param>
-            <param name="dispatcher">Dispatcher to pass to the continuation's delegate, if any.</param>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.IJobFilter">
-            <summary>
-            Determines which jobs are allowed to serve a <see cref="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPop``1(``0@,BepuUtilities.TestLinkedTaskStack.Task@)"/> request.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.IJobFilter.AllowJob(System.UInt64)">
-            <summary>
-            Determines whether a job with the given tag should be allowed to serve a <see cref="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPop``1(``0@,BepuUtilities.TestLinkedTaskStack.Task@)"/> request.
-            </summary>
-            <param name="jobTag">Tag of the candidate job.</param>
-            <returns>True if the job should be allowed to serve a request, false otherwise.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.AllowAllJobs">
-            <summary>
-            A filter that will allow pops from any jobs.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.AllowAllJobs.AllowJob(System.UInt64)">
-            <inheritdoc/>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.DelegateJobFilter">
-            <summary>
-            A job filter that wraps a managed delegate.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.DelegateJobFilter.Filter">
-            <summary>
-            Delegate to use as the filter.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.DelegateJobFilter.#ctor(System.Func{System.UInt64,System.Boolean})">
-            <summary>
-            Creates a job filter that wraps a delegate.
-            </summary>
-            <param name="filter">Delegate to use as the filter.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.DelegateJobFilter.AllowJob(System.UInt64)">
-            <inheritdoc/>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.FunctionPointerJobFilter">
-            <summary>
-            A job filter that wraps a function pointer.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.FunctionPointerJobFilter.Filter">
-            <summary>
-            Delegate to use as the filter.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.FunctionPointerJobFilter.#ctor()">
-            <summary>
-            Creates a job filter that wraps a delegate.
-            </summary>
-            <param name="filter">Delegate to use as the filter.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.FunctionPointerJobFilter.AllowJob(System.UInt64)">
-            <inheritdoc/>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.MinimumTagFilter">
-            <summary>
-            A job filter that requires the job tag to meet or exceed a threshold value.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.MinimumTagFilter.MinimumTagValue">
-            <summary>
-            Value that a job must match or exceed to be allowed.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.MinimumTagFilter.#ctor(System.UInt64)">
-            <summary>
-            Creates a job filter that wraps a delegate.
-            </summary>
-            <param name="minimumTagValue">Value that a job must match or exceed to be allowed.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.MinimumTagFilter.AllowJob(System.UInt64)">
-            <inheritdoc/>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Job.TryPop(BepuUtilities.TestLinkedTaskStack.Task@)">
-            <summary>
-            Attempts to pop a task from the job.
-            </summary>
-            <param name="task">Task popped from the job, if any.</param>
-            <returns>True if a task was available to pop, false otherwise.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.ContinuationBlock">
-            <summary>
-            Stores a block of task continuations that maintains a pointer to previous blocks. 
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Worker.AllocateJob(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.UInt64,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a set of tasks onto the stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="tag">User tag associated with the job.</param>
-            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
-            <remarks>If the worker associated with this stack might be active, this function can only be called by the worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.Worker.AllocateContinuation(System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestLinkedTaskStack.Task)">
-            <summary>
-            Allocates a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="dispatcher">Dispatcher from which to pull a buffer pool if needed for resizing.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the continuation.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.TaskContinuation">
-            <summary>
-            Stores data relevant to tracking task completion and reporting completion for a continuation.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.TaskContinuation.OnCompleted">
-            <summary>
-            Task to run upon completion of the associated task.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.TaskContinuation.RemainingTaskCounter">
-            <summary>
-            Number of tasks not yet reported as complete in the continuation.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack">
-            <summary>
-            Manages a linked stack of tasks.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.head">
-            <summary>
-            Most recently pushed job on the stack. May be null if the stack is empty.
-            </summary>
-            <remarks>Pointers and generics don't play well, alas.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.#ctor(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Constructs a new parallel task stack.
-            </summary>
-            <param name="pool">Buffer pool to allocate non-thread allocated resources from.</param>
-            <param name="dispatcher">Thread dispatcher to pull thread pools from for thread allocations.</param>
-            <param name="workerCount">Number of workers to allocate space for.</param>
-            <param name="initialWorkerJobCapacity">Initial number of jobs (groups of tasks submitted together) to allocate space for in each worker.</param>
-            <param name="continuationBlockCapacity">Number of slots to allocate in each block of continuations in each worker.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.Reset(BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Returns the stack to a fresh state without reallocating.
-            </summary>
-            <param name="dispatcher">Dispatcher whose thread pools should be used to return any thread allocated resources.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.Dispose(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Returns unmanaged resources held by the <see cref="T:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack"/> to a pool.
-            </summary>
-            <param name="pool">Buffer pool to return resources to.</param>
-            <param name="dispatcher">Dispatcher whose thread pools should be used to return any thread allocated resources.</param>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.ApproximateTaskCount">
-            <summary>
-            Gets the approximate number of active tasks. This is not guaranteed to actually measure the true number of tasks at any one point in time.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.ApproximateContinuationCount">
-            <summary>
-            Gets the approximate number of active continuations. This is not guaranteed to actually measure the true number of continuations at any one point in time; it checks each worker in sequence, and the continuation counts could vary arbitrarily as the checks proceed.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.AllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestLinkedTaskStack.Task)">
-            <summary>
-            Attempts to allocate a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="workerIndex">Worker index to allocate the continuation on.</param>
-            <param name="dispatcher">Dispatcher to use for any per-thread allocations if necessary.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestLinkedTaskStack.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the continuation.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPop``1(``0@,BepuUtilities.TestLinkedTaskStack.Task@)">
-            <summary>
-            Attempts to pop a task.
-            </summary>
-            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
-            <param name="task">Popped task, if any.</param>
-            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPop(BepuUtilities.TestLinkedTaskStack.Task@)">
-            <summary>
-            Attempts to pop a task.
-            </summary>
-            <param name="task">Popped task, if any.</param>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPopAndRun``1(``0@,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Attempts to pop a task and run it.
-            </summary>
-            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
-            <param name="workerIndex">Index of the worker to pass into the task function.</param>
-            <param name="dispatcher">Thread dispatcher running this task stack.</param>
-            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.TryPopAndRun(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Attempts to pop a task and run it.
-            </summary>
-            <param name="workerIndex">Index of the worker to pass into the task function.</param>
-            <param name="dispatcher">Thread dispatcher running this task stack.</param>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.PushUnsafely(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
-            <summary>
-            Pushes a set of tasks onto the task stack. This function is not thread safe.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="tag">User-defined tag data for the submitted job.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.PushUnsafely(BepuUtilities.TestLinkedTaskStack.Task,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
-            <summary>
-            Pushes a task onto the task stack. This function is not thread safe.
-            </summary>
-            <param name="task">Task to push.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.Push(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
-            <summary>
-            Pushes a set of tasks onto the task stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="tag">User-defined tag data for the submitted job.</param>
-            <returns>True if the push succeeded, false if it was contested.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.AllocateContinuationAndPush(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TestLinkedTaskStack.Task)">
-            <summary>
-            Pushes a set of tasks to the stack with a created continuation.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <param name="onComplete">Task to run upon completion of all the submitted tasks, if any.</param>
-            <returns>Handle of the continuation created for these tasks.</returns>
-            <remarks>Note that this will keep trying until task submission succeeds.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.WaitForCompletion``1(``0@,BepuUtilities.TestLinkedTaskStack.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Waits for a continuation to be completed.
-            </summary>
-            <remarks>Instead of spinning the entire time, this may pop and execute pending tasks to fill the gap.</remarks>
-            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
-            <param name="continuation">Continuation to wait on.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the executing worker.</param>
-            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.WaitForCompletion(BepuUtilities.TestLinkedTaskStack.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Waits for a continuation to be completed.
-            </summary>
-            <remarks>Instead of spinning the entire time, this may pop and execute pending tasks to fill the gap.</remarks>
-            <param name="continuation">Continuation to wait on.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the executing worker.</param>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.RunTasks``1(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,``0@,System.UInt64)">
-            <summary>
-            Pushes a set of tasks to the worker stack and returns when all tasks are complete.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="workerIndex">Index of the worker executing this function.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="filter">Filter applied to jobs considered for filling the calling thread's wait for other threads to complete.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
-            <remarks>Note that this will keep working until all tasks are run. It may execute tasks unrelated to the requested tasks while waiting on other workers to complete constituent tasks.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.RunTasks(System.Span{BepuUtilities.TestLinkedTaskStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
-            <summary>
-            Pushes a set of tasks to the worker stack and returns when all tasks are complete.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="workerIndex">Index of the worker executing this function.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <remarks>Note that this will keep working until all tasks are run. It may execute tasks unrelated to the requested tasks while waiting on other workers to complete constituent tasks.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.RequestStop">
-            <summary>
-            Requests that all workers stop. The next time a worker runs out of tasks to run, if it sees a stop command, it will be reported.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.PushForUnsafely(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TestLinkedTaskStack.ContinuationHandle)">
-            <summary>
-            Pushes a for loop onto the task stack. Does not take a lock.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.PushFor(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TestLinkedTaskStack.ContinuationHandle)">
-            <summary>
-            Pushes a for loop onto the task stack.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param> 
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <remarks>This function will not attempt to run any iterations of the loop itself.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.For``1(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,``0@,System.UInt64)">
-            <summary>
-            Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each iteration of the loop.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="filter">Filter applied to jobs considered for filling the calling thread's wait for other threads to complete.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
-            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
-        </member>
-        <member name="M:BepuUtilities.TestLinkedTaskStack.LinkedTaskStack.For(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
-            <summary>
-            Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each iteration of the loop.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
         </member>
         <member name="T:BepuUtilities.MathChecker">
             <summary>
@@ -2838,8 +2370,8 @@
             <summary>
             Inverts the given matix.
             </summary>
-            <param name="matrix">Matrix to be inverted.</param>
-            <param name="result">Inverted matrix.</param>
+            <param name="m">Matrix to be inverted.</param>
+            <param name="inverse">Inverted matrix.</param>
         </member>
         <member name="F:BepuUtilities.Matrix2x3Wide.X">
             <summary>
@@ -3766,7 +3298,13 @@
             Collection of pools used by worker threads.
             </summary> 
         </member>
-        <!-- Badly formed XML comment ignored for member "P:BepuUtilities.Memory.WorkerBufferPools.Item(System.Int32)" -->
+        <member name="P:BepuUtilities.Memory.WorkerBufferPools.Item(System.Int32)">
+            <summary>
+            Gets the pool associated with this worker.
+            </summary>
+            <param name="workerIndex">Worker index of the pool to look up.</param>
+            <returns>Pool associated with the given worker.</returns>
+        </member>
         <member name="P:BepuUtilities.Memory.WorkerBufferPools.DefaultBlockCapacity">
             <summary>
             Gets or sets the default block capacity for any newly created arena subpools.
@@ -3795,392 +3333,6 @@
             Gets the total number of bytes allocated from native memory by all worker pools. Includes memory that is not currently in use by external allocators.
             </summary>
             <returns>Total number of bytes allocated from native memory by all worker pools. Includes memory that is not currently in use by external allocators.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestParallelStack.Task">
-            <summary>
-            Description of a task to be submitted to a <see cref="T:BepuUtilities.TestParallelStack.ParallelTaskStack"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.Task.Function">
-            <summary>
-            Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestParallelStack.Task.Id"/>, <see cref="F:BepuUtilities.TestParallelStack.Task.Context"/> pointer, and executing worker index.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.Task.Context">
-            <summary>
-            Context to be passed into the <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.Task.Continuation">
-            <summary>
-            Continuation to be notified after this task completes, if any.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.Task.Id">
-            <summary>
-            User-provided identifier of this task.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.Task.#ctor(,System.Void*,System.Int64,BepuUtilities.TestParallelStack.ContinuationHandle)">
-            <summary>
-            Creates a new task.
-            </summary>
-            <param name="function">Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestParallelStack.Task.Id"/>, <see cref="F:BepuUtilities.TestParallelStack.Task.Context"/> pointer, executing worker index, and executing <see cref="T:BepuUtilities.IThreadDispatcher"/>.</param>
-            <param name="context">Context pointer to pass to the <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/>.</param>
-            <param name="taskId">Id of this task to be passed into the <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/>.</param>
-            <param name="continuation">Continuation to notify after the completion of this task, if any.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.Task.op_Implicit()~BepuUtilities.TestParallelStack.Task">
-            <summary>
-            Creates a task from a function.
-            </summary>
-            <param name="function">Function to turn into a task.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.Task.Run(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Runs the task and, if necessary, notifies the associated continuation of its completion.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the function.</param> 
-            <param name="dispatcher">Dispatcher running this task.</param>
-        </member>
-        <member name="T:BepuUtilities.TestParallelStack.PopTaskResult">
-            <summary>
-            Describes the result status of a pop attempt.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.PopTaskResult.Success">
-            <summary>
-            A task was successfully popped.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.PopTaskResult.Empty">
-            <summary>
-            The stack was empty, but may have more tasks in the future.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.PopTaskResult.Stop">
-            <summary>
-            The stack has been terminated and all threads seeking work should stop.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestParallelStack.ContinuationHandle">
-            <summary>
-            Refers to a continuation within a <see cref="T:BepuUtilities.TestParallelStack.ParallelTaskStack"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.ContinuationHandle.WorkerStack">
-            <summary>
-            Source worker task stack.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ContinuationHandle.Completed">
-            <summary>
-            Gets whether the tasks associated with this continuation have completed.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ContinuationHandle.Continuation">
-            <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestParallelStack.ContinuationHandle"/>.
-            </summary>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ContinuationHandle.Null">
-            <summary>
-            Gets a null continuation handle.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ContinuationHandle.Exists">
-            <summary>
-            Gets whether the continuation associated with this handle was allocated and has outstanding tasks.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ContinuationHandle.Initialized">
-            <summary>
-            Gets whether this handle ever represented an allocated handle. This does not guarantee that the continuation's associated tasks are active in the <see cref="T:BepuUtilities.TestParallelStack.ParallelTaskStack"/> that it was allocated from.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ContinuationHandle.NotifyTaskCompleted(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Notifies the continuation that one task was completed.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the continuation's delegate, if any.</param>
-            <param name="dispatcher">Dispatcher to pass to the continuation's delegate, if any.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.TryPop(BepuUtilities.TestParallelStack.Task@)">
-            <summary>
-            Attempts to pop a task from the stack.
-            </summary>
-            <param name="task">Task popped from the stack, if any.</param>
-            <returns>True if a task was available to pop, false otherwise.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.PushUnsafely(System.Span{BepuUtilities.TestParallelStack.Task},BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a set of tasks onto the stack. Does not acquire a lock.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
-            <remarks>If the worker associated with this stack might be active, this function can only be called by the worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.PushUnsafely(BepuUtilities.TestParallelStack.Task,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a task onto the task stack. Does not acquire a lock.
-            </summary>
-            <param name="task">Task to push</param>
-            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.TryPush(System.Span{BepuUtilities.TestParallelStack.Task},BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Tries to push a set of tasks to the task stack if the stack is uncontested.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
-            <returns>True if the push succeeded, false if the push was contested.</returns>
-            <remarks>This must only be called from the associated worker if the worker is potentially active.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.Push(System.Span{BepuUtilities.TestParallelStack.Task},BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Push a set of tasks to the task stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
-            <remarks>This must only be called from the associated worker if the worker is potentially active.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.TryAllocateContinuation(System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.ContinuationHandle@,BepuUtilities.TestParallelStack.Task)">
-            <summary>
-            Attempts to allocate a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="dispatcher">Dispatcher from which to pull a buffer pool if needed for resizing.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/> will not be executed.</param>
-            <param name="continuationHandle">Handle of the continuation if allocation is successful.</param>
-            <returns>True if the continuation was allocated, false if the attempt was contested..</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.AllocateContinuation(System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.Task)">
-            <summary>
-            Allocates a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="dispatcher">Dispatcher from which to pull any thread allocations if necessary.</param>
-            <param name="onCompleted">Task to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the allocated continuation.</returns>
-            <remarks>Note that this will keep trying until allocation succeeds. If something is blocking allocation, such as insufficient room in the continuations buffer and there are no workers consuming tasks, this will block forever.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.GetContinuation(BepuUtilities.TestParallelStack.ContinuationHandle)">
-            <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestParallelStack.ContinuationHandle"/>.
-            </summary>
-            <param name="continuationHandle">Handle to look up the associated continuation for.</param>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.WorkerTaskStack.IsComplete(BepuUtilities.TestParallelStack.ContinuationHandle)">
-            <summary>
-            Checks whether all tasks associated with this continuation have completed.
-            </summary>
-            <param name="continuationHandle">Continuation to check for completion.</param>
-            <returns>True if all tasks associated with a continuation have completed, false otherwise.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestParallelStack.TaskContinuation">
-            <summary>
-            Stores data relevant to tracking task completion and reporting completion for a continuation.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.TaskContinuation.OnCompleted">
-            <summary>
-            Task to run upon completion of the associated task.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.TaskContinuation.Version">
-            <summary>
-            Version of this continuation.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestParallelStack.TaskContinuation.RemainingTaskCounter">
-            <summary>
-            Number of tasks not yet reported as complete in the continuation.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestParallelStack.ParallelTaskStack">
-            <summary>
-            Manages task stacks for parallel workers. Supports work stealing between workers.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.#ctor(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Constructs a new parallel task stack.
-            </summary>
-            <param name="pool">Buffer pool to allocate non-thread allocated resources from.</param>
-            <param name="dispatcher">Thread dispatcher to pull thread pools from for thread allocations.</param>
-            <param name="workerCount">Number of workers to allocate space for.</param>
-            <param name="initialWorkerTaskCapacity">Initial number of tasks to allocate space for in each worker. Tasks are individual chunks of scheduled work..</param>
-            <param name="initialWorkerContinuationCapacity">Initial number of continuations to allocate space for in each worker.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.Reset">
-            <summary>
-            Returns the stack to a fresh state without reallocating.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.Dispose(BepuUtilities.Memory.BufferPool)">
-            <summary>
-            Returns unmanaged resources held by the <see cref="T:BepuUtilities.TestParallelStack.ParallelTaskStack"/> to a pool.
-            </summary>
-            <param name="pool">Buffer pool to return resources to.</param>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ParallelTaskStack.ApproximateTaskCount">
-            <summary>
-            Gets the approximate number of active tasks. This is not guaranteed to actually measure the true number of tasks at any one point in time; it checks each worker in sequence, and the task counts could vary arbitrarily as the checks proceed.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestParallelStack.ParallelTaskStack.ApproximateContinuationCount">
-            <summary>
-            Gets the approximate number of active continuations. This is not guaranteed to actually measure the true number of continuations at any one point in time; it checks each worker in sequence, and the continuation counts could vary arbitrarily as the checks proceed.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.TryAllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.ContinuationHandle@,BepuUtilities.TestParallelStack.Task)">
-            <summary>
-            Attempts to allocate a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="workerIndex">Worker index to allocate the continuation on.</param>
-            <param name="dispatcher">Dispatcher to use for any per-thread allocations if necessary.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/> will not be executed.</param>
-            <param name="continuationHandle">Handle of the continuation if allocation is successful.</param>
-            <returns>True if the allocation succeeded, false if it was contested..</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.AllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.Task)">
-            <summary>
-            Allocates a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="workerIndex">Worker index to allocate the continuation on.</param>
-            <param name="dispatcher">Dispatcher to use for any per-thread allocations if necessary.</param>
-            <param name="onCompleted">Task to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestParallelStack.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the allocated continuation.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.TryPop(System.Int32,BepuUtilities.TestParallelStack.Task@)">
-            <summary>
-            Attempts to pop a task.
-            </summary>
-            <param name="workerIndex">Index of the worker executing this function.</param>
-            <param name="task">Popped task, if any.</param>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.TryPopAndRun(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Attempts to pop a task and run it.
-            </summary>
-            <param name="workerIndex">Index of the worker to pass into the task function.</param>
-            <param name="dispatcher">Thread dispatcher running this task stack.</param>
-            <returns>Result status of the pop attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.PushUnsafely(System.Span{BepuUtilities.TestParallelStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a set of tasks onto a worker's task stack. Does not acquire a lock.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.PushUnsafely(BepuUtilities.TestParallelStack.Task,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a task onto a worker's task stack. Does not acquire a lock.
-            </summary>
-            <param name="task">Task to push.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.TryPush(System.Span{BepuUtilities.TestParallelStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Tries to pushes a set of tasks onto a worker's task stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <returns>True if the push succeeded, false if it was contested.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.Push(System.Span{BepuUtilities.TestParallelStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a set of tasks onto a worker's task stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.AllocateContinuationAndPush(System.Span{BepuUtilities.TestParallelStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.Task)">
-            <summary>
-            Pushes a set of tasks to the stack with a created continuation.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="onComplete">Task to run upon completion of all the submitted tasks, if any.</param>
-            <returns>Handle of the continuation created for these tasks.</returns>
-            <remarks>Note that this will keep trying until task submission succeeds.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.WaitForCompletion(BepuUtilities.TestParallelStack.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Waits for a continuation to be completed.
-            </summary>
-            <remarks>Instead of spinning the entire time, this may pop and execute pending tasks to fill the gap.</remarks>
-            <param name="continuation">Continuation to wait on.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the executing worker.</param>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.RunTasks(System.Span{BepuUtilities.TestParallelStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Pushes a set of tasks to the worker stack and returns when all tasks are complete.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="workerIndex">Index of the worker executing this function.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <remarks>Note that this will keep working until all tasks are run. It may execute tasks unrelated to the requested tasks while waiting on other workers to complete constituent tasks.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.RequestStop">
-            <summary>
-            Requests that all workers stop. The next time a worker runs out of tasks to run, if it sees a stop command, it will be reported.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.PushForUnsafely(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.ContinuationHandle)">
-            <summary>
-            Pushes a for loop onto the task stack. Does not take a lock.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.PushFor(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestParallelStack.ContinuationHandle)">
-            <summary>
-            Pushes a for loop onto the task stack.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <remarks>This function will not usually attempt to run any iterations of the loop itself. It tries to push the loop tasks onto the stack.<para/>
-            If the task stack is full, this will opt to run the tasks inline while waiting for room.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestParallelStack.ParallelTaskStack.For(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each iteration of the loop.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
         </member>
         <member name="T:BepuUtilities.QuaternionEx">
             <summary>
@@ -5041,7 +4193,6 @@
             </summary>
             <param name="a">Matrix to be reinterpreted as symmetric for the multiply.</param>
             <param name="b">Second matrix of the pair to multiply.</param>
-            <param name="result">Result of multiplying a * b.</param>
         </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.MultiplyByTransposed(BepuUtilities.Symmetric3x3Wide@,BepuUtilities.Matrix3x3Wide@,BepuUtilities.Matrix3x3Wide@)">
             <summary>
@@ -5065,7 +4216,7 @@
             </summary>
             <param name="m">Matrix to use as the sandwich bread.</param>
             <param name="t">Succulent interior symmetric matrix.</param>
-            <param name="sandwich">Result of m * t * mT for a symmetric matrix t.</param>
+            <param name="result">Result of m * t * mT for a symmetric matrix t.</param>
         </member>
         <member name="M:BepuUtilities.Symmetric3x3Wide.CompleteMatrixSandwich(BepuUtilities.Matrix3x3Wide@,BepuUtilities.Matrix3x3Wide@,BepuUtilities.Symmetric3x3Wide@)">
             <summary>
@@ -5193,669 +4344,310 @@
             <param name="result0">First 3 values of the result vector.</param>
             <param name="result1">Second 3 values of the result vector.</param>
         </member>
-        <member name="T:BepuUtilities.TestQueue.Task">
+        <member name="T:BepuUtilities.TaskScheduling.ContinuationBlock">
             <summary>
-            Description of a task to be submitted to a <see cref="T:BepuUtilities.TestQueue.TaskQueue"/>.
+            Stores a block of task continuations that maintains a pointer to previous blocks. 
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.Task.Function">
+        <member name="T:BepuUtilities.TaskScheduling.ContinuationHandle">
             <summary>
-            Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestQueue.Task.Id"/>, <see cref="F:BepuUtilities.TestQueue.Task.Context"/> pointer, and executing worker index.
+            Refers to a continuation within a <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.Task.Context">
+        <member name="P:BepuUtilities.TaskScheduling.ContinuationHandle.Completed">
             <summary>
-            Context to be passed into the <see cref="F:BepuUtilities.TestQueue.Task.Function"/>.
+            Gets whether the tasks associated with this continuation have completed. If the continuation has not been initialized, this will always return false.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.Task.Continuation">
+        <member name="P:BepuUtilities.TaskScheduling.ContinuationHandle.Continuation">
             <summary>
-            Continuation to be notified after this task completes, if any.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.Task.Id">
-            <summary>
-            User-provided identifier of this task.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.Task.#ctor(,System.Void*,System.Int64,BepuUtilities.TestQueue.ContinuationHandle)">
-            <summary>
-            Creates a new task.
-            </summary>
-            <param name="function">Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestQueue.Task.Id"/>, <see cref="F:BepuUtilities.TestQueue.Task.Context"/> pointer, executing worker index, and executing <see cref="T:BepuUtilities.IThreadDispatcher"/>.</param>
-            <param name="context">Context pointer to pass to the <see cref="F:BepuUtilities.TestQueue.Task.Function"/>.</param>
-            <param name="taskId">Id of this task to be passed into the <see cref="F:BepuUtilities.TestQueue.Task.Function"/>.</param>
-            <param name="continuation">Continuation to notify after the completion of this task, if any.</param>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.Task.op_Implicit()~BepuUtilities.TestQueue.Task">
-            <summary>
-            Creates a task from a function.
-            </summary>
-            <param name="function">Function to turn into a task.</param>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.Task.Run(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Runs the task and, if necessary, notifies the associated continuation of its completion.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the function.</param> 
-            <param name="dispatcher">Dispatcher running this task.</param>
-        </member>
-        <member name="T:BepuUtilities.TestQueue.DequeueTaskResult">
-            <summary>
-            Describes the result status of a dequeue attempt.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.DequeueTaskResult.Success">
-            <summary>
-            A task was successfully dequeued.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.DequeueTaskResult.Empty">
-            <summary>
-            The queue was empty, but may have more tasks in the future.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.DequeueTaskResult.Stop">
-            <summary>
-            The queue has been terminated and all threads seeking work should stop.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestQueue.EnqueueTaskResult">
-            <summary>
-            Describes the result of a task enqueue attempt.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.EnqueueTaskResult.Success">
-            <summary>
-            The tasks were successfully enqueued.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.EnqueueTaskResult.Contested">
-            <summary>
-            The enqueue attempt was blocked by concurrent access.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.EnqueueTaskResult.Full">
-            <summary>
-            The enqueue attempt was blocked because no space remained in the tasks buffer.
-            </summary>
-        </member>
-        <member name="T:BepuUtilities.TestQueue.ContinuationHandle">
-            <summary>
-            Refers to a continuation within a <see cref="T:BepuUtilities.TestQueue.TaskQueue"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestQueue.ContinuationHandle.Continuations">
-            <summary>
-            Set of continuations in the queue.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestQueue.ContinuationHandle.Completed">
-            <summary>
-            Gets whether the tasks associated with this continuation have completed.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestQueue.ContinuationHandle.Continuation">
-            <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestQueue.ContinuationHandle"/>.
+            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TaskScheduling.ContinuationHandle"/>.
             </summary>
             <returns>Pointer to the continuation backing the given handle.</returns>
             <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
         </member>
-        <member name="P:BepuUtilities.TestQueue.ContinuationHandle.Null">
+        <member name="P:BepuUtilities.TaskScheduling.ContinuationHandle.Null">
             <summary>
             Gets a null continuation handle.
             </summary>
         </member>
-        <member name="P:BepuUtilities.TestQueue.ContinuationHandle.Exists">
+        <member name="P:BepuUtilities.TaskScheduling.ContinuationHandle.Initialized">
             <summary>
-            Gets whether the continuation associated with this handle was allocated and has outstanding tasks.
+            Gets whether this handle ever represented an allocated handle. This does not guarantee that the continuation's associated tasks are active in the <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that it was allocated from.
             </summary>
         </member>
-        <member name="P:BepuUtilities.TestQueue.ContinuationHandle.Initialized">
-            <summary>
-            Gets whether this handle ever represented an allocated handle. This does not guarantee that the continuation's associated tasks are active in the <see cref="T:BepuUtilities.TestQueue.TaskQueue"/> that it was allocated from.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.ContinuationHandle.NotifyTaskCompleted(System.Int32,BepuUtilities.IThreadDispatcher)">
+        <member name="M:BepuUtilities.TaskScheduling.ContinuationHandle.NotifyTaskCompleted(System.Int32,BepuUtilities.IThreadDispatcher)">
             <summary>
             Notifies the continuation that one task was completed.
             </summary>
             <param name="workerIndex">Worker index to pass to the continuation's delegate, if any.</param>
             <param name="dispatcher">Dispatcher to pass to the continuation's delegate, if any.</param>
         </member>
-        <member name="T:BepuUtilities.TestQueue.AllocateTaskContinuationResult">
+        <member name="T:BepuUtilities.TaskScheduling.IJobFilter">
             <summary>
-            Describes the result of a continuation allocation attempt.
+            Determines which jobs are allowed to serve a <see cref="M:BepuUtilities.TaskScheduling.TaskStack.TryPop``1(``0@,BepuUtilities.TaskScheduling.Task@)"/> request.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.AllocateTaskContinuationResult.Success">
+        <member name="M:BepuUtilities.TaskScheduling.IJobFilter.AllowJob(System.UInt64)">
             <summary>
-            The continuation was successfully allocated.
+            Determines whether a job with the given tag should be allowed to serve a <see cref="M:BepuUtilities.TaskScheduling.TaskStack.TryPop``1(``0@,BepuUtilities.TaskScheduling.Task@)"/> request.
+            </summary>
+            <param name="jobTag">Tag of the candidate job.</param>
+            <returns>True if the job should be allowed to serve a request, false otherwise.</returns>
+        </member>
+        <member name="T:BepuUtilities.TaskScheduling.AllowAllJobs">
+            <summary>
+            A filter that will allow pops from any jobs.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.AllocateTaskContinuationResult.Contested">
+        <member name="M:BepuUtilities.TaskScheduling.AllowAllJobs.AllowJob(System.UInt64)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BepuUtilities.TaskScheduling.DelegateJobFilter">
             <summary>
-            The continuation was blocked by concurrent access.
+            A job filter that wraps a managed delegate.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.AllocateTaskContinuationResult.Full">
+        <member name="F:BepuUtilities.TaskScheduling.DelegateJobFilter.Filter">
             <summary>
-            The queue's continuation buffer is full and can't hold the continuation.
+            Delegate to use as the filter.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueueContinuations.GetContinuation(BepuUtilities.TestQueue.ContinuationHandle)">
+        <member name="M:BepuUtilities.TaskScheduling.DelegateJobFilter.#ctor(System.Func{System.UInt64,System.Boolean})">
             <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestQueue.ContinuationHandle"/>.
+            Creates a job filter that wraps a delegate.
             </summary>
-            <param name="continuationHandle">Handle to look up the associated continuation for.</param>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
+            <param name="filter">Delegate to use as the filter.</param>
         </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueueContinuations.IsComplete(BepuUtilities.TestQueue.ContinuationHandle)">
-            <summary>
-            Checks whether all tasks associated with this continuation have completed.
-            </summary>
-            <param name="continuationHandle">Continuation to check for completion.</param>
-            <returns>True if all tasks associated with a continuation have completed, false otherwise.</returns>
+        <member name="M:BepuUtilities.TaskScheduling.DelegateJobFilter.AllowJob(System.UInt64)">
+            <inheritdoc/>
         </member>
-        <member name="T:BepuUtilities.TestQueue.TaskContinuation">
+        <member name="T:BepuUtilities.TaskScheduling.FunctionPointerJobFilter">
             <summary>
-            Stores data relevant to tracking task completion and reporting completion for a continuation.
+            A job filter that wraps a function pointer.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.TaskContinuation.OnCompleted">
+        <member name="F:BepuUtilities.TaskScheduling.FunctionPointerJobFilter.Filter">
             <summary>
-            Task to run upon completion of the associated task.
+            Delegate to use as the filter.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.TaskContinuation.Version">
+        <member name="M:BepuUtilities.TaskScheduling.FunctionPointerJobFilter.#ctor()">
             <summary>
-            Version of this continuation.
+            Creates a job filter that wraps a delegate.
+            </summary>
+            <param name="filter">Delegate to use as the filter.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.FunctionPointerJobFilter.AllowJob(System.UInt64)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BepuUtilities.TaskScheduling.MinimumTagFilter">
+            <summary>
+            A job filter that requires the job tag to meet or exceed a threshold value.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.TaskContinuation.RemainingTaskCounter">
+        <member name="F:BepuUtilities.TaskScheduling.MinimumTagFilter.MinimumTagValue">
             <summary>
-            Number of tasks not yet reported as complete in the continuation.
+            Value that a job must match or exceed to be allowed.
             </summary>
         </member>
-        <member name="T:BepuUtilities.TestQueue.TaskQueue">
+        <member name="M:BepuUtilities.TaskScheduling.MinimumTagFilter.#ctor(System.UInt64)">
             <summary>
-            Multithreaded task queue 
+            Creates a job filter that requires the job tag to meet or exceed a threshold value.
+            </summary>
+            <param name="minimumTagValue">Value that a job must match or exceed to be allowed.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.MinimumTagFilter.AllowJob(System.UInt64)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BepuUtilities.TaskScheduling.EqualTagFilter">
+            <summary>
+            A job filter that requires the job tag to match a specific value.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestQueue.TaskQueue.continuationsContainer">
+        <member name="F:BepuUtilities.TaskScheduling.EqualTagFilter.RequiredTag">
             <summary>
-            Holds the task queue's continuations data in unmanaged memory just in case the queue itself is in unpinned memory.
+            Tag value required to allow a job.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.#ctor(BepuUtilities.Memory.BufferPool,System.Int32,System.Int32)">
+        <member name="M:BepuUtilities.TaskScheduling.EqualTagFilter.#ctor(System.UInt64)">
             <summary>
-            Constructs a new task queue.
-            </summary>
-            <param name="pool">Buffer pool to allocate resources from.</param>
-            <param name="maximumTaskCapacity">Maximum number of tasks to allocate space for. Tasks are individual chunks of scheduled work. Rounded up to the nearest power of 2.</param>
-            <param name="maximumContinuationCapacity">Maximum number of continuations to allocate space for. If more continuations exist at any one moment, attempts to create new continuations may have to stall until space is available.</param>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.Reset">
-            <summary>
-            Returns the task queue to a fresh state without reallocating.
+            Creates a job filter that requires the job tag to match a specific value.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.Dispose(BepuUtilities.Memory.BufferPool)">
-            <summary>
-            Returns unmanaged resources held by the <see cref="T:BepuUtilities.TestQueue.TaskQueue"/> to a pool.
-            </summary>
-            <param name="pool">Buffer pool to return resources to.</param>
+        <member name="M:BepuUtilities.TaskScheduling.EqualTagFilter.AllowJob(System.UInt64)">
+            <inheritdoc/>
         </member>
-        <member name="P:BepuUtilities.TestQueue.TaskQueue.TaskCapacity">
+        <member name="M:BepuUtilities.TaskScheduling.Job.TryPop(BepuUtilities.TaskScheduling.Task@)">
             <summary>
-            Gets the queue's capacity for tasks.
+            Attempts to pop a task from the job.
             </summary>
+            <param name="task">Task popped from the job, if any.</param>
+            <returns>True if a task was available to pop, false otherwise.</returns>
         </member>
-        <member name="P:BepuUtilities.TestQueue.TaskQueue.ContinuationCapacity">
-            <summary>
-            Gets the queue's capacity for continuations.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestQueue.TaskQueue.UnsafeTaskCount">
-            <summary>
-            Gets the number of tasks active in the queue.
-            </summary>
-            <remarks>Does not take a lock; if other threads are modifying the task values, the reported count may be invalid.</remarks>
-        </member>
-        <member name="P:BepuUtilities.TestQueue.TaskQueue.TaskCount">
-            <summary>
-            Gets the number of tasks active in the queue.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestQueue.TaskQueue.ContinuationCount">
-            <summary>
-            Gets the number of continuations active in the queue.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryAllocateContinuation(System.Int32,BepuUtilities.TestQueue.ContinuationHandle@,BepuUtilities.TestQueue.Task)">
-            <summary>
-            Attempts to allocate a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestQueue.Task.Function"/> will not be executed.</param>
-            <param name="continuationHandle">Handle of the continuation if allocation is successful.</param>
-            <returns>Result status of the continuation allocation attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.AllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestQueue.Task)">
-            <summary>
-            Allocates a continuation for a set of tasks.
-            </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="workerIndex">Worker index to pass to any inline executed tasks if the continuations buffer is full.</param>
-            <param name="dispatcher">Dispatcher to pass to inline executed tasks if the continuations buffer is full.</param>
-            <param name="onCompleted">Task to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestQueue.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the allocated continuation.</returns>
-            <remarks>Note that this will keep trying until allocation succeeds. If something is blocking allocation, such as insufficient room in the continuations buffer and there are no workers consuming tasks, this will block forever.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryDequeue(BepuUtilities.TestQueue.Task@)">
-            <summary>
-            Attempts to dequeue a task.
-            </summary>
-            <param name="task">Dequeued task, if any.</param>
-            <returns>Result status of the dequeue attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryDequeueAndRun(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Attempts to dequeue a task and run it.
-            </summary>
-            <param name="workerIndex">Index of the worker to pass into the task function.</param>
-            <param name="dispatcher">Thread dispatcher running this task queue.</param>
-            <returns>Result status of the dequeue attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueueUnsafely(System.Span{BepuUtilities.TestQueue.Task})">
-            <summary>
-            Tries to appends a set of tasks to the task queue. Does not acquire a lock; cannot return <see cref="F:BepuUtilities.TestQueue.EnqueueTaskResult.Contested"/>.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <returns>Result of the enqueue attempt.</returns>
-            <remarks>This must not be used while other threads could be performing task enqueues or task dequeues.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueueUnsafely(BepuUtilities.TestQueue.Task)">
-            <summary>
-            Tries to appends a task to the task queue. Does not acquire a lock; cannot return <see cref="F:BepuUtilities.TestQueue.EnqueueTaskResult.Contested"/>.
-            </summary>
-            <param name="task">Task to enqueue</param>
-            <returns>Result of the enqueue attempt.</returns>
-            <remarks>This must not be used while other threads could be performing task enqueues or task dequeues.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueue(System.Span{BepuUtilities.TestQueue.Task})">
-            <summary>
-            Tries to appends a set of tasks to the task queue if the ring buffer is uncontested.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <returns>Result of the enqueue attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.Enqueue(System.Span{BepuUtilities.TestQueue.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Appends a set of tasks to the queue.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="workerIndex">Worker index to pass to inline-executed tasks if the task buffer is full.</param>
-            <param name="dispatcher">Dispatcher to pass to inline-executed tasks if the task buffer is full.</param>
-            <remarks>Note that this will keep trying until task submission succeeds. 
-            If the task queue is full, this will opt to run some tasks inline while waiting for room.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.AllocateContinuationAndEnqueue(System.Span{BepuUtilities.TestQueue.Task},System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestQueue.Task)">
-            <summary>
-            Appends a set of tasks to the queue. Creates a continuation for the tasks.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="workerIndex">Worker index to pass to inline-executed tasks if the task buffer is full.</param>
-            <param name="dispatcher">Dispatcher to pass to inline-executed tasks if the task buffer is full.</param>
-            <param name="onComplete">Task to run upon completion of all the submitted tasks, if any.</param>
-            <returns>Handle of the continuation created for these tasks.</returns>
-            <remarks>Note that this will keep trying until task submission succeeds. 
-            If the task queue is full, this will opt to run some tasks inline while waiting for room.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.WaitForCompletion(BepuUtilities.TestQueue.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Waits for a continuation to be completed.
-            </summary>
-            <remarks>Instead of spinning the entire time, this may dequeue and execute pending tasks to fill the gap.</remarks>
-            <param name="continuation">Continuation to wait on.</param>
-            <param name="workerIndex">Currently executing worker index to pass to any tasks used to fill the wait period.</param>
-            <param name="dispatcher">Currently executing dispatcher to pass to any tasks used to fill the wait period.</param>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.RunTasks(System.Span{BepuUtilities.TestQueue.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Appends a set of tasks to the queue and returns when all tasks are complete.
-            </summary>
-            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="workerIndex">Worker index to pass to inline-executed tasks if the task buffer is full.</param>
-            <param name="dispatcher">Dispatcher to pass to inline-executed tasks if the task buffer is full.</param>
-            <remarks>Note that this will keep working until all tasks are run.
-            If the task queue is full, this will opt to run some tasks inline while waiting for room.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueueStop">
-            <summary>
-            Tries to enqueues the stop command. 
-            </summary>
-            <returns>Result status of the enqueue attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.EnqueueStop(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Enqueues the stop command. 
-            </summary>
-            <param name="workerIndex">Worker index to pass to any inline executed tasks if the task buffer is full.</param>
-            <param name="dispatcher">Dispatcher to pass to any inline executed tasks if the task buffer is full.</param>
-            <remarks>Note that this will keep trying until task submission succeeds.
-            If the task buffer is full, this may attempt to dequeue tasks to run inline.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueueStopUnsafely">
-            <summary>
-            Tries to enqueues the stop command. Does not take a lock; cannot return <see cref="F:BepuUtilities.TestQueue.EnqueueTaskResult.Contested"/>.
-            </summary>
-            <returns>Result status of the enqueue attempt.</returns>
-            <remarks>This must not be used while other threads could be performing task enqueues or task dequeues.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.TryEnqueueForUnsafely(,System.Void*,System.Int32,System.Int32,BepuUtilities.TestQueue.ContinuationHandle)">
-            <summary>
-            Enqueues a for loop onto the task queue. Does not take a lock; cannot return <see cref="F:BepuUtilities.TestQueue.EnqueueTaskResult.Contested"/>.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <returns>Status result of the enqueue operation.</returns>
-            <remarks>This must not be used while other threads could be performing task enqueues or task dequeues.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.EnqueueFor(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestQueue.ContinuationHandle)">
-            <summary>
-            Enqueues a for loop onto the task queue.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each task execution.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="workerIndex">Worker index to pass to any inline-executed task if the task queue is full.</param>
-            <param name="dispatcher">Dispatcher to pass to any inline-executed task if the task queue is full.</param>
-            <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <remarks>This function will not usually attempt to run any iterations of the loop itself. It tries to push the loop tasks onto the queue.<para/>
-            If the task queue is full, this will opt to run the tasks inline while waiting for room.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestQueue.TaskQueue.For(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
-            </summary>
-            <param name="function">Function to execute on each iteration of the loop.</param>
-            <param name="context">Context pointer to pass into each iteration of the loop.</param>
-            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
-            <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="workerIndex">Index of the currently executing worker.</param>
-            <param name="dispatcher">Currently executing thread dispatcher.</param>
-        </member>
-        <member name="T:BepuUtilities.TestStack.Task">
-            <summary>
-            Description of a task to be submitted to a <see cref="T:BepuUtilities.TestStack.TaskStack"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.Task.Function">
-            <summary>
-            Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestStack.Task.Id"/>, <see cref="F:BepuUtilities.TestStack.Task.Context"/> pointer, and executing worker index.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.Task.Context">
-            <summary>
-            Context to be passed into the <see cref="F:BepuUtilities.TestStack.Task.Function"/>.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.Task.Continuation">
-            <summary>
-            Continuation to be notified after this task completes, if any.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.Task.Id">
-            <summary>
-            User-provided identifier of this task.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestStack.Task.#ctor(,System.Void*,System.Int64,BepuUtilities.TestStack.ContinuationHandle)">
-            <summary>
-            Creates a new task.
-            </summary>
-            <param name="function">Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TestStack.Task.Id"/>, <see cref="F:BepuUtilities.TestStack.Task.Context"/> pointer, executing worker index, and executing <see cref="T:BepuUtilities.IThreadDispatcher"/>.</param>
-            <param name="context">Context pointer to pass to the <see cref="F:BepuUtilities.TestStack.Task.Function"/>.</param>
-            <param name="taskId">Id of this task to be passed into the <see cref="F:BepuUtilities.TestStack.Task.Function"/>.</param>
-            <param name="continuation">Continuation to notify after the completion of this task, if any.</param>
-        </member>
-        <member name="M:BepuUtilities.TestStack.Task.op_Implicit()~BepuUtilities.TestStack.Task">
-            <summary>
-            Creates a task from a function.
-            </summary>
-            <param name="function">Function to turn into a task.</param>
-        </member>
-        <member name="M:BepuUtilities.TestStack.Task.Run(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Runs the task and, if necessary, notifies the associated continuation of its completion.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the function.</param> 
-            <param name="dispatcher">Dispatcher running this task.</param>
-        </member>
-        <member name="T:BepuUtilities.TestStack.PopTaskResult">
+        <member name="T:BepuUtilities.TaskScheduling.PopTaskResult">
             <summary>
             Describes the result status of a pop attempt.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PopTaskResult.Success">
+        <member name="F:BepuUtilities.TaskScheduling.PopTaskResult.Success">
             <summary>
             A task was successfully popped.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PopTaskResult.Contested">
-            <summary>
-            The pop was contested.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.PopTaskResult.Empty">
+        <member name="F:BepuUtilities.TaskScheduling.PopTaskResult.Empty">
             <summary>
             The stack was empty, but may have more tasks in the future.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PopTaskResult.Stop">
+        <member name="F:BepuUtilities.TaskScheduling.PopTaskResult.Stop">
             <summary>
             The stack has been terminated and all threads seeking work should stop.
             </summary>
         </member>
-        <member name="T:BepuUtilities.TestStack.PushTaskResult">
+        <member name="T:BepuUtilities.TaskScheduling.Task">
             <summary>
-            Describes the result of a task enqueue attempt.
+            Description of a task to be submitted to a <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PushTaskResult.Success">
+        <member name="F:BepuUtilities.TaskScheduling.Task.Function">
             <summary>
-            The tasks were successfully pushed.
+            Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TaskScheduling.Task.Id"/>, <see cref="F:BepuUtilities.TaskScheduling.Task.Context"/> pointer, and executing worker index.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PushTaskResult.Contested">
+        <member name="F:BepuUtilities.TaskScheduling.Task.Context">
             <summary>
-            The push attempt was blocked by concurrent access.
+            Context to be passed into the <see cref="F:BepuUtilities.TaskScheduling.Task.Function"/>.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.PushTaskResult.Full">
+        <member name="F:BepuUtilities.TaskScheduling.Task.Continuation">
             <summary>
-            The push attempt was blocked because no space remained in the tasks buffer.
+            Continuation to be notified after this task completes, if any.
             </summary>
         </member>
-        <member name="T:BepuUtilities.TestStack.ContinuationHandle">
+        <member name="F:BepuUtilities.TaskScheduling.Task.Id">
             <summary>
-            Refers to a continuation within a <see cref="T:BepuUtilities.TestStack.TaskStack"/>.
+            User-provided identifier of this task.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.ContinuationHandle.Continuations">
+        <member name="M:BepuUtilities.TaskScheduling.Task.#ctor(,System.Void*,System.Int64,BepuUtilities.TaskScheduling.ContinuationHandle)">
             <summary>
-            Source worker task stack.
+            Creates a new task.
             </summary>
+            <param name="function">Function to be executed by the task. Takes as arguments the <see cref="F:BepuUtilities.TaskScheduling.Task.Id"/>, <see cref="F:BepuUtilities.TaskScheduling.Task.Context"/> pointer, executing worker index, and executing <see cref="T:BepuUtilities.IThreadDispatcher"/>.</param>
+            <param name="context">Context pointer to pass to the <see cref="F:BepuUtilities.TaskScheduling.Task.Function"/>.</param>
+            <param name="taskId">Id of this task to be passed into the <see cref="F:BepuUtilities.TaskScheduling.Task.Function"/>.</param>
+            <param name="continuation">Continuation to notify after the completion of this task, if any.</param>
         </member>
-        <member name="P:BepuUtilities.TestStack.ContinuationHandle.Completed">
+        <member name="M:BepuUtilities.TaskScheduling.Task.op_Implicit()~BepuUtilities.TaskScheduling.Task">
             <summary>
-            Gets whether the tasks associated with this continuation have completed.
+            Creates a task from a function.
             </summary>
+            <param name="function">Function to turn into a task.</param>
         </member>
-        <member name="P:BepuUtilities.TestStack.ContinuationHandle.Continuation">
+        <member name="M:BepuUtilities.TaskScheduling.Task.Run(System.Int32,BepuUtilities.IThreadDispatcher)">
             <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestStack.ContinuationHandle"/>.
+            Runs the task and, if necessary, notifies the associated continuation of its completion.
             </summary>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
+            <param name="workerIndex">Worker index to pass to the function.</param> 
+            <param name="dispatcher">Dispatcher running this task.</param>
         </member>
-        <member name="P:BepuUtilities.TestStack.ContinuationHandle.Null">
-            <summary>
-            Gets a null continuation handle.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestStack.ContinuationHandle.Exists">
-            <summary>
-            Gets whether the continuation associated with this handle was allocated and has outstanding tasks.
-            </summary>
-        </member>
-        <member name="P:BepuUtilities.TestStack.ContinuationHandle.Initialized">
-            <summary>
-            Gets whether this handle ever represented an allocated handle. This does not guarantee that the continuation's associated tasks are active in the <see cref="T:BepuUtilities.TestStack.TaskStack"/> that it was allocated from.
-            </summary>
-        </member>
-        <member name="M:BepuUtilities.TestStack.ContinuationHandle.NotifyTaskCompleted(System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Notifies the continuation that one task was completed.
-            </summary>
-            <param name="workerIndex">Worker index to pass to the continuation's delegate, if any.</param>
-            <param name="dispatcher">Dispatcher to pass to the continuation's delegate, if any.</param>
-        </member>
-        <member name="T:BepuUtilities.TestStack.TaskContinuation">
+        <member name="T:BepuUtilities.TaskScheduling.TaskContinuation">
             <summary>
             Stores data relevant to tracking task completion and reporting completion for a continuation.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.TaskContinuation.OnCompleted">
+        <member name="F:BepuUtilities.TaskScheduling.TaskContinuation.OnCompleted">
             <summary>
             Task to run upon completion of the associated task.
             </summary>
         </member>
-        <member name="F:BepuUtilities.TestStack.TaskContinuation.Version">
-            <summary>
-            Version of this continuation.
-            </summary>
-        </member>
-        <member name="F:BepuUtilities.TestStack.TaskContinuation.RemainingTaskCounter">
+        <member name="F:BepuUtilities.TaskScheduling.TaskContinuation.RemainingTaskCounter">
             <summary>
             Number of tasks not yet reported as complete in the continuation.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStackContinuations.GetContinuation(BepuUtilities.TestStack.ContinuationHandle)">
+        <member name="T:BepuUtilities.TaskScheduling.TaskStack">
             <summary>
-            Retrieves a pointer to the continuation data for <see cref="T:BepuUtilities.TestStack.ContinuationHandle"/>.
-            </summary>
-            <param name="continuationHandle">Handle to look up the associated continuation for.</param>
-            <returns>Pointer to the continuation backing the given handle.</returns>
-            <remarks>This should not be used if the continuation handle is not known to be valid. The data pointed to by the data could become invalidated if the continuation completes.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStackContinuations.IsComplete(BepuUtilities.TestStack.ContinuationHandle)">
-            <summary>
-            Checks whether all tasks associated with this continuation have completed.
-            </summary>
-            <param name="continuationHandle">Continuation to check for completion.</param>
-            <returns>True if all tasks associated with a continuation have completed, false otherwise.</returns>
-        </member>
-        <member name="T:BepuUtilities.TestStack.TaskStack">
-            <summary>
-            Manages task stacks for parallel workers. Supports work stealing between workers.
+            Manages a linked stack of tasks.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.#ctor(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Int32,System.Int32)">
+        <member name="F:BepuUtilities.TaskScheduling.TaskStack.head">
+            <summary>
+            Most recently pushed job on the stack. May be null if the stack is empty.
+            </summary>
+            <remarks>Pointers and generics don't play well, alas.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.#ctor(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Int32,System.Int32,System.Int32)">
             <summary>
             Constructs a new parallel task stack.
             </summary>
             <param name="pool">Buffer pool to allocate non-thread allocated resources from.</param>
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
-            <param name="maximumTaskCapacity">Maximum number of tasks to allocate space for in each worker. Tasks are individual chunks of scheduled work..</param>
-            <param name="maximumContinuationCapacity">Maximum number of continuations to allocate space for in each worker.</param>
+            <param name="dispatcher">Thread dispatcher to pull thread pools from for thread allocations.</param>
+            <param name="workerCount">Number of workers to allocate space for.</param>
+            <param name="initialWorkerJobCapacity">Initial number of jobs (groups of tasks submitted together) to allocate space for in each worker.</param>
+            <param name="continuationBlockCapacity">Number of slots to allocate in each block of continuations in each worker.</param>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.Dispose(BepuUtilities.Memory.BufferPool)">
-            <summary>
-            Returns unmanaged resources held by the <see cref="T:BepuUtilities.TestStack.TaskStack"/> to a pool.
-            </summary>
-            <param name="pool">Buffer pool to return resources to.</param>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.Reset">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.Reset(BepuUtilities.IThreadDispatcher)">
             <summary>
             Returns the stack to a fresh state without reallocating.
             </summary>
+            <param name="dispatcher">Dispatcher whose thread pools should be used to return any thread allocated resources.</param>
         </member>
-        <member name="P:BepuUtilities.TestStack.TaskStack.TaskCount">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.Dispose(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher)">
             <summary>
-            Gets the number of active tasks.
+            Returns unmanaged resources held by the <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> to a pool.
+            </summary>
+            <param name="pool">Buffer pool to return resources to.</param>
+            <param name="dispatcher">Dispatcher whose thread pools should be used to return any thread allocated resources.</param>
+        </member>
+        <member name="P:BepuUtilities.TaskScheduling.TaskStack.ApproximateTaskCount">
+            <summary>
+            Gets the approximate number of active tasks. This is not guaranteed to actually measure the true number of tasks at any one point in time.
             </summary>
         </member>
-        <member name="P:BepuUtilities.TestStack.TaskStack.ContinuationCount">
+        <member name="P:BepuUtilities.TaskScheduling.TaskStack.ApproximateContinuationCount">
             <summary>
-            Gets the number of active continuations.
+            Gets the approximate number of active continuations. This is not guaranteed to actually measure the true number of continuations at any one point in time; it checks each worker in sequence, and the continuation counts could vary arbitrarily as the checks proceed.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPop(BepuUtilities.TestStack.Task@)">
-            <summary>
-            Attempts to pop a task from the stack.
-            </summary>
-            <param name="task">Task popped from the stack, if any.</param>
-            <returns>True if a task was available to pop, false otherwise.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPushUnsafely(System.Span{BepuUtilities.TestStack.Task})">
-            <summary>
-            Pushes a set of tasks onto the stack. Does not acquire a lock.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <returns>True if there was room to complete the push, false otherwise.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPushUnsafely(BepuUtilities.TestStack.Task)">
-            <summary>
-            Pushes a task onto the task stack. Does not acquire a lock.
-            </summary>
-            <param name="task">Task to push</param>
-            <returns>True if there was room to complete the push, false otherwise.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPush(System.Span{BepuUtilities.TestStack.Task})">
-            <summary>
-            Tries to push a set of tasks to the task stack if the stack is uncontested.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <returns>Status of the push attempt.</returns>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.Push(System.Span{BepuUtilities.TestStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
-            <summary>
-            Push a set of tasks to the task stack.
-            </summary>
-            <param name="tasks">Tasks composing the job.</param>
-            <param name="workerIndex">Worker index of the currently executing thread.</param>
-            <param name="dispatcher">Currently executing thread dispatcher.</param>
-            <remarks>Runs filler tasks if the push is blocked by a lack of capacity.</remarks>
-        </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryAllocateContinuation(System.Int32,BepuUtilities.TestStack.ContinuationHandle@,BepuUtilities.TestStack.Task)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.AllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.Task)">
             <summary>
             Attempts to allocate a continuation for a set of tasks.
             </summary>
             <param name="taskCount">Number of tasks associated with the continuation.</param>
-            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestStack.Task.Function"/> will not be executed.</param>
-            <param name="continuationHandle">Handle of the continuation if allocation is successful.</param>
-            <returns>True if the continuation was allocated, false if the attempt was contested..</returns>
+            <param name="workerIndex">Worker index to allocate the continuation on.</param>
+            <param name="dispatcher">Dispatcher to use for any per-thread allocations if necessary.</param>
+            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TaskScheduling.Task.Function"/> will not be executed.</param>
+            <returns>Handle of the continuation.</returns>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.AllocateContinuation(System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestStack.Task)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.TryPop``1(``0@,BepuUtilities.TaskScheduling.Task@)">
             <summary>
-            Allocates a continuation for a set of tasks.
+            Attempts to pop a task.
             </summary>
-            <param name="taskCount">Number of tasks associated with the continuation.</param>
+            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
+            <param name="task">Popped task, if any.</param>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
+            <returns>Result status of the pop attempt.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.TryPop(BepuUtilities.TaskScheduling.Task@)">
+            <summary>
+            Attempts to pop a task.
+            </summary>
+            <param name="task">Popped task, if any.</param>
+            <returns>Result status of the pop attempt.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.TryPopAndRun``1(``0@,System.Int32,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Attempts to pop a task and run it.
+            </summary>
+            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
             <param name="workerIndex">Index of the worker to pass into the task function.</param>
             <param name="dispatcher">Thread dispatcher running this task stack.</param>
-            <param name="onCompleted">Task to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TestStack.Task.Function"/> will not be executed.</param>
-            <returns>Handle of the allocated continuation.</returns>
-            <remarks>Note that this will keep trying until allocation succeeds.</remarks>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
+            <returns>Result status of the pop attempt.</returns>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPopAndRun(System.Int32,BepuUtilities.IThreadDispatcher)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.TryPopAndRun(System.Int32,BepuUtilities.IThreadDispatcher)">
             <summary>
             Attempts to pop a task and run it.
             </summary>
@@ -5863,41 +4655,154 @@
             <param name="dispatcher">Thread dispatcher running this task stack.</param>
             <returns>Result status of the pop attempt.</returns>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.AllocateContinuationAndPush(System.Span{BepuUtilities.TestStack.Task},System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestStack.Task)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.PushUnsafely(System.Span{BepuUtilities.TaskScheduling.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a set of tasks onto the task stack. This function is not thread safe.
+            </summary>
+            <param name="tasks">Tasks composing the job.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="tag">User-defined tag data for the submitted job.</param>
+            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.PushUnsafely(BepuUtilities.TaskScheduling.Task,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a task onto the task stack. This function is not thread safe.
+            </summary>
+            <param name="task">Task to push.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+            <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.Push(System.Span{BepuUtilities.TaskScheduling.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a set of tasks onto the task stack.
+            </summary>
+            <param name="tasks">Tasks composing the job.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="tag">User-defined tag data for the submitted job.</param>
+            <returns>True if the push succeeded, false if it was contested.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.Push(BepuUtilities.TaskScheduling.Task,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a task onto the task stack.
+            </summary>
+            <param name="task">Task composing the job.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the task onto.</param>
+            <param name="tag">User-defined tag data for the submitted job.</param>
+            <returns>True if the push succeeded, false if it was contested.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.AllocateContinuationAndPush(System.Span{BepuUtilities.TaskScheduling.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TaskScheduling.Task)">
             <summary>
             Pushes a set of tasks to the stack with a created continuation.
             </summary>
             <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
-            <param name="workerIndex">Index of the currently executing worker.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
             <param name="onComplete">Task to run upon completion of all the submitted tasks, if any.</param>
             <returns>Handle of the continuation created for these tasks.</returns>
-            <remarks>Note that this will keep trying until task submission succeeds.</remarks>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.WaitForCompletion(BepuUtilities.TestStack.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.AllocateContinuationAndPush(BepuUtilities.TaskScheduling.Task,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TaskScheduling.Task)">
+            <summary>
+            Pushes a task to the stack with a created continuation.
+            </summary>
+            <param name="task">Task composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided task.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the task onto.</param>
+            <param name="tag">User tag associated with the task's job.</param>
+            <param name="onComplete">Task to run upon completion of all the submitted task, if any.</param>
+            <returns>Handle of the continuation created for these task.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.WaitForCompletion``1(``0@,BepuUtilities.TaskScheduling.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
             <summary>
             Waits for a continuation to be completed.
             </summary>
             <remarks>Instead of spinning the entire time, this may pop and execute pending tasks to fill the gap.</remarks>
-            <param name="continuation">Continuation to wait on.</param>   
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
+            <param name="filter">Filter to apply to jobs. Only allowed jobs can have tasks popped from them.</param>
+            <param name="continuation">Continuation to wait on.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the executing worker.</param>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.WaitForCompletion(BepuUtilities.TaskScheduling.ContinuationHandle,System.Int32,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Waits for a continuation to be completed.
+            </summary>
+            <remarks>Instead of spinning the entire time, this may pop and execute pending tasks to fill the gap.</remarks>
+            <param name="continuation">Continuation to wait on.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
             <param name="workerIndex">Index of the executing worker.</param>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.RunTasks(System.Span{BepuUtilities.TestStack.Task},System.Int32,BepuUtilities.IThreadDispatcher)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RunTasks``1(System.Span{BepuUtilities.TaskScheduling.Task},System.Int32,BepuUtilities.IThreadDispatcher,``0@,System.UInt64)">
             <summary>
             Pushes a set of tasks to the worker stack and returns when all tasks are complete.
             </summary>
             <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
             <param name="workerIndex">Index of the worker executing this function.</param>
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="filter">Filter applied to jobs considered for filling the calling thread's wait for other threads to complete.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
             <remarks>Note that this will keep working until all tasks are run. It may execute tasks unrelated to the requested tasks while waiting on other workers to complete constituent tasks.</remarks>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.RequestStop">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RunTasks(System.Span{BepuUtilities.TaskScheduling.Task},System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a set of tasks to the worker stack and returns when all tasks are complete.
+            </summary>
+            <param name="tasks">Tasks composing the job. A continuation will be assigned internally; no continuation should be present on any of the provided tasks.</param>
+            <param name="workerIndex">Index of the worker executing this function.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+            <remarks>Note that this will keep working until all tasks are run. It may execute tasks unrelated to the requested tasks while waiting on other workers to complete constituent tasks.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RunTask(BepuUtilities.TaskScheduling.Task,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Pushes a task to the worker stack and returns when it completes.
+            </summary>
+            <param name="task">Task composing the job. A continuation will be assigned internally; no continuation should be present on the task.</param>
+            <param name="workerIndex">Index of the worker executing this function.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="tag">User tag associated with the job spanning the submitted task.</param>
+            <remarks>Note that this will keep working until the task completes. It may execute tasks unrelated to the requested task while waiting on other workers.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RunTask``1(BepuUtilities.TaskScheduling.Task,System.Int32,BepuUtilities.IThreadDispatcher,``0@,System.UInt64)">
+            <summary>
+            Pushes a task to the worker stack and returns when all tasks are complete.
+            </summary>
+            <param name="task">Task composing the job. A continuation will be assigned internally; no continuation should be present on the task.</param>
+            <param name="workerIndex">Index of the worker executing this function.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="filter">Filter applied to jobs considered for filling the calling thread's wait for other threads to complete.</param>
+            <param name="tag">User tag associated with the job spanning the submitted task.</param>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
+            <remarks>Note that this will keep working the task completes. It may execute tasks unrelated to the requested task while waiting on other workers to complete constituent tasks.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RequestStop">
             <summary>
             Requests that all workers stop. The next time a worker runs out of tasks to run, if it sees a stop command, it will be reported.
             </summary>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.TryPushForUnsafely(,System.Void*,System.Int32,System.Int32,BepuUtilities.TestStack.ContinuationHandle)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.RequestStopTaskFunction(System.Int64,System.Void*,System.Int32,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Convenience function for requesting a stop. Requires the context to be a pointer to the expected <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>.
+            </summary>
+            <param name="id">Id of the task.</param>
+            <param name="untypedContext"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> to be stopped.</param>
+            <param name="workerIndex">Index of the worker executing this task.</param>
+            <param name="dispatcher">Dispatcher associated with the execution.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.GetRequestStopTask(BepuUtilities.TaskScheduling.TaskStack*)">
+            <summary>
+            Convenience function for getting a task representing a stop request.
+            </summary>
+            <param name="stack">Stack to be stopped.</param>
+            <returns>Task representing a stop request.</returns>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.PushForUnsafely(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TaskScheduling.ContinuationHandle)">
             <summary>
             Pushes a for loop onto the task stack. Does not take a lock.
             </summary>
@@ -5905,11 +4810,13 @@
             <param name="context">Context pointer to pass into each task execution.</param>
             <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
             <param name="iterationCount">Number of iterations to perform.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
             <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <returns>True if there was enough room on the stack to push, false otherwise.</returns>
             <remarks>This must not be used while other threads could be performing task pushes or pops that could affect the specified worker.</remarks>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.PushFor(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TestStack.ContinuationHandle)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.PushFor(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64,BepuUtilities.TaskScheduling.ContinuationHandle)">
             <summary>
             Pushes a for loop onto the task stack.
             </summary>
@@ -5917,13 +4824,13 @@
             <param name="context">Context pointer to pass into each task execution.</param>
             <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
             <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
-            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param> 
             <param name="continuation">Continuation associated with the loop tasks, if any.</param>
-            <remarks>This function will not usually attempt to run any iterations of the loop itself. It tries to push the loop tasks onto the stack.<para/>
-            If the task stack is full, this will opt to run the tasks inline while waiting for room.</remarks>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+            <remarks>This function will not attempt to run any iterations of the loop itself.</remarks>
         </member>
-        <member name="M:BepuUtilities.TestStack.TaskStack.For(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher)">
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.For``1(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,``0@,System.UInt64)">
             <summary>
             Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
             </summary>
@@ -5931,8 +4838,57 @@
             <param name="context">Context pointer to pass into each iteration of the loop.</param>
             <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
             <param name="iterationCount">Number of iterations to perform.</param>
-            <param name="dispatcher">Thread dispatcher calling this TaskStack.</param>
             <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="filter">Filter applied to jobs considered for filling the calling thread's wait for other threads to complete.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+            <typeparam name="TJobFilter">Type of the job filter used in the pop.</typeparam>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.For(,System.Void*,System.Int32,System.Int32,System.Int32,BepuUtilities.IThreadDispatcher,System.UInt64)">
+            <summary>
+            Submits a set of tasks representing a for loop over the given indices and returns when all loop iterations are complete.
+            </summary>
+            <param name="function">Function to execute on each iteration of the loop.</param>
+            <param name="context">Context pointer to pass into each iteration of the loop.</param>
+            <param name="inclusiveStartIndex">Inclusive start index of the loop range.</param>
+            <param name="iterationCount">Number of iterations to perform.</param>
+            <param name="workerIndex">Index of the worker stack to push the tasks onto.</param>
+            <param name="dispatcher">Thread dispatcher to allocate thread data from if necessary.</param>
+            <param name="tag">User tag associated with the job spanning the submitted tasks.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.DispatchWorkerFunction(System.Int32,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Worker function that pops tasks from the stack and executes them.
+            </summary>
+            <param name="workerIndex">Index of the worker calling this function.</param>
+            <param name="dispatcher">Thread dispatcher responsible for the invocation.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.TaskStack.DispatchWorkers(BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Object)">
+            <summary>
+            Dispatches workers to execute tasks from the given stack.
+            </summary>
+            <param name="taskStack">Task stack to pull work from.</param>
+            <param name="dispatcher">Thread dispatcher to dispatch workers with.</param>
+            <param name="maximumWorkerCount">Maximum number of workers to spin up for the dispatch.</param>
+            <param name="managedContext">Managed context to include in this dispatch, if any.</param>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.Worker.AllocateJob(System.Span{BepuUtilities.TaskScheduling.Task},System.UInt64,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Pushes a set of tasks onto the stack.
+            </summary>
+            <param name="tasks">Tasks composing the job.</param>
+            <param name="tag">User tag associated with the job.</param>
+            <param name="dispatcher">Dispatcher used to pull thread allocations if necessary.</param>
+            <remarks>If the worker associated with this stack might be active, this function can only be called by the worker.</remarks>
+        </member>
+        <member name="M:BepuUtilities.TaskScheduling.Worker.AllocateContinuation(System.Int32,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.Task)">
+            <summary>
+            Allocates a continuation for a set of tasks.
+            </summary>
+            <param name="taskCount">Number of tasks associated with the continuation.</param>
+            <param name="dispatcher">Dispatcher from which to pull a buffer pool if needed for resizing.</param>
+            <param name="onCompleted">Function to execute upon completing all associated tasks, if any. Any task with a null <see cref="F:BepuUtilities.TaskScheduling.Task.Function"/> will not be executed.</param>
+            <returns>Handle of the continuation.</returns>
         </member>
         <member name="T:BepuUtilities.ThreadDispatcher">
             <summary>
@@ -6156,8 +5112,8 @@
             <summary>
             Finds the result of subtracting the components of a vector from a scalar.
             </summary>
-            <param name="v">Vector to subtract from the scalar.</param>
-            <param name="s">Scalar to subtract from.</param>
+            <param name="a">Vector to subtract from the scalar.</param>
+            <param name="b">Scalar to subtract from.</param>
             <returns>Vector with components equal the input vector subtracted from the input scalar.</returns>
         </member>
         <member name="M:BepuUtilities.Vector3Wide.Dot(BepuUtilities.Vector3Wide@,BepuUtilities.Vector3Wide@,System.Numerics.Vector{System.Single}@)">

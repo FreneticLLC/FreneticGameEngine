@@ -6,10 +6,12 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.CoreSystems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace FGECore.StackNoteSystem
 {
@@ -39,6 +41,7 @@ namespace FGECore.StackNoteSystem
         /// <param name="relatedObj">A related object, if any.</param>
         public static void Push(string note, object relatedObj)
         {
+            //OutputType.DEBUG.Output($"Thread {Thread.CurrentThread.Name ?? Environment.CurrentManagedThreadId.ToString()} pushing note {note} with related object {relatedObj}.");
             Notes.Push(note, relatedObj);
         }
 

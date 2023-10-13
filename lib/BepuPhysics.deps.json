@@ -6,9 +6,9 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v7.0": {
-      "BepuPhysics/2.5.0-beta.11": {
+      "BepuPhysics/2.5.0-beta.14": {
         "dependencies": {
-          "BepuUtilities": "2.5.0-beta.11",
+          "BepuUtilities": "2.5.0-beta.14",
           "Microsoft.SourceLink.GitHub": "1.1.1"
         },
         "runtime": {
@@ -23,7 +23,7 @@
           "Microsoft.SourceLink.Common": "1.1.1"
         }
       },
-      "BepuUtilities/2.5.0-beta.11": {
+      "BepuUtilities/2.5.0-beta.14": {
         "runtime": {
           "BepuUtilities.dll": {}
         }
@@ -31,7 +31,7 @@
     }
   },
   "libraries": {
-    "BepuPhysics/2.5.0-beta.11": {
+    "BepuPhysics/2.5.0-beta.14": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -57,7 +57,7 @@
       "path": "microsoft.sourcelink.github/1.1.1",
       "hashPath": "microsoft.sourcelink.github.1.1.1.nupkg.sha512"
     },
-    "BepuUtilities/2.5.0-beta.11": {
+    "BepuUtilities/2.5.0-beta.14": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

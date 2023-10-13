@@ -50,19 +50,19 @@ namespace FGECore.EntitySystem.PhysicsHelpers
         /// <summary>Implements <see cref="CollisionEvent.GetNormal"/>.</summary>
         public override Location GetNormal(int contact)
         {
-            return Manifold.GetNormal(ref Manifold, contact).ToLocation();
+            return Manifold.GetNormal(contact).ToLocation();
         }
 
         /// <summary>Implements <see cref="CollisionEvent.GetOffset"/>.</summary>
         public override Location GetOffset(int contact)
         {
-            return Manifold.GetOffset(ref Manifold, contact).ToLocation();
+            return Manifold.GetOffset(contact).ToLocation();
         }
 
         /// <summary>Implements <see cref="CollisionEvent.GetDepth"/>.</summary>
         public override float GetDepth(int contact)
         {
-            return Manifold.GetDepth(ref Manifold, contact);
+            return Manifold.GetDepth(contact);
         }
     }
 }

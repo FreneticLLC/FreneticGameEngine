@@ -252,6 +252,14 @@
             <param name="bodyHandle">Handle to check for.</param>
             <returns>True if the handle exists in the collection, false otherwise.</returns>
         </member>
+        <member name="M:BepuPhysics.Bodies.CountBodies">
+            <summary>
+            Computes the number of bodies contained in the simulation.
+            </summary>
+            <returns>Number of bodies contained in the simulation.</returns>
+            <remarks>Enumerates all <see cref="T:BepuPhysics.BodySet"/> instances in the <see cref="T:BepuPhysics.Bodies"/> collection, summing the body counts for every allocated instance. 
+            For simulations with very large numbers of sleeping body sets, this is not a trivial operation.</remarks>
+        </member>
         <member name="M:BepuPhysics.Bodies.EnumerateConnectedBodyIndices``1(System.Int32,``0@)">
             <summary>
             Enumerates all the bodies connected to a given active body.
@@ -514,6 +522,12 @@
             Linear and angular velocity of the body.
             </summary>
         </member>
+        <member name="M:BepuPhysics.MotionState.ToString">
+            <summary>
+            Returns a string representing the MotionState.
+            </summary>
+            <returns>String representing the MotionState.</returns>
+        </member>
         <member name="T:BepuPhysics.RigidPose">
             <summary>
             Represents a rigid transformation.
@@ -596,6 +610,12 @@
             <param name="b">Second transform to concatenate.</param>
             <param name="result">Result of the concatenation.</param>
         </member>
+        <member name="M:BepuPhysics.RigidPose.ToString">
+            <summary>
+            Returns a string representing the RigidPose as "Position, Orientation".
+            </summary>
+            <returns>String representing the RigidPose.</returns>
+        </member>
         <member name="T:BepuPhysics.BodyVelocity">
             <summary>
             Linear and angular velocity for a body.
@@ -636,6 +656,12 @@
             </summary>
             <param name="velocities">Velocities to use in the body velocity.</param>
         </member>
+        <member name="M:BepuPhysics.BodyVelocity.ToString">
+            <summary>
+            Returns a string representing the BodyVelocity as "Linear, Angular".
+            </summary>
+            <returns>String representing the BodyVelocity.</returns>
+        </member>
         <member name="T:BepuPhysics.BodyInertia">
             <summary>
             Stores the inertia for a body.
@@ -651,6 +677,12 @@
             <summary>
             Inverse of the body's mass.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.BodyInertia.ToString">
+            <summary>
+            Returns a string representing the BodyInertia as "InverseMass, InverseInertiaTensor".
+            </summary>
+            <returns>String representing the BodyInertia.</returns>
         </member>
         <member name="T:BepuPhysics.BodyInertias">
             <summary>
@@ -670,6 +702,12 @@
             <remarks>
             We cache this here because velocity integration wants both the local and world inertias, and any integration happening within the solver will do so without the benefit of sequential loads.
             In that context, being able to load a single cache line to grab both local and world inertia helps quite a lot.</remarks>
+        </member>
+        <member name="M:BepuPhysics.BodyInertias.ToString">
+            <summary>
+            Returns a string representing the BodyInertias.
+            </summary>
+            <returns>String representing the BodyInertias.</returns>
         </member>
         <member name="T:BepuPhysics.BodyDynamics">
             <summary>
@@ -691,6 +729,12 @@
             <summary>
             Inertia information for the body.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.BodyDynamics.ToString">
+            <summary>
+            Returns a string representing the BodyDynamics.
+            </summary>
+            <returns>String representing the BodyDynamics.</returns>
         </member>
         <member name="T:BepuPhysics.BodyActivity">
             <summary>
@@ -1055,7 +1099,7 @@
             <summary>
             Gets a reference to the properties associated with a collidable.
             </summary>
-            <param name="staticHandle">Collidable to retrieve the properties for.</param>
+            <param name="collidable">Collidable to retrieve the properties for.</param>
             <returns>Reference to properties associated with a collidable.</returns>
         </member>
         <member name="M:BepuPhysics.CollidableProperty`1.Allocate(BepuPhysics.BodyHandle)">
@@ -1076,7 +1120,7 @@
             <summary>
             Ensures there is space for a given collidable reference and returns a reference to the used memory.
             </summary>
-            <param name="handle">Collidable reference to allocate for.</param>
+            <param name="collidableReference">Collidable reference to allocate for.</param>
             <returns>Reference to the data for the given collidable.</returns>
         </member>
         <member name="M:BepuPhysics.CollidableProperty`1.EnsureBodyCapacity(System.Int32)">
@@ -1121,13 +1165,44 @@
             Buffer of children within this compound.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.BigCompound.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild},BepuPhysics.Collidables.Shapes,BepuUtilities.Memory.BufferPool)">
+        <member name="M:BepuPhysics.Collidables.BigCompound.CreateWithoutTreeBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild},BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Creates a BigCompound shape instance, but leaves the Tree in an unbuilt state. The Tree must be built before the compound can be used.
+            </summary>
+            <param name="children">Children to use in the compound.</param>
+            <param name="pool">Pool used to allocate acceleration structures.</param>
+            <returns>Created compound shape.</returns>
+            <remarks>In some cases, the default binned build may not be the ideal builder. This function does everything needed to set up a tree without the expense of figuring out the details of the acceleration structure.
+            The user can then run whatever build/refinement process is appropriate.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.FillSubtreesForChildren(System.Span{BepuPhysics.Collidables.CompoundChild},BepuPhysics.Collidables.Shapes,System.Span{BepuPhysics.Trees.NodeChild})">
+            <summary>
+            Fills a buffer of subtrees according to a buffer of triangles.
+            </summary>
+            <remarks>The term "subtree" is used because the binned builder does not care whether the input came from leaf nodes or a refinement process's internal nodes.</remarks>
+            <param name="children">Children to build subtrees from.</param>
+            <param name="shapes">Shapes set in which child shapes are allocated.</param>
+            <param name="subtrees">Subtrees created for the triangles.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.CreateWithSweepBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild},BepuPhysics.Collidables.Shapes,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Creates a compound shape instance and builds an acceleration structure using a sweep builder.
+            </summary>
+            <param name="children">Children to use in the compound.</param>
+            <param name="shapes">Shapes set in which child shapes are allocated.</param>
+            <param name="pool">Pool used to allocate acceleration structures.</param>
+            <returns>Created compound shape.</returns>
+            <remarks>The sweep builder is significantly slower than the binned builder, but can sometimes create higher quality trees.
+            <para>Note that the binned builder can be tuned to create higher quality trees. That is usually a better choice than trying to use the sweep builder; this is here primarily for legacy reasons.</para></remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.BigCompound.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild},BepuPhysics.Collidables.Shapes,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher)">
             <summary>
             Creates a compound shape with an acceleration structure.
             </summary>
             <param name="children">Set of children in the compound.</param>
             <param name="shapes">Shapes set in which child shapes are allocated.</param>
             <param name="pool">Pool to use to allocate acceleration structures.</param>
+            <param name="dispatcher">Thread dispatcher to use to multithread the acceleration structure build, if any.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.BigCompound.Add(BepuPhysics.Collidables.CompoundChild,BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.Shapes)">
             <summary>
@@ -1594,7 +1669,7 @@
             <param name="shapeBatches">Shape collection into which the index indexes.</param>
             <returns>True if the index is valid, false otherwise.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.Compound.ValidateChildIndices(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.CompoundChild}@,BepuPhysics.Collidables.Shapes)">
+        <member name="M:BepuPhysics.Collidables.Compound.ValidateChildIndices(System.Span{BepuPhysics.Collidables.CompoundChild},BepuPhysics.Collidables.Shapes)">
             <summary>
             Checks if a set of children shape indices are all valid.
             </summary>
@@ -1977,6 +2052,7 @@
             <param name="pool">Pool used to allocate resources for the hullShape.</param>
             <param name="hullShape">Convex hull shape created from the input data.</param>
             <param name="center">Computed center of mass of the convex hull before its points were recentered onto the origin.</param>
+            <returns>True if the shape was created successfully, false otherwise. If false, the hull probably had no volume and would not have worked properly as a shape.</returns>
         </member>
         <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateShape(System.Span{System.Numerics.Vector3},BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.HullData@,System.Numerics.Vector3@,BepuPhysics.Collidables.ConvexHull@)">
             <summary>
@@ -1987,6 +2063,7 @@
             <param name="hullData">Intermediate hull data that got processed into the convex hull.</param>
             <param name="center">Computed center of mass of the convex hull before its points were recentered onto the origin.</param>
             <param name="convexHull">Convex hull shape of the input point set.</param>
+            <returns>True if the shape was created successfully, false otherwise. If false, the hull probably had no volume and would not have worked properly as a shape.</returns>
         </member>
         <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateShape(System.Span{System.Numerics.Vector3},BepuUtilities.Memory.BufferPool,System.Numerics.Vector3@,BepuPhysics.Collidables.ConvexHull@)">
             <summary>
@@ -1996,6 +2073,7 @@
             <param name="pool">Buffer pool used for temporary allocations and the output data structures.</param>
             <param name="center">Computed center of mass of the convex hull before its points were recentered onto the origin.</param>
             <param name="convexHull">Convex hull shape of the input point set.</param>
+            <returns>True if the shape was created successfully, false otherwise. If false, the hull probably had no volume and would not have worked properly as a shape.</returns>
         </member>
         <member name="M:BepuPhysics.Collidables.ConvexHullHelper.CreateTransformedCopy(BepuPhysics.Collidables.ConvexHull@,BepuUtilities.Matrix3x3@,BepuUtilities.Memory.Buffer{BepuUtilities.Vector3Wide},BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.HullBoundingPlanes})">
             <summary>
@@ -2057,6 +2135,12 @@
             Type id of cylinder shapes.
             </summary>
         </member>
+        <member name="M:BepuPhysics.Collidables.IDisposableShape.Dispose(BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Returns all resources used by the shape instance to the given pool.
+            </summary>
+            <param name="pool">Pool to return shape resources to.</param>
+        </member>
         <member name="T:BepuPhysics.Collidables.IShape">
             <summary>
             Defines a type usable as a shape by collidables.
@@ -2075,8 +2159,7 @@
             <param name="initialCapacity">Initial capacity to allocate within the batch.</param>
             <param name="shapeBatches">The set of shapes to contain this batch.</param>
             <returns>Shape batch for the shape type.</returns>
-            <remarks>This is typically used internally to initialize new shape collections in response to shapes being added. It is not likely to be useful outside of the engine.
-            Ideally, this would be implemented as a static abstract, but those aren't available yet.</remarks>
+            <remarks>This is typically used internally to initialize new shape collections in response to shapes being added. It is not likely to be useful outside of the engine.</remarks>
         </member>
         <member name="T:BepuPhysics.Collidables.IConvexShape">
             <summary>
@@ -2177,12 +2260,6 @@
             <param name="compoundChildIndex">Index of the child to look up.</param>
             <returns>Reference to the requested compound child.</returns>
         </member>
-        <member name="M:BepuPhysics.Collidables.ICompoundShape.Dispose(BepuUtilities.Memory.BufferPool)">
-            <summary>
-            Returns all resources used by the shape instance to the given pool.
-            </summary>
-            <param name="pool">Pool to return shape resources to.</param>
-        </member>
         <member name="T:BepuPhysics.Collidables.IHomogeneousCompoundShape`2">
             <summary>
             Defines a compound shape type that has children of only one type.
@@ -2242,12 +2319,6 @@
             </summary>
             <param name="childIndex">Index of the child in the compound parent.</param>
             <param name="childData">Reference to an AOSOA slot.</param>
-        </member>
-        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.Dispose(BepuUtilities.Memory.BufferPool)">
-            <summary>
-            Returns all resources used by the shape instance to the given pool.
-            </summary>
-            <param name="pool">Pool to return shape resources to.</param>
         </member>
         <member name="T:BepuPhysics.Collidables.IShapeWide`1">
             <summary>
@@ -2339,7 +2410,39 @@
             Gets or sets the scale of the mesh.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.Mesh.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3,BepuUtilities.Memory.BufferPool)">
+        <member name="M:BepuPhysics.Collidables.Mesh.FillSubtreesForTriangles(System.Span{BepuPhysics.Collidables.Triangle},System.Span{BepuPhysics.Trees.NodeChild})">
+            <summary>
+            Fills a buffer of subtrees according to a buffer of triangles.
+            </summary>
+            <remarks>The term "subtree" is used because the binned builder does not care whether the input came from leaf nodes or a refinement process's internal nodes.</remarks>
+            <param name="triangles">Triangles to build subtrees from.</param>
+            <param name="subtrees">Subtrees created for the triangles.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Mesh.CreateWithoutTreeBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Creates a mesh shape instance, but leaves the Tree in an unbuilt state. The tree must be built before the mesh can be used.
+            </summary>
+            <param name="triangles">Triangles to use in the mesh.</param>
+            <param name="scale">Scale to apply to all vertices at runtime.
+            Note that the scale is not baked into the triangles or acceleration structure; the same set of triangles and acceleration structure can be used across multiple Mesh instances with different scales.</param>
+            <param name="pool">Pool used to allocate acceleration structures.</param>
+            <returns>Created mesh shape.</returns>
+            <remarks>In some cases, the default binned build may not be the ideal builder. This function does everything needed to set up a tree without the expense of figuring out the details of the acceleration structure.
+            The user can then run whatever build/refinement process is appropriate.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Mesh.CreateWithSweepBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Creates a mesh shape instance and builds an acceleration structure using a sweep builder.
+            </summary>
+            <param name="triangles">Triangles to use in the mesh.</param>
+            <param name="scale">Scale to apply to all vertices at runtime.
+            Note that the scale is not baked into the triangles or acceleration structure; the same set of triangles and acceleration structure can be used across multiple Mesh instances with different scales.</param>
+            <param name="pool">Pool used to allocate acceleration structures.</param>
+            <returns>Created mesh shape.</returns>
+            <remarks>The sweep builder is significantly slower than the binned builder, but can sometimes create higher quality trees.
+            <para>Note that the binned builder can be tuned to create higher quality trees. That is usually a better choice than trying to use the sweep builder; this is here primarily for legacy reasons.</para></remarks>
+        </member>
+        <member name="M:BepuPhysics.Collidables.Mesh.#ctor(BepuUtilities.Memory.Buffer{BepuPhysics.Collidables.Triangle},System.Numerics.Vector3,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher)">
             <summary>
             Creates a mesh shape.
             </summary>
@@ -2347,6 +2450,7 @@
             <param name="scale">Scale to apply to all vertices at runtime.
             Note that the scale is not baked into the triangles or acceleration structure; the same set of triangles and acceleration structure can be used across multiple Mesh instances with different scales.</param>
             <param name="pool">Pool used to allocate acceleration structures.</param>
+            <param name="dispatcher">Dispatcher to use to multithread the execution of the mesh build process. If null, the build will be single threaded.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.Mesh.#ctor(System.Span{System.Byte},BepuUtilities.Memory.BufferPool)">
             <summary>
@@ -2359,14 +2463,12 @@
             <summary>
             Gets the number of bytes it would take to store the given mesh in a byte buffer.
             </summary>
-            <param name="mesh">Mesh to measure.</param>
             <returns>Number of bytes it would take to store the mesh.</returns>
         </member>
         <member name="M:BepuPhysics.Collidables.Mesh.Serialize(System.Span{System.Byte})">
             <summary>
             Writes a mesh's data to a byte buffer.
             </summary>
-            <param name="mesh">Mesh to write into the byte buffer.</param>
             <param name="data">Byte buffer to store the mesh in.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.Mesh.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,``0@)">
@@ -2907,6 +3009,65 @@
             <param name="min">New minimum bounds for the leaf.</param>
             <param name="max">New maximum bounds for the leaf.</param>
         </member>
+        <member name="T:BepuPhysics.CollisionDetection.BroadPhase.RefinementScheduler">
+            <summary>
+            Returns the size and number of refinements to execute during the broad phase.
+            </summary>
+            <param name="frameIndex">Index of the frame as tracked by the broad phase.</param>
+            <param name="tree">Tree being considered for refinement.</param>
+            <param name="rootRefinementSize">Size of the root refinement. If zero or negative, no root refinement will be performed.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to perform. Can be zero.</param>
+            <param name="subtreeRefinementSize">Target size of the subtree refinements.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+        </member>
+        <member name="P:BepuPhysics.CollisionDetection.BroadPhase.ActiveRefinementSchedule">
+            <summary>
+            Gets or sets the refinement schedule to use for the active tree.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.CollisionDetection.BroadPhase.StaticRefinementSchedule">
+            <summary>
+            Gets or sets the refinement schedule to use for the static tree.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.DefaultRefinementScheduler(System.Single,System.Int32,System.Single,System.Single,System.Int32,System.Int32,BepuPhysics.Trees.Tree@,System.Int32@,System.Int32@,System.Int32@,System.Boolean@)">
+            <summary>
+            Returns the size and number of refinements to execute for the active tree. Used by default.
+            </summary>
+            <param name="optimizationFraction">Target fraction of the tree to be optimized.</param>
+            <param name="rootRefinementPeriod">Period, in timesteps, of refinements applied to the root.</param>
+            <param name="rootRefinementSizeScale">Multiplier to apply to the square root of the leaf count to get the target root refinement size.</param>
+            <param name="subtreeRefinementSizeScale">Multiplier to apply to the square root of the leaf count to get the target subtree refinement size.</param>
+            <param name="nonpriorityPeriod">The period between non-priority queue based root refinements, measured in units of root refinements.</param>
+            <param name="frameIndex">Index of the frame as tracked by the broad phase.</param>
+            <param name="tree">Tree being considered for refinement.</param>
+            <param name="rootRefinementSize">Size of the root refinement. If zero or negative, no root refinement will be performed.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to perform. Can be zero.</param>
+            <param name="subtreeRefinementSize">Target size of the subtree refinements.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.DefaultActiveRefinementScheduler(System.Int32,BepuPhysics.Trees.Tree@,System.Int32@,System.Int32@,System.Int32@,System.Boolean@)">
+            <summary>
+            Returns the size and number of refinements to execute for the active tree. Used by default.
+            </summary>
+            <param name="frameIndex">Index of the frame as tracked by the broad phase.</param>
+            <param name="tree">Tree being considered for refinement.</param>
+            <param name="rootRefinementSize">Size of the root refinement. If zero or negative, no root refinement will be performed.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to perform. Can be zero.</param>
+            <param name="subtreeRefinementSize">Target size of the subtree refinements.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.DefaultStaticRefinementScheduler(System.Int32,BepuPhysics.Trees.Tree@,System.Int32@,System.Int32@,System.Int32@,System.Boolean@)">
+            <summary>
+            Returns the size and number of refinements to execute for the active tree. Used by default.
+            </summary>
+            <param name="frameIndex">Index of the frame as tracked by the broad phase.</param>
+            <param name="tree">Tree being considered for refinement.</param>
+            <param name="rootRefinementSize">Size of the root refinement. If zero or negative, no root refinement will be performed.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to perform. Can be zero.</param>
+            <param name="subtreeRefinementSize">Target size of the subtree refinements.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+        </member>
         <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Clear">
             <summary>
             Clears out the broad phase's structures without releasing any resources.
@@ -3292,8 +3453,6 @@
             <summary>
             Pair of objects awaiting collision processing that involves velocities for bounds calculation.
             </summary>
-            <typeparam name="TA">Type of the first shape in the pair.</typeparam>
-            <typeparam name="TB">Type of the second shape in the pair.</typeparam>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.ConstraintRemover">
             <summary>
@@ -3361,28 +3520,28 @@
             <param name="solver">Solver in which the constraint lives.</param>
             <param name="extractor">Extractor to handle the extracted references.</param>
         </member>
-        <member name="T:BepuPhysics.CollisionDetection.NonconvexContact">
+        <member name="T:BepuPhysics.CollisionDetection.Contact">
             <summary>
-            Information about a single contact in a nonconvex collidable pair.
-            Nonconvex pairs can have different surface bases at each contact point, since the contact surface is not guaranteed to be a plane.
+            Information about a single contact.
             </summary>
+            <remarks>This type contains a field for the normal; it can be used to represent contacts within nonconvex contact manifolds or convex manifolds.</remarks>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.NonconvexContact.Offset">
+        <member name="F:BepuPhysics.CollisionDetection.Contact.Offset">
             <summary>
             Offset from the position of collidable A to the contact position. 
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.NonconvexContact.Depth">
+        <member name="F:BepuPhysics.CollisionDetection.Contact.Depth">
             <summary>
             Penetration depth between the two collidables at this contact. Negative values represent separation.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.NonconvexContact.Normal">
+        <member name="F:BepuPhysics.CollisionDetection.Contact.Normal">
             <summary>
             Surface basis of the contact. If transformed into a rotation matrix, X and Z represent tangent directions and Y represents the contact normal. Points from collidable B to collidable A.
             </summary>
         </member>
-        <member name="F:BepuPhysics.CollisionDetection.NonconvexContact.FeatureId">
+        <member name="F:BepuPhysics.CollisionDetection.Contact.FeatureId">
             <summary>
             Id of the features involved in the collision that generated this contact. If a contact has the same feature id as in a previous frame, it is an indication that the
             same parts of the shape contributed to its creation. This is useful for carrying information from frame to frame.
@@ -3419,16 +3578,46 @@
             Gets whether the contact manifold was created by a pair of convex objects or not. True if convex, false if nonconvex.
             </summary>
         </member>
+        <member name="P:BepuPhysics.CollisionDetection.IContactManifold`1.Item(System.Int32)">
+            <summary>
+            Gets or sets the contact at the given index in the manifold.
+            </summary>
+            <param name="contactIndex">Index of the contact to get or set.</param>
+            <returns>Contact at the specified index.</returns>
+            <remarks>Note that contact normals are shared across a <see cref="T:BepuPhysics.CollisionDetection.ConvexContactManifold"/>. Setting one contact in a convex manifold will change the entire convex manifold's normal.</remarks>
+        </member>
         <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetFeatureId(System.Int32)">
             <summary>
-            Retrieves the feature id associated with a requested contact.
+            Gets the feature id associated with a requested contact.
             </summary>
             <param name="contactIndex">Index of the contact to grab the feature id of.</param>
             <returns>Feature id of the requested contact.</returns>
         </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetDepth(System.Int32)">
+            <summary>
+            Gets the depth associated with a requested contact.
+            </summary>
+            <param name="contactIndex">Index of the contact to grab the depth of.</param>
+            <returns>Depth of the requested contact.</returns>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetNormal(System.Int32)">
+            <summary>
+            Gets a contact's normal.
+            </summary>
+            <param name="contactIndex">Index of the contact to grab the normal of.</param>
+            <returns>Normal of the requested contact.</returns>
+            <remarks>Points from collidable B to collidable A. In convex manifolds, all contacts share a normal and will return the same value.</remarks>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetOffset(System.Int32)">
+            <summary>
+            Gets the offset from collidable A to the requested contact.
+            </summary>
+            <param name="contactIndex">Index of the contact to grab the offset of.</param>
+            <returns>Offset to a contact's offset.</returns>
+        </member>
         <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetContact(System.Int32,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single@,System.Int32@)">
             <summary>
-            Retrieves a copy of a contact's data.
+            Gets a copy of a contact's data.
             </summary>
             <param name="contactIndex">Index of the contact to copy data from.</param>
             <param name="offset">Offset from the first collidable's position to the contact position.</param>
@@ -3437,37 +3626,62 @@
             <param name="featureId">Feature id of the requested contact.
             Feature ids represent which parts of the collidables formed the contact and can be used to track unique contacts across frames.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetDepth(`0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetContact(System.Int32,BepuPhysics.CollisionDetection.Contact@)">
             <summary>
-            Pulls a reference to a contact's depth.
+            Gets a copy of a contact's data.
+            </summary>
+            <param name="contactIndex">Index of the contact to copy data from.</param>
+            <param name="contactData">Data associated with the contact.</param>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetDepthReference(`0@,System.Int32)">
+            <summary>
+            Gets a reference to a contact's depth.
             </summary>
             <param name="manifold">Manifold to pull a reference from.</param>
             <param name="contactIndex">Contact to pull data from.</param>
             <returns>Reference to a contact's depth.</returns>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetNormal(`0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetNormalReference(`0@,System.Int32)">
             <summary>
-            Pulls a reference to a contact's normal. Points from collidable B to collidable A. For convex manifolds that share a normal, all contact indices will simply return a reference to the manifold-wide normal.
+            Gets a reference to a contact's normal. Points from collidable B to collidable A. For convex manifolds that share a normal, all contact indices will simply return a reference to the manifold-wide normal.
             </summary>
             <param name="manifold">Manifold to pull a reference from.</param>
             <param name="contactIndex">Contact to pull data from.</param>
             <returns>Reference to a contact's normal (or the manifold-wide normal in a convex manifold).</returns>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetOffset(`0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetOffsetReference(`0@,System.Int32)">
             <summary>
-            Pulls a reference to a contact's offset.
+            Gets a reference to the offset from collidable A to the requested contact.
             </summary>
             <param name="manifold">Manifold to pull a reference from.</param>
             <param name="contactIndex">Contact to pull data from.</param>
             <returns>Reference to a contact's offset.</returns>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetFeatureId(`0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetFeatureIdReference(`0@,System.Int32)">
             <summary>
-            Pulls a reference to a contact's feature id.
+            Gets a reference to a contact's feature id.
             </summary>
             <param name="manifold">Manifold to pull a reference from.</param>
             <param name="contactIndex">Contact to pull data from.</param>
             <returns>Reference to a contact's feature id.</returns>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetNonconvexContactReference(`0@,System.Int32)">
+            <summary>
+            Gets a reference to a nonconvex manifold's contact.
+            </summary>
+            <param name="manifold">Manifold to pull a reference from.</param>
+            <param name="contactIndex">Contact to pull data from.</param>
+            <returns>Reference to the requested contact.</returns>
+            <remarks>This is a helper that avoids manual casting. If the manifold is not a <see cref="T:BepuPhysics.CollisionDetection.NonconvexContactManifold"/>, the function will throw an <see cref="T:System.NotSupportedException"/>.</remarks>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.IContactManifold`1.GetConvexContactReference(`0@,System.Int32)">
+            <summary>
+            Gets a reference to a convex manifold's contact.
+            </summary>
+            <param name="manifold">Manifold to pull a reference from.</param>
+            <param name="contactIndex">Contact to pull data from.</param>
+            <returns>Reference to the requested contact.</returns>
+            <remarks>This is a helper that avoids manual casting. If the manifold is not a <see cref="T:BepuPhysics.CollisionDetection.ConvexContactManifold"/>, the function will throw an <see cref="T:System.NotSupportedException"/>.</remarks>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.NonconvexContactManifold">
             <summary>
@@ -3484,56 +3698,6 @@
             The maximum number of contacts that can exist within a nonconvex manifold.
             </summary>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetContact(System.Int32,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single@,System.Int32@)">
-            <summary>
-            Retrieves a copy of a contact's data.
-            </summary>
-            <param name="contactIndex">Index of the contact to copy data from.</param>
-            <param name="offset">Offset from the first collidable's position to the contact position.</param>
-            <param name="normal">Normal of the contact surface at the requested contact. Points from collidable B to collidable A.</param>
-            <param name="depth">Penetration depth at the requested contact.</param>
-            <param name="featureId">Feature id of the requested contact.
-            Feature ids represent which parts of the collidables formed the contact and can be used to track unique contacts across frames.</param>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetFeatureId(System.Int32)">
-            <summary>
-            Retrieves the feature id associated with a requested contact.
-            </summary>
-            <param name="contactIndex">Index of the contact to grab the feature id of.</param>
-            <returns>Feature id of the requested contact.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetDepth(BepuPhysics.CollisionDetection.NonconvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's depth.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's depth.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetNormal(BepuPhysics.CollisionDetection.NonconvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's normal. Points from collidable B to collidable A.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's normal.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetOffset(BepuPhysics.CollisionDetection.NonconvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's offset.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's offset.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.NonconvexContactManifold.GetFeatureId(BepuPhysics.CollisionDetection.NonconvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's feature id.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's feature id.</returns>
-        </member>
         <member name="T:BepuPhysics.CollisionDetection.ConvexContactManifold">
             <summary>
             Contains the data associated with a convex contact manifold.
@@ -3549,13 +3713,6 @@
             Surface normal shared by all contacts. Points from collidable B to collidable A.
             </summary>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetFeatureId(System.Int32)">
-            <summary>
-            Retrieves the feature id associated with a requested contact.
-            </summary>
-            <param name="contactIndex">Index of the contact to grab the feature id of.</param>
-            <returns>Feature id of the requested contact.</returns>
-        </member>
         <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetContact(System.Int32,System.Numerics.Vector3@,System.Numerics.Vector3@,System.Single@,System.Int32@)">
             <summary>
             Retrieves a copy of a contact's data.
@@ -3566,38 +3723,6 @@
             <param name="depth">Penetration depth at the requested contact.</param>
             <param name="featureId">Feature id of the requested contact.
             Feature ids represent which parts of the collidables formed the contact and can be used to track unique contacts across frames.</param>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetDepth(BepuPhysics.CollisionDetection.ConvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's depth.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's depth.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetNormal(BepuPhysics.CollisionDetection.ConvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact manifold's normal. Points from collidable B to collidable A. Convex manifolds share a single normal across all contacts.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to the contact manifold's normal.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetOffset(BepuPhysics.CollisionDetection.ConvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's offset.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's offset.</returns>
-        </member>
-        <member name="M:BepuPhysics.CollisionDetection.ConvexContactManifold.GetFeatureId(BepuPhysics.CollisionDetection.ConvexContactManifold@,System.Int32)">
-            <summary>
-            Pulls a reference to a contact's feature id.
-            </summary>
-            <param name="manifold">Manifold to pull a reference from.</param>
-            <param name="contactIndex">Contact to pull data from.</param>
-            <returns>Reference to a contact's feature id.</returns>
         </member>
         <member name="P:BepuPhysics.CollisionDetection.CCDContinuationIndex.Index">
             <summary>
@@ -3713,7 +3838,7 @@
             <param name="childIndexA">Index of the child of collidable A in the pair. If collidable A is not compound, then this is always 0.</param>
             <param name="childIndexB">Index of the child of collidable B in the pair. If collidable B is not compound, then this is always 0.</param>
             <param name="manifold">Set of contacts detected between the collidables.</param>
-            <returns>True if this manifold should be considered for constraint generation, false otherwise.</returns>
+            <returns>True if this manifold should be considered for the parent pair's contact manifold generation, false otherwise.</returns>
         </member>
         <member name="M:BepuPhysics.CollisionDetection.INarrowPhaseCallbacks.Dispose">
             <summary>
@@ -5003,11 +5128,6 @@
             </summary>
             <typeparam name="TDescription">Type of the description.</typeparam>
             <remarks>This and the other body-count aware interfaces exist to give the compiler a way to report errors when using Solver.Add with different body counts.</remarks>
-        </member>
-        <member name="M:BepuPhysics.Constraints.Inequality2Body1DOF.ApplyImpulse(BepuPhysics.Constraints.Projection2Body1DOF@,System.Numerics.Vector{System.Single}@,BepuPhysics.BodyVelocityWide@,BepuPhysics.BodyVelocityWide@)">
-            <summary>
-            Transforms an impulse from constraint space to world space, uses it to modify the cached world space velocities of the bodies.
-            </summary>
         </member>
         <member name="T:BepuPhysics.Constraints.LinearAxisLimit">
             <summary>
@@ -7559,15 +7679,17 @@
             <param name="b">Second tree to compare.</param>
             <returns>True if the two trees have the same nodes and node count, false otherwise.</returns>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.MergeLeafNodes(BepuUtilities.BoundingBox@,System.Int32,System.Int32,BepuUtilities.BoundingBox@)">
+        <member name="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)">
             <summary>
-            Merges a new leaf node with an existing leaf node, producing a new internal node referencing both leaves, and then returns the index of the leaf node.
+            Adds a leaf to the tree with the given bounding box and returns the index of the added leaf.
             </summary>
-            <param name="newLeafBounds">Bounding box of the leaf being added.</param>
-            <param name="parentIndex">Index of the parent node that the existing leaf belongs to.</param>
-            <param name="indexInParent">Index of the child wtihin the parent node that the existing leaf belongs to.</param>
-            <param name="merged">Bounding box holding both the new and existing leaves.</param>
-            <returns>Index of the leaf </returns>
+            <param name="bounds">Extents of the leaf bounds.</param>
+            <param name="pool">Resource pool to use if resizing is required.</param>
+            <returns>Index of the leaf allocated in the tree's leaf array.</returns>
+            <remarks>This performs no incremental refinement. When acting on the same tree, it's slightly cheaper than <see cref="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>, 
+            but the quality of the tree depends on insertion order.<para/>
+            Pathological insertion orders can result in a maximally imbalanced tree, quadratic insertion times across the full tree build, and query performance linear in the number of leaves.<para/>
+            This is typically best reserved for cases where the insertion order is known to be randomized or otherwise conducive to building decent trees.</remarks>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)">
             <summary>
@@ -7576,6 +7698,19 @@
             <param name="bounds">Extents of the leaf bounds.</param>
             <param name="pool">Resource pool to use if resizing is required.</param>
             <returns>Index of the leaf allocated in the tree's leaf array.</returns>
+            <remarks>Performs incrementally refining tree rotations down along the insertion path, unlike <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
+            For a given tree, this is slightly slower than <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/> and slightly faster than <see cref="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
+            Trees built with repeated insertions of this kind tend to have decent quality, but slightly worse than <see cref="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)">
+            <summary>
+            Adds a leaf to the tree with the given bounding box and returns the index of the added leaf.
+            </summary>
+            <param name="bounds">Extents of the leaf bounds.</param>
+            <param name="pool">Resource pool to use if resizing is required.</param>
+            <returns>Index of the leaf allocated in the tree's leaf array.</returns>
+            <remarks>Performs incrementally refining tree rotations up along the insertion path, unlike <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
+            Trees built with repeated insertions of this kind tend to have slightly better quality than <see cref="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>, but it is also slightly more expensive.</remarks>
         </member>
         <member name="T:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext">
             <summary>
@@ -7621,6 +7756,12 @@
             The target number of tasks that would be used for the root node. Later nodes will tend to target smaller numbers of tasks on the assumption that other parallel nodes will provide enough work to fill in the gaps.
             </summary>
         </member>
+        <member name="F:BepuPhysics.Trees.Tree.JobFilterTagHeader">
+            <summary>
+            Random value stored in the upper 32 bits of the job tag submitted for internal multithreading operations.
+            </summary>
+            <remarks>Other systems using the same task stack may want to use their own filtering approaches. By using a very specific and unique signature, those other systems are less likely to accidentally collide.</remarks>
+        </member>
         <member name="F:BepuPhysics.Trees.Tree.CentroidPrepassTaskContext.PrepassWorkers">
             <summary>
             Stores per-worker prepass bounds accumulated over multiple tasks. If there are less tasks than workers, then only the lower contiguous region of these bounds are used.
@@ -7628,9 +7769,9 @@
             Note that the allocation occurs on the loop dispatching thread: the workers that help with the loop do not have to allocate anything themselves.
             </summary>
         </member>
-        <member name="F:BepuPhysics.Trees.Tree.CentroidPrepassTaskContext.Subtrees">
+        <member name="F:BepuPhysics.Trees.Tree.CentroidPrepassTaskContext.Bounds">
             <summary>
-            Buffer containing all subtrees in the node.
+            Buffer containing the bounding boxes of all subtrees in the node.
             </summary>
         </member>
         <member name="F:BepuPhysics.Trees.Tree.BinSubtreesTaskContext.BinSubtreesWorkers">
@@ -7682,7 +7823,7 @@
             Buffer containing bin indices for all subtrees in the node (encoded with one byte per subtree).
             </summary>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.BinnedBuilderInternal(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.Buffer{System.Byte},BepuUtilities.IThreadDispatcher,BepuUtilities.TestLinkedTaskStack.LinkedTaskStack*,System.Int32,BepuUtilities.Memory.BufferPool,System.Int32,System.Int32,System.Single,System.Int32)">
+        <member name="M:BepuPhysics.Trees.Tree.BinnedBuilderInternal(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.Buffer{System.Byte},BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32,System.Int32,BepuUtilities.Memory.BufferPool,System.Int32,System.Int32,System.Single,System.Int32,System.Boolean)">
             <summary>
             Runs a binned build across the input <see cref="T:BepuPhysics.Trees.NodeChild"/> buffer.
             </summary>
@@ -7694,20 +7835,27 @@
             Metanodes, like nodes, are created in a depth first ordering with respect to the input buffer.
             Metanodes are in the same order and in the same slots; they simply contain data about nodes that most traversals don't need to know about.</param>
             <param name="leaves">Buffer holding the leaf references created by the build process.<para/>
-            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.</param>
+            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.
+            If a default-valued (unallocated) buffer is passed in, the binned builder will ignore leaves.</param>
             <param name="binIndices">Buffer to be used for caching bin indices during execution. If subtreesPong is defined, binIndices must also be defined, and vice versa.</param>
             <param name="dispatcher">Thread dispatcher used to accelerate the build process.</param>
-            <param name="taskStackPointer">Task stack used to accelerate the build process. Can be null; one will be created if not provided.</param>
-            <param name="workerCount">Number of workers to be used in the builder.</param>
+            <param name="taskStackPointer">Task stack being used to run the build process, if any.
+            If provided, the builder assumes the refinement is running within an existing multithreaded dispatch and will not call IThreadDispatcher.DispatchWorkers.
+            If null, the builder will create its own task stack and call IThreadDispatcher.DispatchWorkers internally.</param>
+            <param name="workerIndex">Index of the current worker.</param>
+            <param name="workerCount">Number of workers that may be used in the builder. This should span all worker indices that may contribute to the build process even only a subset are expected to be used at any one time.</param>
+            <param name="targetTaskCount">Number of tasks to try to use in the builder.</param>
             <param name="pool">Buffer pool used to preallocate temporary resources for building.</param>
             <param name="minimumBinCount">Minimum number of bins the builder should use per node.</param>
             <param name="maximumBinCount">Maximum number of bins the builder should use per node. Must be no higher than 255.</param>
             <param name="leafToBinMultiplier">Multiplier to apply to the subtree count within a node to decide the bin count. Resulting value will then be clamped by the minimum/maximum bin counts.</param>
             <param name="microsweepThreshold">Threshold at or under which the binned builder resorts to local counting sort sweeps.</param>
+            <param name="deterministic">Whether to force determinism at a slightly higher cost when using internally multithreaded execution.<para/>
+            If the build is single threaded, it is already deterministic and this flag has no effect.</param>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.BinnedBuilder(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.BufferPool,System.Int32,System.Int32,System.Int32,System.Single,System.Int32)">
+        <member name="M:BepuPhysics.Trees.Tree.BinnedBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Metanode},BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Leaf},BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Boolean)">
             <summary>
-            Runs a binned build across the subtrees buffer.
+            Runs a multithreaded binned build across the subtrees buffer.
             </summary>
             <param name="subtrees">Subtrees (either leaves or nodes) to run the builder over. The builder may make in-place modifications to the input buffer; the input buffer should not be assumed to be in a valid state after the builder runs.</param>
             <param name="nodes">Buffer holding the nodes created by the build process.<para/>
@@ -7716,33 +7864,57 @@
             Metanodes, like nodes, are created in a depth first ordering with respect to the input buffer.
             Metanodes are in the same order and in the same slots; they simply contain data about nodes that most traversals don't need to know about.</param>
             <param name="leaves">Buffer holding the leaf references created by the build process.<para/>
-            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.</param>
-            <param name="pool">Buffer pool used to preallocate a pingpong buffer if the number of subtrees exceeds maximumSubtreeStackAllocationCount. If null, stack allocation or a slower in-place partitioning will be used.</param>
+            The indices written by the build process are those defined in the inputs; any <see cref="F:BepuPhysics.Trees.NodeChild.Index"/> that is negative is encoded according to <see cref="M:BepuPhysics.Trees.Tree.Encode(System.Int32)"/> and points into the leaf buffer.
+            If a default-valued (unallocated) buffer is passed in, the binned builder will ignore leaves.</param>
+            <param name="pool">Buffer pool used to preallocate a pingpong buffer if the number of subtrees exceeds maximumSubtreeStackAllocationCount. If null, stack allocation or a slower in-place partitioning will be used.
+            <param name="dispatcher">Dispatcher used to multithread the execution of the build. If the dispatcher is not null, pool must also not be null.</param>
+            <param name="taskStackPointer">Task stack being used to run the build process, if any.
+            If provided, the builder assumes the refinement is running within an existing multithreaded dispatch and will not call IThreadDispatcher.DispatchWorkers.
+            If null, the builder will create its own task stack and call IThreadDispatcher.DispatchWorkers internally.</param>
+            <para/>A pool must be provided if a thread dispatcher is given.</param>
+            <param name="workerIndex">Index of the currently executing worker. If not running within a dispatch, 0 is valid.</param>
+            <param name="workerCount">Number of workers that may be used in the builder. This should span all worker indices that may contribute to the build process even only a subset are expected to be used at any one time.
+            If negative, the dispatcher's thread count will be used.</param>
+            <param name="targetTaskCount">Number of tasks to try to use in the builder. If negative, the dispatcher's thread count will be used.</param>
             <param name="maximumSubtreeStackAllocationCount">Maximum number of subtrees to try putting on the stack for the binned builder's pong buffers.<para/>
             Subtree counts larger than this threshold will either resort to a buffer pool allocation (if available) or slower in-place partition operations.</param>
             <param name="minimumBinCount">Minimum number of bins the builder should use per node.</param>
             <param name="maximumBinCount">Maximum number of bins the builder should use per node.</param>
             <param name="leafToBinMultiplier">Multiplier to apply to the subtree count within a node to decide the bin count. Resulting value will then be clamped by the minimum/maximum bin counts.</param>
             <param name="microsweepThreshold">Threshold at or under which the binned builder resorts to local counting sort sweeps.</param>
+            <param name="deterministic">Whether to force determinism at a slightly higher cost when using internally multithreaded execution.<para/>
+            If the build is single threaded, it is already deterministic and this flag has no effect.</param>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.TrySwapNodesThreadSafe(System.Int32@,System.Int32@)">
+        <member name="M:BepuPhysics.Trees.Tree.BinnedBuild(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.NodeChild},BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Boolean)">
             <summary>
-            Attempts to swap two nodes. Aborts without changing memory if the swap is contested by another thread.
+            Runs a binned build across the subtrees buffer.
             </summary>
-            <remarks>Uses Node.RefineFlag as a lock-keeping mechanism. All refine flags should be cleared to 0 before a multithreaded processing stage that performs swaps.</remarks>
-            <param name="aIndex">First node of the swap pair.</param>
-            <param name="bIndex">Second node of the swap pair.</param>
-            <returns>True if the nodes were swapped, false if the swap was contested.</returns>
+            <param name="subtrees">Subtrees (either leaves or nodes) to run the builder over. The builder may make in-place modifications to the input buffer; the input buffer should not be assumed to be in a valid state after the builder runs.</param>
+            <param name="pool">Buffer pool used to preallocate a pingpong buffer if the number of subtrees exceeds maximumSubtreeStackAllocationCount. If null, stack allocation or a slower in-place partitioning will be used.
+            <para/>A pool must be provided if a thread dispatcher is given.</param>
+            <param name="dispatcher">Dispatcher used to multithread the execution of the build. If the dispatcher is not null, pool must also not be null.</param>
+            <param name="taskStackPointer">Task stack being used to run the build process, if any.
+            If provided, the builder assumes the refinement is running within an existing multithreaded dispatch and will not call IThreadDispatcher.DispatchWorkers.
+            If null, the builder will create its own task stack and call IThreadDispatcher.DispatchWorkers internally.</param> 
+            <param name="workerIndex">Index of the currently executing worker. If not running within a dispatch, 0 is valid.</param>
+            <param name="workerCount">Number of workers that may be used in the builder. This should span all worker indices that may contribute to the build process even only a subset are expected to be used at any one time.
+            If negative, the dispatcher's thread count will be used.</param>
+            <param name="targetTaskCount">Number of tasks to try to use in the builder. If negative, the dispatcher's thread count will be used.</param>
+            <param name="maximumSubtreeStackAllocationCount">Maximum number of subtrees to try putting on the stack for the binned builder's pong buffers.<para/>
+            Subtree counts larger than this threshold will either resort to a buffer pool allocation (if available) or slower in-place partition operations.</param>
+            <param name="minimumBinCount">Minimum number of bins the builder should use per node.</param>
+            <param name="maximumBinCount">Maximum number of bins the builder should use per node.</param>
+            <param name="leafToBinMultiplier">Multiplier to apply to the subtree count within a node to decide the bin count. Resulting value will then be clamped by the minimum/maximum bin counts.</param>
+            <param name="microsweepThreshold">Threshold at or under which the binned builder resorts to local counting sort sweeps.</param>
+            <param name="deterministic">Whether to force determinism at a slightly higher cost when using internally multithreaded execution.<para/>
+            If the build is single threaded, it is already deterministic and this flag has no effect.</param>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.IncrementalCacheOptimizeThreadSafe(System.Int32)">
+        <member name="M:BepuPhysics.Trees.Tree.ComputeCacheOptimalLocation(System.Int32)">
             <summary>
-            Moves the children if the specified node into the correct relative position in memory.
-            Takes care to avoid contested moves in multithreaded contexts. May not successfully
-            complete all desired moves if contested.
+            Computes the index where the given node would be located if the tree were in depth first traversal order.
             </summary>
-            <param name="nodeIndex">Node whose children should be optimized.</param>
-            <returns>True if no other threads contested the optimization or if the node is already optimized, otherwise false.
-            Will return true even if not all nodes are optimized if the reason was a target index outside of the node list bounds.</returns>
+            <param name="nodeIndex">Node index to find the location for in a depth first traversal order.</param>
+            <returns>Target index of the node if the tree were in depth first traversal order.</returns>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.CacheOptimize(System.Int32)">
             <summary>
@@ -7750,6 +7922,31 @@
             Requires that the targeted node is already at the global optimum position.
             </summary>
             <param name="nodeIndex">Node to begin the optimization process at.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.CacheOptimizeLimitedSubtree(System.Int32,System.Int32)">
+            <summary>
+            Starts a cache optimization process at the target node index and the nodeOptimizationCount closest nodes in the tree.
+            </summary>
+            <param name="nodeIndex">Node index to start the optimization process at.</param>
+            <param name="nodeOptimizationCount">Number of nodes to move.</param>
+            <remarks>This optimizer will move the targeted node index to the globally optimal location if necessary.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.CacheOptimizeRegion(System.Int32,System.Int32)">
+            <summary>
+            Puts all nodes starting from the given node index into depth first traversal order.
+            If the count is larger than the number of nodes beneath the starting node, the optimization will stop early.
+            </summary>
+            <param name="startingNodeIndex">Node index to start the optimization at.</param>
+            <param name="targetCount">Number of nodes to try to optimize.</param>
+            <returns>Number of nodes optimized.</returns>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetOverlaps``1(BepuPhysics.Trees.Tree@,``0@)">
+            <summary>
+            Gets pairs of leaf indices with bounding boxes which overlap.
+            </summary>
+            <typeparam name="TOverlapHandler">Type of the <see cref="T:BepuPhysics.Trees.IOverlapHandler"/> implementation to report pairs to.</typeparam>
+            <param name="treeB">Tree to test this tree against.</param>
+            <param name="overlapHandler">Handler to report pairs to.</param>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.MultithreadedIntertreeTest`1.PrepareJobs(BepuPhysics.Trees.Tree@,BepuPhysics.Trees.Tree@,`0[],System.Int32)">
             <summary>
@@ -7774,6 +7971,67 @@
             Caches input and output for the multithreaded execution of a tree's refit and refinement operations.
             </summary>
         </member>
+        <member name="M:BepuPhysics.Trees.Tree.TryPushChildForRootRefinement(System.Int32,BepuUtilities.Memory.Buffer{System.Numerics.Vector{System.Int32}},System.Int32,System.Int32,BepuPhysics.Trees.NodeChild@,BepuUtilities.Collections.QuickList{System.ValueTuple{System.Int32,System.Int32}}@,BepuUtilities.Collections.QuickList{BepuPhysics.Trees.NodeChild}@)">
+            <summary>
+            Checks if a child should be a subtree in the root refinement. If so, it's added to the list. Otherwise, it's pushed onto the stack.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.TryPushChildForRootRefinement2(System.Int32,System.Int32,BepuUtilities.Memory.Buffer{System.Numerics.Vector{System.Int32}},BepuPhysics.Trees.NodeChild@,BepuPhysics.Trees.Tree.BinaryHeap@,BepuUtilities.Collections.QuickList{BepuPhysics.Trees.NodeChild}@)">
+            <summary>
+            Checks if a child should be a subtree in the root refinement. If so, it's added to the list. Otherwise, it's pushed onto the stack.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refine2(System.Int32,System.Int32@,System.Int32,System.Int32,BepuUtilities.Memory.BufferPool,System.Boolean)">
+            <summary>
+            Incrementally refines a subset of the tree by running a binned builder over subtrees.
+            </summary>
+            <param name="rootRefinementSize">Size of the refinement run on nodes near the root. Nonpositive values will cause the root refinement to be skipped.</param>
+            <param name="subtreeRefinementStartIndex">Index used to distribute subtree refinements over multiple executions.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to execute.</param>
+            <param name="subtreeRefinementSize">Target size of subtree refinements. The actual size of refinement will usually be larger or smaller.</param>
+            <param name="pool">Pool used for ephemeral allocations during the refinement.</param> 
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+            <remarks>Nodes will not be refit.</remarks>
+        </member>
+        <member name="F:BepuPhysics.Trees.Tree.RefinementContext.Tree">
+            <remarks>
+            This is a *copy* of the original tree that spawned this refinement. Refinements do not modify the memory stored at the level of the Tree, only memory *pointed* to by the tree.
+            </remarks>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refine2(System.Int32,System.Int32@,System.Int32,System.Int32,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Boolean,System.Boolean)">
+            <summary>
+            Incrementally refines a subset of the tree by running a binned builder over subtrees.
+            </summary>
+            <param name="rootRefinementSize">Size of the refinement run on nodes near the root. Nonpositive values will cause the root refinement to be skipped.</param>
+            <param name="subtreeRefinementStartIndex">Index used to distribute subtree refinements over multiple executions.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to execute.</param>
+            <param name="subtreeRefinementSize">Target size of subtree refinements. The actual size of refinement will usually be larger or smaller.</param>
+            <param name="pool">Pool used for ephemeral allocations during the refinement.</param>
+            <param name="threadDispatcher">Thread dispatcher used during the refinement.</param>
+            <param name="deterministic">Whether to force determinism at a slightly higher cost when using internally multithreaded execution for an individual refinement operation.<para/>
+            If the refine is single threaded, it is already deterministic and this flag has no effect.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+            <remarks>Nodes will not be refit.</remarks>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refine2(System.Int32,System.Int32@,System.Int32,System.Int32,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32,System.Boolean,System.Boolean)">
+            <summary>
+            Incrementally refines a subset of the tree by running a binned builder over subtrees.
+            <para/>Pushes tasks into the provided <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>. Does not dispatch threads internally; this is intended to be used as a part of a caller-managed dispatch.
+            </summary>
+            <param name="rootRefinementSize">Size of the refinement run on nodes near the root. Nonpositive values will cause the root refinement to be skipped.</param>
+            <param name="subtreeRefinementStartIndex">Index used to distribute subtree refinements over multiple executions.</param>
+            <param name="subtreeRefinementCount">Number of subtree refinements to execute.</param>
+            <param name="subtreeRefinementSize">Target size of subtree refinements. The actual size of refinement will usually be larger or smaller.</param>
+            <param name="pool">Pool used for ephemeral allocations during the refinement.</param>
+            <param name="threadDispatcher">Thread dispatcher used during the refinement.</param>
+            <param name="deterministic">Whether to force determinism at a slightly higher cost when using internally multithreaded execution for an individual refinement operation.<para/>
+            If the refine is single threaded, it is already deterministic and this flag has no effect.</param>
+            <param name="taskStack"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that the refine operation will push tasks onto as needed.</param>
+            <param name="workerIndex">Index of the worker calling the function.</param>
+            <param name="targetTaskCount">Number of tasks the refinement should try to create during execution. If negative, uses <see cref="P:BepuUtilities.IThreadDispatcher.ThreadCount"/>.</param>
+            <param name="usePriorityQueue">True if the root refinement should use a priority queue during subtree collection to find larger nodes, false if it should try to collect a more balanced tree.</param>
+            <remarks>Nodes will not be refit.</remarks>
+        </member>
         <member name="M:BepuPhysics.Trees.Tree.RefitForNodeBoundsChange(System.Int32)">
             <summary>
             Refits the bounding box of every parent of the node recursively to the root.
@@ -7790,6 +8048,77 @@
             Updates the bounding boxes of all internal nodes in the tree.
             </summary>
         </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher)">
+            <summary>
+            Refits all bounding boxes in the tree using multiple threads.
+            </summary>
+            <param name="pool">Pool used for main thread temporary allocations during execution.</param>
+            <param name="dispatcher">Dispatcher used during execution.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32)">
+            <summary>
+            Refits all bounding boxes in the tree using multiple threads.<para/>Pushes tasks into the provided <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>. Does not dispatch threads internally; this is intended to be used as a part of a caller-managed dispatch.
+            </summary>
+            <param name="pool">Pool used for allocations during execution.</param>
+            <param name="dispatcher">Dispatcher used during execution.</param>
+            <param name="taskStack"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that the refit operation will push tasks onto as needed.</param>
+            <param name="workerIndex">Index of the worker calling the function.</param>
+            <param name="targetTaskCount">Number of tasks the refit should try to create during execution.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2WithCacheOptimization(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node})">
+            <summary>
+            Updates the bounding boxes of all internal nodes in the tree. The refit is based on the provided sourceNodes, and 
+            the results are written into the tree's current <see cref="F:BepuPhysics.Trees.Tree.Nodes"/>, <see cref="F:BepuPhysics.Trees.Tree.Metanodes"/>, and <see cref="F:BepuPhysics.Trees.Tree.Leaves"/> buffers.
+            The nodes and metanodes will be in depth traversal order.
+            The input source buffer is not modified.
+            </summary>
+            <param name="sourceNodes">Nodes to base the refit on.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2WithCacheOptimization(BepuUtilities.Memory.BufferPool,System.Boolean)">
+            <summary>
+            Updates the bounding boxes of all internal nodes in the tree. Reallocates the nodes and metanodes and writes the refit tree into them in depth first traversal order.
+            The tree instance is modified to point to the new nodes and metanodes.
+            </summary>
+            <param name="pool">Pool to allocate from. If disposeOriginals is true, this must be the same pool from which the <see cref="F:BepuPhysics.Trees.Tree.Nodes"/> buffer was allocated from.</param>
+            <param name="disposeOriginalNodes">Whether to dispose of the original nodes buffer. If false, it's up to the caller to dispose of it appropriately.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2WithCacheOptimization(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Boolean)">
+            <summary>
+            Refits all bounding boxes in the tree using multiple threads. Reallocates the nodes and metanodes and writes the refit tree into them in depth first traversal order.
+            The tree instance is modified to point to the new nodes and metanodes.
+            </summary>
+            <param name="pool">Pool used for main thread temporary allocations during execution.</param>
+            <param name="dispatcher">Dispatcher used during execution.</param>
+            <param name="disposeOriginalNodes">Whether to dispose of the original nodes buffer. If false, it's up to the caller to dispose of it appropriately.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2WithCacheOptimization(BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Refits all bounding boxes in the tree using multiple threads. Reallocates the nodes and writes the refit tree into them in depth first traversal order.
+            The tree instance is modified to point to the new nodes.
+            <para/>Pushes tasks into the provided <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>. Does not dispatch threads internally; this is intended to be used as a part of a caller-managed dispatch.
+            </summary>
+            <param name="pool">Pool used for allocations during execution.</param>
+            <param name="dispatcher">Dispatcher used during execution.</param>
+            <param name="taskStack"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that the refit operation will push tasks onto as needed.</param>
+            <param name="workerIndex">Index of the worker calling the function.</param>
+            <param name="targetTaskCount">Number of tasks the refit should try to create during execution. If negative, uses <see cref="P:BepuUtilities.IThreadDispatcher.ThreadCount"/>.</param>
+            <param name="disposeOriginalNodes">Whether to dispose of the original nodes buffer. If false, it's up to the caller to dispose of it appropriately.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Refit2WithCacheOptimization(BepuUtilities.Memory.Buffer{BepuPhysics.Trees.Node},BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32)">
+            <summary>
+            Updates the bounding boxes of all internal nodes in the tree using multiple threads. The refit is based on the provided sourceNodes, and 
+            the results are written into the tree's current <see cref="F:BepuPhysics.Trees.Tree.Nodes"/>, <see cref="F:BepuPhysics.Trees.Tree.Metanodes"/>, and <see cref="F:BepuPhysics.Trees.Tree.Leaves"/> buffers.
+            The nodes and metanodes will be in depth traversal order.
+            The input source buffer is not modified.
+            <para/>Pushes tasks into the provided <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>. Does not dispatch threads internally; this is intended to be used as a part of a caller-managed dispatch.
+            </summary>
+            <param name="sourceNodes">Nodes to base the refit on.</param>
+            <param name="pool">Pool used for allocations during execution.</param>
+            <param name="dispatcher">Dispatcher used during execution.</param>
+            <param name="taskStack"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that the refit operation will push tasks onto as needed.</param>
+            <param name="workerIndex">Index of the worker calling the function.</param>
+            <param name="targetTaskCount">Number of tasks the refit should try to create during execution. If negative, uses <see cref="P:BepuUtilities.IThreadDispatcher.ThreadCount"/>.</param>
+        </member>
         <member name="M:BepuPhysics.Trees.Tree.RemoveAt(System.Int32)">
             <summary>
             Removes a leaf at an index. If the index is not at the end of the leaf list, the last leaf is swapped into the removed location.
@@ -7797,6 +8126,34 @@
             <param name="leafIndex">Index of the leaf to remove.</param>
             <returns>Former index of the leaf that was moved into the removed leaf's slot, if any.
             If leafIndex pointed at the last slot in the list, then this returns -1 since no leaf was moved.</returns>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetSelfOverlaps2``1(``0@)">
+            <summary>
+            Reports all bounding box overlaps between leaves in the tree to the given <typeparamref name="TOverlapHandler"/>.
+            </summary>
+            <param name="results">Handler to report results to.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetSelfOverlaps2``1(``0@,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,System.Object)">
+            <summary>
+            Reports all bounding box overlaps between leaves in the tree to the given <typeparamref name="TOverlapHandler"/>. Uses the thread dispatcher to parallelize overlap testing.
+            </summary>
+            <param name="results">Handler to report results to.</param>
+            <param name="pool">Pool used for ephemeral allocations.</param>
+            <param name="threadDispatcher">Thread dispatcher used during the overlap testing.</param>
+            <param name="managedContext">Managed context to provide to the overlap handler, if any.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetSelfOverlaps2``1(``0@,BepuUtilities.Memory.BufferPool,BepuUtilities.IThreadDispatcher,BepuUtilities.TaskScheduling.TaskStack*,System.Int32,System.Int32)">
+            <summary>
+            Reports all bounding box overlaps between leaves in the tree to the given <typeparamref name="TOverlapHandler"/>.
+            <para/>Pushes tasks into the provided <see cref="T:BepuUtilities.TaskScheduling.TaskStack"/>. Does not dispatch threads internally; this is intended to be used as a part of a caller-managed dispatch.
+            </summary>
+            <param name="results">Handler to report results to.</param>
+            <param name="pool">Pool used for ephemeral allocations.</param>
+            <param name="threadDispatcher">Thread dispatcher used during the overlap test.</param>
+            <param name="taskStack"><see cref="T:BepuUtilities.TaskScheduling.TaskStack"/> that the overlap test will push tasks onto as needed.</param>
+            <param name="workerIndex">Index of the worker calling the function.</param>
+            <param name="targetTaskCount">Number of tasks the overlap testing should try to create during execution. If negative, uses <see cref="P:BepuUtilities.IThreadDispatcher.ThreadCount"/>.</param>
+            <remarks>This does not dispatch workers on the <see cref="T:BepuUtilities.IThreadDispatcher"/> directly. If the overlap handler requires managed context, that should be provided by whatever dispatched the workers.</remarks>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.MultithreadedSelfTest`1.PrepareJobs(BepuPhysics.Trees.Tree@,`0[],System.Int32)">
             <summary>
@@ -7816,6 +8173,32 @@
             Executes a single worker of the multithreaded self test.
             </summary>
             <param name="workerIndex">Index of the worker executing this set of tests.</param>
+        </member>
+        <member name="T:BepuPhysics.Trees.IOverlapHandler">
+            <summary>
+            Overlap callback for tree overlap queries.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.IOverlapHandler.Handle(System.Int32,System.Int32)">
+            <summary>
+            Handles an overlap between leaves.
+            </summary>
+            <param name="indexA">Index of the first leaf in the overlap.</param>
+            <param name="indexB">Index of the second leaf in the overlap.</param>
+        </member>
+        <member name="T:BepuPhysics.Trees.IThreadedOverlapHandler">
+            <summary>
+            Overlap callback for tree overlap queries. Used in multithreaded contexts.
+            </summary>
+        </member>
+        <member name="M:BepuPhysics.Trees.IThreadedOverlapHandler.Handle(System.Int32,System.Int32,System.Int32,System.Object)">
+            <summary>
+            Handles an overlap between leaves.
+            </summary>
+            <param name="indexA">Index of the first leaf in the overlap.</param>
+            <param name="indexB">Index of the second leaf in the overlap.</param>
+            <param name="workerIndex">Index of the worker reporting the overlap.</param>
+            <param name="managedContext">Managed context provided by the multithreaded dispatch.</param>
         </member>
     </members>
 </doc>

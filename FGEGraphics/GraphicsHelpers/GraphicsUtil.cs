@@ -33,6 +33,7 @@ namespace FGEGraphics.GraphicsHelpers
         public static void CheckError(string callerLocationLabel, object context = null)
         {
             ErrorCode ec = GL.GetError();
+            //OutputType.DEBUG.Output($"Doing error check {callerLocationLabel} with context {context} yield {ec}");
             while (ec != ErrorCode.NoError)
             {
                 string contextText = context is null ? "" : context + ": ";
