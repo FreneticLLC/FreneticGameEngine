@@ -58,7 +58,7 @@ namespace FGECore.CoreSystems
         /// <summary>Add and activate a joint into this engine.</summary>
         public void AddJoint(GenericBaseJoint joint)
         {
-            if (joint.JointID > 0)
+            if (joint.Added)
             {
                 throw new InvalidOperationException("Cannot add a joint that is already added to an engine.");
             }
@@ -74,6 +74,7 @@ namespace FGECore.CoreSystems
             {
                 NonPhysicalJoints.Add(nonPhysJoint);
             }
+            joint.Added = true;
             joint.Enable();
             joint.EntityOne.Joints.Add(joint);
             joint.EntityTwo.Joints.Add(joint);
@@ -93,15 +94,15 @@ namespace FGECore.CoreSystems
         /// <summary>Remove and deactivate a joint from this engine.</summary>
         public void RemoveJoint(GenericBaseJoint joint)
         {
-            if (joint.JointID <= 0 || !Joints.Remove(joint.JointID))
+            if (!joint.Added || !Joints.Remove(joint.JointID))
             {
                 throw new InvalidOperationException("Cannot remove a joint that is not added to an engine.");
             }
-            joint.JointID = 0;
             if (joint is NonPhysicalJointBase nonPhysJoint)
             {
                 NonPhysicalJoints.Remove(nonPhysJoint);
             }
+            joint.Added = false;
             joint.Disable();
             joint.EntityOne.Joints.Remove(joint);
             joint.EntityTwo.Joints.Remove(joint);

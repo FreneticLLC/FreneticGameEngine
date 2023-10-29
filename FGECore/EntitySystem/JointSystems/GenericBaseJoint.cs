@@ -30,6 +30,9 @@ namespace FGECore.EntitySystem.JointSystems
         /// <summary>A unique ID for this specific joint.</summary>
         public long JointID;
 
+        /// <summary>If true, this joint has been added to the world.</summary>
+        public bool Added = false;
+
         /// <summary>Called to enable the joint however necessary.</summary>
         public abstract void Enable();
 
@@ -51,7 +54,7 @@ namespace FGECore.EntitySystem.JointSystems
         /// <summary>Returns whether this joint is the same as other.</summary>
         public bool Equals(GenericBaseJoint other)
         {
-            if (JointID == 0)
+            if (!Added)
             {
                 return ReferenceEquals(this, other);
             }
