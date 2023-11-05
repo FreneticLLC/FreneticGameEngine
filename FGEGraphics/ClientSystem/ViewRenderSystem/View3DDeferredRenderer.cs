@@ -1105,6 +1105,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.ReadBuffer(ReadBufferMode.None);
             float exp = FindExp(Internal.DynamicExposureResult);
             exp = Math.Clamp(exp, 0.4f, 5);
+            exp = (float)Math.Sqrt(exp);
             exp = 1f / exp;
             float stepUp = (float)Engine.Delta * 0.005f * Engine.Deferred_DynamicExposureRate;
             float stepDown = stepUp * 5;
