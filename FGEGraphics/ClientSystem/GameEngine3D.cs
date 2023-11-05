@@ -60,6 +60,9 @@ public class GameEngine3D : GameEngineBase
     /// <summary>Whether to enable deferred mode Dynamic Exposure.</summary>
     public bool Deferred_DynamicExposure = true;
 
+    /// <summary>Rate multiplier for dynamic exposure. 1 is normal, 10 is fast, 0.1 is slow.</summary>
+    public float Deferred_DynamicExposureRate = 1;
+
     /// <summary>Whether deferred mode should use SSAO effects.</summary>
     public bool Deferred_SSAO = true;
 

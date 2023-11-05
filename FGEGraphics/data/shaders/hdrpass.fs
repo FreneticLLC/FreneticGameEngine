@@ -28,9 +28,9 @@ void main()
 		for (float y = 0.0; y < (1.0 / SPREAD); y += jump.y)
 		{
 			vec3 col = texture(lighttex, f_scrpos + vec2(x, y)).xyz;
-			tcur += max(col.x, max(col.y, col.z));
+			tcur += col.x + col.y + col.z;
 			px++;
 		}
 	}
-	color = tcur / px;
+	color = tcur / (px * 3);
 }

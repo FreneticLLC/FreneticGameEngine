@@ -930,10 +930,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
     /// <summary>The actual internal transparency render method.</summary>
     public void RenderTranspInt(ref int lightc, Frustum frustumToUse)
     {
-        if (frustumToUse == null)
-        {
-            frustumToUse = State.CameraFrustum;
-        }
+        frustumToUse ??= State.CameraFrustum;
         if (Engine.Deferred_TransparentLights)
         {
             State.RenderLights = true;
@@ -1107,12 +1104,12 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             GL.ReadBuffer(ReadBufferMode.None);
             float exp = FindExp(Internal.DynamicExposureResult);
-            exp = Math.Max(Math.Min(exp, 5.0f), 0.4f);
-            exp = 1.0f / exp;
-            float stepUp = (float)Engine.Delta * 0.05f;
-            float stepDown = stepUp * 5.0f;
+            exp = Math.Clamp(exp, 0.4f, 5);
+            exp = 1f / exp;
+            float stepUp = (float)Engine.Delta * 0.005f * Engine.Deferred_DynamicExposureRate;
+            float stepDown = stepUp * 5;
             float relative = Math.Abs(State.CurrentExposure - exp);
-            float modder = relative * 3f;
+            float modder = relative * 3;
             stepUp *= modder;
             stepDown *= modder;
             if (exp > State.CurrentExposure + stepUp)
@@ -1143,6 +1140,6 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         {
             total += inp[i];
         }
-        return total / (float)inp.Length;
+        return total / inp.Length;
     }
 }
