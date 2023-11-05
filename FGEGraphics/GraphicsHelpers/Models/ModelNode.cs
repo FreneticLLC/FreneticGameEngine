@@ -12,24 +12,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.GraphicsHelpers.Models
+namespace FGEGraphics.GraphicsHelpers.Models;
+
+/// <summary>Represents a node in a model.</summary>
+public class ModelNode
 {
-    /// <summary>Represents a node in a model.</summary>
-    public class ModelNode
-    {
-        /// <summary>The parent node.</summary>
-        public ModelNode Parent = null;
+    /// <summary>The parent node.</summary>
+    public ModelNode Parent = null;
 
-        /// <summary>All children nodes.</summary>
-        public List<ModelNode> Children = new();
+    /// <summary>All children nodes.</summary>
+    public List<ModelNode> Children = new();
 
-        /// <summary>All relevant bones.</summary>
-        public List<ModelBone> Bones = new();
+    /// <summary>All relevant bones.</summary>
+    public List<ModelBone> Bones = new();
 
-        /// <summary>The mode ID.</summary>
-        public byte Mode;
+    /// <summary>The mode ID.</summary>
+    public byte Mode;
 
-        /// <summary>The name of the node.</summary>
-        public string Name;
-    }
+    /// <summary>The name of the node.</summary>
+    public string Name;
 }

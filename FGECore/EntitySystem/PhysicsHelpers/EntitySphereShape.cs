@@ -16,30 +16,29 @@ using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 
-namespace FGECore.EntitySystem.PhysicsHelpers
+namespace FGECore.EntitySystem.PhysicsHelpers;
+
+/// <summary>A sphere shape for an entity.</summary>
+public class EntitySphereShape : EntityShapeHelper
 {
-    /// <summary>A sphere shape for an entity.</summary>
-    public class EntitySphereShape : EntityShapeHelper
+    /// <summary>Constructs a new <see cref="EntitySphereShape"/> of the specified size.</summary>
+    public EntitySphereShape(float size, PhysicsSpace space) : base(space)
     {
-        /// <summary>Constructs a new <see cref="EntitySphereShape"/> of the specified size.</summary>
-        public EntitySphereShape(float size, PhysicsSpace space) : base(space)
-        {
-            BepuShape = new Sphere(size);
-        }
+        BepuShape = new Sphere(size);
+    }
 
-        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
-        public override EntitySphereShape Register()
-        {
-            EntitySphereShape dup = MemberwiseClone() as EntitySphereShape;
-            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Sphere)BepuShape);
-            return dup;
-        }
+    /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+    public override EntitySphereShape Register()
+    {
+        EntitySphereShape dup = MemberwiseClone() as EntitySphereShape;
+        dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Sphere)BepuShape);
+        return dup;
+    }
 
-        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
-        public override string ToString()
-        {
-            Sphere sphere = (Sphere)BepuShape;
-            return $"{nameof(EntitySphereShape)}({sphere.Radius})";
-        }
+    /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+    public override string ToString()
+    {
+        Sphere sphere = (Sphere)BepuShape;
+        return $"{nameof(EntitySphereShape)}({sphere.Radius})";
     }
 }

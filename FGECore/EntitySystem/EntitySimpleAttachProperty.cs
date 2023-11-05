@@ -14,81 +14,76 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGECore.PhysicsSystem;
-using FGECore.UtilitySystems;
-using BepuPhysics;
-using BepuUtilities;
 
-namespace FGECore.EntitySystem
+namespace FGECore.EntitySystem;
+
+/// <summary>Attaches an entity to another entity.</summary>
+public class EntitySimpleAttachProperty : BasicEntityProperty
 {
-    /// <summary>Attaches an entity to another entity.</summary>
-    public class EntitySimpleAttachProperty : BasicEntityProperty
+    /// <summary>The entity this entity is attached to.</summary>
+    public virtual BasicEntity AttachedTo
     {
-        /// <summary>The entity this entity is attached to.</summary>
-        public virtual BasicEntity AttachedTo
-        {
-            get;
-            set;
-        }
+        get;
+        set;
+    }
 
-        /// <summary>Set the relative offset to the current relative locations and orientation.</summary>
-        public virtual void SetRelativeToCurrent()
-        {
-            SetRelativeBasedOn(AttachedTo.LastKnownOrientation, AttachedTo.LastKnownPosition);
-        }
+    /// <summary>Set the relative offset to the current relative locations and orientation.</summary>
+    public virtual void SetRelativeToCurrent()
+    {
+        SetRelativeBasedOn(AttachedTo.LastKnownOrientation, AttachedTo.LastKnownPosition);
+    }
 
-        /// <summary>Sets the relative offset based on the attached properties.</summary>
-        /// <param name="orient">The attached orientation.</param>
-        /// <param name="pos">The attached position.</param>
-        public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
-        {
-            Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(pos.ToNumerics());
-            Matrix4x4.Invert(worldTrans, out Matrix4x4 inverted);
-            RelativeOffset = Matrix4x4.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix4x4.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
-        }
+    /// <summary>Sets the relative offset based on the attached properties.</summary>
+    /// <param name="orient">The attached orientation.</param>
+    /// <param name="pos">The attached position.</param>
+    public void SetRelativeBasedOn(MathHelpers.Quaternion orient, Location pos)
+    {
+        Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(pos.ToNumerics());
+        Matrix4x4.Invert(worldTrans, out Matrix4x4 inverted);
+        RelativeOffset = Matrix4x4.CreateFromQuaternion(Entity.LastKnownOrientation.ToNumerics()) * Matrix4x4.CreateTranslation(Entity.LastKnownPosition.ToNumerics()) * inverted;
+    }
 
-        /// <summary>The relative offset matrix offset to maintain.</summary>
-        public Matrix4x4 RelativeOffset = Matrix4x4.Identity;
+    /// <summary>The relative offset matrix offset to maintain.</summary>
+    public Matrix4x4 RelativeOffset = Matrix4x4.Identity;
 
-        /// <summary>Handles the spawn event.</summary>
-        public override void OnSpawn()
-        {
-            AttachedTo.OnPositionChanged += FixPosition;
-            AttachedTo.OnOrientationChanged += FixOrientation;
-            FixPosition(AttachedTo.LastKnownPosition);
-            FixOrientation(AttachedTo.LastKnownOrientation);
-        }
+    /// <summary>Handles the spawn event.</summary>
+    public override void OnSpawn()
+    {
+        AttachedTo.OnPositionChanged += FixPosition;
+        AttachedTo.OnOrientationChanged += FixOrientation;
+        FixPosition(AttachedTo.LastKnownPosition);
+        FixOrientation(AttachedTo.LastKnownOrientation);
+    }
 
-        /// <summary>Fixes this entity's position based on its attachment.</summary>
-        public virtual void FixPosition(Location position)
-        {
-            SetPositionOrientation(position, AttachedTo.LastKnownOrientation);
-        }
+    /// <summary>Fixes this entity's position based on its attachment.</summary>
+    public virtual void FixPosition(Location position)
+    {
+        SetPositionOrientation(position, AttachedTo.LastKnownOrientation);
+    }
 
-        /// <summary>Fixes this entity's orientation based on its attachment.</summary>
-        public virtual void FixOrientation(MathHelpers.Quaternion orientation)
-        {
-            SetPositionOrientation(AttachedTo.LastKnownPosition, orientation);
-        }
+    /// <summary>Fixes this entity's orientation based on its attachment.</summary>
+    public virtual void FixOrientation(MathHelpers.Quaternion orientation)
+    {
+        SetPositionOrientation(AttachedTo.LastKnownPosition, orientation);
+    }
 
-        /// <summary>Sets this entity's position and orientation relative to <see cref="AttachedTo"/>.</summary>
-        /// <param name="position">The attached-to entity's position.</param>
-        /// <param name="orient">The attached-to entity's orientation.</param>
-        public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
-        {
-            Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(position.ToNumerics());
-            Matrix4x4 tmat = RelativeOffset * worldTrans;
-            Location pos = tmat.Translation.ToLocation();
-            MathHelpers.Quaternion quat = System.Numerics.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
-            Entity.SetPosition(pos);
-            Entity.SetOrientation(quat);
-        }
+    /// <summary>Sets this entity's position and orientation relative to <see cref="AttachedTo"/>.</summary>
+    /// <param name="position">The attached-to entity's position.</param>
+    /// <param name="orient">The attached-to entity's orientation.</param>
+    public void SetPositionOrientation(Location position, MathHelpers.Quaternion orient)
+    {
+        Matrix4x4 worldTrans = Matrix4x4.CreateFromQuaternion(orient.ToNumerics()) * Matrix4x4.CreateTranslation(position.ToNumerics());
+        Matrix4x4 tmat = RelativeOffset * worldTrans;
+        Location pos = tmat.Translation.ToLocation();
+        MathHelpers.Quaternion quat = System.Numerics.Quaternion.CreateFromRotationMatrix(tmat).ToCore();
+        Entity.SetPosition(pos);
+        Entity.SetOrientation(quat);
+    }
 
-        /// <summary>Handles the despawn event.</summary>
-        public override void OnDespawn()
-        {
-            AttachedTo.OnPositionChanged -= FixPosition;
-            AttachedTo.OnOrientationChanged -= FixOrientation;
-        }
+    /// <summary>Handles the despawn event.</summary>
+    public override void OnDespawn()
+    {
+        AttachedTo.OnPositionChanged -= FixPosition;
+        AttachedTo.OnOrientationChanged -= FixOrientation;
     }
 }

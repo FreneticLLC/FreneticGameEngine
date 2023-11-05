@@ -15,43 +15,42 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using NUnit.Framework;
 
-namespace FGETests
-{
-    /// <summary>Represents any test in Voxalia. Should be derived from.</summary>
-    public abstract class FGETest
-    {
-        /// <summary>ALWAYS call this in a test's static OneTimeSetUp!</summary>
-        public static void Setup()
-        {
-            Program.PreInit(new FGETestProgram());
-        }
+namespace FGETests;
 
-        /// <summary>Asserts that two normal-range doubles are approximately equal (down to 4 decimal places).</summary>
-        /// <param name="expected">The expected value.</param>
-        /// <param name="actual">The actual value.</param>
-        /// <param name="message">The message to display if they aren't roughly equal.</param>
-        public static void AssertAreRoughlyEqual(double expected, double actual, string message)
-        {
-            Assert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
-        }
+/// <summary>Represents any test in Voxalia. Should be derived from.</summary>
+public abstract class FGETest
+{
+    /// <summary>ALWAYS call this in a test's static OneTimeSetUp!</summary>
+    public static void Setup()
+    {
+        Program.PreInit(new FGETestProgram());
     }
 
-    /// <summary>Represents a test program.</summary>
+    /// <summary>Asserts that two normal-range doubles are approximately equal (down to 4 decimal places).</summary>
+    /// <param name="expected">The expected value.</param>
+    /// <param name="actual">The actual value.</param>
+    /// <param name="message">The message to display if they aren't roughly equal.</param>
+    public static void AssertAreRoughlyEqual(double expected, double actual, string message)
+    {
+        Assert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
+    }
+}
+
+/// <summary>Represents a test program.</summary>
 	public class FGETestProgram : Program
 	{
-        /// <summary>Name of the program.</summary>
-        public const string NAME = "FGE Tests";
+    /// <summary>Name of the program.</summary>
+    public const string NAME = "FGE Tests";
 
-        /// <summary>Version of the program.</summary>
-        public const string VERSION = "1.0.0.0";
+    /// <summary>Version of the program.</summary>
+    public const string VERSION = "1.0.0.0";
 
-        /// <summary>Version-Description of the program.</summary>
-        public const string VERSDESC = "Test-Only";
+    /// <summary>Version-Description of the program.</summary>
+    public const string VERSDESC = "Test-Only";
 
-        /// <summary>Construct the tester.</summary>
-        public FGETestProgram()
-            : base(NAME, VERSION, VERSDESC)
-        {
-        }
+    /// <summary>Construct the tester.</summary>
+    public FGETestProgram()
+        : base(NAME, VERSION, VERSDESC)
+    {
+    }
 	}
-}

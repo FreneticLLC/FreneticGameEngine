@@ -12,30 +12,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.UISystem
-{
-    /// <summary>Simple enumeration of text alignment modes.</summary>
-    public enum TextAlignment
-    {
-        /// <summary>(Horizontal only) Left alignment. Normal for English text.</summary>
-        LEFT = 0,
-        /// <summary>(Vertical only) Top alignment. Normal for English text.</summary>
-        TOP = LEFT,
-        /// <summary>Center alignment.</summary>
-        CENTER = 1,
-        /// <summary>(Horizontal only) Right alignment. Opposite of normal English text.</summary>
-        RIGHT = 2,
-        /// <summary>(Vertical only) Bottom alignment. Opposite of normal English text.</summary>
-        BOTTOM = RIGHT
-    }
+namespace FGEGraphics.UISystem;
 
-    /// <summary>Helper methods for <see cref="TextAlignment"/>.</summary>
-    public static class TextAlignmentExtensions
+/// <summary>Simple enumeration of text alignment modes.</summary>
+public enum TextAlignment
+{
+    /// <summary>(Horizontal only) Left alignment. Normal for English text.</summary>
+    LEFT = 0,
+    /// <summary>(Vertical only) Top alignment. Normal for English text.</summary>
+    TOP = LEFT,
+    /// <summary>Center alignment.</summary>
+    CENTER = 1,
+    /// <summary>(Horizontal only) Right alignment. Opposite of normal English text.</summary>
+    RIGHT = 2,
+    /// <summary>(Vertical only) Bottom alignment. Opposite of normal English text.</summary>
+    BOTTOM = RIGHT
+}
+
+/// <summary>Helper methods for <see cref="TextAlignment"/>.</summary>
+public static class TextAlignmentExtensions
+{
+    /// <summary>Returns the fraction of text width or height to multiply in to get the proper offset for this alignment. Returns 0, 0.5, or 1.</summary>
+    public static float SizeMultiplier(this TextAlignment align)
     {
-        /// <summary>Returns the fraction of text width or height to multiply in to get the proper offset for this alignment. Returns 0, 0.5, or 1.</summary>
-        public static float SizeMultiplier(this TextAlignment align)
-        {
-            return ((float)align) * 0.5f;
-        }
+        return ((float)align) * 0.5f;
     }
 }

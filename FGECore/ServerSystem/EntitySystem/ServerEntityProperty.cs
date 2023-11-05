@@ -13,10 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.EntitySystem;
 
-namespace FGECore.ServerSystem.EntitySystem
+namespace FGECore.ServerSystem.EntitySystem;
+
+/// <summary>Represents a property on a server-side entity.</summary>
+public class ServerEntityProperty : BasicEntityProperty<ServerEntity, ServerEngine>
 {
-    /// <summary>Represents a property on a server-side entity.</summary>
-    public class ServerEntityProperty : BasicEntityProperty<ServerEntity, ServerEngine>
-    {
-    }
 }

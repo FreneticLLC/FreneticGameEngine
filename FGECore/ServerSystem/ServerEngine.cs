@@ -15,17 +15,16 @@ using FGECore.CoreSystems;
 using FGECore.EntitySystem;
 using FGECore.ServerSystem.EntitySystem;
 
-namespace FGECore.ServerSystem
+namespace FGECore.ServerSystem;
+
+/// <summary>Represents an engine on the server side.</summary>
+public class ServerEngine : BasicEngine<ServerEntity, ServerEngine>
 {
-    /// <summary>Represents an engine on the server side.</summary>
-    public class ServerEngine : BasicEngine<ServerEntity, ServerEngine>
+    /// <summary>Creates an entity.</summary>
+    /// <param name="ticks">Whether it ticks.</param>
+    /// <returns>The entity.</returns>
+    public override ServerEntity CreateEntity(bool ticks)
     {
-        /// <summary>Creates an entity.</summary>
-        /// <param name="ticks">Whether it ticks.</param>
-        /// <returns>The entity.</returns>
-        public override ServerEntity CreateEntity(bool ticks)
-        {
-            return new ServerEntity(this, ticks);
-        }
+        return new ServerEntity(this, ticks);
     }
 }

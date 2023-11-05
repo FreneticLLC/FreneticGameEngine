@@ -15,22 +15,21 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
-namespace FGEGraphics.LightingSystem
+namespace FGEGraphics.LightingSystem;
+
+/// <summary>Represents any 3D light source.</summary>
+public abstract class LightObject
 {
-    /// <summary>Represents any 3D light source.</summary>
-    public abstract class LightObject
-    {
-        /// <summary>The actual lights making up this light.</summary>
-        public List<Light> InternalLights = new();
+    /// <summary>The actual lights making up this light.</summary>
+    public List<Light> InternalLights = new();
 
-        /// <summary>The position of the light source.</summary>
-        public Location EyePos;
+    /// <summary>The position of the light source.</summary>
+    public Location EyePos;
 
-        /// <summary>The maximum radius this light can affect.</summary>
-        public float MaxDistance;
+    /// <summary>The maximum radius this light can affect.</summary>
+    public float MaxDistance;
 
-        /// <summary>Repositions the light.</summary>
-        /// <param name="pos">Position.</param>
-        public abstract void Reposition(Location pos);
-    }
+    /// <summary>Repositions the light.</summary>
+    /// <param name="pos">Position.</param>
+    public abstract void Reposition(Location pos);
 }

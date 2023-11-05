@@ -17,143 +17,142 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.GraphicsHelpers.FontSets
+namespace FGEGraphics.GraphicsHelpers.FontSets;
+
+/// <summary>Handles Text rendering.</summary>
+public struct TextVBOBuilder
 {
-    /// <summary>Handles Text rendering.</summary>
-    public struct TextVBOBuilder
+    /// <summary>The position VBO (Vertex Buffer Object).</summary>
+    public uint VBO;
+
+    /// <summary>The texture coordinate VBO (Vertex Buffer Object).</summary>
+    public uint VBOTexCoords;
+
+    /// <summary>The colors VBO (Vertex Buffer Object).</summary>
+    public uint VBOColors;
+
+    /// <summary>The indices VBO (Vertex Buffer Object).</summary>
+    public uint VBOIndices;
+
+    /// <summary>The VAO (VertexArrayObject).</summary>
+    public uint VAO;
+
+    /// <summary>An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
+    public static ResizableArray<Vector4> ReusableVertexArray = new();
+
+    /// <summary>An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
+    public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new();
+
+    /// <summary>An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
+    public static ResizableArray<Vector4> ReusableColorArray = new();
+
+    /// <summary>An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
+    public static ResizableArray<uint> ReusableIndexArray = new();
+
+    /// <summary>Adds a quadrilateral (rectangle) to the VBO.</summary>
+    /// <param name="minX">The minimum X.</param>
+    /// <param name="minY">The minimum Y.</param>
+    /// <param name="maxX">The maximum X.</param>
+    /// <param name="maxY">The maximum Y.</param>
+    /// <param name="tminX">The minimum texture X.</param>
+    /// <param name="tminY">The minimum texture Y.</param>
+    /// <param name="tmaxX">The maximum texture X.</param>
+    /// <param name="tmaxY">The maximum texture Y.</param>
+    /// <param name="color">The color.</param>
+    public static void AddQuad(float minX, float minY, float maxX, float maxY, float tminX, float tminY, float tmaxX, float tmaxY, Color4F color)
     {
-        /// <summary>The position VBO (Vertex Buffer Object).</summary>
-        public uint VBO;
+        ReusableVertexArray.Add(new Vector4(minX, minY, maxX, maxY));
+        ReusableTextureCoordinateArray.Add(new Vector4(tminX, tminY, tmaxX, tmaxY));
+        ReusableColorArray.Add(color.ToOpenTK());
+    }
 
-        /// <summary>The texture coordinate VBO (Vertex Buffer Object).</summary>
-        public uint VBOTexCoords;
+    /// <summary>Destroys the internal VBO, so this can be safely deleted.</summary>
+    public void Destroy()
+    {
+        GL.DeleteBuffer(VBO);
+        GL.DeleteBuffer(VBOTexCoords);
+        GL.DeleteBuffer(VBOColors);
+        GL.DeleteBuffer(VBOIndices);
+        GL.DeleteVertexArray(VAO);
+        hasBuffers = false;
+    }
 
-        /// <summary>The colors VBO (Vertex Buffer Object).</summary>
-        public uint VBOColors;
+    /// <summary>Builds the buffers pre-emptively.</summary>
+    public void BuildBuffers()
+    {
+        GL.GenBuffers(1, out VBO);
+        GL.GenBuffers(1, out VBOTexCoords);
+        GL.GenBuffers(1, out VBOColors);
+        GL.GenBuffers(1, out VBOIndices);
+        GL.GenVertexArrays(1, out VAO);
+        hasBuffers = true;
+    }
 
-        /// <summary>The indices VBO (Vertex Buffer Object).</summary>
-        public uint VBOIndices;
+    /// <summary>The number of indices in the VBO.</summary>
+    public int Length;
 
-        /// <summary>The VAO (VertexArrayObject).</summary>
-        public uint VAO;
+    /// <summary>Whether this VBO has buffers already.</summary>
+    bool hasBuffers;
 
-        /// <summary>An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableVertexArray = new();
-
-        /// <summary>An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new();
-
-        /// <summary>An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<Vector4> ReusableColorArray = new();
-
-        /// <summary>An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-        public static ResizableArray<uint> ReusableIndexArray = new();
-
-        /// <summary>Adds a quadrilateral (rectangle) to the VBO.</summary>
-        /// <param name="minX">The minimum X.</param>
-        /// <param name="minY">The minimum Y.</param>
-        /// <param name="maxX">The maximum X.</param>
-        /// <param name="maxY">The maximum Y.</param>
-        /// <param name="tminX">The minimum texture X.</param>
-        /// <param name="tminY">The minimum texture Y.</param>
-        /// <param name="tmaxX">The maximum texture X.</param>
-        /// <param name="tmaxY">The maximum texture Y.</param>
-        /// <param name="color">The color.</param>
-        public static void AddQuad(float minX, float minY, float maxX, float maxY, float tminX, float tminY, float tmaxX, float tmaxY, Color4F color)
+    /// <summary>Turns the local VBO build information into an actual internal GPU-side VBO.</summary>
+    public void Build()
+    {
+        if (!hasBuffers)
         {
-            ReusableVertexArray.Add(new Vector4(minX, minY, maxX, maxY));
-            ReusableTextureCoordinateArray.Add(new Vector4(tminX, tminY, tmaxX, tmaxY));
-            ReusableColorArray.Add(color.ToOpenTK());
+            BuildBuffers();
         }
-
-        /// <summary>Destroys the internal VBO, so this can be safely deleted.</summary>
-        public void Destroy()
+        Length = ReusableVertexArray.Length;
+        ReusableIndexArray.EnsureCapacity(Length);
+        for (uint i = 0; i < Length; i++)
         {
-            GL.DeleteBuffer(VBO);
-            GL.DeleteBuffer(VBOTexCoords);
-            GL.DeleteBuffer(VBOColors);
-            GL.DeleteBuffer(VBOIndices);
-            GL.DeleteVertexArray(VAO);
-            hasBuffers = false;
+            ReusableIndexArray.Add(i);
         }
+        GL.BindVertexArray(0);
+        // Vertex buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableVertexArray.Length * Vector4.SizeInBytes), ReusableVertexArray.Internal, BufferUsageHint.StaticDraw);
+        // TexCoord buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexCoords);
+        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableTextureCoordinateArray.Length * Vector4.SizeInBytes), ReusableTextureCoordinateArray.Internal, BufferUsageHint.StaticDraw);
+        // Color buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBOColors);
+        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableColorArray.Length * Vector4.SizeInBytes), ReusableColorArray.Internal, BufferUsageHint.StaticDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        // Index buffer
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIndices);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(ReusableIndexArray.Length * sizeof(uint)), ReusableIndexArray.Internal, BufferUsageHint.StaticDraw);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+        // VAO
+        GL.BindVertexArray(VAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 0, 0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexCoords);
+        GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, 0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBOColors);
+        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, 0, 0);
+        GL.EnableVertexAttribArray(0);
+        GL.EnableVertexAttribArray(1);
+        GL.EnableVertexAttribArray(2);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIndices);
+        // Clean up
+        GL.BindVertexArray(0);
+        ReusableVertexArray.Clear();
+        ReusableTextureCoordinateArray.Clear();
+        ReusableColorArray.Clear();
+        ReusableIndexArray.Clear();
+    }
 
-        /// <summary>Builds the buffers pre-emptively.</summary>
-        public void BuildBuffers()
+    /// <summary>Renders the internal VBO to screen.</summary>
+    public void Render(GLFontEngine engine)
+    {
+        if (Length == 0)
         {
-            GL.GenBuffers(1, out VBO);
-            GL.GenBuffers(1, out VBOTexCoords);
-            GL.GenBuffers(1, out VBOColors);
-            GL.GenBuffers(1, out VBOIndices);
-            GL.GenVertexArrays(1, out VAO);
-            hasBuffers = true;
+            return;
         }
-
-        /// <summary>The number of indices in the VBO.</summary>
-        public int Length;
-
-        /// <summary>Whether this VBO has buffers already.</summary>
-        bool hasBuffers;
-
-        /// <summary>Turns the local VBO build information into an actual internal GPU-side VBO.</summary>
-        public void Build()
-        {
-            if (!hasBuffers)
-            {
-                BuildBuffers();
-            }
-            Length = ReusableVertexArray.Length;
-            ReusableIndexArray.EnsureCapacity(Length);
-            for (uint i = 0; i < Length; i++)
-            {
-                ReusableIndexArray.Add(i);
-            }
-            GL.BindVertexArray(0);
-            // Vertex buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableVertexArray.Length * Vector4.SizeInBytes), ReusableVertexArray.Internal, BufferUsageHint.StaticDraw);
-            // TexCoord buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexCoords);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableTextureCoordinateArray.Length * Vector4.SizeInBytes), ReusableTextureCoordinateArray.Internal, BufferUsageHint.StaticDraw);
-            // Color buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOColors);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ReusableColorArray.Length * Vector4.SizeInBytes), ReusableColorArray.Internal, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            // Index buffer
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIndices);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(ReusableIndexArray.Length * sizeof(uint)), ReusableIndexArray.Internal, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            // VAO
-            GL.BindVertexArray(VAO);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 0, 0);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexCoords);
-            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, 0);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOColors);
-            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, 0, 0);
-            GL.EnableVertexAttribArray(0);
-            GL.EnableVertexAttribArray(1);
-            GL.EnableVertexAttribArray(2);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIndices);
-            // Clean up
-            GL.BindVertexArray(0);
-            ReusableVertexArray.Clear();
-            ReusableTextureCoordinateArray.Clear();
-            ReusableColorArray.Clear();
-            ReusableIndexArray.Clear();
-        }
-
-        /// <summary>Renders the internal VBO to screen.</summary>
-        public void Render(GLFontEngine engine)
-        {
-            if (Length == 0)
-            {
-                return;
-            }
-            GL.BindTexture(TextureTarget.Texture2D, engine.TextureMain);
-            GL.BindVertexArray(VAO);
-            GL.DrawElements(PrimitiveType.Points, Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
-            GL.BindVertexArray(0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
+        GL.BindTexture(TextureTarget.Texture2D, engine.TextureMain);
+        GL.BindVertexArray(VAO);
+        GL.DrawElements(PrimitiveType.Points, Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
+        GL.BindVertexArray(0);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
     }
 }

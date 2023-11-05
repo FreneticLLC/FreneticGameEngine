@@ -16,23 +16,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace FGEWelcomer
+namespace FGEWelcomer;
+
+static class Program
 {
-    static class Program
+    /// <summary>The main entry point for the application.</summary>
+    [STAThread]
+    [SupportedOSPlatform("windows")]
+    static void Main()
     {
-        /// <summary>The main entry point for the application.</summary>
-        [STAThread]
-        [SupportedOSPlatform("windows")]
-        static void Main()
-        {
-            // Pre-Init
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
-            // Form Init
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new WelcomerForm());
-        }
+        // Pre-Init
+        Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+        // Form Init
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new WelcomerForm());
     }
 }

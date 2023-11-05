@@ -14,28 +14,27 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>A joint that restricts one axis of rotation between two entities, like a hinge that can also swivel.</summary>
+public class JointSwivelHingeAngular : PhysicsJointBase<AngularSwivelHinge>
 {
-    /// <summary>A joint that restricts one axis of rotation between two entities, like a hinge that can also swivel.</summary>
-    public class JointSwivelHingeAngular : PhysicsJointBase<AngularSwivelHinge>
+    /// <summary>Constructs the <see cref="JointSwivelHingeAngular"/>.</summary>
+    public JointSwivelHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hinge, Location twist) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointSwivelHingeAngular"/>.</summary>
-        public JointSwivelHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hinge, Location twist) : base(e1, e2)
-        {
-            WorldHinge = hinge;
-            WorldTwist = twist;
-        }
+        WorldHinge = hinge;
+        WorldTwist = twist;
+    }
 
-        /// <summary>The hinge axis. For a door, this with be vertical.</summary>
-        public Location WorldHinge;
+    /// <summary>The hinge axis. For a door, this with be vertical.</summary>
+    public Location WorldHinge;
 
-        /// <summary>The twist axis. This should be perpendicular to the hinge axis.</summary>
-        public Location WorldTwist;
+    /// <summary>The twist axis. This should be perpendicular to the hinge axis.</summary>
+    public Location WorldTwist;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override AngularSwivelHinge CreateJointDescription()
-        {
-            return new AngularSwivelHinge() { LocalHingeAxisB = WorldHinge.ToNumerics(), LocalSwivelAxisA = WorldTwist.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override AngularSwivelHinge CreateJointDescription()
+    {
+        return new AngularSwivelHinge() { LocalHingeAxisB = WorldHinge.ToNumerics(), LocalSwivelAxisA = WorldTwist.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
     }
 }

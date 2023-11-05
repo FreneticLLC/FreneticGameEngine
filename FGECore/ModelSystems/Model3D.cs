@@ -13,74 +13,73 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGECore.ModelSystems
+namespace FGECore.ModelSystems;
+
+/// <summary>Represents an abstract 3D model.</summary>
+public class Model3D
 {
-    /// <summary>Represents an abstract 3D model.</summary>
-    public class Model3D
-    {
-        /// <summary>The meshes that compose this model.</summary>
-        public Model3DMesh[] Meshes;
+    /// <summary>The meshes that compose this model.</summary>
+    public Model3DMesh[] Meshes;
 
-        /// <summary>The root bone node of the model.</summary>
-        public Model3DNode RootNode;
+    /// <summary>The root bone node of the model.</summary>
+    public Model3DNode RootNode;
 
-        /// <summary>The default matrix of the model.</summary>
-        public Matrix4x4 MatrixA;
-    }
+    /// <summary>The default matrix of the model.</summary>
+    public Matrix4x4 MatrixA;
+}
 
-    /// <summary>Represents a single mesh of an abstract 3D model.</summary>
-    public class Model3DMesh
-    {
-        // TODO: Remove dependence on BEPU, use FGE types for Vector3 and Matrix.
+/// <summary>Represents a single mesh of an abstract 3D model.</summary>
+public class Model3DMesh
+{
+    // TODO: Remove dependence on BEPU, use FGE types for Vector3 and Matrix.
 
-        /// <summary>The vertices on this mesh.</summary>
-        public Vector3[] Vertices;
+    /// <summary>The vertices on this mesh.</summary>
+    public Vector3[] Vertices;
 
-        /// <summary>The indices on this mesh.</summary>
-        public uint[] Indices;
+    /// <summary>The indices on this mesh.</summary>
+    public uint[] Indices;
 
-        /// <summary>The normal vectors on this mesh.</summary>
-        public Vector3[] Normals;
+    /// <summary>The normal vectors on this mesh.</summary>
+    public Vector3[] Normals;
 
-        /// <summary>The texture coordinates on this mesh.</summary>
-        public Vector2[] TexCoords;
+    /// <summary>The texture coordinates on this mesh.</summary>
+    public Vector2[] TexCoords;
 
-        /// <summary>The bones on this mesh.</summary>
-        public Model3DBone[] Bones;
+    /// <summary>The bones on this mesh.</summary>
+    public Model3DBone[] Bones;
 
-        /// <summary>The name of this mesh.</summary>
-        public string Name;
-    }
+    /// <summary>The name of this mesh.</summary>
+    public string Name;
+}
 
-    /// <summary>Represents a single bone in an abstract 3D model mesh.</summary>
-    public class Model3DBone
-    {
-        /// <summary>The name of this bone.</summary>
-        public string Name;
+/// <summary>Represents a single bone in an abstract 3D model mesh.</summary>
+public class Model3DBone
+{
+    /// <summary>The name of this bone.</summary>
+    public string Name;
 
-        /// <summary>The vertex IDs of this bone.</summary>
-        public int[] IDs;
+    /// <summary>The vertex IDs of this bone.</summary>
+    public int[] IDs;
 
-        /// <summary>The vertex weights on this bone.</summary>
-        public double[] Weights;
+    /// <summary>The vertex weights on this bone.</summary>
+    public double[] Weights;
 
-        /// <summary>The default matrix of this bone.</summary>
-        public Matrix4x4 MatrixA;
-    }
+    /// <summary>The default matrix of this bone.</summary>
+    public Matrix4x4 MatrixA;
+}
 
-    /// <summary>Represents a single node in an abstract 3D model mesh.</summary>
-    public class Model3DNode
-    {
-        /// <summary>The name of this node.</summary>
-        public string Name;
+/// <summary>Represents a single node in an abstract 3D model mesh.</summary>
+public class Model3DNode
+{
+    /// <summary>The name of this node.</summary>
+    public string Name;
 
-        /// <summary>The default matrix of this node.</summary>
-        public Matrix4x4 MatrixA;
+    /// <summary>The default matrix of this node.</summary>
+    public Matrix4x4 MatrixA;
 
-        /// <summary>The parent of this node.</summary>
-        public Model3DNode Parent;
+    /// <summary>The parent of this node.</summary>
+    public Model3DNode Parent;
 
-        /// <summary>All children of this node.</summary>
-        public Model3DNode[] Children;
-    }
+    /// <summary>All children of this node.</summary>
+    public Model3DNode[] Children;
 }

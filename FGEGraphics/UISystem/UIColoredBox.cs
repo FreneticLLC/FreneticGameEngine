@@ -17,67 +17,66 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents a simple colored box on a screen.</summary>
+public class UIColoredBox : UIElement
 {
-    /// <summary>Represents a simple colored box on a screen.</summary>
-    public class UIColoredBox : UIElement
+    /// <summary>The color of this box.</summary>
+    public Vector4 Color;
+
+    /// <summary>Gets the texture ID this box uses.</summary>
+    public Func<int> GetTexture;
+
+    /// <summary>Whether this box is vertically flipped.</summary>
+    public bool Flip = false;
+
+    /// <summary>Constructs a simple colored box.</summary>
+    /// <param name="color">The color to use.</param>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="texture">The function to use to get the texture ID, if any.</param>
+    public UIColoredBox(Vector4 color, UIPositionHelper pos, Func<int> texture = null)
+        : base(pos)
     {
-        /// <summary>The color of this box.</summary>
-        public Vector4 Color;
+        Color = color;
+        GetTexture = texture;
+    }
 
-        /// <summary>Gets the texture ID this box uses.</summary>
-        public Func<int> GetTexture;
-
-        /// <summary>Whether this box is vertically flipped.</summary>
-        public bool Flip = false;
-
-        /// <summary>Constructs a simple colored box.</summary>
-        /// <param name="color">The color to use.</param>
-        /// <param name="pos">The position of the element.</param>
-        /// <param name="texture">The function to use to get the texture ID, if any.</param>
-        public UIColoredBox(Vector4 color, UIPositionHelper pos, Func<int> texture = null)
-            : base(pos)
+    /// <summary>Renders this box on the screen.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        int x = LastAbsolutePosition.X;
+        int y = LastAbsolutePosition.Y;
+        float w = LastAbsoluteSize.X;
+        float h = LastAbsoluteSize.Y;
+        GameEngineBase engine = view.Engine;
+        if (Color.W > 0.0f)
         {
-            Color = color;
-            GetTexture = texture;
+            Renderer2D.SetColor(Color);
         }
-
-        /// <summary>Renders this box on the screen.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        public override void Render(ViewUI2D view, double delta)
+        else
         {
-            int x = LastAbsolutePosition.X;
-            int y = LastAbsolutePosition.Y;
-            float w = LastAbsoluteSize.X;
-            float h = LastAbsoluteSize.Y;
-            GameEngineBase engine = view.Engine;
-            if (Color.W > 0.0f)
-            {
-                Renderer2D.SetColor(Color);
-            }
-            else
-            {
-                Renderer2D.SetColor(Vector4.One);
-            }
-            if (GetTexture != null)
-            {
-                GL.BindTexture(TextureTarget.Texture2D, GetTexture());
-            }
-            else
-            {
-                engine.Textures.White.Bind();
-            }
-            if (Flip)
-            {
-                view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            }
-            else
-            {
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            }
             Renderer2D.SetColor(Vector4.One);
+        }
+        if (GetTexture != null)
+        {
+            GL.BindTexture(TextureTarget.Texture2D, GetTexture());
+        }
+        else
+        {
             engine.Textures.White.Bind();
         }
+        if (Flip)
+        {
+            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        }
+        else
+        {
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + w, y + h, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        }
+        Renderer2D.SetColor(Vector4.One);
+        engine.Textures.White.Bind();
     }
 }

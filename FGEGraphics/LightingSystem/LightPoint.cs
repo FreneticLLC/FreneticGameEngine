@@ -19,24 +19,23 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.LightingSystem
+namespace FGEGraphics.LightingSystem;
+
+/// <summary>Represents a 3D point light.</summary>
+class LightPoint : Light
 {
-    /// <summary>Represents a 3D point light.</summary>
-    class LightPoint : Light
+    /// <summary>Sets up the 3D point light.</summary>
+    /// <param name="pos">Position.</param>
+    /// <param name="targ">Target.</param>
+    /// <param name="fov">Field of view.</param>
+    /// <param name="max_range">Maximum range.</param>
+    /// <param name="col">Color.</param>
+    public void Setup(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
     {
-        /// <summary>Sets up the 3D point light.</summary>
-        /// <param name="pos">Position.</param>
-        /// <param name="targ">Target.</param>
-        /// <param name="fov">Field of view.</param>
-        /// <param name="max_range">Maximum range.</param>
-        /// <param name="col">Color.</param>
-        public void Setup(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
-        {
-            EyePosition = pos;
-            TargetPosition = targ;
-            FOV = fov;
-            MaxRange = max_range;
-            Color = col;
-        }
+        EyePosition = pos;
+        TargetPosition = targ;
+        FOV = fov;
+        MaxRange = max_range;
+        Color = col;
     }
 }

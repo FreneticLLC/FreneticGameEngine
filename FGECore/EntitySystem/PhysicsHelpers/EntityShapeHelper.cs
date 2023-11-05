@@ -17,53 +17,52 @@ using FGECore.PhysicsSystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 
-namespace FGECore.EntitySystem.PhysicsHelpers
+namespace FGECore.EntitySystem.PhysicsHelpers;
+
+/// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
+public abstract class EntityShapeHelper
 {
-    /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
-    public abstract class EntityShapeHelper
+    /// <summary>Constructs the <see cref="EntityShapeHelper"/>.</summary>
+    public EntityShapeHelper(PhysicsSpace _space)
     {
-        /// <summary>Constructs the <see cref="EntityShapeHelper"/>.</summary>
-        public EntityShapeHelper(PhysicsSpace _space)
+        Space = _space;
+    }
+
+    /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
+    public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
+
+    /// <summary>The space this shape is registered into.</summary>
+    public PhysicsSpace Space;
+
+    /// <summary>The BEPU shape index if registered.</summary>
+    public TypedIndex ShapeIndex;
+
+    /// <summary>Unregisters the shape from the physics space, invalidating it.</summary>
+    public virtual void Unregister()
+    {
+        if (ShapeIndex.Exists)
         {
-            Space = _space;
+            Space.Internal.CoreSimulation.Shapes.Remove(ShapeIndex);
+            ShapeIndex = default;
         }
+    }
 
-        /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
-        public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
+    /// <summary>Registers the shape into the physics space, and returns the BEPU shape index.</summary>
+    public abstract EntityShapeHelper Register();
 
-        /// <summary>The space this shape is registered into.</summary>
-        public PhysicsSpace Space;
+    /// <summary>Gets the BEPU convex shape (if possible).</summary>
+    public IShape BepuShape;
 
-        /// <summary>The BEPU shape index if registered.</summary>
-        public TypedIndex ShapeIndex;
-
-        /// <summary>Unregisters the shape from the physics space, invalidating it.</summary>
-        public virtual void Unregister()
+    /// <summary>Compute inertia for the shape.</summary>
+    public virtual void ComputeInertia(float mass, out BodyInertia inertia)
+    {
+        if (BepuShape is IConvexShape convex)
         {
-            if (ShapeIndex.Exists)
-            {
-                Space.Internal.CoreSimulation.Shapes.Remove(ShapeIndex);
-                ShapeIndex = default;
-            }
+            inertia = convex.ComputeInertia(mass);
         }
-
-        /// <summary>Registers the shape into the physics space, and returns the BEPU shape index.</summary>
-        public abstract EntityShapeHelper Register();
-
-        /// <summary>Gets the BEPU convex shape (if possible).</summary>
-        public IShape BepuShape;
-
-        /// <summary>Compute inertia for the shape.</summary>
-        public virtual void ComputeInertia(float mass, out BodyInertia inertia)
+        else
         {
-            if (BepuShape is IConvexShape convex)
-            {
-                inertia = convex.ComputeInertia(mass);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
     }
 }

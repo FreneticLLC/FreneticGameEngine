@@ -17,83 +17,82 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents an entire screen with any kind of graphics.</summary>
+public class UIScreen : UIElement
 {
-    /// <summary>Represents an entire screen with any kind of graphics.</summary>
-    public class UIScreen : UIElement
+    /// <summary>The default priority of a UI Screen.</summary>
+    public const double SCREEN_PRIORITY_DEFAULT = -10E10;
+
+    /// <summary>
+    /// A reference to the relevant client backing this screen.
+    /// Get this using <see cref="Window"/>.
+    /// </summary>
+    private readonly GameClientWindow InternalClient;
+
+    /// <summary>Gets the client game engine this screen is associated with.</summary>
+    public override GameEngineBase Engine
     {
-        /// <summary>The default priority of a UI Screen.</summary>
-        public const double SCREEN_PRIORITY_DEFAULT = -10E10;
-
-        /// <summary>
-        /// A reference to the relevant client backing this screen.
-        /// Get this using <see cref="Window"/>.
-        /// </summary>
-        private readonly GameClientWindow InternalClient;
-
-        /// <summary>Gets the client game engine this screen is associated with.</summary>
-        public override GameEngineBase Engine
+        get
         {
-            get
-            {
-                return InternalClient.CurrentEngine;
-            }
+            return InternalClient.CurrentEngine;
         }
+    }
 
-        /// <summary>Gets the client game window this screen is associated with.</summary>
-        public override GameClientWindow Window
+    /// <summary>Gets the client game window this screen is associated with.</summary>
+    public override GameClientWindow Window
+    {
+        get
         {
-            get
-            {
-                return InternalClient;
-            }
+            return InternalClient;
         }
+    }
 
-        /// <summary>
-        /// Whether to erase the screen at the beginning of each render call.
-        /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
-        /// </summary>
-        protected bool ResetOnRender = false;
+    /// <summary>
+    /// Whether to erase the screen at the beginning of each render call.
+    /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
+    /// </summary>
+    protected bool ResetOnRender = false;
 
-        /// <summary>Constructs a screen that covers the entire game window.</summary>
-        /// <param name="view">The client UI View.</param>
-        public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
+    /// <summary>Constructs a screen that covers the entire game window.</summary>
+    /// <param name="view">The client UI View.</param>
+    public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
+    {
+        Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
+        Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
+        RenderPriority = SCREEN_PRIORITY_DEFAULT;
+    }
+
+    /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
+    /// <param name="client">The client game window.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
+    {
+        InternalClient = client;
+        IsValid = true;
+    }
+
+    /// <summary>Performs a render on this element.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        if (ResetOnRender)
         {
-            Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
-            Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
-            RenderPriority = SCREEN_PRIORITY_DEFAULT;
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
+            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+            GraphicsUtil.CheckError("RenderScreen - Reset");
         }
+    }
 
-        /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
-        /// <param name="client">The client game window.</param>
-        /// <param name="pos">The position of the element.</param>
-        public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
-        {
-            InternalClient = client;
-            IsValid = true;
-        }
+    /// <summary>Preps the switch to this screen.</summary>
+    public virtual void SwitchTo()
+    {
+    }
 
-        /// <summary>Performs a render on this element.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        public override void Render(ViewUI2D view, double delta)
-        {
-            if (ResetOnRender)
-            {
-                GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
-                GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                GraphicsUtil.CheckError("RenderScreen - Reset");
-            }
-        }
-
-        /// <summary>Preps the switch to this screen.</summary>
-        public virtual void SwitchTo()
-        {
-        }
-
-        /// <summary>Preps the switch from this screen.</summary>
-        public virtual void SwitchFrom()
-        {
-        }
+    /// <summary>Preps the switch from this screen.</summary>
+    public virtual void SwitchFrom()
+    {
     }
 }

@@ -14,24 +14,23 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>A joint that constrains two entities to slide along a single line relative to each other.</summary>
+public class JointSlider : PhysicsJointBase<PointOnLineServo>
 {
-    /// <summary>A joint that constrains two entities to slide along a single line relative to each other.</summary>
-    public class JointSlider : PhysicsJointBase<PointOnLineServo>
+    /// <summary>Constructs the <see cref="JointSlider"/>.</summary>
+    public JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location dir) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointSlider"/>.</summary>
-        public JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location dir) : base(e1, e2)
-        {
-            Direction = dir.Normalize();
-        }
+        Direction = dir.Normalize();
+    }
 
-        /// <summary>The direction of the slider axis.</summary>
-        public Location Direction;
+    /// <summary>The direction of the slider axis.</summary>
+    public Location Direction;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override PointOnLineServo CreateJointDescription()
-        {
-            return new PointOnLineServo() { LocalDirection = Direction.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default };
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override PointOnLineServo CreateJointDescription()
+    {
+        return new PointOnLineServo() { LocalDirection = Direction.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default };
     }
 }

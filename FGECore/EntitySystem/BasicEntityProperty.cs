@@ -14,35 +14,34 @@ using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.PropertySystem;
 
-namespace FGECore.EntitySystem
+namespace FGECore.EntitySystem;
+
+/// <summary>Represents a property on a basic entity.</summary>
+public abstract class BasicEntityProperty : Property
 {
-    /// <summary>Represents a property on a basic entity.</summary>
-    public abstract class BasicEntityProperty : Property
+    /// <summary>Gets the entity associated with a property.</summary>
+    public BasicEntity Entity => Holder as BasicEntity;
+
+    /// <summary>Gets the engine associated with a property.</summary>
+    public BasicEngine Engine => Entity.EngineGeneric;
+
+    /// <summary>Run when the entity is spawned.</summary>
+    public virtual void OnSpawn()
     {
-        /// <summary>Gets the entity associated with a property.</summary>
-        public BasicEntity Entity => Holder as BasicEntity;
-
-        /// <summary>Gets the engine associated with a property.</summary>
-        public BasicEngine Engine => Entity.EngineGeneric;
-
-        /// <summary>Run when the entity is spawned.</summary>
-        public virtual void OnSpawn()
-        {
-        }
-
-        /// <summary>Run when the entity is de-spawned.</summary>
-        public virtual void OnDespawn()
-        {
-        }
     }
 
-    /// <summary>Represents a property on a basic entity, with generic types refering the implementation type.</summary>
-    public class BasicEntityProperty<T, T2> : BasicEntityProperty where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+    /// <summary>Run when the entity is de-spawned.</summary>
+    public virtual void OnDespawn()
     {
-        /// <summary>Gets the entity associated with a property.</summary>
-        public new T Entity => Holder as T;
-
-        /// <summary>Gets the engine associated with a property.</summary>
-        public new T2 Engine => Entity.Engine;
     }
+}
+
+/// <summary>Represents a property on a basic entity, with generic types refering the implementation type.</summary>
+public class BasicEntityProperty<T, T2> : BasicEntityProperty where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
+{
+    /// <summary>Gets the entity associated with a property.</summary>
+    public new T Entity => Holder as T;
+
+    /// <summary>Gets the engine associated with a property.</summary>
+    public new T2 Engine => Entity.Engine;
 }

@@ -15,77 +15,76 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
 
-namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests
+namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests;
+
+/// <summary>Tests expectations of <see cref="AsciiMatcher"/>.</summary>
+public class AsciiMatcherTests : FGETest
 {
-    /// <summary>Tests expectations of <see cref="AsciiMatcher"/>.</summary>
-    public class AsciiMatcherTests : FGETest
+    /// <summary>Prepares the basics.</summary>
+    [OneTimeSetUp]
+    public static void PreInit()
     {
-        /// <summary>Prepares the basics.</summary>
-        [OneTimeSetUp]
-        public static void PreInit()
+        Setup();
+        ReferenceMatcher = new AsciiMatcher(ReferenceMatchChars);
+    }
+
+    /// <summary>Matched characters reference.</summary>
+    public const string ReferenceMatchChars = "AaBCcDDDDDDDDDDDdeeF12215490lMO!?@#$%";
+
+    /// <summary>Non-matched characters reference.</summary>
+    public const string ReferenceNonMatchedChars = "bEf3mZz()*&\0";
+
+    /// <summary>Reference matcher constructed from <see cref="ReferenceMatchChars"/>.</summary>
+    public static AsciiMatcher ReferenceMatcher;
+
+    /// <summary>Tests "IsMatch".</summary>
+    [Test]
+    public static void IsMatchTest()
+    {
+        foreach (char c in ReferenceMatchChars)
         {
-            Setup();
-            ReferenceMatcher = new AsciiMatcher(ReferenceMatchChars);
+            Assert.That(ReferenceMatcher.IsMatch(c), $"IsMatch failed for {c}");
         }
-
-        /// <summary>Matched characters reference.</summary>
-        public const string ReferenceMatchChars = "AaBCcDDDDDDDDDDDdeeF12215490lMO!?@#$%";
-
-        /// <summary>Non-matched characters reference.</summary>
-        public const string ReferenceNonMatchedChars = "bEf3mZz()*&\0";
-
-        /// <summary>Reference matcher constructed from <see cref="ReferenceMatchChars"/>.</summary>
-        public static AsciiMatcher ReferenceMatcher;
-
-        /// <summary>Tests "IsMatch".</summary>
-        [Test]
-        public static void IsMatchTest()
+        foreach (char c in ReferenceNonMatchedChars)
         {
-            foreach (char c in ReferenceMatchChars)
-            {
-                Assert.That(ReferenceMatcher.IsMatch(c), $"IsMatch failed for {c}");
-            }
-            foreach (char c in ReferenceNonMatchedChars)
-            {
-                Assert.That(!ReferenceMatcher.IsMatch(c), $"!IsMatch failed for {c}");
-            }
-            Assert.That(!ReferenceMatcher.IsMatch((char)1000), "!IsMatch failed for char 1000");
+            Assert.That(!ReferenceMatcher.IsMatch(c), $"!IsMatch failed for {c}");
         }
+        Assert.That(!ReferenceMatcher.IsMatch((char)1000), "!IsMatch failed for char 1000");
+    }
 
-        /// <summary>Tests "ContainsAnyMatch".</summary>
-        [Test]
-        public static void ContainsAnyMatchTest()
-        {
-            Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars), $"ContainsAnyMatch failed.");
-            Assert.That(!ReferenceMatcher.ContainsAnyMatch(ReferenceNonMatchedChars), $"!ContainsAnyMatch failed.");
-            Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars + ReferenceNonMatchedChars), $"ContainsAnyMatch failed.");
-        }
+    /// <summary>Tests "ContainsAnyMatch".</summary>
+    [Test]
+    public static void ContainsAnyMatchTest()
+    {
+        Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars), $"ContainsAnyMatch failed.");
+        Assert.That(!ReferenceMatcher.ContainsAnyMatch(ReferenceNonMatchedChars), $"!ContainsAnyMatch failed.");
+        Assert.That(ReferenceMatcher.ContainsAnyMatch(ReferenceMatchChars + ReferenceNonMatchedChars), $"ContainsAnyMatch failed.");
+    }
 
-        /// <summary>Tests "IsOnlyMatches".</summary>
-        [Test]
-        public static void IsOnlyMatchesTest()
-        {
-            Assert.That(ReferenceMatcher.IsOnlyMatches(ReferenceMatchChars), $"IsOnlyMatches failed.");
-            Assert.That(!ReferenceMatcher.IsOnlyMatches(ReferenceNonMatchedChars), $"!IsOnlyMatches failed.");
-            Assert.That(!ReferenceMatcher.IsOnlyMatches(ReferenceMatchChars + ReferenceNonMatchedChars), $"!IsOnlyMatches failed.");
-        }
+    /// <summary>Tests "IsOnlyMatches".</summary>
+    [Test]
+    public static void IsOnlyMatchesTest()
+    {
+        Assert.That(ReferenceMatcher.IsOnlyMatches(ReferenceMatchChars), $"IsOnlyMatches failed.");
+        Assert.That(!ReferenceMatcher.IsOnlyMatches(ReferenceNonMatchedChars), $"!IsOnlyMatches failed.");
+        Assert.That(!ReferenceMatcher.IsOnlyMatches(ReferenceMatchChars + ReferenceNonMatchedChars), $"!IsOnlyMatches failed.");
+    }
 
-        /// <summary>Tests "TrimToMatches".</summary>
-        [Test]
-        public static void TrimToMatchesTest()
-        {
-            Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceMatchChars), $"TrimToMatches pure-match failed.");
-            Assert.AreEqual("", ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars), $"TrimToMatches no-match failed.");
-            Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars + ReferenceMatchChars + ReferenceNonMatchedChars), $"TrimToMatches mixed-match failed.");
-        }
+    /// <summary>Tests "TrimToMatches".</summary>
+    [Test]
+    public static void TrimToMatchesTest()
+    {
+        Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceMatchChars), $"TrimToMatches pure-match failed.");
+        Assert.AreEqual("", ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars), $"TrimToMatches no-match failed.");
+        Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars + ReferenceMatchChars + ReferenceNonMatchedChars), $"TrimToMatches mixed-match failed.");
+    }
 
-        /// <summary>Tests "TrimToNonMatches".</summary>
-        [Test]
-        public static void TrimToNonMatchesTest()
-        {
-            Assert.AreEqual("", ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars), $"TrimToNonMatches pure-match failed.");
-            Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceNonMatchedChars), $"TrimToNonMatches no-match failed.");
-            Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars + ReferenceNonMatchedChars + ReferenceMatchChars), $"TrimToNonMatches mixed-match failed.");
-        }
+    /// <summary>Tests "TrimToNonMatches".</summary>
+    [Test]
+    public static void TrimToNonMatchesTest()
+    {
+        Assert.AreEqual("", ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars), $"TrimToNonMatches pure-match failed.");
+        Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceNonMatchedChars), $"TrimToNonMatches no-match failed.");
+        Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars + ReferenceNonMatchedChars + ReferenceMatchChars), $"TrimToNonMatches mixed-match failed.");
     }
 }

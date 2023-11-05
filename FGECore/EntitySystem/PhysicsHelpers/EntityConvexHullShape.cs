@@ -15,30 +15,29 @@ using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics.Collidables;
 
-namespace FGECore.EntitySystem.PhysicsHelpers
+namespace FGECore.EntitySystem.PhysicsHelpers;
+
+/// <summary>A convex hull shape for an entity.</summary>
+public class EntityConvexHullShape : EntityShapeHelper
 {
-    /// <summary>A convex hull shape for an entity.</summary>
-    public class EntityConvexHullShape : EntityShapeHelper
+    /// <summary>Constructs a new <see cref="EntityConvexHullShape"/> from the specified hull object.</summary>
+    public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space) : base(space)
     {
-        /// <summary>Constructs a new <see cref="EntityConvexHullShape"/> from the specified hull object.</summary>
-        public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space) : base(space)
-        {
-            BepuShape = hull;
-        }
+        BepuShape = hull;
+    }
 
-        /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
-        public override EntityConvexHullShape Register()
-        {
-            EntityConvexHullShape dup = MemberwiseClone() as EntityConvexHullShape;
-            dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((ConvexHull) BepuShape);
-            return dup;
-        }
+    /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
+    public override EntityConvexHullShape Register()
+    {
+        EntityConvexHullShape dup = MemberwiseClone() as EntityConvexHullShape;
+        dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((ConvexHull) BepuShape);
+        return dup;
+    }
 
-        /// <summary>Implements <see cref="Object.ToString"/>.</summary>
-        public override string ToString()
-        {
-            ConvexHull hull = (ConvexHull)BepuShape;
-            return $"{nameof(EntityConvexHullShape)}({hull.Points.Length} points)";
-        }
+    /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+    public override string ToString()
+    {
+        ConvexHull hull = (ConvexHull)BepuShape;
+        return $"{nameof(EntityConvexHullShape)}({hull.Points.Length} points)";
     }
 }

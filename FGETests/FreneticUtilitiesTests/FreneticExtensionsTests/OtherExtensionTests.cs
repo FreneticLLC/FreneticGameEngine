@@ -17,32 +17,31 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
 
-namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
-{
-    /// <summary>Tests expectations of <see cref="OtherExtensions"/>.</summary>
-    [TestFixture]
-    public class OtherExtensionTests : FGETest
-    {
-        /// <summary>Prepares the basics.</summary>
-        [OneTimeSetUp]
-        public static void PreInit()
-        {
-            Setup();
-        }
+namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests;
 
-        /// <summary>
-        /// Tests "NextGaussian".
-        /// Note: this test can/should fail if the underlying implementation of <see cref="Random"/> changes.
-        /// </summary>
-        [Test]
-        public static void NextGaussian()
-        {
-            Random random = new(12345);
-            AssertAreRoughlyEqual(0.992784877525018, random.NextGaussian(), "Gaussian first try failed");
-            AssertAreRoughlyEqual(-0.0499612497007243, random.NextGaussian(), "Gaussian second try failed");
-            AssertAreRoughlyEqual(-0.594917629112312, random.NextGaussian(), "Gaussian third try failed");
-            AssertAreRoughlyEqual(-1.88807372437318, random.NextGaussian(), "Gaussian fourth try failed");
-            AssertAreRoughlyEqual(-0.0618950052147339, random.NextGaussian(), "Gaussian fifth try failed");
-        }
+/// <summary>Tests expectations of <see cref="OtherExtensions"/>.</summary>
+[TestFixture]
+public class OtherExtensionTests : FGETest
+{
+    /// <summary>Prepares the basics.</summary>
+    [OneTimeSetUp]
+    public static void PreInit()
+    {
+        Setup();
+    }
+
+    /// <summary>
+    /// Tests "NextGaussian".
+    /// Note: this test can/should fail if the underlying implementation of <see cref="Random"/> changes.
+    /// </summary>
+    [Test]
+    public static void NextGaussian()
+    {
+        Random random = new(12345);
+        AssertAreRoughlyEqual(0.992784877525018, random.NextGaussian(), "Gaussian first try failed");
+        AssertAreRoughlyEqual(-0.0499612497007243, random.NextGaussian(), "Gaussian second try failed");
+        AssertAreRoughlyEqual(-0.594917629112312, random.NextGaussian(), "Gaussian third try failed");
+        AssertAreRoughlyEqual(-1.88807372437318, random.NextGaussian(), "Gaussian fourth try failed");
+        AssertAreRoughlyEqual(-0.0618950052147339, random.NextGaussian(), "Gaussian fifth try failed");
     }
 }

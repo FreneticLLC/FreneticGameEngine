@@ -14,20 +14,19 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
-{
-    /// <summary>Constrains two bodies to be perfectly glued together.</summary>
-    public class JointWeld : PhysicsJointBase<Weld>
-    {
-        /// <summary>Constructs the <see cref="JointWeld"/>.</summary>
-        public JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : base(e1, e2)
-        {
-        }
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override Weld CreateJointDescription()
-        {
-            return new Weld() { LocalOffset = (One.Position - Two.Position).ToNumerics(), LocalOrientation = Quaternion.GetQuaternionBetween(One.Orientation, Two.Orientation).ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-        }
+/// <summary>Constrains two bodies to be perfectly glued together.</summary>
+public class JointWeld : PhysicsJointBase<Weld>
+{
+    /// <summary>Constructs the <see cref="JointWeld"/>.</summary>
+    public JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : base(e1, e2)
+    {
+    }
+
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override Weld CreateJointDescription()
+    {
+        return new Weld() { LocalOffset = (One.Position - Two.Position).ToNumerics(), LocalOrientation = Quaternion.GetQuaternionBetween(One.Orientation, Two.Orientation).ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
     }
 }

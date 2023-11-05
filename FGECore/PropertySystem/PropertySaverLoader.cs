@@ -12,19 +12,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGECore.PropertySystem
+namespace FGECore.PropertySystem;
+
+/// <summary>Represents a helper to save or load an object.</summary>
+public class PropertySaverLoader
 {
-    /// <summary>Represents a helper to save or load an object.</summary>
-    public class PropertySaverLoader
-    {
-        /// <summary>The save name.</summary>
-        public string SaveString;
+    /// <summary>The save name.</summary>
+    public string SaveString;
 
-        /// <summary>The save method.</summary>
-        public Func<object, byte[]> Saver;
+    /// <summary>The save method.</summary>
+    public Func<object, byte[]> Saver;
 
-        /// <summary>The load method.</summary>
-        public Func<byte[], object> Loader;
-    }
-
+    /// <summary>The load method.</summary>
+    public Func<byte[], object> Loader;
 }

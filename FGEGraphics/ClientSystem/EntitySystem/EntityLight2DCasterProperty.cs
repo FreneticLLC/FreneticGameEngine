@@ -20,112 +20,111 @@ using FGEGraphics.LightingSystem;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.ClientSystem.EntitySystem
+namespace FGEGraphics.ClientSystem.EntitySystem;
+
+/// <summary>Represents the fact that the entity casts 2D light.</summary>
+public class EntityLight2DCasterProperty : ClientEntityProperty
 {
-    /// <summary>Represents the fact that the entity casts 2D light.</summary>
-    public class EntityLight2DCasterProperty : ClientEntityProperty
+    /// <summary>
+    /// Fixes the position of the light to match a new location.
+    /// Automatically called by <see cref="BasicEntity.OnPositionChanged"/>.
+    /// </summary>
+    /// <param name="pos">The new position.</param>
+    public void FixPosition(Location pos)
     {
-        /// <summary>
-        /// Fixes the position of the light to match a new location.
-        /// Automatically called by <see cref="BasicEntity.OnPositionChanged"/>.
-        /// </summary>
-        /// <param name="pos">The new position.</param>
-        public void FixPosition(Location pos)
+        LightPosition = new Vector2(pos.XF, pos.YF);
+        if (ActualLight != null)
         {
-            LightPosition = new Vector2(pos.XF, pos.YF);
-            if (ActualLight != null)
-            {
-                ActualLight.Position = LightPosition;
-            }
+            ActualLight.Position = LightPosition;
         }
+    }
 
-        /// <summary>The current position of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Vector2 LightPosition;
+    /// <summary>The current position of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public Vector2 LightPosition;
 
 
-        /// <summary>The current strength of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public float LightStrength = 256;
+    /// <summary>The current strength of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float LightStrength = 256;
 
-        /// <summary>The current color of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Color4F LightColor = Color4F.White;
+    /// <summary>The current color of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public Color4F LightColor = Color4F.White;
 
-        /// <summary>The current subdivider-scale of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public float LightSDScale = 0.5f;
+    /// <summary>The current subdivider-scale of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float LightSDScale = 0.5f;
 
-        /// <summary>How deep into an object the light should go.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public float LightExtraDist = 50.0f;
+    /// <summary>How deep into an object the light should go.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float LightExtraDist = 50.0f;
 
-        /// <summary>The lowest layer that can present a shadow.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public double ShadowMinLayer = -10E10;
+    /// <summary>The lowest layer that can present a shadow.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public double ShadowMinLayer = -10E10;
 
-        /// <summary>The highest layer that can present a shadow.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public double ShadowMaxLayer = 10E10;
+    /// <summary>The highest layer that can present a shadow.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public double ShadowMaxLayer = 10E10;
 
-        /// <summary>Whether the light source is a 'sky' light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public bool IsSkyLight = false;
+    /// <summary>Whether the light source is a 'sky' light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public bool IsSkyLight = false;
 
-        /// <summary>The actual light object.</summary>
-        public PointLight2D ActualLight;
+    /// <summary>The actual light object.</summary>
+    public PointLight2D ActualLight;
 
-        /// <summary>Whether an entity will cast shadows from this light.</summary>
-        /// <param name="ent">The entity in question.</param>
-        /// <returns>Whether to cast shadows.</returns>
-        public bool CastShadow(ClientEntity ent)
+    /// <summary>Whether an entity will cast shadows from this light.</summary>
+    /// <param name="ent">The entity in question.</param>
+    /// <returns>Whether to cast shadows.</returns>
+    public bool CastShadow(ClientEntity ent)
+    {
+        return ent.EID != Entity.EID && ent.Renderer != null && ent.Renderer.CastShadows && ent.Renderer.RenderingPriorityOrder >= ShadowMinLayer && ent.Renderer.RenderingPriorityOrder <= ShadowMaxLayer;
+    }
+
+    /// <summary>Fired when the entity is spawned.</summary>
+    public override void OnSpawn()
+    {
+        if (Entity.Engine is GameEngine2D eng)
         {
-            return ent.EID != Entity.EID && ent.Renderer != null && ent.Renderer.CastShadows && ent.Renderer.RenderingPriorityOrder >= ShadowMinLayer && ent.Renderer.RenderingPriorityOrder <= ShadowMaxLayer;
+            ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng)
+            {
+                Color = LightColor,
+                ShouldShadow = CastShadow,
+                ExtraLightDist = LightExtraDist,
+                IsSkyLight = IsSkyLight
+            };
+            eng.Lights.Add(ActualLight);
+            Entity.OnPositionChanged += FixPosition;
         }
-
-        /// <summary>Fired when the entity is spawned.</summary>
-        public override void OnSpawn()
+        else
         {
-            if (Entity.Engine is GameEngine2D eng)
-            {
-                ActualLight = new PointLight2D(LightPosition, LightStrength, LightSDScale, eng)
-                {
-                    Color = LightColor,
-                    ShouldShadow = CastShadow,
-                    ExtraLightDist = LightExtraDist,
-                    IsSkyLight = IsSkyLight
-                };
-                eng.Lights.Add(ActualLight);
-                Entity.OnPositionChanged += FixPosition;
-            }
-            else
-            {
-                OutputType.WARNING.Output("2D light spawned into a non-2D-engine-based game!");
-            }
+            OutputType.WARNING.Output("2D light spawned into a non-2D-engine-based game!");
         }
+    }
 
-        /// <summary>Fired when the entity is despawned.</summary>
-        public override void OnDespawn()
+    /// <summary>Fired when the entity is despawned.</summary>
+    public override void OnDespawn()
+    {
+        if (Entity.Engine is GameEngine2D eng)
         {
-            if (Entity.Engine is GameEngine2D eng)
-            {
-                eng.Lights.Remove(ActualLight);
-                ActualLight.Destroy();
-                ActualLight = null;
-                Entity.OnPositionChanged -= FixPosition;
-            }
-            else
-            {
-                OutputType.WARNING.Output("2D light despawned from a non-2D-engine-based game!");
-            }
+            eng.Lights.Remove(ActualLight);
+            ActualLight.Destroy();
+            ActualLight = null;
+            Entity.OnPositionChanged -= FixPosition;
+        }
+        else
+        {
+            OutputType.WARNING.Output("2D light despawned from a non-2D-engine-based game!");
         }
     }
 }

@@ -21,124 +21,123 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents an interactable text link on a screen.</summary>
+public class UITextLink : UIElement
 {
-    /// <summary>Represents an interactable text link on a screen.</summary>
-    public class UITextLink : UIElement
+    /// <summary>Action to perform when this link is clicked.</summary>
+    public Action ClickedTask;
+
+    /// <summary>The text to display for this link.</summary>
+    public RenderableText Text;
+
+    /// <summary>The text to display when hovering over this link.</summary>
+    public RenderableText TextHover;
+
+    /// <summary>The text to display when clicking this link.</summary>
+    public RenderableText TextClick;
+
+    /// <summary>The base text color for this link.</summary>
+    public string BColor = "^r^7";
+
+    /// <summary>Whether the mouse is hovering over this link.</summary>
+    public bool Hovered = false;
+
+    /// <summary>Whether this link is being clicked.</summary>
+    public bool Clicked = false;
+
+    /// <summary>The font to use.</summary>
+    public FontSet TextFont;
+
+    /// <summary>The icon to display alongside this link.</summary>
+    public Texture Icon;
+
+    /// <summary>The color of the icon.</summary>
+    public Color4F IconColor = Color4F.White;
+
+    /// <summary>Constructs an interactable text link.</summary>
+    /// <param name="ico">The icon to display.</param>
+    /// <param name="btext">The text to display.</param>
+    /// <param name="btexthover">The text to display while hovering.</param>
+    /// <param name="btextclick">The text to display while clicking.</param>
+    /// <param name="font">The font to use.</param>
+    /// <param name="clicked">The action to run when clicked.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UITextLink(Texture ico, string btext, string btexthover, string btextclick, FontSet font, Action clicked, UIPositionHelper pos)
+        : base(pos)
     {
-        /// <summary>Action to perform when this link is clicked.</summary>
-        public Action ClickedTask;
+        TextFont = font;
+        Icon = ico;
+        ClickedTask = clicked;
+        Text = font.ParseFancyText(btext, BColor);
+        TextHover = font.ParseFancyText(btexthover, BColor);
+        TextClick = font.ParseFancyText(btextclick, BColor);
+        Position.ConstantWidth(Text.Width + (Icon == null ? 0 : font.FontDefault.Height));
+        Position.ConstantHeight(TextFont.FontDefault.Height * Text.Lines.Length);
+    }
 
-        /// <summary>The text to display for this link.</summary>
-        public RenderableText Text;
+    /// <summary>Detects hovering.</summary>
+    public override void MouseEnter()
+    {
+        Hovered = true;
+    }
 
-        /// <summary>The text to display when hovering over this link.</summary>
-        public RenderableText TextHover;
+    /// <summary>Detects hover cancellation.</summary>
+    public override void MouseLeave()
+    {
+        Hovered = false;
+        Clicked = false;
+    }
 
-        /// <summary>The text to display when clicking this link.</summary>
-        public RenderableText TextClick;
+    /// <summary>Detects clicking.</summary>
+    public override void MouseLeftDown()
+    {
+        Hovered = true;
+        Clicked = true;
+    }
 
-        /// <summary>The base text color for this link.</summary>
-        public string BColor = "^r^7";
-
-        /// <summary>Whether the mouse is hovering over this link.</summary>
-        public bool Hovered = false;
-
-        /// <summary>Whether this link is being clicked.</summary>
-        public bool Clicked = false;
-
-        /// <summary>The font to use.</summary>
-        public FontSet TextFont;
-
-        /// <summary>The icon to display alongside this link.</summary>
-        public Texture Icon;
-
-        /// <summary>The color of the icon.</summary>
-        public Color4F IconColor = Color4F.White;
-
-        /// <summary>Constructs an interactable text link.</summary>
-        /// <param name="ico">The icon to display.</param>
-        /// <param name="btext">The text to display.</param>
-        /// <param name="btexthover">The text to display while hovering.</param>
-        /// <param name="btextclick">The text to display while clicking.</param>
-        /// <param name="font">The font to use.</param>
-        /// <param name="clicked">The action to run when clicked.</param>
-        /// <param name="pos">The position of the element.</param>
-        public UITextLink(Texture ico, string btext, string btexthover, string btextclick, FontSet font, Action clicked, UIPositionHelper pos)
-            : base(pos)
+    /// <summary>Detects releasing clicks.</summary>
+    public override void MouseLeftUp()
+    {
+        if (!Clicked)
         {
-            TextFont = font;
-            Icon = ico;
-            ClickedTask = clicked;
-            Text = font.ParseFancyText(btext, BColor);
-            TextHover = font.ParseFancyText(btexthover, BColor);
-            TextClick = font.ParseFancyText(btextclick, BColor);
-            Position.ConstantWidth(Text.Width + (Icon == null ? 0 : font.FontDefault.Height));
-            Position.ConstantHeight(TextFont.FontDefault.Height * Text.Lines.Length);
+            return;
         }
-
-        /// <summary>Detects hovering.</summary>
-        public override void MouseEnter()
+        Clicked = false;
+        if (Hovered)
         {
-            Hovered = true;
+            ClickedTask.Invoke();
         }
+    }
 
-        /// <summary>Detects hover cancellation.</summary>
-        public override void MouseLeave()
+    /// <summary>Performs a render on this link.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        RenderableText tt = Text;
+        if (Clicked)
         {
-            Hovered = false;
-            Clicked = false;
+            tt = TextClick;
         }
-
-        /// <summary>Detects clicking.</summary>
-        public override void MouseLeftDown()
+        else if (Hovered)
         {
-            Hovered = true;
-            Clicked = true;
+            tt = TextHover;
         }
-
-        /// <summary>Detects releasing clicks.</summary>
-        public override void MouseLeftUp()
+        int x = LastAbsolutePosition.X;
+        int y = LastAbsolutePosition.Y;
+        if (Icon != null)
         {
-            if (!Clicked)
-            {
-                return;
-            }
-            Clicked = false;
-            if (Hovered)
-            {
-                ClickedTask.Invoke();
-            }
+            Icon.Bind();
+            Renderer2D.SetColor(IconColor);
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0));
+            Renderer2D.SetColor(Vector4.One);
         }
-
-        /// <summary>Performs a render on this link.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        public override void Render(ViewUI2D view, double delta)
+        else
         {
-            RenderableText tt = Text;
-            if (Clicked)
-            {
-                tt = TextClick;
-            }
-            else if (Hovered)
-            {
-                tt = TextHover;
-            }
-            int x = LastAbsolutePosition.X;
-            int y = LastAbsolutePosition.Y;
-            if (Icon != null)
-            {
-                Icon.Bind();
-                Renderer2D.SetColor(IconColor);
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + TextFont.FontDefault.Height, y + TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                TextFont.DrawFancyText(tt, new Location(x + TextFont.FontDefault.Height, y, 0));
-                Renderer2D.SetColor(Vector4.One);
-            }
-            else
-            {
-                TextFont.DrawFancyText(tt, new Location(x, y, 0));
-            }
+            TextFont.DrawFancyText(tt, new Location(x, y, 0));
         }
     }
 }

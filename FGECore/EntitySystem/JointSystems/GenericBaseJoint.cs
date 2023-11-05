@@ -13,52 +13,51 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
 
-namespace FGECore.EntitySystem.JointSystems
+namespace FGECore.EntitySystem.JointSystems;
+
+/// <summary>The lowest level base class for all joints.</summary>
+public abstract class GenericBaseJoint : IEquatable<GenericBaseJoint>
 {
-    /// <summary>The lowest level base class for all joints.</summary>
-    public abstract class GenericBaseJoint : IEquatable<GenericBaseJoint>
+    /// <summary>Get the first entity in the joint.</summary>
+    public abstract BasicEntity EntityOne { get; }
+
+    /// <summary>Get the second entity in the joint.</summary>
+    public abstract BasicEntity EntityTwo { get; }
+
+    /// <summary>Get the generic engine backing this joint.</summary>
+    public BasicEngine EngineGeneric => EntityOne.EngineGeneric;
+
+    /// <summary>A unique ID for this specific joint.</summary>
+    public long JointID;
+
+    /// <summary>If true, this joint has been added to the world.</summary>
+    public bool Added = false;
+
+    /// <summary>Called to enable the joint however necessary.</summary>
+    public abstract void Enable();
+
+    /// <summary>Called to disable the joint however necessary.</summary>
+    public abstract void Disable();
+
+    /// <summary>Implements <see cref="Object.GetHashCode"/>.</summary>
+    public override int GetHashCode()
     {
-        /// <summary>Get the first entity in the joint.</summary>
-        public abstract BasicEntity EntityOne { get; }
+        return JointID.GetHashCode();
+    }
 
-        /// <summary>Get the second entity in the joint.</summary>
-        public abstract BasicEntity EntityTwo { get; }
+    /// <summary>Implements <see cref="Object.Equals(object?)"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is GenericBaseJoint joint && Equals(joint);
+    }
 
-        /// <summary>Get the generic engine backing this joint.</summary>
-        public BasicEngine EngineGeneric => EntityOne.EngineGeneric;
-
-        /// <summary>A unique ID for this specific joint.</summary>
-        public long JointID;
-
-        /// <summary>If true, this joint has been added to the world.</summary>
-        public bool Added = false;
-
-        /// <summary>Called to enable the joint however necessary.</summary>
-        public abstract void Enable();
-
-        /// <summary>Called to disable the joint however necessary.</summary>
-        public abstract void Disable();
-
-        /// <summary>Implements <see cref="Object.GetHashCode"/>.</summary>
-        public override int GetHashCode()
+    /// <summary>Returns whether this joint is the same as other.</summary>
+    public bool Equals(GenericBaseJoint other)
+    {
+        if (!Added)
         {
-            return JointID.GetHashCode();
+            return ReferenceEquals(this, other);
         }
-
-        /// <summary>Implements <see cref="Object.Equals(object?)"/>.</summary>
-        public override bool Equals(object obj)
-        {
-            return obj is GenericBaseJoint joint && Equals(joint);
-        }
-
-        /// <summary>Returns whether this joint is the same as other.</summary>
-        public bool Equals(GenericBaseJoint other)
-        {
-            if (!Added)
-            {
-                return ReferenceEquals(this, other);
-            }
-            return JointID == other.JointID;
-        }
+        return JointID == other.JointID;
     }
 }

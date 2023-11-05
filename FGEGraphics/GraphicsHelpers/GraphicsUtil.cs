@@ -21,26 +21,25 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.GraphicsHelpers
-{
-    /// <summary>Helper class for graphical systems.</summary>
-    public static class GraphicsUtil
-    {
-        /// <summary>Checks errors when debug is enabled.</summary>
-        /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
-        /// <param name="context">An optional context object.</param>
-        [Conditional("DEBUG")]
-        public static void CheckError(string callerLocationLabel, object context = null)
-        {
-            ErrorCode ec = GL.GetError();
-            //OutputType.DEBUG.Output($"Doing error check {callerLocationLabel} with context {context} yield {ec}");
-            while (ec != ErrorCode.NoError)
-            {
-                string contextText = context is null ? "" : context + ": ";
-                OutputType.ERROR.Output($"OpenGL error [{callerLocationLabel}]: {contextText}{ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
-                ec = GL.GetError();
-            }
-        }
+namespace FGEGraphics.GraphicsHelpers;
 
+/// <summary>Helper class for graphical systems.</summary>
+public static class GraphicsUtil
+{
+    /// <summary>Checks errors when debug is enabled.</summary>
+    /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
+    /// <param name="context">An optional context object.</param>
+    [Conditional("DEBUG")]
+    public static void CheckError(string callerLocationLabel, object context = null)
+    {
+        ErrorCode ec = GL.GetError();
+        //OutputType.DEBUG.Output($"Doing error check {callerLocationLabel} with context {context} yield {ec}");
+        while (ec != ErrorCode.NoError)
+        {
+            string contextText = context is null ? "" : context + ": ";
+            OutputType.ERROR.Output($"OpenGL error [{callerLocationLabel}]: {contextText}{ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
+            ec = GL.GetError();
+        }
     }
+
 }

@@ -21,71 +21,70 @@ using FGECore.UtilitySystems;
 using System.Speech.Synthesis;
 #endif
 
-namespace FGEGraphics.AudioSystem
-{
-    /// <summary>Text-to-speech helper.</summary>
-    public class TextToSpeech
-    {
-        /// <summary>Whether to try the Windows speech engine.</summary>
-        public static bool TrySpeech = true;
+namespace FGEGraphics.AudioSystem;
 
-        /// <summary>Speaks aloud some text.</summary>
-        /// <param name="text">The text.</param>
-        /// <param name="male">Whether to be male (if not, female).</param>
-        /// <param name="rate">The rate at which to speak.</param>
-        public static void Speak(string text, bool male, int rate)
+/// <summary>Text-to-speech helper.</summary>
+public class TextToSpeech
+{
+    /// <summary>Whether to try the Windows speech engine.</summary>
+    public static bool TrySpeech = true;
+
+    /// <summary>Speaks aloud some text.</summary>
+    /// <param name="text">The text.</param>
+    /// <param name="male">Whether to be male (if not, female).</param>
+    /// <param name="rate">The rate at which to speak.</param>
+    public static void Speak(string text, bool male, int rate)
+    {
+        Task.Factory.StartNew(() =>
         {
-            Task.Factory.StartNew(() =>
+            try
             {
-                try
-                {
 #if WINDOWS
-                    if (TrySpeech)
+                if (TrySpeech)
+                {
+                    SpeechSynthesizer speech = new SpeechSynthesizer();
+                    VoiceInfo vi = null;
+                    foreach (InstalledVoice v in speech.GetInstalledVoices())
                     {
-                        SpeechSynthesizer speech = new SpeechSynthesizer();
-                        VoiceInfo vi = null;
-                        foreach (InstalledVoice v in speech.GetInstalledVoices())
+                        if (!v.Enabled)
                         {
-                            if (!v.Enabled)
-                            {
-                                continue;
-                            }
-                            if (vi == null)
-                            {
-                                vi = v.VoiceInfo;
-                            }
-                            else if ((male && v.VoiceInfo.Gender == VoiceGender.Male) || (!male && v.VoiceInfo.Gender == VoiceGender.Female))
-                            {
-                                vi = v.VoiceInfo;
-                                break;
-                            }
+                            continue;
                         }
                         if (vi == null)
                         {
-                            TrySpeech = false;
+                            vi = v.VoiceInfo;
                         }
-                        else
+                        else if ((male && v.VoiceInfo.Gender == VoiceGender.Male) || (!male && v.VoiceInfo.Gender == VoiceGender.Female))
                         {
-                            speech.SelectVoice(vi.Name);
-                            speech.Rate = rate;
-                            speech.Speak(text);
+                            vi = v.VoiceInfo;
+                            break;
                         }
                     }
+                    if (vi == null)
+                    {
+                        TrySpeech = false;
+                    }
+                    else
+                    {
+                        speech.SelectVoice(vi.Name);
+                        speech.Rate = rate;
+                        speech.Speak(text);
+                    }
+                }
 #endif
-                }
-                catch (Exception ex)
-                {
-                    CommonUtilities.CheckException(ex);
-                    TrySpeech = false;
-                }
-                if (!TrySpeech)
-                {
-                    // TODO: Rate!
-                    String addme = male ? " -p 40" : " -p 95";
-                    Process p = Process.Start("espeak", "\"" + text.Replace("\"", " quote ") + "\"" + addme);
-                    Console.WriteLine(p.MainModule.FileName);
-                }
-            });
-        }
+            }
+            catch (Exception ex)
+            {
+                CommonUtilities.CheckException(ex);
+                TrySpeech = false;
+            }
+            if (!TrySpeech)
+            {
+                // TODO: Rate!
+                String addme = male ? " -p 40" : " -p 95";
+                Process p = Process.Start("espeak", "\"" + text.Replace("\"", " quote ") + "\"" + addme);
+                Console.WriteLine(p.MainModule.FileName);
+            }
+        });
     }
 }

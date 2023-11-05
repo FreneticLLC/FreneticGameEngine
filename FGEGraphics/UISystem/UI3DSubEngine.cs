@@ -21,66 +21,65 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents a 3D sub-engine within a UI.</summary>
+public class UI3DSubEngine : UIElement
 {
-    /// <summary>Represents a 3D sub-engine within a UI.</summary>
-    public class UI3DSubEngine : UIElement
+    /// <summary>The held sub-engine.</summary>
+    public GameEngine3D SubEngine;
+
+    /// <summary>Constructs a new 3D sub-engine.</summary>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="alphaBack">Whether to have an alpha background.</param>
+    public UI3DSubEngine(UIPositionHelper pos, bool alphaBack)
+        : base(pos)
     {
-        /// <summary>The held sub-engine.</summary>
-        public GameEngine3D SubEngine;
-
-        /// <summary>Constructs a new 3D sub-engine.</summary>
-        /// <param name="pos">The position of the element.</param>
-        /// <param name="alphaBack">Whether to have an alpha background.</param>
-        public UI3DSubEngine(UIPositionHelper pos, bool alphaBack)
-            : base(pos)
+        SubEngine = new GameEngine3D
         {
-            SubEngine = new GameEngine3D()
-            {
-                IsSubEngine = true,
-                SubSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height)
-            };
-            SubEngine.OwningInstance = pos.View.Client;
-            if (alphaBack)
-            {
-                SubEngine.MainView.Config.ClearColor = new float[] { 0f, 0f, 0f, 0f };
-            }
-        }
-
-        /// <summary>Initializes the subengine.</summary>
-        public override void Init()
+            IsSubEngine = true,
+            SubSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height),
+            OwningInstance = pos.View.Client
+        };
+        if (alphaBack)
         {
-            SubEngine.OwningInstance = Window;
-            SubEngine.Load();
+            SubEngine.MainView.Config.ClearColor = new float[] { 0f, 0f, 0f, 0f };
         }
+    }
 
-        /// <summary>Destroys the subengine.</summary>
-        public override void Destroy()
-        {
-            SubEngine.MainView.GenerationHelper.Destroy();
-        }
+    /// <summary>Initializes the subengine.</summary>
+    public override void Init()
+    {
+        SubEngine.OwningInstance = Window;
+        SubEngine.Load();
+    }
 
-        /// <summary>Ticks the element.</summary>
-        /// <param name="delta">Delta.</param>
-        public override void Tick(double delta)
-        {
-            SubEngine.Delta = delta;
-            // TODO: Check for resize need?
-            SubEngine.RenderSingleFrame();
-            SubEngine.Tick();
-        }
+    /// <summary>Destroys the subengine.</summary>
+    public override void Destroy()
+    {
+        SubEngine.MainView.GenerationHelper.Destroy();
+    }
 
-        /// <summary>Renders the view on-screen.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">Delta time.</param>
-        public override void Render(ViewUI2D view, double delta)
-        {
-            int x = LastAbsolutePosition.X;
-            int y = LastAbsolutePosition.Y;
-            int w = LastAbsoluteSize.X;
-            int h = LastAbsoluteSize.Y;
-            GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
-            view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        }
+    /// <summary>Ticks the element.</summary>
+    /// <param name="delta">Delta.</param>
+    public override void Tick(double delta)
+    {
+        SubEngine.Delta = delta;
+        // TODO: Check for resize need?
+        SubEngine.RenderSingleFrame();
+        SubEngine.Tick();
+    }
+
+    /// <summary>Renders the view on-screen.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">Delta time.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        int x = LastAbsolutePosition.X;
+        int y = LastAbsolutePosition.Y;
+        int w = LastAbsoluteSize.X;
+        int h = LastAbsoluteSize.Y;
+        GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
+        view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
     }
 }

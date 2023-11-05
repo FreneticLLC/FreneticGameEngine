@@ -14,37 +14,36 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>Constrains two entities to have a specific position on each body maintain a specific distance from each other.</summary>
+public class JointDistance : PhysicsJointBase<DistanceLimit>
 {
-    /// <summary>Constrains two entities to have a specific position on each body maintain a specific distance from each other.</summary>
-    public class JointDistance : PhysicsJointBase<DistanceLimit>
+    /// <summary>Constructs the <see cref="JointDistance"/>.</summary>
+    public JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float _min, float _max, Location e1pos, Location e2pos) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointDistance"/>.</summary>
-        public JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float _min, float _max, Location e1pos, Location e2pos) : base(e1, e2)
-        {
-            Min = _min;
-            Max = _max;
-            Ent1Pos = e1pos;
-            Ent2Pos = e2pos;
-        }
+        Min = _min;
+        Max = _max;
+        Ent1Pos = e1pos;
+        Ent2Pos = e2pos;
+    }
 
-        /// <summary>The minimum allowed distance.</summary>
-        public float Min;
+    /// <summary>The minimum allowed distance.</summary>
+    public float Min;
 
-        /// <summary>The maximum allowed distance.</summary>
-        public float Max;
+    /// <summary>The maximum allowed distance.</summary>
+    public float Max;
 
-        /// <summary>The position relative to entity <see cref="PhysicsJointBase.One"/>'s body.</summary>
-        public Location Ent1Pos;
+    /// <summary>The position relative to entity <see cref="PhysicsJointBase.One"/>'s body.</summary>
+    public Location Ent1Pos;
 
-        /// <summary>The position relative to entity <see cref="PhysicsJointBase.Two"/>'s body.</summary>
-        public Location Ent2Pos;
+    /// <summary>The position relative to entity <see cref="PhysicsJointBase.Two"/>'s body.</summary>
+    public Location Ent2Pos;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override DistanceLimit CreateJointDescription()
-        {
-            DistanceLimit dl = new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
-            return dl;
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override DistanceLimit CreateJointDescription()
+    {
+        DistanceLimit dl = new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
+        return dl;
     }
 }

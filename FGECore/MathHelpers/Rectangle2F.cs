@@ -12,21 +12,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGECore.MathHelpers
+namespace FGECore.MathHelpers;
+
+/// <summary>Represents a float-based rectangle.</summary>
+public class Rectangle2F
 {
-    /// <summary>Represents a float-based rectangle.</summary>
-    public class Rectangle2F
-    {
-        /// <summary>X coordinate.</summary>
-        public float X;
+    /// <summary>X coordinate.</summary>
+    public float X;
 
-        /// <summary>Y coordinate.</summary>
-        public float Y;
+    /// <summary>Y coordinate.</summary>
+    public float Y;
 
-        /// <summary>The width.</summary>
-        public float Width;
+    /// <summary>The width.</summary>
+    public float Width;
 
-        /// <summary>The height.</summary>
-        public float Height;
-    }
+    /// <summary>The height.</summary>
+    public float Height;
 }

@@ -17,37 +17,36 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents a simple image on a screen.</summary>
+public class UIImage : UIElement
 {
-    /// <summary>Represents a simple image on a screen.</summary>
-    public class UIImage : UIElement
+    /// <summary>The image to display.</summary>
+    public Texture Image;
+
+    /// <summary>Constructs an image.</summary>
+    /// <param name="image">The image to display.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UIImage(Texture image, UIPositionHelper pos)
+        : base(pos)
     {
-        /// <summary>The image to display.</summary>
-        public Texture Image;
+        Image = image;
+    }
 
-        /// <summary>Constructs an image.</summary>
-        /// <param name="image">The image to display.</param>
-        /// <param name="pos">The position of the element.</param>
-        public UIImage(Texture image, UIPositionHelper pos)
-            : base(pos)
+    /// <summary>Renders the image on a screen.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        if (Image != null)
         {
-            Image = image;
-        }
-
-        /// <summary>Renders the image on a screen.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        public override void Render(ViewUI2D view, double delta)
-        {
-            if (Image != null)
-            {
-                Image.Bind();
-                int x = LastAbsolutePosition.X;
-                int y = LastAbsolutePosition.Y;
-                float width = LastAbsoluteSize.X;
-                float height = LastAbsoluteSize.Y;
-                view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            }
+            Image.Bind();
+            int x = LastAbsolutePosition.X;
+            int y = LastAbsolutePosition.Y;
+            float width = LastAbsoluteSize.X;
+            float height = LastAbsoluteSize.Y;
+            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         }
     }
 }

@@ -22,148 +22,147 @@ using OpenTK;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
-namespace FGEGraphics.ClientSystem
+namespace FGEGraphics.ClientSystem;
+
+/// <summary>Represents the common functionality of a client Game Engine.</summary>
+public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>, IDisposable
 {
-    /// <summary>Represents the common functionality of a client Game Engine.</summary>
-    public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>, IDisposable
+    /// <summary>Dumb MS logic dispose method.</summary>
+    /// <param name="disposing">Whether to dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
     {
-        /// <summary>Dumb MS logic dispose method.</summary>
-        /// <param name="disposing">Whether to dispose managed resources.</param>
-        protected virtual void Dispose(bool disposing)
+        if (disposing)
         {
-            if (disposing)
-            {
-                Sounds.Dispose();
-                Shutdown();
-            }
+            Sounds.Dispose();
+            Shutdown();
         }
+    }
 
-        /// <summary>Creates an entity.</summary>
-        /// <param name="ticks">Whether it ticks.</param>
-        /// <returns>The entity.</returns>
-        public override ClientEntity CreateEntity(bool ticks)
+    /// <summary>Creates an entity.</summary>
+    /// <param name="ticks">Whether it ticks.</param>
+    /// <returns>The entity.</returns>
+    public override ClientEntity CreateEntity(bool ticks)
+    {
+        return new ClientEntity(this, ticks);
+    }
+
+    /// <summary>Disposes the window client.</summary>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Dispose(true);
+    }
+
+    /// <summary>The backing game client.</summary>
+    public GameClientWindow Client => OwningInstance as GameClientWindow;
+
+    /// <summary>Whether to use audio 'enforce' mode.</summary>
+    public bool EnforceAudio = true;
+
+    /// <summary>Whether to shut up when the game is deselected.</summary>
+    public bool QuietOnDeselect = true;
+
+    /// <summary>The sound system.</summary>
+    public SoundEngine Sounds;
+
+    /// <summary>The audio camera view.</summary>
+    public Camera3D AudioCamera = new();
+
+    /// <summary>Gets the client window.</summary>
+    public GameWindow Window
+    {
+        get
         {
-            return new ClientEntity(this, ticks);
+            return Client.Window;
         }
+    }
 
-        /// <summary>Disposes the window client.</summary>
-        public void Dispose()
+    /// <summary>Gets the client shader system.</summary>
+    public ShaderEngine Shaders
+    {
+        get
         {
-            GC.SuppressFinalize(this);
-            Dispose(true);
+            return Client.Shaders;
         }
+    }
 
-        /// <summary>The backing game client.</summary>
-        public GameClientWindow Client => OwningInstance as GameClientWindow;
-
-        /// <summary>Whether to use audio 'enforce' mode.</summary>
-        public bool EnforceAudio = true;
-
-        /// <summary>Whether to shut up when the game is deselected.</summary>
-        public bool QuietOnDeselect = true;
-
-        /// <summary>The sound system.</summary>
-        public SoundEngine Sounds;
-
-        /// <summary>The audio camera view.</summary>
-        public Camera3D AudioCamera = new();
-
-        /// <summary>Gets the client window.</summary>
-        public GameWindow Window
+    /// <summary>Gets the client texture system.</summary>
+    public TextureEngine Textures
+    {
+        get
         {
-            get
-            {
-                return Client.Window;
-            }
+            return Client.Textures;
         }
+    }
 
-        /// <summary>Gets the client shader system.</summary>
-        public ShaderEngine Shaders
+    /// <summary>Gets the client model system.</summary>
+    public ModelEngine Models
+    {
+        get
         {
-            get
-            {
-                return Client.Shaders;
-            }
+            return Client.Models;
         }
+    }
 
-        /// <summary>Gets the client texture system.</summary>
-        public TextureEngine Textures
+    /// <summary>The title of the window.</summary>
+    public readonly string StartingWindowTitle;
+
+    /// <summary>Run through a full single-frame render sequence.</summary>
+    public abstract void RenderSingleFrame();
+
+    /// <summary>Get any relevant shaders.</summary>
+    public abstract void GetShaders();
+
+    /// <summary>Reload any relevant screen buffers.</summary>
+    public abstract void ReloadScreenBuffers();
+
+    /// <summary>Loads the engine.</summary>
+    public void Load()
+    {
+        try
         {
-            get
-            {
-                return Client.Textures;
-            }
+            StackNoteHelper.Push("GameEngineBase - Loading", this);
+            OutputType.CLIENTINIT.Output("GameEngine starting load sequence, start with basic...");
+            LoadBasic();
+            OutputType.CLIENTINIT.Output("GameEngine loading shaders...");
+            GetShaders();
+            OutputType.CLIENTINIT.Output("GameEngine core load complete, calling additional load...");
+            PostLoad();
+            OutputType.CLIENTINIT.Output("GameEngine prepping audio systems...");
+            Sounds = new SoundEngine();
+            Sounds.Init(this);
+            OutputType.CLIENTINIT.Output("GameEngine load sequence complete.");
         }
-
-        /// <summary>Gets the client model system.</summary>
-        public ModelEngine Models
+        finally
         {
-            get
-            {
-                return Client.Models;
-            }
+            StackNoteHelper.Pop();
         }
+    }
 
-        /// <summary>The title of the window.</summary>
-        public readonly string StartingWindowTitle;
+    /// <summary>Any post-load actions.</summary>
+    public abstract void PostLoad();
 
-        /// <summary>Run through a full single-frame render sequence.</summary>
-        public abstract void RenderSingleFrame();
-
-        /// <summary>Get any relevant shaders.</summary>
-        public abstract void GetShaders();
-
-        /// <summary>Reload any relevant screen buffers.</summary>
-        public abstract void ReloadScreenBuffers();
-
-        /// <summary>Loads the engine.</summary>
-        public void Load()
+    /// <summary>Calculates whether a renderable should render.</summary>
+    /// <param name="render">The renderable.</param>
+    /// <param name="cast_shadows">Whether currently casting shadows.</param>
+    /// <returns>Whether it should render.</returns>
+    public static bool ShouldRender(EntityRenderableProperty render, bool cast_shadows)
+    {
+        if (render == null || !render.IsVisible)
         {
-            try
-            {
-                StackNoteHelper.Push("GameEngineBase - Loading", this);
-                OutputType.CLIENTINIT.Output("GameEngine starting load sequence, start with basic...");
-                LoadBasic();
-                OutputType.CLIENTINIT.Output("GameEngine loading shaders...");
-                GetShaders();
-                OutputType.CLIENTINIT.Output("GameEngine core load complete, calling additional load...");
-                PostLoad();
-                OutputType.CLIENTINIT.Output("GameEngine prepping audio systems...");
-                Sounds = new SoundEngine();
-                Sounds.Init(this);
-                OutputType.CLIENTINIT.Output("GameEngine load sequence complete.");
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
+            return false;
         }
-
-        /// <summary>Any post-load actions.</summary>
-        public abstract void PostLoad();
-
-        /// <summary>Calculates whether a renderable should render.</summary>
-        /// <param name="render">The renderable.</param>
-        /// <param name="cast_shadows">Whether currently casting shadows.</param>
-        /// <returns>Whether it should render.</returns>
-        public static bool ShouldRender(EntityRenderableProperty render, bool cast_shadows)
+        if (cast_shadows ? !render.CastShadows : render.ShadowsOnly)
         {
-            if (render == null || !render.IsVisible)
-            {
-                return false;
-            }
-            if (cast_shadows ? !render.CastShadows : render.ShadowsOnly)
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
+        return true;
+    }
 
-        /// <summary>Returns a string of this object.</summary>
-        /// <returns>The string.</returns>
-        public override string ToString()
-        {
-            return "GameEngine";
-        }
+    /// <summary>Returns a string of this object.</summary>
+    /// <returns>The string.</returns>
+    public override string ToString()
+    {
+        return "GameEngine";
     }
 }

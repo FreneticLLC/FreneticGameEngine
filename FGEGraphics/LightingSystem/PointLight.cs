@@ -19,74 +19,73 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.LightingSystem
+namespace FGEGraphics.LightingSystem;
+
+/// <summary>Represents a 3D point light.</summary>
+public class PointLight : LightObject
 {
-    /// <summary>Represents a 3D point light.</summary>
-    public class PointLight : LightObject
+    /// <summary>Radius of the light.</summary>
+    public float Radius;
+
+    /// <summary>Color of the light.</summary>
+    Color3F Color;
+
+    /// <summary>Gets whether it should cast shadows.</summary>
+    public bool CastShadows = true;
+
+    /// <summary>Sets whether it should cast shadows properly.</summary>
+    /// <param name="shad">Shadow cast mode.</param>
+    public void SetCastShadows(bool shad)
     {
-        /// <summary>Radius of the light.</summary>
-        public float Radius;
-
-        /// <summary>Color of the light.</summary>
-        Color3F Color;
-
-        /// <summary>Gets whether it should cast shadows.</summary>
-        public bool CastShadows = true;
-
-        /// <summary>Sets whether it should cast shadows properly.</summary>
-        /// <param name="shad">Shadow cast mode.</param>
-        public void SetCastShadows(bool shad)
+        CastShadows = shad;
+        for (int i = 0; i < 6; i++)
         {
-            CastShadows = shad;
-            for (int i = 0; i < 6; i++)
-            {
-                InternalLights[i].CastShadows = shad;
-            }
+            InternalLights[i].CastShadows = shad;
         }
+    }
 
-        /// <summary>Constructs the point light.</summary>
-        /// <param name="pos">The position.</param>
-        /// <param name="radius">The radius.</param>
-        /// <param name="col">The color.</param>
-        public PointLight(Location pos, float radius, Color3F col)
+    /// <summary>Constructs the point light.</summary>
+    /// <param name="pos">The position.</param>
+    /// <param name="radius">The radius.</param>
+    /// <param name="col">The color.</param>
+    public PointLight(Location pos, float radius, Color3F col)
+    {
+        EyePos = pos;
+        Radius = radius;
+        Color = col;
+        for (int i = 0; i < 6; i++)
         {
-            EyePos = pos;
-            Radius = radius;
-            Color = col;
-            for (int i = 0; i < 6; i++)
-            {
-                Light li = new();
-                li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color.ToOpenTK());
-                InternalLights.Add(li);
-            }
-            InternalLights[4].UpVector = new Vector3(0, 1, 0);
-            InternalLights[5].UpVector = new Vector3(0, 1, 0);
-            Reposition(EyePos);
-            MaxDistance = radius;
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            Light li = new();
+            li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color.ToOpenTK());
+            InternalLights.Add(li);
         }
+        InternalLights[4].UpVector = new Vector3(0, 1, 0);
+        InternalLights[5].UpVector = new Vector3(0, 1, 0);
+        Reposition(EyePos);
+        MaxDistance = radius;
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+    }
 
-        /// <summary>Destroys the light.</summary>
-        public void Destroy()
-        {
-        }
+    /// <summary>Destroys the light.</summary>
+    public void Destroy()
+    {
+    }
 
-        /// <summary>Repositions the light.</summary>
-        /// <param name="pos">The new position.</param>
-        public sealed override void Reposition(Location pos)
+    /// <summary>Repositions the light.</summary>
+    /// <param name="pos">The new position.</param>
+    public sealed override void Reposition(Location pos)
+    {
+        EyePos = pos;
+        for (int i = 0; i < 6; i++)
         {
-            EyePos = pos;
-            for (int i = 0; i < 6; i++)
-            {
-                InternalLights[i].NeedsUpdate = true;
-                InternalLights[i].EyePosition = EyePos.ToOpenTK3D();
-            }
-            InternalLights[0].TargetPosition = (EyePos + new Location(1, 0, 0)).ToOpenTK3D();
-            InternalLights[1].TargetPosition = (EyePos + new Location(-1, 0, 0)).ToOpenTK3D();
-            InternalLights[2].TargetPosition = (EyePos + new Location(0, 1, 0)).ToOpenTK3D();
-            InternalLights[3].TargetPosition = (EyePos + new Location(0, -1, 0)).ToOpenTK3D();
-            InternalLights[4].TargetPosition = (EyePos + new Location(0, 0, 1)).ToOpenTK3D();
-            InternalLights[5].TargetPosition = (EyePos + new Location(0, 0, -1)).ToOpenTK3D();
+            InternalLights[i].NeedsUpdate = true;
+            InternalLights[i].EyePosition = EyePos.ToOpenTK3D();
         }
+        InternalLights[0].TargetPosition = (EyePos + new Location(1, 0, 0)).ToOpenTK3D();
+        InternalLights[1].TargetPosition = (EyePos + new Location(-1, 0, 0)).ToOpenTK3D();
+        InternalLights[2].TargetPosition = (EyePos + new Location(0, 1, 0)).ToOpenTK3D();
+        InternalLights[3].TargetPosition = (EyePos + new Location(0, -1, 0)).ToOpenTK3D();
+        InternalLights[4].TargetPosition = (EyePos + new Location(0, 0, 1)).ToOpenTK3D();
+        InternalLights[5].TargetPosition = (EyePos + new Location(0, 0, -1)).ToOpenTK3D();
     }
 }

@@ -14,24 +14,23 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>A joint that works like the angular portion of a hinge. The two entities can only rotate relative to each other around the hinge axis.</summary>
+public class JointHingeAngular : PhysicsJointBase<AngularHinge>
 {
-    /// <summary>A joint that works like the angular portion of a hinge. The two entities can only rotate relative to each other around the hinge axis.</summary>
-    public class JointHingeAngular : PhysicsJointBase<AngularHinge>
+    /// <summary>Constructs the <see cref="JointHingeAngular"/>.</summary>
+    public JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointHingeAngular"/>.</summary>
-        public JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : base(e1, e2)
-        {
-            Axis = hingeAxis;
-        }
+        Axis = hingeAxis;
+    }
 
-        /// <summary>The hinge axis. For a door, this with be vertical.</summary>
-        public Location Axis;
+    /// <summary>The hinge axis. For a door, this with be vertical.</summary>
+    public Location Axis;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override AngularHinge CreateJointDescription()
-        {
-            return new AngularHinge() { LocalHingeAxisA = Axis.ToNumerics(), LocalHingeAxisB = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override AngularHinge CreateJointDescription()
+    {
+        return new AngularHinge() { LocalHingeAxisA = Axis.ToNumerics(), LocalHingeAxisB = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
     }
 }

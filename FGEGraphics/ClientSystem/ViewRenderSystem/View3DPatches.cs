@@ -15,62 +15,61 @@ using FGEGraphics.LightingSystem;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.ClientSystem.ViewRenderSystem
+namespace FGEGraphics.ClientSystem.ViewRenderSystem;
+
+/// <summary>Path methods to be called by <see cref="View3DForwardRenderer"/>.</summary>
+public class View3DPatchesForward
 {
-    /// <summary>Path methods to be called by <see cref="View3DForwardRenderer"/>.</summary>
-    public class View3DPatchesForward
-    {
-        /// <summary>Executable view patch: pre-solid-render shader setup.</summary>
-        public Action<float[], float[], float, Vector3, int> PreSolidPatch;
+    /// <summary>Executable view patch: pre-solid-render shader setup.</summary>
+    public Action<float[], float[], float, Vector3, int> PreSolidPatch;
 
-        /// <summary>Executable view patch: solid VR shader setup.</summary>
-        public Action VRSolidPatch;
+    /// <summary>Executable view patch: solid VR shader setup.</summary>
+    public Action VRSolidPatch;
 
-        /// <summary>Executable view patch: pre-transparent-render shader setup.</summary>
-        public Action<float, float[], float[], int> PreTransparentPatch;
+    /// <summary>Executable view patch: pre-transparent-render shader setup.</summary>
+    public Action<float, float[], float[], int> PreTransparentPatch;
 
-        /// <summary>Executable view patch: transparent VR shader setup.</summary>
-        public Action VRTransparentPatch;
+    /// <summary>Executable view patch: transparent VR shader setup.</summary>
+    public Action VRTransparentPatch;
 
-        /// <summary>Executable view patch: end of Forward rendering.</summary>
-        public Action EndPatch;
-    }
+    /// <summary>Executable view patch: end of Forward rendering.</summary>
+    public Action EndPatch;
+}
 
-    /// <summary>Path methods to be called by <see cref="View3DDeferredRenderer"/>.</summary>
-    public class View3DPatchesDeferred
-    {
+/// <summary>Path methods to be called by <see cref="View3DDeferredRenderer"/>.</summary>
+public class View3DPatchesDeferred
+{
 
-        /// <summary>Executable view patch.</summary>
-        public Action PreShadowsPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action PreShadowsPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action<LightObject, Light> ShadowLightPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action<LightObject, Light> ShadowLightPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action PreFBOPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action PreFBOPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action VRFBOPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action VRFBOPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action RefractionPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action RefractionPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action VRRefractionPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action VRRefractionPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action<float> PreTransparentPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action<float> PreTransparentPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action VRTransparentPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action VRTransparentPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action<Matrix4, float[], float[]> TransparentLightPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action<Matrix4, float[], float[]> TransparentLightPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action<Matrix4> LLPatch;
+    /// <summary>Executable view patch.</summary>
+    public Action<Matrix4> LLPatch;
 
-        /// <summary>Executable view patch.</summary>
-        public Action TransparentRenderPatch;
-    }
+    /// <summary>Executable view patch.</summary>
+    public Action TransparentRenderPatch;
 }

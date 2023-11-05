@@ -14,270 +14,269 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Helper for positioning of UI elements.</summary>
+public class UIPositionHelper
 {
-    /// <summary>Helper for positioning of UI elements.</summary>
-    public class UIPositionHelper
+    /// <summary>Constructs the UI Position Helper.</summary>
+    /// <param name="uiview">The backing view.</param>
+    public UIPositionHelper(ViewUI2D uiview)
     {
-        /// <summary>Constructs the UI Position Helper.</summary>
-        /// <param name="uiview">The backing view.</param>
-        public UIPositionHelper(ViewUI2D uiview)
-        {
-            View = uiview;
-            ConstantXY(0, 0);
-            ConstantWidthHeight(0, 0);
-            ConstantRotation(0f);
-        }
+        View = uiview;
+        ConstantXY(0, 0);
+        ConstantWidthHeight(0, 0);
+        ConstantRotation(0f);
+    }
 
-        /// <summary>Returns a <see cref="UIPositionHelper"/> that is automatically below another one, by adding to the Y value, with an optional additional padding.</summary>
-        public static UIPositionHelper Below(UIPositionHelper prior, int yPad)
-        {
-            UIPositionHelper newPos = new UIPositionHelper(prior.View).Anchor(prior.MainAnchor).GetterY(() => prior.Y + prior.Height + yPad);
-            newPos.Internal.X = prior.Internal.X;
-            return newPos;
-        }
+    /// <summary>Returns a <see cref="UIPositionHelper"/> that is automatically below another one, by adding to the Y value, with an optional additional padding.</summary>
+    public static UIPositionHelper Below(UIPositionHelper prior, int yPad)
+    {
+        UIPositionHelper newPos = new UIPositionHelper(prior.View).Anchor(prior.MainAnchor).GetterY(() => prior.Y + prior.Height + yPad);
+        newPos.Internal.X = prior.Internal.X;
+        return newPos;
+    }
 
-        /// <summary>The view backing this element's positioning logic.</summary>
-        public ViewUI2D View;
+    /// <summary>The view backing this element's positioning logic.</summary>
+    public ViewUI2D View;
 
-        /// <summary>The element this is the position for.</summary>
-        public UIElement For;
+    /// <summary>The element this is the position for.</summary>
+    public UIElement For;
 
-        /// <summary>The main positional anchor.</summary>
-        public UIAnchor MainAnchor = UIAnchor.CENTER;
+    /// <summary>The main positional anchor.</summary>
+    public UIAnchor MainAnchor = UIAnchor.CENTER;
 
-        /// <summary>Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.</summary>
-        public struct InternalData
+    /// <summary>Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.</summary>
+    public struct InternalData
+    {
+        /// <summary>
+        /// Helper to represent the data for a single coordinate, dynamically as a constant or getter.
+        /// </summary>
+        public struct Coordinate<T> where T : unmanaged
         {
             /// <summary>
-            /// Helper to represent the data for a single coordinate, dynamically as a constant or getter.
+            /// What mode this coordinate uses (eg constant or getter).
             /// </summary>
-            public struct Coordinate<T> where T : unmanaged
+            public UIPosMode Mode;
+
+            /// <summary>
+            /// Constant value, if <see cref="Mode"/> is set to <see cref="UIPosMode.CONSTANT"/>.
+            /// </summary>
+            public T ConstVal;
+
+            /// <summary>
+            /// Getter value, if <see cref="Mode"/> is set to <see cref="UIPosMode.GETTER"/>.
+            /// </summary>
+            public Func<T> GetterVal;
+
+            /// <summary>
+            /// Gets the current value for this coordinate.
+            /// </summary>
+            public T Get()
             {
-                /// <summary>
-                /// What mode this coordinate uses (eg constant or getter).
-                /// </summary>
-                public UIPosMode Mode;
-
-                /// <summary>
-                /// Constant value, if <see cref="Mode"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-                /// </summary>
-                public T ConstVal;
-
-                /// <summary>
-                /// Getter value, if <see cref="Mode"/> is set to <see cref="UIPosMode.GETTER"/>.
-                /// </summary>
-                public Func<T> GetterVal;
-
-                /// <summary>
-                /// Gets the current value for this coordinate.
-                /// </summary>
-                public T Get()
+                if (Mode == UIPosMode.CONSTANT)
                 {
-                    if (Mode == UIPosMode.CONSTANT)
-                    {
-                        return ConstVal;
-                    }
-                    if (Mode == UIPosMode.GETTER)
-                    {
-                        return GetterVal();
-                    }
-                    return default;
+                    return ConstVal;
                 }
+                if (Mode == UIPosMode.GETTER)
+                {
+                    return GetterVal();
+                }
+                return default;
             }
-
-            /// <summary>
-            /// Internal coordinate data. Generally, do not use.
-            /// </summary>
-            public Coordinate<int> X, Y, Width, Height;
-
-            /// <summary>
-            /// Internal coordinate data. Generally, do not use.
-            /// </summary>
-            public Coordinate<float> Rotation;
         }
 
-        /// <summary>Internal data that should usually not be accessed directly.</summary>
-        public InternalData Internal;
+        /// <summary>
+        /// Internal coordinate data. Generally, do not use.
+        /// </summary>
+        public Coordinate<int> X, Y, Width, Height;
 
-        /// <summary>Sets an anchor.</summary>
-        /// <param name="anchor">The anchor.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper Anchor(UIAnchor anchor)
-        {
-            MainAnchor = anchor;
-            return this;
-        }
-
-        /// <summary>Sets a constant X value.</summary>
-        /// <param name="x">The X value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantX(int x)
-        {
-            Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
-            return this;
-        }
-
-        /// <summary>Sets a constant Y value.</summary>
-        /// <param name="y">The Y value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantY(int y)
-        {
-            Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
-            return this;
-        }
-
-        /// <summary>Sets a constant X and Y value.</summary>
-        /// <param name="x">The X value.</param>
-        /// <param name="y">The Y value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantXY(int x, int y)
-        {
-            Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
-            Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
-            return this;
-        }
-
-        /// <summary>Sets a constant Width value.</summary>
-        /// <param name="width">The Width value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantWidth(int width)
-        {
-            Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
-            return this;
-        }
-
-        /// <summary>Sets a constant Height value.</summary>
-        /// <param name="height">The Height value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantHeight(int height)
-        {
-            Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
-            return this;
-        }
-
-        /// <summary>Sets a constant Width and Height value.</summary>
-        /// <param name="width">The Width value.</param>
-        /// <param name="height">The Height value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantWidthHeight(int width, int height)
-        {
-            Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
-            Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
-            return this;
-        }
-
-        /// <summary>Sets a constant Rotation value.</summary>
-        /// <param name="rotation">The Rotation value.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper ConstantRotation(float rotation)
-        {
-            Internal.Rotation = new() { Mode = UIPosMode.CONSTANT, ConstVal = rotation };
-            return this;
-        }
-
-        /// <summary>Sets a getter X value.</summary>
-        /// <param name="x">The X getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterX(Func<int> x)
-        {
-            Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
-            return this;
-        }
-
-        /// <summary>Sets a getter Y value.</summary>
-        /// <param name="y">The Y getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterY(Func<int> y)
-        {
-            Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
-            return this;
-        }
-
-        /// <summary>Sets a getter X and Y value.</summary>
-        /// <param name="x">The X getter.</param>
-        /// <param name="y">The Y getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterXY(Func<int> x, Func<int> y)
-        {
-            Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
-            Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
-            return this;
-        }
-
-        /// <summary>Sets a getter Width value.</summary>
-        /// <param name="width">The Width getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterWidth(Func<int> width)
-        {
-            Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
-            return this;
-        }
-
-        /// <summary>Sets a getter Height value.</summary>
-        /// <param name="height">The Height getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterHeight(Func<int> height)
-        {
-            Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
-            return this;
-        }
-
-        /// <summary>Sets a constant Width and Height value.</summary>
-        /// <param name="width">The Width getter.</param>
-        /// <param name="height">The Height getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterWidthHeight(Func<int> width, Func<int> height)
-        {
-            Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
-            Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
-            return this;
-        }
-
-        /// <summary>Sets a getter Rotation value.</summary>
-        /// <param name="rotation">The Rotation getter.</param>
-        /// <returns>This object.</returns>
-        public UIPositionHelper GetterRotation(Func<float> rotation)
-        {
-            Internal.Rotation = new() { Mode = UIPosMode.GETTER, GetterVal = rotation };
-            return this;
-        }
-
-        /// <summary>Gets the X coordinate.</summary>
-        public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);
-
-        /// <summary>Gets the Y coordinate.</summary>
-        public int Y => Internal.Y.Get() + (For.Parent != null ? MainAnchor.GetY(For) : 0);
-
-        /// <summary>Gets the width.</summary>
-        public int Width => Internal.Width.Get();
-
-        /// <summary>Gets the height.</summary>
-        public int Height => Internal.Height.Get();
-
-        /// <summary>Gets the local Rotation value.</summary>
-        public float Rotation => Internal.Rotation.Get();
-
-        /// <summary>Gets the X/Y coordinate pair.</summary>
-        public Vector2i Position => new(X, Y);
-
-        /// <summary>Gets the Width/Height coordinate pair.</summary>
-        public Vector2i Size => new(Width, Height);
-
-        /// <summary>Converts this position helper's present data to a simplified debug string.</summary>
-        public override string ToString()
-        {
-            return $"UIPositionHelper:PresentState(XY: {X}, {Y} / WH: {Width}, {Height} / Rot: {Rotation})";
-        }
+        /// <summary>
+        /// Internal coordinate data. Generally, do not use.
+        /// </summary>
+        public Coordinate<float> Rotation;
     }
 
-    /// <summary>Modes for the <see cref="UIPositionHelper"/>.</summary>
-    public enum UIPosMode : byte
+    /// <summary>Internal data that should usually not be accessed directly.</summary>
+    public InternalData Internal;
+
+    /// <summary>Sets an anchor.</summary>
+    /// <param name="anchor">The anchor.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper Anchor(UIAnchor anchor)
     {
-        /// <summary>A constant position.</summary>
-        CONSTANT = 0,
-        /// <summary>A getter function.</summary>
-        GETTER = 1
-        // TODO: More modes?
+        MainAnchor = anchor;
+        return this;
     }
+
+    /// <summary>Sets a constant X value.</summary>
+    /// <param name="x">The X value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantX(int x)
+    {
+        Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
+        return this;
+    }
+
+    /// <summary>Sets a constant Y value.</summary>
+    /// <param name="y">The Y value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantY(int y)
+    {
+        Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
+        return this;
+    }
+
+    /// <summary>Sets a constant X and Y value.</summary>
+    /// <param name="x">The X value.</param>
+    /// <param name="y">The Y value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantXY(int x, int y)
+    {
+        Internal.X = new() { Mode = UIPosMode.CONSTANT, ConstVal = x };
+        Internal.Y = new() { Mode = UIPosMode.CONSTANT, ConstVal = y };
+        return this;
+    }
+
+    /// <summary>Sets a constant Width value.</summary>
+    /// <param name="width">The Width value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantWidth(int width)
+    {
+        Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
+        return this;
+    }
+
+    /// <summary>Sets a constant Height value.</summary>
+    /// <param name="height">The Height value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantHeight(int height)
+    {
+        Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
+        return this;
+    }
+
+    /// <summary>Sets a constant Width and Height value.</summary>
+    /// <param name="width">The Width value.</param>
+    /// <param name="height">The Height value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantWidthHeight(int width, int height)
+    {
+        Internal.Width = new() { Mode = UIPosMode.CONSTANT, ConstVal = width };
+        Internal.Height = new() { Mode = UIPosMode.CONSTANT, ConstVal = height };
+        return this;
+    }
+
+    /// <summary>Sets a constant Rotation value.</summary>
+    /// <param name="rotation">The Rotation value.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantRotation(float rotation)
+    {
+        Internal.Rotation = new() { Mode = UIPosMode.CONSTANT, ConstVal = rotation };
+        return this;
+    }
+
+    /// <summary>Sets a getter X value.</summary>
+    /// <param name="x">The X getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterX(Func<int> x)
+    {
+        Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
+        return this;
+    }
+
+    /// <summary>Sets a getter Y value.</summary>
+    /// <param name="y">The Y getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterY(Func<int> y)
+    {
+        Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
+        return this;
+    }
+
+    /// <summary>Sets a getter X and Y value.</summary>
+    /// <param name="x">The X getter.</param>
+    /// <param name="y">The Y getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterXY(Func<int> x, Func<int> y)
+    {
+        Internal.X = new() { Mode = UIPosMode.GETTER, GetterVal = x };
+        Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
+        return this;
+    }
+
+    /// <summary>Sets a getter Width value.</summary>
+    /// <param name="width">The Width getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterWidth(Func<int> width)
+    {
+        Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
+        return this;
+    }
+
+    /// <summary>Sets a getter Height value.</summary>
+    /// <param name="height">The Height getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterHeight(Func<int> height)
+    {
+        Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
+        return this;
+    }
+
+    /// <summary>Sets a constant Width and Height value.</summary>
+    /// <param name="width">The Width getter.</param>
+    /// <param name="height">The Height getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterWidthHeight(Func<int> width, Func<int> height)
+    {
+        Internal.Width = new() { Mode = UIPosMode.GETTER, GetterVal = width };
+        Internal.Height = new() { Mode = UIPosMode.GETTER, GetterVal = height };
+        return this;
+    }
+
+    /// <summary>Sets a getter Rotation value.</summary>
+    /// <param name="rotation">The Rotation getter.</param>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterRotation(Func<float> rotation)
+    {
+        Internal.Rotation = new() { Mode = UIPosMode.GETTER, GetterVal = rotation };
+        return this;
+    }
+
+    /// <summary>Gets the X coordinate.</summary>
+    public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);
+
+    /// <summary>Gets the Y coordinate.</summary>
+    public int Y => Internal.Y.Get() + (For.Parent != null ? MainAnchor.GetY(For) : 0);
+
+    /// <summary>Gets the width.</summary>
+    public int Width => Internal.Width.Get();
+
+    /// <summary>Gets the height.</summary>
+    public int Height => Internal.Height.Get();
+
+    /// <summary>Gets the local Rotation value.</summary>
+    public float Rotation => Internal.Rotation.Get();
+
+    /// <summary>Gets the X/Y coordinate pair.</summary>
+    public Vector2i Position => new(X, Y);
+
+    /// <summary>Gets the Width/Height coordinate pair.</summary>
+    public Vector2i Size => new(Width, Height);
+
+    /// <summary>Converts this position helper's present data to a simplified debug string.</summary>
+    public override string ToString()
+    {
+        return $"UIPositionHelper:PresentState(XY: {X}, {Y} / WH: {Width}, {Height} / Rot: {Rotation})";
+    }
+}
+
+/// <summary>Modes for the <see cref="UIPositionHelper"/>.</summary>
+public enum UIPosMode : byte
+{
+    /// <summary>A constant position.</summary>
+    CONSTANT = 0,
+    /// <summary>A getter function.</summary>
+    GETTER = 1
+    // TODO: More modes?
 }

@@ -14,24 +14,23 @@ using System.Threading.Tasks;
 using FGECore.FileSystems;
 using FGEGraphics.AudioSystem.EnforcerSystem;
 
-namespace FGEGraphics.AudioSystem
+namespace FGEGraphics.AudioSystem;
+
+/// <summary>Represents a general sound effect.</summary>
+public class SoundEffect
 {
-    /// <summary>Represents a general sound effect.</summary>
-    public class SoundEffect
-    {
-        /// <summary>The name of the effect.</summary>
-        public string Name;
+    /// <summary>The name of the effect.</summary>
+    public string Name;
 
-        /// <summary>The internal OpenAL ID, if one is relevant.</summary>
-        public int Internal;
+    /// <summary>The internal OpenAL ID, if one is relevant.</summary>
+    public int Internal;
 
-        /// <summary>A quick-and-dirty event for when the sound effect is loaded.</summary>
-        public EventHandler<EventArgs> Loaded;
+    /// <summary>A quick-and-dirty event for when the sound effect is loaded.</summary>
+    public EventHandler<EventArgs> Loaded;
 
-        /// <summary>The time this sound effect was last used.</summary>
-        public double LastUse = 0.0;
+    /// <summary>The time this sound effect was last used.</summary>
+    public double LastUse = 0.0;
 
-        /// <summary>The internal enforcer clip, if one is relevant.</summary>
-        public LiveAudioClip Clip;
-    }
+    /// <summary>The internal enforcer clip, if one is relevant.</summary>
+    public LiveAudioClip Clip;
 }

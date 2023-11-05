@@ -12,61 +12,60 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.GraphicsHelpers.Shaders
+namespace FGEGraphics.GraphicsHelpers.Shaders;
+
+/// <summary>
+/// Represents the identifier key for a unique shader.
+/// TODO: Use this in <see cref="ShaderEngine"/>
+/// </summary>
+public class ShaderKey : IEquatable<ShaderKey>
 {
+    /// <summary>The filepath of the shader, excluding the "shaders/" prefix or the file extension suffix.</summary>
+    public string ShaderPath;
+
     /// <summary>
-    /// Represents the identifier key for a unique shader.
-    /// TODO: Use this in <see cref="ShaderEngine"/>
+    /// The filepath of the shader, akin to <see cref="ShaderPath"/>, but for an added geometry shader component.
+    /// Often null.
     /// </summary>
-    public class ShaderKey : IEquatable<ShaderKey>
+    public string GeometryShaderPath;
+
+    /// <summary>An array of specially defined pre-compiler variable keys.</summary>
+    public string[] Defines = Array.Empty<string>();
+
+    /// <summary>Gets a unique hash code for the instance.</summary>
+    public override int GetHashCode()
     {
-        /// <summary>The filepath of the shader, excluding the "shaders/" prefix or the file extension suffix.</summary>
-        public string ShaderPath;
+        return ShaderPath.GetHashCode()
+            + (GeometryShaderPath == null ? 0 : GeometryShaderPath.GetHashCode())
+            + Defines.Sum(s => s.GetHashCode());
+    }
 
-        /// <summary>
-        /// The filepath of the shader, akin to <see cref="ShaderPath"/>, but for an added geometry shader component.
-        /// Often null.
-        /// </summary>
-        public string GeometryShaderPath;
-
-        /// <summary>An array of specially defined pre-compiler variable keys.</summary>
-        public string[] Defines = Array.Empty<string>();
-
-        /// <summary>Gets a unique hash code for the instance.</summary>
-        public override int GetHashCode()
+    /// <summary>Compares the <see cref="ShaderKey"/> instance for equality with another instance.</summary>
+    public override bool Equals(object obj)
+    {
+        if (obj is ShaderKey key)
         {
-            return ShaderPath.GetHashCode()
-                + (GeometryShaderPath == null ? 0 : GeometryShaderPath.GetHashCode())
-                + Defines.Sum(s => s.GetHashCode());
+            return Equals(key);
         }
+        return false;
+    }
 
-        /// <summary>Compares the <see cref="ShaderKey"/> instance for equality with another instance.</summary>
-        public override bool Equals(object obj)
+    /// <summary>Compares the <see cref="ShaderKey"/> instance for equality with another instance.</summary>
+    public bool Equals(ShaderKey other)
+    {
+        if (ShaderPath != other.ShaderPath
+            || GeometryShaderPath != other.GeometryShaderPath
+            || Defines.Length != other.Defines.Length)
         {
-            if (obj is ShaderKey key)
-            {
-                return Equals(key);
-            }
             return false;
         }
-
-        /// <summary>Compares the <see cref="ShaderKey"/> instance for equality with another instance.</summary>
-        public bool Equals(ShaderKey other)
+        for (int i = 0; i < Defines.Length; i++)
         {
-            if (ShaderPath != other.ShaderPath
-                || GeometryShaderPath != other.GeometryShaderPath
-                || Defines.Length != other.Defines.Length)
+            if (Defines[i] != other.Defines[i])
             {
                 return false;
             }
-            for (int i = 0; i < Defines.Length; i++)
-            {
-                if (Defines[i] != other.Defines[i])
-                {
-                    return false;
-                }
-            }
-            return true;
         }
+        return true;
     }
 }

@@ -17,63 +17,62 @@ using FGECore.MathHelpers;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.LightingSystem
+namespace FGEGraphics.LightingSystem;
+
+/// <summary>Represents a directed spot light in 3D.</summary>
+public class SpotLight : LightObject
 {
-    /// <summary>Represents a directed spot light in 3D.</summary>
-    public class SpotLight : LightObject
+    /// <summary>The range of the light.</summary>
+    public float Radius;
+
+    /// <summary>Color of the light.</summary>
+    public Location Color;
+
+    /// <summary>Direction of the light.</summary>
+    public Location Direction;
+
+    /// <summary>Width of the light (FOV).</summary>
+    public float Width;
+
+    /// <summary>Constructs the spot light.</summary>
+    /// <param name="pos">Position.</param>
+    /// <param name="radius">Radius.</param>
+    /// <param name="col">Color.</param>
+    /// <param name="dir">Direction.</param>
+    /// <param name="size">FOV.</param>
+    public SpotLight(Location pos, float radius, Location col, Location dir, float size)
     {
-        /// <summary>The range of the light.</summary>
-        public float Radius;
-
-        /// <summary>Color of the light.</summary>
-        public Location Color;
-
-        /// <summary>Direction of the light.</summary>
-        public Location Direction;
-
-        /// <summary>Width of the light (FOV).</summary>
-        public float Width;
-
-        /// <summary>Constructs the spot light.</summary>
-        /// <param name="pos">Position.</param>
-        /// <param name="radius">Radius.</param>
-        /// <param name="col">Color.</param>
-        /// <param name="dir">Direction.</param>
-        /// <param name="size">FOV.</param>
-        public SpotLight(Location pos, float radius, Location col, Location dir, float size)
+        EyePos = pos;
+        Radius = radius;
+        Color = col;
+        Width = size;
+        InternalLights.Add(new Light());
+        if (dir.Z >= 1 || dir.Z <= -1)
         {
-            EyePos = pos;
-            Radius = radius;
-            Color = col;
-            Width = size;
-            InternalLights.Add(new Light());
-            if (dir.Z >= 1 || dir.Z <= -1)
-            {
-                InternalLights[0].UpVector = new Vector3(0, 1, 0);
-            }
-            else
-            {
-                InternalLights[0].UpVector = new Vector3(0, 0, 1);
-            }
-            Direction = dir;
-            InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color.ToOpenTK());
-            MaxDistance = radius;
+            InternalLights[0].UpVector = new Vector3(0, 1, 0);
         }
-
-        /// <summary>Destroys the spot light.</summary>
-        public void Destroy()
+        else
         {
-            InternalLights[0].Destroy();
+            InternalLights[0].UpVector = new Vector3(0, 0, 1);
         }
+        Direction = dir;
+        InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color.ToOpenTK());
+        MaxDistance = radius;
+    }
 
-        /// <summary>Reposition the light.</summary>
-        /// <param name="pos">New position.</param>
-        public override void Reposition(Location pos)
-        {
-            EyePos = pos;
-            InternalLights[0].NeedsUpdate = true;
-            InternalLights[0].EyePosition = EyePos.ToOpenTK3D();
-            InternalLights[0].TargetPosition = (EyePos + Direction).ToOpenTK3D();
-        }
+    /// <summary>Destroys the spot light.</summary>
+    public void Destroy()
+    {
+        InternalLights[0].Destroy();
+    }
+
+    /// <summary>Reposition the light.</summary>
+    /// <param name="pos">New position.</param>
+    public override void Reposition(Location pos)
+    {
+        EyePos = pos;
+        InternalLights[0].NeedsUpdate = true;
+        InternalLights[0].EyePosition = EyePos.ToOpenTK3D();
+        InternalLights[0].TargetPosition = (EyePos + Direction).ToOpenTK3D();
     }
 }

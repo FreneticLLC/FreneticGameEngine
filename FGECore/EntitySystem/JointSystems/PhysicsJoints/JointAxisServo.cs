@@ -14,24 +14,23 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>Constrains two entities to remain on a shared plane using a servo.</summary>
+class JointAxisServo : PhysicsJointBase<LinearAxisServo>
 {
-    /// <summary>Constrains two entities to remain on a shared plane using a servo.</summary>
-    class JointAxisServo : PhysicsJointBase<LinearAxisServo>
+    /// <summary>Constructs the <see cref="JointAxisServo"/>.</summary>
+    public JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointAxisServo"/>.</summary>
-        public JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : base(e1, e2)
-        {
-            Axis = axis;
-        }
+        Axis = axis;
+    }
 
-        /// <summary>The plane normal axis.</summary>
-        public Location Axis;
+    /// <summary>The plane normal axis.</summary>
+    public Location Axis;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override LinearAxisServo CreateJointDescription()
-        {
-            return new LinearAxisServo() { LocalPlaneNormal = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default, TargetOffset = 1f };
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override LinearAxisServo CreateJointDescription()
+    {
+        return new LinearAxisServo() { LocalPlaneNormal = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default, TargetOffset = 1f };
     }
 }

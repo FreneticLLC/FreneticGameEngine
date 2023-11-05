@@ -20,120 +20,119 @@ using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem
+namespace FGEGraphics.UISystem;
+
+/// <summary>Represents a simple piece text on a screen.</summary>
+public class UILabel : UIElement
 {
-    /// <summary>Represents a simple piece text on a screen.</summary>
-    public class UILabel : UIElement
+    /// <summary>Internal data for <see cref="UILabel"/>.</summary>
+    public struct InternalData
     {
-        /// <summary>Internal data for <see cref="UILabel"/>.</summary>
-        public struct InternalData
-        {
-            /// <summary>
-            /// The internal text value.
-            /// <para>This will not update this label's width or height.</para>
-            /// </summary>
-            public RenderableText Text;
-
-            /// <summary>
-            /// The internal text value.
-            /// <para>This will not update this label's render data.</para>
-            /// </summary>
-            public string RawText;
-
-            /// <summary>
-            /// The internal text font value.
-            /// <para>This will not update this label's width or height.</para>
-            /// </summary>
-            public FontSet TextFont;
-        }
-
-        /// <summary>Internal data for <see cref="UILabel"/>.</summary>
-        public InternalData Internal;
+        /// <summary>
+        /// The internal text value.
+        /// <para>This will not update this label's width or height.</para>
+        /// </summary>
+        public RenderableText Text;
 
         /// <summary>
-        /// The text to display on this label.
-        /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
+        /// The internal text value.
+        /// <para>This will not update this label's render data.</para>
         /// </summary>
-        public string Text
-        {
-            get
-            {
-                return Internal.RawText;
-            }
-            set
-            {
-                Internal.RawText = value;
-                Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
-                FixScale();
-            }
-        }
+        public string RawText;
 
         /// <summary>
-        /// The font to use.
-        /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
+        /// The internal text font value.
+        /// <para>This will not update this label's width or height.</para>
         /// </summary>
-        public FontSet TextFont
+        public FontSet TextFont;
+    }
+
+    /// <summary>Internal data for <see cref="UILabel"/>.</summary>
+    public InternalData Internal;
+
+    /// <summary>
+    /// The text to display on this label.
+    /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
+    /// </summary>
+    public string Text
+    {
+        get
         {
-            get
-            {
-                return Internal.TextFont;
-            }
-            set
-            {
-                Internal.TextFont = value;
-                Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
-                FixScale();
-            }
+            return Internal.RawText;
         }
-
-        /// <summary>
-        /// The background color for this label.
-        /// <para>Set to Vector4.Zero (or any values with W=0) to disable the background color.</para>
-        /// </summary>
-        public Vector4 BackColor = Vector4.Zero;
-
-        /// <summary>The base text color for this label.</summary>
-        public string BColor = "^r^7";
-
-        /// <summary>The custom-limit width.</summary>
-        public int CustomWidthValue;
-
-        /// <summary>Constructs a new label.</summary>
-        /// <param name="btext">The text to display on the label.</param>
-        /// <param name="font">The font to use.</param>
-        /// <param name="pos">The position of the element.</param>
-        public UILabel(string btext, FontSet font, UIPositionHelper pos)
-            : base(pos)
+        set
         {
-            CustomWidthValue = Position.Width;
-            Internal.TextFont = font;
-            Text = btext;
-            // TODO: Dynamic scaling support?
+            Internal.RawText = value;
+            Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
             FixScale();
         }
+    }
 
-        /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="TextFont"/>.</summary>
-        public void FixScale()
+    /// <summary>
+    /// The font to use.
+    /// <para>Setting this automatically adjusts this label's width and height as necessary.</para>
+    /// </summary>
+    public FontSet TextFont
+    {
+        get
         {
-            Internal.Text = CustomWidthValue > 0 ? FontSet.SplitAppropriately(Internal.Text, CustomWidthValue) : Internal.Text;
-            Position.ConstantWidthHeight((int)Internal.Text.Width, (Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height));
+            return Internal.TextFont;
         }
+        set
+        {
+            Internal.TextFont = value;
+            Internal.Text = Internal.TextFont.ParseFancyText(Internal.RawText, BColor);
+            FixScale();
+        }
+    }
 
-        /// <summary>Renders this label on the screen.</summary>
-        /// <param name="view">The UI view.</param>
-        /// <param name="delta">The time since the last render.</param>
-        public override void Render(ViewUI2D view, double delta)
+    /// <summary>
+    /// The background color for this label.
+    /// <para>Set to Vector4.Zero (or any values with W=0) to disable the background color.</para>
+    /// </summary>
+    public Vector4 BackColor = Vector4.Zero;
+
+    /// <summary>The base text color for this label.</summary>
+    public string BColor = "^r^7";
+
+    /// <summary>The custom-limit width.</summary>
+    public int CustomWidthValue;
+
+    /// <summary>Constructs a new label.</summary>
+    /// <param name="btext">The text to display on the label.</param>
+    /// <param name="font">The font to use.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UILabel(string btext, FontSet font, UIPositionHelper pos)
+        : base(pos)
+    {
+        CustomWidthValue = Position.Width;
+        Internal.TextFont = font;
+        Text = btext;
+        // TODO: Dynamic scaling support?
+        FixScale();
+    }
+
+    /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="TextFont"/>.</summary>
+    public void FixScale()
+    {
+        Internal.Text = CustomWidthValue > 0 ? FontSet.SplitAppropriately(Internal.Text, CustomWidthValue) : Internal.Text;
+        Position.ConstantWidthHeight((int)Internal.Text.Width, (Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height));
+    }
+
+    /// <summary>Renders this label on the screen.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public override void Render(ViewUI2D view, double delta)
+    {
+        int height = Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height;
+        int bx = LastAbsolutePosition.X;
+        int by = LastAbsolutePosition.Y;
+        if (BackColor.W > 0)
         {
-            int height = Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height;
-            int bx = LastAbsolutePosition.X;
-            int by = LastAbsolutePosition.Y;
-            if (BackColor.W > 0)
-            {
-                Renderer2D.SetColor(BackColor);
-                view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + Internal.Text.Width, by + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-                Renderer2D.SetColor(Vector4.One);
-            }
-            TextFont.DrawFancyText(Internal.Text, new Location(bx, by, 0));
+            Renderer2D.SetColor(BackColor);
+            view.Rendering.RenderRectangle(view.UIContext, bx, by, bx + Internal.Text.Width, by + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            Renderer2D.SetColor(Vector4.One);
         }
+        TextFont.DrawFancyText(Internal.Text, new Location(bx, by, 0));
     }
 }

@@ -17,148 +17,144 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.EntitySystem;
 using FGECore.StackNoteSystem;
 
-namespace FGECore.CoreSystems
+namespace FGECore.CoreSystems;
+
+/// <summary>Watchdog thread manager for <see cref="GameInstance"/>.</summary>
+public class InstanceWatchdog
 {
-    /// <summary>Watchdog thread manager for <see cref="GameInstance"/>.</summary>
-    public class InstanceWatchdog
+    /// <summary>The watchdog SysConsole output type.</summary>
+    public static OutputType OUT_TYPE = new() { Name = "WATCHDOG", BaseColor = "^r^3" };
+
+    /// <summary>Matcher for symbols to allow in thread names to reduce risk of errors.</summary>
+    public static AsciiMatcher ThreadNameSafetyMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_.");
+
+    /// <summary>Incremental thread ID to ensure thread names are unique.</summary>
+    public static long CurrentThreadNameID = 0;
+
+    /// <summary>Applies a custom name to the thread.</summary>
+    public static void NameThread(Thread thread, string name)
     {
-        /// <summary>The watchdog SysConsole output type.</summary>
-        public static OutputType OUT_TYPE = new() { Name = "WATCHDOG", BaseColor = "^r^3" };
+        thread.Name ??= ThreadNameSafetyMatcher.TrimToMatches(name) + "_" + (CurrentThreadNameID++);
+    }
 
-        /// <summary>Matcher for symbols to allow in thread names to reduce risk of errors.</summary>
-        public static AsciiMatcher ThreadNameSafetyMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_.");
+    /// <summary>The relevant <see cref="GameInstance"/> being watched.</summary>
+    public GameInstance Instance;
 
-        /// <summary>Incremental thread ID to ensure thread names are unique.</summary>
-        public static long CurrentThreadNameID = 0;
+    /// <summary>The primary <see cref="GameInstance"/> tick thread.</summary>
+    public Thread WatchedThread;
 
-        /// <summary>Applies a custom name to the thread.</summary>
-        public static void NameThread(Thread thread, string name)
+    /// <summary>The <see cref="StackNoteSet"/> for the <see cref="WatchedThread"/>.</summary>
+    public StackNoteSet NotesForWatchedThread;
+
+    /// <summary>Internal data, do not touch.</summary>
+    public struct InternalData
+    {
+        /// <summary>The async lock object for starts/stops.</summary>
+        public LockObject Lock;
+
+        /// <summary>Counter, incremented via <see cref="InstanceWatchdog.IsAlive"/>.</summary>
+        public ulong Counter;
+
+        /// <summary>The cancel token, to stop the watchdog.</summary>
+        public CancellationTokenSource CancelToken;
+    }
+
+    /// <summary>Internal data, do not touch.</summary>
+    public InternalData Internal;
+
+    /// <summary>
+    /// Constructs and readies the watchdog.
+    /// Call <see cref="Start"/> to begin watching.
+    /// </summary>
+    public InstanceWatchdog(GameInstance _instance)
+    {
+        Instance = _instance;
+        Internal.Lock = new LockObject();
+    }
+
+    /// <summary>
+    /// Starts the watchdog.
+    /// Call <see cref="Stop"/> when done.
+    /// </summary>
+    public void Start()
+    {
+        lock (Internal.Lock)
         {
-            if (thread.Name is null)
+            if (WatchedThread != null)
             {
-                thread.Name = ThreadNameSafetyMatcher.TrimToMatches(name) + "_" + (CurrentThreadNameID++);
+                throw new InvalidOperationException("Watchdog already started.");
             }
+            Internal.CancelToken = new CancellationTokenSource();
+            WatchedThread = Thread.CurrentThread;
+            NotesForWatchedThread = StackNoteHelper.Notes;
+            Thread thread = new(MainWatchdogLoop);
+            NameThread(thread, "fge_instance_watchdog" + (WatchedThread.Name is null ? "" : "_for_" + WatchedThread.Name));
+            thread.Start();
         }
+    }
 
-        /// <summary>The relevant <see cref="GameInstance"/> being watched.</summary>
-        public GameInstance Instance;
-
-        /// <summary>The primary <see cref="GameInstance"/> tick thread.</summary>
-        public Thread WatchedThread;
-
-        /// <summary>The <see cref="StackNoteSet"/> for the <see cref="WatchedThread"/>.</summary>
-        public StackNoteSet NotesForWatchedThread;
-
-        /// <summary>Internal data, do not touch.</summary>
-        public struct InternalData
+    /// <summary>
+    /// The main watch dog loop.
+    /// Call <see cref="Start"/> to start this.
+    /// </summary>
+    public async void MainWatchdogLoop()
+    {
+        Internal.Counter = 0;
+        ulong lastId = 0;
+        int ticksDead = 0;
+        try
         {
-            /// <summary>The async lock object for starts/stops.</summary>
-            public LockObject Lock;
-
-            /// <summary>Counter, incremented via <see cref="InstanceWatchdog.IsAlive"/>.</summary>
-            public ulong Counter;
-
-            /// <summary>The cancel token, to stop the watchdog.</summary>
-            public CancellationTokenSource CancelToken;
-        }
-
-        /// <summary>Internal data, do not touch.</summary>
-        public InternalData Internal;
-
-        /// <summary>
-        /// Constructs and readies the watchdog.
-        /// Call <see cref="Start"/> to begin watching.
-        /// </summary>
-        public InstanceWatchdog(GameInstance _instance)
-        {
-            Instance = _instance;
-            Internal.Lock = new LockObject();
-        }
-
-        /// <summary>
-        /// Starts the watchdog.
-        /// Call <see cref="Stop"/> when done.
-        /// </summary>
-        public void Start()
-        {
-            lock (Internal.Lock)
+            while (true)
             {
-                if (WatchedThread != null)
+                await Task.Delay(1000, Internal.CancelToken.Token);
+                if (Internal.CancelToken.IsCancellationRequested)
                 {
-                    throw new InvalidOperationException("Watchdog already started.");
+                    return;
                 }
-                Internal.CancelToken = new CancellationTokenSource();
-                WatchedThread = Thread.CurrentThread;
-                NotesForWatchedThread = StackNoteHelper.Notes;
-                Thread thread = new(MainWatchdogLoop);
-                NameThread(thread, "fge_instance_watchdog" + (WatchedThread.Name is null ? "" : "_for_" + WatchedThread.Name));
-                thread.Start();
-            }
-        }
-
-        /// <summary>
-        /// The main watch dog loop.
-        /// Call <see cref="Start"/> to start this.
-        /// </summary>
-        public async void MainWatchdogLoop()
-        {
-            Internal.Counter = 0;
-            ulong lastId = 0;
-            int ticksDead = 0;
-            try
-            {
-                while (true)
+                ulong newId = Interlocked.Read(ref Internal.Counter);
+                if (newId != lastId)
                 {
-                    await Task.Delay(1000, Internal.CancelToken.Token);
+                    lastId = newId;
+                    ticksDead = 0;
+                    continue;
+                }
+                ticksDead++;
+                if (ticksDead % 10 == 0)
+                {
                     if (Internal.CancelToken.IsCancellationRequested)
                     {
                         return;
                     }
-                    ulong newId = Interlocked.Read(ref Internal.Counter);
-                    if (newId != lastId)
-                    {
-                        lastId = newId;
-                        ticksDead = 0;
-                        continue;
-                    }
-                    ticksDead++;
-                    if (ticksDead % 10 == 0)
-                    {
-                        if (Internal.CancelToken.IsCancellationRequested)
-                        {
-                            return;
-                        }
-                        string instanceData = $"Game instance (type={Instance.GetType().Name} threadID={WatchedThread.ManagedThreadId}, threadName={WatchedThread.Name})";
-                        string type = WatchedThread.IsAlive ? "unresponsive" : "DEAD";
-                        SysConsole.Output(OUT_TYPE, $"{instanceData} {type} for {ticksDead} seconds... stack notes:\n{NotesForWatchedThread}");
-                    }
+                    string instanceData = $"Game instance (type={Instance.GetType().Name} threadID={WatchedThread.ManagedThreadId}, threadName={WatchedThread.Name})";
+                    string type = WatchedThread.IsAlive ? "unresponsive" : "DEAD";
+                    SysConsole.Output(OUT_TYPE, $"{instanceData} {type} for {ticksDead} seconds... stack notes:\n{NotesForWatchedThread}");
                 }
             }
-            catch (TaskCanceledException)
-            {
-                return;
-            }
-            catch (Exception ex)
-            {
-                SysConsole.Output("Watchdog crash", ex);
-            }
         }
-
-        /// <summary>Signal to the watchdog that the original thread is still alive.</summary>
-        public void IsAlive()
+        catch (TaskCanceledException)
         {
-            Interlocked.Increment(ref Internal.Counter);
+            return;
         }
-
-        /// <summary>Stops the watchdog.</summary>
-        public void Stop()
+        catch (Exception ex)
         {
-            lock (Internal.Lock)
-            {
-                Internal.CancelToken.Cancel();
-                WatchedThread = null;
-                NotesForWatchedThread = null;
-            }
+            SysConsole.Output("Watchdog crash", ex);
+        }
+    }
+
+    /// <summary>Signal to the watchdog that the original thread is still alive.</summary>
+    public void IsAlive()
+    {
+        Interlocked.Increment(ref Internal.Counter);
+    }
+
+    /// <summary>Stops the watchdog.</summary>
+    public void Stop()
+    {
+        lock (Internal.Lock)
+        {
+            Internal.CancelToken.Cancel();
+            WatchedThread = null;
+            NotesForWatchedThread = null;
         }
     }
 }

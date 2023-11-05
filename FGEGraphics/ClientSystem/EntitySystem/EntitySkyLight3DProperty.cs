@@ -17,101 +17,97 @@ using FGECore.MathHelpers;
 using FGECore.PropertySystem;
 using FGEGraphics.LightingSystem;
 
-namespace FGEGraphics.ClientSystem.EntitySystem
+namespace FGEGraphics.ClientSystem.EntitySystem;
+
+/// <summary>Represents a 3D sky light.</summary>
+public class EntitySkyLight3DProperty : ClientEntityProperty
 {
-    /// <summary>Represents a 3D sky light.</summary>
-    public class EntitySkyLight3DProperty : ClientEntityProperty
+    /// <summary>
+    /// Fixes the position of the light to match a new location.
+    /// Automatically called by <see cref="BasicEntity.OnPositionChanged"/>.
+    /// </summary>
+    /// <param name="pos">The new position.</param>
+    public void FixPosition(Location pos)
     {
-        /// <summary>
-        /// Fixes the position of the light to match a new location.
-        /// Automatically called by <see cref="BasicEntity.OnPositionChanged"/>.
-        /// </summary>
-        /// <param name="pos">The new position.</param>
-        public void FixPosition(Location pos)
+        LightPosition = pos;
+        InternalLight?.Reposition(pos);
+    }
+
+    /// <summary>
+    /// Whether to automatically place the sky light where the camera's at every tick.
+    /// Disable if you have a better method of keeping it positioned.
+    /// </summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public bool AutoCorrectPlacement = true;
+
+    /// <summary>The current position of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public Location LightPosition = Location.Zero;
+
+    /// <summary>The direction of the light.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public Location Direction = -Location.UnitZ;
+
+    /// <summary>The vertical size of the sky light. How far it reaches.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float Radius = 512f;
+
+    /// <summary>The horizontal radius of the sky light. How wide of an area it reaches.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float Size = 128f;
+
+    /// <summary>The current color of the light as (X,Y,Z) => (R,G,B).</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public Location LightColor = Location.One * 0.75;
+
+    /// <summary>The represented 3D sky light.</summary>
+    public SkyLight InternalLight;
+
+    /// <summary>Ticks the sky light, correcting its position.</summary>
+    public void Tick()
+    {
+        if (AutoCorrectPlacement)
         {
-            LightPosition = pos;
-            if (InternalLight != null)
-            {
-                InternalLight.Reposition(pos);
-            }
+            Entity.SetPosition(Engine3D.MainCamera.Position - Direction * (Radius * 0.5));
         }
+    }
 
-        /// <summary>
-        /// Whether to automatically place the sky light where the camera's at every tick.
-        /// Disable if you have a better method of keeping it positioned.
-        /// </summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public bool AutoCorrectPlacement = true;
-
-        /// <summary>The current position of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Location LightPosition = Location.Zero;
-
-        /// <summary>The direction of the light.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Location Direction = -Location.UnitZ;
-
-        /// <summary>The vertical size of the sky light. How far it reaches.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public float Radius = 512f;
-
-        /// <summary>The horizontal radius of the sky light. How wide of an area it reaches.</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public float Size = 128f;
-
-        /// <summary>The current color of the light as (X,Y,Z) => (R,G,B).</summary>
-        [PropertyDebuggable]
-        [PropertyAutoSavable]
-        public Location LightColor = Location.One * 0.75;
-
-        /// <summary>The represented 3D sky light.</summary>
-        public SkyLight InternalLight;
-
-        /// <summary>Ticks the sky light, correcting its position.</summary>
-        public void Tick()
+    /// <summary>Fired when the entity is spawned.</summary>
+    public override void OnSpawn()
+    {
+        if (Entity.Engine is GameEngine3D eng)
         {
-            if (AutoCorrectPlacement)
-            {
-                Entity.SetPosition(Engine3D.MainCamera.Position - Direction * (Radius * 0.5));
-            }
+            InternalLight = new SkyLight(LightPosition, Radius, LightColor, Direction, Size, false, Engine3D.MainView.Config.ShadowTexSize());
+            eng.MainView.Config.Lights.Add(InternalLight);
+            Entity.OnPositionChanged += FixPosition;
+            Entity.OnTick += Tick;
         }
-
-        /// <summary>Fired when the entity is spawned.</summary>
-        public override void OnSpawn()
+        else
         {
-            if (Entity.Engine is GameEngine3D eng)
-            {
-                InternalLight = new SkyLight(LightPosition, Radius, LightColor, Direction, Size, false, Engine3D.MainView.Config.ShadowTexSize());
-                eng.MainView.Config.Lights.Add(InternalLight);
-                Entity.OnPositionChanged += FixPosition;
-                Entity.OnTick += Tick;
-            }
-            else
-            {
-                OutputType.WARNING.Output("3D light spawned into a non-3D-engine-based game!");
-            }
+            OutputType.WARNING.Output("3D light spawned into a non-3D-engine-based game!");
         }
+    }
 
-        /// <summary>Fired when the entity is despawned.</summary>
-        public override void OnDespawn()
+    /// <summary>Fired when the entity is despawned.</summary>
+    public override void OnDespawn()
+    {
+        if (Entity.Engine is GameEngine3D eng)
         {
-            if (Entity.Engine is GameEngine3D eng)
-            {
-                eng.MainView.Config.Lights.Remove(InternalLight);
-                InternalLight.Destroy();
-                InternalLight = null;
-                Entity.OnPositionChanged -= FixPosition;
-                Entity.OnTick -= Tick;
-            }
-            else
-            {
-                OutputType.WARNING.Output("3D light despawned from a non-3D-engine-based game!");
-            }
+            eng.MainView.Config.Lights.Remove(InternalLight);
+            InternalLight.Destroy();
+            InternalLight = null;
+            Entity.OnPositionChanged -= FixPosition;
+            Entity.OnTick -= Tick;
+        }
+        else
+        {
+            OutputType.WARNING.Output("3D light despawned from a non-3D-engine-based game!");
         }
     }
 }

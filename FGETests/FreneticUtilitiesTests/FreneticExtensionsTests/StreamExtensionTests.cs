@@ -17,33 +17,32 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
 
-namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests
-{
-    /// <summary>Tests expectations of <see cref="StreamExtensions"/>.</summary>
-    [TestFixture]
-    public class StreamExtensionTests : FGETest
-    {
-        /// <summary>Prepares the basics.</summary>
-        [OneTimeSetUp]
-        public static void PreInit()
-        {
-            Setup();
-        }
+namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests;
 
-        /// <summary>Tests "AllLinesOfText"</summary>
-        [Test]
-        public static void AllLinesOfTextTest()
+/// <summary>Tests expectations of <see cref="StreamExtensions"/>.</summary>
+[TestFixture]
+public class StreamExtensionTests : FGETest
+{
+    /// <summary>Prepares the basics.</summary>
+    [OneTimeSetUp]
+    public static void PreInit()
+    {
+        Setup();
+    }
+
+    /// <summary>Tests "AllLinesOfText"</summary>
+    [Test]
+    public static void AllLinesOfTextTest()
+    {
+        string input = "Wow\nThis\nIs a big ol'\nlist of text\nyep";
+        string[] splitInput = input.Split('\n');
+        Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+        IEnumerable<string> result = stream.AllLinesOfText();
+        int i = 0;
+        foreach (string str in result)
         {
-            string input = "Wow\nThis\nIs a big ol'\nlist of text\nyep";
-            string[] splitInput = input.Split('\n');
-            Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
-            IEnumerable<string> result = stream.AllLinesOfText();
-            int i = 0;
-            foreach (string str in result)
-            {
-                Assert.AreEqual(splitInput[i++], str, $"Stream AllLinesOfText broke at line {i}");
-            }
-            Assert.AreEqual(5, i, "Stream AllLinesOfText length wrong");
+            Assert.AreEqual(splitInput[i++], str, $"Stream AllLinesOfText broke at line {i}");
         }
+        Assert.AreEqual(5, i, "Stream AllLinesOfText length wrong");
     }
 }

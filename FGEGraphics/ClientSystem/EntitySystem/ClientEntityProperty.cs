@@ -16,27 +16,26 @@ using FGECore.CoreSystems;
 using FGECore.EntitySystem;
 using FGECore.MathHelpers;
 
-namespace FGEGraphics.ClientSystem.EntitySystem
-{
-    /// <summary>Represents a property on a client-side entity.</summary>
-    public class ClientEntityProperty : BasicEntityProperty<ClientEntity, GameEngineBase>
-    {
-        /// <summary>Gets the associated client game engine, as a <see cref="GameEngine2D"/> (only works when the engine is 3D, of course)</summary>
-        public GameEngine2D Engine2D
-        {
-            get
-            {
-                return Entity.Engine as GameEngine2D;
-            }
-        }
+namespace FGEGraphics.ClientSystem.EntitySystem;
 
-        /// <summary>Gets the associated client game engine, as a <see cref="GameEngine3D"/> (only works when the engine is 3D, of course).</summary>
-        public GameEngine3D Engine3D
+/// <summary>Represents a property on a client-side entity.</summary>
+public class ClientEntityProperty : BasicEntityProperty<ClientEntity, GameEngineBase>
+{
+    /// <summary>Gets the associated client game engine, as a <see cref="GameEngine2D"/> (only works when the engine is 3D, of course)</summary>
+    public GameEngine2D Engine2D
+    {
+        get
         {
-            get
-            {
-                return Entity.Engine as GameEngine3D;
-            }
+            return Entity.Engine as GameEngine2D;
+        }
+    }
+
+    /// <summary>Gets the associated client game engine, as a <see cref="GameEngine3D"/> (only works when the engine is 3D, of course).</summary>
+    public GameEngine3D Engine3D
+    {
+        get
+        {
+            return Entity.Engine as GameEngine3D;
         }
     }
 }

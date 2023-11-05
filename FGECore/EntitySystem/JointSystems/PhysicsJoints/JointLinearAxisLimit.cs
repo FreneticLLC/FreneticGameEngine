@@ -14,41 +14,40 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
 
-namespace FGECore.EntitySystem.JointSystems.PhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
+
+/// <summary>Limits the relative motion of two entities along a linear axis.</summary>
+public class JointLinearAxisLimit : PhysicsJointBase<LinearAxisLimit>
 {
-    /// <summary>Limits the relative motion of two entities along a linear axis.</summary>
-    public class JointLinearAxisLimit : PhysicsJointBase<LinearAxisLimit>
+    /// <summary>Constructs the <see cref="JointLinearAxisLimit"/>.</summary>
+    public JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float min, float max, Location relPos1, Location relPos2, Location axis) : base(e1, e2)
     {
-        /// <summary>Constructs the <see cref="JointLinearAxisLimit"/>.</summary>
-        public JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float min, float max, Location relPos1, Location relPos2, Location axis) : base(e1, e2)
-        {
-            Min = min;
-            Max = max;
-            RelativePositionOne = relPos1;
-            RelativePositionTwo = relPos2;
-            Axis = axis;
-        }
+        Min = min;
+        Max = max;
+        RelativePositionOne = relPos1;
+        RelativePositionTwo = relPos2;
+        Axis = axis;
+    }
 
-        /// <summary>The minimum distance between the two entities.</summary>
-        public float Min;
+    /// <summary>The minimum distance between the two entities.</summary>
+    public float Min;
 
-        /// <summary>The maximum distance between the two entities.</summary>
-        public float Max;
+    /// <summary>The maximum distance between the two entities.</summary>
+    public float Max;
 
-        /// <summary>The position relative to <see cref="PhysicsJointBase.One"/>.</summary>
-        public Location RelativePositionOne;
+    /// <summary>The position relative to <see cref="PhysicsJointBase.One"/>.</summary>
+    public Location RelativePositionOne;
 
-        /// <summary>The position relative to <see cref="PhysicsJointBase.Two"/>.</summary>
-        public Location RelativePositionTwo;
+    /// <summary>The position relative to <see cref="PhysicsJointBase.Two"/>.</summary>
+    public Location RelativePositionTwo;
 
-        /// <summary>The constrained axis.</summary>
-        public Location Axis;
+    /// <summary>The constrained axis.</summary>
+    public Location Axis;
 
-        /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-        public override LinearAxisLimit CreateJointDescription()
-        {
-            // TODO: Assume the CPos values?
-            return new LinearAxisLimit() { LocalAxis = Axis.ToNumerics(), MinimumOffset = Min, MaximumOffset = Max, LocalOffsetA = RelativePositionOne.ToNumerics(), LocalOffsetB = RelativePositionTwo.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-        }
+    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    public override LinearAxisLimit CreateJointDescription()
+    {
+        // TODO: Assume the CPos values?
+        return new LinearAxisLimit() { LocalAxis = Axis.ToNumerics(), MinimumOffset = Min, MaximumOffset = Max, LocalOffsetA = RelativePositionOne.ToNumerics(), LocalOffsetB = RelativePositionTwo.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
     }
 }

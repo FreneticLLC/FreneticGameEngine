@@ -14,15 +14,14 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.GraphicsHelpers.Models
-{
-    /// <summary>Represents a model's bone.</summary>
-    public class ModelBone
-    {
-        /// <summary>The transform of the bone.</summary>
-        public Matrix4 Transform = Matrix4.Identity;
+namespace FGEGraphics.GraphicsHelpers.Models;
 
-        /// <summary>The offset of the bone.</summary>
-        public Matrix4 Offset;
-    }
+/// <summary>Represents a model's bone.</summary>
+public class ModelBone
+{
+    /// <summary>The transform of the bone.</summary>
+    public Matrix4 Transform = Matrix4.Identity;
+
+    /// <summary>The offset of the bone.</summary>
+    public Matrix4 Offset;
 }

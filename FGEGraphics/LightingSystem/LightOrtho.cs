@@ -15,20 +15,19 @@ using FGEGraphics.ClientSystem.ViewRenderSystem;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.LightingSystem
+namespace FGEGraphics.LightingSystem;
+
+/// <summary>Represents an orthographic light.</summary>
+public class LightOrtho : Light
 {
-    /// <summary>Represents an orthographic light.</summary>
-    public class LightOrtho : Light
+    /// <summary>Gets the matrix of the light.</summary>
+    /// <param name="view">The relevant view system.</param>
+    /// <returns>The relevant matrix.</returns>
+    public override Matrix4 GetMatrix(View3D view)
     {
-        /// <summary>Gets the matrix of the light.</summary>
-        /// <param name="view">The relevant view system.</param>
-        /// <returns>The relevant matrix.</returns>
-        public override Matrix4 GetMatrix(View3D view)
-        {
-            Vector3d c = view.State.RenderRelative.ToOpenTK3D();
-            Vector3d e = EyePosition - c;
-            Vector3d d = TargetPosition - c;
-            return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), UpVector) * Matrix4.CreateOrthographicOffCenter(-FOV * 0.5f, FOV * 0.5f, -FOV * 0.5f, FOV * 0.5f, 1, MaxRange);
-        }
+        Vector3d c = view.State.RenderRelative.ToOpenTK3D();
+        Vector3d e = EyePosition - c;
+        Vector3d d = TargetPosition - c;
+        return Matrix4.LookAt(new Vector3((float)e.X, (float)e.Y, (float)e.Z), new Vector3((float)d.X, (float)d.Y, (float)d.Z), UpVector) * Matrix4.CreateOrthographicOffCenter(-FOV * 0.5f, FOV * 0.5f, -FOV * 0.5f, FOV * 0.5f, 1, MaxRange);
     }
 }

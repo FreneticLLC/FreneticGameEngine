@@ -14,38 +14,31 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
 
-namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints
+namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
+
+/// <summary>Special pseudo-constraint to indicate two entities shouldn't collide with each other.</summary>
+public class JointNoCollide : PhysicsJointBase
 {
-    /// <summary>Special pseudo-constraint to indicate two entities shouldn't collide with each other.</summary>
-    public class JointNoCollide : PhysicsJointBase
+    /// <summary>Constructs the <see cref="JointNoCollide"/>.</summary>
+    public JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _two)
     {
-        /// <summary>Constructs the <see cref="JointNoCollide"/>.</summary>
-        public JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _two)
-        {
-            One = _one;
-            Two = _two;
-        }
+        One = _one;
+        Two = _two;
+    }
 
-        /// <summary>Implements <see cref="GenericBaseJoint.Enable"/>.</summary>
-        public override void Enable()
-        {
-            if (One.Internal.NoCollideIDs == null)
-            {
-                One.Internal.NoCollideIDs = new HashSet<long>(16);
-            }
-            One.Internal.NoCollideIDs.Add(Two.Entity.EID);
-            if (Two.Internal.NoCollideIDs == null)
-            {
-                Two.Internal.NoCollideIDs = new HashSet<long>(16);
-            }
-            Two.Internal.NoCollideIDs.Add(One.Entity.EID);
-        }
+    /// <summary>Implements <see cref="GenericBaseJoint.Enable"/>.</summary>
+    public override void Enable()
+    {
+        One.Internal.NoCollideIDs ??= new HashSet<long>(16);
+        One.Internal.NoCollideIDs.Add(Two.Entity.EID);
+        Two.Internal.NoCollideIDs ??= new HashSet<long>(16);
+        Two.Internal.NoCollideIDs.Add(One.Entity.EID);
+    }
 
-        /// <summary>Implements <see cref="GenericBaseJoint.Disable"/>.</summary>
-        public override void Disable()
-        {
-            One.Internal.NoCollideIDs.Remove(Two.Entity.EID);
-            Two.Internal.NoCollideIDs.Remove(One.Entity.EID);
-        }
+    /// <summary>Implements <see cref="GenericBaseJoint.Disable"/>.</summary>
+    public override void Disable()
+    {
+        One.Internal.NoCollideIDs.Remove(Two.Entity.EID);
+        Two.Internal.NoCollideIDs.Remove(One.Entity.EID);
     }
 }

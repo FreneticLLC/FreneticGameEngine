@@ -13,206 +13,205 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGECore.FileSystems
+namespace FGECore.FileSystems;
+
+/// <summary>A simplified in-memory stream object.</summary>
+public sealed class DataStream : Stream
 {
-    /// <summary>A simplified in-memory stream object.</summary>
-    public sealed class DataStream : Stream
+    /// <summary>Wrapped internal stream.</summary>
+    public byte[] Wrapped;
+
+    /// <summary>Current data length.</summary>
+    public long Len = 0;
+
+    /// <summary>Current index.</summary>
+    public long Ind = 0;
+
+    /// <summary>Returns true.</summary>
+    public override bool CanRead
     {
-        /// <summary>Wrapped internal stream.</summary>
-        public byte[] Wrapped;
-
-        /// <summary>Current data length.</summary>
-        public long Len = 0;
-
-        /// <summary>Current index.</summary>
-        public long Ind = 0;
-
-        /// <summary>Returns true.</summary>
-        public override bool CanRead
+        get
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
+    }
 
-        /// <summary>Returns true.</summary>
-        public override bool CanSeek
+    /// <summary>Returns true.</summary>
+    public override bool CanSeek
+    {
+        get
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
+    }
 
-        /// <summary>Returns true.</summary>
-        public override bool CanWrite
+    /// <summary>Returns true.</summary>
+    public override bool CanWrite
+    {
+        get
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
+    }
 
-        /// <summary>Get length.</summary>
-        public override long Length
+    /// <summary>Get length.</summary>
+    public override long Length
+    {
+        get
         {
-            get
-            {
-                return Len + Ind;
-            }
+            return Len + Ind;
         }
+    }
 
-        /// <summary>Get or set position index.</summary>
-        public override long Position
+    /// <summary>Get or set position index.</summary>
+    public override long Position
+    {
+        get
         {
-            get
-            {
-                return Ind;
-            }
-            set
-            {
-                Ind = value;
-            }
-        }
-
-        /// <summary>Constructs a data stream with bytes pre-loaded.</summary>
-        /// <param name="bytes">The bytes to pre-load.</param>
-        public DataStream(byte[] bytes)
-        {
-            Wrapped = bytes;
-            Len = bytes.LongLength;
-            Ind = 0;
-        }
-
-        /// <summary>Constructs an empty data stream.</summary>
-        public DataStream()
-        {
-            Wrapped = Array.Empty<byte>();
-            Len = 0;
-            Ind = 0;
-        }
-
-        /// <summary>Constructs a datastream with a specific capacity.</summary>
-        /// <param name="capacity">The capacity.</param>
-        public DataStream(int capacity)
-        {
-            Wrapped = new byte[capacity];
-            Len = 0;
-            Ind = 0;
-        }
-
-        /// <summary>Does nothing!</summary>
-        public override void Flush()
-        {
-        }
-
-        /// <summary>Set to a specific location.</summary>
-        /// <param name="offset">Where to move to.</param>
-        /// <param name="origin">What position to seek relative to.</param>
-        /// <returns>New index.</returns>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            // TODO: More logical seek operation
-            if (origin == SeekOrigin.Begin)
-            {
-                Ind = offset;
-            }
-            else if (origin == SeekOrigin.Current)
-            {
-                Ind += offset;
-            }
-            else if (origin == SeekOrigin.End)
-            {
-                Ind = Wrapped.Length - offset;
-            }
             return Ind;
         }
-
-        /// <summary>Set the length of the stream.</summary>
-        /// <param name="res_len">The resultant length.</param>
-        public override void SetLength(long res_len)
+        set
         {
-            Len = res_len;
-            if (Len == 0)
-            {
-                Ind = 0;
-            }
+            Ind = value;
         }
+    }
 
-        /// <summary>Set the length of the underlying buffer.</summary>
-        /// <param name="res_len">The resultant length.</param>
-        public void SetCapacity(long res_len)
+    /// <summary>Constructs a data stream with bytes pre-loaded.</summary>
+    /// <param name="bytes">The bytes to pre-load.</param>
+    public DataStream(byte[] bytes)
+    {
+        Wrapped = bytes;
+        Len = bytes.LongLength;
+        Ind = 0;
+    }
+
+    /// <summary>Constructs an empty data stream.</summary>
+    public DataStream()
+    {
+        Wrapped = Array.Empty<byte>();
+        Len = 0;
+        Ind = 0;
+    }
+
+    /// <summary>Constructs a datastream with a specific capacity.</summary>
+    /// <param name="capacity">The capacity.</param>
+    public DataStream(int capacity)
+    {
+        Wrapped = new byte[capacity];
+        Len = 0;
+        Ind = 0;
+    }
+
+    /// <summary>Does nothing!</summary>
+    public override void Flush()
+    {
+    }
+
+    /// <summary>Set to a specific location.</summary>
+    /// <param name="offset">Where to move to.</param>
+    /// <param name="origin">What position to seek relative to.</param>
+    /// <returns>New index.</returns>
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        // TODO: More logical seek operation
+        if (origin == SeekOrigin.Begin)
         {
-            byte[] t = new byte[res_len];
-            Array.Copy(Wrapped, Ind, t, 0, Math.Min(res_len, Len));
-            Wrapped = t;
+            Ind = offset;
         }
-
-        /// <summary>Reads a single byte, or returns -1.</summary>
-        /// <returns>The byte read.</returns>
-        public override int ReadByte()
+        else if (origin == SeekOrigin.Current)
         {
-            if (Len == 0)
-            {
-                return -1;
-            }
-            Len--;
-            return Wrapped[Ind++];
+            Ind += offset;
         }
-
-        /// <summary>Read some data.</summary>
-        /// <param name="buffer">Data read buffer.</param>
-        /// <param name="offset">Start index.</param>
-        /// <param name="count">Length.</param>
-        /// <returns>Bytes read.</returns>
-        public override int Read(byte[] buffer, int offset, int count)
+        else if (origin == SeekOrigin.End)
         {
-            if (Len >= count)
-            {
-                for (long i = 0; i < count; i++)
-                {
-                    buffer[offset + i] = Wrapped[Ind++];
-                }
-                Len -= count;
-                return count;
-            }
-            if (Len == 0)
-            {
-                return -1;
-            }
-            long validlen = Math.Min(Len, count);
-            for (long i = 0; i < validlen; i++)
+            Ind = Wrapped.Length - offset;
+        }
+        return Ind;
+    }
+
+    /// <summary>Set the length of the stream.</summary>
+    /// <param name="res_len">The resultant length.</param>
+    public override void SetLength(long res_len)
+    {
+        Len = res_len;
+        if (Len == 0)
+        {
+            Ind = 0;
+        }
+    }
+
+    /// <summary>Set the length of the underlying buffer.</summary>
+    /// <param name="res_len">The resultant length.</param>
+    public void SetCapacity(long res_len)
+    {
+        byte[] t = new byte[res_len];
+        Array.Copy(Wrapped, Ind, t, 0, Math.Min(res_len, Len));
+        Wrapped = t;
+    }
+
+    /// <summary>Reads a single byte, or returns -1.</summary>
+    /// <returns>The byte read.</returns>
+    public override int ReadByte()
+    {
+        if (Len == 0)
+        {
+            return -1;
+        }
+        Len--;
+        return Wrapped[Ind++];
+    }
+
+    /// <summary>Read some data.</summary>
+    /// <param name="buffer">Data read buffer.</param>
+    /// <param name="offset">Start index.</param>
+    /// <param name="count">Length.</param>
+    /// <returns>Bytes read.</returns>
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        if (Len >= count)
+        {
+            for (long i = 0; i < count; i++)
             {
                 buffer[offset + i] = Wrapped[Ind++];
             }
-            Len -= validlen;
-            return (int)validlen;
+            Len -= count;
+            return count;
         }
-
-        /// <summary>Write some data.</summary>
-        /// <param name="buffer">Data to write.</param>
-        /// <param name="offset">Start index.</param>
-        /// <param name="count">Length.</param>
-        public override void Write(byte[] buffer, int offset, int count)
+        if (Len == 0)
         {
-            if (Wrapped.Length - (Len + Ind) < count)
-            {
-                SetCapacity((Len + count) * 2);
-            }
-            for (int i = 0; i < count; i++)
-            {
-                Wrapped[Ind + Len++] = buffer[offset + i];
-            }
+            return -1;
         }
-
-        /// <summary>Returns a copy of the internal data array, trimmed to match the stream length.</summary>
-        /// <returns>Bytes.</returns>
-        public byte[] ToArray()
+        long validlen = Math.Min(Len, count);
+        for (long i = 0; i < validlen; i++)
         {
-            byte[] b = new byte[Len];
-            Array.Copy(Wrapped, Ind, b, 0, Len);
-            return b;
+            buffer[offset + i] = Wrapped[Ind++];
         }
+        Len -= validlen;
+        return (int)validlen;
+    }
+
+    /// <summary>Write some data.</summary>
+    /// <param name="buffer">Data to write.</param>
+    /// <param name="offset">Start index.</param>
+    /// <param name="count">Length.</param>
+    public override void Write(byte[] buffer, int offset, int count)
+    {
+        if (Wrapped.Length - (Len + Ind) < count)
+        {
+            SetCapacity((Len + count) * 2);
+        }
+        for (int i = 0; i < count; i++)
+        {
+            Wrapped[Ind + Len++] = buffer[offset + i];
+        }
+    }
+
+    /// <summary>Returns a copy of the internal data array, trimmed to match the stream length.</summary>
+    /// <returns>Bytes.</returns>
+    public byte[] ToArray()
+    {
+        byte[] b = new byte[Len];
+        Array.Copy(Wrapped, Ind, b, 0, Len);
+        return b;
     }
 }

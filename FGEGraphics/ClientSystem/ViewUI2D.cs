@@ -23,147 +23,146 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.ClientSystem
+namespace FGEGraphics.ClientSystem;
+
+/// <summary>A 2D UI view.</summary>
+public class ViewUI2D
 {
-    /// <summary>A 2D UI view.</summary>
-    public class ViewUI2D
+    /// <summary>The backing client window.</summary>
+    public GameClientWindow Client;
+
+    /// <summary>Gets the primary engine.</summary>
+    public GameEngineBase Engine
     {
-        /// <summary>The backing client window.</summary>
-        public GameClientWindow Client;
-
-        /// <summary>Gets the primary engine.</summary>
-        public GameEngineBase Engine
+        get
         {
-            get
+            return Client.CurrentEngine;
+        }
+    }
+
+    /// <summary>Gets the rendering helper for the engine.</summary>
+    public Renderer2D Rendering
+    {
+        get
+        {
+            return Client.Rendering2D;
+        }
+    }
+
+    /// <summary>The default basic UI screen.</summary>
+    public UIScreen DefaultScreen;
+
+    /// <summary>Constructs the view.</summary>
+    /// <param name="gameClient">Backing client window.</param>
+    public ViewUI2D(GameClientWindow gameClient)
+    {
+        Client = gameClient;
+        UIContext = new RenderContext2D();
+        DefaultScreen = new UIScreen(this);
+        CurrentScreen = DefaultScreen;
+    }
+
+    /// <summary>
+    /// Generally do not set this directly.
+    /// Instead use <see cref="CurrentScreen"/>.
+    /// </summary>
+    public UIScreen InternalCurrentScreen;
+
+    /// <summary>The current main screen.</summary>
+    public UIScreen CurrentScreen
+    {
+        get
+        {
+            return InternalCurrentScreen;
+        }
+        set
+        {
+            if (value != InternalCurrentScreen)
             {
-                return Client.CurrentEngine;
+                InternalCurrentScreen?.SwitchFrom();
+                InternalCurrentScreen = value;
+                InternalCurrentScreen?.SwitchTo();
             }
         }
+    }
 
-        /// <summary>Gets the rendering helper for the engine.</summary>
-        public Renderer2D Rendering
+    /// <summary>The render context (2D) for the UI.</summary>
+    public RenderContext2D UIContext;
+
+    /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
+    public bool DirectToScreen = true;
+
+    /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
+    public int RelativeYLast = 0;
+
+    /// <summary>Draw the menu to the relevant back buffer.</summary>
+    public void Draw()
+    {
+        StackNoteHelper.Push("Draw ViewUI2D", this);
+        try
         {
-            get
+            GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
+            if (DirectToScreen)
             {
-                return Client.Rendering2D;
+                UIContext.ZoomMultiplier = Client.Window.ClientSize.X * 0.5f;
+                UIContext.Width = Client.Window.ClientSize.X;
+                UIContext.Height = Client.Window.ClientSize.Y;
+                float aspect = UIContext.Width / (float)UIContext.Height;
+                float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
+                UIContext.Scaler = new Vector2(sc, -sc * aspect);
+                UIContext.ViewCenter = new Vector2(-Client.Window.ClientSize.X * 0.5f, -Client.Window.ClientSize.Y * 0.5f);
+                UIContext.Adder = UIContext.ViewCenter;
+                UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
+                Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.ClientSize.X, Client.Window.ClientSize.Y, 0, -1, 1);
+                GL.Viewport(0, 0, UIContext.Width, UIContext.Height);
+                GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
             }
-        }
-
-        /// <summary>The default basic UI screen.</summary>
-        public UIScreen DefaultScreen;
-
-        /// <summary>Constructs the view.</summary>
-        /// <param name="gameClient">Backing client window.</param>
-        public ViewUI2D(GameClientWindow gameClient)
-        {
-            Client = gameClient;
-            UIContext = new RenderContext2D();
-            DefaultScreen = new UIScreen(this);
-            CurrentScreen = DefaultScreen;
-        }
-
-        /// <summary>
-        /// Generally do not set this directly.
-        /// Instead use <see cref="CurrentScreen"/>.
-        /// </summary>
-        public UIScreen InternalCurrentScreen;
-
-        /// <summary>The current main screen.</summary>
-        public UIScreen CurrentScreen
-        {
-            get
+            // TODO: alternate Ortho setting from scaler/adder def!
+            Client.Shaders.ColorMult2DShader.Bind();
+            Renderer2D.SetColor(Color4F.White);
+            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
+            GL.Uniform2(ShaderLocations.Common2D.ADDER, ref UIContext.Adder);
+            GL.Disable(EnableCap.DepthTest);
+            Shader s = Client.FontSets.FixToShader;
+            Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
+            LastRenderedSet.Clear();
+            RelativeYLast = 0;
+            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
+            foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
             {
-                return InternalCurrentScreen;
-            }
-            set
-            {
-                if (value != InternalCurrentScreen)
+                StackNoteHelper.Push("Draw UI Element", elem);
+                try
                 {
-                    InternalCurrentScreen?.SwitchFrom();
-                    InternalCurrentScreen = value;
-                    InternalCurrentScreen?.SwitchTo();
-                }
-            }
-        }
-
-        /// <summary>The render context (2D) for the UI.</summary>
-        public RenderContext2D UIContext;
-
-        /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
-        public bool DirectToScreen = true;
-
-        /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
-        public int RelativeYLast = 0;
-
-        /// <summary>Draw the menu to the relevant back buffer.</summary>
-        public void Draw()
-        {
-            StackNoteHelper.Push("Draw ViewUI2D", this);
-            try
-            {
-                GraphicsUtil.CheckError("ViewUI2D - Draw - Pre");
-                if (DirectToScreen)
-                {
-                    UIContext.ZoomMultiplier = Client.Window.ClientSize.X * 0.5f;
-                    UIContext.Width = Client.Window.ClientSize.X;
-                    UIContext.Height = Client.Window.ClientSize.Y;
-                    float aspect = UIContext.Width / (float)UIContext.Height;
-                    float sc = 1.0f / (UIContext.Zoom * UIContext.ZoomMultiplier);
-                    UIContext.Scaler = new Vector2(sc, -sc * aspect);
-                    UIContext.ViewCenter = new Vector2(-Client.Window.ClientSize.X * 0.5f, -Client.Window.ClientSize.Y * 0.5f);
-                    UIContext.Adder = UIContext.ViewCenter;
-                    UIContext.AspectHelper = UIContext.Width / (float)UIContext.Height;
-                    Client.Ortho = Matrix4.CreateOrthographicOffCenter(0, Client.Window.ClientSize.X, Client.Window.ClientSize.Y, 0, -1, 1);
-                    GL.Viewport(0, 0, UIContext.Width, UIContext.Height);
-                    GraphicsUtil.CheckError("ViewUI2D - Draw - DirectToScreenPost");
-                }
-                // TODO: alternate Ortho setting from scaler/adder def!
-                Client.Shaders.ColorMult2DShader.Bind();
-                Renderer2D.SetColor(Color4F.White);
-                GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
-                GL.Uniform2(ShaderLocations.Common2D.ADDER, ref UIContext.Adder);
-                GL.Disable(EnableCap.DepthTest);
-                Shader s = Client.FontSets.FixToShader;
-                Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
-                GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-                LastRenderedSet.Clear();
-                RelativeYLast = 0;
-                CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
-                GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-                foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
-                {
-                    StackNoteHelper.Push("Draw UI Element", elem);
-                    try
+                    if (elem.IsValid)
                     {
-                        if (elem.IsValid)
-                        {
-                            elem.Render(this, Client.Delta);
-                        }
-                    }
-                    finally
-                    {
-                        StackNoteHelper.Pop();
+                        elem.Render(this, Client.Delta);
                     }
                 }
-                GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
-                Client.FontSets.FixToShader = s;
+                finally
+                {
+                    StackNoteHelper.Pop();
+                }
             }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
+            GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
+            Client.FontSets.FixToShader = s;
         }
-
-        /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
-        public bool SortToPriority = false;
-
-        /// <summary>The last set of elements that were rendered (not sorted).</summary>
-        public List<UIElement> LastRenderedSet = new();
-
-        /// <summary>Ticks all elements attached to this view.</summary>
-        public void Tick()
+        finally
         {
-            CurrentScreen.FullTick(Client.Delta);
+            StackNoteHelper.Pop();
         }
+    }
+
+    /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
+    public bool SortToPriority = false;
+
+    /// <summary>The last set of elements that were rendered (not sorted).</summary>
+    public List<UIElement> LastRenderedSet = new();
+
+    /// <summary>Ticks all elements attached to this view.</summary>
+    public void Tick()
+    {
+        CurrentScreen.FullTick(Client.Delta);
     }
 }

@@ -14,39 +14,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.ClientSystem.ViewRenderSystem
+namespace FGEGraphics.ClientSystem.ViewRenderSystem;
+
+/// <summary>Timing statistics for a <see cref="View3D"/> (when enabled).</summary>
+public class View3DStats
 {
-    /// <summary>Timing statistics for a <see cref="View3D"/> (when enabled).</summary>
-    public class View3DStats
+    /// <summary>Time contributed by the named specific part of performance processing.</summary>
+    public PerformanceTimer Shadows = new("Shadows"),
+        FrameBuffer = new("FrameBuffer"),
+        Lights = new("Lights"),
+        Total = new("RenderTotal");
+
+    /// <summary>How much delta time has accumulated since the last spike reset.</summary>
+    public double TimeSinceSpikeReset = 0;
+
+    /// <summary>How much delta time shall accumulate before spikes are reset.</summary>
+    public double TimeToRetainSpikes = 5;
+
+    /// <summary>Resets perf spike times when needed.</summary>
+    public void Check(double delta)
     {
-        /// <summary>Time contributed by the named specific part of performance processing.</summary>
-        public PerformanceTimer Shadows = new("Shadows"),
-            FrameBuffer = new("FrameBuffer"),
-            Lights = new("Lights"),
-            Total = new("RenderTotal");
-
-        /// <summary>How much delta time has accumulated since the last spike reset.</summary>
-        public double TimeSinceSpikeReset = 0;
-
-        /// <summary>How much delta time shall accumulate before spikes are reset.</summary>
-        public double TimeToRetainSpikes = 5;
-
-        /// <summary>Resets perf spike times when needed.</summary>
-        public void Check(double delta)
+        if (PerformanceTimer.DISABLE)
         {
-            if (PerformanceTimer.DISABLE)
-            {
-                return;
-            }
-            TimeSinceSpikeReset += delta;
-            if (TimeSinceSpikeReset >= TimeToRetainSpikes)
-            {
-                TimeSinceSpikeReset = 0;
-                Shadows.SpikeMS = 0;
-                FrameBuffer.SpikeMS = 0;
-                Lights.SpikeMS = 0;
-                Total.SpikeMS = 0;
-            }
+            return;
+        }
+        TimeSinceSpikeReset += delta;
+        if (TimeSinceSpikeReset >= TimeToRetainSpikes)
+        {
+            TimeSinceSpikeReset = 0;
+            Shadows.SpikeMS = 0;
+            FrameBuffer.SpikeMS = 0;
+            Lights.SpikeMS = 0;
+            Total.SpikeMS = 0;
         }
     }
 }

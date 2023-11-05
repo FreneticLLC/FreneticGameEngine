@@ -14,39 +14,38 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.ClientSystem
+namespace FGEGraphics.ClientSystem;
+
+/// <summary>Represents a 2D rendering context.</summary>
+public class RenderContext2D
 {
-    /// <summary>Represents a 2D rendering context.</summary>
-    public class RenderContext2D
-    {
-        /// <summary>The backing engine.</summary>
-        public GameEngine2D Engine;
+    /// <summary>The backing engine.</summary>
+    public GameEngine2D Engine;
 
-        /// <summary>Width of the view.</summary>
-        public int Width = 1024;
+    /// <summary>Width of the view.</summary>
+    public int Width = 1024;
 
-        /// <summary>Height of the view.</summary>
-        public int Height = 768;
+    /// <summary>Height of the view.</summary>
+    public int Height = 768;
 
-        /// <summary>The zoom of the view.</summary>
-        public float Zoom = 1f;
+    /// <summary>The zoom of the view.</summary>
+    public float Zoom = 1f;
 
-        /// <summary>Width over height.</summary>
-        public float AspectHelper = 1024f / 768f;
+    /// <summary>Width over height.</summary>
+    public float AspectHelper = 1024f / 768f;
 
-        /// <summary>Whether the system is currently calculating shadows.</summary>
-        public bool CalcShadows = false;
+    /// <summary>Whether the system is currently calculating shadows.</summary>
+    public bool CalcShadows = false;
 
-        /// <summary>The multiplier for zoom effects.</summary>
-        public float ZoomMultiplier = 1f;
+    /// <summary>The multiplier for zoom effects.</summary>
+    public float ZoomMultiplier = 1f;
 
-        /// <summary>The center of the 2D view.</summary>
-        public Vector2 ViewCenter = Vector2.Zero;
+    /// <summary>The center of the 2D view.</summary>
+    public Vector2 ViewCenter = Vector2.Zero;
 
-        /// <summary>The present Adder value.</summary>
-        public Vector2 Adder;
+    /// <summary>The present Adder value.</summary>
+    public Vector2 Adder;
 
-        /// <summary>The present Scaler value.</summary>
-        public Vector2 Scaler;
-    }
+    /// <summary>The present Scaler value.</summary>
+    public Vector2 Scaler;
 }

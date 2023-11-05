@@ -14,45 +14,44 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FGEGraphics.ClientSystem;
 
-namespace FGEGraphics.GraphicsHelpers.Models
+namespace FGEGraphics.GraphicsHelpers.Models;
+
+
+/// <summary>Represents a mesh within a model.</summary>
+public class ModelMesh
 {
+    /// <summary>The name of this mesh.</summary>
+    public string Name;
 
-    /// <summary>Represents a mesh within a model.</summary>
-    public class ModelMesh
+    /// <summary>The bones relevant to this mesh.</summary>
+    public List<ModelBone> Bones = new();
+
+    /// <summary>Constructs the model mesh.</summary>
+    /// <param name="_name">The name of it.</param>
+    public ModelMesh(string _name)
     {
-        /// <summary>The name of this mesh.</summary>
-        public string Name;
-
-        /// <summary>The bones relevant to this mesh.</summary>
-        public List<ModelBone> Bones = new();
-
-        /// <summary>Constructs the model mesh.</summary>
-        /// <param name="_name">The name of it.</param>
-        public ModelMesh(string _name)
+        Name = _name.ToLowerFast();
+        if (Name.EndsWith(".001"))
         {
-            Name = _name.ToLowerFast();
-            if (Name.EndsWith(".001"))
-            {
-                Name = Name[..^".001".Length];
-            }
-            BaseRenderable = new Renderable();
+            Name = Name[..^".001".Length];
         }
+        BaseRenderable = new Renderable();
+    }
 
-        /// <summary>The VBO for this mesh.</summary>
-        public Renderable BaseRenderable;
+    /// <summary>The VBO for this mesh.</summary>
+    public Renderable BaseRenderable;
 
-        /// <summary>Destroys the backing <see cref="Renderable"/>.</summary>
-        public void Destroy()
-        {
-            BaseRenderable.Destroy();
-        }
+    /// <summary>Destroys the backing <see cref="Renderable"/>.</summary>
+    public void Destroy()
+    {
+        BaseRenderable.Destroy();
+    }
 
-        /// <summary>Renders the mesh.</summary>
-        /// <param name="context">The sourcing render context.</param>
-        public void Draw(RenderContext context)
-        {
-            context.ModelsRendered++;
-            BaseRenderable.Render(context, true);
-        }
+    /// <summary>Renders the mesh.</summary>
+    /// <param name="context">The sourcing render context.</param>
+    public void Draw(RenderContext context)
+    {
+        context.ModelsRendered++;
+        BaseRenderable.Render(context, true);
     }
 }

@@ -12,38 +12,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGECore.EntitySystem.JointSystems
+namespace FGECore.EntitySystem.JointSystems;
+
+/// <summary>The base class for all non-physics-based joints.</summary>
+public abstract class NonPhysicalJointBase : GenericBaseJoint
 {
-    /// <summary>The base class for all non-physics-based joints.</summary>
-    public abstract class NonPhysicalJointBase : GenericBaseJoint
+    /// <summary>Constructs the non-physics joint base.</summary>
+    public NonPhysicalJointBase(BasicEntity _one, BasicEntity _two)
     {
-        /// <summary>Constructs the non-physics joint base.</summary>
-        public NonPhysicalJointBase(BasicEntity _one, BasicEntity _two)
-        {
-            One = _one;
-            Two = _two;
-        }
+        One = _one;
+        Two = _two;
+    }
 
-        /// <summary>The applicable entities for this joint.</summary>
-        public BasicEntity One, Two;
+    /// <summary>The applicable entities for this joint.</summary>
+    public BasicEntity One, Two;
 
-        /// <summary>Implements <see cref="GenericBaseJoint.EntityOne"/>.</summary>
-        public override BasicEntity EntityOne => One;
+    /// <summary>Implements <see cref="GenericBaseJoint.EntityOne"/>.</summary>
+    public override BasicEntity EntityOne => One;
 
-        /// <summary>Implements <see cref="GenericBaseJoint.EntityTwo"/>.</summary>
-        public override BasicEntity EntityTwo => Two;
+    /// <summary>Implements <see cref="GenericBaseJoint.EntityTwo"/>.</summary>
+    public override BasicEntity EntityTwo => Two;
 
-        /// <summary>Calculate the joint's logic and apply it.</summary>
-        public abstract void Solve();
+    /// <summary>Calculate the joint's logic and apply it.</summary>
+    public abstract void Solve();
 
-        /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Enable"/>.</summary>
-        public override void Enable()
-        {
-        }
+    /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Enable"/>.</summary>
+    public override void Enable()
+    {
+    }
 
-        /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Disable"/>.</summary>
-        public override void Disable()
-        {
-        }
+    /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Disable"/>.</summary>
+    public override void Disable()
+    {
     }
 }
