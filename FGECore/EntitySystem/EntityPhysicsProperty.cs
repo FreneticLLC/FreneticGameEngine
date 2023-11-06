@@ -438,4 +438,21 @@ public class EntityPhysicsProperty : BasicEntityProperty
             LinearVelocity += force / Mass;
         }
     }
+
+    /// <summary>Applies an angular force directly to the physics entity's body.
+    /// Note: this is a force, not a velocity. Mass is relevant.
+    /// This will activate the entity.</summary>
+    /// <param name="force">The angular force vector.</param>
+    public void ApplyAngularForce(Location force)
+    {
+        if (IsSpawned)
+        {
+            SpawnedBody.ApplyAngularImpulse(force.ToNumerics());
+            SpawnedBody.Awake = true;
+        }
+        else
+        {
+            AngularVelocity += force / Mass;
+        }
+    }
 }
