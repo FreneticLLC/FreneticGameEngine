@@ -285,7 +285,7 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
                 }
                 while (!AddEntity(ce))
                 {
-                    OutputType.WARNING.Output($"Entity with newly generated EID {ce.EID} failed to add - EID tracker may be corrupt, or save data may have been mixed. Re-attempting...");
+                    Logs.Warning($"Entity with newly generated EID {ce.EID} failed to add - EID tracker may be corrupt, or save data may have been mixed. Re-attempting...");
                     ce.EID = CurrentEntityID++;
                 }
                 ce.IsSpawned = true;
@@ -338,7 +338,7 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     {
         if (!ent.IsSpawned)
         {
-            OutputType.WARNING.Output("Despawing non-spawned entity.");
+            Logs.Warning("Despawing non-spawned entity.");
             return;
         }
         try

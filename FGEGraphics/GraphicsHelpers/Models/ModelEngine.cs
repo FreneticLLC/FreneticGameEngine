@@ -125,19 +125,16 @@ public class ModelEngine
         try
         {
             filename = FileEngine.CleanFileName(filename);
-            if (!Window.Files.TryReadFileData("models/" + filename + ".vmd", out byte[] bits))
+            if (!Window.Files.TryReadFileData($"models/{filename}.vmd", out byte[] bits))
             {
-                OutputType.WARNING.Output("Cannot load model, file '" +
-                    TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Base +
-                    "' does not exist.");
+                Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Base}' does not exist.");
                 return null;
             }
             return FromBytes(filename, bits);
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output("Failed to load model from filename '" +
-                TextStyle.Standout + "models/" + filename + ".vmd" + TextStyle.Error + "': " + ex.ToString());
+            Logs.Error($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Error}': {ex}");
             return null;
         }
     }
@@ -162,7 +159,7 @@ public class ModelEngine
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output(ex.ToString());
+            Logs.Error(ex.ToString());
         }
         Loaded ??= new Model(modelname) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
         LoadedModels.Add(modelname, Loaded);
@@ -202,11 +199,11 @@ public class ModelEngine
         }
         void fileMissing()
         {
-            OutputType.WARNING.Output($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
+            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
         }
         void handleError(string message)
         {
-            OutputType.ERROR.Output($"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
+            Logs.Error($"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
         }
         Window.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
         return model;
@@ -253,7 +250,7 @@ public class ModelEngine
         };
         if (scene.Meshes.Length == 0)
         {
-            throw new Exception("Scene has no meshes! (" + name + ")");
+            throw new Exception($"Scene has no meshes! ({name})");
         }
         foreach (Model3DMesh mesh in scene.Meshes)
         {
@@ -266,11 +263,11 @@ public class ModelEngine
             bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
             if (!hasn)
             {
-                OutputType.WARNING.Output("Mesh has no normals! (" + name + ")");
+                Logs.Warning($"Mesh has no normals! ({name})");
             }
             if (!hastc)
             {
-                OutputType.WARNING.Output("Mesh has no texcoords! (" + name + ")");
+                Logs.Warning($"Mesh has no texcoords! ({name})");
             }
             Renderable.ArrayBuilder builder = new();
             builder.Prepare(mesh.Vertices.Length, mesh.Indices.Length);
@@ -302,7 +299,7 @@ public class ModelEngine
             int bc = mesh.Bones.Length;
             if (bc > 200)
             {
-                OutputType.WARNING.Output("Mesh has " + bc + " bones! (" + name + ")");
+                Logs.Warning($"Mesh has {bc} bones! ({name})");
                 bc = 200;
             }
             int[] pos = new int[builder.Vertices.Length];

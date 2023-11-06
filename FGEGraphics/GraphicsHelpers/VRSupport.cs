@@ -87,7 +87,7 @@ public class VRSupport
         VRSupport vrs = new() { Window = twindow, VR = OpenVR.Init(ref err) };
         if (err != EVRInitError.None)
         {
-            OutputType.CLIENTINFO.Output($"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
+            Logs.ClientInfo($"VR error: {err}: {OpenVR.GetStringForHmdError(err)}");
             return null;
         }
         vrs.Start();
@@ -110,7 +110,7 @@ public class VRSupport
         StringBuilder val = new(256);
         ETrackedPropertyError errx = ETrackedPropertyError.TrackedProp_Success;
         VR.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_TrackingSystemName_String, val, 256, ref errx);
-        OutputType.CLIENTINIT.Output("Switching to VR mode: " + w + "/" + h + "... " + val.ToString());
+        Logs.ClientInit($"Switching to VR mode: {w}/{h}... {val}");
         VRModel = val.ToString();
         Compositor = OpenVR.Compositor;
         Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseStanding);
@@ -216,13 +216,13 @@ public class VRSupport
         }
         if (merr != EVRCompositorError.None)
         {
-            OutputType.WARNING.Output("Posing error: " + merr);
+            Logs.Warning($"Posing error: {merr}");
         }
         Left = GetController(true);
         Right = GetController(false);
         if (!Compositor.CanRenderScene())
         {
-            OutputType.WARNING.Output("Can't render VR scene!");
+            Logs.Warning("Can't render VR scene!");
         }
         Texture_t left = new()
         {
@@ -240,7 +240,7 @@ public class VRSupport
         EVRCompositorError lerr = Compositor.Submit(EVREye.Eye_Left, ref left, ref bounds, EVRSubmitFlags.Submit_Default);
         if (lerr != EVRCompositorError.None)
         {
-            OutputType.WARNING.Output("Left eye error: " + lerr);
+            Logs.Warning($"Left eye error: {lerr}");
         }
         Texture_t right = new()
         {
@@ -258,7 +258,7 @@ public class VRSupport
         EVRCompositorError rerr = Compositor.Submit(EVREye.Eye_Right, ref right, ref rbounds, EVRSubmitFlags.Submit_Default);
         if (rerr != EVRCompositorError.None)
         {
-            OutputType.WARNING.Output("Right eye error: " + rerr);
+            Logs.Warning($"Right eye error: {rerr}");
         }
     }
 }

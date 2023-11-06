@@ -548,7 +548,7 @@ public class Renderable
         {
             if (buildList.Vertices == null)
             {
-                OutputType.ERROR.Output("Failed to generate VBO, null vertices!");
+                Logs.Error("Failed to generate VBO, null vertices!");
                 return;
             }
             vecs = buildList.Vertices.ToArray();
@@ -570,7 +570,7 @@ public class Renderable
         {
             if (buildArray.Vertices == null)
             {
-                OutputType.ERROR.Output("Failed to generate VBO, null vertices!");
+                Logs.Error("Failed to generate VBO, null vertices!");
                 return;
             }
             vecs = buildArray.Vertices;
@@ -590,12 +590,12 @@ public class Renderable
         }
         else
         {
-            OutputType.ERROR.Output("Failed to generate VBO, unknown builder type '" + builder + "'!");
+            Logs.Error("Failed to generate VBO, unknown builder type '" + builder + "'!");
             return;
         }
         if (vecs.Length == 0)
         {
-            OutputType.ERROR.Output("Failed to generate VBO, empty vertices!");
+            Logs.Error("Failed to generate VBO, empty vertices!");
             return;
         }
 #if DEBUG

@@ -125,11 +125,11 @@ public class GameEngine2D : GameEngineBase
     public override void PostLoad()
     {
         GraphicsUtil.CheckError("PostLoad - Pre");
-        OutputType.CLIENTINIT.Output("GameEngine loading render helpers...");
+        Logs.ClientInit("GameEngine loading render helpers...");
         RenderHelper = new Renderer2D(Textures, Shaders);
         RenderHelper.Init();
         GraphicsUtil.CheckError("PostLoad - RenderHelper Done");
-        OutputType.CLIENTINIT.Output("GameEngine loading 2D light helpers...");
+        Logs.ClientInit("GameEngine loading 2D light helpers...");
         LoadLightHelpers();
         GraphicsUtil.CheckError("PostLoad - Post");
     }

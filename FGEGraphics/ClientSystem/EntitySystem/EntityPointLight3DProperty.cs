@@ -62,7 +62,7 @@ public class EntityPointLight3DProperty : ClientEntityProperty
         }
         else
         {
-            OutputType.WARNING.Output("3D light spawned into a non-3D-engine-based game!");
+            Logs.Warning("3D light spawned into a non-3D-engine-based game!");
         }
     }
 
@@ -78,7 +78,7 @@ public class EntityPointLight3DProperty : ClientEntityProperty
         }
         else
         {
-            OutputType.WARNING.Output("3D light despawned from a non-3D-engine-based game!");
+            Logs.Warning("3D light despawned from a non-3D-engine-based game!");
         }
     }
 }

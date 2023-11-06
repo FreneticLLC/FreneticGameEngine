@@ -236,7 +236,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         try
         {
             StackNoteHelper.Push("GameClientWindow - Start, run", this);
-            OutputType.CLIENTINIT.Output("GameEngine loading...");
+            Logs.ClientInit("GameEngine loading...");
             Window = new GameWindow(new GameWindowSettings(), new NativeWindowSettings()
             {
                 Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
@@ -255,9 +255,9 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             Window.MouseMove += Mouse_Move;
             Window.Closing += Window_Closed;
             Window.Resize += Window_Resize;
-            OutputType.CLIENTINIT.Output("GameEngine calling SetUp event...");
+            Logs.ClientInit("GameEngine calling SetUp event...");
             OnWindowSetUp?.Invoke();
-            OutputType.CLIENTINIT.Output("GameEngine running...");
+            Logs.ClientInit("GameEngine running...");
             Window.Run();
         }
         finally
@@ -279,7 +279,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     private void Window_Load()
     {
         Window.Focus();
-        OutputType.CLIENTINIT.Output("GameClient starting load sequence...");
+        Logs.ClientInit("GameClient starting load sequence...");
         GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -287,14 +287,14 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         GL.Disable(EnableCap.CullFace);
         GraphicsUtil.CheckError("GEB - Initial");
         InstanceInit();
-        OutputType.CLIENTINIT.Output("GameClient loading shader helpers...");
+        Logs.ClientInit("GameClient loading shader helpers...");
         Shaders = new ShaderEngine();
         Shaders.InitShaderSystem(Files);
-        OutputType.CLIENTINIT.Output("GameClient loading texture helpers...");
+        Logs.ClientInit("GameClient loading texture helpers...");
         Textures = new TextureEngine();
         Textures.InitTextureSystem(Files, AssetStreaming, Schedule);
         GraphicsUtil.CheckError("GEB - Textures");
-        OutputType.CLIENTINIT.Output("GameClient loading font helpers...");
+        Logs.ClientInit("GameClient loading font helpers...");
         GLFonts = new GLFontEngine(Textures, Shaders);
         GLFonts.Init(Files);
         FontSets = new FontSetEngine(GLFonts)
@@ -304,23 +304,23 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         // TODO: FGE/Core->Languages engine!
         FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);
         GraphicsUtil.CheckError("GEB - Fonts");
-        OutputType.CLIENTINIT.Output("GameClient loading 2D/UI render helper...");
+        Logs.ClientInit("GameClient loading 2D/UI render helper...");
         Keyboard = new KeyHandler(this);
         MainUI = new ViewUI2D(this);
-        OutputType.CLIENTINIT.Output("GameClient loading model engine...");
+        Logs.ClientInit("GameClient loading model engine...");
         Animations = new AnimationEngine();
         Models = new ModelEngine();
         Models.Init(Animations, this);
-        OutputType.CLIENTINIT.Output("GameClient loading render helper...");
+        Logs.ClientInit("GameClient loading render helper...");
         Rendering3D = new Renderer(Textures, Shaders, Models);
         Rendering3D.Init();
         Rendering2D = new Renderer2D(Textures, Shaders);
         Rendering2D.Init();
-        OutputType.CLIENTINIT.Output("GameClient calling engine load...");
+        Logs.ClientInit("GameClient calling engine load...");
         CurrentEngine.Load();
-        OutputType.CLIENTINIT.Output("GameClient calling external load event...");
+        Logs.ClientInit("GameClient calling external load event...");
         OnWindowLoad?.Invoke();
-        OutputType.CLIENTINIT.Output("GameClient is ready and loaded! Starting main game loop...");
+        Logs.ClientInit("GameClient is ready and loaded! Starting main game loop...");
         GraphicsUtil.CheckError("GEB - Loaded");
         Internal.Loaded = true;
     }
@@ -354,7 +354,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             ErrorCode ec = GL.GetError();
             while (ec != ErrorCode.NoError)
             {
-                OutputType.WARNING.Output("Uncaught GL Error: " + ec);
+                Logs.Warning($"Uncaught GL Error: {ec}");
                 ec = GL.GetError();
             }
             // Second step: clear the screen

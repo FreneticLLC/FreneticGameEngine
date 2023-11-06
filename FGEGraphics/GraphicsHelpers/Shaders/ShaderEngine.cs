@@ -162,12 +162,12 @@ public class ShaderEngine
             filename = $"shaders/{filename}";
             if (!TryGetShaderFileText(filename + ".vs", out string VS))
             {
-                OutputType.WARNING.Output($"Cannot load vertex shader, file '{TextStyle.Standout}{filename}.vs{TextStyle.Base}' does not exist.");
+                Logs.Warning($"Cannot load vertex shader, file '{TextStyle.Standout}{filename}.vs{TextStyle.Base}' does not exist.");
                 return null;
             }
             if (!TryGetShaderFileText(filename + ".fs", out string FS))
             {
-                OutputType.WARNING.Output($"Cannot load fragment shader, file '{TextStyle.Standout}{filename}.fs{TextStyle.Base}' does not exist.");
+                Logs.Warning($"Cannot load fragment shader, file '{TextStyle.Standout}{filename}.fs{TextStyle.Base}' does not exist.");
                 return null;
             }
             string GS = null;
@@ -177,7 +177,7 @@ public class ShaderEngine
                 geomFilename = $"shaders/{geomFilename}.geom";
                 if (!TryGetShaderFileText(geomFilename, out GS))
                 {
-                    OutputType.WARNING.Output($"Cannot load geometry shader, file '{TextStyle.Standout}{geomFilename}{TextStyle.Base}' does not exist.");
+                    Logs.Warning($"Cannot load geometry shader, file '{TextStyle.Standout}{geomFilename}{TextStyle.Base}' does not exist.");
                     return null;
                 }
             }
@@ -185,7 +185,7 @@ public class ShaderEngine
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output($"Failed to load shader from filename '{TextStyle.Standout}{filename}.fs or .vs{TextStyle.Base}': {ex}");
+            Logs.Error($"Failed to load shader from filename '{TextStyle.Standout}{filename}.fs or .vs{TextStyle.Base}': {ex}");
             return null;
         }
     }
@@ -322,7 +322,7 @@ public class ShaderEngine
         string str = GL.GetProgramInfoLog(program);
         if (str.Length != 0)
         {
-            OutputType.CLIENTINFO.Output($"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
+            Logs.ClientInfo($"Linked shader '{fileName}' with message: '{str}' -- FOR -- {fileText}");
         }
         GL.DeleteShader(shaderObject);
         GraphicsUtil.CheckError("Shader - Compute - Compile");
@@ -399,7 +399,7 @@ public class ShaderEngine
         string str = GL.GetProgramInfoLog(Program);
         if (str.Length != 0)
         {
-            OutputType.CLIENTINFO.Output($"Linked shader with message: '{str}' -- FOR: variables: " + string.Join(",", vars));
+            Logs.ClientInfo($"Linked shader with message: '{str}' -- FOR: variables: {vars.JoinString(",")}");
         }
         GL.DeleteShader(FragmentObject);
         GL.DeleteShader(VertexObject);

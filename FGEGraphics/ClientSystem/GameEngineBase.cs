@@ -122,16 +122,16 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
         try
         {
             StackNoteHelper.Push("GameEngineBase - Loading", this);
-            OutputType.CLIENTINIT.Output("GameEngine starting load sequence, start with basic...");
+            Logs.ClientInit("GameEngine starting load sequence, start with basic...");
             LoadBasic();
-            OutputType.CLIENTINIT.Output("GameEngine loading shaders...");
+            Logs.ClientInit("GameEngine loading shaders...");
             GetShaders();
-            OutputType.CLIENTINIT.Output("GameEngine core load complete, calling additional load...");
+            Logs.ClientInit("GameEngine core load complete, calling additional load...");
             PostLoad();
-            OutputType.CLIENTINIT.Output("GameEngine prepping audio systems...");
+            Logs.ClientInit("GameEngine prepping audio systems...");
             Sounds = new SoundEngine();
             Sounds.Init(this);
-            OutputType.CLIENTINIT.Output("GameEngine load sequence complete.");
+            Logs.ClientInit("GameEngine load sequence complete.");
         }
         finally
         {

@@ -78,7 +78,7 @@ public class AnimationEngine
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output("Loading an animation: " + ex.ToString());
+            Logs.Error($"Loading an animation: {ex}");
             sa = new() { Name = namelow, Length = 1, Engine = this };
             Animations.Add(sa.Name, sa);
             return sa;
@@ -121,7 +121,7 @@ public class AnimationEngine
                     string[] dat = data[i].SplitFast(':');
                     if (dat.Length <= 1)
                     {
-                        OutputType.WARNING.Output("Invalid key dat: " + dat[0]);
+                        Logs.Warning($"Invalid key dat: {dat[0]}");
                     }
                     else
                     {
@@ -146,7 +146,7 @@ public class AnimationEngine
                         }
                         else
                         {
-                            OutputType.WARNING.Output("Unknown GENERAL key: " + key);
+                            Logs.Warning($"Unknown GENERAL key: {key}");
                         }
                     }
                     else
@@ -191,7 +191,7 @@ public class AnimationEngine
                         }
                         else
                         {
-                            OutputType.WARNING.Output("Unknown NODE key: " + key);
+                            Logs.Warning($"Unknown NODE key: {key}");
                         }
                     }
                 }

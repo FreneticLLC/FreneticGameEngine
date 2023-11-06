@@ -169,7 +169,7 @@ public class SoundEngine : IDisposable
             ALError err = AL.GetError();
             if (err != ALError.NoError)
             {
-                OutputType.WARNING.Output("Found audio error " + err + " for " + inp);
+                Logs.Warning($"Found audio error {err} for {inp}");
                 //init(Client, CVars);
                 return;
             }
@@ -196,7 +196,7 @@ public class SoundEngine : IDisposable
             ALError err = AL.GetError();
             if (err != ALError.NoError)
             {
-                OutputType.WARNING.Output("Found audio error " + err + "!");
+                Logs.Warning($"Found audio error {err}!");
                 //init(Client, CVars);
                 return;
             }
@@ -598,7 +598,7 @@ public class SoundEngine : IDisposable
             string newname = $"sounds/{name}.ogg";
             if (!Client.Client.Files.FileExists(newname))
             {
-                OutputType.WARNING.Output($"Cannot load audio '{name}': file does not exist.");
+                Logs.Warning($"Cannot load audio '{name}': file does not exist.");
                 return null;
             }
             SoundEffect tsfx = new()
@@ -641,7 +641,7 @@ public class SoundEngine : IDisposable
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output($"Reading sound file '{name}': {ex}");
+            Logs.Error($"Reading sound file '{name}': {ex}");
             return null;
         }
     }

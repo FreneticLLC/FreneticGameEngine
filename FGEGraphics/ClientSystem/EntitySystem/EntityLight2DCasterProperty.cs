@@ -108,7 +108,7 @@ public class EntityLight2DCasterProperty : ClientEntityProperty
         }
         else
         {
-            OutputType.WARNING.Output("2D light spawned into a non-2D-engine-based game!");
+            Logs.Warning("2D light spawned into a non-2D-engine-based game!");
         }
     }
 
@@ -124,7 +124,7 @@ public class EntityLight2DCasterProperty : ClientEntityProperty
         }
         else
         {
-            OutputType.WARNING.Output("2D light despawned from a non-2D-engine-based game!");
+            Logs.Warning("2D light despawned from a non-2D-engine-based game!");
         }
     }
 }

@@ -37,7 +37,7 @@ public static class GraphicsUtil
         while (ec != ErrorCode.NoError)
         {
             string contextText = context is null ? "" : context + ": ";
-            OutputType.ERROR.Output($"OpenGL error [{callerLocationLabel}]: {contextText}{ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
+            Logs.Error($"OpenGL error [{callerLocationLabel}]: {contextText}{ec}\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
             ec = GL.GetError();
         }
     }

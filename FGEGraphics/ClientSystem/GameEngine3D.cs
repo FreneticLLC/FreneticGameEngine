@@ -165,10 +165,10 @@ public class GameEngine3D : GameEngineBase
         MainContext.Engine = this;
         FogMaxDist = () => ZFar();
         GraphicsUtil.CheckError("PostLoad - Pre");
-        OutputType.CLIENTINIT.Output("GameEngine configuring graphics...");
+        Logs.ClientInit("GameEngine configuring graphics...");
         GL.Enable(EnableCap.CullFace);
         GL.CullFace(CullFaceMode.Front);
-        OutputType.CLIENTINIT.Output("GameEngine loading main 3D view...");
+        Logs.ClientInit("GameEngine loading main 3D view...");
         if (!IsSubEngine)
         {
             SubSize = new(Window.ClientSize.X, Window.ClientSize.Y);

@@ -388,7 +388,7 @@ public class Model
                                 }
                                 else
                                 {
-                                    OutputType.WARNING.Output("Unknown skin entry typer: '" + typer + "', expected reflectivity, specular, or simply no specification!");
+                                    Logs.Warning($"Unknown skin entry typer: '{typer}', expected reflectivity, specular, or simply no specification!");
                                 }
                                 c++;
                                 success = true;
@@ -396,25 +396,25 @@ public class Model
                         }
                         if (!success)
                         {
-                            OutputType.WARNING.Output("Unknown skin entry " + datums[0]);
+                            Logs.Warning($"Unknown skin entry {datums[0]}");
                             StringBuilder all = new(Meshes.Count * 100);
                             for (int i = 0; i < Meshes.Count; i++)
                             {
                                 all.Append(Meshes[i].Name + ", ");
                             }
-                            OutputType.WARNING.Output("Available: " + all.ToString());
+                            Logs.Warning($"Available: {all}");
                         }
                     }
                 }
             }
             if (c == 0)
             {
-                OutputType.WARNING.Output("No entries in " + Name + ".skin");
+                Logs.Warning($"No entries in {Name}.skin");
             }
         }
         else
         {
-            OutputType.WARNING.Output("Can't find models/" + Name + ".skin!");
+            Logs.Warning($"Can't find models/{Name}.skin!");
         }
     }
 

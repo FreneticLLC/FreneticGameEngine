@@ -42,7 +42,7 @@ public class FileEngine
 
     private static void PackageWarningMethod(string warning)
     {
-        OutputType.WARNING.Output("[FileEngine/PackageHandler] " + warning);
+        Logs.Warning($"[FileEngine/PackageHandler] {warning}");
     }
     #endregion
 

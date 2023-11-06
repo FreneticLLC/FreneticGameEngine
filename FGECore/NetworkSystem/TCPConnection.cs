@@ -86,7 +86,7 @@ public class TCPConnection : IDisposable
             CommonUtilities.CheckException(ex);
             RelevantSocket.Close();
             RelevantSocket = null;
-            OutputType.SERVERINFO.Output($"[Connections:Error] {ex}");
+            Logs.ServerInfo($"[Connections:Error] {ex}");
         }
     }
 
@@ -204,7 +204,7 @@ public class TCPConnection : IDisposable
             CommonUtilities.CheckException(ex);
             RelevantSocket.Close();
             RelevantSocket = null;
-            OutputType.SERVERINFO.Output($"[Connections:Error] {ex.Message}");
+            Logs.ServerInfo($"[Connections:Error] {ex.Message}");
         }
     }
 

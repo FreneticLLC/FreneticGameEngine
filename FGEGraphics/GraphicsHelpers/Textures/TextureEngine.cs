@@ -174,7 +174,7 @@ public class TextureEngine : IDisposable
         };
         void handleError(string message)
         {
-            OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
+            Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
             texture.LoadedProperly = false;
         }
         void processLoad(byte[] data)
@@ -205,7 +205,7 @@ public class TextureEngine : IDisposable
         }
         void fileMissing()
         {
-            OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
+            Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
             texture.LoadedProperly = false;
         }
         AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
@@ -295,14 +295,14 @@ public class TextureEngine : IDisposable
             filename = FileEngine.CleanFileName(filename);
             if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureFile))
             {
-                OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                 return null;
             }
             return BitmapForBytes(textureFile, twidth);
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
+            Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
             return null;
         }
     }
@@ -353,7 +353,7 @@ public class TextureEngine : IDisposable
             filename = FileEngine.CleanFileName(filename);
             if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureData))
             {
-                OutputType.WARNING.Output($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                 return;
             }
             using Bitmap bmp = BitmapForBytes(textureData, twidth);
@@ -361,7 +361,7 @@ public class TextureEngine : IDisposable
         }
         catch (Exception ex)
         {
-            OutputType.ERROR.Output($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
+            Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}': {ex}");
             return;
         }
     }

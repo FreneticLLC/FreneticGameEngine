@@ -107,7 +107,7 @@ public class AssetStreamingEngine
             }
             catch (Exception ex2)
             {
-                OutputType.ERROR.Output("Exception in asset streaming error handler: " + ex2 + "\nCaused by: File not found.");
+                Logs.Error($"Exception in asset streaming error handler: {ex2}\nCaused by: File not found.");
             }
         }
 
@@ -123,12 +123,12 @@ public class AssetStreamingEngine
                 }
                 else
                 {
-                    OutputType.ERROR.Output("Asset streaming engine encountered error: " + message);
+                    Logs.Error($"Asset streaming engine encountered error: {message}");
                 }
             }
             catch (Exception ex2)
             {
-                OutputType.ERROR.Output("Exception in asset streaming error handler: " + ex2 + "\nCaused by:\n" + message);
+                Logs.Error($"Exception in asset streaming error handler: {ex2}\nCaused by:\n{message}");
             }
         }
     }
