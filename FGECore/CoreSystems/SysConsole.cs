@@ -434,10 +434,10 @@ public class OutputType
     public static OutputType CLIENTINIT = new() { Name = "INIT/CLIENT", BaseColor = "^r^@" };
 
     /// <summary>"Out - Good" script output from the client.</summary>
-    public static OutputType CLIENTOUTGOOD = new() { Name = "OUT/GOOD/CLIENT", BaseColor = "^r^@" };
+    public static OutputType CLIENTOUTGOOD = new() { Name = "OUT/GOOD/CLIENT", BaseColor = "^r^2" };
 
     /// <summary>"Out - Bad" script output from the client.</summary>
-    public static OutputType CLIENTOUTBAD = new() { Name = "OUT/BAD/CLIENT", BaseColor = "^r^!" };
+    public static OutputType CLIENTOUTBAD = new() { Name = "OUT/BAD/CLIENT", BaseColor = "^r^1" };
 
     /// <summary>"Out - Good" script output from the server.</summary>
     public static OutputType SERVEROUTGOOD = new() { Name = "OUT/GOOD/SERVER", BaseColor = "^r^2" };
