@@ -147,15 +147,15 @@ public class PropertyHolder
     /// <summary>Sends a signal to all properties with a specific interface.</summary>
     /// <typeparam name="T">The type of the interface.</typeparam>
     /// <param name="signal">The signal to send.</param>
-    public void SignalAllInterfacedProperties<T>(Action<T> signal)
+    public void SignalAllInterfacedProperties<T>(Action<T> signal) where T : class
     {
         if (!PropertyInternals.HeldInterfaces.TryGetValue(typeof(T), out List<object> objs))
         {
             return;
         }
-        foreach (T obj in objs)
+        foreach (object obj in objs)
         {
-            signal(obj);
+            signal(obj as T);
         }
     }
 
