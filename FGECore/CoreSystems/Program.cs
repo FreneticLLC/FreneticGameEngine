@@ -51,34 +51,16 @@ public abstract class Program
     public readonly string VersionDescription;
 
     /// <summary>The current program's game name.</summary>
-    public static string GameName
-    {
-        get
-        {
-            return Instance.Name;
-        }
-    }
+    public static string GameName => Instance.Name;
 
     /// <summary>The current program's game version.</summary>
-    public static string GameVersion
-    {
-        get
-        {
-            return Instance.Version;
-        }
-    }
+    public static string GameVersion => Instance.Version;
 
     /// <summary>
     /// The current program's game version description.
     /// (EG "Release", "Beta", or "Alpha" usually).
     /// </summary>
-    public static string GameVersionDescription
-    {
-        get
-        {
-            return Instance.VersionDescription;
-        }
-    }
+    public static string GameVersionDescription => Instance.VersionDescription;
 
     /// <summary>Construct the program descriptor.</summary>
     /// <param name="_name">Game name.</param>

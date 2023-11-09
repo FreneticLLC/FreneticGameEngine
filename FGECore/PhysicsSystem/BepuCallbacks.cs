@@ -147,17 +147,17 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
         }
         EntityPhysicsProperty aEntity = PhysPropForCollidable(a);
         EntityPhysicsProperty bEntity = PhysPropForCollidable(b);
-        if (aEntity == null || bEntity == null)
+        if (aEntity is null || bEntity is null)
         {
-            EntityPhysicsProperty validOne = (aEntity ?? bEntity);
-            if (validOne != null)
+            EntityPhysicsProperty validOne = aEntity ?? bEntity;
+            if (validOne is not null)
             {
                 return validOne.CGroup.DoesCollide(CollisionUtil.WorldSolid);
             }
             return false;
         }
         HashSet<long> noCollide = aEntity.Internal.NoCollideIDs;
-        if (noCollide != null && noCollide.Contains(bEntity.Entity.EID))
+        if (noCollide is not null && noCollide.Contains(bEntity.Entity.EID))
         {
             return false;
         }
