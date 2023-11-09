@@ -33,10 +33,7 @@ public abstract class Program
     public static void PreInit(Program p)
     {
         Instance = p;
-        SystemCulture = CultureInfo.DefaultThreadCurrentCulture;
-        Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+        SystemCulture = SpecialTools.Internationalize();
         Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, e) =>
         {
