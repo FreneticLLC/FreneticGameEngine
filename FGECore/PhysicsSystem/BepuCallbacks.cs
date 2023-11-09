@@ -191,16 +191,16 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
         EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
         if (aEntity is null || bEntity is null)
         {
-            EntityPhysicsProperty validOne = (aEntity ?? bEntity);
+            EntityPhysicsProperty validOne = aEntity ?? bEntity;
             if (validOne is not null)
             {
                 pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
-                pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 2;
+                pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 4;
             }
             else
             {
-                pairMaterial.FrictionCoefficient = 1f;
-                pairMaterial.MaximumRecoveryVelocity = 0.5f;
+                pairMaterial.FrictionCoefficient = 1;
+                pairMaterial.MaximumRecoveryVelocity = 2;
             }
         }
         else
