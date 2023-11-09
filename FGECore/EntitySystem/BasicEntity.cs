@@ -23,12 +23,6 @@ namespace FGECore.EntitySystem;
 /// <summary>The base most class of an entity in the FreneticGameEngine.</summary>
 public abstract class BasicEntity : PropertyHolder
 {
-    /// <summary>
-    /// Whether the entity should tick normally.
-    /// <para>Note: Setting this after it's spawned is not guaranteed to validly modify its value.</para>
-    /// </summary>
-    public bool Ticks;
-
     /// <summary>The internal Entity ID (Identifier) number for this entity.</summary>
     public long EID;
 
@@ -129,12 +123,6 @@ public abstract class BasicEntity : PropertyHolder
         OnPositionChanged?.Invoke(position);
     }
 
-    /// <summary>Tick the entity. Just fires the tick event!</summary>
-    public void TickThis()
-    {
-        OnTick?.Invoke();
-    }
-
     /// <summary>Gets a string debug helper for this entity.</summary>
     public override string ToString()
     {
@@ -219,11 +207,9 @@ public abstract class BasicEntity<T, T2> : BasicEntity where T : BasicEntity<T, 
 
     /// <summary>Construct the basic Entity.</summary>
     /// <param name="eng">The owning engine.</param>
-    /// <param name="_ticks">Whether the entity ticks.</param>
-    public BasicEntity(T2 eng, bool _ticks)
+    public BasicEntity(T2 eng)
     {
         Engine = eng;
-        Ticks = _ticks;
         OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>(Engine.Schedule.EventHelper);
         OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>(Engine.Schedule.EventHelper);
 

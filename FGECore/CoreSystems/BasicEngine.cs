@@ -261,19 +261,17 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     }
 
     /// <summary>Creates an entity.</summary>
-    /// <param name="ticks">Whether it should tick.</param>
-    public abstract T CreateEntity(bool ticks);
+    public abstract T CreateEntity();
 
     /// <summary>Spawns an entity into the world.</summary>
-    /// <param name="ticks">Whether it should tick.</param>
     /// <param name="configure">A method to configure the entity prior to spawn or property add, if one applies.</param>
     /// <param name="props">Any properties to apply.</param>
-    public T SpawnEntity(bool ticks, Action<T> configure, params Property[] props)
+    public T SpawnEntity(Action<T> configure, params Property[] props)
     {
         try
         {
             StackNoteHelper.Push("BasicEngine - Spawn Entity", this);
-            T ce = CreateEntity(ticks);
+            T ce = CreateEntity();
             ce.EID = CurrentEntityID++;
             try
             {
@@ -311,26 +309,10 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     }
 
     /// <summary>Spawns an entity into the world.</summary>
-    /// <param name="ticks">Whether it should tick.</param>
-    /// <param name="props">Any properties to apply.</param>
-    public T SpawnEntity(bool ticks, params Property[] props)
-    {
-        return SpawnEntity(ticks, null, props);
-    }
-
-    /// <summary>Spawns an entity into the world.</summary>
-    /// <param name="configure">A method to configure the entity prior to spawn, if one applies.</param>
-    /// <param name="props">Any properties to apply.</param>
-    public T SpawnEntity(Action<T> configure, params Property[] props)
-    {
-        return SpawnEntity(true, configure, props);
-    }
-
-    /// <summary>Spawns an entity into the world.</summary>
     /// <param name="props">Any properties to apply.</param>
     public T SpawnEntity(params Property[] props)
     {
-        return SpawnEntity(true, null, props);
+        return SpawnEntity(null, props);
     }
 
     /// <summary>Removes an entity from the world.</summary>
@@ -396,12 +378,12 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
             IReadOnlyList<T> ents = EntityListDuplicate();
             foreach (T ent in ents)
             {
-                if (ent.Ticks)
+                if (ent.OnTick is not null)
                 {
-                    try
+                    try // TODO: This try/finally is a bit heavy to be running on *every* entity, can extra outside the loop possibly?
                     {
                         StackNoteHelper.Push("BasicEngine - Tick specific entity", ent);
-                        ent.TickThis();
+                        ent.OnTick();
                     }
                     finally
                     {

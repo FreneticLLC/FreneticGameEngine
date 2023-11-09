@@ -35,10 +35,9 @@ public class ServerEntity : BasicEntity<ServerEntity, ServerEngine>
 
     /// <summary>Constructs a server-side entity.</summary>
     /// <param name="engine">The owning engine.</param>
-    /// <param name="_ticks">Whether it should tick.</param>
     /// <param name="_shouldNetwork">Whether it should network.</param>
-    public ServerEntity(ServerEngine engine, bool _ticks, bool _shouldNetwork = false)
-        : base(engine, _ticks)
+    public ServerEntity(ServerEngine engine, bool _shouldNetwork = false)
+        : base(engine)
     {
         ShouldNetwork = _shouldNetwork;
     }

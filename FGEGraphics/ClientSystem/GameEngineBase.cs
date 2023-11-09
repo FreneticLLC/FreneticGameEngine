@@ -39,11 +39,10 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
     }
 
     /// <summary>Creates an entity.</summary>
-    /// <param name="ticks">Whether it ticks.</param>
     /// <returns>The entity.</returns>
-    public override ClientEntity CreateEntity(bool ticks)
+    public override ClientEntity CreateEntity()
     {
-        return new ClientEntity(this, ticks);
+        return new ClientEntity(this);
     }
 
     /// <summary>Disposes the window client.</summary>

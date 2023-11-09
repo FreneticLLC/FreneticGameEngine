@@ -21,10 +21,9 @@ namespace FGECore.ServerSystem;
 public class ServerEngine : BasicEngine<ServerEntity, ServerEngine>
 {
     /// <summary>Creates an entity.</summary>
-    /// <param name="ticks">Whether it ticks.</param>
     /// <returns>The entity.</returns>
-    public override ServerEntity CreateEntity(bool ticks)
+    public override ServerEntity CreateEntity()
     {
-        return new ServerEntity(this, ticks);
+        return new ServerEntity(this);
     }
 }
