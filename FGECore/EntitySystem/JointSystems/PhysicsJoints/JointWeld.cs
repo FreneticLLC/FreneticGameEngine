@@ -11,8 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
+using BepuPhysics;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
@@ -24,9 +24,16 @@ public class JointWeld : PhysicsJointBase<Weld>
     {
     }
 
+    /// <summary>The tracked offset between the entities.</summary>
+    public RigidPose Offset;
+
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override Weld CreateJointDescription()
     {
-        return new Weld() { LocalOffset = (One.Position - Two.Position).ToNumerics(), LocalOrientation = Quaternion.GetQuaternionBetween(One.Orientation, Two.Orientation).ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
+        RigidPose rt1 = new(One.Position.ToNumerics(), One.Orientation.ToNumerics());
+        RigidPose rt2 = new(Two.Position.ToNumerics(), Two.Orientation.ToNumerics());
+        RigidPose.Invert(rt2, out RigidPose rt2inv);
+        RigidPose.MultiplyWithoutOverlap(rt1, rt2inv, out Offset);
+        return new Weld() { LocalOffset = Offset.Position, LocalOrientation = Offset.Orientation, SpringSettings = new SpringSettings(20, 1) };
     }
 }
