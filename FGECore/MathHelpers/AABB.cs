@@ -18,6 +18,9 @@ namespace FGECore.MathHelpers;
 /// <summary>Represents an Axis-Aligned Bounding Box.</summary>
 public struct AABB
 {
+    /// <summary>An AABB of (NaN, NaN).</summary>
+    public static readonly AABB NaN = new(Location.NaN, Location.NaN);
+
     /// <summary>Constructs an <see cref="AABB"/> with given mins/maxes.</summary>
     public AABB(Location _min, Location _max)
     {
