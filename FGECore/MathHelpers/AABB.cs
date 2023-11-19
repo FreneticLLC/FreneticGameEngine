@@ -53,30 +53,15 @@ public struct AABB
     /// <param name="pos">The position to include.</param>
     public void Include(in Location pos)
     {
-        if (pos.X < Min.X)
-        {
-            Min.X = pos.X;
-        }
-        else if (pos.X > Max.X)
-        {
-            Max.X = pos.X;
-        }
-        if (pos.Y < Min.Y)
-        {
-            Min.Y = pos.Y;
-        }
-        else if (pos.Y > Max.Y)
-        {
-            Max.Y = pos.Y;
-        }
-        if (pos.Z < Min.Z)
-        {
-            Min.Z = pos.Z;
-        }
-        else if (pos.Z > Max.Z)
-        {
-            Max.Z = pos.Z;
-        }
+        Min = Min.Min(pos);
+        Max = Max.Max(pos);
+    }
+
+    /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking), and returns the resultant AABB.</summary>
+    /// <param name="pos">The position to include.</param>
+    public AABB Including(in Location pos)
+    {
+        return new AABB(Min.Min(pos), Max.Max(pos));
     }
 }
 
