@@ -8,16 +8,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
-using FGEGraphics.GraphicsHelpers;
-using OpenTK;
-using OpenTK.Input;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -44,8 +36,20 @@ public abstract class UIElement
     /// <summary>Last known absolute position.</summary>
     public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
 
-    /// <summary>Last known absolute size (Width / Height).</summary>
+    /// <summary>Last known absolute size (Width and Height).</summary>
     public FGECore.MathHelpers.Vector2i LastAbsoluteSize;
+
+    /// <summary>Last known absolute X position (from <see cref="LastAbsolutePosition"/>).</summary>
+    public int X => LastAbsolutePosition.X;
+
+    /// <summary>Last known absolute Y position (from <see cref="LastAbsolutePosition"/>).</summary>
+    public int Y => LastAbsolutePosition.Y;
+
+    /// <summary>Last known absolute width (from <see cref="LastAbsoluteSize"/>).</summary>
+    public int Width => LastAbsoluteSize.X;
+
+    /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
+    public int Height => LastAbsoluteSize.Y;
 
     /// <summary>Last known aboslute rotation.</summary>
     public float LastAbsoluteRotation;

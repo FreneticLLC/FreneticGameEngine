@@ -25,7 +25,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable button on a screen.</summary>
-public class UIButton : UIElement
+public class UIButton : UIClickableElement
 {
     /// <summary>Represents the rendering style of a <see cref="UIButton"/>.</summary>
     public class Style
@@ -155,15 +155,6 @@ public class UIButton : UIElement
     /// <summary>The font to use.</summary>
     public FontSet TextFont;
 
-    /// <summary>Ran when this button is clicked.</summary>
-    public Action ClickedTask;
-
-    /// <summary>Whether the mouse is hovering over this button.</summary>
-    public bool Hovered = false;
-
-    /// <summary>Whether this button is being clicked.</summary>
-    public bool Clicked = false;
-
     /// <summary>Constructs a new button based on a render style.</summary>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
@@ -174,12 +165,12 @@ public class UIButton : UIElement
     /// <param name="pos">The position of the element.</param>
     public UIButton(Style normal, Style hover, Style click, string text, FontSet font, Action clicked, UIPositionHelper pos)
         : base(pos)
+        : base(pos, clicked)
     {
         StyleNormal = new Style(normal);
         StyleHover = new Style(hover);
         StyleClick = new Style(click);
         TextFont = font;
-        ClickedTask = clicked;
         Text = text;
     }
 
@@ -199,36 +190,6 @@ public class UIButton : UIElement
             StyleHover.DisplayTexture = Textures.GetTexture(buttontexname + "_hover");
             StyleClick.DisplayTexture = Textures.GetTexture(buttontexname + "_click");
         }
-    }
-
-    /// <summary>Ran when the mouse enters the boundaries of this button.</summary>
-    public override void MouseEnter()
-    {
-        Hovered = true;
-    }
-
-    /// <summary>Ran when the mouse exits the boundaries of this button.</summary>
-    public override void MouseLeave()
-    {
-        Hovered = false;
-        Clicked = false;
-    }
-
-    /// <summary>Ran when the left mouse button is pressed down within the boundaries of this button.</summary>
-    public override void MouseLeftDown()
-    {
-        Hovered = true;
-        Clicked = true;
-    }
-
-    /// <summary>Ran when the left mouse button is released within the boundaries of this button.</summary>
-    public override void MouseLeftUp()
-    {
-        if (Clicked && Hovered)
-        {
-            ClickedTask.Invoke();
-        }
-        Clicked = false;
     }
 
     /// <summary>Renders this button on the screen.</summary>
