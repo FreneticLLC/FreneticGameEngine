@@ -31,12 +31,8 @@ public class UIElementText
         /// <summary>The raw string content of this text.</summary>
         public string RawContent;
         
-        /// <summary>A cache mapping a UI element's styles to renderable text.</summary>
-        // TODO: The only relevant data here is fontset/styling. Could make that an internal class on
-        // UIElementStyle -- just those two values -- and use that here as the key instead (with proper
-        // hashing/eq implementation). This would solve redundant entries with styles that don't differ
-        // in font.
-        public Dictionary<UIElementStyle, RenderableText> RenderableContent;
+        /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
+        public Dictionary<UIElementStyle.UITextStyle, RenderableText> RenderableContent;
     }
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
@@ -55,7 +51,7 @@ public class UIElementText
         {
             ParentElement = parent,
             RawContent = content,
-            RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
+            RenderableContent = new Dictionary<UIElementStyle.UITextStyle, RenderableText>()
         };
         RefreshRenderables();
     }
@@ -63,11 +59,12 @@ public class UIElementText
     /// <summary>Updates the renderable cache based on an element's registered styles.</summary>
     private void RefreshRenderables()
     {
+        Internal.RenderableContent.Clear();
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
         {
             if (style.TextFont is not null)
             {
-                Internal.RenderableContent[style] = style.TextFont.ParseFancyText(Internal.RawContent, style.TextStyling);
+                Internal.RenderableContent[style.Text] = style.TextFont.ParseFancyText(Internal.RawContent, style.TextStyling);
             }
         }
     }
@@ -87,7 +84,7 @@ public class UIElementText
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
     /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
     /// </summary>
-    public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.GetStyle()];
+    public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.GetStyle().Text];
 
     /// <summary>
     /// Returns <see cref="Renderable"/>.

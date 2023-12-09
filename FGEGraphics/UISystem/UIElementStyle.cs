@@ -21,6 +21,15 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
 public class UIElementStyle
 {
+    /// <summary>The text styling for a <see cref="UIElementStyle"/></summary>
+    /// <param name="Font">The text font to use (or <c>null</c> for none).</param>
+    /// <param name="Styling">The base color effect to use for text (consider <see cref="TextStyle.Simple"/> if unsure).</param>
+    public record struct UITextStyle(FontSet Font, string Styling)
+    {
+        /// <summary>The default UI text style.</summary>
+        public static readonly UITextStyle Default = new(null, TextStyle.Simple);
+    }
+
     /// <summary>An empty element style.</summary>
     public static readonly UIElementStyle Empty = new();
 
@@ -39,11 +48,22 @@ public class UIElementStyle
     /// <summary>How big the drop-shadow effect should be (or <c>0</c> for none).</summary>
     public int DropShadowLength = 0;
 
-    /// <summary>The text font to use (or <c>null</c> for none).</summary>
-    public FontSet TextFont;
+    /// <summary>The text styling for this element style.</summary>
+    public UITextStyle Text = new();
 
-    /// <summary>The base color effect to use for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
-    public string TextStyling = TextStyle.Simple;
+    /// <summary>Gets or sets the text font (or <c>null</c> for none).</summary>
+    public FontSet TextFont
+    {
+        get => Text.Font;
+        set => Text.Font = value;
+    }
+
+    /// <summary>Gets or sets the base color effect for text (consider <see cref="FGECore.ConsoleHelpers.TextStyle.Simple"/> if unsure).</summary>
+    public string TextStyling
+    {
+        get => Text.Styling;
+        set => Text.Styling = value;
+    }
 
     /// <summary>Constructs a default element style.</summary>
     public UIElementStyle()
@@ -59,8 +79,7 @@ public class UIElementStyle
         BorderColor = style.BorderColor;
         BorderThickness = style.BorderThickness;
         DropShadowLength = style.DropShadowLength;
-        TextFont = style.TextFont;
-        TextStyling = style.TextStyling;
+        Text = style.Text;
     }
 
     /// <summary>Returns whether this style can render the specified text.</summary>

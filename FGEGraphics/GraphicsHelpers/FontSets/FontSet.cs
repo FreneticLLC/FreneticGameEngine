@@ -833,4 +833,16 @@ public class FontSet
     {
         return FORMAT_CODES_MATCHER.IsMatch(c);
     }
+
+    /// <summary>Determines if the specified object is equal to this <see cref="FontSet"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is FontSet set && FontDefault.Equals(set.FontDefault);
+    }
+
+    /// <summary>Returns a hash code for this <see cref="FontSet"/>.</summary>
+    public override int GetHashCode()
+    {
+        return FontDefault.GetHashCode();
+    }
 }
