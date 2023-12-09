@@ -21,15 +21,6 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
 public class UIElementStyle
 {
-    /// <summary>The text styling for a <see cref="UIElementStyle"/></summary>
-    /// <param name="Font">The text font to use (or <c>null</c> for none).</param>
-    /// <param name="Styling">The base color effect to use for text (consider <see cref="TextStyle.Simple"/> if unsure).</param>
-    public record struct UITextStyle(FontSet Font, string Styling)
-    {
-        /// <summary>The default UI text style.</summary>
-        public static readonly UITextStyle Default = new(null, TextStyle.Simple);
-    }
-
     /// <summary>An empty element style.</summary>
     public static readonly UIElementStyle Empty = new();
 
@@ -48,22 +39,11 @@ public class UIElementStyle
     /// <summary>How big the drop-shadow effect should be (or <c>0</c> for none).</summary>
     public int DropShadowLength = 0;
 
-    /// <summary>The text styling for this element style.</summary>
-    public UITextStyle Text = new();
+    /// <summary>The text font (or <c>null</c> for none).</summary>
+    public FontSet TextFont;
 
-    /// <summary>Gets or sets the text font (or <c>null</c> for none).</summary>
-    public FontSet TextFont
-    {
-        get => Text.Font;
-        set => Text.Font = value;
-    }
-
-    /// <summary>Gets or sets the base color effect for text (consider <see cref="FGECore.ConsoleHelpers.TextStyle.Simple"/> if unsure).</summary>
-    public string TextStyling
-    {
-        get => Text.Styling;
-        set => Text.Styling = value;
-    }
+    /// <summary>The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
+    public Func<string, string> TextStyling = _ => TextStyle.Simple;
 
     /// <summary>Constructs a default element style.</summary>
     public UIElementStyle()
@@ -79,12 +59,17 @@ public class UIElementStyle
         BorderColor = style.BorderColor;
         BorderThickness = style.BorderThickness;
         DropShadowLength = style.DropShadowLength;
-        Text = style.Text;
+        TextFont = style.TextFont;
+        TextStyling = style.TextStyling;
     }
+
+    /// <summary>Returns whether this style can render the specified text.</summary>
+    public bool CanRenderText()
+        => TextFont is not null;
 
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
     /// <returns>Whether this style can render the specified text.</returns>
     public bool CanRenderText(UIElementText text)
-        => TextFont is not null && text.Internal.RenderableContent.ContainsKey(Text);
+        => CanRenderText() && text.Internal.RenderableContent.ContainsKey(this);
 }

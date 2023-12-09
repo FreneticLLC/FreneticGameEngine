@@ -72,6 +72,7 @@ public abstract class UIElement
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
+        ElementInternal.CurrentStyle = GetStyle();
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -193,6 +194,9 @@ public abstract class UIElement
 
         /// <summary>Styles registered on this element.</summary>
         public List<UIElementStyle> Styles;
+
+        /// <summary>The current style of this element.</summary>
+        public UIElementStyle CurrentStyle;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -251,7 +255,7 @@ public abstract class UIElement
     /// <returns>The UI text instance.</returns>
     public UIElementText CreateText(string text)
     {
-        return new UIElementText(this, text);
+        return new(this, text);
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
@@ -361,6 +365,14 @@ public abstract class UIElement
             output.Add(this);
             UpdateChildPositions(output, delta, x, y, lastRot);
         }
+    }
+
+    /// <summary>Performs a render on this element.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public void RenderInternal(ViewUI2D view, double delta)
+    {
+        Render(view, delta, ElementInternal.CurrentStyle = GetStyle());
     }
 
     /// <summary>Performs a render on this element.</summary>

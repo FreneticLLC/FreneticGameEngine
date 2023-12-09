@@ -22,6 +22,11 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 public class UIElementText
 {
+    /// <summary>Represents a hashable UI text style instance.</summary>
+    /// <param name="Font">The text font (or <c>null</c> for none).</param>
+    /// <param name="Styling">The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</param>
+    public record struct StyleInstance(FontSet Font, string Styling);
+
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public struct InternalData
     {
@@ -30,9 +35,13 @@ public class UIElementText
 
         /// <summary>The raw string content of this text.</summary>
         public string RawContent;
-        
+
+        /// <summary>The current style of the parent element.
+        /// </summary>
+        public UIElementStyle CurrentStyle;
+
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
-        public Dictionary<UIElementStyle.UITextStyle, RenderableText> RenderableContent;
+        public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
@@ -51,20 +60,27 @@ public class UIElementText
         {
             ParentElement = parent,
             RawContent = content,
-            RenderableContent = new Dictionary<UIElementStyle.UITextStyle, RenderableText>()
+            RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
         };
         RefreshRenderables();
     }
 
-    /// <summary>Updates the renderable cache based on an element's registered styles.</summary>
+    /// <summary>Updates the renderable cache based on the parent element's registered styles.</summary>
     private void RefreshRenderables()
     {
         Internal.RenderableContent.Clear();
+        HashSet<StyleInstance> instances = new();
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
         {
-            if (style.TextFont is not null)
+            if (!style.CanRenderText())
             {
-                Internal.RenderableContent[style.Text] = style.TextFont.ParseFancyText(Internal.RawContent, style.TextStyling);
+                continue;
+            }
+            string styling = style.TextStyling(Internal.RawContent);
+            StyleInstance instance = new(style.TextFont, styling);
+            if (instances.Add(instance))
+            {
+                Internal.RenderableContent[style] = style.TextFont.ParseFancyText(Internal.RawContent, styling);
             }
         }
     }
@@ -84,7 +100,7 @@ public class UIElementText
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
     /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
     /// </summary>
-    public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.GetStyle().Text];
+    public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.ElementInternal.CurrentStyle];
 
     /// <summary>
     /// Returns <see cref="Renderable"/>.
