@@ -25,19 +25,10 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable button on a screen.</summary>
-public class UIButton : UIClickableElement
+public class UIButton : UIClickableElement.Styled
 {
     /// <summary>The text to render on this button.</summary>
     public UIElementText Text;
-
-    /// <summary>The render style to use when the button is not being interacted with.</summary>
-    public UIElementStyle StyleNormal;
-
-    /// <summary>The render style to use when the user is hovering their mouse cursor over this button.</summary>
-    public UIElementStyle StyleHover;
-
-    /// <summary>The render style to use when the user is clicking on this button.</summary>
-    public UIElementStyle StyleClick;
 
     /// <summary>Constructs a new button based on a render style.</summary>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
@@ -47,7 +38,7 @@ public class UIButton : UIClickableElement
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
     public UIButton(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, string text, Action clicked, UIPositionHelper pos)
-        : base(pos, clicked)
+        : base(normal, hover, click, pos, clicked)
     {
         StyleNormal = RegisterStyle(normal);
         StyleHover = RegisterStyle(hover);
@@ -61,7 +52,7 @@ public class UIButton : UIClickableElement
     /// <param name="font">The font to use.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(string textureSet, string text, FontSet font, Action clicked, UIPositionHelper pos)
+    /*public UIButton(string textureSet, string text, FontSet font, Action clicked, UIPositionHelper pos)
         : base(pos, clicked)
     {
         if (textureSet is not null) // TODO: now this needs an error case
@@ -72,22 +63,7 @@ public class UIButton : UIClickableElement
             StyleClick = RegisterStyle(new UIElementStyle() { BaseTexture = Textures.GetTexture($"{textureSet}_click") });
             Text = CreateText(text);
         }
-    }
-
-    /// <summary>Returns the <b>current</b> element style.</summary>
-    /// <returns>The current element style.</returns>
-    public override UIElementStyle GetStyle()
-    {
-        if (Clicked)
-        {
-            return StyleClick;
-        }
-        if (Hovered)
-        {
-            return StyleHover;
-        }
-        return StyleNormal;
-    }
+    }*/
 
     /// <summary>Renders this button on the screen.</summary>
     /// <param name="view">The UI view.</param>

@@ -86,5 +86,5 @@ public class UIElementStyle
     /// <param name="text">The UI text object to check.</param>
     /// <returns>Whether this style can render the specified text.</returns>
     public bool CanRenderText(UIElementText text)
-        => TextFont is not null && text.Internal.RenderableContent.ContainsKey(this);
+        => TextFont is not null && text.Internal.RenderableContent.ContainsKey(Text);
 }
