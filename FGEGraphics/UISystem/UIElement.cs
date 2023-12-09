@@ -254,9 +254,7 @@ public abstract class UIElement
         return new UIElementText(this, text);
     }
 
-    /// <summary>
-    /// Returns the <b>current</b> element style.
-    /// </summary>
+    /// <summary>Returns the <b>current</b> element style.</summary>
     /// <returns>The current element style.</returns>
     public virtual UIElementStyle GetStyle()
     {

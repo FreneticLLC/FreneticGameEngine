@@ -32,6 +32,10 @@ public class UIElementText
         public string RawContent;
         
         /// <summary>A cache mapping a UI element's styles to renderable text.</summary>
+        // TODO: The only relevant data here is fontset/styling. Could make that an internal class on
+        // UIElementStyle -- just those two values -- and use that here as the key instead (with proper
+        // hashing/eq implementation). This would solve redundant entries with styles that don't differ
+        // in font.
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 

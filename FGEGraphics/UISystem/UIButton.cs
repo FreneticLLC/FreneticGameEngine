@@ -56,23 +56,26 @@ public class UIButton : UIClickableElement
     }
 
     /// <summary>Constructs a new button based on a standard texture set.</summary>
-    /// <param name="buttontexname">The name of the texture set to use.</param>
+    /// <param name="textureSet">The name of the texture set to use.</param>
     /// <param name="text">The text to display.</param>
     /// <param name="font">The font to use.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    /*public UIButton(string buttontexname, string text, FontSet font, Action clicked, UIPositionHelper pos)
-        : this(new Style(), new Style(), new Style(), text, font, clicked, pos)
+    public UIButton(string textureSet, string text, FontSet font, Action clicked, UIPositionHelper pos)
+        : base(pos, clicked)
     {
-        if (buttontexname is not null)
+        if (textureSet is not null) // TODO: now this needs an error case
         {
-            TextureEngine Textures = TextFont.Engine.GLFonts.Textures;
-            StyleNormal.DisplayTexture = Textures.GetTexture(buttontexname + "_none");
-            StyleHover.DisplayTexture = Textures.GetTexture(buttontexname + "_hover");
-            StyleClick.DisplayTexture = Textures.GetTexture(buttontexname + "_click");
+            TextureEngine Textures = font.Engine.GLFonts.Textures;
+            StyleNormal = RegisterStyle(new UIElementStyle() { BaseTexture = Textures.GetTexture($"{textureSet}_none") });
+            StyleHover = RegisterStyle(new UIElementStyle() { BaseTexture = Textures.GetTexture($"{textureSet}_hover") });
+            StyleClick = RegisterStyle(new UIElementStyle() { BaseTexture = Textures.GetTexture($"{textureSet}_click") });
+            Text = CreateText(text);
         }
-    }*/
+    }
 
+    /// <summary>Returns the <b>current</b> element style.</summary>
+    /// <returns>The current element style.</returns>
     public override UIElementStyle GetStyle()
     {
         if (Clicked)

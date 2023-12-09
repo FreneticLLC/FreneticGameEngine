@@ -19,6 +19,9 @@ public abstract class UIClickableElement : UIElement
     /// <summary>Whether this element is being clicked.</summary>
     public bool Clicked = false;
 
+    /// <summary>Constructs the clickable element.</summary>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="clickedTask">Ran when the element is clicked.</param>
     public UIClickableElement(UIPositionHelper pos, Action clickedTask = null) : base(pos)
     {
         ClickedTask = clickedTask;

@@ -50,6 +50,19 @@ public class UIElementStyle
     {
     }
 
+    /// <summary>Constructs a new style as a copy of another style.</summary>
+    /// <param name="style">The style to copy.</param>
+    public UIElementStyle(UIElementStyle style)
+    {
+        BaseColor = style.BaseColor;
+        BaseTexture = style.BaseTexture;
+        BorderColor = style.BorderColor;
+        BorderThickness = style.BorderThickness;
+        DropShadowLength = style.DropShadowLength;
+        TextFont = style.TextFont;
+        TextStyling = style.TextStyling;
+    }
+
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
     /// <returns>Whether this style can render the specified text.</returns>
