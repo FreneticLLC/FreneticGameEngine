@@ -89,10 +89,9 @@ public class UIButton : UIClickableElement
     /// <summary>Renders this button on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    // TODO: maybe provide style as a parameter here
-    public override void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        UIElementStyle style = GetStyle();
         Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
         bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
         if (any)

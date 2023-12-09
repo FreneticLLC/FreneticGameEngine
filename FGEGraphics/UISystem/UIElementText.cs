@@ -16,17 +16,35 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FGEGraphics.UISystem;
 
+/// <summary>
+/// A text object that automatically updates its renderable content
+/// based on a <see cref="UIElement"/>'s <see cref="UIElementStyle"/>s.
+/// </summary>
 public class UIElementText
 {
+    /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public struct InternalData
     {
+        /// <summary>The parent UI element.</summary>
         public UIElement ParentElement;
+
+        /// <summary>The raw string content of this text.</summary>
         public string RawContent;
+        
+        /// <summary>A cache mapping a UI element's styles to renderable text.</summary>
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 
+    /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public InternalData Internal;
 
+    /// <summary>
+    /// Creates and returns a <see cref="UIElementText"/> instance.
+    /// Generally, prefer calling <see cref="UIElement.CreateText(string)"/> instead.
+    /// </summary>
+    /// <param name="parent">The parent UI element.</param>
+    /// <param name="content">The initial text content.</param>
+    /// <returns>The UI text instance.</returns>
     public UIElementText(UIElement parent, string content)
     {
         Internal = new InternalData()
@@ -38,6 +56,7 @@ public class UIElementText
         RefreshRenderables();
     }
 
+    /// <summary>Updates the renderable cache based on an element's registered styles.</summary>
     private void RefreshRenderables()
     {
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
@@ -49,6 +68,7 @@ public class UIElementText
         }
     }
 
+    /// <summary>Gets or sets the raw text content.</summary>
     public string Content
     {
         get => Internal.RawContent;
@@ -59,8 +79,16 @@ public class UIElementText
         }
     }
 
+    /// <summary>
+    /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
+    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
+    /// </summary>
     public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.GetStyle()];
 
+    /// <summary>
+    /// Returns <see cref="Renderable"/>.
+    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
+    /// </summary>
     public static implicit operator RenderableText(UIElementText text)
     {
         return text.Renderable;
