@@ -190,6 +190,9 @@ public abstract class UIElement
 
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
+
+        /// <summary>Styles registered on this element.</summary>
+        public List<UIElementStyle> Styles;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -197,7 +200,8 @@ public abstract class UIElement
     {
         ToAdd = new List<UIElement>(),
         ToRemove = new List<UIElement>(),
-        Children = new List<UIElement>()
+        Children = new List<UIElement>(),
+        Styles = new List<UIElementStyle>()
     };
 
     /// <summary>Adds and removes any queued children.</summary>
@@ -232,6 +236,31 @@ public abstract class UIElement
         CheckChildren();
         Tick(delta);
         TickChildren(delta);
+    }
+
+    /// <summary>Registers a style to this element instance. This should be called for every available style.</summary>
+    /// <param name="style">The style to register.</param>
+    public UIElementStyle RegisterStyle(UIElementStyle style)
+    {
+        ElementInternal.Styles.Add(style);
+        return style;
+    }
+
+    /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
+    /// <param name="text">The initial text content.</param>
+    /// <returns>The UI text instance.</returns>
+    public UIElementText CreateText(string text)
+    {
+        return new UIElementText(this, text);
+    }
+
+    /// <summary>
+    /// Returns the <b>current</b> element style.
+    /// </summary>
+    /// <returns>The current element style.</returns>
+    public virtual UIElementStyle GetStyle()
+    {
+        return UIElementStyle.Empty;
     }
 
     /// <summary>Performs a tick on this element.</summary>
