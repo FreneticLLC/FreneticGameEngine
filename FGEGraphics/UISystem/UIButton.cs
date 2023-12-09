@@ -114,7 +114,7 @@ public class UIButton : UIClickableElement
         if (style.BaseColor.A > 0)
         {
             Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, X + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
+            view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
         }
         if (any)
         {
@@ -128,7 +128,7 @@ public class UIButton : UIClickableElement
         if (style.CanRenderText(Text))
         {
             float textHeight = style.TextFont.FontDefault.Height * Text.Renderable.Lines.Length;
-            style.TextFont.DrawFancyText(Text, new Location(Math.Round((double)(X + Width / 2 - Text.Renderable.Width / 2)), Math.Round(X + Height / 2 - textHeight / 2), 0));
+            style.TextFont.DrawFancyText(Text, new Location(Math.Round(X + Width / 2.0f - Text.Renderable.Width / 2.0f), Math.Round(Y + Height / 2.0f - textHeight / 2.0f), 0));
         }
     }
 }
