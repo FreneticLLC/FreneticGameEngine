@@ -25,7 +25,7 @@ public class UICheckbox : UIClickableElement
         ClickedTask = () => Checked = !Checked;
     }
 
-    public override void Render(ViewUI2D view, double delta)
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         Engine.Textures.White.Bind();
         view.Rendering.RenderRectangle(view.UIContext, X, Y, Width, Height);
