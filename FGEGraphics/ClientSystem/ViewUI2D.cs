@@ -137,7 +137,7 @@ public class ViewUI2D
                 {
                     if (elem.IsValid)
                     {
-                        elem.Render(this, Client.Delta);
+                        elem.Render(this, Client.Delta, elem.GetStyle());
                     }
                 }
                 finally

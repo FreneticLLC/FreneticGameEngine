@@ -368,7 +368,8 @@ public abstract class UIElement
     /// <summary>Performs a render on this element.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public virtual void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public virtual void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
     }
 

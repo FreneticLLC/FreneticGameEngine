@@ -122,7 +122,8 @@ public class UILabel : UIElement
     /// <summary>Renders this label on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public override void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         int height = Internal.Text.Lines.Length * Internal.TextFont.FontDefault.Height;
         int bx = LastAbsolutePosition.X;
