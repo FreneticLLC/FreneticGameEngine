@@ -83,8 +83,7 @@ public abstract class UIClickableElement : UIElement
             OnClick = onClick;
         }
 
-        /// <summary>Returns the <b>current</b> element style.</summary>
-        /// <returns>The current element style.</returns>
+        /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
         public override UIElementStyle GetStyle()
         {
             if (Clicked)

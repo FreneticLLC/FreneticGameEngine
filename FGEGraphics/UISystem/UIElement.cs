@@ -72,7 +72,6 @@ public abstract class UIElement
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
-        ElementInternal.CurrentStyle = GetStyle();
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -238,6 +237,10 @@ public abstract class UIElement
     public void FullTick(double delta)
     {
         CheckChildren();
+        if (ElementInternal.CurrentStyle is null)
+        {
+            SwitchToStyle(ElementInternal.CurrentStyle = GetStyle());
+        }
         Tick(delta);
         TickChildren(delta);
     }
@@ -260,10 +263,19 @@ public abstract class UIElement
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
-    /// <returns>The current element style.</returns>
     public virtual UIElementStyle GetStyle()
     {
         return UIElementStyle.Empty;
+    }
+
+    /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
+    public virtual void SwitchFromStyle(UIElementStyle style)
+    {
+    }
+
+    /// <summary>Ran when this element switches to the relevant <see cref="UIElementStyle"/>.</summary>
+    public virtual void SwitchToStyle(UIElementStyle style)
+    {
     }
 
     /// <summary>Performs a tick on this element.</summary>
@@ -368,12 +380,16 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Performs a render on this element.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    public void RenderInternal(ViewUI2D view, double delta)
+    /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
+    public void UpdateStyle()
     {
-        Render(view, delta, ElementInternal.CurrentStyle = GetStyle());
+        UIElementStyle newStyle = GetStyle();
+        if (newStyle != ElementInternal.CurrentStyle)
+        {
+            SwitchFromStyle(ElementInternal.CurrentStyle);
+            SwitchToStyle(newStyle);
+        }
+        ElementInternal.CurrentStyle = newStyle;
     }
 
     /// <summary>Performs a render on this element.</summary>

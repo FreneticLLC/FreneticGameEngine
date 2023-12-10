@@ -130,6 +130,13 @@ public class ViewUI2D
             RelativeYLast = 0;
             CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
+            foreach (UIElement elem in LastRenderedSet)
+            {
+                if (elem.IsValid)
+                {
+                    elem.UpdateStyle();
+                }
+            }
             foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
             {
                 StackNoteHelper.Push("Draw UI Element", elem);
@@ -137,7 +144,7 @@ public class ViewUI2D
                 {
                     if (elem.IsValid)
                     {
-                        elem.RenderInternal(this, Client.Delta);
+                        elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }
                 }
                 finally
