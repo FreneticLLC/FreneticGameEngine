@@ -29,30 +29,22 @@ public class UITextLink : UIClickableElement.Styled
     /// <summary>The text to display for this link.</summary>
     public UIElementText Text;
 
-    // todo: should this and below represented by BaseColor & Texture in element style? (probably not)
     /// <summary>The icon to display alongside this link.</summary>
     public Texture Icon;
 
-    // TODO: settable in constructor (if not in style??)
-    /// <summary>The color of the icon.</summary>
-    public Color4F IconColor = Color4F.White;
-
     /// <summary>Constructs an interactable text link.</summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="icon">The icon to display alongside the text.</param>
+    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>
-    /// <param name="text">The text to display.</param>
-    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UITextLink(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, string text, Texture icon, Action clicked, UIPositionHelper pos)
+    public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, clicked)
     {
         Text = CreateText(text);
         Icon = icon;
-        // TODO: need TextFont guaranteed FOR ALL STYLES. also this is wrong if hover/click have different fonts than normal.
-        // (put this in render method?)
-        Position.ConstantWidth(Text.Renderable.Width + (Icon == null ? 0 : normal.TextFont.FontDefault.Height));
-        Position.ConstantHeight(normal.TextFont.FontDefault.Height * Text.Renderable.Lines.Length);
     }
 
     /// <summary>Performs a render on this link.</summary>
@@ -67,9 +59,11 @@ public class UITextLink : UIClickableElement.Styled
             return;
         }
         Icon.Bind();
-        Renderer2D.SetColor(IconColor);
+        Renderer2D.SetColor(style.BaseColor);
+        Position.ConstantWidth(Text.Renderable.Width + style.TextFont.FontDefault.Height);
+        Position.ConstantHeight(style.TextFont.FontDefault.Height * Text.Renderable.Lines.Length);
         view.Rendering.RenderRectangle(view.UIContext, X, Y, X + style.TextFont.FontDefault.Height, Y + style.TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        style.TextFont.DrawFancyText(Text, new Location(Y + style.TextFont.FontDefault.Height, Y, 0));
+        style.TextFont.DrawFancyText(Text, new Location(X + style.TextFont.FontDefault.Height, Y, 0));
         Renderer2D.SetColor(Vector4.One);
     }
 }
