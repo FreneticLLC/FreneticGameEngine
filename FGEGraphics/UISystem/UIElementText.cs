@@ -36,8 +36,10 @@ public class UIElementText
         /// <summary>The raw string content of this text.</summary>
         public string RawContent;
 
-        /// <summary>The current style of the parent element.
-        /// </summary>
+        /// <summary>The custom width for this text, if any.</summary>
+        public int Width;
+
+        /// <summary>The current style of the parent element.</summary>
         public UIElementStyle CurrentStyle;
 
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
@@ -49,17 +51,19 @@ public class UIElementText
 
     /// <summary>
     /// Creates and returns a <see cref="UIElementText"/> instance.
-    /// Generally, prefer calling <see cref="UIElement.CreateText(string)"/> instead.
+    /// Generally, prefer calling <see cref="UIElement.CreateText(string, int)"/> instead.
     /// </summary>
     /// <param name="parent">The parent UI element.</param>
     /// <param name="content">The initial text content.</param>
+    /// <param name="width">The custom maximum width, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content)
+    public UIElementText(UIElement parent, string content, int width = -1)
     {
         Internal = new InternalData()
         {
             ParentElement = parent,
             RawContent = content,
+            Width = width,
             RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
         };
         RefreshRenderables();
@@ -78,10 +82,16 @@ public class UIElementText
             }
             string styling = style.TextStyling(Internal.RawContent);
             StyleInstance instance = new(style.TextFont, styling);
-            if (instances.Add(instance))
+            if (!instances.Add(instance))
             {
-                Internal.RenderableContent[style] = style.TextFont.ParseFancyText(Internal.RawContent, styling);
+                continue;
             }
+            RenderableText text = style.TextFont.ParseFancyText(Internal.RawContent, styling);
+            if (Internal.Width > 0)
+            {
+                text = FontSet.SplitAppropriately(text, Internal.Width);
+            }
+            Internal.RenderableContent[style] = text;
         }
     }
 
@@ -92,6 +102,17 @@ public class UIElementText
         set
         {
             Internal.RawContent = value;
+            RefreshRenderables();
+        }
+    }
+
+    /// <summary>Gets or sets the maximum width of the text.</summary>
+    public int Width
+    {
+        get => Internal.Width;
+        set
+        {
+            Internal.Width = value;
             RefreshRenderables();
         }
     }

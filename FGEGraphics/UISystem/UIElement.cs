@@ -252,10 +252,11 @@ public abstract class UIElement
 
     /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
     /// <param name="text">The initial text content.</param>
+    /// <param name="width">The custom maximum width, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText CreateText(string text)
+    public UIElementText CreateText(string text, int width = -1)
     {
-        return new(this, text);
+        return new(this, text, width);
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
