@@ -37,7 +37,7 @@ public class UIButton : UIClickableElement.Styled
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, string text, Action clicked, UIPositionHelper pos)
+    public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, clicked)
     {
         StyleNormal = RegisterStyle(normal);
@@ -53,12 +53,12 @@ public class UIButton : UIClickableElement.Styled
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public static UIButton Textured(UIElementStyle style, TextureEngine textures, string textureSet, string text, Action clicked, UIPositionHelper pos)
+    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UIPositionHelper pos)
     {
         UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
         UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
         UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
-        return new UIButton(normal, hover, click, text, clicked, pos);
+        return new UIButton(text, clicked, normal, hover, click, pos);
     }
 
     /// <summary>Renders this button on the screen.</summary>
