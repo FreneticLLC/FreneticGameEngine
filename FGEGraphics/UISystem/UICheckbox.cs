@@ -22,7 +22,7 @@ public class UICheckbox : UIClickableElement
 
     public UICheckbox(UIPositionHelper pos) : base(pos)
     {
-        OnClick = () => Checked = !Checked;
+        Clicked += (_, _) => Checked = !Checked;
     }
 
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)

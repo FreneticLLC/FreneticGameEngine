@@ -11,13 +11,13 @@ namespace FGEGraphics.UISystem;
 public abstract class UIClickableElement : UIElement
 {
     /// <summary>Ran when this element is clicked.</summary>
-    public Action OnClick;
+    public EventHandler Clicked;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
 
     /// <summary>Whether this element is being clicked.</summary>
-    public bool Clicked = false;
+    public bool Pressed = false;
 
     // TODO: Maybe factor out into "UIInteractableElement" or something?
     /// <summary>Whether this element can be interacted with. Don't set directly, use <see cref="Enabled"/>.</summary>
@@ -33,7 +33,7 @@ public abstract class UIClickableElement : UIElement
             if (!value)
             {
                 Hovered = false;
-                Clicked = false;
+                Pressed = false;
             }
         }
     }
@@ -43,7 +43,10 @@ public abstract class UIClickableElement : UIElement
     /// <param name="onClick">Ran when the element is clicked.</param>
     public UIClickableElement(UIPositionHelper pos, Action onClick = null) : base(pos)
     {
-        OnClick = onClick;
+        if (onClick is not null)
+        {
+            Clicked += (_, _) => onClick();
+        }
     }
 
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
@@ -61,7 +64,7 @@ public abstract class UIClickableElement : UIElement
         if (Enabled)
         {
             Hovered = false;
-            Clicked = false;
+            Pressed = false;
         }
     }
 
@@ -71,7 +74,7 @@ public abstract class UIClickableElement : UIElement
         if (Enabled)
         {
             Hovered = true;
-            Clicked = true;
+            Pressed = true;
         }
     }
 
@@ -82,11 +85,11 @@ public abstract class UIClickableElement : UIElement
         {
             return;
         }
-        if (OnClick is not null && Clicked && Hovered)
+        if (Clicked is not null && Pressed && Hovered)
         {
-            OnClick.Invoke();
+            Clicked.Invoke(this, null);
         }
-        Clicked = false;
+        Pressed = false;
     }
 
     /// <summary>Represents a clickable UI element with distinct normal, hovering, and clicking styles.</summary>
@@ -108,18 +111,17 @@ public abstract class UIClickableElement : UIElement
         /// <param name="click">The style to display when clicked.</param>
         /// <param name="pos">The position of the element.</param>
         /// <param name="onClick">Ran when the element is clicked.</param>
-        public Styled(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, Action onClick = null) : base(pos)
+        public Styled(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, Action onClick = null) : base(pos, onClick)
         {
             StyleNormal = RegisterStyle(normal);
             StyleHover = RegisterStyle(hover);
             StyleClick = RegisterStyle(click);
-            OnClick = onClick;
         }
 
         /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
         public override UIElementStyle GetStyle()
         {
-            if (Clicked)
+            if (Pressed)
             {
                 return StyleClick;
             }
