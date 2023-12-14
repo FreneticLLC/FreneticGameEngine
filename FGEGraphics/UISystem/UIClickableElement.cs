@@ -19,6 +19,25 @@ public abstract class UIClickableElement : UIElement
     /// <summary>Whether this element is being clicked.</summary>
     public bool Clicked = false;
 
+    // TODO: Maybe factor out into "UIInteractableElement" or something?
+    /// <summary>Whether this element can be interacted with. Don't set directly, use <see cref="Enabled"/>.</summary>
+    public bool Internal_Enabled = true;
+
+    /// <summary>Gets or sets whether this element can be interacted with.</summary>
+    public bool Enabled
+    {
+        get => Internal_Enabled;
+        set
+        {
+            Internal_Enabled = value;
+            if (!value)
+            {
+                Hovered = false;
+                Clicked = false;
+            }
+        }
+    }
+
     /// <summary>Constructs the clickable element.</summary>
     /// <param name="pos">The position of the element.</param>
     /// <param name="onClick">Ran when the element is clicked.</param>
@@ -30,26 +49,39 @@ public abstract class UIClickableElement : UIElement
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
     public override void MouseEnter()
     {
-        Hovered = true;
+        if (Enabled)
+        {
+            Hovered = true;
+        }
     }
 
     /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
     public override void MouseLeave()
     {
-        Hovered = false;
-        Clicked = false;
+        if (Enabled)
+        {
+            Hovered = false;
+            Clicked = false;
+        }
     }
 
     /// <summary>Ran when the left mouse button is pressed down within the boundaries of this element.</summary>
     public override void MouseLeftDown()
     {
-        Hovered = true;
-        Clicked = true;
+        if (Enabled)
+        {
+            Hovered = true;
+            Clicked = true;
+        }
     }
 
     /// <summary>Ran when the left mouse button is released within the boundaries of this element.</summary>
     public override void MouseLeftUp()
     {
+        if (!Enabled)
+        {
+            return;
+        }
         if (OnClick is not null && Clicked && Hovered)
         {
             OnClick.Invoke();
@@ -58,6 +90,7 @@ public abstract class UIClickableElement : UIElement
     }
 
     /// <summary>Represents a clickable UI element with distinct normal, hovering, and clicking styles.</summary>
+    // TODO: Style for when enabled is false?
     public abstract class Styled : UIClickableElement
     {
         /// <summary>The render style to use when the element is not being interacted with.</summary>
