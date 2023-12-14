@@ -42,8 +42,11 @@ public class UIElementStyle
     /// <summary>The text font (or <c>null</c> for none).</summary>
     public FontSet TextFont;
 
+    /// <summary>The styling effect for text.</summary>
+    public Func<string, string> TextStyling = str => $"B^{str}";
+
     /// <summary>The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
-    public Func<string, string> TextStyling = _ => TextStyle.Simple;
+    public string TextBaseColor = TextStyle.Simple;
 
     /// <summary>Constructs a default element style.</summary>
     public UIElementStyle()
@@ -61,6 +64,7 @@ public class UIElementStyle
         DropShadowLength = style.DropShadowLength;
         TextFont = style.TextFont;
         TextStyling = style.TextStyling;
+        TextBaseColor = style.TextBaseColor;
     }
 
     /// <summary>Returns whether this style can render the specified text.</summary>

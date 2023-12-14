@@ -27,6 +27,9 @@ public class UIElementText
     /// <param name="Font">The text font (or <c>null</c> for none).</param>
     /// <param name="Styling">The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</param>
     public record struct StyleInstance(FontSet Font, string Styling);
+    /// <param name="Styled">The styled text string.</param>
+    /// <param name="BaseColor">The base text color.</param>
+    public record struct StyleInstance(FontSet Font, string Styled, string BaseColor);
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public struct InternalData
@@ -35,7 +38,7 @@ public class UIElementText
         public UIElement ParentElement;
 
         /// <summary>The raw string content of this text.</summary>
-        public string RawContent;
+        public string Content;
 
         /// <summary>The custom width for this text, if any.</summary>
         public int Width;
@@ -63,8 +66,8 @@ public class UIElementText
         Internal = new InternalData()
         {
             ParentElement = parent,
-            RawContent = content,
             Width = width,
+            Content = content,
             RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
         };
         RefreshRenderables();
@@ -81,14 +84,14 @@ public class UIElementText
             {
                 continue;
             }
-            string styling = style.TextStyling(Internal.RawContent);
-            StyleInstance instance = new(style.TextFont, styling);
+            string styled = style.TextStyling(Internal.Content);
+            StyleInstance instance = new(style.TextFont, styled, style.TextBaseColor);
             if (!instances.Add(instance))
             {
                 continue;
             }
-            RenderableText text = style.TextFont.ParseFancyText(Internal.RawContent, styling);
             if (Internal.Width > 0)
+            RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
             {
                 text = FontSet.SplitAppropriately(text, Internal.Width);
             }
@@ -99,10 +102,10 @@ public class UIElementText
     /// <summary>Gets or sets the raw text content.</summary>
     public string Content
     {
-        get => Internal.RawContent;
+        get => Internal.Content;
         set
         {
-            Internal.RawContent = value;
+            Internal.Content = value;
             RefreshRenderables();
         }
     }
