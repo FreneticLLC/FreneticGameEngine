@@ -8,12 +8,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FGECore.ConsoleHelpers;
+using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
-using FreneticUtilities.FreneticExtensions;
 
 namespace FGEGraphics.UISystem;
 
@@ -25,8 +22,6 @@ public class UIElementText
 {
     /// <summary>Represents a hashable UI text style instance.</summary>
     /// <param name="Font">The text font (or <c>null</c> for none).</param>
-    /// <param name="Styling">The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</param>
-    public record struct StyleInstance(FontSet Font, string Styling);
     /// <param name="Styled">The styled text string.</param>
     /// <param name="BaseColor">The base text color.</param>
     public record struct StyleInstance(FontSet Font, string Styled, string BaseColor);
@@ -40,36 +35,38 @@ public class UIElementText
         /// <summary>The raw string content of this text.</summary>
         public string Content;
 
-        /// <summary>The custom width for this text, if any.</summary>
-        public int Width;
-
-        /// <summary>The current style of the parent element.</summary>
-        public UIElementStyle CurrentStyle;
+        /// <summary>The maximum total width of this text, if any.</summary>
+        public int MaxWidth;
 
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
+
+    /// <summary>The alignment of the text, if any.</summary>
+    public TextAlignment Alignment;
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public InternalData Internal;
 
     /// <summary>
     /// Creates and returns a <see cref="UIElementText"/> instance.
-    /// Generally, prefer calling <see cref="UIElement.CreateText(string, int)"/> instead.
+    /// Generally, prefer calling <see cref="UIElement.CreateText(string, int, TextAlignment)"/> instead.
     /// </summary>
     /// <param name="parent">The parent UI element.</param>
     /// <param name="content">The initial text content.</param>
-    /// <param name="width">The custom maximum width, if any.</param>
+    /// <param name="maxWidth">The maximum total width, if any.</param>
+    /// <param name="alignment">The text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, int width = -1)
+    public UIElementText(UIElement parent, string content, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
         Internal = new InternalData()
         {
             ParentElement = parent,
-            Width = width,
             Content = content,
+            MaxWidth = maxWidth,
             RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
         };
+        Alignment = alignment;
         RefreshRenderables();
     }
 
@@ -90,10 +87,10 @@ public class UIElementText
             {
                 continue;
             }
-            if (Internal.Width > 0)
             RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
+            if (Internal.MaxWidth > 0)
             {
-                text = FontSet.SplitAppropriately(text, Internal.Width);
+                text = FontSet.SplitAppropriately(text, Internal.MaxWidth);
             }
             Internal.RenderableContent[style] = text;
         }
@@ -110,13 +107,13 @@ public class UIElementText
         }
     }
 
-    /// <summary>Gets or sets the maximum width of the text.</summary>
-    public int Width
+    /// <summary>Gets or sets the maximum total width of the text.</summary>
+    public int MaxWidth
     {
-        get => Internal.Width;
+        get => Internal.MaxWidth;
         set
         {
-            Internal.Width = value;
+            Internal.MaxWidth = value;
             RefreshRenderables();
         }
     }
@@ -126,6 +123,23 @@ public class UIElementText
     /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
     /// </summary>
     public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.ElementInternal.CurrentStyle];
+
+    /// <summary>The total width of the text.</summary>
+    public int Width => Renderable.Width;
+
+    /// <summary>The total height of the text.</summary>
+    public int Height => Renderable.Lines.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont.FontDefault.Height;
+
+    /// <summary>Returns the render position of the text given a starting position.</summary>
+    /// <param name="startX">The left-oriented anchor X value.</param>
+    /// <param name="startY">The top-oriented anchor Y value.</param>
+    public Location GetPosition(double startX, double startY)
+    {
+        float sizeMul = Alignment.SizeMultiplier();
+        double x = Math.Round(startX + sizeMul * -Width);
+        double y = Math.Round(startY + sizeMul * -Height);
+        return new(x, y, 0);
+    }
 
     /// <summary>
     /// Returns <see cref="Renderable"/>.

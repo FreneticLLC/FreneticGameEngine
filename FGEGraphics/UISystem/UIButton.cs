@@ -43,7 +43,7 @@ public class UIButton : UIClickableElement.Styled
         StyleNormal = RegisterStyle(normal);
         StyleHover = RegisterStyle(hover);
         StyleClick = RegisterStyle(click);
-        Text = CreateText(text);
+        Text = CreateText(text, alignment: TextAlignment.CENTER);
     }
 
     /// <summary>Constructs a new button based on a standard texture set.</summary>
@@ -99,8 +99,7 @@ public class UIButton : UIClickableElement.Styled
         }
         if (style.CanRenderText(Text))
         {
-            float textHeight = style.TextFont.FontDefault.Height * Text.Renderable.Lines.Length;
-            style.TextFont.DrawFancyText(Text, new Location(Math.Round(X + Width / 2.0f - Text.Renderable.Width / 2.0f), Math.Round(Y + Height / 2.0f - textHeight / 2.0f), 0));
+            style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));
         }
     }
 }

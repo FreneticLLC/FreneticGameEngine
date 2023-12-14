@@ -256,10 +256,11 @@ public abstract class UIElement
     /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
     /// <param name="text">The initial text content.</param>
     /// <param name="width">The custom maximum width, if any.</param>
+    /// <param name="alignment">The text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText CreateText(string text, int width = -1)
+    public UIElementText CreateText(string text, int width = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
-        return new(this, text, width);
+        return new(this, text, width, alignment);
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
