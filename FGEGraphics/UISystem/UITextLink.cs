@@ -45,6 +45,13 @@ public class UITextLink : UIClickableElement.Styled
     {
         Text = CreateText(text);
         Icon = icon;
+        UpdateStyle();
+    }
+
+    /// <summary>Fixes this text link's width and height based on <see cref="Text"/> and the current style.</summary>
+    public override void SwitchToStyle(UIElementStyle style)
+    {
+        Position.ConstantWidthHeight(Text.Width, Text.Height);
     }
 
     /// <summary>Performs a render on this link.</summary>

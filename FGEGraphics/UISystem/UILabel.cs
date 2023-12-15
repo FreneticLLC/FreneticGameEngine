@@ -39,8 +39,8 @@ public class UILabel : UIElement
     public UILabel(string text, UIElementStyle style, UIPositionHelper pos)
         : base(pos)
     {
-        Text = CreateText(text, Position.Width);
         Style = RegisterStyle(style);
+        Text = CreateText(text, Position.Width);
     }
 
     /// <summary>Returns this label's style.</summary>

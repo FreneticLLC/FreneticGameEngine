@@ -19,7 +19,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
-public class UIElementStyle
+public record UIElementStyle
 {
     /// <summary>An empty element style.</summary>
     public static readonly UIElementStyle Empty = new();
@@ -43,7 +43,7 @@ public class UIElementStyle
     public FontSet TextFont;
 
     /// <summary>The styling effect for text.</summary>
-    public Func<string, string> TextStyling = str => $"B^{str}";
+    public Func<string, string> TextStyling = str => str;
 
     /// <summary>The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
     public string TextBaseColor = TextStyle.Simple;

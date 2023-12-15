@@ -40,9 +40,6 @@ public class UIButton : UIClickableElement.Styled
     public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, clicked)
     {
-        StyleNormal = RegisterStyle(normal);
-        StyleHover = RegisterStyle(hover);
-        StyleClick = RegisterStyle(click);
         Text = CreateText(text, alignment: TextAlignment.CENTER);
     }
 

@@ -387,10 +387,13 @@ public abstract class UIElement
         UIElementStyle newStyle = GetStyle();
         if (newStyle != ElementInternal.CurrentStyle)
         {
-            SwitchFromStyle(ElementInternal.CurrentStyle);
+            if (ElementInternal.CurrentStyle is not null)
+            {
+                SwitchFromStyle(ElementInternal.CurrentStyle);
+            }
+            ElementInternal.CurrentStyle = newStyle;
             SwitchToStyle(newStyle);
         }
-        ElementInternal.CurrentStyle = newStyle;
     }
 
     /// <summary>Performs a render on this element.</summary>

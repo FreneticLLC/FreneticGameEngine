@@ -70,6 +70,7 @@ public class UIElementText
         RefreshRenderables();
     }
 
+    // TODO: everything breaks if a style is registered after an element text is created
     /// <summary>Updates the renderable cache based on the parent element's registered styles.</summary>
     private void RefreshRenderables()
     {
