@@ -20,11 +20,6 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 public class UIElementText
 {
-    /// <summary>Represents a hashable UI text style instance.</summary>
-    /// <param name="Font">The text font (or <c>null</c> for none).</param>
-    /// <param name="Styled">The styled text string.</param>
-    /// <param name="BaseColor">The base text color.</param>
-    public record struct StyleInstance(FontSet Font, string Styled, string BaseColor);
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public struct InternalData
@@ -75,7 +70,6 @@ public class UIElementText
     private void RefreshRenderables()
     {
         Internal.RenderableContent.Clear();
-        HashSet<StyleInstance> instances = new();
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
         {
             if (!style.CanRenderText())
@@ -83,11 +77,6 @@ public class UIElementText
                 continue;
             }
             string styled = style.TextStyling(Internal.Content);
-            StyleInstance instance = new(style.TextFont, styled, style.TextBaseColor);
-            if (!instances.Add(instance))
-            {
-                continue;
-            }
             RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
             if (Internal.MaxWidth > 0)
             {
