@@ -41,9 +41,9 @@ public class UITextLink : UIClickableElement.Styled
     /// <param name="click">The style to display when clicked.</param>
     /// <param name="pos">The position of the element.</param>
     public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
-        : base(normal, hover, click, pos, clicked)
+        : base(normal, hover, click, pos, true, clicked)
     {
-        Text = CreateText(text);
+        Text = CreateText(text, required: true);
         Icon = icon;
         UpdateStyle();
     }
@@ -60,17 +60,18 @@ public class UITextLink : UIClickableElement.Styled
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
+        Location textLocation = Text.GetPosition(X, Y);
         if (Icon is null)
         {
-            style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+            style.TextFont.DrawFancyText(Text, textLocation);
             return;
         }
+        int fontHeight = style.TextFont.FontDefault.Height;
+        textLocation += new Location(fontHeight, fontHeight, 0);
         Icon.Bind();
         Renderer2D.SetColor(style.BaseColor);
-        Position.ConstantWidth(Text.Renderable.Width + style.TextFont.FontDefault.Height);
-        Position.ConstantHeight(style.TextFont.FontDefault.Height * Text.Renderable.Lines.Length);
-        view.Rendering.RenderRectangle(view.UIContext, X, Y, X + style.TextFont.FontDefault.Height, Y + style.TextFont.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        style.TextFont.DrawFancyText(Text, new Location(X + style.TextFont.FontDefault.Height, Y, 0));
-        Renderer2D.SetColor(Vector4.One);
+        view.Rendering.RenderRectangle(view.UIContext, X, Y, textLocation.XF, textLocation.YF, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        style.TextFont.DrawFancyText(Text, textLocation);
+        Renderer2D.SetColor(Color4F.White);
     }
 }

@@ -67,13 +67,12 @@ public record UIElementStyle
         TextBaseColor = style.TextBaseColor;
     }
 
-    /// <summary>Returns whether this style can render the specified text.</summary>
+    /// <summary>Returns whether this style can render text in general.</summary>
     public bool CanRenderText()
         => TextFont is not null;
 
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
-    /// <returns>Whether this style can render the specified text.</returns>
     public bool CanRenderText(UIElementText text)
-        => CanRenderText() && text.Internal.RenderableContent.ContainsKey(this);
+        => !text.Empty && CanRenderText() && text.Internal.RenderableContent.ContainsKey(this);
 }

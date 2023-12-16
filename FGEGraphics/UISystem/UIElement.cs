@@ -247,20 +247,27 @@ public abstract class UIElement
 
     /// <summary>Registers a style to this element instance. This should be called for every available style.</summary>
     /// <param name="style">The style to register.</param>
-    public UIElementStyle RegisterStyle(UIElementStyle style)
+    /// <param name="requireText">Whether the style must support text rendering.</param>
+    public UIElementStyle RegisterStyle(UIElementStyle style, bool requireText = false)
     {
+        if (requireText && !style.CanRenderText())
+        {
+            throw new Exception("Style must support text rendering when 'requireText' is true");
+        }
         ElementInternal.Styles.Add(style);
         return style;
     }
 
     /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
     /// <param name="text">The initial text content.</param>
+    /// <param name="required">Whether text content should be present even if null.</param>
     /// <param name="width">The custom maximum width, if any.</param>
     /// <param name="alignment">The text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText CreateText(string text, int width = -1, TextAlignment alignment = TextAlignment.LEFT)
+    public UIElementText CreateText(string text, bool required = false, int width = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
-        return new(this, text, width, alignment);
+        string content = text ?? (required ? "null" : null);
+        return new(this, content, width, alignment);
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>

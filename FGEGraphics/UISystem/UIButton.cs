@@ -38,7 +38,7 @@ public class UIButton : UIClickableElement.Styled
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
     public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
-        : base(normal, hover, click, pos, clicked)
+        : base(normal, hover, click, pos, false, clicked)
     {
         Text = CreateText(text, alignment: TextAlignment.CENTER);
     }

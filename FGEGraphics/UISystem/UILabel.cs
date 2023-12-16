@@ -39,8 +39,8 @@ public class UILabel : UIElement
     public UILabel(string text, UIElementStyle style, UIPositionHelper pos)
         : base(pos)
     {
-        Style = RegisterStyle(style);
-        Text = CreateText(text, Position.Width);
+        Style = RegisterStyle(style, true);
+        Text = CreateText(text, true, Position.Width);
     }
 
     /// <summary>Returns this label's style.</summary>
@@ -65,8 +65,8 @@ public class UILabel : UIElement
         {
             Renderer2D.SetColor(style.BaseColor);
             view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            Renderer2D.SetColor(Vector4.One);
+            Renderer2D.SetColor(Color4F.White);
         }
-        style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+        style.TextFont.DrawFancyText(Text, Text.GetPosition(X, Y));
     }
 }

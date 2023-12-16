@@ -40,6 +40,9 @@ public class UIElementText
     /// <summary>The alignment of the text, if any.</summary>
     public TextAlignment Alignment;
 
+    /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
+    public bool Empty { get; private set; }
+
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public InternalData Internal;
 
@@ -54,6 +57,11 @@ public class UIElementText
     /// <returns>The UI text instance.</returns>
     public UIElementText(UIElement parent, string content, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
+        if (content is null)
+        {
+            Empty = true;
+            return;
+        }
         Internal = new InternalData()
         {
             ParentElement = parent,
