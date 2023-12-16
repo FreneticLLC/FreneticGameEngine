@@ -237,10 +237,7 @@ public abstract class UIElement
     public void FullTick(double delta)
     {
         CheckChildren();
-        if (ElementInternal.CurrentStyle is null)
-        {
-            SwitchToStyle(ElementInternal.CurrentStyle = GetStyle());
-        }
+        UpdateStyle();
         Tick(delta);
         TickChildren(delta);
     }
@@ -398,8 +395,7 @@ public abstract class UIElement
             {
                 SwitchFromStyle(ElementInternal.CurrentStyle);
             }
-            ElementInternal.CurrentStyle = newStyle;
-            SwitchToStyle(newStyle);
+            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
         }
     }
 
