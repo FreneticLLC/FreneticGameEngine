@@ -51,6 +51,9 @@ public abstract class UIElement
     /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
     public int Height => LastAbsoluteSize.Y;
 
+    /// <summary>Whether the element has a parent element.</summary>
+    public bool HasParent => Parent is not null && !Parent.ElementInternal.ToRemove.Contains(this);
+
     /// <summary>Last known aboslute rotation.</summary>
     public float LastAbsoluteRotation;
 
@@ -62,6 +65,9 @@ public abstract class UIElement
     /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
     /// </summary>
     public double RenderPriority = 0;
+
+    /// <summary>Whether the element has rendering priority over its parent, if any.</summary>
+    public bool ChildPriority = true;
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
@@ -76,7 +82,8 @@ public abstract class UIElement
 
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
-    public void AddChild(UIElement child)
+    /// <param name="priority">Whether the child element has render priority over this element.</param>
+    public void AddChild(UIElement child, bool priority = true)
     {
         if (child.Parent != null)
         {
@@ -99,6 +106,7 @@ public abstract class UIElement
         }
         child.Parent = this;
         child.IsValid = true;
+        child.ChildPriority = priority;
         child.Init();
     }
 
@@ -344,45 +352,48 @@ public abstract class UIElement
     /// <param name="lastRot">The last rotation made in the render chain.</param>
     public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
     {
-        if (Parent == null || !Parent.ElementInternal.ToRemove.Contains(this))
+        if (Parent is not null && Parent.ElementInternal.ToRemove.Contains(this))
         {
-            int x = Position.X;
-            int y = Position.Y;
-            if (Position.MainAnchor == UIAnchor.RELATIVE)
-            {
-                y += Position.View.RelativeYLast;
-            }
-            if (Math.Abs(lastRot.Z) < 0.001f)
-            {
-                x += xoff;
-                y += yoff;
-                lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
-            }
-            else
-            {
-                int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
-                int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
-                float half_wid = Position.Width * 0.5f;
-                float half_hei = Position.Height * 0.5f;
-                float tx = x + lastRot.X + cwx - half_wid;
-                float ty = y + lastRot.Y + chy - half_hei;
-                float cosRot = (float)Math.Cos(-lastRot.Z);
-                float sinRot = (float)Math.Sin(-lastRot.Z);
-                float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
-                float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
-                lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
-                int bx = (int)tx2 + xoff;
-                int by = (int)ty2 + yoff;
-                x = bx;
-                y = by;
-            }
-            LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
-            LastAbsoluteRotation = lastRot.Z;
-            LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
-            Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
-            output.Add(this);
-            UpdateChildPositions(output, delta, x, y, lastRot);
+            return;
         }
+        int x = Position.X;
+        int y = Position.Y;
+        if (Position.MainAnchor == UIAnchor.RELATIVE)
+        {
+            y += Position.View.RelativeYLast;
+        }
+        if (Math.Abs(lastRot.Z) < 0.001f)
+        {
+            x += xoff;
+            y += yoff;
+            lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
+        }
+        else
+        {
+            int cwx = Parent is null ? 0 : Position.MainAnchor.GetX(this);
+            int chy = Parent is null ? 0 : Position.MainAnchor.GetY(this);
+            float half_wid = Position.Width * 0.5f;
+            float half_hei = Position.Height * 0.5f;
+            float tx = x + lastRot.X + cwx - half_wid;
+            float ty = y + lastRot.Y + chy - half_hei;
+            float cosRot = (float)Math.Cos(-lastRot.Z);
+            float sinRot = (float)Math.Sin(-lastRot.Z);
+            float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
+            float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
+            lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
+            int bx = (int)tx2 + xoff;
+            int by = (int)ty2 + yoff;
+            x = bx;
+            y = by;
+        }
+        LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
+        LastAbsoluteRotation = lastRot.Z;
+        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
+        Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
+        CheckChildren();
+        UpdateChildPositions(output, delta, x, y, lastRot, false);
+        output.Add(this);
+        UpdateChildPositions(output, delta, x, y, lastRot, true);
     }
 
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
@@ -413,12 +424,12 @@ public abstract class UIElement
     /// <param name="xoff">The X offset of this element's parent.</param>
     /// <param name="yoff">The Y offset of this element's parent.</param>
     /// <param name="lastRot">The last rotation made in the render chain.</param>
-    public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+    /// <param name="childPriority">The priority value to target.</param>
+    public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot, bool childPriority)
     {
-        CheckChildren();
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid)
+            if (element.IsValid && element.ChildPriority == childPriority)
             {
                 element.UpdatePositions(output, delta, xoff, yoff, lastRot);
             }
