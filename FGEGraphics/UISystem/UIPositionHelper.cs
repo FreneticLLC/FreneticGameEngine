@@ -29,6 +29,15 @@ public class UIPositionHelper
         ConstantRotation(0f);
     }
 
+    /// <summary>Constructs a UI Position Helper as a copy of another one.</summary>
+    /// <param name="pos">The position helper to copy.</param>
+    public UIPositionHelper(UIPositionHelper pos)
+    {
+        View = pos.View;
+        MainAnchor = pos.MainAnchor;
+        Internal = pos.Internal;
+    }
+
     /// <summary>Returns a <see cref="UIPositionHelper"/> that is automatically below another one, by adding to the Y value, with an optional additional padding.</summary>
     public static UIPositionHelper Below(UIPositionHelper prior, int yPad)
     {
@@ -242,6 +251,9 @@ public class UIPositionHelper
         Internal.Rotation = new() { Mode = UIPosMode.GETTER, GetterVal = rotation };
         return this;
     }
+
+    /// <summary>Returns a copy of this position fixed at the top-left origin.</summary>
+    public UIPositionHelper AtOrigin() => new UIPositionHelper(this).Anchor(UIAnchor.TOP_LEFT).ConstantXY(0, 0);
 
     /// <summary>Gets the X coordinate.</summary>
     public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);

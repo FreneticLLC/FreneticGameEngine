@@ -27,6 +27,9 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents an interactable button on a screen.</summary>
 public class UIButton : UIClickableElement.Styled
 {
+    /// <summary>The pressable area of this button.</summary>
+    public UIBox Box;
+
     /// <summary>The text to render on this button.</summary>
     public UIElementText Text;
 
@@ -40,6 +43,7 @@ public class UIButton : UIClickableElement.Styled
     public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, false, clicked)
     {
+        AddChild(Box = new UIBox(normal, pos.AtOrigin()), false);
         Text = CreateText(text, alignment: TextAlignment.CENTER);
     }
 
@@ -58,42 +62,18 @@ public class UIButton : UIClickableElement.Styled
         return new UIButton(text, clicked, normal, hover, click, pos);
     }
 
+    /// <summary>Updates the style of the pressable <see cref="Box"/>.</summary>
+    public override void SwitchToStyle(UIElementStyle style)
+    {
+        Box.Style = style;
+    }
+
     /// <summary>Renders this button on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
-        bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
-        if (any)
-        {
-            Engine.Textures.White.Bind();
-        }
-        if (style.DropShadowLength > 0)
-        {
-            Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
-        }
-        if (style.BorderColor.A > 0 && style.BorderThickness > 0)
-        {
-            Renderer2D.SetColor(style.BorderColor);
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, rotation);
-        }
-        if (style.BaseColor.A > 0)
-        {
-            Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
-        }
-        if (any)
-        {
-            Renderer2D.SetColor(Color4F.White);
-        }
-        if (style.BaseTexture is not null)
-        {
-            style.BaseTexture.Bind();
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, rotation);
-        }
         if (style.CanRenderText(Text))
         {
             style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));
