@@ -14,40 +14,66 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-public class UITabGroup
+/// <summary>Arguments for a <see cref="UITabGroup.TabSwitched"/> event handler.</summary>
+/// <param name="From">The tab screen being switched from.</param>
+/// <param name="To">The tab screen being switched to.</param>
+public record TabSwitchedArgs(UIScreen From, UIScreen To);
+
+/// <summary>
+/// Represents a container of elements supporting <see cref="UIClickableElement"/>s that lead to <see cref="UIScreen"/>s,
+/// automatically handling the <see cref="UIClickableElement.Enabled"/> state.
+/// </summary>
+public class UITabGroup : UIGroup
 {
-    public EventHandler<UIScreen> TabSwitched;
+    /// <summary>Ran when the tab is switched.</summary>
+    public event EventHandler<TabSwitchedArgs> TabSwitched;
 
-    public struct InternalData
+    /// <summary>The button leading to the currently selected tab.</summary>
+    public UIClickableElement SelectedButton;
+
+    /// <summary>The currently selected tab.</summary>
+    public UIScreen SelectedTab;
+
+    /// <summary>Constructs a new tab group.</summary>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="onSwitch">Ran when the tab is switched.</param>
+    public UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : base(pos)
     {
-        public UIClickableElement CurrentButton;
-        public UIScreen CurrentTab;
+        if (onSwitch is not null)
+        {
+            TabSwitched += (_, args) => onSwitch(args);
+        }
     }
 
-    public InternalData Internal;
-
-    public UITabGroup(Action<UIScreen> onSwitch)
+    /// <summary>Adds a button and a screen as a tab to the group.</summary>
+    /// <param name="button">The button linked to the screen.</param>
+    /// <param name="tab">The screen to switch to when the button is pressed.</param>
+    /// <param name="main">Whether this tab should be selected by default.</param>
+    /// <param name="addChild">Whether to add the button as a child element of the group.</param>
+    public void AddTab(UIClickableElement button, UIScreen tab, bool main = false, bool addChild = true)
     {
-        TabSwitched += (_, tab) => onSwitch(tab);
-    }
-
-    public void Add(UIClickableElement button, UIScreen tab)
-    {
-        if (Internal.CurrentButton is null)
+        if (main)
         {
             button.Enabled = false;
-            Internal.CurrentButton = button;
-            Internal.CurrentTab = tab;
+            SelectedButton = button;
+            SelectedTab = tab;
         }
         button.Clicked += (_, _) =>
         {
-            Internal.CurrentButton.Enabled = true;
-            Internal.CurrentTab.SwitchFrom();
+            if (SelectedButton is not null)
+            {
+                SelectedButton.Enabled = true;
+                SelectedTab.SwitchFrom();
+            }
             button.Enabled = false;
             tab.SwitchTo();
-            Internal.CurrentButton = button;
-            Internal.CurrentTab = tab;
-            TabSwitched.Invoke(this, tab);
+            TabSwitched.Invoke(this, new(SelectedTab, tab));
+            SelectedButton = button;
+            SelectedTab = tab;
         };
+        if (addChild)
+        {
+            AddChild(button);
+        }
     }
 }

@@ -43,7 +43,7 @@ public class UITextLink : UIClickableElement.Styled
     public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, true, clicked)
     {
-        Text = CreateText(text, required: true);
+        Text = CreateText(text, true);
         Icon = icon;
         UpdateStyle();
     }

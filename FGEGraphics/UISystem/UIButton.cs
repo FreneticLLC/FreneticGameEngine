@@ -30,7 +30,7 @@ public class UIButton : UIClickableElement.Styled
     /// <summary>The text to render on this button.</summary>
     public UIElementText Text;
 
-    /// <summary>Constructs a new button based on a render style.</summary>
+    /// <summary>Constructs a new style-based button.</summary>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>

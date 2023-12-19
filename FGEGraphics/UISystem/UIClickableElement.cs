@@ -11,7 +11,7 @@ namespace FGEGraphics.UISystem;
 public abstract class UIClickableElement : UIElement
 {
     /// <summary>Ran when this element is clicked.</summary>
-    public EventHandler Clicked;
+    public event EventHandler Clicked;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
