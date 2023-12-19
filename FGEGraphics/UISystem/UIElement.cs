@@ -242,7 +242,7 @@ public abstract class UIElement
         TickChildren(delta);
     }
 
-    /// <summary>Registers a style to this element instance. This should be called for every available style.</summary>
+    /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
     /// <param name="style">The style to register.</param>
     /// <param name="requireText">Whether the style must support text rendering.</param>
     public UIElementStyle RegisterStyle(UIElementStyle style, bool requireText = false)
