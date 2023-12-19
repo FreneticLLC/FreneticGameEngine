@@ -142,7 +142,7 @@ public class ViewUI2D
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try
                 {
-                    if (elem.IsValid)
+                    if (elem.IsValid && elem.ShouldRender)
                     {
                         elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }

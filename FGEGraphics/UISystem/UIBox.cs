@@ -33,8 +33,9 @@ public class UIBox : UIElement
     /// <summary>Constructs a simple colored box.</summary>
     /// <param name="style">The style of the element.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIBox(UIElementStyle style, UIPositionHelper pos)
-        : base(pos)
+    /// <param name="shouldRender">Whether the element should render automatically.</param>
+    public UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true)
+        : base(pos, shouldRender)
     {
         Style = style;
     }

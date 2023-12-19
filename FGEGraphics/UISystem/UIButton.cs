@@ -43,7 +43,7 @@ public class UIButton : UIClickableElement.Styled
     public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, false, clicked)
     {
-        AddChild(Box = new UIBox(normal, pos.AtOrigin()), false);
+        AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false));
         Text = CreateText(text, alignment: TextAlignment.CENTER);
     }
 
@@ -62,18 +62,13 @@ public class UIButton : UIClickableElement.Styled
         return new UIButton(text, clicked, normal, hover, click, pos);
     }
 
-    /// <summary>Updates the style of the pressable <see cref="Box"/>.</summary>
-    public override void SwitchToStyle(UIElementStyle style)
-    {
-        Box.Style = style;
-    }
-
     /// <summary>Renders this button on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
+        Box.Render(view, delta, style);
         if (style.CanRenderText(Text))
         {
             style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));

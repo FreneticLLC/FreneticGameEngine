@@ -60,21 +60,26 @@ public abstract class UIElement
     /// <summary>The position and size of this element.</summary>
     public UIPositionHelper Position;
 
+    /// <summary>Whether this element should render automatically.</summary>
+    public bool ShouldRender;
+
     /// <summary>
     /// Priority for rendering logic.
     /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
     /// </summary>
     public double RenderPriority = 0;
 
-    /// <summary>Whether the element has rendering priority over its parent, if any.</summary>
+    /// <summary>Whether this element has rendering priority over its parent, if any.</summary>
     public bool ChildPriority = true;
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
-    public UIElement(UIPositionHelper pos)
+    /// <param name="shouldRender">Whether the element should render automatically.</param>
+    public UIElement(UIPositionHelper pos, bool shouldRender = true)
     {
         Position = pos;
         Position.For = this;
+        ShouldRender = shouldRender;
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
