@@ -11,3 +11,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly")]
 [assembly: SuppressMessage("Design", "CA1060:Move pinvokes to native methods class")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+[assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "Not owned code", Scope = "member", Target = "~M:FGECore.PhysicsSystem.BepuCharacters.CharacterControllers.AnalyzeContactsWorkerCache.#ctor(System.Int32,BepuUtilities.Memory.BufferPool)")]

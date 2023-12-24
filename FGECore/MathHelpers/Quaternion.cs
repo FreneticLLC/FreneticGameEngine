@@ -381,7 +381,7 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
     public readonly Location RepresentedAxis() => (new Location(X, Y, Z) * Math.Sign(W)).Normalize();
 
     /// <summary>Converts the <see cref="Quaternion"/> value to a floating point <see cref="System.Numerics.Quaternion"/>.</summary>
-    public readonly System.Numerics.Quaternion ToNumerics() => new System.Numerics.Quaternion(XF, YF, ZF, WF);
+    public readonly System.Numerics.Quaternion ToNumerics() => new(XF, YF, ZF, WF);
 
     /// <summary>Returns the Spherical Linear Interpolation ('slerp') between this quaternion and another.</summary>
     public readonly Quaternion Slerp(Quaternion end, double interpolationAmount)
@@ -409,5 +409,5 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
 public static class ExtensionsForQuaternion
 {
     /// <summary>Converts a floating point <see cref="System.Numerics.Quaternion"/> to a <see cref="Quaternion"/>.</summary>
-    public static Quaternion ToCore(this System.Numerics.Quaternion quat) => new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
+    public static Quaternion ToCore(this System.Numerics.Quaternion quat) => new(quat.X, quat.Y, quat.Z, quat.W);
 }
