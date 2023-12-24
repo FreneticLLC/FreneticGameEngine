@@ -27,19 +27,19 @@ public class AnimationEngine
     /// <summary>Constructs the animation helper.</summary>
     public AnimationEngine()
     {
-        Animations = new Dictionary<string, SingleAnimation>();
-        string[] HBones = new string[] { "neck02", "neck03", "head", "jaw", "levator02.l", "levator02.r", "special01", "special03", "special06.l", "special06.r",
+        Animations = [];
+        string[] HBones = [ "neck02", "neck03", "head", "jaw", "levator02.l", "levator02.r", "special01", "special03", "special06.l", "special06.r",
                                          "temporalis01.l", "temporalis01.r", "temporalis02.l", "temporalis02.r", "special04", "oris02", "oris01", "oris06.l",
                                          "oris07.l", "oris06.r", "oris07.r", "tongue00", "tongue01", "tongue02", "tongue03", "tongue04", "tongue07.l", "tongue07.r",
                                          "tongue06.l", "tongue06.r", "tongue05.l", "tongue05.r", "levator03.l", "levator04.l", "levator05.l", "levator03.r",
                                          "levator04.r", "levator05.r", "oris04.l", "oris03.l", "oris04.r", "oris03.r", "oris06", "oris05", "levator06.l", "levator06.r",
                                          "special05.l", "eye.l", "orbicularis03.l", "orbicularis04.l", "special05.r", "eye.r", "orbicularis03.r", "orbicularis04.r",
-                                         "oculi02.l", "oculi01.l", "oculi02.r", "oculi01.r", "risorius02.l", "risorius03.l", "risorius02.r", "risorius03.r" };
-        string[] LBones = new string[] { "pelvis.l", "upperleg01.l", "upperleg02.l", "lowerleg01.l", "lowerleg02.l", "foot.l", "toe1-1.l", "toe1-2.l",
+                                         "oculi02.l", "oculi01.l", "oculi02.r", "oculi01.r", "risorius02.l", "risorius03.l", "risorius02.r", "risorius03.r" ];
+        string[] LBones = [ "pelvis.l", "upperleg01.l", "upperleg02.l", "lowerleg01.l", "lowerleg02.l", "foot.l", "toe1-1.l", "toe1-2.l",
                                          "toe2-1.l", "toe2-2.l", "toe2-3.l", "toe3-1.l", "toe3-2.l", "toe3-3.l", "toe4-1.l", "toe4-2.l", "toe4-3.l",
                                          "toe5-1.l", "toe5-2.l", "toe5-3.l", "pelvis.r", "upperleg01.r", "upperleg02.r", "lowerleg01.r", "lowerleg02.r",
                                          "foot.r", "toe1-1.r", "toe1-2.r", "toe2-1.r", "toe2-2.r", "toe2-3.r", "toe3-1.r", "toe3-2.r", "toe3-3.r",
-                                         "toe4-1.r", "toe4-2.r", "toe4-3.r", "toe5-1.r", "toe5-2.r", "toe5-3.r" };
+                                         "toe4-1.r", "toe4-2.r", "toe4-3.r", "toe5-1.r", "toe5-2.r", "toe5-3.r" ];
         foreach (string str in HBones)
         {
             HeadBones.Add(str);
@@ -51,10 +51,10 @@ public class AnimationEngine
     }
 
     /// <summary>The usual head bones.</summary>
-    public HashSet<string> HeadBones = new();
+    public HashSet<string> HeadBones = [];
     //public HashSet<string> TorsoBones = new HashSet<string>();
     /// <summary>The usual leg bones.</summary>
-    public HashSet<string> LegBones = new();
+    public HashSet<string> LegBones = [];
 
     /// <summary>All known animations.</summary>
     public Dictionary<string, SingleAnimation> Animations;
@@ -107,7 +107,7 @@ public class AnimationEngine
                 {
                     break;
                 }
-                List<(string, string)> entries = new();
+                List<(string, string)> entries = [];
                 for (i += 2; i < data.Length; i++)
                 {
                     if (data[i].Trim().StartsWith("//"))
@@ -236,10 +236,10 @@ public class SingleAnimation
     public AnimationEngine Engine;
 
     /// <summary>All nodes in the animation.</summary>
-    public List<SingleAnimationNode> Nodes = new();
+    public List<SingleAnimationNode> Nodes = [];
 
     /// <summary>A mapping of nodes.</summary>
-    public Dictionary<string, SingleAnimationNode> node_map = new();
+    public Dictionary<string, SingleAnimationNode> node_map = [];
 
     /// <summary>Gets a node by name.</summary>
     /// <param name="name">The name of it.</param>
@@ -270,16 +270,16 @@ public class SingleAnimationNode
     public Location Offset;
 
     /// <summary>The position time stamps.</summary>
-    public List<double> PosTimes = new();
+    public List<double> PosTimes = [];
 
     /// <summary>The positions.</summary>
-    public List<Location> Positions = new();
+    public List<Location> Positions = [];
 
     /// <summary>The rotation time stamps.</summary>
-    public List<double> RotTimes = new();
+    public List<double> RotTimes = [];
 
     /// <summary>The rotations.</summary>
-    public List<MathHelpers.Quaternion> Rotations = new();
+    public List<MathHelpers.Quaternion> Rotations = [];
 
     /// <summary>Finds a position by time.</summary>
     /// <param name="time">The time.</param>

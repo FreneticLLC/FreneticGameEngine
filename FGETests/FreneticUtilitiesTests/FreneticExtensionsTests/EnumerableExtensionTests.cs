@@ -111,8 +111,8 @@ public class EnumerableExtensionTests : FGETest
     [Test]
     public static void StopWhenTest()
     {
-        string[] strs = new[] { "alpha", "bravo", "charlie", "delta" };
-        IEnumerable<string> stoppedEarly = strs.StopWhen(s => s.StartsWith("c"));
+        string[] strs = ["alpha", "bravo", "charlie", "delta"];
+        IEnumerable<string> stoppedEarly = strs.StopWhen(s => s.StartsWith('c'));
         ClassicAssert.AreEqual(2, stoppedEarly.Count(), "StopWhenTest stopped at wrong spot");
     }
 
@@ -134,8 +134,8 @@ public class EnumerableExtensionTests : FGETest
     [Test]
     public static void JoinWithTest()
     {
-        string[] alpha = new[] { "alpha", "bravo" };
-        string[] bravo = new[] { "charlie", "delta" };
+        string[] alpha = ["alpha", "bravo"];
+        string[] bravo = ["charlie", "delta"];
         string[] resultArray = alpha.JoinWith(bravo);
         ClassicAssert.AreEqual(4, resultArray.Length, "JoinWithTest resultArray length wrong");
         ClassicAssert.AreEqual("alpha", resultArray[0], "JoinWithTest resultArray[0] wrong");

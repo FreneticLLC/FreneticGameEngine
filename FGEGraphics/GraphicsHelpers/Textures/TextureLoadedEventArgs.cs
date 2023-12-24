@@ -24,15 +24,10 @@ using OpenTK.Graphics.OpenGL4;
 namespace FGEGraphics.GraphicsHelpers.Textures;
 
 /// <summary>Event arguments for a texture being loaded.</summary>
-public class TextureLoadedEventArgs : EventArgs
+/// <param name="_texture">The texture that was loaded.</param>
+public class TextureLoadedEventArgs(Texture _texture) : EventArgs
 {
-    /// <summary>Constructs a texture loaded event argument set.</summary>
-    /// <param name="_texture">The texture that was loaded.</param>
-    public TextureLoadedEventArgs(Texture _texture)
-    {
-        LoadedTexture = _texture;
-    }
 
     /// <summary>The texture that was loaded.</summary>
-    public Texture LoadedTexture;
+    public Texture LoadedTexture = _texture;
 }

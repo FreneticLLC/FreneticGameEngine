@@ -49,7 +49,7 @@ public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
     /// PRIMARILY FOR INTERNAL USAGE.
     /// Caps to disable for this render.
     /// </summary>
-    public HashSet<EnableCap> DisabledCaps = new();
+    public HashSet<EnableCap> DisabledCaps = [];
 
     /// <summary>
     /// Gets or sets whether the object is always visible through walls.

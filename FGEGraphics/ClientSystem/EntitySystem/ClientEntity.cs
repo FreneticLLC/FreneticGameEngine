@@ -17,7 +17,8 @@ using FGECore.PropertySystem;
 namespace FGEGraphics.ClientSystem.EntitySystem;
 
 /// <summary>Represents an entity on the client side.</summary>
-public class ClientEntity : BasicEntity<ClientEntity, GameEngineBase>
+/// <param name="_engine">The owning game engine.</param>
+public class ClientEntity(GameEngineBase _engine) : BasicEntity<ClientEntity, GameEngineBase>(_engine)
 {
     /// <summary>
     /// Get or set the renderer for this entity.
@@ -27,13 +28,6 @@ public class ClientEntity : BasicEntity<ClientEntity, GameEngineBase>
 
     /// <summary>Gets the client window associated with this entity.</summary>
     public GameClientWindow Window => Engine.Client;
-
-    /// <summary>Constructs a client-side entity.</summary>
-    /// <param name="_engine">The owning game engine.</param>
-    public ClientEntity(GameEngineBase _engine)
-        : base(_engine)
-    {
-    }
 
     /// <summary>Called when a property is added.</summary>
     public override void OnAdded(Property prop)

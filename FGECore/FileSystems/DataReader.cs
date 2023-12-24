@@ -19,19 +19,13 @@ using FGECore.UtilitySystems;
 namespace FGECore.FileSystems;
 
 /// <summary>Helper to read data from a stream.</summary>
-public class DataReader
+/// <param name="stream">The base stream.</param>
+public class DataReader(DataStream stream)
 {
     /// <summary>The internal stream.</summary>
-    public DataStream Internal;
+    public DataStream Internal = stream;
 
     private readonly byte[] HelperBytes = new byte[32];
-
-    /// <summary>Constructs the data reader.</summary>
-    /// <param name="stream">The base stream.</param>
-    public DataReader(DataStream stream)
-    {
-        Internal = stream;
-    }
 
     /// <summary>Reads a single byte from the stream.</summary>
     public byte ReadByte()

@@ -55,7 +55,7 @@ public class View3DGenerationHelper : View3DCoreDataSet
         Internal.FBO_OutView_Main = GL.GenFramebuffer();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_OutView_Main);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture, 0);
-        GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+        GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
     }

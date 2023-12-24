@@ -88,7 +88,7 @@ public sealed class DataStream : Stream
     /// <summary>Constructs an empty data stream.</summary>
     public DataStream()
     {
-        Wrapped = Array.Empty<byte>();
+        Wrapped = [];
         Len = 0;
         Ind = 0;
     }

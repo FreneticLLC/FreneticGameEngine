@@ -19,6 +19,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>FGE_Icon.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BepuPhysics">

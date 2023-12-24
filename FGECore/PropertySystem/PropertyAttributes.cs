@@ -38,16 +38,10 @@ public class PropertyRequiredBool : Attribute
 /// Used to indicate that the numerical priority (order of usage, lowest = first, highest = last) a property should be handled in.
 /// <para>Note that fields always come before property methods.</para>
 /// </summary>
+/// <param name="_prio">The priority value.</param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-public class PropertyPriority : Attribute
+public class PropertyPriority(double _prio) : Attribute
 {
     /// <summary>The priority.</summary>
-    public double Priority;
-
-    /// <summary>Construct the priority.</summary>
-    /// <param name="_prio">The priority value.</param>
-    public PropertyPriority(double _prio)
-    {
-        Priority = _prio;
-    }
+    public double Priority = _prio;
 }

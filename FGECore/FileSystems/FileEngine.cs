@@ -79,8 +79,8 @@ public class FileEngine
         PackageList = new List<FFPackage>(64),
         Files = new Dictionary<string, FFPFile>(1024),
         RootFolder = new FFPFolder(),
-        RawFolders = new HashSet<string>(),
-        SavedFiles = new HashSet<string>()
+        RawFolders = [],
+        SavedFiles = []
     };
     #endregion
 
@@ -531,7 +531,7 @@ public class FileEngine
     /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
     public string[] ListFiles(string folder, string extension = null, bool deep = false)
     {
-        HashSet<string> files = new();
+        HashSet<string> files = [];
         string fullExtension = extension == null ? null : "." + extension;
         foreach (IEnumerable<string> fileSet in EnumerateFileSets(folder, deep))
         {
@@ -544,7 +544,7 @@ public class FileEngine
                 files.UnionWith(fileSet);
             }
         }
-        return files.ToArray();
+        return [.. files];
     }
 
     private IEnumerable<IEnumerable<string>> EnumerateFolderSets(string folder)
@@ -579,12 +579,12 @@ public class FileEngine
     /// <exception cref="DirectoryNotFoundException">When no folder exists by the given path.</exception>
     public string[] ListFolders(string folder)
     {
-        HashSet<string> folders = new();
+        HashSet<string> folders = [];
         foreach (IEnumerable<string> folderSet in EnumerateFolderSets(folder))
         {
             folders.UnionWith(folderSet);
         }
-        return folders.ToArray();
+        return [.. folders];
     }
     #endregion
 

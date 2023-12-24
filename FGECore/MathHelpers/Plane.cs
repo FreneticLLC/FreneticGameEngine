@@ -113,15 +113,17 @@ public class Plane
     /// <returns>-1, 0, or 1.</returns>
     public int SignToPlane(Location mins, Location maxes)
     {
-        Location[] locs = new Location[8];
-        locs[0] = new Location(mins.X, mins.Y, mins.Z);
-        locs[1] = new Location(mins.X, mins.Y, maxes.Z);
-        locs[2] = new Location(mins.X, maxes.Y, mins.Z);
-        locs[3] = new Location(mins.X, maxes.Y, maxes.Z);
-        locs[4] = new Location(maxes.X, mins.Y, mins.Z);
-        locs[5] = new Location(maxes.X, mins.Y, maxes.Z);
-        locs[6] = new Location(maxes.X, maxes.Y, mins.Z);
-        locs[7] = new Location(maxes.X, maxes.Y, maxes.Z);
+        Location[] locs =
+        [
+            new Location(mins.X, mins.Y, mins.Z),
+            new Location(mins.X, mins.Y, maxes.Z),
+            new Location(mins.X, maxes.Y, mins.Z),
+            new Location(mins.X, maxes.Y, maxes.Z),
+            new Location(maxes.X, mins.Y, mins.Z),
+            new Location(maxes.X, mins.Y, maxes.Z),
+            new Location(maxes.X, maxes.Y, mins.Z),
+            new Location(maxes.X, maxes.Y, maxes.Z),
+        ];
         int pSign = Math.Sign(Distance(locs[0]));
         for (int i = 1; i < locs.Length; i++)
         {

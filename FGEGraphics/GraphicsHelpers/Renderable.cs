@@ -551,19 +551,19 @@ public class Renderable
                 Logs.Error("Failed to generate VBO, null vertices!");
                 return;
             }
-            vecs = buildList.Vertices.ToArray();
-            inds = buildList.Indices.ToArray();
-            norms = buildList.Normals.ToArray();
-            texs = buildList.TexCoords.ToArray();
-            tangs = buildList.Tangents != null ? buildList.Tangents.ToArray() : TangentsFor(vecs, norms, texs);
+            vecs = [.. buildList.Vertices];
+            inds = [.. buildList.Indices];
+            norms = [.. buildList.Normals];
+            texs = [.. buildList.TexCoords];
+            tangs = buildList.Tangents != null ? [.. buildList.Tangents] : TangentsFor(vecs, norms, texs);
             cols = buildList.Colors?.ToArray();
             if (buildList.BoneIDs != null)
             {
                 Internal.HasBones = true;
-                ids = buildList.BoneIDs.ToArray();
-                weights = buildList.BoneWeights.ToArray();
-                ids2 = buildList.BoneIDs2.ToArray();
-                weights2 = buildList.BoneWeights2.ToArray();
+                ids = [.. buildList.BoneIDs];
+                weights = [.. buildList.BoneWeights];
+                ids2 = [.. buildList.BoneIDs2];
+                weights2 = [.. buildList.BoneWeights2];
             }
         }
         else if (builder is ArrayBuilder buildArray)

@@ -66,11 +66,6 @@ public class PointLight : LightObject
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
-    /// <summary>Destroys the light.</summary>
-    public void Destroy()
-    {
-    }
-
     /// <summary>Repositions the light.</summary>
     /// <param name="pos">The new position.</param>
     public sealed override void Reposition(Location pos)

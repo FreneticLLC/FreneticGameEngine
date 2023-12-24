@@ -23,7 +23,9 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.GraphicsHelpers;
 
 /// <summary>2D render helper.</summary>
-public class Renderer2D
+/// <param name="tengine">Texture engine.</param>
+/// <param name="shaderdet">Shader engine.</param>
+public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -103,20 +105,11 @@ public class Renderer2D
         Line = builder.Generate();
     }
 
-    /// <summary>Constructs the renderer - Init() it after!</summary>
-    /// <param name="tengine">Texture engine.</param>
-    /// <param name="shaderdet">Shader engine.</param>
-    public Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
-    {
-        Engine = tengine;
-        Shaders = shaderdet;
-    }
-
     /// <summary>Texture system.</summary>
-    public TextureEngine Engine;
+    public TextureEngine Engine = tengine;
 
     /// <summary>Shader system.</summary>
-    public ShaderEngine Shaders;
+    public ShaderEngine Shaders = shaderdet;
 
     /// <summary>Render a line between two points.</summary>
     /// <param name="start">The initial point.</param>

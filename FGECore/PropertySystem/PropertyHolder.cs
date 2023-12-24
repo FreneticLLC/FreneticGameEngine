@@ -34,7 +34,7 @@ public class PropertyHolder
         /// <param name="holder">The holder instance.</param>
         /// <param name="type">The property class type.</param>
         /// <param name="propObj">The property object instance.</param>
-        public void NoticeProperty(PropertyHolder holder, Type type, Property propObj)
+        public readonly void NoticeProperty(PropertyHolder holder, Type type, Property propObj)
         {
             propObj.Holder = holder;
             propObj.Helper = PropertyHelper.EnsureHandled(type);
@@ -46,7 +46,7 @@ public class PropertyHolder
                 }
                 else
                 {
-                    HeldInterfaces[iface] = new List<Object>() { propObj };
+                    HeldInterfaces[iface] = [propObj];
                 }
             }
             propObj.OnAdded();
@@ -57,7 +57,7 @@ public class PropertyHolder
         /// <param name="holder">The holder instance.</param>
         /// <param name="type">The property class type.</param>
         /// <param name="prop">The property of relevance.</param>
-        public void ForgetProperty(PropertyHolder holder, Type type, Property prop)
+        public readonly void ForgetProperty(PropertyHolder holder, Type type, Property prop)
         {
             HeldProperties.Remove(type);
             foreach (Type iface in type.GetInterfaces())
@@ -76,8 +76,8 @@ public class PropertyHolder
     /// <summary>Internal data useful to <see cref="PropertyHolder"/> instances.</summary>
     public Internal PropertyInternals = new()
     {
-        HeldProperties = new Dictionary<Type, Property>(),
-        HeldInterfaces = new Dictionary<Type, List<object>>(),
+        HeldProperties = [],
+        HeldInterfaces = [],
     };
 
     /// <summary>

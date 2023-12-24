@@ -149,7 +149,7 @@ public class GLFont : IDisposable
         int processed = 0;
         foreach (string inputSymbol in input)
         {
-            bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(":") && inputSymbol.EndsWith(":");
+            bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(':') && inputSymbol.EndsWith(':');
             Font fnt = (inputSymbol.Length == 1 ? Internal_Font : BackupFont);
             string chr = inputSymbol == "\t" ? "    " : inputSymbol;
             int nwidth = Height;
@@ -174,7 +174,7 @@ public class GLFont : IDisposable
                 {
                     Engine.CX = X;
                     Engine.CY = Y;
-                    List<string> toret = new();
+                    List<string> toret = [];
                     return input.Skip(processed);
                 }
             }
@@ -343,7 +343,7 @@ public class GLFont : IDisposable
     }
 
     /// <summary>Already-tested emoji names, with a boolean indicating whether they are valid.</summary>
-    public Dictionary<string, bool> TestedEmoji = new();
+    public Dictionary<string, bool> TestedEmoji = [];
 
     /// <summary>Returns whether the string is an emoji name.</summary>
     /// <param name="str">The string.</param>

@@ -17,16 +17,11 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>A joint that constrains two entities to slide along a single line relative to each other.</summary>
-public class JointSlider : PhysicsJointBase<PointOnLineServo>
+public class JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location dir) : PhysicsJointBase<PointOnLineServo>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointSlider"/>.</summary>
-    public JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location dir) : base(e1, e2)
-    {
-        Direction = dir.Normalize();
-    }
 
     /// <summary>The direction of the slider axis.</summary>
-    public Location Direction;
+    public Location Direction = dir.Normalize();
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override PointOnLineServo CreateJointDescription()

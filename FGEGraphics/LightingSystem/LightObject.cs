@@ -21,7 +21,7 @@ namespace FGEGraphics.LightingSystem;
 public abstract class LightObject
 {
     /// <summary>The actual lights making up this light.</summary>
-    public List<Light> InternalLights = new();
+    public List<Light> InternalLights = [];
 
     /// <summary>The position of the light source.</summary>
     public Location EyePos;

@@ -17,16 +17,11 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>A joint that works like the angular portion of a hinge. The two entities can only rotate relative to each other around the hinge axis.</summary>
-public class JointHingeAngular : PhysicsJointBase<AngularHinge>
+public class JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : PhysicsJointBase<AngularHinge>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointHingeAngular"/>.</summary>
-    public JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : base(e1, e2)
-    {
-        Axis = hingeAxis;
-    }
 
     /// <summary>The hinge axis. For a door, this with be vertical.</summary>
-    public Location Axis;
+    public Location Axis = hingeAxis;
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override AngularHinge CreateJointDescription()

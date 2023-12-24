@@ -37,7 +37,7 @@ public class CollisionResult
 }
 
 /// <summary>Helper to group together logic for whether two objects collide.</summary>
-public class CollisionGroup
+public class CollisionGroup(string _name)
 {
     /// <summary>Static current collision group ID to always give a unique ID to new group objects.</summary>
     public static uint CurrentID = 0;
@@ -46,16 +46,10 @@ public class CollisionGroup
     public uint ID = CurrentID++;
 
     /// <summary>An array of booleans, with a true value for any indices that match a collision group ID that this group will NOT collide with.</summary>
-    public bool[] NoCollideWith = Array.Empty<bool>();
+    public bool[] NoCollideWith = [];
 
     /// <summary>The clean name of this collision group.</summary>
-    public string Name;
-
-    /// <summary>Construct a new collision group instance.</summary>
-    public CollisionGroup(string _name)
-    {
-        Name = _name;
-    }
+    public string Name = _name;
 
     /// <summary>Returns true if this group should collide with another.</summary>
     public bool DoesCollide(CollisionGroup two)
@@ -83,10 +77,11 @@ public class CollisionGroup
 }
 
 /// <summary>Helper code for tracing collision.</summary>
-public class CollisionUtil
+/// <param name="world">The physics world.</param>
+public class CollisionUtil(PhysicsSpace world)
 {
     /// <summary>The space associated with this utility.</summary>
-    public PhysicsSpace World;
+    public PhysicsSpace World = world;
 
     /// <summary>The non-solid group.</summary>
     public static CollisionGroup NonSolid = new("NonSolid");
@@ -154,13 +149,6 @@ public class CollisionUtil
             return false;
         }
         return true;
-    }
-
-    /// <summary>Constructs the utility.</summary>
-    /// <param name="world">The physics world.</param>
-    public CollisionUtil(PhysicsSpace world)
-    {
-        World = world;
     }
 
     /// <summary>Performs a cuboid line trace.</summary>

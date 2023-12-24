@@ -158,7 +158,7 @@ public class ViewUI2D
     public bool SortToPriority = false;
 
     /// <summary>The last set of elements that were rendered (not sorted).</summary>
-    public List<UIElement> LastRenderedSet = new();
+    public List<UIElement> LastRenderedSet = [];
 
     /// <summary>Ticks all elements attached to this view.</summary>
     public void Tick()

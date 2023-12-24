@@ -19,19 +19,13 @@ using FGECore.UtilitySystems;
 namespace FGECore.FileSystems;
 
 /// <summary>Helper for writing data to a stream.</summary>
-public class DataWriter
+/// <param name="stream">The base stream.</param>
+public class DataWriter(DataStream stream)
 {
     /// <summary>The internal stream.</summary>
-    public DataStream Internal;
+    public DataStream Internal = stream;
 
     private readonly byte[] HelperBytes = new byte[32];
-
-    /// <summary>Constructs the data writer.</summary>
-    /// <param name="stream">The base stream.</param>
-    public DataWriter(DataStream stream)
-    {
-        Internal = stream;
-    }
 
     /// <summary>Write a location object (24 bytes).</summary>
     /// <param name="loc">The data.</param>

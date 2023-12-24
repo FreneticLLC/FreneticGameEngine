@@ -72,7 +72,6 @@ public class EntityPointLight3DProperty : ClientEntityProperty
         if (Entity.Engine is GameEngine3D eng)
         {
             eng.MainView.Config.Lights.Remove(InternalLight);
-            InternalLight.Destroy();
             InternalLight = null;
             Entity.OnPositionChanged -= FixPosition;
         }

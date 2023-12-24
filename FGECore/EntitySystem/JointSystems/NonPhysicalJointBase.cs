@@ -15,17 +15,11 @@ using System.Threading.Tasks;
 namespace FGECore.EntitySystem.JointSystems;
 
 /// <summary>The base class for all non-physics-based joints.</summary>
-public abstract class NonPhysicalJointBase : GenericBaseJoint
+public abstract class NonPhysicalJointBase(BasicEntity _one, BasicEntity _two) : GenericBaseJoint
 {
-    /// <summary>Constructs the non-physics joint base.</summary>
-    public NonPhysicalJointBase(BasicEntity _one, BasicEntity _two)
-    {
-        One = _one;
-        Two = _two;
-    }
 
     /// <summary>The applicable entities for this joint.</summary>
-    public BasicEntity One, Two;
+    public BasicEntity One = _one, Two = _two;
 
     /// <summary>Implements <see cref="GenericBaseJoint.EntityOne"/>.</summary>
     public override BasicEntity EntityOne => One;

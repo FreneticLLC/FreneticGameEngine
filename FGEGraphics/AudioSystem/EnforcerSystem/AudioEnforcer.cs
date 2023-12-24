@@ -38,7 +38,7 @@ public class AudioEnforcer
     public float Volume = 0.5f;
 
     /// <summary>All currently playing audio.</summary>
-    public List<LiveAudioInstance> Playing = new();
+    public List<LiveAudioInstance> Playing = [];
 
     /// <summary>Locker for interaction with the enforcer.</summary>
     public LockObject Locker = new();
@@ -171,7 +171,7 @@ public class AudioEnforcer
         }
 
         /// <summary>Calculates the correct positional audio volume for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
-        public (float, float) GetPositionalVolume(Location position)
+        public readonly (float, float) GetPositionalVolume(Location position)
         {
             float distanceGain = 1.0f / Math.Max(1.0f, (float)position.DistanceSquared(Instance.Position));
             Location relativeDirectionVector = (position - Instance.Position).Normalize();
@@ -199,7 +199,7 @@ public class AudioEnforcer
         }
 
         /// <summary>Adds a single audio instance to a raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
-        public void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
+        public readonly void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
         {
             int outBufPosition = 0;
             float volumeLeft = 1f, volumeRight = 1f;
@@ -255,7 +255,7 @@ public class AudioEnforcer
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
-        public float GetLevelFor(byte[] buffer)
+        public readonly float GetLevelFor(byte[] buffer)
         {
             float level = 0.0f;
             for (int i = 0; i < buffer.Length; i += BYTERATE)
@@ -269,7 +269,7 @@ public class AudioEnforcer
         }
 
         /// <summary>Causes a single buffer of audio to be added to the live playing audio in OpenAL. Also ensures the enforcer is playing in OpenAL at all.</summary>
-        public void PlayBuffer(byte[] buffer)
+        public readonly void PlayBuffer(byte[] buffer)
         {
             int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
             AL.BufferData(bufferID, ALFormat.Stereo16, buffer, FREQUENCY);
@@ -292,7 +292,7 @@ public class AudioEnforcer
                 AL.Source(ALAudioSource, ALSourceb.Looping, false);
                 AL.Source(ALAudioSource, ALSourceb.SourceRelative, true);
                 UsableBufferIDs = new Queue<int>();
-                DeadInstances = new List<LiveAudioInstance>();
+                DeadInstances = [];
                 while (true)
                 {
                     if (!Instance.Run)

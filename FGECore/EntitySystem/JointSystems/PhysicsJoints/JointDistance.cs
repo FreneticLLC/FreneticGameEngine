@@ -17,28 +17,20 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>Constrains two entities to have a specific position on each body maintain a specific distance from each other.</summary>
-public class JointDistance : PhysicsJointBase<DistanceLimit>
+public class JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float _min, float _max, Location e1pos, Location e2pos) : PhysicsJointBase<DistanceLimit>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointDistance"/>.</summary>
-    public JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float _min, float _max, Location e1pos, Location e2pos) : base(e1, e2)
-    {
-        Min = _min;
-        Max = _max;
-        Ent1Pos = e1pos;
-        Ent2Pos = e2pos;
-    }
 
     /// <summary>The minimum allowed distance.</summary>
-    public float Min;
+    public float Min = _min;
 
     /// <summary>The maximum allowed distance.</summary>
-    public float Max;
+    public float Max = _max;
 
     /// <summary>The position relative to entity <see cref="PhysicsJointBase.One"/>'s body.</summary>
-    public Location Ent1Pos;
+    public Location Ent1Pos = e1pos;
 
     /// <summary>The position relative to entity <see cref="PhysicsJointBase.Two"/>'s body.</summary>
-    public Location Ent2Pos;
+    public Location Ent2Pos = e2pos;
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override DistanceLimit CreateJointDescription()

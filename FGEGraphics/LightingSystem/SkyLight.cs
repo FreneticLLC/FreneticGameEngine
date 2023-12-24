@@ -100,7 +100,6 @@ public class SkyLight : LightObject
     /// <summary>Destroys the sky light.</summary>
     public void Destroy()
     {
-        InternalLights[0].Destroy();
         GL.DeleteFramebuffer(FBO);
         GL.DeleteTexture(FBO_Tex);
         GL.DeleteTexture(FBO_DepthTex);

@@ -25,7 +25,7 @@ public struct StackNote
     public object Related;
 
     /// <summary>Gets a string output for this stack note.</summary>
-    public override string ToString()
+    public override readonly string ToString()
     {
         try
         {

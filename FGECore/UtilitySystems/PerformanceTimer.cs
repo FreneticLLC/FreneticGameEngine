@@ -16,19 +16,13 @@ using System.Threading.Tasks;
 namespace FGECore.UtilitySystems;
 
 /// <summary>Helper class to measure the amount of time a section of code contributes to the overall frame time.</summary>
-public class PerformanceTimer
+public class PerformanceTimer(string _name)
 {
     /// <summary>Can be used to globally disable performance timing if preferred.</summary>
     public static bool DISABLE = false;
 
     /// <summary>The name of this <see cref="PerformanceTimer"/>, if any.</summary>
-    public string Name;
-
-    /// <summary>Constructs a new <see cref="PerformanceTimer"/> with a given name.</summary>
-    public PerformanceTimer(string _name)
-    {
-        Name = _name;
-    }
+    public string Name = _name;
 
     /// <summary>The actual internal <see cref="Stopwatch"/> instance used for timing things.</summary>
     public Stopwatch Internal = new();

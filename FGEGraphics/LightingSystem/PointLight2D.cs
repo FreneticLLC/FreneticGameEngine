@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.EntitySystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using OpenTK.Graphics;
@@ -138,7 +139,7 @@ public class PointLight2D
     public void PrepareLightmap()
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-        GL.ClearBuffer(ClearBuffer.Color, 0, Engine.OneDLights ? new float[] { 1.0f } : new float[] { 0, 0, 0, 0 });
+        GL.ClearBuffer(ClearBuffer.Color, 0, Engine.OneDLights ? View3DInternalData.ARR_FLOAT_1F_1 : [0, 0, 0, 0]);
         GL.Viewport(0, 0, Width, Engine.OneDLights ? 1 : Width);
     }
 

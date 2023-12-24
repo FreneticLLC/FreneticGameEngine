@@ -200,7 +200,7 @@ public class PhysicsSpace
     /// <returns>The list of entities found.</returns>
     public IEnumerable<EntityPhysicsProperty> GetEntitiesInBox(AABB box)
     {
-        EntitiesInBoxHelper helper = new() { Entities = new List<EntityPhysicsProperty>(), Space = this };
+        EntitiesInBoxHelper helper = new() { Entities = [], Space = this };
         Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
         return helper.Entities;
     }
@@ -223,13 +223,13 @@ public class PhysicsSpace
 
         public PhysicsSpace Space;
 
-        public bool AllowTest(CollidableReference collidable)
+        public readonly bool AllowTest(CollidableReference collidable)
         {
             EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
             return entity == null || Filter == null || Filter(entity);
         }
 
-        public bool AllowTest(CollidableReference collidable, int childIndex)
+        public readonly bool AllowTest(CollidableReference collidable, int childIndex)
         {
             return AllowTest(collidable);
         }
@@ -268,13 +268,13 @@ public class PhysicsSpace
 
         public Location Start;
 
-        public bool AllowTest(CollidableReference collidable)
+        public readonly bool AllowTest(CollidableReference collidable)
         {
             EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
             return entity == null || Filter == null || Filter(entity);
         }
 
-        public bool AllowTest(CollidableReference collidable, int childIndex)
+        public readonly bool AllowTest(CollidableReference collidable, int childIndex)
         {
             return AllowTest(collidable);
         }

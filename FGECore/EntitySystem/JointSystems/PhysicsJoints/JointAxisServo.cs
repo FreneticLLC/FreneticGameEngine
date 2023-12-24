@@ -17,16 +17,11 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>Constrains two entities to remain on a shared plane using a servo.</summary>
-class JointAxisServo : PhysicsJointBase<LinearAxisServo>
+class JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : PhysicsJointBase<LinearAxisServo>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointAxisServo"/>.</summary>
-    public JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : base(e1, e2)
-    {
-        Axis = axis;
-    }
 
     /// <summary>The plane normal axis.</summary>
-    public Location Axis;
+    public Location Axis = axis;
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override LinearAxisServo CreateJointDescription()

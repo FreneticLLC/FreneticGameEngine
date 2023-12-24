@@ -47,8 +47,8 @@ public class KeyHandler
     /// <summary>Builds key map data.</summary>
     static KeyHandler()
     {
-        NamesToKeys = new Dictionary<string, Keys>();
-        KeysToNames = new Dictionary<Keys, string>();
+        NamesToKeys = [];
+        KeysToNames = [];
         RegKey("a", Keys.A); RegKey("b", Keys.B); RegKey("c", Keys.C);
         RegKey("d", Keys.D); RegKey("e", Keys.E); RegKey("f", Keys.F);
         RegKey("g", Keys.G); RegKey("h", Keys.H); RegKey("i", Keys.I);
@@ -298,7 +298,7 @@ public class KeyHandler
                 {
                     string copied;
                     copied = TextCopy.ClipboardService.GetText().Replace('\r', ' ');
-                    if (copied.Length > 0 && copied.EndsWith("\n"))
+                    if (copied.Length > 0 && copied.EndsWith('\n'))
                     {
                         copied = copied[0..^1];
                     }

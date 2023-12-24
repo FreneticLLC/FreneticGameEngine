@@ -22,36 +22,29 @@ namespace FGECore.MathHelpers;
 /// Represents a 3-piece floating point color.
 /// Occupies 12 bytes, calculated as 4 * 3, as it has 3 fields (R, G, B) each occupying 4 bytes (a float).
 /// </summary>
+/// <param name="_r">Red.</param>
+/// <param name="_g">Green.</param>
+/// <param name="_b">Blue.</param>
 [StructLayout(LayoutKind.Explicit)]
-public struct Color3F
+public struct Color3F(float _r, float _g, float _b)
 {
-    /// <summary>Constructs the color 3F.</summary>
-    /// <param name="_r">Red.</param>
-    /// <param name="_g">Green.</param>
-    /// <param name="_b">Blue.</param>
-    public Color3F(float _r, float _g, float _b)
-    {
-        R = _r;
-        G = _g;
-        B = _b;
-    }
 
     /// <summary>The red component.</summary>
     [FieldOffset(0)]
-    public float R;
+    public float R = _r;
 
     /// <summary>The green component.</summary>
     [FieldOffset(4)]
-    public float G;
+    public float G = _g;
 
     /// <summary>The blue component.</summary>
     [FieldOffset(8)]
-    public float B;
+    public float B = _b;
 
     /// <summary>Integer R.</summary>
     public int IR
     {
-        get
+        readonly get
         {
             return (int)(R * 255);
         }
@@ -64,7 +57,7 @@ public struct Color3F
     /// <summary>Integer G.</summary>
     public int IG
     {
-        get
+        readonly get
         {
             return (int)(G * 255);
         }
@@ -77,7 +70,7 @@ public struct Color3F
     /// <summary>Integer B.</summary>
     public int IB
     {
-        get
+        readonly get
         {
             return (int)(B * 255);
         }
@@ -89,7 +82,7 @@ public struct Color3F
 
     /// <summary>Returns a 12-byte set representation of this color.</summary>
     /// <returns>The color bytes.</returns>
-    public byte[] ToBytes()
+    public readonly byte[] ToBytes()
     {
         byte[] b = new byte[12];
         ToBytes(b, 0);
@@ -98,10 +91,7 @@ public struct Color3F
 
     /// <summary>Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.</summary>
     /// <returns>The location value.</returns>
-    public Location ToLocation()
-    {
-        return new Location(R, G, B);
-    }
+    public readonly Location ToLocation() => new(R, G, B);
 
     /// <summary>
     /// Returns a 12-byte set representation of this color.
@@ -109,7 +99,7 @@ public struct Color3F
     /// </summary>
     /// <param name="outputBytes">The output byte array.</param>
     /// <param name="offset">The starting offset in the output array.</param>
-    public void ToBytes(byte[] outputBytes, int offset)
+    public readonly void ToBytes(byte[] outputBytes, int offset)
     {
         PrimitiveConversionHelper.Float32ToBytes(R, outputBytes, offset);
         PrimitiveConversionHelper.Float32ToBytes(G, outputBytes, offset + 4);
@@ -134,19 +124,13 @@ public struct Color3F
 
     /// <summary>Returns a string form of this color.</summary>
     /// <returns>The string form.</returns>
-    public override string ToString()
-    {
-        return "(" + R + ", " + G + ", " + B + ")";
-    }
+    public override readonly string ToString() => $"({R}, {G}, {B})";
 
     /// <summary>Multiplies a color by a scale.</summary>
     /// <param name="v">The color.</param>
     /// <param name="scale">The scale.</param>
     /// <returns>Result.</returns>
-    public static Color3F operator *(Color3F v, float scale)
-    {
-        return new Color3F(v.R * scale, v.G * scale, v.B * scale);
-    }
+    public static Color3F operator *(Color3F v, float scale) => new(v.R * scale, v.G * scale, v.B * scale);
 
     /// <summary>Sample Color3F (1, 1, 1).</summary>
     public static readonly Color3F White = new(1, 1, 1);

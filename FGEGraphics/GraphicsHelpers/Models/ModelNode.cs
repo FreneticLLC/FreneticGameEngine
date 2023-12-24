@@ -21,10 +21,10 @@ public class ModelNode
     public ModelNode Parent = null;
 
     /// <summary>All children nodes.</summary>
-    public List<ModelNode> Children = new();
+    public List<ModelNode> Children = [];
 
     /// <summary>All relevant bones.</summary>
-    public List<ModelBone> Bones = new();
+    public List<ModelBone> Bones = [];
 
     /// <summary>The mode ID.</summary>
     public byte Mode;

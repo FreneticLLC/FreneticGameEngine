@@ -24,16 +24,16 @@ public class TCPGameNetwork : GameNetwork
     public TcpListener Listening = null;
 
     /// <summary>A mapping of packet names to their packet data.</summary>
-    public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = new();
+    public Dictionary<string, KeyValuePair<long, Func<ServerTCPDataPacketIn>>> NamesToPackets = [];
 
     /// <summary>Packets, listed by ID number.</summary>
-    public List<Func<ServerTCPDataPacketIn>> Packets = new();
+    public List<Func<ServerTCPDataPacketIn>> Packets = [];
 
     /// <summary>All present connections.</summary>
-    public List<TCPConnection> Connections = new();
+    public List<TCPConnection> Connections = [];
 
     /// <summary>All presently registered channels.</summary>
-    public HashSet<int> Channels = new() { 0 };
+    public HashSet<int> Channels = [0];
 
     /// <summary>Start the network engine.</summary>
     public override void Start()

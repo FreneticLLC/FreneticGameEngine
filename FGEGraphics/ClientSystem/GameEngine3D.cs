@@ -192,7 +192,7 @@ public class GameEngine3D : GameEngineBase
     public void SortEntities()
     {
         Location pos = MainView.State.RenderRelative;
-        EntityList = EntityList.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos)).ToList();
+        EntityList = [.. EntityList.OrderBy((e) => e.LastKnownPosition.DistanceSquared(pos))];
     }
 
     /// <summary>Reverses the entity order for transparent rendering.</summary>

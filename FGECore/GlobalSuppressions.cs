@@ -10,3 +10,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable")]
 [assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly")]
 [assembly: SuppressMessage("Design", "CA1060:Move pinvokes to native methods class")]
+[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]

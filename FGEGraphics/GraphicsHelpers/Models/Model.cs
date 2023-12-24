@@ -25,25 +25,17 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.GraphicsHelpers.Models;
 
 /// <summary>Represents a 3D model.</summary>
-public class Model
+/// <param name="_name">The name.</param>
+public class Model(string _name)
 {
     /// <summary>The original core model.</summary>
     public Model3D Original;
-
-    /// <summary>Constructs the model.</summary>
-    /// <param name="_name">The name.</param>
-    public Model(string _name)
-    {
-        Name = _name;
-        Meshes = new List<ModelMesh>();
-        MeshMap = new Dictionary<string, ModelMesh>();
-    }
 
     /// <summary>The root transform.</summary>
     public Matrix4 Root;
 
     /// <summary>The name of  this model.</summary>
-    public string Name;
+    public string Name = _name;
 
     /// <summary>LOD helper data.</summary>
     public KeyValuePair<int, int>[] LODHelper = null;
@@ -52,10 +44,10 @@ public class Model
     public AABB LODBox = default;
 
     /// <summary>All the meshes this model has.</summary>
-    public List<ModelMesh> Meshes;
+    public List<ModelMesh> Meshes = [];
 
     /// <summary>A map of mesh names to meshes for this model.</summary>
-    public Dictionary<string, ModelMesh> MeshMap;
+    public Dictionary<string, ModelMesh> MeshMap = [];
 
     /// <summary>The root node.</summary>
     public ModelNode RootNode;
@@ -134,12 +126,12 @@ public class Model
     {
         Matrix4 ident = Matrix4.Identity;
         GL.UniformMatrix4(100, false, ref ident);
-        Matrix4[] mats = new Matrix4[] { ident };
+        Matrix4[] mats = [ident];
         SetBones(mats);
     }
 
     /// <summary>Any custom animation adjustments on this model.</summary>
-    public Dictionary<string, Matrix4> CustomAnimationAdjustments = new();
+    public Dictionary<string, Matrix4> CustomAnimationAdjustments = [];
 
     /// <summary>Force bones not to offset.</summary>
     public bool ForceBoneNoOffset = false;

@@ -229,7 +229,7 @@ public class View3D : View3DCoreDataSet
         GL.Enable(EnableCap.DepthTest);
         State.RenderTextures = true;
         GL.ClearBuffer(ClearBuffer.Color, 0, Config.ClearColor);
-        GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.DEPTH_CLEAR);
+        GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
         State.CameraBasePos = Config.CameraPos;
         State.CameraAdjust = -cameraForwardVector.CrossProduct(cameraUpVector) * 0.25;
         if (Engine.Client.VR != null)

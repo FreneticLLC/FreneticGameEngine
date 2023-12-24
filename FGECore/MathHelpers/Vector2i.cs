@@ -20,40 +20,31 @@ namespace FGECore.MathHelpers;
 /// Represents a 2D vector of integers.
 /// Occupies 8 bytes, calculated as 4 * 2, as it has 2 fields (X, Y) each occupying 4 bytes (an integer).
 /// </summary>
+/// <param name="x">X coordinate.</param>
+/// <param name="y">Y coordinate.</param>
 [StructLayout(LayoutKind.Explicit)]
-public struct Vector2i : IEquatable<Vector2i>
+public struct Vector2i(int x, int y) : IEquatable<Vector2i>
 {
-    /// <summary>Construct the vec2i.</summary>
-    /// <param name="x">X coordinate.</param>
-    /// <param name="y">Y coordinate.</param>
-    public Vector2i(int x, int y)
-    {
-        X = x;
-        Y = y;
-    }
 
     /// <summary>The zero vector.</summary>
     public static readonly Vector2i Zero = new(0, 0);
 
     /// <summary>The x coordinate.</summary>
     [FieldOffset(0)]
-    public int X;
+    public int X = x;
 
     /// <summary>The y coordinate.</summary>
     [FieldOffset(4)]
-    public int Y;
+    public int Y = y;
 
     /// <summary>Gets a cheap hash code.</summary>
     /// <returns>The hash code.</returns>
-    public override int GetHashCode()
-    {
-        return X * 23 + Y;
-    }
+    public override readonly int GetHashCode() => X * 23 + Y;
 
     /// <summary>Compares equality between this and another vector.</summary>
     /// <param name="other">The other vector.</param>
     /// <returns>Whether they are equal.</returns>
-    public override bool Equals(object other)
+    public override readonly bool Equals(object other)
     {
         if (other is not Vector2i vecForm)
         {
@@ -65,36 +56,24 @@ public struct Vector2i : IEquatable<Vector2i>
     /// <summary>Compares equality between this and another vector.</summary>
     /// <param name="other">The other vector.</param>
     /// <returns>Whether they are equal.</returns>
-    public bool Equals(Vector2i other)
-    {
-        return other.X == X && other.Y == Y;
-    }
+    public readonly bool Equals(Vector2i other) => other.X == X && other.Y == Y;
 
     /// <summary>
     /// Converts this vector a floating point Location.
     /// Zero on Z axis.
     /// </summary>
     /// <returns>The Location.</returns>
-    public Location ToLocation()
-    {
-        return new Location(X, Y, 0);
-    }
+    public readonly Location ToLocation() => new(X, Y, 0);
 
     /// <summary>Gets a simple string of the vector.</summary>
     /// <returns>The string.</returns>
-    public override string ToString()
-    {
-        return "(" + X + ", " + Y + ")";
-    }
+    public override readonly string ToString() => $"({X}, {Y})";
 
     /// <summary>Logical comparison.</summary>
     /// <param name="one">First vec.</param>
     /// <param name="two">Second vec.</param>
     /// <returns>Result.</returns>
-    public static bool operator !=(Vector2i one, Vector2i two)
-    {
-        return !one.Equals(two);
-    }
+    public static bool operator !=(Vector2i one, Vector2i two) => !one.Equals(two);
 
     /// <summary>Logical comparison.</summary>
     /// <param name="one">First vec.</param>
@@ -109,26 +88,17 @@ public struct Vector2i : IEquatable<Vector2i>
     /// <param name="one">First vec.</param>
     /// <param name="two">Second vec.</param>
     /// <returns>Result.</returns>
-    public static Vector2i operator +(Vector2i one, Vector2i two)
-    {
-        return new Vector2i(one.X + two.X, one.Y + two.Y);
-    }
+    public static Vector2i operator +(Vector2i one, Vector2i two) => new(one.X + two.X, one.Y + two.Y);
 
     /// <summary>Mathematical comparison.</summary>
     /// <param name="one">First vec.</param>
     /// <param name="two">Int scalar.</param>
     /// <returns>Result.</returns>
-    public static Vector2i operator *(Vector2i one, int two)
-    {
-        return new Vector2i(one.X * two, one.Y * two);
-    }
+    public static Vector2i operator *(Vector2i one, int two) => new(one.X * two, one.Y * two);
 
     /// <summary>Mathematical comparison.</summary>
     /// <param name="one">First vec.</param>
     /// <param name="two">Int scalar.</param>
     /// <returns>Result.</returns>
-    public static Vector2i operator /(Vector2i one, int two)
-    {
-        return new Vector2i(one.X / two, one.Y / two);
-    }
+    public static Vector2i operator /(Vector2i one, int two) => new(one.X / two, one.Y / two);
 }

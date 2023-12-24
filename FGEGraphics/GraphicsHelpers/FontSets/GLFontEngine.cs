@@ -27,22 +27,15 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 /// Handles rendering of fonts.
 /// Most users should not interact with this directly. Instead, use <see cref="FontSetEngine"/>.
 /// </summary>
-public class GLFontEngine : IDisposable
+/// <param name="teng">The texture system.</param>
+/// <param name="sengine">The shader system.</param>
+public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposable
 {
-    /// <summary>Constructs a GLFontEngine. Does not initialize.</summary>
-    /// <param name="teng">The texture system.</param>
-    /// <param name="sengine">The shader system.</param>
-    public GLFontEngine(TextureEngine teng, ShaderEngine sengine)
-    {
-        Textures = teng;
-        Shaders = sengine;
-    }
-
     /// <summary>The texture system.</summary>
-    public TextureEngine Textures;
+    public TextureEngine Textures = teng;
 
     /// <summary>The shader system.</summary>
-    public ShaderEngine Shaders;
+    public ShaderEngine Shaders = sengine;
 
     /// <summary>The default font.</summary>
     public GLFont Standard;
@@ -145,7 +138,7 @@ public class GLFontEngine : IDisposable
         }
         // Load other stuff
         LoadTextFile();
-        Fonts = new List<GLFont>();
+        Fonts = [];
         // Choose a default font.
         FontFamily[] families = FontFamily.Families;
         FontFamily family = FontFamily.GenericMonospace;
@@ -217,7 +210,7 @@ public class GLFontEngine : IDisposable
         }
         else
         {
-            datas = new string[] { " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=~`[]{};:'\",./<>?\\|\x00A0" };
+            datas = [" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=~`[]{};:'\",./<>?\\|\x00A0"];
         }
         for (int i = 0; i < datas.Length; i++)
         {

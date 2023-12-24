@@ -144,7 +144,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     }
 
     /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
-    public InternalData Internal = new() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = new[] { 0f, 1f, 1f, 1f }, DepthClear = new[] { 1f }, Loaded = false };
+    public InternalData Internal = new() { WindowWidth = 800, WindowHeight = 600, ScreenClearColor = [0f, 1f, 1f, 1f], DepthClear = [1f], Loaded = false };
 
     /// <summary>Constructs the game client window.</summary>
     /// <param name="_sWindowTitle">The starting window title.</param>
@@ -239,7 +239,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             Logs.ClientInit("GameEngine loading...");
             Window = new GameWindow(new GameWindowSettings(), new NativeWindowSettings()
             {
-                Size = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
+                ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
                 Title = StartingWindowTitle,
                 Flags = ContextFlags.ForwardCompatible,
                 WindowState = WindowState.Normal,

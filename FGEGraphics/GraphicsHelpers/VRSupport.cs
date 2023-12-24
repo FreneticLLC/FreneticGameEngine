@@ -391,7 +391,7 @@ public class VRControllerTextureEngine
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
         GL.Disable(EnableCap.CullFace);
         GL.Viewport(0, 0, 512, 512);
-        GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
+        GL.ClearBuffer(ClearBuffer.Color, 0, [0.5f, 0.5f, 0.5f, 1.0f]);
         GL.ActiveTexture(TextureUnit.Texture0);
         BaseTexture.Bind();
         Matrix4 basic = Matrix4.CreateOrthographicOffCenter(-1, 1, -1, 1, -1, 1);

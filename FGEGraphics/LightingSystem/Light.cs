@@ -63,11 +63,6 @@ public class Light
         Color = col;
     }
 
-    /// <summary>Destroys the light object.</summary>
-    public void Destroy()
-    {
-    }
-
     /// <summary>Sets the projection for rendering light shadows.</summary>
     /// <param name="view">The relevant view system.</param>
     public void SetProj(View3D view)

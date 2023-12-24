@@ -134,8 +134,8 @@ public class DeferredRenderTarget
     /// <summary>Whether this RS4P is bound.</summary>
     public bool IsBound = false;
 
-    static readonly DrawBuffersEnum[] DRAW_BUFFERS_ARRAY = new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
-            DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3, DrawBuffersEnum.ColorAttachment4, DrawBuffersEnum.ColorAttachment5 };
+    static readonly DrawBuffersEnum[] DRAW_BUFFERS_ARRAY = [ DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
+            DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3, DrawBuffersEnum.ColorAttachment4, DrawBuffersEnum.ColorAttachment5 ];
 
     /// <summary>Sets the proper "GL.DrawBuffers(6, ..." for this object.</summary>
     public static void SetDrawBuffers()
@@ -162,10 +162,10 @@ public class DeferredRenderTarget
     public static class Internal
     {
         /// <summary>Premade array of 4 zeroes, for <see cref="Clear"/>.</summary>
-        public static float[] Zeroes = new float[] { 0f, 0f, 0f, 0f };
+        public static float[] Zeroes = [0f, 0f, 0f, 0f];
 
         /// <summary>Premade array of 1 one, for <see cref="Clear"/>.</summary>
-        public static float[] One = new float[] { 1f };
+        public static float[] One = [1f];
     }
 
 

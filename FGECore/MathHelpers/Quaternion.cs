@@ -23,76 +23,43 @@ namespace FGECore.MathHelpers;
 /// Occupies 32 bytes, calculated as 8 * 4, as it has 4 fields (X, Y, Z, W) each occupying 8 bytes (a double).
 /// </summary>
 /// <remarks>Based upon BEPU utilities Quaternion.</remarks>
+/// <param name="_x">X.</param>
+/// <param name="_y">Y.</param>
+/// <param name="_z">Z.</param>
+/// <param name="_w">W.</param>
 [StructLayout(LayoutKind.Explicit)]
-public struct Quaternion : IEquatable<Quaternion>
+public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatable<Quaternion>
 {
     /// <summary>The identity Quaternion: one with no rotation applied.</summary>
     public static readonly Quaternion Identity = new(0, 0, 0, 1);
 
     /// <summary>The X component of this Quaternion.</summary>
     [FieldOffset(0)]
-    public double X;
+    public double X = _x;
 
     /// <summary>The Y component of this Quaternion.</summary>
     [FieldOffset(8)]
-    public double Y;
+    public double Y = _y;
 
     /// <summary>The Z component of this Quaternion.</summary>
     [FieldOffset(16)]
-    public double Z;
+    public double Z = _z;
 
     /// <summary>The W component of this Quaternion.</summary>
     [FieldOffset(24)]
-    public double W;
+    public double W = _w;
 
     /// <summary>Returns X as a float.</summary>
-    public float XF
-    {
-        get
-        {
-            return (float)X;
-        }
-    }
+    public readonly float XF => (float)X;
 
     /// <summary>Returns Y as a float.</summary>
-    public float YF
-    {
-        get
-        {
-            return (float)Y;
-        }
-    }
+    public readonly float YF => (float)Y;
 
     /// <summary>Returns Z as a float.</summary>
-    public float ZF
-    {
-        get
-        {
-            return (float)Z;
-        }
-    }
+    public readonly float ZF => (float)Z;
 
     /// <summary>Returns W as a float.</summary>
-    public float WF
-    {
-        get
-        {
-            return (float)W;
-        }
-    }
-
-    /// <summary>Constructs a Quaternion with specific components.</summary>
-    /// <param name="_x">X.</param>
-    /// <param name="_y">Y.</param>
-    /// <param name="_z">Z.</param>
-    /// <param name="_w">W.</param>
-    public Quaternion(double _x, double _y, double _z, double _w)
-    {
-        X = _x;
-        Y = _y;
-        Z = _z;
-        W = _w;
-    }
+    public readonly float WF => (float)W;
 
     /// <summary>
     /// Returns a quaternion plus another. Uses simple addition.
@@ -100,10 +67,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="b">The other.</param>
     /// <returns>The added result.</returns>
-    public Quaternion Plus(in Quaternion b)
-    {
-        return new Quaternion(X + b.X, Y + b.Y, Z + b.Z, W + b.W);
-    }
+    public readonly Quaternion Plus(in Quaternion b) => new(X + b.X, Y + b.Y, Z + b.Z, W + b.W);
 
     /// <summary>
     /// Returns a Quaternion multiplied by another.
@@ -111,7 +75,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="b">The other.</param>
     /// <returns>The multiplied result.</returns>
-    public Quaternion MultipliedBy(in Quaternion b)
+    public readonly Quaternion MultipliedBy(in Quaternion b)
     {
         return new Quaternion(
             X * b.W + b.X * W + Y * b.Z - Z * b.Y,
@@ -127,17 +91,14 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="scale">The scaling factor.</param>
     /// <returns>The scaled quaternion.</returns>
-    public Quaternion ScaledBy(double scale)
-    {
-        return new Quaternion(X * scale, Y * scale, Z * scale, W * scale);
-    }
+    public readonly Quaternion ScaledBy(double scale) => new(X * scale, Y * scale, Z * scale, W * scale);
 
     /// <summary>
     /// Returns a normalized version of the Quaternion.
     /// Goes through a slow square root op.
     /// </summary>
     /// <returns>The normalized form.</returns>
-    public Quaternion Normalized()
+    public readonly Quaternion Normalized()
     {
         double len_inv = 1 / Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
         return new Quaternion(X * len_inv, Y * len_inv, Z * len_inv, W * len_inv);
@@ -148,32 +109,23 @@ public struct Quaternion : IEquatable<Quaternion>
     /// Squared for efficiency.
     /// </summary>
     /// <returns>The length.</returns>
-    public double LengthSquared()
-    {
-        return X * X + Y * Y + Z * Z + W * W;
-    }
+    public readonly double LengthSquared() => X * X + Y * Y + Z * Z + W * W;
 
     /// <summary>
     /// Gets the length of this Quaternion.
     /// Non-squared, and thus inefficient.
     /// </summary>
     /// <returns></returns>
-    public double Length()
-    {
-        return Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
-    }
+    public readonly double Length() => Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
 
     /// <summary>Returns the conjugate of this Quaternion.</summary>
     /// <returns>The conjugate.</returns>
-    public Quaternion Conjugate()
-    {
-        return new Quaternion(-X, -Y, -Z, W);
-    }
+    public readonly Quaternion Conjugate() => new(-X, -Y, -Z, W);
 
     /// <summary>Returns the inverse of this Quaternion.
     /// The inverse is the same amount of rotation, in the opposite direction.</summary>
     /// <returns>The inverse.</returns>
-    public Quaternion Inverse()
+    public readonly Quaternion Inverse()
     {
         double len_sq = X * X + Y * Y + Z * Z + W * W;
         return new Quaternion(-X * len_sq, -Y * len_sq, -Z * len_sq, W * len_sq);
@@ -182,49 +134,34 @@ public struct Quaternion : IEquatable<Quaternion>
     /// <summary>Returns the negative of this Quaternion.
     /// This is not just a backwards rotation - for that, use <see cref="Inverse"/>.</summary>
     /// <returns>The negative.</returns>
-    public Quaternion Negative()
-    {
-        return new Quaternion(-X, -Y, -Z, -W);
-    }
+    public readonly Quaternion Negative() => new(-X, -Y, -Z, -W);
 
     /// <summary>Returns whether the two Quaternions are equal.</summary>
     /// <param name="a">First Quaternion.</param>
     /// <param name="b">Second Quaternion.</param>
     /// <returns>Equality.</returns>
-    public static bool operator ==(in Quaternion a, in Quaternion b)
-    {
-        return a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
-    }
+    public static bool operator ==(in Quaternion a, in Quaternion b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
     /// <summary>Returns whether the two Quaternions are NOT equal.</summary>
     /// <param name="a">First Quaternion.</param>
     /// <param name="b">Second Quaternion.</param>
     /// <returns>Non-equality.</returns>
-    public static bool operator !=(in Quaternion a, in Quaternion b)
-    {
-        return a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;
-    }
+    public static bool operator !=(in Quaternion a, in Quaternion b) => a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;
 
     /// <summary>Returns the Quaternion multiplied by another.</summary>
     /// <param name="a">First Quaternion.</param>
     /// <param name="b">Second Quaternion.</param>
     /// <returns>Multiplication result.</returns>
-    public static Quaternion operator *(in Quaternion a, in Quaternion b)
-    {
-        return a.MultipliedBy(b);
-    }
+    public static Quaternion operator *(in Quaternion a, in Quaternion b) => a.MultipliedBy(b);
 
     /// <summary>Returns a hash code for this Quaternion.</summary>
     /// <returns>A hash code.</returns>
-    public override int GetHashCode()
-    {
-        return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode() + W.GetHashCode();
-    }
+    public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z, W);
 
     /// <summary>Returns whether this Quaternion equals another object.</summary>
     /// <param name="obj">The object.</param>
     /// <returns>Equality.</returns>
-    public override bool Equals(object obj)
+    public override readonly bool Equals(object obj)
     {
         if (obj is Quaternion q)
         {
@@ -236,17 +173,11 @@ public struct Quaternion : IEquatable<Quaternion>
     /// <summary>Returns whether this Quaternion equals another Quaternion.</summary>
     /// <param name="b">The other Quaternion.</param>
     /// <returns>Equality.</returns>
-    public bool Equals(Quaternion b)
-    {
-        return this == b;
-    }
+    public readonly bool Equals(Quaternion b) => this == b;
 
     /// <summary>Returns a simple string of this Quaternion.</summary>
     /// <returns>The simple string.</returns>
-    public override string ToString()
-    {
-        return "(" + X + ", " + Y + ", " + Z + ", " + W + ")";
-    }
+    public override readonly string ToString() => $"({X}, {Y}, {Z}, {W})";
 
     /// <summary>Creates a Quaternion from an axis and an angle around the axis.</summary>
     /// <param name="axis">The axis.</param>
@@ -296,14 +227,11 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="a">First quaternion.</param>
     /// <param name="b">Second quaternion.</param>
-    public static Quaternion GetQuaternionBetween(in Quaternion a, in Quaternion b)
-    {
-        return a.MultipliedBy(b.Conjugate());
-    }
+    public static Quaternion GetQuaternionBetween(in Quaternion a, in Quaternion b) => a.MultipliedBy(b.Conjugate());
 
     /// <summary>Get the angle around an axis for a specific quaternion, in radians.</summary>
     /// <param name="axis">The relative axis.</param>
-    public double AxisAngleForRadians(in Location axis)
+    public readonly double AxisAngleForRadians(in Location axis)
     {
         Location ra = new(X, Y, Z);
         Location p = ra.Project(axis);
@@ -337,7 +265,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="outputBytes">The output byte array.</param>
     /// <param name="offset">The starting offset in the output array.</param>
-    public void ToFloatBytes(byte[] outputBytes, int offset)
+    public readonly void ToFloatBytes(byte[] outputBytes, int offset)
     {
         PrimitiveConversionHelper.Float32ToBytes((float)X, outputBytes, offset);
         PrimitiveConversionHelper.Float32ToBytes((float)Y, outputBytes, offset + 4);
@@ -370,7 +298,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// </summary>
     /// <param name="outputBytes">The output byte array.</param>
     /// <param name="offset">The starting offset in the output array.</param>
-    public void ToDoubleBytes(byte[] outputBytes, int offset)
+    public readonly void ToDoubleBytes(byte[] outputBytes, int offset)
     {
         PrimitiveConversionHelper.Double64ToBytes(X, outputBytes, offset);
         PrimitiveConversionHelper.Double64ToBytes(Y, outputBytes, offset + 8);
@@ -384,7 +312,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// Inverts <see cref="FromDoubleBytes(byte[], int)"/>.
     /// </summary>
     /// <returns>The byte array.</returns>
-    public byte[] ToDoubleBytes()
+    public readonly byte[] ToDoubleBytes()
     {
         byte[] toret = new byte[32];
         ToDoubleBytes(toret, 0);
@@ -394,7 +322,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// <summary>Transforms a location vector by this Quaternion and returns the result.</summary>
     /// <param name="v">The location vector.</param>
     /// <returns>The transformed location vector.</returns>
-    public Location Transform(in Location v)
+    public readonly Location Transform(in Location v)
     {
         double x2 = X * 2;
         double y2 = Y * 2;
@@ -415,7 +343,7 @@ public struct Quaternion : IEquatable<Quaternion>
 
     /// <summary>Transform the normal X axis by this Quaternion.</summary>
     /// <returns>The transformed axis.</returns>
-    public Location TransformX()
+    public readonly Location TransformX()
     {
         double y2 = Y * 2;
         double z2 = Z * 2;
@@ -425,7 +353,7 @@ public struct Quaternion : IEquatable<Quaternion>
     /// <summary>Gets or sets this Quaternion as a 2D angle.</summary>
     public double Angle2D
     {
-        get
+        readonly get
         {
             return AxisAngleForRadians(Location.UnitZ);
         }
@@ -439,7 +367,7 @@ public struct Quaternion : IEquatable<Quaternion>
     }
 
     /// <summary>Gets the angle represented by the Quaternion.</summary>
-    public double RepresentedAngle()
+    public readonly double RepresentedAngle()
     {
         double wAbs = Math.Abs(W);
         if (wAbs > 1)
@@ -450,19 +378,13 @@ public struct Quaternion : IEquatable<Quaternion>
     }
 
     /// <summary>Gets the axis of rotation represented by the Quaternion.</summary>
-    public Location RepresentedAxis()
-    {
-        return (new Location(X, Y, Z) * Math.Sign(W)).Normalize();
-    }
+    public readonly Location RepresentedAxis() => (new Location(X, Y, Z) * Math.Sign(W)).Normalize();
 
     /// <summary>Converts the <see cref="Quaternion"/> value to a floating point <see cref="System.Numerics.Quaternion"/>.</summary>
-    public System.Numerics.Quaternion ToNumerics()
-    {
-        return new System.Numerics.Quaternion(XF, YF, ZF, WF);
-    }
+    public readonly System.Numerics.Quaternion ToNumerics() => new System.Numerics.Quaternion(XF, YF, ZF, WF);
 
     /// <summary>Returns the Spherical Linear Interpolation ('slerp') between this quaternion and another.</summary>
-    public Quaternion Slerp(Quaternion end, double interpolationAmount)
+    public readonly Quaternion Slerp(Quaternion end, double interpolationAmount)
     {
         double cosHalfTheta = W * end.W + X * end.X + Y * end.Y + Z * end.Z;
         if (cosHalfTheta < 0)
@@ -487,8 +409,5 @@ public struct Quaternion : IEquatable<Quaternion>
 public static class ExtensionsForQuaternion
 {
     /// <summary>Converts a floating point <see cref="System.Numerics.Quaternion"/> to a <see cref="Quaternion"/>.</summary>
-    public static Quaternion ToCore(this System.Numerics.Quaternion quat)
-    {
-        return new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-    }
+    public static Quaternion ToCore(this System.Numerics.Quaternion quat) => new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
 }

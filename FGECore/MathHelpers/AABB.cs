@@ -16,27 +16,20 @@ using FGECore.MathHelpers;
 namespace FGECore.MathHelpers;
 
 /// <summary>Represents an Axis-Aligned Bounding Box.</summary>
-public struct AABB
+public struct AABB(Location _min, Location _max)
 {
     /// <summary>An AABB of (NaN, NaN).</summary>
     public static readonly AABB NaN = new(Location.NaN, Location.NaN);
 
-    /// <summary>Constructs an <see cref="AABB"/> with given mins/maxes.</summary>
-    public AABB(Location _min, Location _max)
-    {
-        Min = _min;
-        Max = _max;
-    }
-
     /// <summary>The minimum coordinates.</summary>
-    public Location Min;
+    public Location Min = _min;
 
     /// <summary>The maximum coordinates.</summary>
-    public Location Max;
+    public Location Max = _max;
 
     /// <summary>Returns whether the box intersects another box.</summary>
     /// <param name="box2">The second box.</param>
-    public bool Intersects(in AABB box2)
+    public readonly bool Intersects(in AABB box2)
     {
         Location min2 = box2.Min;
         Location max2 = box2.Max;
@@ -44,7 +37,7 @@ public struct AABB
     }
 
     /// <summary>Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)</summary>
-    public override string ToString()
+    public override readonly string ToString()
     {
         return Min + "/" + Max;
     }
@@ -59,7 +52,7 @@ public struct AABB
 
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking), and returns the resultant AABB.</summary>
     /// <param name="pos">The position to include.</param>
-    public AABB Including(in Location pos)
+    public readonly AABB Including(in Location pos)
     {
         return new AABB(Min.Min(pos), Max.Max(pos));
     }
