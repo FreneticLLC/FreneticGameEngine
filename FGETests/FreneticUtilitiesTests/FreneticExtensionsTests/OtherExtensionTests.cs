@@ -16,6 +16,7 @@ using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests;
 

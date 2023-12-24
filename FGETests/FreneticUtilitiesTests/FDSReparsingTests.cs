@@ -15,6 +15,7 @@ using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests;
 
@@ -67,10 +68,10 @@ public class FDSReparsingTests : FGETest
     [Test]
     public static void TestExpectedObjects()
     {
-        Assert.AreEqual(3, TestSection.GetInt("my root section 1.my_sub_section.my numeric key"), "Key == 3!");
-        Assert.AreEqual(3.14159, TestSection.GetDouble("my root section 1.my_sub_section.my decimal key"), "Key == 3.14159!");
-        Assert.AreEqual("alpha", TestSection.GetString("my root section 1.my other section.my string key"), "Key == alpha!");
-        Assert.AreEqual(StringConversionHelper.UTF8Encoding.GetString(TestSection.GetData("my second root section.my binary key").Internal as byte[]),
+        ClassicAssert.AreEqual(3, TestSection.GetInt("my root section 1.my_sub_section.my numeric key"), "Key == 3!");
+        ClassicAssert.AreEqual(3.14159, TestSection.GetDouble("my root section 1.my_sub_section.my decimal key"), "Key == 3.14159!");
+        ClassicAssert.AreEqual("alpha", TestSection.GetString("my root section 1.my other section.my string key"), "Key == alpha!");
+        ClassicAssert.AreEqual(StringConversionHelper.UTF8Encoding.GetString(TestSection.GetData("my second root section.my binary key").Internal as byte[]),
             "Hello world, and all who inhabit it!", "Key string from binary check!");
     }
 
@@ -79,15 +80,15 @@ public class FDSReparsingTests : FGETest
     public static void TestList()
     {
         List<string> list = TestSection.GetStringList("my second root section.my list key");
-        Assert.AreEqual(2, list.Count, "Key->List count");
-        Assert.AreEqual("1", list[0], "Key->List[0] yields 1!");
-        Assert.AreEqual("two", list[1], "Key->List[1] yields two!");
+        ClassicAssert.AreEqual(2, list.Count, "Key->List count");
+        ClassicAssert.AreEqual("1", list[0], "Key->List[0] yields 1!");
+        ClassicAssert.AreEqual("two", list[1], "Key->List[1] yields two!");
     }
 
     /// <summary>Confirm that the FDS section parsed has the proper comments.</summary>
     [Test]
     public static void TestComments()
     {
-        Assert.AreEqual("MyTestFile.fds", TestSection.GetData("my root section 1").PrecedingComments[0].Trim(), "Root comment!");
+        ClassicAssert.AreEqual("MyTestFile.fds", TestSection.GetData("my root section 1").PrecedingComments[0].Trim(), "Root comment!");
     }
 }

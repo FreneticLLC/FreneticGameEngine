@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests;
 
@@ -74,17 +75,17 @@ public class AsciiMatcherTests : FGETest
     [Test]
     public static void TrimToMatchesTest()
     {
-        Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceMatchChars), $"TrimToMatches pure-match failed.");
-        Assert.AreEqual("", ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars), $"TrimToMatches no-match failed.");
-        Assert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars + ReferenceMatchChars + ReferenceNonMatchedChars), $"TrimToMatches mixed-match failed.");
+        ClassicAssert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceMatchChars), $"TrimToMatches pure-match failed.");
+        ClassicAssert.AreEqual("", ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars), $"TrimToMatches no-match failed.");
+        ClassicAssert.AreEqual(ReferenceMatchChars, ReferenceMatcher.TrimToMatches(ReferenceNonMatchedChars + ReferenceMatchChars + ReferenceNonMatchedChars), $"TrimToMatches mixed-match failed.");
     }
 
     /// <summary>Tests "TrimToNonMatches".</summary>
     [Test]
     public static void TrimToNonMatchesTest()
     {
-        Assert.AreEqual("", ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars), $"TrimToNonMatches pure-match failed.");
-        Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceNonMatchedChars), $"TrimToNonMatches no-match failed.");
-        Assert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars + ReferenceNonMatchedChars + ReferenceMatchChars), $"TrimToNonMatches mixed-match failed.");
+        ClassicAssert.AreEqual("", ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars), $"TrimToNonMatches pure-match failed.");
+        ClassicAssert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceNonMatchedChars), $"TrimToNonMatches no-match failed.");
+        ClassicAssert.AreEqual(ReferenceNonMatchedChars, ReferenceMatcher.TrimToNonMatches(ReferenceMatchChars + ReferenceNonMatchedChars + ReferenceMatchChars), $"TrimToNonMatches mixed-match failed.");
     }
 }

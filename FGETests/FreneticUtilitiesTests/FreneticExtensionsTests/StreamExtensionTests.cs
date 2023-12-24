@@ -16,6 +16,7 @@ using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests;
 
@@ -41,8 +42,8 @@ public class StreamExtensionTests : FGETest
         int i = 0;
         foreach (string str in result)
         {
-            Assert.AreEqual(splitInput[i++], str, $"Stream AllLinesOfText broke at line {i}");
+            ClassicAssert.AreEqual(splitInput[i++], str, $"Stream AllLinesOfText broke at line {i}");
         }
-        Assert.AreEqual(5, i, "Stream AllLinesOfText length wrong");
+        ClassicAssert.AreEqual(5, i, "Stream AllLinesOfText length wrong");
     }
 }

@@ -14,6 +14,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests;
 
@@ -32,7 +33,7 @@ public abstract class FGETest
     /// <param name="message">The message to display if they aren't roughly equal.</param>
     public static void AssertAreRoughlyEqual(double expected, double actual, string message)
     {
-        Assert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
+        ClassicAssert.AreEqual((int)Math.Round(expected * 10000), (int)Math.Round(actual * 10000), message);
     }
 }
 
