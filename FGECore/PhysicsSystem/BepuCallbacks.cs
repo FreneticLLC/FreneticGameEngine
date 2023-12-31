@@ -64,6 +64,7 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     /// <param name="dt">Current time step duration.</param>
     public void PrepareForIntegration(float dt)
     {
+        Space.GeneralPhysicsUpdate?.Invoke(dt);
         Delta = dt;
     }
 
@@ -93,6 +94,7 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
                 if (physicsEntity != null)
                 {
                     physicsEntity.PhysicsUpdate?.Invoke(delta);
+                    Space.PhysicsUpdate?.Invoke(physicsEntity, delta);
                     Vector3Wide.ReadSlot(ref velocity.Linear, i, out Vector3 velLinear);
                     Vector3Wide.ReadSlot(ref velocity.Angular, i, out Vector3 velAngular);
                     velLinear += physicsEntity.ActualGravity.ToNumerics() * delta;

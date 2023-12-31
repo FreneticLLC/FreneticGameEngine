@@ -89,6 +89,17 @@ public class PhysicsSpace
     /// <para>To change this value, use <see cref="Recenter(Location)"/>.</para></summary>
     public Location Offset => Internal.Offset;
 
+    /// <summary>Event called once every update tick, with a delta value. This fires *before* <see cref="PhysicsUpdate"/>.
+    /// <para>Note that physics delta might not always match game delta.</para>
+    /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
+    public Action<double> GeneralPhysicsUpdate;
+
+    /// <summary>Event called every physics update tick for each entity, with a delta value. This fires *after* <see cref="GeneralPhysicsUpdate"/>.
+    /// Immediately after this event completes, the entity's velocity/gravity/etc. are copied over, and then after general physics calculations occur.
+    /// <para>Note that physics delta might not always match game delta.</para>
+    /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
+    public Action<EntityPhysicsProperty, double> PhysicsUpdate;
+
     /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
     public void Recenter(Location newCenter)
     {
