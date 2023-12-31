@@ -71,6 +71,57 @@ public class PhysicsSpace
             Characters = new BepuCharacters.CharacterControllers(Pool);
             CoreSimulation = Simulation.Create(Pool, NarrowPhaseHandler, PoseHandler, new SolveDescription(velocityIterationCount: 1, substepCount: 8));
         }
+
+        /// <summary>Helper struct for ray tracing.</summary>
+        public struct RayTraceHelper : IRayHitHandler, IShapeRayHitHandler
+        {
+            /// <summary>The filter to apply, or null if none.</summary>
+            public Func<EntityPhysicsProperty, bool> Filter;
+
+            /// <summary>The result, if any.</summary>
+            public CollisionResult Hit;
+
+            /// <summary>The backing space.</summary>
+            public PhysicsSpace Space;
+
+            /// <summary>Implements <see cref="IRayHitHandler.AllowTest(CollidableReference)"/></summary>
+            public readonly bool AllowTest(CollidableReference collidable)
+            {
+                EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
+                return entity == null || Filter == null || Filter(entity);
+            }
+
+            /// <summary>Implements <see cref="IRayHitHandler.AllowTest(CollidableReference, int)"/></summary>
+            public readonly bool AllowTest(CollidableReference collidable, int childIndex)
+            {
+                return AllowTest(collidable);
+            }
+
+            /// <summary>Implements <see cref="IShapeRayHitHandler.AllowTest(int)"/></summary>
+            public readonly bool AllowTest(int childIndex)
+            {
+                return true;
+            }
+
+            /// <summary>Implements <see cref="IRayHitHandler.OnRayHit(in RayData, ref float, float, Vector3, CollidableReference, int)"/></summary>
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex)
+            {
+                if (!Hit.Hit || t < Hit.Time)
+                {
+                    Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                }
+            }
+
+            /// <summary>Implements <see cref="IShapeRayHitHandler.OnRayHit(in RayData, ref float, float, Vector3, int)"/></summary>
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, int childIndex)
+            {
+                if (!Hit.Hit || t < Hit.Time)
+                {
+                    Hit = new CollisionResult() { Hit = true, Time = t, Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
+                }
+            }
+        }
+
     }
 
     /// <summary>The backing engine.</summary>
@@ -226,47 +277,16 @@ public class PhysicsSpace
         return Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value];
     }
 
-    private struct RayTraceHelper : IRayHitHandler
-    {
-        public Func<EntityPhysicsProperty, bool> Filter;
-
-        public CollisionResult Hit;
-
-        public PhysicsSpace Space;
-
-        public readonly bool AllowTest(CollidableReference collidable)
-        {
-            EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
-            return entity == null || Filter == null || Filter(entity);
-        }
-
-        public readonly bool AllowTest(CollidableReference collidable, int childIndex)
-        {
-            return AllowTest(collidable);
-        }
-
-        public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex)
-        {
-            if (Hit == null || t < Hit.Time)
-            {
-                Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = (ray.Origin + ray.Direction * t).ToLocation() };
-            }
-        }
-    }
-
-    /// <summary>
-    /// Sends a world ray trace, giving back the single found object, or null if none.
-    /// Uses a standard filter.
-    /// </summary>
+    /// <summary>Performs a ray trace against the entire physics world.</summary>
     /// <param name="start">The start position.</param>
-    /// <param name="dir">The direction.</param>
-    /// <param name="dist">The distance.</param>
-    /// <param name="filter">The filter, if any.</param>
-    public CollisionResult RayTraceSingle(Location start, Location dir, double dist, Func<EntityPhysicsProperty, bool> filter = null)
+    /// <param name="direction">The direction, should be normalized in advance.</param>
+    /// <param name="distance">The distance.</param>
+    /// <param name="filter">The entity filter, if any.</param>
+    public CollisionResult RayTraceSingle(Location start, Location direction, double distance, Func<EntityPhysicsProperty, bool> filter = null)
     {
-        RayTraceHelper helper = new() { Space = this, Filter = filter };
-        Internal.CoreSimulation.RayCast(start.ToNumerics(), dir.ToNumerics(), (float)dist, ref helper);
-        return helper.Hit ?? new CollisionResult() { Position = start + dir * dist };
+        InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Hit = new() { Position = start, Normal = direction, Time = distance } };
+        Internal.CoreSimulation.RayCast(start.ToNumerics(), direction.ToNumerics(), (float)distance, ref helper);
+        return helper.Hit;
     }
 
     private struct ConvexTraceHelper : ISweepHitHandler

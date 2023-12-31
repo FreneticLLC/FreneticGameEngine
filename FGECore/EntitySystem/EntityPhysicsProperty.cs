@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.CoreSystems;
-using FGECore.EntitySystem.JointSystems;
 using FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
@@ -20,9 +18,9 @@ using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using BepuPhysics.CollisionDetection;
-using BepuUtilities;
 using System.Numerics;
+using BepuPhysics.Trees;
+
 using Quaternion = FGECore.MathHelpers.Quaternion;
 
 namespace FGECore.EntitySystem;
@@ -485,5 +483,25 @@ public class EntityPhysicsProperty : BasicEntityProperty
         {
             AngularVelocity += force / Mass;
         }
+    }
+
+    /// <summary>Performs a ray-trace against just this one entity.</summary>
+    /// <param name="start">The starting location.</param>
+    /// <param name="direction">The direction. Should be normalized in advance.</param>
+    /// <param name="distance">The maximum distance before giving up.</param>
+    public CollisionResult RayTrace(Location start, Location direction, double distance)
+    {
+        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Hit = new() { Position = start, Normal = direction, Time = distance } };
+        helper.Hit.Position = start;
+        helper.Hit.Normal = direction;
+        if (!IsSpawned)
+        {
+            return helper.Hit;
+        }
+        float maximumT = (float)distance;
+        TypedIndex shape = SpawnedBody.Collidable.Shape;
+        RayData ray = new() { Direction = direction.ToNumerics(), Origin = start.ToNumerics() };
+        PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        return helper.Hit;
     }
 }

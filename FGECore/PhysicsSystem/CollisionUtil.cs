@@ -18,7 +18,7 @@ using BepuPhysics.Collidables;
 namespace FGECore.PhysicsSystem;
 
 /// <summary>Represents the results of a collision trace.</summary>
-public class CollisionResult
+public struct CollisionResult
 {
     /// <summary>Whether it hit anything.</summary>
     public bool Hit;
@@ -33,7 +33,7 @@ public class CollisionResult
     public EntityPhysicsProperty HitEnt;
 
     /// <summary>The time of hit, where 0 is colliding-at-the-start, up to the distance from start to target.</summary>
-    public float Time;
+    public double Time;
 }
 
 /// <summary>Helper to group together logic for whether two objects collide.</summary>
