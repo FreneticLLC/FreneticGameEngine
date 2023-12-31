@@ -21,6 +21,9 @@ using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
+using BepuUtilities;
+using System.Numerics;
+using Quaternion = FGECore.MathHelpers.Quaternion;
 
 namespace FGECore.EntitySystem;
 
@@ -249,6 +252,28 @@ public class EntityPhysicsProperty : BasicEntityProperty
                 SpawnedBody.UpdateBounds();
             }
         }
+    }
+
+    /// <summary>Gets the entity's bounding box. This box is centered on the entity - to get the spatial bounds, add the <see cref="Position"/> to the box.
+    /// Returns <see cref="AABB.NaN"/> if the entity is not spawned or otherwise has no known box.</summary>
+    /// <param name="recalculate">If true, the bounding box will be updated before returning. If false, it will be only whatever value was present on the last physics update (ie, may be offset if the entity has moved).</param>
+    public unsafe AABB GetBounds(bool recalculate)
+    {
+        if (!IsSpawned)
+        {
+            return AABB.NaN;
+        }
+        if (recalculate)
+        {
+            SpawnedBody.UpdateBounds();
+        }
+        SpawnedBody.GetBoundsReferencesFromBroadPhase(out Vector3* min, out Vector3* max);
+        Vector3 pos = SpawnedBody.Pose.Position;
+        if (min is null || max is null)
+        {
+            return AABB.NaN;
+        }
+        return new((*min - pos).ToLocation(), (*max - pos).ToLocation());
     }
 
     /// <summary>Fired when the entity is added to the world.</summary>
