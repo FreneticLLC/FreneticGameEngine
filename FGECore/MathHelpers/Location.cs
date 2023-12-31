@@ -461,50 +461,60 @@ public struct Location : IEquatable<Location>
     /// <summary>Adds two locations.</summary>
     /// <param name="v1">The first location.</param>
     /// <param name="v2">The second location.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator +(in Location v1, in Location v2) => new(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
 
     /// <summary>Negates a location.</summary>
-    /// <param name="v">The first location.</param>
+    /// <param name="v">The location.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator -(in Location v) => new(-v.X, -v.Y, -v.Z);
 
     /// <summary>Subtracts two locations.</summary>
     /// <param name="v1">The first location.</param>
     /// <param name="v2">The second location.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator -(in Location v1, in Location v2) => new(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
 
     /// <summary>Multiplies two locations.</summary>
     /// <param name="v1">The first location.</param>
     /// <param name="v2">The second location.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator *(in Location v1, in Location v2) => new(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
 
     /// <summary>Divides two locations.</summary>
     /// <param name="v1">The first location.</param>
     /// <param name="v2">The second location.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator /(in Location v1, in Location v2) => new(v1.X / v2.X, v1.Y / v2.Y, v1.Z / v2.Z);
 
     /// <summary>Multiplies a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator *(in Location v, double scale) => new(v.X * scale, v.Y * scale, v.Z * scale);
 
     /// <summary>Multiplies a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator *(double scale, in Location v) => new(v.X * scale, v.Y * scale, v.Z * scale);
 
     /// <summary>Multiplies a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator *(in Location v, float scale) => new(v.X * scale, v.Y * scale, v.Z * scale);
 
     /// <summary>Multiplies a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator *(float scale, in Location v) => new(v.X * scale, v.Y * scale, v.Z * scale);
 
     /// <summary>Divides a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator /(in Location v, double scale)
     {
         double sc = 1.0 / scale;
@@ -514,6 +524,7 @@ public struct Location : IEquatable<Location>
     /// <summary>Divides a location by a scalar.</summary>
     /// <param name="v">The location.</param>
     /// <param name="scale">The scalar.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator /(in Location v, float scale)
     {
         double sc = 1.0 / scale;

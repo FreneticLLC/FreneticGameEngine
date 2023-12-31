@@ -64,8 +64,8 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     /// <param name="dt">Current time step duration.</param>
     public void PrepareForIntegration(float dt)
     {
-        Space.GeneralPhysicsUpdate?.Invoke(dt);
         Delta = dt;
+        Space.GeneralPhysicsUpdate?.Invoke(dt);
     }
 
     /// <summary>Callback called for each active body within the simulation during body integration.</summary>

@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
@@ -56,6 +57,37 @@ public struct AABB(Location _min, Location _max)
     {
         return new AABB(Min.Min(pos), Max.Max(pos));
     }
+
+    #region operators
+    /// <summary>Returns whether two AABBs are equal.</summary>
+    /// <param name="v1">The first AABB.</param>
+    /// <param name="v2">The second AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator ==(in AABB v1, in AABB v2) => v1.Min == v2.Min && v1.Max == v2.Max;
+
+    /// <summary>Returns whether two AABBs are not equal.</summary>
+    /// <param name="v1">The first AABB.</param>
+    /// <param name="v2">The second AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator !=(in AABB v1, in AABB v2) => v1.Min != v2.Min || v1.Max != v2.Max;
+
+    /// <summary>Returns an AABB offset by a Location vector.</summary>
+    /// <param name="box">The AABB.</param>
+    /// <param name="vec">The location vector.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator +(in AABB box, in Location vec) => new(box.Min + vec, box.Max + vec);
+
+    /// <summary>Negates an AABB.</summary>
+    /// <param name="v">The AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator -(in AABB v) => new(-v.Min, -v.Max);
+
+    /// <summary>Returns an AABB offset backwards by Location vector.</summary>
+    /// <param name="box">The AABB.</param>
+    /// <param name="vec">The location vector.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator -(in AABB box, in Location vec) => new(box.Min - vec, box.Max - vec);
+    #endregion
 }
 
 /// <summary>Helper extensions for <see cref="AABB"/>.</summary>
