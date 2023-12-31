@@ -25,6 +25,8 @@ public class EntityMeshShape : EntityShapeHelper
     public EntityMeshShape(Mesh mesh, PhysicsSpace space) : base(space)
     {
         BepuShape = mesh;
+        mesh.ComputeClosedCenterOfMass(out float volume, out _);
+        Volume = volume;
     }
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>

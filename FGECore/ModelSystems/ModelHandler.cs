@@ -17,6 +17,7 @@ using FGECore.FileSystems;
 using FGECore.PhysicsSystem;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
+using FGECore.MathHelpers;
 
 namespace FGECore.ModelSystems;
 
@@ -229,17 +230,29 @@ public class ModelHandler
         return new Mesh(triangles, Vector3.One, space.Internal.Pool);
     }
 
-    /// <summary>Converts a mesh to a BEPU convex mesh.</summary>
+    /// <summary>Converts a mesh to a BEPU convex hull.</summary>
     /// <param name="space">The relevant physics space.</param>
     /// <param name="input">The model.</param>
-    /// <param name="verts">The vertice count if needed.</param>
+    /// <param name="verts">The vertex count if needed.</param>
     /// <param name="center">The center output.</param>
-    /// <returns>The BEPU mesh.</returns>
-    public static ConvexHull MeshToBepuConvex(PhysicsSpace space, Model3D input, out int verts, out Vector3 center)
+    public static ConvexHull MeshToBepuConvex(PhysicsSpace space, Model3D input, out int verts, out Location center)
     {
         Span<Vector3> vertices = new(GetCollisionVertices(input));
         verts = vertices.Length;
-        ConvexHullHelper.CreateShape(vertices, space.Internal.Pool, out center, out ConvexHull hull);
+        return MeshToBepuConvex(space, vertices, out center);
+    }
+
+    /// <summary>Converts a mesh to a BEPU convex hull.</summary>
+    /// <param name="space">The relevant physics space.</param>
+    /// <param name="vertices">Triplets of vertices - 3 vertices per face.</param>
+    /// <param name="center">The center output.</param>
+    public static ConvexHull MeshToBepuConvex(PhysicsSpace space, Span<Vector3> vertices, out Location center)
+    {
+        if (!ConvexHullHelper.CreateShape(vertices, space.Internal.Pool, out Vector3 centerNumerics, out ConvexHull hull))
+        {
+            throw new InvalidOperationException("Cannot create a convex hull from the given vertices.");
+        }
+        center = centerNumerics.ToLocation();
         return hull;
     }
 }

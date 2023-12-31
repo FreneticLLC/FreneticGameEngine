@@ -21,10 +21,16 @@ namespace FGECore.EntitySystem.PhysicsHelpers;
 /// <summary>A sphere shape for an entity.</summary>
 public class EntitySphereShape : EntityShapeHelper
 {
+    private const double SPHERE_VOLUME_CONSTANT = 4.0 / 3.0 * Math.PI;
+
+    /// <summary>Gets the volume for a sphere of the given radius.</summary>
+    public static double CalculateSphereVolume(double radius) => SPHERE_VOLUME_CONSTANT * radius * radius * radius; // 4/3 pi r^3
+
     /// <summary>Constructs a new <see cref="EntitySphereShape"/> of the specified size.</summary>
     public EntitySphereShape(float size, PhysicsSpace space) : base(space)
     {
         BepuShape = new Sphere(size);
+        Volume = CalculateSphereVolume(size);
     }
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>

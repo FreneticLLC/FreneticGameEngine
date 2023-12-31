@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics.Collidables;
+using System.Numerics;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -24,6 +25,12 @@ public class EntityConvexHullShape : EntityShapeHelper
     public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space) : base(space)
     {
         BepuShape = hull;
+        Volume = 0;
+        ConvexHull.ConvexHullTriangleSource tris = new(hull);
+        while (tris.GetNextTriangle(out Vector3 a, out Vector3 b, out Vector3 c))
+        {
+            Volume += MeshInertiaHelper.ComputeTetrahedronVolume(a, b, c);
+        }
     }
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
@@ -34,7 +41,7 @@ public class EntityConvexHullShape : EntityShapeHelper
         return dup;
     }
 
-    /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+    /// <inheritdoc/>
     public override string ToString()
     {
         ConvexHull hull = (ConvexHull)BepuShape;

@@ -24,10 +24,14 @@ namespace FGECore.EntitySystem.PhysicsHelpers;
 /// <summary>A cylinder shape for an entity.</summary>
 public class EntityCylinderShape : EntityShapeHelper
 {
+    /// <summary>Gets the volume of a cylinder of the given radius and height.</summary>
+    public static double CalculateCylinderVolume(double radius, double height) => Math.PI * radius * radius * height;
+
     /// <summary>Constructs a new <see cref="EntityCylinderShape"/> of the specified size.</summary>
     public EntityCylinderShape(float radius, float height, PhysicsSpace space) : base(space)
     {
         BepuShape = new Cylinder(radius, height);
+        Volume = CalculateCylinderVolume(radius, height);
     }
 
     /// <summary>The index of the cylinder sub-component, if registered.</summary>

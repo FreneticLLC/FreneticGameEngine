@@ -32,6 +32,9 @@ public abstract class EntityShapeHelper(PhysicsSpace _space)
     /// <summary>The BEPU shape index if registered.</summary>
     public TypedIndex ShapeIndex;
 
+    /// <summary>The volume of this shape.</summary>
+    public double Volume = 1;
+
     /// <summary>Unregisters the shape from the physics space, invalidating it.</summary>
     public virtual void Unregister()
     {
