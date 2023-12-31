@@ -12,7 +12,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.MathHelpers;
 
 namespace FGECore.MathHelpers;
 
@@ -38,10 +37,7 @@ public struct AABB(Location _min, Location _max)
     }
 
     /// <summary>Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)</summary>
-    public override readonly string ToString()
-    {
-        return Min + "/" + Max;
-    }
+    public override readonly string ToString() => $"{Min}/{Max}";
 
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking).</summary>
     /// <param name="pos">The position to include.</param>
@@ -53,10 +49,7 @@ public struct AABB(Location _min, Location _max)
 
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking), and returns the resultant AABB.</summary>
     /// <param name="pos">The position to include.</param>
-    public readonly AABB Including(in Location pos)
-    {
-        return new AABB(Min.Min(pos), Max.Max(pos));
-    }
+    public readonly AABB Including(in Location pos) => new(Min.Min(pos), Max.Max(pos));
 
     #region operators
     /// <summary>Returns whether two AABBs are equal.</summary>
@@ -87,6 +80,12 @@ public struct AABB(Location _min, Location _max)
     /// <param name="vec">The location vector.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static AABB operator -(in AABB box, in Location vec) => new(box.Min - vec, box.Max - vec);
+
+    /// <inheritdoc/>
+    public readonly override bool Equals(object obj) => obj is AABB box && box == this;
+
+    /// <inheritdoc/>
+    public readonly override int GetHashCode() => HashCode.Combine(Min, Max);
     #endregion
 }
 

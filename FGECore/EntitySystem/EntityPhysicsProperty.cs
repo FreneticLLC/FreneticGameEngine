@@ -497,7 +497,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// <param name="distance">The maximum distance before giving up.</param>
     public CollisionResult RayTrace(Location start, Location direction, double distance)
     {
-        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Hit = new() { Position = start, Normal = direction, Time = distance } };
+        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
         helper.Hit.Position = start;
         helper.Hit.Normal = direction;
         if (!IsSpawned)
