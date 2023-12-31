@@ -88,14 +88,16 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
             if (localInertia.InverseMass[i] > 0)
             {
                 int bodyIndex = bodyIndices[i];
+                float delta = dt[i];
                 EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
                 if (physicsEntity != null)
                 {
+                    physicsEntity.PhysicsUpdate?.Invoke(delta);
                     Vector3Wide.ReadSlot(ref velocity.Linear, i, out Vector3 velLinear);
                     Vector3Wide.ReadSlot(ref velocity.Angular, i, out Vector3 velAngular);
-                    velLinear += physicsEntity.ActualGravity.ToNumerics() * Delta;
-                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
-                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
+                    velLinear += physicsEntity.ActualGravity.ToNumerics() * delta;
+                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, delta);
+                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, delta);
                     velLinear *= linearDampingDt;
                     velAngular *= angularDampingDt;
                     Vector3Wide.WriteSlot(velLinear, i, ref velocity.Linear);

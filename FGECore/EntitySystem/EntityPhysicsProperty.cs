@@ -29,28 +29,37 @@ public class EntityPhysicsProperty : BasicEntityProperty
 {
     // TODO: Save the correct physics world ref?
     /// <summary>The owning physics world.</summary>
-    public PhysicsSpace PhysicsWorld; // Set by constructor.
+    public PhysicsSpace PhysicsWorld;
 
     /// <summary>Whether the entity is currently spawned into the physics world.</summary>
-    public bool IsSpawned = false; // Set by spawner.
+    public bool IsSpawned = false;
 
     /// <summary>The spawned physics body handle.</summary>
-    public BodyReference SpawnedBody; // Set by spawner.
+    public BodyReference SpawnedBody;
 
     /// <summary>Event fired when this entity collides with another.
     /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
-    public Action<CollisionEvent> CollisionHandler; // Set by client.
+    public Action<CollisionEvent> CollisionHandler;
+
+    /// <summary>Event called every physics update tick with a delta value.
+    /// Immediately after this event completes, the entity's velocity/gravity/etc. are copied over, and then after general physics calculations occur.
+    /// <para>Note that physics delta might not always match game delta.</para>
+    /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
+    public Action<double> PhysicsUpdate;
 
     /// <summary>The shape of the physics body. This should not be altered while the entity is spawned.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     [PropertyPriority(-1000)]
-    public EntityShapeHelper Shape; // Set by client.
+    public EntityShapeHelper Shape;
 
     /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="Gravity"/> is invalid or irrelevant.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public bool GravityIsSet = false;
+
+    /// <summary>This entity's collision group.</summary>
+    public CollisionGroup CGroup;
 
     /// <summary>Internal data for this physics property.</summary>
     public struct InternalData
@@ -59,16 +68,16 @@ public class EntityPhysicsProperty : BasicEntityProperty
         public float Mass;
 
         /// <summary>The starting gravity of the physics body.</summary>
-        public Location Gravity; // Auto-set to match the region at object construct time.
+        public Location Gravity;
 
         /// <summary>The starting linear velocity of the physics body.</summary>
-        public Location LinearVelocity; // 0,0,0 is good.
+        public Location LinearVelocity;
 
         /// <summary>The starting angular velocity of the physics body.</summary>
-        public Location AngularVelocity; // 0,0,0 is good.
+        public Location AngularVelocity;
 
         /// <summary>The starting position of the physics body.</summary>
-        public Location Position; // 0,0,0 is good.
+        public Location Position;
 
         /// <summary>The starting orientation of the physics body.</summary>
         public Quaternion Orientation;
@@ -241,9 +250,6 @@ public class EntityPhysicsProperty : BasicEntityProperty
             }
         }
     }
-
-    /// <summary>This entity's collision group.</summary>
-    public CollisionGroup CGroup;
 
     /// <summary>Fired when the entity is added to the world.</summary>
     public override void OnSpawn()
