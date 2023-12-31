@@ -174,6 +174,12 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float AngularDamping = 0.03f;
 
+    /// <summary>Temporary (single-physics-tick) boost to linear damping.</summary>
+    public float LinearDampingBoost = 0;
+
+    /// <summary>Temporary (single-physics-tick) boost to angular damping.</summary>
+    public float AngularDampingBoost = 0;
+
     /// <summary>Gets or sets the entity's linear velocity.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
@@ -503,5 +509,21 @@ public class EntityPhysicsProperty : BasicEntityProperty
         RayData ray = new() { Direction = direction.ToNumerics(), Origin = start.ToNumerics() };
         PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
         return helper.Hit;
+    }
+
+    /// <summary>Temporarily adjusts the linear damping, for exactly 1 physics-tick.</summary>
+    /// <param name="damping">Damping to add.</param>
+    public void ModifyLinearDamping(float damping)
+    {
+        float totalDamping = LinearDamping + LinearDampingBoost;
+        float remainder = 1 - totalDamping;
+        LinearDampingBoost += damping * remainder;
+    }
+    /// <summary>Temporarily adjusts the angular damping. for exactly 1 physics-tick.</summary>
+    public void ModifyAngularDamping(float damping)
+    {
+        float totalDamping = AngularDamping + AngularDampingBoost;
+        float remainder = 1 - totalDamping;
+        AngularDampingBoost += damping * remainder;
     }
 }

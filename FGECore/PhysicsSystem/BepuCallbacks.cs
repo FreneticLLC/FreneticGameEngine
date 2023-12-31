@@ -98,12 +98,16 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
                     Vector3Wide.ReadSlot(ref velocity.Linear, i, out Vector3 velLinear);
                     Vector3Wide.ReadSlot(ref velocity.Angular, i, out Vector3 velAngular);
                     velLinear += physicsEntity.ActualGravity.ToNumerics() * delta;
-                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, delta);
-                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, delta);
+                    float linDamp = physicsEntity.LinearDamping + physicsEntity.LinearDampingBoost;
+                    float angDamp = physicsEntity.AngularDamping + physicsEntity.AngularDampingBoost;
+                    float linearDampingDt = MathF.Pow(1 - linDamp, delta);
+                    float angularDampingDt = MathF.Pow(1 - angDamp, delta);
                     velLinear *= linearDampingDt;
                     velAngular *= angularDampingDt;
                     Vector3Wide.WriteSlot(velLinear, i, ref velocity.Linear);
                     Vector3Wide.WriteSlot(velAngular, i, ref velocity.Angular);
+                    physicsEntity.LinearDampingBoost = 0;
+                    physicsEntity.AngularDampingBoost = 0;
                 }
             }
         }
