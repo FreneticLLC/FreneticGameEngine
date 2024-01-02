@@ -72,7 +72,7 @@ public class PhysicsSpace
         }
 
         /// <summary>Helper struct for ray tracing.</summary>
-        public struct RayTraceHelper : IRayHitHandler, IShapeRayHitHandler, ISweepHitHandler
+        public struct RayTraceHelper : IRayHitHandler, IShapeRayHitHandler, ISweepHitHandler, ISweepFilter
         {
             /// <summary>The filter to apply, or null if none.</summary>
             public Func<EntityPhysicsProperty, bool> Filter;
@@ -92,21 +92,22 @@ public class PhysicsSpace
             /// <summary>Implements <see cref="IRayHitHandler.AllowTest(CollidableReference)"/></summary>
             public readonly bool AllowTest(CollidableReference collidable)
             {
+                if (Filter is null)
+                {
+                    return true;
+                }
                 EntityPhysicsProperty entity = Space.GetEntityFrom(collidable);
-                return entity == null || Filter == null || Filter(entity);
+                return entity is null || Filter(entity);
             }
 
             /// <summary>Implements <see cref="IRayHitHandler.AllowTest(CollidableReference, int)"/></summary>
-            public readonly bool AllowTest(CollidableReference collidable, int childIndex)
-            {
-                return AllowTest(collidable);
-            }
+            public readonly bool AllowTest(CollidableReference collidable, int childIndex) => AllowTest(collidable);
 
             /// <summary>Implements <see cref="IShapeRayHitHandler.AllowTest(int)"/></summary>
-            public readonly bool AllowTest(int childIndex)
-            {
-                return true;
-            }
+            public readonly bool AllowTest(int childIndex) => true;
+
+            /// <summary>Implements <see cref="ISweepFilter.AllowTest(int, int)"/></summary>
+            public readonly bool AllowTest(int childA, int childB) => true;
 
             /// <summary>Implements <see cref="ISweepHitHandler.OnHit(ref float, float, Vector3, Vector3, CollidableReference)"/></summary>
             public void OnHit(ref float maximumT, float t, Vector3 hitLocation, Vector3 normal, CollidableReference collidable)
@@ -118,16 +119,10 @@ public class PhysicsSpace
             }
 
             /// <summary>Implements <see cref="ISweepHitHandler.OnHitAtZeroT(ref float, CollidableReference)"/></summary>
-            public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable)
-            {
-                OnHit(ref maximumT, 0, Start.ToNumerics(), Direction.ToNumerics(), collidable);
-            }
+            public void OnHitAtZeroT(ref float maximumT, CollidableReference collidable) => OnHit(ref maximumT, 0, Start.ToNumerics(), Vector3.Zero, collidable);
 
             /// <summary>Implements <see cref="IRayHitHandler.OnRayHit(in RayData, ref float, float, Vector3, CollidableReference, int)"/></summary>
-            public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex)
-            {
-                OnHit(ref maximumT, t, ray.Origin + ray.Direction * t, normal, collidable);
-            }
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex) => OnHit(ref maximumT, t, ray.Origin + ray.Direction * t, normal, collidable);
 
             /// <summary>Implements <see cref="IShapeRayHitHandler.OnRayHit(in RayData, ref float, float, Vector3, int)"/></summary>
             public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, int childIndex)

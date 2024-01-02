@@ -20,6 +20,7 @@ using BepuPhysics;
 using BepuPhysics.Collidables;
 using System.Numerics;
 using BepuPhysics.Trees;
+using BepuPhysics.CollisionDetection;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
 
@@ -506,8 +507,59 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
         float maximumT = (float)distance;
         TypedIndex shape = SpawnedBody.Collidable.Shape;
-        RayData ray = new() { Direction = direction.ToNumerics(), Origin = start.ToNumerics() };
+        RayData ray = new() { Direction = direction.ToNumerics(), Origin = (start - PhysicsWorld.Offset).ToNumerics() };
         PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        return helper.Hit;
+    }
+
+
+    /// <summary>Performs a convex-sweep-cast-trace against just this one entity.</summary>
+    /// <param name="shape">The shape to be sweeped.</param>
+    /// <param name="shapeOffset">The offset position for the shape.</param>
+    /// <param name="shapeRotation">The rotation for the shape.</param>
+    /// <param name="start">The starting location.</param>
+    /// <param name="direction">The direction. Should be normalized in advance.</param>
+    /// <param name="distance">The maximum distance before giving up.</param>
+    public unsafe CollisionResult ConvexTrace<TShape>(EntityShapeHelper shape, Location shapeOffset, Quaternion shapeRotation, Location start, Location direction, double distance)
+    {
+        // TODO: This hasn't been tested at time of commit.
+        if (shape.BepuShape is not IConvexShape convexInput)
+        {
+            throw new ArgumentException("Shape must be convex.");
+        }
+        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
+        if (!IsSpawned)
+        {
+            return helper.Hit;
+        }
+        Simulation simulation = PhysicsWorld.Internal.CoreSimulation;
+        SweepTask task = simulation.NarrowPhase.SweepTaskRegistry.GetTask(shape.ShapeIndex.Type, Shape.ShapeIndex.Type);
+        if (task is null)
+        {
+            // TODO: Should this be an error?
+            return helper.Hit;
+        }
+        simulation.Shapes[shape.ShapeIndex.Type].GetShapeData(shape.ShapeIndex.Index, out void* shapePointer, out _);
+        simulation.Shapes[Shape.ShapeIndex.Type].GetShapeData(shape.ShapeIndex.Index, out void* ownShapePointer, out _);
+        // These estimate calculations from BEPU source, simplified for local specifics (direction.Length == 1, shape won't spin while moving, etc)
+        convexInput.ComputeAngularExpansionData(out float maximumRadius, out float maximumAngularExpansion);
+        float minimumRadius = maximumRadius - maximumAngularExpansion;
+        float sizeEstimate = Math.Max(minimumRadius, maximumRadius * 0.25f);
+        float minimumProgressionDistance = 0.1f * sizeEstimate;
+        float convergenceThresholdDistance = 1e-5f * sizeEstimate;
+        float minimumProgressionT = minimumProgressionDistance;
+        float convergenceThresholdT = convergenceThresholdDistance;
+        const int maximumIterationCount = 25;
+        // The BEPU sweep code is cursed and hypercomplicated. It's not really built for this type of call, it's meant for the actual main engine run.
+        /* public unsafe bool Sweep<TSweepFilter>(
+            void* shapeDataA, int shapeTypeA, Quaternion orientationA, in BodyVelocity velocityA,
+            void* shapeDataB, int shapeTypeB, Vector3 offsetB, Quaternion orientationB, in BodyVelocity velocityB,
+            float maximumT, float minimumProgression, float convergenceThreshold, int maximumIterationCount,
+            ref TSweepFilter filter, Shapes shapes, SweepTaskRegistry sweepTasks, BufferPool pool, out float t0, out float t1, out Vector3 hitLocation, out Vector3 hitNormal)*/
+        task.Sweep(shapePointer, shape.ShapeIndex.Type, shapeRotation.ToNumerics(), new BodyVelocity(direction.ToNumerics()),
+            ownShapePointer, Shape.ShapeIndex.Type, SpawnedBody.Pose.Position - shapeOffset.ToNumerics(), SpawnedBody.Pose.Orientation, new BodyVelocity(),
+            (float) distance, minimumProgressionT, convergenceThresholdT, maximumIterationCount,
+            ref helper, simulation.Shapes, simulation.NarrowPhase.SweepTaskRegistry, simulation.BufferPool, out _, out _, out _, out _);
         return helper.Hit;
     }
 
@@ -519,7 +571,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         float remainder = 1 - totalDamping;
         LinearDampingBoost += damping * remainder;
     }
-    /// <summary>Temporarily adjusts the angular damping. for exactly 1 physics-tick.</summary>
+    /// <summary>Temporarily adjusts the angular damping, for exactly 1 physics-tick.</summary>
     public void ModifyAngularDamping(float damping)
     {
         float totalDamping = AngularDamping + AngularDampingBoost;
