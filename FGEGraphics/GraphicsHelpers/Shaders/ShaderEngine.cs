@@ -153,7 +153,7 @@ public class ShaderEngine
             string[] shaderVariables = filename.SplitFast('?', 1); // TODO: Less ridiculous system
             string geomFilename = shaderVariables.Length > 1 ? shaderVariables[1] : null;
             string[] dat1 = shaderVariables[0].SplitFast('#', 1);
-            string[] vars = Array.Empty<string>();
+            string[] vars = [];
             if (dat1.Length == 2)
             {
                 vars = dat1[1].SplitFast(',');

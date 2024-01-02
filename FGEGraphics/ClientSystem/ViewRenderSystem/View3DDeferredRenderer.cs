@@ -130,8 +130,8 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                         subLight.NeedsUpdate = false;
                                         View.BindFramebuffer(FramebufferTarget.Framebuffer, sky.FBO);
                                         View.DrawBuffer(DrawBufferMode.ColorAttachment0);
-                                        GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f });
-                                        GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                                        GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
+                                        GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                         State.FBOid = FBOID.STATIC_SHADOWS;
                                         GraphicsUtil.CheckError("Prerender - Shadows");
                                         Config.Render3D(View);
@@ -143,7 +143,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                     GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
                                     if (Engine.EnableDynamicShadows)
                                     {
-                                        //GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f });
+                                        //GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                         State.FBOid = FBOID.DYNAMIC_SHADOWS;
                                         Config.Render3D(View);
                                     }
@@ -151,14 +151,14 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 else if (!subLight.CastShadows)
                                 {
                                     View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Shadow[lTID]);
-                                    GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                                    GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f });
+                                    GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
+                                    GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                 }
                                 else
                                 {
                                     View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Shadow[lTID]);
-                                    GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
-                                    GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f });
+                                    GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
+                                    GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                     State.FBOid = FBOID.SHADOWS;
                                     Config.Render3D(View);
                                 }
@@ -573,9 +573,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             }
         }
         State.BufferDontTouch = true;
-        GL.DrawBuffers(2, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1 });
-        GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
-        GL.ClearBuffer(ClearBuffer.Color, 1, new float[] { 0f, 0f, 0f, 0f });
+        GL.DrawBuffers(2, [DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1]);
+        GL.ClearBuffer(ClearBuffer.Color, 0, [0f, 0f, 0f, 0f]);
+        GL.ClearBuffer(ClearBuffer.Color, 1, [0f, 0f, 0f, 0f]);
         GL.BlendFuncSeparate(1, BlendingFactorSrc.SrcColor, BlendingFactorDest.Zero, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.Zero);
         GL.Uniform3(8, Config.DOF_Target.ToOpenTK());
         GL.Uniform1(9, Config.DOF_Factor);
@@ -725,7 +725,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.FBO);
         GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
         View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
-        GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 0f });
+        GL.ClearBuffer(ClearBuffer.Color, 0, [0f, 0f, 0f, 0f]);
         int lightc = 0;
         GraphicsUtil.CheckError("PreTransp - 3");
         // TODO: VR Patch!
@@ -816,7 +816,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         State.FBOid = FBOID.NONE;
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.Disable(EnableCap.CullFace);
-        GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+        GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
         GL.Disable(EnableCap.DepthTest);
         GraphicsUtil.CheckError("PreGR");
         if (Config.GodRays)

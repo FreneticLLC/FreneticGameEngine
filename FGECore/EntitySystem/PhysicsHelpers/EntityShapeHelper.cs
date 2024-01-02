@@ -20,22 +20,20 @@ using BepuPhysics.Collidables;
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
 /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
-public abstract class EntityShapeHelper
+public abstract class EntityShapeHelper(PhysicsSpace _space)
 {
-    /// <summary>Constructs the <see cref="EntityShapeHelper"/>.</summary>
-    public EntityShapeHelper(PhysicsSpace _space)
-    {
-        Space = _space;
-    }
 
     /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
     public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
 
     /// <summary>The space this shape is registered into.</summary>
-    public PhysicsSpace Space;
+    public PhysicsSpace Space = _space;
 
     /// <summary>The BEPU shape index if registered.</summary>
     public TypedIndex ShapeIndex;
+
+    /// <summary>The volume of this shape.</summary>
+    public double Volume = 1;
 
     /// <summary>Unregisters the shape from the physics space, invalidating it.</summary>
     public virtual void Unregister()

@@ -17,7 +17,8 @@ namespace FGECore.UtilitySystems;
 
 /// <summary>Helper for live-sorted queues of data.</summary>
 /// <typeparam name="T">The data type at hand.</typeparam>
-public class PriorityQueue<T>
+/// <param name="capacity">The capacity to prepare.</param>
+public class PriorityQueue<T>(int capacity = 512)
 {
     /// <summary>Represents a single node in a queue.</summary>
     private struct Node
@@ -30,22 +31,13 @@ public class PriorityQueue<T>
     }
 
     /// <summary>Where the queue starts.</summary>
-    private int start;
+    private int start = 0;
 
     /// <summary>How many nodes are actually in the queue.</summary>
-    private int numNodes;
+    private int numNodes = 0;
 
     /// <summary>All current nodes.</summary>
-    private Node[] nodes; // TODO: Array possibly isn't the most efficient way to store a priority queue, even when working with structs? Experiment!
-
-    /// <summary>Constructs the priority queue.</summary>
-    /// <param name="capacity">The capacity to prepare.</param>
-    public PriorityQueue(int capacity = 512)
-    {
-        start = 0;
-        numNodes = 0;
-        nodes = new Node[capacity];
-    }
+    private Node[] nodes = new Node[capacity]; // TODO: Array possibly isn't the most efficient way to store a priority queue, even when working with structs? Experiment!
 
     /// <summary>Gets the number of items in the queue.</summary>
     public int Count

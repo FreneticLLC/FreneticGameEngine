@@ -257,13 +257,15 @@ public partial class WelcomerForm : Form
             gitExe = ofd.FileName;
         }
         string pfname = folder.TrimEnd('/', '\\');
-        int ind = pfname.LastIndexOfAny(new char[] { '/', '\\' });
+        int ind = pfname.LastIndexOfAny(['/', '\\']);
         string proj_name = pfname[(ind + 1)..];
         string baseFolder = folder + "/" + proj_name + "/";
-        List<KeyValuePair<string, string>> strs = new() { };
-        strs.Add(new KeyValuePair<string, string>("name", proj_name));
-        strs.Add(new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()));
-        strs.Add(new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()));
+        List<KeyValuePair<string, string>> strs =
+        [
+            new KeyValuePair<string, string>("name", proj_name),
+            new KeyValuePair<string, string>("guid_project", Guid.NewGuid().ToString()),
+            new KeyValuePair<string, string>("guid_sln", Guid.NewGuid().ToString()),
+        ];
         CopyOverText("gprogram_cs", baseFolder + "GameProgram.cs", strs);
         CopyOverText("gitignore", folder + "/.gitignore", strs);
         CopyOverText("fge_legal", folder + "/FGE-LEGAL.md", strs);
@@ -315,8 +317,8 @@ public partial class WelcomerForm : Form
         Directory.CreateDirectory(newBase);
         foreach (string f in Directory.GetFileSystemEntries("./" + dir + "/"))
         {
-            int find = f.LastIndexOfAny(new char[] { '/', '\\' });
-            if (f.EndsWith("/") || File.GetAttributes(f).HasFlag(FileAttributes.Directory))
+            int find = f.LastIndexOfAny(['/', '\\']);
+            if (f.EndsWith('/') || File.GetAttributes(f).HasFlag(FileAttributes.Directory))
             {
                 string fn = f.TrimEnd('/', '\\')[(find + 1)..];
                 CopyDirectoryAndChildren(dir + "/" + fn, newBase + fn + "/");
@@ -326,7 +328,7 @@ public partial class WelcomerForm : Form
         }
     }
 
-    readonly string[] FILES = new string[] { "BepuPhysics.dll", "BepuPhysics.pdb", "BepuPhysics.xml",
+    readonly string[] FILES = [ "BepuPhysics.dll", "BepuPhysics.pdb", "BepuPhysics.xml",
         "BepuUtilities.dll", "BepuUtilities.pdb", "BepuUtilities.xml",
         "FreneticUtilities.dll", "FreneticUtilities.pdb", "FreneticUtilities.xml",
         "FGECore.dll", "FGECore.pdb", "FGECore.xml",
@@ -335,7 +337,7 @@ public partial class WelcomerForm : Form
         "NVorbis.dll",
         "OpenTK.dll", "OpenTK.dll.config", "OpenTK.pdb", "OpenTK.xml",
         "openvr_api.dll", "openvr_api.pdb"
-    };
+    ];
 
     /// <summary>Handles a mouse button being released.</summary>
     /// <param name="sender">The event sender.</param>

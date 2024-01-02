@@ -29,7 +29,10 @@ namespace FGEGraphics.GraphicsHelpers;
 /// Rendering utility.
 /// Construct and call <see cref="Init"/>.
 /// </summary>
-public class Renderer
+/// <param name="tengine">The relevant texture engine.</param>
+/// <param name="shaderdet">The relevant shader engine.</param>
+/// <param name="modelsdet">The relevant model engine.</param>
+public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine modelsdet)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -142,25 +145,14 @@ public class Renderer
         Box = builder.Generate();
     }
 
-    /// <summary>Constructs the renderer.</summary>
-    /// <param name="tengine">The relevant texture engine.</param>
-    /// <param name="shaderdet">The relevant shader engine.</param>
-    /// <param name="modelsdet">The relevant model engine.</param>
-    public Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine modelsdet)
-    {
-        TEngine = tengine;
-        Shaders = shaderdet;
-        Models = modelsdet;
-    }
-
     /// <summary>Texture engine.</summary>
-    public TextureEngine TEngine;
+    public TextureEngine TEngine = tengine;
 
     /// <summary>Shader engine.</summary>
-    public ShaderEngine Shaders;
+    public ShaderEngine Shaders = shaderdet;
 
     /// <summary>Model engine.</summary>
-    public ModelEngine Models;
+    public ModelEngine Models = modelsdet;
 
     /// <summary>Renders a line box.</summary>
     /// <param name="min">The minimum coordinate.</param>

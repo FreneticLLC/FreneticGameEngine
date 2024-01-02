@@ -25,6 +25,7 @@ public class EntityBoxShape : EntityShapeHelper
     public EntityBoxShape(Location size, PhysicsSpace space) : base(space)
     {
         BepuShape = new Box(size.XF, size.YF, size.ZF);
+        Volume = size.X * size.Y * size.Z;
     }
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>

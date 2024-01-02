@@ -19,10 +19,12 @@ using FGECore.MathHelpers;
 namespace FGECore.ServerSystem.EntitySystem;
 
 /// <summary>Represents an entity on the server side.</summary>
-public class ServerEntity : BasicEntity<ServerEntity, ServerEngine>
+/// <param name="engine">The owning engine.</param>
+/// <param name="_shouldNetwork">Whether it should network.</param>
+public class ServerEntity(ServerEngine engine, bool _shouldNetwork = false) : BasicEntity<ServerEntity, ServerEngine>(engine)
 {
     /// <summary>Whether this entity should be sent over the network.</summary>
-    public bool ShouldNetwork;
+    public bool ShouldNetwork = _shouldNetwork;
 
     /// <summary>Gets the backing server engine.</summary>
     public ServerEngine Server
@@ -31,15 +33,6 @@ public class ServerEntity : BasicEntity<ServerEntity, ServerEngine>
         {
             return Engine as ServerEngine;
         }
-    }
-
-    /// <summary>Constructs a server-side entity.</summary>
-    /// <param name="engine">The owning engine.</param>
-    /// <param name="_shouldNetwork">Whether it should network.</param>
-    public ServerEntity(ServerEngine engine, bool _shouldNetwork = false)
-        : base(engine)
-    {
-        ShouldNetwork = _shouldNetwork;
     }
 
     /// <summary>Gets a string debug helper for this entity.</summary>

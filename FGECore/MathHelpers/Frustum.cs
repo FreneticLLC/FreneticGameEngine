@@ -21,56 +21,46 @@ namespace FGECore.MathHelpers;
 /// <para>Can be used to represent the area a camera can see.</para>
 /// <para>Can be used for high-speed culling of visible objects.</para>
 /// </summary>
-public class Frustum
+/// <param name="matrix">The matrix.</param>
+public class Frustum(Matrix4x4 matrix)
 {
     /// <summary>Near plane.</summary>
-    public Plane Near;
+    public Plane Near = new(new(-matrix.M13, -matrix.M23, -matrix.M33), -matrix.M43);
 
     /// <summary>Far plane.</summary>
-    public Plane Far;
+    public Plane Far = new(new(matrix.M13 - matrix.M14, matrix.M23 - matrix.M24, matrix.M33 - matrix.M34), matrix.M43 - matrix.M44);
 
     /// <summary>Left plane.</summary>
-    public Plane Left;
+    public Plane Left = new(new(-matrix.M14 - matrix.M11, -matrix.M24 - matrix.M21, -matrix.M34 - matrix.M31), -matrix.M44 - matrix.M41);
 
     /// <summary>Right plane.</summary>
-    public Plane Right;
+    public Plane Right = new(new(matrix.M11 - matrix.M14, matrix.M21 - matrix.M24, matrix.M31 - matrix.M34), matrix.M41 - matrix.M44);
 
     /// <summary>Top plane.</summary>
-    public Plane Top;
+    public Plane Top = new(new(matrix.M12 - matrix.M14, matrix.M22 - matrix.M24, matrix.M32 - matrix.M34), matrix.M42 - matrix.M44);
 
     /// <summary>Bottom plane.</summary>
-    public Plane Bottom;
-
-    /// <summary>Constructs the Frustum from a Matrix.</summary>
-    /// <param name="matrix">The matrix.</param>
-    public Frustum(Matrix4x4 matrix)
-    {
-        Left = new Plane(new Location(-matrix.M14 - matrix.M11, -matrix.M24 - matrix.M21, -matrix.M34 - matrix.M31), -matrix.M44 - matrix.M41);
-        Right = new Plane(new Location(matrix.M11 - matrix.M14, matrix.M21 - matrix.M24, matrix.M31 - matrix.M34), matrix.M41 - matrix.M44);
-        Top = new Plane(new Location(matrix.M12 - matrix.M14, matrix.M22 - matrix.M24, matrix.M32 - matrix.M34), matrix.M42 - matrix.M44);
-        Bottom = new Plane(new Location(-matrix.M14 - matrix.M12, -matrix.M24 - matrix.M22, -matrix.M34 - matrix.M32), -matrix.M44 - matrix.M42);
-        Near = new Plane(new Location(-matrix.M13, -matrix.M23, -matrix.M33), -matrix.M43);
-        Far = new Plane(new Location(matrix.M13 - matrix.M14, matrix.M23 - matrix.M24, matrix.M33 - matrix.M34), matrix.M43 - matrix.M44);
-    }
+    public Plane Bottom = new(new(-matrix.M14 - matrix.M12, -matrix.M24 - matrix.M22, -matrix.M34 - matrix.M32), -matrix.M44 - matrix.M42);
 
     /// <summary>Returns a boolean indicating whether an AABB is contained by the Frustum.</summary>
     /// <param name="min">The lower coord of the AABB.</param>
     /// <param name="max">The higher coord of the AABB.</param>
     /// <returns>Whether it is contained.</returns>
     public bool ContainsBox(Location min, Location max)
-    { // TODO: Improve accuracy
+    {
+        // TODO: Improve accuracy
         if (min == max)
         {
             return Contains(min);
         }
-        Location[] locs = new Location[] {
-            min, max, new Location(min.X, min.Y, max.Z),
-            new Location(min.X, max.Y, max.Z),
-            new Location(max.X, min.Y, max.Z),
-            new Location(max.X, min.Y, min.Z),
-            new Location(max.X, max.Y, min.Z),
-            new Location(min.X, max.Y, min.Z)
-        };
+        Location[] locs = [
+            min, max, new(min.X, min.Y, max.Z),
+            new(min.X, max.Y, max.Z),
+            new(max.X, min.Y, max.Z),
+            new(max.X, min.Y, min.Z),
+            new(max.X, max.Y, min.Z),
+            new(min.X, max.Y, min.Z)
+        ];
         for (int p = 0; p < 6; p++)
         {
             Plane pl = GetFor(p);

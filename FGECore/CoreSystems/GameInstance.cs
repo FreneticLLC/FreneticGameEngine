@@ -152,7 +152,7 @@ public abstract class GameInstance
 public abstract class GameInstance<T, T2> : GameInstance where T : BasicEntity<T, T2> where T2 : BasicEngine<T, T2>
 {
     /// <summary>Any and all engines running in this instance on the main level.</summary>
-    public List<T2> Engines = new();
+    public List<T2> Engines = [];
 
     /// <summary>Gets the "default" engine: the first in the <see cref="Engines"/> list!</summary>
     public T2 DefaultEngine

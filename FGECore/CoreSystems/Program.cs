@@ -18,7 +18,10 @@ using System.Threading.Tasks;
 namespace FGECore.CoreSystems;
 
 /// <summary>Represents the current program abstractly.</summary>
-public abstract class Program
+/// <param name="_name">Game name.</param>
+/// <param name="_version">Game version.</param>
+/// <param name="_versdesc">Game version descriptor.</param>
+public abstract class Program(string _name, string _version, string _versdesc)
 {
     /// <summary>The current program instance.</summary>
     public static Program Instance;
@@ -42,13 +45,13 @@ public abstract class Program
     }
 
     /// <summary>The name of this program.</summary>
-    public readonly string Name;
+    public readonly string Name = _name;
 
     /// <summary>The version (number) of this program.</summary>
-    public readonly string Version;
+    public readonly string Version = _version;
 
     /// <summary>The version description of this program.</summary>
-    public readonly string VersionDescription;
+    public readonly string VersionDescription = _versdesc;
 
     /// <summary>The current program's game name.</summary>
     public static string GameName => Instance.Name;
@@ -61,15 +64,4 @@ public abstract class Program
     /// (EG "Release", "Beta", or "Alpha" usually).
     /// </summary>
     public static string GameVersionDescription => Instance.VersionDescription;
-
-    /// <summary>Construct the program descriptor.</summary>
-    /// <param name="_name">Game name.</param>
-    /// <param name="_version">Game version.</param>
-    /// <param name="_versdesc">Game version descriptor.</param>
-    public Program(string _name, string _version, string _versdesc)
-    {
-        Name = _name;
-        Version = _version;
-        VersionDescription = _versdesc;
-    }
 }

@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.CoreSystems;
-using FGECore.EntitySystem.JointSystems;
 using FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
@@ -20,7 +18,10 @@ using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using BepuPhysics.CollisionDetection;
+using System.Numerics;
+using BepuPhysics.Trees;
+
+using Quaternion = FGECore.MathHelpers.Quaternion;
 
 namespace FGECore.EntitySystem;
 
@@ -29,28 +30,37 @@ public class EntityPhysicsProperty : BasicEntityProperty
 {
     // TODO: Save the correct physics world ref?
     /// <summary>The owning physics world.</summary>
-    public PhysicsSpace PhysicsWorld; // Set by constructor.
+    public PhysicsSpace PhysicsWorld;
 
     /// <summary>Whether the entity is currently spawned into the physics world.</summary>
-    public bool IsSpawned = false; // Set by spawner.
+    public bool IsSpawned = false;
 
     /// <summary>The spawned physics body handle.</summary>
-    public BodyReference SpawnedBody; // Set by spawner.
+    public BodyReference SpawnedBody;
 
     /// <summary>Event fired when this entity collides with another.
     /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
-    public Action<CollisionEvent> CollisionHandler; // Set by client.
+    public Action<CollisionEvent> CollisionHandler;
+
+    /// <summary>Event called every physics update tick with a delta value.
+    /// Immediately after this event completes, the entity's velocity/gravity/etc. are copied over, and then after general physics calculations occur.
+    /// <para>Note that physics delta might not always match game delta.</para>
+    /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
+    public Action<double> PhysicsUpdate;
 
     /// <summary>The shape of the physics body. This should not be altered while the entity is spawned.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     [PropertyPriority(-1000)]
-    public EntityShapeHelper Shape; // Set by client.
+    public EntityShapeHelper Shape;
 
     /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="Gravity"/> is invalid or irrelevant.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public bool GravityIsSet = false;
+
+    /// <summary>This entity's collision group.</summary>
+    public CollisionGroup CGroup;
 
     /// <summary>Internal data for this physics property.</summary>
     public struct InternalData
@@ -59,16 +69,16 @@ public class EntityPhysicsProperty : BasicEntityProperty
         public float Mass;
 
         /// <summary>The starting gravity of the physics body.</summary>
-        public Location Gravity; // Auto-set to match the region at object construct time.
+        public Location Gravity;
 
         /// <summary>The starting linear velocity of the physics body.</summary>
-        public Location LinearVelocity; // 0,0,0 is good.
+        public Location LinearVelocity;
 
         /// <summary>The starting angular velocity of the physics body.</summary>
-        public Location AngularVelocity; // 0,0,0 is good.
+        public Location AngularVelocity;
 
         /// <summary>The starting position of the physics body.</summary>
-        public Location Position; // 0,0,0 is good.
+        public Location Position;
 
         /// <summary>The starting orientation of the physics body.</summary>
         public Quaternion Orientation;
@@ -164,6 +174,12 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float AngularDamping = 0.03f;
 
+    /// <summary>Temporary (single-physics-tick) boost to linear damping.</summary>
+    public float LinearDampingBoost = 0;
+
+    /// <summary>Temporary (single-physics-tick) boost to angular damping.</summary>
+    public float AngularDampingBoost = 0;
+
     /// <summary>Gets or sets the entity's linear velocity.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
@@ -242,8 +258,27 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
     }
 
-    /// <summary>This entity's collision group.</summary>
-    public CollisionGroup CGroup;
+    /// <summary>Gets the entity's bounding box. This box is centered on the entity - to get the spatial bounds, add the <see cref="Position"/> to the box.
+    /// Returns <see cref="AABB.NaN"/> if the entity is not spawned or otherwise has no known box.</summary>
+    /// <param name="recalculate">If true, the bounding box will be updated before returning. If false, it will be only whatever value was present on the last physics update (ie, may be offset if the entity has moved).</param>
+    public unsafe AABB GetBounds(bool recalculate)
+    {
+        if (!IsSpawned)
+        {
+            return AABB.NaN;
+        }
+        if (recalculate)
+        {
+            SpawnedBody.UpdateBounds();
+        }
+        SpawnedBody.GetBoundsReferencesFromBroadPhase(out Vector3* min, out Vector3* max);
+        Vector3 pos = SpawnedBody.Pose.Position;
+        if (min is null || max is null)
+        {
+            return AABB.NaN;
+        }
+        return new((*min - pos).ToLocation(), (*max - pos).ToLocation());
+    }
 
     /// <summary>Fired when the entity is added to the world.</summary>
     public override void OnSpawn()
@@ -454,5 +489,41 @@ public class EntityPhysicsProperty : BasicEntityProperty
         {
             AngularVelocity += force / Mass;
         }
+    }
+
+    /// <summary>Performs a ray-trace against just this one entity.</summary>
+    /// <param name="start">The starting location.</param>
+    /// <param name="direction">The direction. Should be normalized in advance.</param>
+    /// <param name="distance">The maximum distance before giving up.</param>
+    public CollisionResult RayTrace(Location start, Location direction, double distance)
+    {
+        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
+        helper.Hit.Position = start;
+        helper.Hit.Normal = direction;
+        if (!IsSpawned)
+        {
+            return helper.Hit;
+        }
+        float maximumT = (float)distance;
+        TypedIndex shape = SpawnedBody.Collidable.Shape;
+        RayData ray = new() { Direction = direction.ToNumerics(), Origin = start.ToNumerics() };
+        PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        return helper.Hit;
+    }
+
+    /// <summary>Temporarily adjusts the linear damping, for exactly 1 physics-tick.</summary>
+    /// <param name="damping">Damping to add.</param>
+    public void ModifyLinearDamping(float damping)
+    {
+        float totalDamping = LinearDamping + LinearDampingBoost;
+        float remainder = 1 - totalDamping;
+        LinearDampingBoost += damping * remainder;
+    }
+    /// <summary>Temporarily adjusts the angular damping. for exactly 1 physics-tick.</summary>
+    public void ModifyAngularDamping(float damping)
+    {
+        float totalDamping = AngularDamping + AngularDampingBoost;
+        float remainder = 1 - totalDamping;
+        AngularDampingBoost += damping * remainder;
     }
 }

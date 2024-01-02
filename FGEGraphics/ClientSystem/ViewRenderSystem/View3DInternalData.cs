@@ -35,8 +35,9 @@ public class View3DInternalData
     /// <summary>
     /// The depth clear float array (a float array with one value: 1.0f).
     /// This is, naturally, for input to "GL.ClearBuffer(ClearBuffer.DEPTH, bufId, DEPTH_CLEAR);"
+    /// Always exactly [1f]. Can be reused elsewhere.
     /// </summary>
-    public static readonly float[] DEPTH_CLEAR = new float[] { 1.0f };
+    public static readonly float[] ARR_FLOAT_1F_1 = [1.0f];
 
     /// <summary>LL needed info.</summary>
     public const int LL_AB_SIZE = 8 * 1024 * 1024; // TODO: Tweak me!

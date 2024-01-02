@@ -30,7 +30,7 @@ public class ShaderKey : IEquatable<ShaderKey>
     public string GeometryShaderPath;
 
     /// <summary>An array of specially defined pre-compiler variable keys.</summary>
-    public string[] Defines = Array.Empty<string>();
+    public string[] Defines = [];
 
     /// <summary>Gets a unique hash code for the instance.</summary>
     public override int GetHashCode()

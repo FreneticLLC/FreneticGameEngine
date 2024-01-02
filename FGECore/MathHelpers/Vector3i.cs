@@ -62,7 +62,7 @@ public struct Vector3i : IEquatable<Vector3i>
 
     /// <summary>Gets a cheap hash code.</summary>
     /// <returns>The hash code.</returns>
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         return X * 23 + Y * 77 + Z;
     }
@@ -71,7 +71,7 @@ public struct Vector3i : IEquatable<Vector3i>
     /// <param name="other">The other vector.</param>
     /// <returns>Whether they are equal.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override bool Equals(object other)
+    public override readonly bool Equals(object other)
     {
         if (other is not Vector3i vecForm)
         {
@@ -84,7 +84,7 @@ public struct Vector3i : IEquatable<Vector3i>
     /// <param name="other">The other vector.</param>
     /// <returns>Whether they are equal.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(Vector3i other)
+    public readonly bool Equals(Vector3i other)
     {
         return other.X == X && other.Y == Y && other.Z == Z;
     }
@@ -92,14 +92,14 @@ public struct Vector3i : IEquatable<Vector3i>
     /// <summary>Converts this vector a floating point <see cref="Location"/>.</summary>
     /// <returns>The Location.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Location ToLocation()
+    public readonly Location ToLocation()
     {
         return new Location(X, Y, Z);
     }
 
     /// <summary>Gets a simple string of the vector.</summary>
     /// <returns>The string.</returns>
-    public override string ToString()
+    public override readonly string ToString()
     {
         return "(" + X + ", " + Y + ", " + Z + ")";
     }
@@ -157,7 +157,7 @@ public struct Vector3i : IEquatable<Vector3i>
     /// <summary>Gets or set the XY 2D component of this <see cref="Vector3i"/>.</summary>
     public Vector2i XY
     {
-        get
+        readonly get
         {
             return new Vector2i(X, Y);
         }
@@ -189,7 +189,7 @@ public struct Vector3i : IEquatable<Vector3i>
     /// Contains 12 bytes.
     /// Inverts <see cref="FromBytes(byte[], int)"/>.
     /// </summary>
-    public byte[] ToBytes()
+    public readonly byte[] ToBytes()
     {
         byte[] toret = new byte[12];
         ToBytes(toret, 0);
@@ -203,7 +203,7 @@ public struct Vector3i : IEquatable<Vector3i>
     /// </summary>
     /// <param name="outputBytes">The output byte array.</param>
     /// <param name="offset">The starting offset in the output array.</param>
-    public void ToBytes(byte[] outputBytes, int offset)
+    public readonly void ToBytes(byte[] outputBytes, int offset)
     {
         PrimitiveConversionHelper.Int32ToBytes(X, outputBytes, offset + 0);
         PrimitiveConversionHelper.Int32ToBytes(Y, outputBytes, offset + 4);
@@ -211,7 +211,7 @@ public struct Vector3i : IEquatable<Vector3i>
     }
 
     /// <summary>Converts the <see cref="Vector3i"/> to a <see cref="System.Numerics.Vector3"/>.</summary>
-    public System.Numerics.Vector3 ToNumerics()
+    public readonly System.Numerics.Vector3 ToNumerics()
     {
         return new System.Numerics.Vector3(X, Y, Z);
     }

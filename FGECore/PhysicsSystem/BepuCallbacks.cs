@@ -31,10 +31,10 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     public PhysicsSpace Space;
 
     /// <summary>Gets how the pose integrator should handle angular velocity integration.</summary>
-    public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.ConserveMomentum;
+    public readonly AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.ConserveMomentum;
 
     /// <summary>Performs any required initialization logic after the Simulation instance has been constructed.</summary>
-    public void Initialize(Simulation simulation)
+    public readonly void Initialize(Simulation simulation)
     {
     }
 
@@ -65,6 +65,7 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     public void PrepareForIntegration(float dt)
     {
         Delta = dt;
+        Space.GeneralPhysicsUpdate?.Invoke(dt);
     }
 
     /// <summary>Callback called for each active body within the simulation during body integration.</summary>
@@ -76,7 +77,7 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     /// <param name="workerIndex">Index of the worker thread processing this bundle.</param>
     /// <param name="dt">Durations to integrate the velocity over. Can vary over lanes.</param>
     /// <param name="velocity">Velocity of bodies in the bundle. Any changes to lanes which are not active by the integrationMask will be discarded.</param>
-    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
+    public readonly void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
     {
         // Note: this is terrifying because the input is SIMD vectors that need to be decomposed and recomposed. Blame BEPU.
         for (int i = 0; i < Vector<int>.Count; i++)
@@ -88,18 +89,25 @@ public struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
             if (localInertia.InverseMass[i] > 0)
             {
                 int bodyIndex = bodyIndices[i];
+                float delta = dt[i];
                 EntityPhysicsProperty physicsEntity = Space.Internal.EntitiesByPhysicsID[Space.Internal.CoreSimulation.Bodies.ActiveSet.IndexToHandle[bodyIndex].Value];
                 if (physicsEntity != null)
                 {
+                    physicsEntity.PhysicsUpdate?.Invoke(delta);
+                    Space.PhysicsUpdate?.Invoke(physicsEntity, delta);
                     Vector3Wide.ReadSlot(ref velocity.Linear, i, out Vector3 velLinear);
                     Vector3Wide.ReadSlot(ref velocity.Angular, i, out Vector3 velAngular);
-                    velLinear += physicsEntity.ActualGravity.ToNumerics() * Delta;
-                    float linearDampingDt = MathF.Pow(1 - physicsEntity.LinearDamping, Delta);
-                    float angularDampingDt = MathF.Pow(1 - physicsEntity.AngularDamping, Delta);
+                    velLinear += physicsEntity.ActualGravity.ToNumerics() * delta;
+                    float linDamp = physicsEntity.LinearDamping + physicsEntity.LinearDampingBoost;
+                    float angDamp = physicsEntity.AngularDamping + physicsEntity.AngularDampingBoost;
+                    float linearDampingDt = MathF.Pow(1 - linDamp, delta);
+                    float angularDampingDt = MathF.Pow(1 - angDamp, delta);
                     velLinear *= linearDampingDt;
                     velAngular *= angularDampingDt;
                     Vector3Wide.WriteSlot(velLinear, i, ref velocity.Linear);
                     Vector3Wide.WriteSlot(velAngular, i, ref velocity.Angular);
+                    physicsEntity.LinearDampingBoost = 0;
+                    physicsEntity.AngularDampingBoost = 0;
                 }
             }
         }
@@ -128,7 +136,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
 
     /// <summary>Helper to get a <see cref="EntityPhysicsProperty"/> from a <see cref="CollidableReference"/>, or null.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public EntityPhysicsProperty PhysPropForCollidable(CollidableReference collidable)
+    public readonly EntityPhysicsProperty PhysPropForCollidable(CollidableReference collidable)
     {
         return collidable.Mobility == CollidableMobility.Dynamic ? Space.Internal.EntitiesByPhysicsID[collidable.BodyHandle.Value] : null;
     }
@@ -139,7 +147,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <param name="b">Reference to the second collidable in the pair.</param>
     /// <param name="speculativeMargin">Reference to the speculative margin used by the pair.</param>
     /// <returns>True if collision detection should proceed, false otherwise.</returns>
-    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
+    public readonly bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
     {
         if (a.Mobility != CollidableMobility.Dynamic && b.Mobility != CollidableMobility.Dynamic)
         {
@@ -174,7 +182,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// For compound-including pairs, if the earlier call to AllowContactGeneration returns false for owning pair, this will not be called. Note that it is possible
     /// for this function to be called twice for the same subpair if the pair has continuous collision detection enabled;
     /// the CCD sweep test that runs before the contact generation test also asks before performing child pair tests.</remarks>
-    public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
+    public readonly bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
     {
         return true;
     }
@@ -185,7 +193,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <param name="manifold">Set of contacts detected between the collidables.</param>
     /// <param name="pairMaterial">Material properties of the manifold.</param>
     /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
-    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
+    public readonly bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
     {
         EntityPhysicsProperty aEntity = PhysPropForCollidable(pair.A);
         EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
@@ -233,13 +241,13 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <param name="childIndexB">Index of the child of collidable B in the pair. If collidable B is not compound, then this is always 0.</param>
     /// <param name="manifold">Set of contacts detected between the collidables.</param>
     /// <returns>True if this manifold should be considered for constraint generation, false otherwise.</returns>
-    public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold)
+    public readonly bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold)
     {
         return true;
     }
 
     /// <summary>Releases any resources held by the callbacks. Called by the owning narrow phase when it is being disposed.</summary>
-    public void Dispose()
+    public readonly void Dispose()
     {
     }
 }

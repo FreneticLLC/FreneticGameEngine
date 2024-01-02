@@ -17,32 +17,23 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>Limits the relative motion of two entities along a linear axis.</summary>
-public class JointLinearAxisLimit : PhysicsJointBase<LinearAxisLimit>
+public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float min, float max, Location relPos1, Location relPos2, Location axis) : PhysicsJointBase<LinearAxisLimit>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointLinearAxisLimit"/>.</summary>
-    public JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float min, float max, Location relPos1, Location relPos2, Location axis) : base(e1, e2)
-    {
-        Min = min;
-        Max = max;
-        RelativePositionOne = relPos1;
-        RelativePositionTwo = relPos2;
-        Axis = axis;
-    }
 
     /// <summary>The minimum distance between the two entities.</summary>
-    public float Min;
+    public float Min = min;
 
     /// <summary>The maximum distance between the two entities.</summary>
-    public float Max;
+    public float Max = max;
 
     /// <summary>The position relative to <see cref="PhysicsJointBase.One"/>.</summary>
-    public Location RelativePositionOne;
+    public Location RelativePositionOne = relPos1;
 
     /// <summary>The position relative to <see cref="PhysicsJointBase.Two"/>.</summary>
-    public Location RelativePositionTwo;
+    public Location RelativePositionTwo = relPos2;
 
     /// <summary>The constrained axis.</summary>
-    public Location Axis;
+    public Location Axis = axis;
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override LinearAxisLimit CreateJointDescription()

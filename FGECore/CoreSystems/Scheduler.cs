@@ -314,9 +314,6 @@ public class ASyncScheduleItem : ScheduleItem
         {
             Done = true;
         }
-        if (FollowUp != null)
-        {
-            FollowUp.RunMe();
-        }
+        FollowUp?.RunMe();
     }
 }

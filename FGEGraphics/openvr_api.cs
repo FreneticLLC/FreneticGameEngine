@@ -2888,22 +2888,24 @@ public uint GetResourceFullPath(string pchResourceName,string pchResourceTypeDir
 
 public class OpenVRInterop
 {
-[DllImportAttribute("openvr_api", EntryPoint = "VR_InitInternal")]
-internal static extern uint InitInternal(ref EVRInitError peError, EVRApplicationType eApplicationType);
-[DllImportAttribute("openvr_api", EntryPoint = "VR_ShutdownInternal")]
-internal static extern void ShutdownInternal();
-[DllImportAttribute("openvr_api", EntryPoint = "VR_IsHmdPresent")]
-internal static extern bool IsHmdPresent();
-[DllImportAttribute("openvr_api", EntryPoint = "VR_IsRuntimeInstalled")]
-internal static extern bool IsRuntimeInstalled();
-[DllImportAttribute("openvr_api", EntryPoint = "VR_GetStringForHmdError")]
-internal static extern IntPtr GetStringForHmdError(EVRInitError error);
-[DllImportAttribute("openvr_api", EntryPoint = "VR_GetGenericInterface")]
-internal static extern IntPtr GetGenericInterface([In, MarshalAs(UnmanagedType.LPStr)] string pchInterfaceVersion, ref EVRInitError peError);
-[DllImportAttribute("openvr_api", EntryPoint = "VR_IsInterfaceVersionValid")]
-internal static extern bool IsInterfaceVersionValid([In, MarshalAs(UnmanagedType.LPStr)] string pchInterfaceVersion);
-[DllImportAttribute("openvr_api", EntryPoint = "VR_GetInitToken")]
-internal static extern uint GetInitToken();
+#pragma warning disable SYSLIB1054 // Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
+    [DllImportAttribute("openvr_api", EntryPoint = "VR_InitInternal")]
+	internal static extern uint InitInternal(ref EVRInitError peError, EVRApplicationType eApplicationType);
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_ShutdownInternal")]
+	internal static extern void ShutdownInternal();
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_IsHmdPresent")]
+	internal static extern bool IsHmdPresent();
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_IsRuntimeInstalled")]
+	internal static extern bool IsRuntimeInstalled();
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_GetStringForHmdError")]
+	internal static extern IntPtr GetStringForHmdError(EVRInitError error);
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_GetGenericInterface")]
+	internal static extern IntPtr GetGenericInterface([In, MarshalAs(UnmanagedType.LPStr)] string pchInterfaceVersion, ref EVRInitError peError);
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_IsInterfaceVersionValid")]
+	internal static extern bool IsInterfaceVersionValid([In, MarshalAs(UnmanagedType.LPStr)] string pchInterfaceVersion);
+	[DllImportAttribute("openvr_api", EntryPoint = "VR_GetInitToken")]
+	internal static extern uint GetInitToken();
+#pragma warning restore SYSLIB1054 // Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
 }
 
 
@@ -4405,8 +4407,7 @@ static COpenVRContext OpenVRInternal_ModuleContext
 {
 	get
 	{
-		if (_OpenVRInternal_ModuleContext == null)
-			_OpenVRInternal_ModuleContext = new COpenVRContext();
+		_OpenVRInternal_ModuleContext ??= new COpenVRContext();
 		return _OpenVRInternal_ModuleContext;
 	}
 }

@@ -121,8 +121,8 @@ public class SoundEngine : IDisposable
                 sfx.Internal = -2;
             }
         }
-        Effects = new Dictionary<string, SoundEffect>();
-        PlayingNow = new List<ActiveSound>();
+        Effects = [];
+        PlayingNow = [];
         //DeafLoop = GetSound("sfx/ringing/earring_loop");
     }
 
@@ -361,7 +361,7 @@ public class SoundEngine : IDisposable
     }
 
     /// <summary>Effect names to remove.</summary>
-    readonly List<string> ToRemove = new();
+    readonly List<string> ToRemove = [];
 
     /// <summary>Runs a full clean-up pass.</summary>
     public void CleanTick()

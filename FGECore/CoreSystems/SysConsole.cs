@@ -28,7 +28,7 @@ namespace FGECore.CoreSystems;
 /// A helper wrapper for the System Console.
 /// TODO: Make this not be purely static based!
 /// </summary>
-public class SysConsole
+public partial class SysConsole
 {
     /// <summary>Closes the <see cref="SysConsole"/>.</summary>
     public static void ShutDown()
@@ -105,7 +105,7 @@ public class SysConsole
     public static class Internal
     {
         /// <summary>All currently waiting messages.</summary>
-        public readonly static List<(string, string)> Waiting = new();
+        public readonly static List<(string, string)> Waiting = [];
 
         /// <summary>Locker for the console.</summary>
         public static LockObject ConsoleLock;
@@ -289,13 +289,14 @@ public class SysConsole
 
 #if !LINUX
     /// <summary>Internal values only applicable on Windows OS.</summary>
-    public static class Internal_Windows
+    public static partial class Internal_Windows
     {
         /// <summary>Used by <see cref="HideConsole"/> and <see cref="ShowConsole"/>.</summary>
         /// <param name="hWnd">Window handle.</param>
         /// <param name="nCmdShow"><see cref="SW_SHOW"/> or <see cref="SW_HIDE"/>.</param>
-        [DllImport("user32.dll")]
-        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         /// <summary>Enum constants for <see cref="ShowWindow(IntPtr, int)"/>.</summary>
         public const int SW_HIDE = 0, SW_SHOW = 5;

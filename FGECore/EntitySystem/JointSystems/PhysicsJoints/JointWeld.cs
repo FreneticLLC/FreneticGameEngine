@@ -17,12 +17,8 @@ using BepuPhysics;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>Constrains two bodies to be perfectly glued together.</summary>
-public class JointWeld : PhysicsJointBase<Weld>
+public class JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : PhysicsJointBase<Weld>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointWeld"/>.</summary>
-    public JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : base(e1, e2)
-    {
-    }
 
     /// <summary>The tracked offset between the entities.</summary>
     public RigidPose Offset;

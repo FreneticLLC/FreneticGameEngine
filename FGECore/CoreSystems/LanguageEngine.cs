@@ -40,10 +40,10 @@ public class LanguageEngine
     /// The default documents in English (or, in whatever language <see cref="DefaultLanguage"/> is set to).
     /// Considered the root-most document, should be the best-written document samples most likely to be updated by developers.
     /// </summary>
-    public Dictionary<string, FDSSection> EnglishDocuments = new();
+    public Dictionary<string, FDSSection> EnglishDocuments = [];
 
     /// <summary>All documents in the currently set language.</summary>
-    public Dictionary<string, FDSSection> LanguageDocuments = new();
+    public Dictionary<string, FDSSection> LanguageDocuments = [];
 
     /// <summary>The currently set language.</summary>
     public string CurrentLanguage = AUTO_DEFAULT;
@@ -149,7 +149,7 @@ public class LanguageEngine
         }
         if (defPath == BADKEY)
         {
-            return new List<string>() { "((Invalid key!))" };
+            return ["((Invalid key!))"];
         }
         return GetTextListDefault(Files, "core", BADKEY);
     }
@@ -214,7 +214,7 @@ public class LanguageEngine
         }
         if (defPath == BADKEY)
         {
-            return new List<string>() { "((Invalid key!))" };
+            return ["((Invalid key!))"];
         }
         return GetTextList(Files, "core", BADKEY);
     }

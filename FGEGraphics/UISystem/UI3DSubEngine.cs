@@ -43,7 +43,7 @@ public class UI3DSubEngine : UIElement
         };
         if (alphaBack)
         {
-            SubEngine.MainView.Config.ClearColor = new float[] { 0f, 0f, 0f, 0f };
+            SubEngine.MainView.Config.ClearColor = [0f, 0f, 0f, 0f];
         }
     }
 

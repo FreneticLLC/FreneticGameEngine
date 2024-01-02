@@ -135,7 +135,7 @@ public class GameEngine2D : GameEngineBase
     }
 
     /// <summary>All current lights.</summary>
-    public List<PointLight2D> Lights = new();
+    public List<PointLight2D> Lights = [];
 
     int c_FBO;
 
@@ -372,7 +372,7 @@ public class GameEngine2D : GameEngineBase
             GL.Uniform2(2, Adder = Lights[i].GetAdder());
             if (OneDLights)
             {
-                GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+                GL.ClearBuffer(ClearBuffer.Depth, 0, [1f]);
                 GL.Uniform4(21, new Vector4(ViewCenterInverse.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenterInverse.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
             }
             MainRenderContext.Scaler = Scaler;

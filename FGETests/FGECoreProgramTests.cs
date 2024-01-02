@@ -15,6 +15,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests;
 

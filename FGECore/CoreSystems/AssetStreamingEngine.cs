@@ -18,16 +18,18 @@ using FGECore.FileSystems;
 namespace FGECore.CoreSystems;
 
 /// <summary>A special helper class to assist with live multithreaded asset streaming.</summary>
-public class AssetStreamingEngine
+/// <param name="_files">The backing file engine.</param>
+/// <param name="_schedule">The backing scheduler.</param>
+public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
 {
     /// <summary>The dedicated file reading thread (splitting across multiple threads is unlikely to benefit anything, and may even get in the way).</summary>
     public Thread FilesThread;
 
     /// <summary>The backing file engine.</summary>
-    public FileEngine Files;
+    public FileEngine Files = _files;
 
     /// <summary>The backing scheduler.</summary>
-    public Scheduler Schedule;
+    public Scheduler Schedule = _schedule;
 
     /// <summary>
     /// All currently waiting asset streaming goals.
@@ -40,15 +42,6 @@ public class AssetStreamingEngine
     /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
     /// </summary>
     public AutoResetEvent GoalWaitingReset = new(false);
-
-    /// <summary>Construct the <see cref="AssetStreamingEngine"/>. Call <see cref="Init"/> to actually start it.</summary>
-    /// <param name="_files">The backing file engine.</param>
-    /// <param name="_schedule">The backing scheduler.</param>
-    public AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
-    {
-        Files = _files;
-        Schedule = _schedule;
-    }
 
     /// <summary>The cancel token for <see cref="FilesThread"/>.</summary>
     public CancellationTokenSource FileThreadCancelToken = new();

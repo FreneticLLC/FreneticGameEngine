@@ -27,6 +27,8 @@ public class EntityCapsuleShape : EntityShapeHelper
     public EntityCapsuleShape(float radius, float height, PhysicsSpace space) : base(space)
     {
         BepuShape = new Capsule(radius, height);
+        // A capsule is just a cylinder + two halves of a sphere
+        Volume = EntityCylinderShape.CalculateCylinderVolume(radius, height) + EntitySphereShape.CalculateSphereVolume(radius);
     }
 
     /// <summary>The index of the capsule sub-component, if registered.</summary>

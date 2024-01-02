@@ -60,12 +60,6 @@ public class SpotLight : LightObject
         MaxDistance = radius;
     }
 
-    /// <summary>Destroys the spot light.</summary>
-    public void Destroy()
-    {
-        InternalLights[0].Destroy();
-    }
-
     /// <summary>Reposition the light.</summary>
     /// <param name="pos">New position.</param>
     public override void Reposition(Location pos)

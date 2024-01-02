@@ -91,7 +91,7 @@ public struct Color4F
     /// <summary>Integer R.</summary>
     public int IR
     {
-        get
+        readonly get
         {
             return (int)(R * 255);
         }
@@ -104,7 +104,7 @@ public struct Color4F
     /// <summary>Integer G.</summary>
     public int IG
     {
-        get
+        readonly get
         {
             return (int)(G * 255);
         }
@@ -117,7 +117,7 @@ public struct Color4F
     /// <summary>Integer B.</summary>
     public int IB
     {
-        get
+        readonly get
         {
             return (int)(B * 255);
         }
@@ -130,7 +130,7 @@ public struct Color4F
     /// <summary>Integer A.</summary>
     public int IA
     {
-        get
+        readonly get
         {
             return (int)(A * 255);
         }
@@ -143,7 +143,7 @@ public struct Color4F
     /// <summary>Gets or sets the RGB color object for this color.</summary>
     public Color3F RGB
     {
-        get
+        readonly get
         {
             return new Color3F(R, G, B);
         }
@@ -157,14 +157,14 @@ public struct Color4F
 
     /// <summary>Returns a string form of this color.</summary>
     /// <returns>The string form.</returns>
-    public override string ToString()
+    public override readonly string ToString()
     {
         return "(" + R + ", " + G + ", " + B + ", " + A + ")";
     }
 
     /// <summary>Returns a 16-byte set representation of this color (4 x 32-bit float).</summary>
     /// <returns>The color bytes.</returns>
-    public byte[] ToBytes()
+    public readonly byte[] ToBytes()
     {
         byte[] b = new byte[16];
         ToBytes(b, 0);
@@ -177,7 +177,7 @@ public struct Color4F
     /// </summary>
     /// <param name="outputBytes">The output byte array.</param>
     /// <param name="offset">The starting offset in the output array.</param>
-    public void ToBytes(byte[] outputBytes, int offset)
+    public readonly void ToBytes(byte[] outputBytes, int offset)
     {
         PrimitiveConversionHelper.Float32ToBytes(R, outputBytes, offset);
         PrimitiveConversionHelper.Float32ToBytes(G, outputBytes, offset + 4);
@@ -273,6 +273,7 @@ public struct Color4F
             {
                 a = GetHexVal(str[6]) << 4 | GetHexVal(str[7]);
             }
+            return FromArgb(a, r, g, b);
         }
         if (str.StartsWithFast('(') && (str.EndsWithFast(')')))
         {

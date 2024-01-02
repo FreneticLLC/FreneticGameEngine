@@ -15,6 +15,7 @@ using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticExtensionsTests;
 
@@ -33,12 +34,12 @@ public class StringExtensionTests : FGETest
     [Test]
     public static void CapitalizationTests()
     {
-        Assert.AreEqual("wow", "WOW".ToLowerFast(), "ToLowerFast 'WOW' isn't right");
-        Assert.AreEqual("big long text!", "BIG long TEXT!".ToLowerFast(), "ToLowerFast 'BIG long TEXT!' isn't right");
+        ClassicAssert.AreEqual("wow", "WOW".ToLowerFast(), "ToLowerFast 'WOW' isn't right");
+        ClassicAssert.AreEqual("big long text!", "BIG long TEXT!".ToLowerFast(), "ToLowerFast 'BIG long TEXT!' isn't right");
         Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
         Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
-        Assert.AreEqual("WOW", "wow".ToUpperFast(), "ToUpperFast 'wow' isn't right");
-        Assert.AreEqual("BIG LONG TEXT!", "big long text!".ToUpperFast(), "ToUpperFast 'big long text!' isn't right");
+        ClassicAssert.AreEqual("WOW", "wow".ToUpperFast(), "ToUpperFast 'wow' isn't right");
+        ClassicAssert.AreEqual("BIG LONG TEXT!", "big long text!".ToUpperFast(), "ToUpperFast 'big long text!' isn't right");
         Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
         Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
         Assert.That("LOTS OF UPPER CHARACTERS 123!".IsAllUpperFast(), "IsAllUpperFast isn't right");
@@ -54,40 +55,40 @@ public class StringExtensionTests : FGETest
     [Test]
     public static void BeforeStringTests()
     {
-        Assert.AreEqual("One", "OneTwoThree".Before("Two"), "Before 'OneTwoThree' isn't right");
-        Assert.AreEqual("One", "OneTwoThreeTwo".Before("Two"), "Before 'OneTwoThreeTwo' isn't right");
-        Assert.AreEqual("One", "OneTwoThree".BeforeLast("Two"), "BeforeLast 'OneTwoThree' isn't right");
-        Assert.AreEqual("OneTwoThree", "OneTwoThreeTwo".BeforeLast("Two"), "BeforeLast 'OneTwoThreeTwo' isn't right");
+        ClassicAssert.AreEqual("One", "OneTwoThree".Before("Two"), "Before 'OneTwoThree' isn't right");
+        ClassicAssert.AreEqual("One", "OneTwoThreeTwo".Before("Two"), "Before 'OneTwoThreeTwo' isn't right");
+        ClassicAssert.AreEqual("One", "OneTwoThree".BeforeLast("Two"), "BeforeLast 'OneTwoThree' isn't right");
+        ClassicAssert.AreEqual("OneTwoThree", "OneTwoThreeTwo".BeforeLast("Two"), "BeforeLast 'OneTwoThreeTwo' isn't right");
     }
 
     /// <summary>Tests "Before" and "BeforeLast" character versions.</summary>
     [Test]
     public static void BeforeCharTests()
     {
-        Assert.AreEqual("One", "One2Three".Before('2'), "Before char 'One2Three' isn't right");
-        Assert.AreEqual("One", "One2Three2".Before('2'), "Before char 'One2ThreeTwo' isn't right");
-        Assert.AreEqual("One", "One2Three".BeforeLast('2'), "BeforeLast char 'One2Three' isn't right");
-        Assert.AreEqual("One2Three", "One2Three2".BeforeLast('2'), "BeforeLast char 'OneTwoThree2' isn't right");
+        ClassicAssert.AreEqual("One", "One2Three".Before('2'), "Before char 'One2Three' isn't right");
+        ClassicAssert.AreEqual("One", "One2Three2".Before('2'), "Before char 'One2ThreeTwo' isn't right");
+        ClassicAssert.AreEqual("One", "One2Three".BeforeLast('2'), "BeforeLast char 'One2Three' isn't right");
+        ClassicAssert.AreEqual("One2Three", "One2Three2".BeforeLast('2'), "BeforeLast char 'OneTwoThree2' isn't right");
     }
 
     /// <summary>Tests "After" and "AfterLast" string versions.</summary>
     [Test]
     public static void AfterStringTests()
     {
-        Assert.AreEqual("Three", "OneTwoThree".After("Two"), "After 'OneTwoThree' isn't right");
-        Assert.AreEqual("ThreeTwo", "OneTwoThreeTwo".After("Two"), "After 'OneTwoThreeTwo' isn't right");
-        Assert.AreEqual("Three", "OneTwoThree".AfterLast("Two"), "AfterLast 'OneTwoThree' isn't right");
-        Assert.AreEqual("Four", "OneTwoThreeTwoFour".AfterLast("Two"), "AfterLast 'OneTwoThreeTwoFour' isn't right");
+        ClassicAssert.AreEqual("Three", "OneTwoThree".After("Two"), "After 'OneTwoThree' isn't right");
+        ClassicAssert.AreEqual("ThreeTwo", "OneTwoThreeTwo".After("Two"), "After 'OneTwoThreeTwo' isn't right");
+        ClassicAssert.AreEqual("Three", "OneTwoThree".AfterLast("Two"), "AfterLast 'OneTwoThree' isn't right");
+        ClassicAssert.AreEqual("Four", "OneTwoThreeTwoFour".AfterLast("Two"), "AfterLast 'OneTwoThreeTwoFour' isn't right");
     }
 
     /// <summary>Tests "After" and "AfterLast" character versions.</summary>
     [Test]
     public static void AfterCharTests()
     {
-        Assert.AreEqual("Three", "One2Three".After('2'), "After char 'One2Three' isn't right");
-        Assert.AreEqual("Three2", "One2Three2".After('2'), "After char 'One2Three2' isn't right");
-        Assert.AreEqual("Three", "One2Three".AfterLast('2'), "AfterLast char 'One2Three' isn't right");
-        Assert.AreEqual("Four", "One2Three2Four".AfterLast('2'), "AfterLast char 'One2Three2Four' isn't right");
+        ClassicAssert.AreEqual("Three", "One2Three".After('2'), "After char 'One2Three' isn't right");
+        ClassicAssert.AreEqual("Three2", "One2Three2".After('2'), "After char 'One2Three2' isn't right");
+        ClassicAssert.AreEqual("Three", "One2Three".AfterLast('2'), "AfterLast char 'One2Three' isn't right");
+        ClassicAssert.AreEqual("Four", "One2Three2Four".AfterLast('2'), "AfterLast char 'One2Three2Four' isn't right");
     }
 
     /// <summary>Tests "BeforeAndAfter" and "BeforeAndAfterLast" string versions.</summary>
@@ -138,7 +139,7 @@ public class StringExtensionTests : FGETest
     [Test]
     public static void CountTest()
     {
-        Assert.AreEqual(4, "CA BC132C 23C".CountCharacter('C'), "CountCharacter broke");
+        ClassicAssert.AreEqual(4, "CA BC132C 23C".CountCharacter('C'), "CountCharacter broke");
     }
 
     /// <summary>Tests "SplitFast".</summary>

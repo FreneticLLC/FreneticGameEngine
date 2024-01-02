@@ -38,16 +38,16 @@ public struct TextVBOBuilder
     public uint VAO;
 
     /// <summary>An array of vertices, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-    public static ResizableArray<Vector4> ReusableVertexArray = new();
+    public static ResizableArray<Vector4> ReusableVertexArray = [];
 
     /// <summary>An array of texture coordinates, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-    public static ResizableArray<Vector4> ReusableTextureCoordinateArray = new();
+    public static ResizableArray<Vector4> ReusableTextureCoordinateArray = [];
 
     /// <summary>An array of color values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-    public static ResizableArray<Vector4> ReusableColorArray = new();
+    public static ResizableArray<Vector4> ReusableColorArray = [];
 
     /// <summary>An array of index values, that is reused across all <see cref="TextVBOBuilder"/> instances.</summary>
-    public static ResizableArray<uint> ReusableIndexArray = new();
+    public static ResizableArray<uint> ReusableIndexArray = [];
 
     /// <summary>Adds a quadrilateral (rectangle) to the VBO.</summary>
     /// <param name="minX">The minimum X.</param>
@@ -143,7 +143,7 @@ public struct TextVBOBuilder
     }
 
     /// <summary>Renders the internal VBO to screen.</summary>
-    public void Render(GLFontEngine engine)
+    public readonly void Render(GLFontEngine engine)
     {
         if (Length == 0)
         {

@@ -26,10 +26,12 @@ using FGECore.CoreSystems;
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 /// <summary>Contains various <see cref="GLFont"/>s needed to render fancy text.</summary>
-public class FontSet
+/// <param name="_name">The name of the set.</param>
+/// <param name="engine">The backing engine.</param>
+public class FontSet(string _name, FontSetEngine engine)
 {
     /// <summary>The backing engine.</summary>
-    public FontSetEngine Engine;
+    public FontSetEngine Engine = engine;
 
     /// <summary>Default font.</summary>
     public GLFont FontDefault;
@@ -56,16 +58,7 @@ public class FontSet
     public GLFont FontBoldItalicHalf;
 
     /// <summary>Name of the font set.</summary>
-    public string Name;
-
-    /// <summary>Prepares a font set but does not load it.</summary>
-    /// <param name="_name">The name of the set.</param>
-    /// <param name="engine">The backing engine.</param>
-    public FontSet(string _name, FontSetEngine engine)
-    {
-        Name = _name.ToLowerFast();
-        Engine = engine;
-    }
+    public string Name = _name.ToLowerFast();
 
     /// <summary>Loads the font set.</summary>
     /// <param name="fontname">The name of the font.</param>
@@ -83,7 +76,7 @@ public class FontSet
     }
 
     /// <summary>All colors used by the different font set options.</summary>
-    public static readonly Color4F[] COLORS = new Color4F[] {
+    public static readonly Color4F[] COLORS = [
         new Color4F(0, 0, 0),      // 0  // 0 // Black
         new Color4F(1, 0, 0),    // 1  // 1 // Red
         new Color4F(0, 1, 0),    // 2  // 2 // Green
@@ -106,27 +99,27 @@ public class FontSet
         Color4F.FromArgb(0, 64, 40),    // 19 // ( // DarkTorqoise
         Color4F.FromArgb(64, 64, 64),   // 20 // ) // DarkGray
         Color4F.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
-    };
+    ];
 
-    private readonly static Point[] ShadowPoints = new Point[] {
+    private readonly static Point[] ShadowPoints = [
         new Point(0, 1),
         new Point(1, 0),
         new Point(1, 1),
-    };
-    private readonly static Point[] BetterShadowPoints = new Point[] {
+    ];
+    private readonly static Point[] BetterShadowPoints = [
         new Point(0, 2),
         new Point(1, 2),
         new Point(2, 0),
         new Point(2, 1),
         new Point(2, 2),
-    };
-    private readonly static Point[] EmphasisPoints = new Point[] {
+    ];
+    private readonly static Point[] EmphasisPoints = [
         new Point(0, -1),
         new Point(0, 1),
         new Point(1, 0),
         new Point(-1, 0),
-    };
-    private readonly static Point[] BetterEmphasisPoints = new Point[] {
+    ];
+    private readonly static Point[] BetterEmphasisPoints = [
         new Point(-1, -1),
         new Point(-1, 1),
         new Point(1, -1),
@@ -135,7 +128,7 @@ public class FontSet
         new Point(0, 2),
         new Point(2, 0),
         new Point(-2, 0),
-    };
+    ];
 
     /// <summary>Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText.</summary>
     /// <param name="color">The color number.</param>
@@ -154,7 +147,7 @@ public class FontSet
     /// Key is (baseColor, text), value is renderable text.
     /// TODO: This should be auto-cleaned somehow to avoid wasting RAM.
     /// </summary>
-    public Dictionary<(string, string), RenderableText> FancyTextCache = new();
+    public Dictionary<(string, string), RenderableText> FancyTextCache = [];
 
     /// <summary>
     /// Parses fancy text from raw fancy-text input to renderable data objects.
@@ -396,7 +389,7 @@ public class FontSet
                 }
                 outLines[i] = new RenderableTextLine()
                 {
-                    Parts = parts.ToArray(),
+                    Parts = [.. parts],
                     Width = (int)Math.Ceiling(X)
                 };
                 maxWidth = Math.Max(maxWidth, outLines[i].Width);
@@ -642,7 +635,7 @@ public class FontSet
     /// <returns>The split string.</returns>
     public static List<string> CSplit(string input)
     {
-        List<string> temp = new();
+        List<string> temp = [];
         int start = 0;
         int c = 0;
         for (int i = 0; i < input.Length; i++)
@@ -674,7 +667,7 @@ public class FontSet
             return text;
         }
         StringBuilder sb = new();
-        List<string> parts = new();
+        List<string> parts = [];
         int c = 0;
         int i;
         for (i = index + "^[lang=".Length; i < text.Length; i++)
@@ -706,7 +699,7 @@ public class FontSet
         {
             return text;
         }
-        string translated = AutoTranslateFancyText(Engine.GetLanguageHelper(parts.ToArray()));
+        string translated = AutoTranslateFancyText(Engine.GetLanguageHelper([.. parts]));
         return text[..index] + translated + AutoTranslateFancyText(text[(i + 1)..]);
     }
 
@@ -789,7 +782,7 @@ public class FontSet
                             RenderableTextPart newFirstPart = part.Clone();
                             newFirstPart.Text = firstLine;
                             newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
-                            newFirstParts = newFirstParts.Append(newFirstPart).ToArray();
+                            newFirstParts = [.. newFirstParts, newFirstPart];
                         }
                         RenderableTextLine newFirstLine = new() { Parts = newFirstParts, Width = (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
                         outLines.Add(newFirstLine);
@@ -805,7 +798,7 @@ public class FontSet
                 }
             }
         }
-        return new RenderableText() { Lines = outLines.ToArray(), Width = outLines.Max(l => l.Width) };
+        return new RenderableText() { Lines = [.. outLines], Width = outLines.Max(l => l.Width) };
     }
 
     /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>

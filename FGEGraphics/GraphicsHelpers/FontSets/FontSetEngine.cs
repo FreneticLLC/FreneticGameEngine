@@ -20,15 +20,9 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 /// <summary>Handles pretty-rendered fonts.</summary>
-public class FontSetEngine
+/// <param name="fontEngine">The font engine.</param>
+public class FontSetEngine(GLFontEngine fontEngine)
 {
-    /// <summary>Constructs the font set engine without initializing it.</summary>
-    /// <param name="fontEngine">The font engine.</param>
-    public FontSetEngine(GLFontEngine fontEngine)
-    {
-        GLFonts = fontEngine;
-    }
-
     /// <summary>Shader to revert to after rendering some text.</summary>
     public Shader FixToShader;
 
@@ -36,7 +30,7 @@ public class FontSetEngine
     public MTRandom RandomHelper = new();
 
     /// <summary>The lower-level font system.</summary>
-    public GLFontEngine GLFonts;
+    public GLFontEngine GLFonts = fontEngine;
 
     /// <summary>The general font used for all normal purposes.</summary>
     public FontSet Standard;
@@ -48,7 +42,7 @@ public class FontSetEngine
     public FontSet DoubleSize;
 
     /// <summary>A list of all currently loaded font sets.</summary>
-    public Dictionary<(string, int), FontSet> Fonts = new();
+    public Dictionary<(string, int), FontSet> Fonts = [];
 
     /// <summary>Helper function to get a language data.</summary>
     public Func<string[], string> GetLanguageHelper;

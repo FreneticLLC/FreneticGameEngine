@@ -17,20 +17,14 @@ using BepuPhysics.Constraints;
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>A joint that works like a ball in a socket (like how human arms are attached to shoulders).</summary>
-public class JointBallSocket : PhysicsJointBase<BallSocket>
+public class JointBallSocket(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location pos1, Location pos2) : PhysicsJointBase<BallSocket>(e1, e2)
 {
-    /// <summary>Constructs the <see cref="JointBallSocket"/>.</summary>
-    public JointBallSocket(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location pos1, Location pos2) : base(e1, e2)
-    {
-        PositionOne = pos1;
-        PositionTwo = pos2;
-    }
 
     /// <summary>The world space position that the ball is centered on.</summary>
-    public Location PositionOne;
+    public Location PositionOne = pos1;
 
     /// <summary>The world space position that the ball is centered on.</summary>
-    public Location PositionTwo;
+    public Location PositionTwo = pos2;
 
     /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
     public override BallSocket CreateJointDescription()

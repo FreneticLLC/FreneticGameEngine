@@ -24,7 +24,7 @@ public class ModelMesh
     public string Name;
 
     /// <summary>The bones relevant to this mesh.</summary>
-    public List<ModelBone> Bones = new();
+    public List<ModelBone> Bones = [];
 
     /// <summary>Constructs the model mesh.</summary>
     /// <param name="_name">The name of it.</param>

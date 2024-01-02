@@ -63,7 +63,7 @@ public abstract class BasicEntity : PropertyHolder
     public FreneticEvent<EntityDespawnEventArgs> OnDespawnEvent;
 
     /// <summary>All joints attached to this entity.</summary>
-    public HashSet<GenericBaseJoint> Joints = new();
+    public HashSet<GenericBaseJoint> Joints = [];
 
     /// <summary>The owning engine.</summary>
     public abstract BasicEngine EngineGeneric { get; }

@@ -38,7 +38,7 @@ public class View3DConfiguration
     public Action<View3D> Render3D = null;
 
     /// <summary>All lights known to this view.</summary>
-    public List<LightObject> Lights = new();
+    public List<LightObject> Lights = [];
 
     /// <summary>Whether shadows are allowed to be rendered.</summary>
     public bool ShadowingAllowed = true;
@@ -89,7 +89,7 @@ public class View3DConfiguration
     public Location ForwardVec = Location.Zero;
 
     /// <summary>What color to clear the viewport to.</summary>
-    public float[] ClearColor = new float[] { 0.2f, 1f, 1f, 1f };
+    public float[] ClearColor = [0.2f, 1f, 1f, 1f];
 
     /// <summary>Ambient light.</summary>
     public Location Ambient;

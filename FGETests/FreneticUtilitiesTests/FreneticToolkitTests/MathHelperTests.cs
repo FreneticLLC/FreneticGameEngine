@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FGETests.FreneticUtilitiesTests.FreneticToolkitTests;
 
@@ -38,7 +39,7 @@ public class MathHelperTests : FGETest
             { 128, 128 }, { 256, 256 }, { 300, 512 }, { 800, 1024 }, { 10000, 16384 }, { 150000, 262144 }, { 9999999, 16777216 } };
         foreach (KeyValuePair<int, int> pair in testPairs)
         {
-            Assert.AreEqual(pair.Value, MathHelper.NextPowerOfTwo(pair.Key), $"NextPowerOfTwo returned wrong value for {pair.Key}");
+            ClassicAssert.AreEqual(pair.Value, MathHelper.NextPowerOfTwo(pair.Key), $"NextPowerOfTwo returned wrong value for {pair.Key}");
         }
     }
 
@@ -47,15 +48,15 @@ public class MathHelperTests : FGETest
     public static void StepTowardsTest()
     {
         const double refEpsilon = 0.00001;
-        Assert.AreEqual(1.0, MathHelper.StepTowards(0.5, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 0.5, 1.0, 0.5");
-        Assert.AreEqual(1.0, MathHelper.StepTowards(0.5, 1.0, 0.8), refEpsilon, "StepTowards gave bad value for 0.5, 1.0, 0.8");
-        Assert.AreEqual(1.0, MathHelper.StepTowards(0.8, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 0.8, 1.0, 0.5");
-        Assert.AreEqual(1.0, MathHelper.StepTowards(1.5, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.5, 1.0, 0.5");
-        Assert.AreEqual(1.0, MathHelper.StepTowards(1.5, 1.0, 0.8), refEpsilon, "StepTowards gave bad value for 1.5, 1.0, 0.8");
-        Assert.AreEqual(1.0, MathHelper.StepTowards(1.8, 1.0, 1.0), refEpsilon, "StepTowards gave bad value for 1.8, 1.0, 1.0");
-        Assert.AreEqual(2.0, MathHelper.StepTowards(1.5, 2.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.5, 2.0, 0.5");
-        Assert.AreEqual(1.5, MathHelper.StepTowards(2.0, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 2.0, 1.0, 0.5");
-        Assert.AreEqual(1.5, MathHelper.StepTowards(1.0, 2.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.0, 2.0, 0.5");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(0.5, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 0.5, 1.0, 0.5");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(0.5, 1.0, 0.8), refEpsilon, "StepTowards gave bad value for 0.5, 1.0, 0.8");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(0.8, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 0.8, 1.0, 0.5");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(1.5, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.5, 1.0, 0.5");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(1.5, 1.0, 0.8), refEpsilon, "StepTowards gave bad value for 1.5, 1.0, 0.8");
+        ClassicAssert.AreEqual(1.0, MathHelper.StepTowards(1.8, 1.0, 1.0), refEpsilon, "StepTowards gave bad value for 1.8, 1.0, 1.0");
+        ClassicAssert.AreEqual(2.0, MathHelper.StepTowards(1.5, 2.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.5, 2.0, 0.5");
+        ClassicAssert.AreEqual(1.5, MathHelper.StepTowards(2.0, 1.0, 0.5), refEpsilon, "StepTowards gave bad value for 2.0, 1.0, 0.5");
+        ClassicAssert.AreEqual(1.5, MathHelper.StepTowards(1.0, 2.0, 0.5), refEpsilon, "StepTowards gave bad value for 1.0, 2.0, 0.5");
     }
 
     /// <summary>Tests "IsCloseTo".</summary>

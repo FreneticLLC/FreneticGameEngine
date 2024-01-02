@@ -9,34 +9,27 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.MathHelpers;
 
 namespace FGECore.MathHelpers;
 
 /// <summary>Represents an Axis-Aligned Bounding Box.</summary>
-public struct AABB
+public struct AABB(Location _min, Location _max)
 {
     /// <summary>An AABB of (NaN, NaN).</summary>
     public static readonly AABB NaN = new(Location.NaN, Location.NaN);
 
-    /// <summary>Constructs an <see cref="AABB"/> with given mins/maxes.</summary>
-    public AABB(Location _min, Location _max)
-    {
-        Min = _min;
-        Max = _max;
-    }
-
     /// <summary>The minimum coordinates.</summary>
-    public Location Min;
+    public Location Min = _min;
 
     /// <summary>The maximum coordinates.</summary>
-    public Location Max;
+    public Location Max = _max;
 
     /// <summary>Returns whether the box intersects another box.</summary>
     /// <param name="box2">The second box.</param>
-    public bool Intersects(in AABB box2)
+    public readonly bool Intersects(in AABB box2)
     {
         Location min2 = box2.Min;
         Location max2 = box2.Max;
@@ -44,10 +37,7 @@ public struct AABB
     }
 
     /// <summary>Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)</summary>
-    public override string ToString()
-    {
-        return Min + "/" + Max;
-    }
+    public override readonly string ToString() => $"{Min}/{Max}";
 
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking).</summary>
     /// <param name="pos">The position to include.</param>
@@ -59,10 +49,44 @@ public struct AABB
 
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking), and returns the resultant AABB.</summary>
     /// <param name="pos">The position to include.</param>
-    public AABB Including(in Location pos)
-    {
-        return new AABB(Min.Min(pos), Max.Max(pos));
-    }
+    public readonly AABB Including(in Location pos) => new(Min.Min(pos), Max.Max(pos));
+
+    #region operators
+    /// <summary>Returns whether two AABBs are equal.</summary>
+    /// <param name="v1">The first AABB.</param>
+    /// <param name="v2">The second AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator ==(in AABB v1, in AABB v2) => v1.Min == v2.Min && v1.Max == v2.Max;
+
+    /// <summary>Returns whether two AABBs are not equal.</summary>
+    /// <param name="v1">The first AABB.</param>
+    /// <param name="v2">The second AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator !=(in AABB v1, in AABB v2) => v1.Min != v2.Min || v1.Max != v2.Max;
+
+    /// <summary>Returns an AABB offset by a Location vector.</summary>
+    /// <param name="box">The AABB.</param>
+    /// <param name="vec">The location vector.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator +(in AABB box, in Location vec) => new(box.Min + vec, box.Max + vec);
+
+    /// <summary>Negates an AABB.</summary>
+    /// <param name="v">The AABB.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator -(in AABB v) => new(-v.Min, -v.Max);
+
+    /// <summary>Returns an AABB offset backwards by Location vector.</summary>
+    /// <param name="box">The AABB.</param>
+    /// <param name="vec">The location vector.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static AABB operator -(in AABB box, in Location vec) => new(box.Min - vec, box.Max - vec);
+
+    /// <inheritdoc/>
+    public readonly override bool Equals(object obj) => obj is AABB box && box == this;
+
+    /// <inheritdoc/>
+    public readonly override int GetHashCode() => HashCode.Combine(Min, Max);
+    #endregion
 }
 
 /// <summary>Helper extensions for <see cref="AABB"/>.</summary>

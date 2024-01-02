@@ -23,23 +23,17 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.AudioSystem;
 
 /// <summary>Represents a currently playing sound effect.</summary>
-public class ActiveSound
+/// <param name="sfx">The backing sound effect.</param>
+public class ActiveSound(SoundEffect sfx)
 {
     /// <summary>The backing sound engine.</summary>
     public SoundEngine Engine;
 
     /// <summary>The represented sound effect.</summary>
-    public SoundEffect Effect;
+    public SoundEffect Effect = sfx;
 
     /// <summary>The 3D space position of the sound effect.</summary>
     public Location Position;
-
-    /// <summary>Constructs the active sound.</summary>
-    /// <param name="sfx">The backing sound effect.</param>
-    public ActiveSound(SoundEffect sfx)
-    {
-        Effect = sfx;
-    }
 
     /// <summary>Whether to loop the sound.</summary>
     public bool Loop = false;

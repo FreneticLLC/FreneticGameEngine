@@ -96,12 +96,12 @@ public class ModelEngine
         Model3DMesh m3m = new()
         {
             Name = "cube",
-            Indices = builder.Indices.ToArray(),
-            Vertices = builder.Vertices.ConvertAll((o) => o.ToLocation().ToNumerics()).ToArray(),
-            TexCoords = builder.TexCoords.ConvertAll((o) => new System.Numerics.Vector2(o.X, o.Y)).ToArray(),
-            Normals = builder.Normals.ConvertAll((o) => o.ToLocation().ToNumerics()).ToArray()
+            Indices = [.. builder.Indices],
+            Vertices = [.. builder.Vertices.ConvertAll((o) => o.ToLocation().ToNumerics())],
+            TexCoords = [.. builder.TexCoords.ConvertAll((o) => new System.Numerics.Vector2(o.X, o.Y))],
+            Normals = [.. builder.Normals.ConvertAll((o) => o.ToLocation().ToNumerics())]
         };
-        m.Original.Meshes = new Model3DMesh[] { m3m };
+        m.Original.Meshes = [m3m];
         mm.BaseRenderable.GenerateVBO(builder);
         m.AddMesh(mm);
         return m;
@@ -176,7 +176,7 @@ public class ModelEngine
         void processLoad(byte[] data)
         {
             Model3D scene = Handler.LoadModel(data);
-            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new();
+            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
             Model mod = FromSceneNoGenerate(scene, modelName, builders);
             Window.Schedule.ScheduleSyncTask(() =>
             {
@@ -225,7 +225,7 @@ public class ModelEngine
     /// <returns>The model.</returns>
     public Model FromScene(Model3D scene, string name)
     {
-        List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = new();
+        List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
         Model mod = FromSceneNoGenerate(scene, name, builders);
         foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
         {
@@ -331,7 +331,7 @@ public class ModelEngine
             model.AddMesh(modmesh);
         }
         model.RootNode = new ModelNode() { Parent = null, Name = scene.RootNode.Name.ToLowerFast() };
-        List<ModelNode> allNodes = new();
+        List<ModelNode> allNodes = [];
         PopulateChildren(model.RootNode, scene.RootNode, model, AnimEngine, allNodes);
         for (int i = 0; i < model.Meshes.Count; i++)
         {
