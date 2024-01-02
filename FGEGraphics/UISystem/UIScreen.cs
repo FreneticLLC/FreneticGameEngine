@@ -32,22 +32,10 @@ public class UIScreen : UIElement
     private readonly GameClientWindow InternalClient;
 
     /// <summary>Gets the client game engine this screen is associated with.</summary>
-    public override GameEngineBase Engine
-    {
-        get
-        {
-            return InternalClient.CurrentEngine;
-        }
-    }
+    public override GameEngineBase Engine => InternalClient.CurrentEngine;
 
     /// <summary>Gets the client game window this screen is associated with.</summary>
-    public override GameClientWindow Window
-    {
-        get
-        {
-            return InternalClient;
-        }
-    }
+    public override GameClientWindow Window => InternalClient;
 
     /// <summary>
     /// Whether to erase the screen at the beginning of each render call.

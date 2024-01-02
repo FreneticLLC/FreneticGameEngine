@@ -20,19 +20,13 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple image on a screen.</summary>
-public class UIImage : UIElement
+/// <remarks>Constructs an image.</remarks>
+/// <param name="image">The image to display.</param>
+/// <param name="pos">The position of the element.</param>
+public class UIImage(Texture image, UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The image to display.</summary>
-    public Texture Image;
-
-    /// <summary>Constructs an image.</summary>
-    /// <param name="image">The image to display.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIImage(Texture image, UIPositionHelper pos)
-        : base(pos)
-    {
-        Image = image;
-    }
+    public Texture Image = image;
 
     /// <summary>Renders the image on a screen.</summary>
     /// <param name="view">The UI view.</param>
@@ -40,14 +34,7 @@ public class UIImage : UIElement
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        if (Image != null)
-        {
-            Image.Bind();
-            int x = LastAbsolutePosition.X;
-            int y = LastAbsolutePosition.Y;
-            float width = LastAbsoluteSize.X;
-            float height = LastAbsoluteSize.Y;
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        }
+        Image.Bind();
+        view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
     }
 }

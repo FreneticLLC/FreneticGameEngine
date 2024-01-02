@@ -22,23 +22,17 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple box on the screen.</summary>
-public class UIBox : UIElement
+/// <remarks>Constructs a simple colored box.</remarks>
+/// <param name="style">The style of the element.</param>
+/// <param name="pos">The position of the element.</param>
+/// <param name="shouldRender">Whether the element should render automatically.</param>
+public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true) : UIElement(pos, shouldRender)
 {
     /// <summary>The style of the box.</summary>
-    public UIElementStyle Style;
+    public UIElementStyle Style = style;
 
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
-
-    /// <summary>Constructs a simple colored box.</summary>
-    /// <param name="style">The style of the element.</param>
-    /// <param name="pos">The position of the element.</param>
-    /// <param name="shouldRender">Whether the element should render automatically.</param>
-    public UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true)
-        : base(pos, shouldRender)
-    {
-        Style = style;
-    }
 
     /// <summary>Returns the <see cref="Style"/>.</summary>
     public override UIElementStyle GetStyle() => Style;
