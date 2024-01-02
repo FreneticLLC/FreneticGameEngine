@@ -297,7 +297,11 @@ public class PhysicsSpace
     public CollisionResult RayTraceSingle(Location start, Location direction, double distance, Func<EntityPhysicsProperty, bool> filter = null)
     {
         InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
-        Internal.CoreSimulation.RayCast(start.ToNumerics(), direction.ToNumerics(), (float)distance, ref helper);
+        Internal.CoreSimulation.RayCast((start - Offset).ToNumerics(), direction.ToNumerics(), (float)distance, ref helper);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += Offset;
+        }
         return helper.Hit;
     }
 
@@ -313,7 +317,11 @@ public class PhysicsSpace
     public CollisionResult ConvexTraceSingle<TShape>(TShape shape, Location start, Location direction, double distance, Func<EntityPhysicsProperty, bool> filter = null) where TShape : unmanaged, IConvexShape
     {
         InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
-        Internal.CoreSimulation.Sweep(shape, new RigidPose(start.ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(direction.ToNumerics(), Vector3.Zero), (float)distance, Internal.Pool, ref helper);
+        Internal.CoreSimulation.Sweep(shape, new RigidPose((start - Offset).ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(direction.ToNumerics(), Vector3.Zero), (float)distance, Internal.Pool, ref helper);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += Offset;
+        }
         return helper.Hit;
     }
 

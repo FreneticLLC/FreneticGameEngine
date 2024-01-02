@@ -509,18 +509,21 @@ public class EntityPhysicsProperty : BasicEntityProperty
         TypedIndex shape = SpawnedBody.Collidable.Shape;
         RayData ray = new() { Direction = direction.ToNumerics(), Origin = (start - PhysicsWorld.Offset).ToNumerics() };
         PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += PhysicsWorld.Offset;
+        }
         return helper.Hit;
     }
 
 
     /// <summary>Performs a convex-sweep-cast-trace against just this one entity.</summary>
     /// <param name="shape">The shape to be sweeped.</param>
-    /// <param name="shapeOffset">The offset position for the shape.</param>
     /// <param name="shapeRotation">The rotation for the shape.</param>
     /// <param name="start">The starting location.</param>
     /// <param name="direction">The direction. Should be normalized in advance.</param>
     /// <param name="distance">The maximum distance before giving up.</param>
-    public unsafe CollisionResult ConvexTrace<TShape>(EntityShapeHelper shape, Location shapeOffset, Quaternion shapeRotation, Location start, Location direction, double distance)
+    public unsafe CollisionResult ConvexTrace<TShape>(EntityShapeHelper shape, Quaternion shapeRotation, Location start, Location direction, double distance)
     {
         // TODO: This hasn't been tested at time of commit.
         if (shape.BepuShape is not IConvexShape convexInput)
@@ -557,9 +560,13 @@ public class EntityPhysicsProperty : BasicEntityProperty
             float maximumT, float minimumProgression, float convergenceThreshold, int maximumIterationCount,
             ref TSweepFilter filter, Shapes shapes, SweepTaskRegistry sweepTasks, BufferPool pool, out float t0, out float t1, out Vector3 hitLocation, out Vector3 hitNormal)*/
         task.Sweep(shapePointer, shape.ShapeIndex.Type, shapeRotation.ToNumerics(), new BodyVelocity(direction.ToNumerics()),
-            ownShapePointer, Shape.ShapeIndex.Type, SpawnedBody.Pose.Position - shapeOffset.ToNumerics(), SpawnedBody.Pose.Orientation, new BodyVelocity(),
+            ownShapePointer, Shape.ShapeIndex.Type, SpawnedBody.Pose.Position - (start - PhysicsWorld.Offset).ToNumerics(), SpawnedBody.Pose.Orientation, new BodyVelocity(),
             (float) distance, minimumProgressionT, convergenceThresholdT, maximumIterationCount,
             ref helper, simulation.Shapes, simulation.NarrowPhase.SweepTaskRegistry, simulation.BufferPool, out _, out _, out _, out _);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += PhysicsWorld.Offset;
+        }
         return helper.Hit;
     }
 
