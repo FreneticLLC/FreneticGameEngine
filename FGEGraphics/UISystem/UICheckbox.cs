@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.UISystem;
 
@@ -22,24 +23,29 @@ public class UICheckbox : UIElement
     /// <summary>The button for this checkbox.</summary>
     public UIButton Button;
 
-    /// <summary>The text to render alongside this checkbox.</summary>
-    public UIElementText Text;
+    /// <summary>The label to render alongside this checkbox.</summary>
+    public UILabel Label;
 
     /// <summary>Whether this checkbox is toggled.</summary>
     public bool Toggled = false;
 
     /// <summary>Constructs a new button-based checkbox.</summary>
     /// <param name="text">The text to display.</param>
+    /// <param name="label">The text label style.</param>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UICheckbox(string text, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : base(pos)
+    public UICheckbox(string text, UIElementStyle label, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : base(pos)
     {
-        RegisterStyle(normal, true);
         AddChild(Button = new UIButton(null, Toggle, normal, hover, click, pos.AtOrigin()));
-        // TODO: update pos w/h with text size
-        Text = CreateText(text, true, alignment: TextAlignment.LEFT); // TODO: alignment switches button pos
+        AddChild(Label = new UILabel(text, label, pos.AtOrigin().ConstantWidth(-1)));
+        Label.Position.GetterXY(() => Label.Text.GetPosition(X + Width + 10, Y + Height / 2));
+    }
+
+    /// <summary>Constructs a new checkbox using the normal button style as the label style.</summary>
+    public UICheckbox(string text, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : this(text, new(normal) { BaseColor = Color4F.Transparent }, normal, hover, click, pos)
+    {
     }
 
     /// <summary>Toggles this checkbox.</summary>
@@ -49,12 +55,6 @@ public class UICheckbox : UIElement
         Button.Text.Content = Toggled ? "X" : null;
     }
 
-    public override UIElementStyle GetStyle() => Button.StyleNormal;
-
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
-    {
-        style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width + 10, Y + Height / 2));
-    }
-
+    /// <summary>Returns <see cref="Button"/>.</summary>
     public static implicit operator UIClickableElement(UICheckbox box) => box.Button;
 }

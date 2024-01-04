@@ -98,6 +98,7 @@ public class UIElementText
             RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
             if (Internal.MaxWidth > 0)
             {
+                // TODO: this does not work
                 text = FontSet.SplitAppropriately(text, Internal.MaxWidth);
             }
             Internal.RenderableContent[style] = text;
