@@ -94,6 +94,7 @@ public abstract class UIClickableElement : UIElement
 
     /// <summary>Represents a clickable UI element with distinct normal, hovering, and clicking styles.</summary>
     // TODO: Style for when enabled is false?
+    // TODO: StyleGroup (or why haven't I done this yet?)
     public abstract class Styled : UIClickableElement
     {
         /// <summary>The render style to use when the element is not being interacted with.</summary>

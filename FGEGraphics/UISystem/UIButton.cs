@@ -34,11 +34,11 @@ public class UIButton : UIClickableElement.Styled
     public UIElementText Text;
 
     /// <summary>Constructs a new style-based button.</summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>
-    /// <param name="text">The text to display.</param>
-    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
     public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
         : base(normal, hover, click, pos, false, clicked)

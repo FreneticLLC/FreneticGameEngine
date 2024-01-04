@@ -90,7 +90,7 @@ public abstract class UIElement
     /// <param name="priority">Whether the child element has render priority over this element.</param>
     public void AddChild(UIElement child, bool priority = true)
     {
-        if (child.Parent != null)
+        if (child.Parent is not null)
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
@@ -101,11 +101,7 @@ public abstract class UIElement
                 ElementInternal.ToAdd.Add(child);
             }
         }
-        else if (ElementInternal.ToRemove.Contains(child))
-        {
-            ElementInternal.ToRemove.Remove(child);
-        }
-        else
+        else if (!ElementInternal.ToRemove.Remove(child))
         {
             throw new Exception("Tried to add a child that already belongs to this element!");
         }
@@ -126,11 +122,7 @@ public abstract class UIElement
                 ElementInternal.ToRemove.Add(child);
             }
         }
-        else if (ElementInternal.ToAdd.Contains(child))
-        {
-            ElementInternal.ToAdd.Remove(child);
-        }
-        else
+        else if (!ElementInternal.ToAdd.Remove(child))
         {
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
@@ -214,10 +206,10 @@ public abstract class UIElement
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public ElementInternalData ElementInternal = new()
     {
-        ToAdd = new List<UIElement>(),
-        ToRemove = new List<UIElement>(),
-        Children = new List<UIElement>(),
-        Styles = new List<UIElementStyle>()
+        ToAdd = [],
+        ToRemove = [],
+        Children = [],
+        Styles = []
     };
 
     /// <summary>Adds and removes any queued children.</summary>
@@ -269,15 +261,14 @@ public abstract class UIElement
     }
 
     /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
-    /// <param name="text">The initial text content.</param>
-    /// <param name="required">Whether text content should be present even if null.</param>
-    /// <param name="width">The custom maximum width, if any.</param>
+    /// <param name="content">The initial text content.</param>
+    /// <param name="required">Whether the text is required to display, even if empty.</param>
+    /// <param name="maxWidth">The maximum total width, if any.</param>
     /// <param name="alignment">The text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText CreateText(string text, bool required = false, int width = -1, TextAlignment alignment = TextAlignment.LEFT)
+    public UIElementText CreateText(string content, bool required = false, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
-        string content = text ?? (required ? "null" : null);
-        return new(this, content, width, alignment);
+        return new(this, content, required, maxWidth, alignment);
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>

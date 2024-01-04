@@ -44,10 +44,7 @@ public class UILabel : UIElement
     }
 
     /// <summary>Returns this label's style.</summary>
-    public override UIElementStyle GetStyle()
-    {
-        return Style;
-    }
+    public override UIElementStyle GetStyle() => Style;
 
     /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="Style"/>.</summary>
     public override void SwitchToStyle(UIElementStyle style)
