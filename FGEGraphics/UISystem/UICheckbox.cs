@@ -16,23 +16,45 @@ using FGEGraphics.UISystem;
 
 namespace FGEGraphics.UISystem;
 
-public class UICheckbox : UIClickableElement
+/// <summary>Represents a toggleable button on the screen.</summary>
+public class UICheckbox : UIElement
 {
-    public bool Checked = false;
+    /// <summary>The button for this checkbox.</summary>
+    public UIButton Button;
 
-    public UICheckbox(UIPositionHelper pos) : base(pos)
+    /// <summary>The text to render alongside this checkbox.</summary>
+    public UIElementText Text;
+
+    /// <summary>Whether this checkbox is toggled.</summary>
+    public bool Toggled = false;
+
+    /// <summary>Constructs a new button-based checkbox.</summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
+    /// <param name="hover">The style to display when hovered.</param>
+    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UICheckbox(string text, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : base(pos)
     {
-        Clicked += (_, _) => Checked = !Checked;
+        RegisterStyle(normal, true);
+        AddChild(Button = new UIButton(null, Toggle, normal, hover, click, pos.AtOrigin()));
+        // TODO: update pos w/h with text size
+        Text = CreateText(text, true, alignment: TextAlignment.LEFT); // TODO: alignment switches button pos
     }
+
+    /// <summary>Toggles this checkbox.</summary>
+    public void Toggle()
+    {
+        Toggled = !Toggled;
+        Button.Text.Content = Toggled ? "X" : null;
+    }
+
+    public override UIElementStyle GetStyle() => Button.StyleNormal;
 
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Engine.Textures.White.Bind();
-        view.Rendering.RenderRectangle(view.UIContext, X, Y, Width, Height);
-        if (Checked)
-        {
-            Engine.Textures.Black.Bind();
-            view.Rendering.RenderRectangle(view.UIContext, X + 10, Y + 10, Width - 10, Height - 10);
-        }
+        style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width + 10, Y + Height / 2));
     }
+
+    public static implicit operator UIClickableElement(UICheckbox box) => box.Button;
 }
