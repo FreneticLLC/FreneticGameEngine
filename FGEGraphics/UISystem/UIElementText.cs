@@ -20,6 +20,8 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 public class UIElementText
 {
+    /// <summary>The state to display when a required text value is empty.</summary>
+    public const string Null = "null";
 
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public struct InternalData
@@ -43,34 +45,42 @@ public class UIElementText
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
     public bool Empty { get; private set; }
 
+    /// <summary>Whether the text is required to display some content.</summary>
+    public bool Required;
+
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public InternalData Internal;
 
     /// <summary>
     /// Creates and returns a <see cref="UIElementText"/> instance.
-    /// Generally, prefer calling <see cref="UIElement.CreateText(string, int, TextAlignment)"/> instead.
+    /// Generally, prefer calling <see cref="UIElement.CreateText(string, bool, int, TextAlignment)"/> instead.
     /// </summary>
     /// <param name="parent">The parent UI element.</param>
     /// <param name="content">The initial text content.</param>
+    /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
     /// <param name="alignment">The text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
+    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
     {
+        content ??= (required ? Null : null);
         if (content is null)
         {
             Empty = true;
-            return;
         }
         Internal = new InternalData()
         {
             ParentElement = parent,
             Content = content,
-            MaxWidth = maxWidth,
-            RenderableContent = new Dictionary<UIElementStyle, RenderableText>()
+            MaxWidth = maxWidth
         };
+        Required = required;
         Alignment = alignment;
-        RefreshRenderables();
+        if (!Empty)
+        {
+            Internal.RenderableContent = [];
+            RefreshRenderables();
+        }
     }
 
     // TODO: everything breaks if a style is registered after an element text is created
@@ -100,11 +110,28 @@ public class UIElementText
         get => Internal.Content;
         set
         {
-            Internal.Content = value;
-            RefreshRenderables();
+            Internal.Content = value ?? (Required ? Null : null);
+            if (value is null)
+            {
+                if (!Empty)
+                {
+                    Empty = true;
+                    Internal.RenderableContent = null;
+                }
+            }
+            else
+            {
+                if (Empty)
+                {
+                    Empty = false;
+                    Internal.RenderableContent = [];
+                }
+                RefreshRenderables();
+            }
         }
     }
 
+    // TODO: check for 0 or negative?
     /// <summary>Gets or sets the maximum total width of the text.</summary>
     public int MaxWidth
     {
@@ -120,13 +147,13 @@ public class UIElementText
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
     /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
     /// </summary>
-    public RenderableText Renderable => Internal.RenderableContent[Internal.ParentElement.ElementInternal.CurrentStyle];
+    public RenderableText Renderable => Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, null);
 
     /// <summary>The total width of the text.</summary>
-    public int Width => Renderable.Width;
+    public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable.Lines.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont.FontDefault.Height;
+    public int Height => Renderable?.Lines.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont.FontDefault.Height ?? 0;
 
     /// <summary>Returns the render position of the text given a starting position.</summary>
     /// <param name="startX">The left-oriented anchor X value.</param>
