@@ -21,6 +21,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Trees;
 using BepuUtilities;
 using BepuUtilities.Memory;
+using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.PhysicsSystem;
 
@@ -162,6 +163,9 @@ public class PhysicsSpace
     /// <para>Note that physics delta might not always match game delta.</para>
     /// <para>Warning: runs on physics multi-thread. If you need main-thread, collect data and in-event and then defer handling through the Scheduler.</para></summary>
     public Action<EntityPhysicsProperty, double> PhysicsUpdate;
+
+    /// <summary>Event called when entities are colliding.</summary>
+    public Action<CollisionEvent> CollisionHandler;
 
     /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
     public void Recenter(Location newCenter)
