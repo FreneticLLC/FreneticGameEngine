@@ -516,16 +516,14 @@ public class EntityPhysicsProperty : BasicEntityProperty
         return helper.Hit;
     }
 
-
     /// <summary>Performs a convex-sweep-cast-trace against just this one entity.</summary>
     /// <param name="shape">The shape to be sweeped.</param>
     /// <param name="shapeRotation">The rotation for the shape.</param>
     /// <param name="start">The starting location.</param>
     /// <param name="direction">The direction. Should be normalized in advance.</param>
     /// <param name="distance">The maximum distance before giving up.</param>
-    public unsafe CollisionResult ConvexTrace<TShape>(EntityShapeHelper shape, Quaternion shapeRotation, Location start, Location direction, double distance)
+    public unsafe CollisionResult ConvexTrace(EntityShapeHelper shape, Quaternion shapeRotation, Location start, Location direction, double distance)
     {
-        // TODO: This hasn't been tested at time of commit.
         if (shape.BepuShape is not IConvexShape convexInput)
         {
             throw new ArgumentException("Shape must be convex.");
@@ -559,13 +557,15 @@ public class EntityPhysicsProperty : BasicEntityProperty
             void* shapeDataB, int shapeTypeB, Vector3 offsetB, Quaternion orientationB, in BodyVelocity velocityB,
             float maximumT, float minimumProgression, float convergenceThreshold, int maximumIterationCount,
             ref TSweepFilter filter, Shapes shapes, SweepTaskRegistry sweepTasks, BufferPool pool, out float t0, out float t1, out Vector3 hitLocation, out Vector3 hitNormal)*/
-        task.Sweep(shapePointer, shape.ShapeIndex.Type, shapeRotation.ToNumerics(), new BodyVelocity(direction.ToNumerics()),
+        if (task.Sweep(shapePointer, shape.ShapeIndex.Type, shapeRotation.ToNumerics(), new BodyVelocity(direction.ToNumerics()),
             ownShapePointer, Shape.ShapeIndex.Type, SpawnedBody.Pose.Position - (start - PhysicsWorld.Offset).ToNumerics(), SpawnedBody.Pose.Orientation, new BodyVelocity(),
             (float) distance, minimumProgressionT, convergenceThresholdT, maximumIterationCount,
-            ref helper, simulation.Shapes, simulation.NarrowPhase.SweepTaskRegistry, simulation.BufferPool, out _, out _, out _, out _);
-        if (helper.Hit.Hit)
+            ref helper, simulation.Shapes, simulation.NarrowPhase.SweepTaskRegistry, simulation.BufferPool, out _, out float t1, out _, out Vector3 hitNormal))
         {
-            helper.Hit.Position += PhysicsWorld.Offset;
+            helper.Hit.Hit = true;
+            helper.Hit.Position = start + direction * t1;
+            helper.Hit.Normal = hitNormal.ToLocation();
+            helper.Hit.Time = t1;
         }
         return helper.Hit;
     }

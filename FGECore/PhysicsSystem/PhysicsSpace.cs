@@ -114,7 +114,7 @@ public class PhysicsSpace
             {
                 if (!Hit.Hit || t < Hit.Time)
                 {
-                    Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = hitLocation.ToLocation() };
+                    Hit = new CollisionResult() { Hit = true, Time = t, HitEnt = Space.GetEntityFrom(collidable), Normal = normal.ToLocation(), Position = Start + Direction * t };
                 }
             }
 
