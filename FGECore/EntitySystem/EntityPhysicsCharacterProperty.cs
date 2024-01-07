@@ -149,6 +149,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
             Entity.AddProperty(Physics);
         }
         Physics.Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric);
+        Physics.RecoveryDamping = 0;
         Physics.OnSpawn();
         Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / Physics.Mass };
         ref CharacterController controller = ref Characters.AllocateCharacter(Physics.SpawnedBody.Handle);

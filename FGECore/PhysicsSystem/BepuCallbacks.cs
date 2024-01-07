@@ -222,6 +222,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
                 // TODO: Sustained contacts might not re-call this method, ie the values here will not be kept accurate
                 float projectedVel = Math.Abs(Vector3.Dot(validOne.LinearVelocity.ToNumerics(), avgNorm));
                 pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * projectedVel);
+                pairMaterial.SpringSettings.TwiceDampingRatio = validOne.RecoveryDamping;
             }
             else
             {
@@ -236,6 +237,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
             float projectedVelB = Math.Abs(Vector3.Dot(bEntity.LinearVelocity.ToNumerics(), avgNorm));
             float bounce = aEntity.Bounciness + bEntity.Bounciness;
             pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + bounce * 4, bounce * (projectedVelA + projectedVelB));
+            pairMaterial.SpringSettings.TwiceDampingRatio = (aEntity.RecoveryDamping + bEntity.RecoveryDamping) * 0.5f;
         }
         if (aEntity?.CollisionHandler is not null || bEntity?.CollisionHandler is not null || Space.CollisionHandler is not null)
         {

@@ -175,6 +175,11 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float AngularDamping = 0.03f;
 
+    /// <summary>The entity's collision-recovery damping rate.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float RecoveryDamping = 0.5f;
+
     /// <summary>Temporary (single-physics-tick) boost to linear damping.</summary>
     public float LinearDampingBoost = 0;
 
