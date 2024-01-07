@@ -163,7 +163,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// <summary>The entity's bounciness.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public float Bounciness = 0.25f;
+    public float Bounciness = 0.1f;
 
     /// <summary>The entity's linear damping (per second) rate. Must be from 0 to 1, inclusive.</summary>
     [PropertyDebuggable]

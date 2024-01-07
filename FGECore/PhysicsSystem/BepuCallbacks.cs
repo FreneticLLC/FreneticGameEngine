@@ -123,6 +123,9 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <summary>Defines the default constraint's penetration recovery spring properties.</summary>
     public SpringSettings ContactSpringiness;
 
+    /// <summary>Minimum recovery velocity when bouncing is insufficient.</summary>
+    public float MinimumRecoveryVelocity;
+
     /// <summary>Performs any required initialization logic after the Simulation instance has been constructed.</summary>
     public void Initialize(Simulation simulation)
     {
@@ -130,6 +133,10 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
         {
             // TODO: ?
             ContactSpringiness = new SpringSettings(30, 0.5f);
+        }
+        if (MinimumRecoveryVelocity == 0)
+        {
+            MinimumRecoveryVelocity = 2;
         }
         Space.Internal.Characters.Initialize(simulation);
     }
@@ -203,12 +210,12 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
             if (validOne is not null)
             {
                 pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
-                pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 4;
+                pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * (float)validOne.LinearVelocity.Length());
             }
             else
             {
                 pairMaterial.FrictionCoefficient = 1;
-                pairMaterial.MaximumRecoveryVelocity = 2;
+                pairMaterial.MaximumRecoveryVelocity = MinimumRecoveryVelocity;
             }
         }
         else
