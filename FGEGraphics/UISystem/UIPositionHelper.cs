@@ -262,8 +262,12 @@ public class UIPositionHelper
         return this;
     }
 
-    /// <summary>Returns a copy of this position fixed at the top-left origin.</summary>
-    public UIPositionHelper AtOrigin() => new UIPositionHelper(this).Anchor(UIAnchor.TOP_LEFT).ConstantXY(0, 0);
+    /// <summary>Fixes the position at the top-left origin.</summary>
+    /// <returns>This object.</returns>
+    public UIPositionHelper SetOrigin() => Anchor(UIAnchor.TOP_LEFT).ConstantXY(0, 0);
+
+    /// <summary>Returns a copy of the position fixed at the top-left origin.</summary>
+    public UIPositionHelper AtOrigin() => new UIPositionHelper(this).SetOrigin();
 
     /// <summary>Gets the X coordinate.</summary>
     public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);

@@ -32,22 +32,10 @@ public class ViewUI2D
     public GameClientWindow Client;
 
     /// <summary>Gets the primary engine.</summary>
-    public GameEngineBase Engine
-    {
-        get
-        {
-            return Client.CurrentEngine;
-        }
-    }
+    public GameEngineBase Engine => Client.CurrentEngine;
 
     /// <summary>Gets the rendering helper for the engine.</summary>
-    public Renderer2D Rendering
-    {
-        get
-        {
-            return Client.Rendering2D;
-        }
-    }
+    public Renderer2D Rendering => Client.Rendering2D;
 
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
@@ -68,16 +56,13 @@ public class ViewUI2D
     /// </summary>
     public UIScreen InternalCurrentScreen;
 
-    /// <summary>The current main screen.</summary>
+    /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
     {
-        get
-        {
-            return InternalCurrentScreen;
-        }
+        get => InternalCurrentScreen;
         set
         {
-            if (value != InternalCurrentScreen)
+            if (value == InternalCurrentScreen)
             {
                 InternalCurrentScreen?.SwitchFrom();
                 InternalCurrentScreen = value;
