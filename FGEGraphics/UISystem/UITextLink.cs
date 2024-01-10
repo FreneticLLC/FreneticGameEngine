@@ -34,16 +34,17 @@ public class UITextLink : UIClickableElement.Styled
 
     /// <summary>Constructs an interactable text link.</summary>
     /// <param name="text">The text to display.</param>
+    /// <param name="alignment">The text alignment to use.</param>
     /// <param name="icon">The icon to display alongside the text.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
+    public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT)
         : base(normal, hover, click, pos, true, clicked)
     {
-        Text = CreateText(text, true);
+        Text = new(this, text, true, horizontalAlignment: alignment);
         Icon = icon;
         UpdateStyle();
     }

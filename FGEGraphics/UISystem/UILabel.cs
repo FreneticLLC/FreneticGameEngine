@@ -40,7 +40,7 @@ public class UILabel : UIElement
         : base(pos)
     {
         Style = RegisterStyle(style, true);
-        Text = CreateText(text, true, Position.Width);
+        Text = new(this, text, true, Position.Width);
     }
 
     /// <summary>Returns this label's style.</summary>

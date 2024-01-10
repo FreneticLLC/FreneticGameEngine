@@ -260,17 +260,6 @@ public abstract class UIElement
         return style;
     }
 
-    /// <summary>Creates and returns a <see cref="UIElementText"/> instance that automatically conforms to the current style.</summary>
-    /// <param name="content">The initial text content.</param>
-    /// <param name="required">Whether the text is required to display, even if empty.</param>
-    /// <param name="maxWidth">The maximum total width, if any.</param>
-    /// <param name="alignment">The text alignment, if any.</param>
-    /// <returns>The UI text instance.</returns>
-    public UIElementText CreateText(string content, bool required = false, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
-    {
-        return new(this, content, required, maxWidth, alignment);
-    }
-
     /// <summary>Returns the <b>current</b> element style.</summary>
     public virtual UIElementStyle GetStyle()
     {

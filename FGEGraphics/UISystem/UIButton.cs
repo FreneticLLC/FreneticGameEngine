@@ -44,7 +44,7 @@ public class UIButton : UIClickableElement.Styled
         : base(normal, hover, click, pos, false, clicked)
     {
         AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false));
-        Text = CreateText(text, alignment: TextAlignment.CENTER);
+        Text = new(this, text, horizontalAlignment: TextAlignment.CENTER, verticalAlignment: TextAlignment.CENTER);
     }
 
     /// <summary>Constructs a new button based on a standard texture set.</summary>

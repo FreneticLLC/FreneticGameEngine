@@ -39,8 +39,11 @@ public class UIElementText
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 
-    /// <summary>The alignment of the text, if any.</summary>
-    public TextAlignment Alignment;
+    /// <summary>The horizontal alignment of the text, if any.</summary>
+    public TextAlignment HorizontalAlignment;
+
+    /// <summary>The vertical alignment of the text, if any.</summary>
+    public TextAlignment VerticalAlignment;
 
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
     public bool Empty { get; private set; }
@@ -51,17 +54,15 @@ public class UIElementText
     /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
     public InternalData Internal;
 
-    /// <summary>
-    /// Creates and returns a <see cref="UIElementText"/> instance.
-    /// Generally, prefer calling <see cref="UIElement.CreateText(string, bool, int, TextAlignment)"/> instead.
-    /// </summary>
+    /// <summary>Constructs a <see cref="UIElementText"/> instance.</summary>
     /// <param name="parent">The parent UI element.</param>
     /// <param name="content">The initial text content.</param>
     /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
-    /// <param name="alignment">The text alignment, if any.</param>
+    /// <param name="horizontalAlignment">The horizontal text alignment, if any.</param>
+    /// <param name="verticalAlignment">The vertical text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, TextAlignment alignment = TextAlignment.LEFT)
+    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, TextAlignment horizontalAlignment = TextAlignment.LEFT, TextAlignment verticalAlignment = TextAlignment.TOP)
     {
         content ??= (required ? Null : null);
         if (content is null)
@@ -75,7 +76,8 @@ public class UIElementText
             MaxWidth = maxWidth
         };
         Required = required;
-        Alignment = alignment;
+        HorizontalAlignment = horizontalAlignment;
+        VerticalAlignment = verticalAlignment;
         if (!Empty)
         {
             Internal.RenderableContent = [];
@@ -161,9 +163,8 @@ public class UIElementText
     /// <param name="startY">The top-oriented anchor Y value.</param>
     public Location GetPosition(double startX, double startY)
     {
-        float sizeMul = Alignment.SizeMultiplier();
-        double x = Math.Round(startX + sizeMul * -Width);
-        double y = Math.Round(startY + sizeMul * -Height);
+        double x = Math.Round(startX + HorizontalAlignment.SizeMultiplier() * -Width);
+        double y = Math.Round(startY + VerticalAlignment.SizeMultiplier() * -Height);
         return new(x, y, 0);
     }
 
