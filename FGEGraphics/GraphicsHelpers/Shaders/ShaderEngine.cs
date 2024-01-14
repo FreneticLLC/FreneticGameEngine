@@ -400,7 +400,7 @@ public class ShaderEngine
         string str = GL.GetProgramInfoLog(Program);
         if (str.Length != 0)
         {
-            Logs.ClientInfo($"Linked shader with message: '{str}' -- FOR: '{name}' variables: {vars.JoinString(",")}");
+            Logs.ClientInfo($"Linked shader '{name}' with message: '{str}'");
         }
         GL.DeleteShader(FragmentObject);
         GL.DeleteShader(VertexObject);

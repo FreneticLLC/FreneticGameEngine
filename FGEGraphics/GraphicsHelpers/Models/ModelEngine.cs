@@ -21,6 +21,7 @@ using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
 using OpenTK;
 using OpenTK.Mathematics;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.GraphicsHelpers.Models;
 
@@ -297,10 +298,10 @@ public class ModelEngine
                 builder.Indices[i] = (uint)mesh.Indices[i];
             }
             int bc = mesh.Bones.Length;
-            if (bc > 200)
+            if (bc > View3DInternalData.MAX_BONES)
             {
                 Logs.Warning($"Mesh has {bc} bones! ({name})");
-                bc = 200;
+                bc = View3DInternalData.MAX_BONES;
             }
             int[] pos = new int[builder.Vertices.Length];
             for (int i = 0; i < bc; i++)
