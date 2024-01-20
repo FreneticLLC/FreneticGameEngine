@@ -66,4 +66,7 @@ public class UILabel : UIElement
         }
         style.TextFont.DrawFancyText(Text, Text.GetPosition(X, Y));
     }
+
+    /// <summary>Returns a string that represents the label.</summary>
+    public override string ToString() => $"UILabel(Text: {Text}, Pos: {Position}, Style: {Style})";
 }

@@ -176,4 +176,7 @@ public class UIElementText
     {
         return text.Renderable;
     }
+
+    /// <summary>Returns the text content.</summary>
+    public override string ToString() => Content;
 }
