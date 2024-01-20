@@ -30,7 +30,8 @@ public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender
 {
     /// <summary>The style of the box.</summary>
     public UIElementStyle Style = style;
-
+    
+    // TODO: put this on UIPositionHelper or something
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
 

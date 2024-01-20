@@ -88,7 +88,7 @@ public abstract class UIElement
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
     /// <param name="priority">Whether the child element has render priority over this element.</param>
-    public void AddChild(UIElement child, bool priority = true)
+    public virtual void AddChild(UIElement child, bool priority = true)
     {
         if (child.Parent is not null)
         {
@@ -403,6 +403,17 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Performs a render on this element using the current style.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public void Render(ViewUI2D view, double delta)
+    {
+        if (IsValid)
+        {
+            Render(view, delta, ElementInternal.CurrentStyle);
+        }
+    }
+
     /// <summary>Updates this element's child positions.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -427,7 +438,7 @@ public abstract class UIElement
     public void MouseLeftDown(int x, int y)
     {
         MouseLeftDown();
-        foreach (UIElement child in GetAllAt(x, y))
+        foreach (UIElement child in GetChildrenAt(x, y))
         {
             child.MouseLeftDown(x, y);
         }
@@ -439,7 +450,7 @@ public abstract class UIElement
     public void MouseLeftDownOutside(int x, int y)
     {
         MouseLeftDownOutside();
-        foreach (UIElement child in GetAllNotAt(x, y))
+        foreach (UIElement child in GetChildrenNotAt(x, y))
         {
             child.MouseLeftDownOutside(x, y);
         }
@@ -451,7 +462,7 @@ public abstract class UIElement
     public void MouseLeftUp(int x, int y)
     {
         MouseLeftUp();
-        foreach (UIElement child in GetAllAt(x, y))
+        foreach (UIElement child in GetChildrenAt(x, y))
         {
             child.MouseLeftUp(x, y);
         }
@@ -486,7 +497,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of child elements containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetAllAt(int x, int y)
+    public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
     {
         foreach (UIElement element in ElementInternal.Children)
         {
@@ -501,7 +512,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of child elements not containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetAllNotAt(int x, int y)
+    public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
     {
         foreach (UIElement element in ElementInternal.Children)
         {
