@@ -29,6 +29,10 @@ public class UITexture(Func<int> texture, UIPositionHelper pos, bool shouldRende
     /// <summary>The texture to display.</summary>
     public Func<int> Texture = texture;
 
+    /// <summary>Whether the texture is flipped vertically.</summary>
+    // TODO: Put this on UIPositionHelper
+    public bool Flip;
+
     /// <summary>Renders the texture on a screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -36,6 +40,8 @@ public class UITexture(Func<int> texture, UIPositionHelper pos, bool shouldRende
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         GL.BindTexture(TextureTarget.Texture2D, Texture());
-        view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        float ymin = Flip ? Y + Height : Y;
+        float ymax = Flip ? Y : Y + Height;
+        view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
     }
 }
