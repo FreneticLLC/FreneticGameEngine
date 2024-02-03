@@ -149,6 +149,9 @@ public class PhysicsSpace
     /// <summary>The delta value to use for all non-lagging physics updates.</summary>
     public double UpdateDelta = 1.0 / 60.0;
 
+    /// <summary>The maximum multiple of the standard update-delta that the engine can use to catch up.</summary>
+    public double MaxUpdateDeltaRatio = 6;
+
     /// <summary>Gets Position offset, used to reduce issues converting from engine double-precision space to physics single-precision space.
     /// <para>To change this value, use <see cref="Recenter(Location)"/>.</para></summary>
     public Location Offset => Internal.Offset;
@@ -251,6 +254,11 @@ public class PhysicsSpace
             while (Internal.DeltaAccumulator > updateBy * 3)
             {
                 updateBy *= 3;
+                if (updateBy > UpdateDelta * MaxUpdateDeltaRatio)
+                {
+                    updateBy = UpdateDelta * MaxUpdateDeltaRatio;
+                    break;
+                }
             }
             Internal.DeltaAccumulator -= updateBy;
             Internal.CoreSimulation.Timestep((float)updateBy, Internal.BepuThreadDispatcher);
