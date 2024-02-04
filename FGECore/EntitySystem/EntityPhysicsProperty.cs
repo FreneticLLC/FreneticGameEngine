@@ -55,7 +55,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyPriority(-1000)]
     public EntityShapeHelper Shape;
 
-    /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="Gravity"/> is invalid or irrelevant.</summary>
+    /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="CustomGravity"/> is invalid or irrelevant.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public bool GravityIsSet = false;
@@ -136,10 +136,11 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
     }
 
-    /// <summary>Gets or sets the entity's custom gravity value. Can be unset to use gravity shared gravity value.</summary>
+    /// <summary>Gets or sets the entity's custom gravity value. Can be unset (via <see cref="GravityIsSet"/> or by setting value to <see cref="Location.NaN"/>) to use <see cref="PhysicsWorld"/> shared gravity value.
+    /// <para>Unless you're trying to customize gravity, don't use this - use <see cref="ActualGravity"/>.</para></summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public Location Gravity
+    public Location CustomGravity
     {
         get
         {
@@ -148,7 +149,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         set
         {
             Internal.Gravity = value;
-            GravityIsSet = true;
+            GravityIsSet = !value.IsNaN();
         }
     }
 
@@ -459,7 +460,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
 
     /// <summary>
     /// Applies a force directly to the physics entity's body, at a specified relative origin point.
-    /// The origin is relevant to the body's centerpoint.
+    /// The origin is relative to the body's centerpoint (so eg 0,0,1 is a force 1 unit above the entity that will cause it to spin).
     /// The further you get from the centerpoint, the more spin and less linear motion will be applied.
     /// Note: this is a force, not a velocity. Mass is relevant.
     /// This will activate the entity.
