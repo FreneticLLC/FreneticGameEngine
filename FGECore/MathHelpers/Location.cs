@@ -464,6 +464,12 @@ public struct Location : IEquatable<Location>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator +(in Location v1, in Location v2) => new(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
 
+    /// <summary>Adds coordinates to a location.</summary>
+    /// <param name="v1">The location.</param>
+    /// <param name="v2">The coordinate set.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Location operator +(in Location v1, in (double, double, double) v2) => new(v1.X + v2.Item1, v1.Y + v2.Item2, v1.Z + v2.Item3);
+
     /// <summary>Negates a location.</summary>
     /// <param name="v">The location.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -474,6 +480,12 @@ public struct Location : IEquatable<Location>
     /// <param name="v2">The second location.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location operator -(in Location v1, in Location v2) => new(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z);
+
+    /// <summary>Subtracts coordinates from a location.</summary>
+    /// <param name="v1">The location.</param>
+    /// <param name="v2">The coordinate set.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Location operator -(in Location v1, in (double, double, double) v2) => new(v1.X - v2.Item1, v1.Y - v2.Item2, v1.Z - v2.Item3);
 
     /// <summary>Multiplies two locations.</summary>
     /// <param name="v1">The first location.</param>
