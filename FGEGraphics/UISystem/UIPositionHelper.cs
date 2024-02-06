@@ -267,13 +267,13 @@ public class UIPositionHelper
     public UIPositionHelper SetOrigin() => Anchor(UIAnchor.TOP_LEFT).ConstantXY(0, 0);
 
     /// <summary>Returns a copy of the position fixed at the top-left origin.</summary>
-    public UIPositionHelper AtOrigin() => new UIPositionHelper(this).Anchor(UIAnchor.TOP_LEFT).ConstantXY(0, 0);
+    public UIPositionHelper AtOrigin() => new UIPositionHelper(this).SetOrigin();
 
     /// <summary>Gets the X coordinate.</summary>
-    public int X => Internal.X.Get() + (For is not null && For.Parent is not null ? MainAnchor.GetX(For) : 0);
+    public int X => Internal.X.Get() + (For.Parent != null ? MainAnchor.GetX(For) : 0);
 
     /// <summary>Gets the Y coordinate.</summary>
-    public int Y => Internal.Y.Get() + (For is not null && For.Parent is not null ? MainAnchor.GetY(For) : 0);
+    public int Y => Internal.Y.Get() + (For.Parent != null ? MainAnchor.GetY(For) : 0);
 
     /// <summary>Gets the width.</summary>
     public int Width => Internal.Width.Get();
