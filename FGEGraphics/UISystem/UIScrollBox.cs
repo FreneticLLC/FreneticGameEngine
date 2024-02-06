@@ -55,7 +55,7 @@ public class UIScrollBox : UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of visible child elements containing the position.</returns>
-    public override List<UIElement> GetAllAt(int x, int y)
+    public override List<UIElement> GetChildrenAt(int x, int y)
     {
         List<UIElement> found = new();
         if (SelfContains(x, y))
