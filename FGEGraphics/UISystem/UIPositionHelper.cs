@@ -58,29 +58,19 @@ public class UIPositionHelper
     /// <summary>Internal data for <see cref="UIPositionHelper"/>. Generally, do not access this directly.</summary>
     public struct InternalData
     {
-        /// <summary>
-        /// Helper to represent the data for a single coordinate, dynamically as a constant or getter.
-        /// </summary>
+        /// <summary>Helper to represent the data for a single coordinate, dynamically as a constant or getter.</summary>
         public struct Coordinate<T> where T : unmanaged
         {
-            /// <summary>
-            /// What mode this coordinate uses (eg constant or getter).
-            /// </summary>
+            /// <summary>What mode this coordinate uses (eg constant or getter).</summary>
             public UIPosMode Mode;
 
-            /// <summary>
-            /// Constant value, if <see cref="Mode"/> is set to <see cref="UIPosMode.CONSTANT"/>.
-            /// </summary>
+            /// <summary>Constant value, if <see cref="Mode"/> is set to <see cref="UIPosMode.CONSTANT"/>.</summary>
             public T ConstVal;
 
-            /// <summary>
-            /// Getter value, if <see cref="Mode"/> is set to <see cref="UIPosMode.GETTER"/>.
-            /// </summary>
+            /// <summary>Getter value, if <see cref="Mode"/> is set to <see cref="UIPosMode.GETTER"/>.</summary>
             public Func<T> GetterVal;
 
-            /// <summary>
-            /// Gets the current value for this coordinate.
-            /// </summary>
+            /// <summary>Gets the current value for this coordinate.</summary>
             public T Get()
             {
                 if (Mode == UIPosMode.CONSTANT)
@@ -95,14 +85,10 @@ public class UIPositionHelper
             }
         }
 
-        /// <summary>
-        /// Internal coordinate data. Generally, do not use.
-        /// </summary>
+        /// <summary>Internal coordinate data. Generally, do not use.</summary>
         public Coordinate<int> X, Y, Width, Height;
 
-        /// <summary>
-        /// Internal coordinate data. Generally, do not use.
-        /// </summary>
+        /// <summary>Internal coordinate data. Generally, do not use.</summary>
         public Coordinate<float> Rotation;
     }
 
@@ -110,7 +96,6 @@ public class UIPositionHelper
     public InternalData Internal;
 
     /// <summary>Sets an anchor.</summary>
-    /// <param name="anchor">The anchor.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper Anchor(UIAnchor anchor)
     {
@@ -119,7 +104,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant X value.</summary>
-    /// <param name="x">The X value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantX(int x)
     {
@@ -128,7 +112,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant Y value.</summary>
-    /// <param name="y">The Y value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantY(int y)
     {
@@ -137,8 +120,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant X and Y value.</summary>
-    /// <param name="x">The X value.</param>
-    /// <param name="y">The Y value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantXY(int x, int y)
     {
@@ -148,12 +129,10 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant X and Y value using a <see cref="Location"/>.</summary>
-    /// <param name="location">The location.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantXY(Location location) => ConstantXY((int) location.X, (int) location.Y);
 
     /// <summary>Sets a constant Width value.</summary>
-    /// <param name="width">The Width value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantWidth(int width)
     {
@@ -162,7 +141,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant Height value.</summary>
-    /// <param name="height">The Height value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantHeight(int height)
     {
@@ -171,8 +149,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant Width and Height value.</summary>
-    /// <param name="width">The Width value.</param>
-    /// <param name="height">The Height value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantWidthHeight(int width, int height)
     {
@@ -182,7 +158,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant Rotation value.</summary>
-    /// <param name="rotation">The Rotation value.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantRotation(float rotation)
     {
@@ -191,7 +166,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a getter X value.</summary>
-    /// <param name="x">The X getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterX(Func<int> x)
     {
@@ -200,7 +174,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a getter Y value.</summary>
-    /// <param name="y">The Y getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterY(Func<int> y)
     {
@@ -209,8 +182,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a getter X and Y value.</summary>
-    /// <param name="x">The X getter.</param>
-    /// <param name="y">The Y getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterXY(Func<int> x, Func<int> y)
     {
@@ -220,12 +191,10 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets getter X and Y values using a <see cref="Location"/>.</summary>
-    /// <param name="location">The location getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterXY(Func<Location> location) => GetterXY(() => (int) location().X, () => (int) location().Y);
 
     /// <summary>Sets a getter Width value.</summary>
-    /// <param name="width">The Width getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterWidth(Func<int> width)
     {
@@ -234,7 +203,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a getter Height value.</summary>
-    /// <param name="height">The Height getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterHeight(Func<int> height)
     {
@@ -243,8 +211,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a constant Width and Height value.</summary>
-    /// <param name="width">The Width getter.</param>
-    /// <param name="height">The Height getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterWidthHeight(Func<int> width, Func<int> height)
     {
@@ -254,7 +220,6 @@ public class UIPositionHelper
     }
 
     /// <summary>Sets a getter Rotation value.</summary>
-    /// <param name="rotation">The Rotation getter.</param>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterRotation(Func<float> rotation)
     {
@@ -291,10 +256,7 @@ public class UIPositionHelper
     public Vector2i Size => new(Width, Height);
 
     /// <summary>Converts this position helper's present data to a simplified debug string.</summary>
-    public override string ToString()
-    {
-        return $"UIPositionHelper:PresentState(XY: {X}, {Y} / WH: {Width}, {Height} / Rot: {Rotation})";
-    }
+    public override string ToString() => $"UIPositionHelper:PresentState(XY: {X}, {Y} / WH: {Width}, {Height} / Rot: {Rotation})";
 }
 
 /// <summary>Modes for the <see cref="UIPositionHelper"/>.</summary>
