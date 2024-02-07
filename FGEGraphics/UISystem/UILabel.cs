@@ -61,6 +61,6 @@ public class UILabel : UIElement
             view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
             Renderer2D.SetColor(Color4F.White);
         }
-        style.TextFont.DrawFancyText(Text, Text.GetPosition(X, Y));
+        style.TextFont.DrawFancyText(Text.Renderable, Text.GetPosition(X, Y));
     }
 }

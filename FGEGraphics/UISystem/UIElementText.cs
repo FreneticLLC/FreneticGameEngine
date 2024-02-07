@@ -151,7 +151,7 @@ public class UIElementText
 
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
-    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
+    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first!
     /// </summary>
     public RenderableText Renderable => Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, null);
 
@@ -169,14 +169,5 @@ public class UIElementText
         double x = Math.Round(startX + HorizontalAlignment.SizeMultiplier() * -Width);
         double y = Math.Round(startY + VerticalAlignment.SizeMultiplier() * -Height);
         return new(x, y, 0);
-    }
-
-    /// <summary>
-    /// Returns <see cref="Renderable"/>.
-    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
-    /// </summary>
-    public static implicit operator RenderableText(UIElementText text)
-    {
-        return text.Renderable;
     }
 }
