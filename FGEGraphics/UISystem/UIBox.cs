@@ -46,24 +46,21 @@ public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender
         if (any)
         {
             Engine.Textures.White.Bind();
-        }
-        if (style.DropShadowLength > 0)
-        {
-            Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
-        }
-        if (style.BorderColor.A > 0 && style.BorderThickness > 0)
-        {
-            Renderer2D.SetColor(style.BorderColor);
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, rotation);
-        }
-        if (style.BaseColor.A > 0)
-        {
-            Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
-        }
-        if (any)
-        {
+            if (style.DropShadowLength > 0)
+            {
+                Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
+                view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
+            }
+            if (style.BorderColor.A > 0 && style.BorderThickness > 0)
+            {
+                Renderer2D.SetColor(style.BorderColor);
+                view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, rotation);
+            }
+            if (style.BaseColor.A > 0)
+            {
+                Renderer2D.SetColor(style.BaseColor);
+                view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
+            }
             Renderer2D.SetColor(Color4F.White);
         }
         if (style.BaseTexture is not null)
