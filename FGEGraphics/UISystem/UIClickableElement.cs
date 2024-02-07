@@ -20,10 +20,10 @@ public abstract class UIClickableElement : UIElement
     public bool Pressed = false;
 
     /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
-    public struct InternalData
+    public struct InternalData()
     {
         /// <summary>Whether this element can be interacted with.</summary>
-        public bool Enabled;
+        public bool Enabled = true;
     }
 
     /// <summary>Gets or sets whether this element can be interacted with.</summary>
@@ -42,7 +42,7 @@ public abstract class UIClickableElement : UIElement
     }
 
     /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
-    public InternalData Internal;
+    public InternalData Internal = new();
 
     /// <summary>Constructs the clickable element.</summary>
     /// <param name="pos">The position of the element.</param>
