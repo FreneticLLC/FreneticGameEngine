@@ -62,7 +62,7 @@ public class UITextLink : UIClickableElement.Styled
         Location textLocation = Text.GetPosition(X, Y);
         if (Icon is null)
         {
-            style.TextFont.DrawFancyText(Text.Renderable, textLocation);
+            style.TextFont.DrawFancyText(Text, textLocation);
             return;
         }
         int fontHeight = style.TextFont.FontDefault.Height;
@@ -70,7 +70,7 @@ public class UITextLink : UIClickableElement.Styled
         Icon.Bind();
         Renderer2D.SetColor(style.BaseColor);
         view.Rendering.RenderRectangle(view.UIContext, X, Y, textLocation.XF, textLocation.YF, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        style.TextFont.DrawFancyText(Text.Renderable, textLocation);
+        style.TextFont.DrawFancyText(Text, textLocation);
         Renderer2D.SetColor(Color4F.White);
     }
 }

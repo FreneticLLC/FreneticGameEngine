@@ -71,7 +71,7 @@ public class UIButton : UIClickableElement.Styled
         Box.Render(view, delta, style);
         if (style.CanRenderText(Text))
         {
-            style.TextFont.DrawFancyText(Text.Renderable, Text.GetPosition(X + Width / 2, Y + Height / 2));
+            style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));
         }
     }
 }
