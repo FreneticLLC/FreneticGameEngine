@@ -22,28 +22,19 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 /// <summary>
 /// Represents a container of elements supporting <see cref="UIClickableElement"/>s that lead to <see cref="UIScreen"/>s,
 /// automatically handling the <see cref="UIClickableElement.Enabled"/> state.
+/// <param name="pos">The position of the element.</param>
+/// <param name="onSwitch">Ran when the tab is switched.</param>
 /// </summary>
-public class UITabGroup : UIGroup
+public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
 {
     /// <summary>Ran when the tab is switched.</summary>
-    public event Action<TabSwitchedArgs> TabSwitched;
+    public event Action<TabSwitchedArgs> TabSwitched = onSwitch;
 
     /// <summary>The button leading to the currently selected tab.</summary>
     public UIClickableElement SelectedButton;
 
     /// <summary>The currently selected tab.</summary>
     public UIScreen SelectedTab;
-
-    /// <summary>Constructs a new tab group.</summary>
-    /// <param name="pos">The position of the element.</param>
-    /// <param name="onSwitch">Ran when the tab is switched.</param>
-    public UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : base(pos)
-    {
-        if (onSwitch is not null)
-        {
-            TabSwitched += onSwitch;
-        }
-    }
 
     /// <summary>Adds a button and a screen as a tab to the group.</summary>
     /// <param name="button">The button linked to the screen.</param>
