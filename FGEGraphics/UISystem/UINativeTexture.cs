@@ -24,7 +24,7 @@ namespace FGEGraphics.UISystem;
 /// <param name="texture">The texture to display.</param>
 /// <param name="pos">The position of the element.</param>
 /// <param name="shouldRender">Whether the element should render automatically.</param>
-public class UITexture(Func<int> texture, UIPositionHelper pos, bool shouldRender = true) : UIElement(pos, shouldRender)
+public class UINativeTexture(Func<int> texture, UIPositionHelper pos, bool shouldRender = true) : UIElement(pos, shouldRender)
 {
     /// <summary>The texture to display.</summary>
     public Func<int> Texture = texture;

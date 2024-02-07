@@ -151,9 +151,9 @@ public class UIElementText
 
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
-    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
+    /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
-    public RenderableText Renderable => Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, null);
+    public RenderableText Renderable => Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty);
 
     /// <summary>The total width of the text.</summary>
     public int Width => Renderable?.Width ?? 0;
@@ -171,12 +171,6 @@ public class UIElementText
         return new(x, y, 0);
     }
 
-    /// <summary>
-    /// Returns <see cref="Renderable"/>.
-    /// Check <see cref="UIElementStyle.CanRenderText(UIElementText)"/> first.
-    /// </summary>
-    public static implicit operator RenderableText(UIElementText text)
-    {
-        return text.Renderable;
-    }
+    /// <summary>Returns <see cref="Renderable"/>.</summary>
+    public static implicit operator RenderableText(UIElementText text) => text.Renderable;
 }

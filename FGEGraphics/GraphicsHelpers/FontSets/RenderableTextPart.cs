@@ -163,6 +163,9 @@ public class RenderableTextLine
 /// <summary>Represents a section of renderable text.</summary>
 public class RenderableText
 {
+    /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
+    public static readonly RenderableText Empty = new();
+
     /// <summary>An array of all lines of text.</summary>
     public RenderableTextLine[] Lines;
 
