@@ -36,6 +36,7 @@ public class UILabel : UIElement
     /// <param name="text">The text to display on the label.</param>
     /// <param name="style">The style of the label.</param>
     /// <param name="pos">The position of the element.</param>
+    /// <param name="shouldRender">Whether the element should render automatically.</param>
     public UILabel(string text, UIElementStyle style, UIPositionHelper pos, bool shouldRender = true)
         : base(pos, shouldRender)
     {
@@ -44,10 +45,7 @@ public class UILabel : UIElement
     }
 
     /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="Style"/>.</summary>
-    public override void SwitchToStyle(UIElementStyle style)
-    {
-        Position.ConstantWidthHeight(Text.Renderable.Width, Text.Renderable.Lines.Length * style.TextFont.FontDefault.Height);
-    }
+    public override void SwitchToStyle(UIElementStyle style) => Position.ConstantWidthHeight(Text.Renderable.Width, Text.Renderable.Lines.Length * style.TextFont.FontDefault.Height);
 
     /// <summary>Renders this label on the screen.</summary>
     /// <param name="view">The UI view.</param>

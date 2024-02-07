@@ -30,6 +30,7 @@ public class UITextLink : UIClickableElement.Styled
     public UIElementText Text;
 
     /// <summary>The icon to display alongside this link.</summary>
+    // TODO: UIImage
     public Texture Icon;
 
     /// <summary>Constructs an interactable text link.</summary>
@@ -50,10 +51,7 @@ public class UITextLink : UIClickableElement.Styled
     }
 
     /// <summary>Fixes this text link's width and height based on <see cref="Text"/> and the current style.</summary>
-    public override void SwitchToStyle(UIElementStyle style)
-    {
-        Position.ConstantWidthHeight(Text.Width, Text.Height);
-    }
+    public override void SwitchToStyle(UIElementStyle style) => Position.ConstantWidthHeight(Text.Width, Text.Height);
 
     /// <summary>Performs a render on this link.</summary>
     /// <param name="view">The UI view.</param>

@@ -55,7 +55,7 @@ public abstract class UIClickableElement : UIElement
         }
     }
 
-    /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
+    /// <inheritdoc/>
     public override void MouseEnter()
     {
         if (Enabled)
@@ -64,7 +64,7 @@ public abstract class UIClickableElement : UIElement
         }
     }
 
-    /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
+    /// <inheritdoc/>
     public override void MouseLeave()
     {
         if (Enabled)
@@ -74,7 +74,7 @@ public abstract class UIClickableElement : UIElement
         }
     }
 
-    /// <summary>Ran when the left mouse button is pressed down within the boundaries of this element.</summary>
+    /// <inheritdoc/>
     public override void MouseLeftDown()
     {
         if (Enabled)
@@ -84,7 +84,7 @@ public abstract class UIClickableElement : UIElement
         }
     }
 
-    /// <summary>Ran when the left mouse button is released within the boundaries of this element.</summary>
+    /// <inheritdoc/>
     public override void MouseLeftUp()
     {
         if (!Enabled)
