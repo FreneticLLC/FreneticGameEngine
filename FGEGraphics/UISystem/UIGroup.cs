@@ -15,12 +15,8 @@ using System.Threading.Tasks;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple container of several UI elements.</summary>
-public class UIGroup : UIElement
+/// <remarks>Constructs a new group.</remarks>
+/// <param name="pos">The position of the element.</param>
+public class UIGroup(UIPositionHelper pos) : UIElement(pos)
 {
-    /// <summary>Constructs a new group.</summary>
-    /// <param name="pos">The position of the element.</param>
-    public UIGroup(UIPositionHelper pos)
-        : base(pos)
-    {
-    }
 }
