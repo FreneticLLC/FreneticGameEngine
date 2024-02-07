@@ -29,14 +29,11 @@ namespace FGEGraphics.UISystem;
 public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true) : UIElement(pos, shouldRender)
 {
     /// <summary>The style of the box.</summary>
-    public UIElementStyle Style = style;
+    public override UIElementStyle Style { get; } = style;
     
     // TODO: put this on UIPositionHelper or something
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
-
-    /// <summary>Returns the <see cref="Style"/>.</summary>
-    public override UIElementStyle GetStyle() => Style;
 
     /// <summary>Renders this box on the screen.</summary>
     /// <param name="view">The UI view.</param>

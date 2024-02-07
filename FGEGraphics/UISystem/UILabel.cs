@@ -30,7 +30,7 @@ public class UILabel : UIElement
     public UIElementText Text;
 
     /// <summary>The style of this label.</summary>
-    public UIElementStyle Style;
+    public override UIElementStyle Style { get; }
 
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
@@ -42,9 +42,6 @@ public class UILabel : UIElement
         Style = RegisterStyle(style, true);
         Text = new(this, text, true, Position.Width);
     }
-
-    /// <summary>Returns this label's style.</summary>
-    public override UIElementStyle GetStyle() => Style;
 
     /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="Style"/>.</summary>
     public override void SwitchToStyle(UIElementStyle style)

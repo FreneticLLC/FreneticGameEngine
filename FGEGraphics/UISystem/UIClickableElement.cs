@@ -121,17 +121,20 @@ public abstract class UIClickableElement : UIElement
         }
 
         /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
-        public override UIElementStyle GetStyle()
+        public override UIElementStyle Style
         {
-            if (Pressed)
+            get
             {
-                return StyleClick;
+                if (Pressed)
+                {
+                    return StyleClick;
+                }
+                if (Hovered)
+                {
+                    return StyleHover;
+                }
+                return StyleNormal;
             }
-            if (Hovered)
-            {
-                return StyleHover;
-            }
-            return StyleNormal;
         }
     }
 }

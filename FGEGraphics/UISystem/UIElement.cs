@@ -261,10 +261,7 @@ public abstract class UIElement
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
-    public virtual UIElementStyle GetStyle()
-    {
-        return UIElementStyle.Empty;
-    }
+    public virtual UIElementStyle Style => UIElementStyle.Empty;
 
     /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
     public virtual void SwitchFromStyle(UIElementStyle style)
@@ -384,14 +381,13 @@ public abstract class UIElement
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
     public void UpdateStyle()
     {
-        UIElementStyle newStyle = GetStyle();
-        if (newStyle != ElementInternal.CurrentStyle)
+        if (Style != ElementInternal.CurrentStyle)
         {
             if (ElementInternal.CurrentStyle is not null)
             {
                 SwitchFromStyle(ElementInternal.CurrentStyle);
             }
-            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
+            SwitchToStyle(ElementInternal.CurrentStyle = Style);
         }
     }
 
