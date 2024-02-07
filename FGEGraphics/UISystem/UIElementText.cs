@@ -32,6 +32,9 @@ public class UIElementText
         /// <summary>The raw string content of this text.</summary>
         public string Content;
 
+        /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
+        public bool Empty;
+
         /// <summary>The maximum total width of this text, if any.</summary>
         public int MaxWidth;
 
@@ -46,7 +49,7 @@ public class UIElementText
     public TextAlignment VerticalAlignment;
 
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
-    public bool Empty { get; private set; }
+    public bool Empty => Internal.Empty;
 
     /// <summary>Whether the text is required to display some content.</summary>
     public bool Required;
@@ -67,7 +70,7 @@ public class UIElementText
         content ??= (required ? Null : null);
         if (content is null)
         {
-            Empty = true;
+            Internal.Empty = true;
         }
         Internal = new InternalData()
         {
@@ -118,7 +121,7 @@ public class UIElementText
             {
                 if (!Empty)
                 {
-                    Empty = true;
+                    Internal.Empty = true;
                     Internal.RenderableContent = null;
                 }
             }
@@ -126,7 +129,7 @@ public class UIElementText
             {
                 if (Empty)
                 {
-                    Empty = false;
+                    Internal.Empty = false;
                     Internal.RenderableContent = [];
                 }
                 RefreshRenderables();
