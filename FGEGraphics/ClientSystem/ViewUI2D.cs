@@ -62,7 +62,7 @@ public class ViewUI2D
         get => InternalCurrentScreen;
         set
         {
-            if (value == InternalCurrentScreen)
+            if (value != InternalCurrentScreen)
             {
                 InternalCurrentScreen?.SwitchFrom();
                 InternalCurrentScreen = value;
