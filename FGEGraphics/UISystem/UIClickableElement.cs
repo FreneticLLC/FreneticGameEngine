@@ -8,10 +8,12 @@ using FGEGraphics.UISystem;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a clickable UI element on the screen.</summary>
-public abstract class UIClickableElement : UIElement
+/// <param name="pos">The position of the element.</param>
+/// <param name="onClick">Ran when the element is clicked.</param>
+public abstract class UIClickableElement(UIPositionHelper pos, Action onClick = null) : UIElement(pos)
 {
     /// <summary>Ran when this element is clicked.</summary>
-    public event Action Clicked;
+    public event Action Clicked = onClick;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
@@ -43,17 +45,6 @@ public abstract class UIClickableElement : UIElement
 
     /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
     public InternalData Internal = new();
-
-    /// <summary>Constructs the clickable element.</summary>
-    /// <param name="pos">The position of the element.</param>
-    /// <param name="onClick">Ran when the element is clicked.</param>
-    public UIClickableElement(UIPositionHelper pos, Action onClick = null) : base(pos)
-    {
-        if (onClick is not null)
-        {
-            Clicked += onClick;
-        }
-    }
 
     /// <inheritdoc/>
     public override void MouseEnter()
