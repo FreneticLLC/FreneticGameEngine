@@ -55,7 +55,10 @@ public class View3DInternalData
     public const int SHADOW_BITS_MAX = 17;
 
     /// <summary>Maximum lights at once.</summary>
-    public const int LIGHTS_MAX = 38;
+    public const int LIGHTS_MAX = 32;
+
+    /// <summary>Maximum bones on one entity.</summary>
+    public const int MAX_BONES = 128;
 
     /// <summary>Maximum strength of a light. Used for ortho light radius.</summary>
     public const float LIGHT_MAXIUM_RADIUS = 1E10f;

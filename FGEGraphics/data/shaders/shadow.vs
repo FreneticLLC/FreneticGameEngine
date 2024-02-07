@@ -29,7 +29,7 @@ layout (location = 7) in vec4 Weights2;
 layout (location = 8) in vec4 BoneID2;
 #endif
 
-const int MAX_BONES = 200;
+const int MAX_BONES = 128;
 
 #if MCM_GEOM_ACTIVE
 #else

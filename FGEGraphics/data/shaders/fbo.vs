@@ -48,7 +48,7 @@ out struct vox_fout
 
 #if MCM_GEOM_ACTIVE
 #else
-const int MAX_BONES = 200;
+const int MAX_BONES = 128;
 #endif
 
 vec4 color_for(in vec4 pos, in vec4 colt);

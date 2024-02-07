@@ -149,6 +149,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
             Entity.AddProperty(Physics);
         }
         Physics.Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric);
+        Physics.RecoveryDamping = 0;
         Physics.OnSpawn();
         Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / Physics.Mass };
         ref CharacterController controller = ref Characters.AllocateCharacter(Physics.SpawnedBody.Handle);
@@ -158,8 +159,8 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         controller.JumpVelocity = 6;
         controller.MaximumVerticalForce = 100 * Physics.Mass;
         controller.MaximumHorizontalForce = 80 * Physics.Mass;
-        controller.MinimumSupportDepth = BodyRadius * -0.01f;
-        controller.MinimumSupportContinuationDepth = -0.1f;
+        controller.MinimumSupportDepth = BodyRadius * -0.1f;
+        controller.MinimumSupportContinuationDepth = -0.6f;
         MaximumAerialForce = 10 * Physics.Mass;
         Entity.OnTick += Tick;
         IsSpawned = true;

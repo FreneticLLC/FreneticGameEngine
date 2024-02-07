@@ -26,7 +26,7 @@ public abstract class BasicEngine
     public MTRandom RandomHelper = new();
 
     /// <summary>The source object for this engine.</summary>
-    public Object Source => OwningInstanceGeneric.Source;
+    public object Source => OwningInstanceGeneric.Source;
 
     /// <summary>Current frame delta (seconds).</summary>
     public double Delta;

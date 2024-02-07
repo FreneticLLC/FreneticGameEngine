@@ -20,6 +20,8 @@ using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuUtilities;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 
 namespace FGECore.PhysicsSystem;
 
@@ -123,6 +125,9 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <summary>Defines the default constraint's penetration recovery spring properties.</summary>
     public SpringSettings ContactSpringiness;
 
+    /// <summary>Minimum recovery velocity when bouncing is insufficient.</summary>
+    public float MinimumRecoveryVelocity;
+
     /// <summary>Performs any required initialization logic after the Simulation instance has been constructed.</summary>
     public void Initialize(Simulation simulation)
     {
@@ -130,6 +135,10 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
         {
             // TODO: ?
             ContactSpringiness = new SpringSettings(30, 0.5f);
+        }
+        if (MinimumRecoveryVelocity == 0)
+        {
+            MinimumRecoveryVelocity = 2;
         }
         Space.Internal.Characters.Initialize(simulation);
     }
@@ -195,31 +204,49 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
     public readonly bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
     {
+        pairMaterial.SpringSettings = ContactSpringiness;
         EntityPhysicsProperty aEntity = PhysPropForCollidable(pair.A);
         EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
+        Vector3 avgNorm = Vector3.Zero;
+        for (int i = 0; i < manifold.Count; i++)
+        {
+            avgNorm += manifold.GetNormal(i);
+        }
+        avgNorm /= manifold.Count;
         if (aEntity is null || bEntity is null)
         {
             EntityPhysicsProperty validOne = aEntity ?? bEntity;
             if (validOne is not null)
             {
                 pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
-                pairMaterial.MaximumRecoveryVelocity = validOne.Bounciness * 4;
+                // TODO: Sustained contacts might not re-call this method, ie the values here will not be kept accurate
+                float projectedVel = Math.Abs(Vector3.Dot(validOne.LinearVelocity.ToNumerics(), avgNorm));
+                pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * projectedVel);
+                pairMaterial.SpringSettings.TwiceDampingRatio = validOne.RecoveryDamping;
             }
             else
             {
                 pairMaterial.FrictionCoefficient = 1;
-                pairMaterial.MaximumRecoveryVelocity = 2;
+                pairMaterial.MaximumRecoveryVelocity = MinimumRecoveryVelocity;
             }
         }
         else
         {
             pairMaterial.FrictionCoefficient = aEntity.Friction * bEntity.Friction;
-            pairMaterial.MaximumRecoveryVelocity = aEntity.Bounciness + bEntity.Bounciness;
+            float projectedVelA = Math.Abs(Vector3.Dot(aEntity.LinearVelocity.ToNumerics(), avgNorm));
+            float projectedVelB = Math.Abs(Vector3.Dot(bEntity.LinearVelocity.ToNumerics(), avgNorm));
+            float bounce = aEntity.Bounciness + bEntity.Bounciness;
+            pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + bounce * 4, bounce * (projectedVelA + projectedVelB));
+            pairMaterial.SpringSettings.TwiceDampingRatio = (aEntity.RecoveryDamping + bEntity.RecoveryDamping) * 0.5f;
         }
-        pairMaterial.SpringSettings = ContactSpringiness;
-        if (aEntity?.CollisionHandler is not null || bEntity?.CollisionHandler is not null)
+        if (aEntity?.CollisionHandler is not null || bEntity?.CollisionHandler is not null || Space.CollisionHandler is not null)
         {
             CollisionEvent evt = new CollisionEvent<TManifold>() { One = aEntity, Two = bEntity, Manifold = manifold };
+            Space.CollisionHandler?.Invoke(evt);
+            if (evt.Cancel)
+            {
+                return false;
+            }
             aEntity?.CollisionHandler?.Invoke(evt);
             bEntity?.CollisionHandler?.Invoke(evt);
             if (evt.Cancel)

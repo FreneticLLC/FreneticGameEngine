@@ -58,7 +58,7 @@ in struct vox_fout
 #endif
 } fi;
 
-const int LIGHTS_MAX = 38;
+const int LIGHTS_MAX = 32;
 
 // ...
 layout (location = 4) uniform vec4 screen_size = vec4(1024, 1024, 0.1, 1000.0);
@@ -74,7 +74,7 @@ layout (location = 15) uniform float lights_used = 0.0;
 layout (location = 16) uniform float minimum_light = 0.2;
 #if MCM_LIGHTS
 layout (location = 20) uniform mat4 shadow_matrix_array[LIGHTS_MAX];
-layout (location = 58) uniform mat4 light_data_array[LIGHTS_MAX];
+layout (location = 52) uniform mat4 light_data_array[LIGHTS_MAX];
 #endif
 
 layout (location = 0) out vec4 color;

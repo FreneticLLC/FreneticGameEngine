@@ -50,7 +50,7 @@ out struct vox_fout
 } fi;
 #endif
 
-const int MAX_BONES = 200;
+const int MAX_BONES = 128;
 
 vec4 color_for(in vec4 pos, in vec4 colt);
 float snoise2(in vec3 v);

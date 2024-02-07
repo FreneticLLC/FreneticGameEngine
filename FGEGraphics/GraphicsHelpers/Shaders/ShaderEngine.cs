@@ -199,7 +199,7 @@ public class ShaderEngine
     /// <returns>A valid Shader object.</returns>
     public Shader CreateShader(string VS, string FS, string name, string[] vars, string geom)
     {
-        int Program = CompileToProgram(VS, FS, vars, geom);
+        int Program = CompileToProgram(VS, FS, vars, geom, name);
         return new Shader()
         {
             Name = name,
@@ -336,8 +336,9 @@ public class ShaderEngine
     /// <param name="FS">The input FragmentShader code.</param>
     /// <param name="vars">All variables to include.</param>
     /// <param name="GS">The input GeometryShader code, if any.</param>
+    /// <param name="name">The name of the shader file for debugging.</param>
     /// <returns>The internal OpenGL program ID.</returns>
-    public int CompileToProgram(string VS, string FS, string[] vars, string GS)
+    public int CompileToProgram(string VS, string FS, string[] vars, string GS, string name)
     {
         GraphicsUtil.CheckError("Shader - BeforeCompile");
         if (vars.Length > 0)
@@ -367,7 +368,7 @@ public class ShaderEngine
             GL.GetShader(geomObject, ShaderParameter.CompileStatus, out int GS_Status);
             if (GS_Status != 1)
             {
-                throw new Exception($"Error creating GeometryShader. Error status: {GS_Status}, info: {GS_Info}");
+                throw new Exception($"Error creating GeometryShader '{name}'. Error status: {GS_Status}, info: {GS_Info}");
             }
         }
         int VertexObject = GL.CreateShader(ShaderType.VertexShader);
@@ -377,7 +378,7 @@ public class ShaderEngine
         GL.GetShader(VertexObject, ShaderParameter.CompileStatus, out int VS_Status);
         if (VS_Status != 1)
         {
-            throw new Exception($"Error creating VertexShader. Error status: {VS_Status}, info: {VS_Info}");
+            throw new Exception($"Error creating VertexShader '{name}'. Error status: {VS_Status}, info: {VS_Info}");
         }
         int FragmentObject = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(FragmentObject, FS);
@@ -386,7 +387,7 @@ public class ShaderEngine
         GL.GetShader(FragmentObject, ShaderParameter.CompileStatus, out int FS_Status);
         if (FS_Status != 1)
         {
-            throw new Exception($"Error creating FragmentShader. Error status: {FS_Status}, info: {FS_Info}");
+            throw new Exception($"Error creating FragmentShader '{name}'. Error status: {FS_Status}, info: {FS_Info}");
         }
         int Program = GL.CreateProgram();
         GL.AttachShader(Program, FragmentObject);
@@ -399,7 +400,7 @@ public class ShaderEngine
         string str = GL.GetProgramInfoLog(Program);
         if (str.Length != 0)
         {
-            Logs.ClientInfo($"Linked shader with message: '{str}' -- FOR: variables: {vars.JoinString(",")}");
+            Logs.ClientInfo($"Linked shader '{name}' with message: '{str}'");
         }
         GL.DeleteShader(FragmentObject);
         GL.DeleteShader(VertexObject);

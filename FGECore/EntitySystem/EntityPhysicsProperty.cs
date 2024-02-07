@@ -20,6 +20,7 @@ using BepuPhysics;
 using BepuPhysics.Collidables;
 using System.Numerics;
 using BepuPhysics.Trees;
+using BepuPhysics.CollisionDetection;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
 
@@ -54,7 +55,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyPriority(-1000)]
     public EntityShapeHelper Shape;
 
-    /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="Gravity"/> is invalid or irrelevant.</summary>
+    /// <summary>Whether gravity value is already set for this entity. If not set, <see cref="CustomGravity"/> is invalid or irrelevant.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public bool GravityIsSet = false;
@@ -135,10 +136,11 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
     }
 
-    /// <summary>Gets or sets the entity's custom gravity value. Can be unset to use gravity shared gravity value.</summary>
+    /// <summary>Gets or sets the entity's custom gravity value. Can be unset (via <see cref="GravityIsSet"/> or by setting value to <see cref="Location.NaN"/>) to use <see cref="PhysicsWorld"/> shared gravity value.
+    /// <para>Unless you're trying to customize gravity, don't use this - use <see cref="ActualGravity"/>.</para></summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public Location Gravity
+    public Location CustomGravity
     {
         get
         {
@@ -147,7 +149,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         set
         {
             Internal.Gravity = value;
-            GravityIsSet = true;
+            GravityIsSet = !value.IsNaN();
         }
     }
 
@@ -162,7 +164,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// <summary>The entity's bounciness.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public float Bounciness = 0.25f;
+    public float Bounciness = 0.1f;
 
     /// <summary>The entity's linear damping (per second) rate. Must be from 0 to 1, inclusive.</summary>
     [PropertyDebuggable]
@@ -173,6 +175,11 @@ public class EntityPhysicsProperty : BasicEntityProperty
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public float AngularDamping = 0.03f;
+
+    /// <summary>The entity's collision-recovery damping rate.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float RecoveryDamping = 0.5f;
 
     /// <summary>Temporary (single-physics-tick) boost to linear damping.</summary>
     public float LinearDampingBoost = 0;
@@ -346,7 +353,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         RigidPose pose = new((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
         BodyVelocity velocity = new(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
         Shape = Shape.Register();
-        CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetection.Continuous(1e-4f, 1e-4f));
+        CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetection.Continuous(1e-4f, 1e-4f)) { MinimumSpeculativeMargin = 0.01f };
         BodyDescription description;
         if (Mass == 0)
         {
@@ -453,7 +460,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
 
     /// <summary>
     /// Applies a force directly to the physics entity's body, at a specified relative origin point.
-    /// The origin is relevant to the body's centerpoint.
+    /// The origin is relative to the body's centerpoint (so eg 0,0,1 is a force 1 unit above the entity that will cause it to spin).
     /// The further you get from the centerpoint, the more spin and less linear motion will be applied.
     /// Note: this is a force, not a velocity. Mass is relevant.
     /// This will activate the entity.
@@ -506,8 +513,66 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
         float maximumT = (float)distance;
         TypedIndex shape = SpawnedBody.Collidable.Shape;
-        RayData ray = new() { Direction = direction.ToNumerics(), Origin = start.ToNumerics() };
+        RayData ray = new() { Direction = direction.ToNumerics(), Origin = (start - PhysicsWorld.Offset).ToNumerics() };
         PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += PhysicsWorld.Offset;
+        }
+        return helper.Hit;
+    }
+
+    /// <summary>Performs a convex-sweep-cast-trace against just this one entity.</summary>
+    /// <param name="shape">The shape to be sweeped.</param>
+    /// <param name="shapeRotation">The rotation for the shape.</param>
+    /// <param name="start">The starting location.</param>
+    /// <param name="direction">The direction. Should be normalized in advance.</param>
+    /// <param name="distance">The maximum distance before giving up.</param>
+    public unsafe CollisionResult ConvexTrace(EntityShapeHelper shape, Quaternion shapeRotation, Location start, Location direction, double distance)
+    {
+        if (shape.BepuShape is not IConvexShape convexInput)
+        {
+            throw new ArgumentException("Shape must be convex.");
+        }
+        PhysicsSpace.InternalData.RayTraceHelper helper = new() { Space = PhysicsWorld, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
+        if (!IsSpawned)
+        {
+            return helper.Hit;
+        }
+        Simulation simulation = PhysicsWorld.Internal.CoreSimulation;
+        SweepTask task = simulation.NarrowPhase.SweepTaskRegistry.GetTask(shape.ShapeIndex.Type, Shape.ShapeIndex.Type);
+        if (task is null)
+        {
+            // TODO: Should this be an error?
+            return helper.Hit;
+        }
+        simulation.Shapes[shape.ShapeIndex.Type].GetShapeData(shape.ShapeIndex.Index, out void* shapePointer, out _);
+        simulation.Shapes[Shape.ShapeIndex.Type].GetShapeData(shape.ShapeIndex.Index, out void* ownShapePointer, out _);
+        // These estimate calculations from BEPU source, simplified for local specifics (direction.Length == 1, shape won't spin while moving, etc)
+        convexInput.ComputeAngularExpansionData(out float maximumRadius, out float maximumAngularExpansion);
+        float minimumRadius = maximumRadius - maximumAngularExpansion;
+        float sizeEstimate = Math.Max(minimumRadius, maximumRadius * 0.25f);
+        float minimumProgressionDistance = 0.1f * sizeEstimate;
+        float convergenceThresholdDistance = 1e-5f * sizeEstimate;
+        float minimumProgressionT = minimumProgressionDistance;
+        float convergenceThresholdT = convergenceThresholdDistance;
+        const int maximumIterationCount = 25;
+        // The BEPU sweep code is cursed and hypercomplicated. It's not really built for this type of call, it's meant for the actual main engine run.
+        /* public unsafe bool Sweep<TSweepFilter>(
+            void* shapeDataA, int shapeTypeA, Quaternion orientationA, in BodyVelocity velocityA,
+            void* shapeDataB, int shapeTypeB, Vector3 offsetB, Quaternion orientationB, in BodyVelocity velocityB,
+            float maximumT, float minimumProgression, float convergenceThreshold, int maximumIterationCount,
+            ref TSweepFilter filter, Shapes shapes, SweepTaskRegistry sweepTasks, BufferPool pool, out float t0, out float t1, out Vector3 hitLocation, out Vector3 hitNormal)*/
+        if (task.Sweep(shapePointer, shape.ShapeIndex.Type, shapeRotation.ToNumerics(), new BodyVelocity(direction.ToNumerics()),
+            ownShapePointer, Shape.ShapeIndex.Type, SpawnedBody.Pose.Position - (start - PhysicsWorld.Offset).ToNumerics(), SpawnedBody.Pose.Orientation, new BodyVelocity(),
+            (float) distance, minimumProgressionT, convergenceThresholdT, maximumIterationCount,
+            ref helper, simulation.Shapes, simulation.NarrowPhase.SweepTaskRegistry, simulation.BufferPool, out _, out float t1, out _, out Vector3 hitNormal))
+        {
+            helper.Hit.Hit = true;
+            helper.Hit.Position = start + direction * t1;
+            helper.Hit.Normal = hitNormal.ToLocation();
+            helper.Hit.Time = t1;
+        }
         return helper.Hit;
     }
 
@@ -519,7 +584,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         float remainder = 1 - totalDamping;
         LinearDampingBoost += damping * remainder;
     }
-    /// <summary>Temporarily adjusts the angular damping. for exactly 1 physics-tick.</summary>
+    /// <summary>Temporarily adjusts the angular damping, for exactly 1 physics-tick.</summary>
     public void ModifyAngularDamping(float damping)
     {
         float totalDamping = AngularDamping + AngularDampingBoost;

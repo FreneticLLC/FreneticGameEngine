@@ -20,7 +20,7 @@ layout (location = 6) in vec4 BoneID;
 layout (location = 7) in vec4 Weights2;
 layout (location = 8) in vec4 BoneID2;
 
-const int MAX_BONES = 200;
+const int MAX_BONES = 128;
 
 layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 layout (location = 2) uniform mat4 model_matrix = mat4(1.0);

@@ -23,7 +23,7 @@ public struct CollisionResult
     /// <summary>Whether it hit anything.</summary>
     public bool Hit;
 
-    /// <summary>The impact normal. Warning: not normalized!</summary>
+    /// <summary>The impact normal direction. Warning: not necessarily normalized! May be zero for some valid hits.</summary>
     public Location Normal;
 
     /// <summary>The end location.</summary>
