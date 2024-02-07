@@ -19,17 +19,20 @@ public abstract class UIClickableElement : UIElement
     /// <summary>Whether this element is being clicked.</summary>
     public bool Pressed = false;
 
-    // TODO: Maybe factor out into "UIInteractableElement" or something?
-    /// <summary>Whether this element can be interacted with. Don't set directly, use <see cref="Enabled"/>.</summary>
-    public bool Internal_Enabled = true;
+    /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
+    public struct InternalData
+    {
+        /// <summary>Whether this element can be interacted with.</summary>
+        public bool Enabled;
+    }
 
     /// <summary>Gets or sets whether this element can be interacted with.</summary>
     public bool Enabled
     {
-        get => Internal_Enabled;
+        get => Internal.Enabled;
         set
         {
-            Internal_Enabled = value;
+            Internal.Enabled = value;
             if (!value)
             {
                 Hovered = false;
@@ -37,6 +40,9 @@ public abstract class UIClickableElement : UIElement
             }
         }
     }
+
+    /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
+    public InternalData Internal;
 
     /// <summary>Constructs the clickable element.</summary>
     /// <param name="pos">The position of the element.</param>
