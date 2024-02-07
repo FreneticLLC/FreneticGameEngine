@@ -11,7 +11,7 @@ namespace FGEGraphics.UISystem;
 public abstract class UIClickableElement : UIElement
 {
     /// <summary>Ran when this element is clicked.</summary>
-    public event EventHandler Clicked;
+    public event Action Clicked;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
@@ -45,7 +45,7 @@ public abstract class UIClickableElement : UIElement
     {
         if (onClick is not null)
         {
-            Clicked += (_, _) => onClick();
+            Clicked += onClick;
         }
     }
 
@@ -87,7 +87,7 @@ public abstract class UIClickableElement : UIElement
         }
         if (Clicked is not null && Pressed && Hovered)
         {
-            Clicked.Invoke(this, null);
+            Clicked();
         }
         Pressed = false;
     }

@@ -26,7 +26,7 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 public class UITabGroup : UIGroup
 {
     /// <summary>Ran when the tab is switched.</summary>
-    public event EventHandler<TabSwitchedArgs> TabSwitched;
+    public event Action<TabSwitchedArgs> TabSwitched;
 
     /// <summary>The button leading to the currently selected tab.</summary>
     public UIClickableElement SelectedButton;
@@ -41,7 +41,7 @@ public class UITabGroup : UIGroup
     {
         if (onSwitch is not null)
         {
-            TabSwitched += (_, args) => onSwitch(args);
+            TabSwitched += onSwitch;
         }
     }
 
@@ -58,7 +58,7 @@ public class UITabGroup : UIGroup
             SelectedButton = button;
             SelectedTab = tab;
         }
-        button.Clicked += (_, _) =>
+        button.Clicked += () =>
         {
             if (SelectedButton is not null)
             {
@@ -67,7 +67,7 @@ public class UITabGroup : UIGroup
             }
             button.Enabled = false;
             tab.SwitchTo();
-            TabSwitched.Invoke(this, new(SelectedTab, tab));
+            TabSwitched(new(SelectedTab, tab));
             SelectedButton = button;
             SelectedTab = tab;
         };
