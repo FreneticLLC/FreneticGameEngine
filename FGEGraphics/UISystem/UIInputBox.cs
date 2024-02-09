@@ -26,16 +26,21 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable text input box on a screen.</summary>
-public class UIInputBox : UIElement
+/// <remarks>Constructs a new text input box.</remarks>
+/// <param name="text">The default text in the box.</param>
+/// <param name="info">Information about the box.</param>
+/// <param name="fonts">The font to use.</param>
+/// <param name="pos">The position of the element.</param>
+public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos) : UIElement(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.FontDefault.Height) : pos)
 {
     /// <summary>The current text in this input box.</summary>
-    public string Text;
+    public string Text = text;
 
     /// <summary>Information about this input box.</summary>
-    public string Info;
+    public string Info = info;
 
     /// <summary>The font to use.</summary>
-    public FontSet Fonts;
+    public FontSet Fonts = fonts;
 
     /// <summary>Whether this input box is currently selected.</summary>
     public bool Selected = false;
@@ -60,19 +65,6 @@ public class UIInputBox : UIElement
 
     /// <summary>The color of this input box.</summary>
     public Vector4 Color = Vector4.One;
-
-    /// <summary>Constructs a new text input box.</summary>
-    /// <param name="text">The default text in the box.</param>
-    /// <param name="info">Information about the box.</param>
-    /// <param name="fonts">The font to use.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos)
-        : base(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.FontDefault.Height) : pos)
-    {
-        Text = text;
-        Info = info;
-        Fonts = fonts;
-    }
 
     /// <summary>Internal values for <see cref="UIInputBox"/>.</summary>
     public struct InternalData
