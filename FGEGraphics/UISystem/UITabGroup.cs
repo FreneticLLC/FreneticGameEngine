@@ -1,0 +1,70 @@
+﻿//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+// See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
+// If neither of these are available, assume that neither you nor anyone other than the copyright holder
+// hold any right or permission to use this software until such time as the official license is identified.
+//
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FGEGraphics.UISystem;
+
+/// <summary>Arguments for a <see cref="UITabGroup.TabSwitched"/> event handler.</summary>
+/// <param name="From">The tab screen being switched from.</param>
+/// <param name="To">The tab screen being switched to.</param>
+public record TabSwitchedArgs(UIScreen From, UIScreen To);
+
+/// <summary>
+/// Represents a container of elements supporting <see cref="UIClickableElement"/>s that lead to <see cref="UIScreen"/>s,
+/// automatically handling the <see cref="UIClickableElement.Enabled"/> state.
+/// <param name="pos">The position of the element.</param>
+/// <param name="onSwitch">Ran when the tab is switched.</param>
+/// </summary>
+public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
+{
+    /// <summary>Ran when the tab is switched.</summary>
+    public event Action<TabSwitchedArgs> TabSwitched = onSwitch;
+
+    /// <summary>The button leading to the currently selected tab.</summary>
+    public UIClickableElement SelectedButton;
+
+    /// <summary>The currently selected tab.</summary>
+    public UIScreen SelectedTab;
+
+    /// <summary>Adds a button and a screen as a tab to the group.</summary>
+    /// <param name="button">The button linked to the screen.</param>
+    /// <param name="tab">The screen to switch to when the button is pressed.</param>
+    /// <param name="main">Whether this tab should be selected by default.</param>
+    /// <param name="addChild">Whether to add the button as a child element of the group.</param>
+    public void AddTab(UIClickableElement button, UIScreen tab, bool main = false, bool addChild = true)
+    {
+        if (main)
+        {
+            button.Enabled = false;
+            SelectedButton = button;
+            SelectedTab = tab;
+        }
+        button.Clicked += () =>
+        {
+            if (SelectedButton is not null)
+            {
+                SelectedButton.Enabled = true;
+                SelectedTab.SwitchFrom();
+            }
+            button.Enabled = false;
+            tab.SwitchTo();
+            TabSwitched(new(SelectedTab, tab));
+            SelectedButton = button;
+            SelectedTab = tab;
+        };
+        if (addChild)
+        {
+            AddChild(button);
+        }
+    }
+}

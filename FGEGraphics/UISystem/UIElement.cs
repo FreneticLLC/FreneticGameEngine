@@ -8,16 +8,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
-using FGEGraphics.GraphicsHelpers;
-using OpenTK;
-using OpenTK.Input;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -44,8 +36,23 @@ public abstract class UIElement
     /// <summary>Last known absolute position.</summary>
     public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
 
-    /// <summary>Last known absolute size (Width / Height).</summary>
+    /// <summary>Last known absolute size (Width and Height).</summary>
     public FGECore.MathHelpers.Vector2i LastAbsoluteSize;
+
+    /// <summary>Last known absolute X position (from <see cref="LastAbsolutePosition"/>).</summary>
+    public int X => LastAbsolutePosition.X;
+
+    /// <summary>Last known absolute Y position (from <see cref="LastAbsolutePosition"/>).</summary>
+    public int Y => LastAbsolutePosition.Y;
+
+    /// <summary>Last known absolute width (from <see cref="LastAbsoluteSize"/>).</summary>
+    public int Width => LastAbsoluteSize.X;
+
+    /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
+    public int Height => LastAbsoluteSize.Y;
+
+    /// <summary>Whether the element has a parent element.</summary>
+    public bool HasParent => Parent is not null && !Parent.ElementInternal.ToRemove.Contains(this);
 
     /// <summary>Last known aboslute rotation.</summary>
     public float LastAbsoluteRotation;
@@ -53,18 +60,26 @@ public abstract class UIElement
     /// <summary>The position and size of this element.</summary>
     public UIPositionHelper Position;
 
+    /// <summary>Whether this element should render automatically.</summary>
+    public bool ShouldRender;
+
     /// <summary>
     /// Priority for rendering logic.
     /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
     /// </summary>
     public double RenderPriority = 0;
 
+    /// <summary>Whether this element has rendering priority over its parent, if any.</summary>
+    public bool ChildPriority = true;
+
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
-    public UIElement(UIPositionHelper pos)
+    /// <param name="shouldRender">Whether the element should render automatically.</param>
+    public UIElement(UIPositionHelper pos, bool shouldRender = true)
     {
         Position = pos;
         Position.For = this;
+        ShouldRender = shouldRender;
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
@@ -72,9 +87,10 @@ public abstract class UIElement
 
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
-    public void AddChild(UIElement child)
+    /// <param name="priority">Whether the child element has render priority over this element.</param>
+    public virtual void AddChild(UIElement child, bool priority = true)
     {
-        if (child.Parent != null)
+        if (child.Parent is not null)
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
@@ -85,16 +101,13 @@ public abstract class UIElement
                 ElementInternal.ToAdd.Add(child);
             }
         }
-        else if (ElementInternal.ToRemove.Contains(child))
-        {
-            ElementInternal.ToRemove.Remove(child);
-        }
-        else
+        else if (!ElementInternal.ToRemove.Remove(child))
         {
             throw new Exception("Tried to add a child that already belongs to this element!");
         }
         child.Parent = this;
         child.IsValid = true;
+        child.ChildPriority = priority;
         child.Init();
     }
 
@@ -109,11 +122,7 @@ public abstract class UIElement
                 ElementInternal.ToRemove.Add(child);
             }
         }
-        else if (ElementInternal.ToAdd.Contains(child))
-        {
-            ElementInternal.ToAdd.Remove(child);
-        }
-        else
+        else if (!ElementInternal.ToAdd.Remove(child))
         {
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
@@ -186,14 +195,21 @@ public abstract class UIElement
 
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
+
+        /// <summary>Styles registered on this element.</summary>
+        public List<UIElementStyle> Styles;
+
+        /// <summary>The current style of this element.</summary>
+        public UIElementStyle CurrentStyle;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public ElementInternalData ElementInternal = new()
     {
-        ToAdd = new List<UIElement>(),
-        ToRemove = new List<UIElement>(),
-        Children = new List<UIElement>()
+        ToAdd = [],
+        ToRemove = [],
+        Children = [],
+        Styles = []
     };
 
     /// <summary>Adds and removes any queued children.</summary>
@@ -226,8 +242,35 @@ public abstract class UIElement
     public void FullTick(double delta)
     {
         CheckChildren();
+        UpdateStyle();
         Tick(delta);
         TickChildren(delta);
+    }
+
+    /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
+    /// <param name="style">The style to register.</param>
+    /// <param name="requireText">Whether the style must support text rendering.</param>
+    public UIElementStyle RegisterStyle(UIElementStyle style, bool requireText = false)
+    {
+        if (requireText && !style.CanRenderText())
+        {
+            throw new Exception("Style must support text rendering when 'requireText' is true");
+        }
+        ElementInternal.Styles.Add(style);
+        return style;
+    }
+
+    /// <summary>Returns the <b>current</b> element style.</summary>
+    public virtual UIElementStyle Style => UIElementStyle.Empty;
+
+    /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
+    public virtual void SwitchFromStyle(UIElementStyle style)
+    {
+    }
+
+    /// <summary>Ran when this element switches to the relevant <see cref="UIElementStyle"/>.</summary>
+    public virtual void SwitchToStyle(UIElementStyle style)
+    {
     }
 
     /// <summary>Performs a tick on this element.</summary>
@@ -291,52 +334,80 @@ public abstract class UIElement
     /// <param name="lastRot">The last rotation made in the render chain.</param>
     public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
     {
-        if (Parent == null || !Parent.ElementInternal.ToRemove.Contains(this))
+        if (Parent is not null && Parent.ElementInternal.ToRemove.Contains(this))
         {
-            int x = Position.X;
-            int y = Position.Y;
-            if (Position.MainAnchor == UIAnchor.RELATIVE)
+            return;
+        }
+        int x = Position.X;
+        int y = Position.Y;
+        if (Position.MainAnchor == UIAnchor.RELATIVE)
+        {
+            y += Position.View.RelativeYLast;
+        }
+        if (Math.Abs(lastRot.Z) < 0.001f)
+        {
+            x += xoff;
+            y += yoff;
+            lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
+        }
+        else
+        {
+            int cwx = Parent is null ? 0 : Position.MainAnchor.GetX(this);
+            int chy = Parent is null ? 0 : Position.MainAnchor.GetY(this);
+            float half_wid = Position.Width * 0.5f;
+            float half_hei = Position.Height * 0.5f;
+            float tx = x + lastRot.X + cwx - half_wid;
+            float ty = y + lastRot.Y + chy - half_hei;
+            float cosRot = (float)Math.Cos(-lastRot.Z);
+            float sinRot = (float)Math.Sin(-lastRot.Z);
+            float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
+            float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
+            lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
+            int bx = (int)tx2 + xoff;
+            int by = (int)ty2 + yoff;
+            x = bx;
+            y = by;
+        }
+        LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
+        LastAbsoluteRotation = lastRot.Z;
+        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
+        Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
+        CheckChildren();
+        UpdateChildPositions(output, delta, x, y, lastRot, false);
+        output.Add(this);
+        UpdateChildPositions(output, delta, x, y, lastRot, true);
+    }
+
+    /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
+    public void UpdateStyle()
+    {
+        if (Style != ElementInternal.CurrentStyle)
+        {
+            if (ElementInternal.CurrentStyle is not null)
             {
-                y += Position.View.RelativeYLast;
+                SwitchFromStyle(ElementInternal.CurrentStyle);
             }
-            if (Math.Abs(lastRot.Z) < 0.001f)
-            {
-                x += xoff;
-                y += yoff;
-                lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
-            }
-            else
-            {
-                int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
-                int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
-                float half_wid = Position.Width * 0.5f;
-                float half_hei = Position.Height * 0.5f;
-                float tx = x + lastRot.X + cwx - half_wid;
-                float ty = y + lastRot.Y + chy - half_hei;
-                float cosRot = (float)Math.Cos(-lastRot.Z);
-                float sinRot = (float)Math.Sin(-lastRot.Z);
-                float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
-                float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
-                lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
-                int bx = (int)tx2 + xoff;
-                int by = (int)ty2 + yoff;
-                x = bx;
-                y = by;
-            }
-            LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
-            LastAbsoluteRotation = lastRot.Z;
-            LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
-            Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
-            output.Add(this);
-            UpdateChildPositions(output, delta, x, y, lastRot);
+            SwitchToStyle(ElementInternal.CurrentStyle = Style);
         }
     }
 
     /// <summary>Performs a render on this element.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public virtual void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public virtual void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
+    }
+
+    /// <summary>Performs a render on this element using the current style.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
+    public void Render(ViewUI2D view, double delta)
+    {
+        if (IsValid)
+        {
+            Render(view, delta, ElementInternal.CurrentStyle);
+        }
     }
 
     /// <summary>Updates this element's child positions.</summary>
@@ -345,12 +416,12 @@ public abstract class UIElement
     /// <param name="xoff">The X offset of this element's parent.</param>
     /// <param name="yoff">The Y offset of this element's parent.</param>
     /// <param name="lastRot">The last rotation made in the render chain.</param>
-    public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+    /// <param name="childPriority">The priority value to target.</param>
+    public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot, bool childPriority)
     {
-        CheckChildren();
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid)
+            if (element.IsValid && element.ChildPriority == childPriority)
             {
                 element.UpdatePositions(output, delta, xoff, yoff, lastRot);
             }
@@ -363,7 +434,7 @@ public abstract class UIElement
     public void MouseLeftDown(int x, int y)
     {
         MouseLeftDown();
-        foreach (UIElement child in GetAllAt(x, y))
+        foreach (UIElement child in GetChildrenAt(x, y))
         {
             child.MouseLeftDown(x, y);
         }
@@ -375,7 +446,7 @@ public abstract class UIElement
     public void MouseLeftDownOutside(int x, int y)
     {
         MouseLeftDownOutside();
-        foreach (UIElement child in GetAllNotAt(x, y))
+        foreach (UIElement child in GetChildrenNotAt(x, y))
         {
             child.MouseLeftDownOutside(x, y);
         }
@@ -387,7 +458,7 @@ public abstract class UIElement
     public void MouseLeftUp(int x, int y)
     {
         MouseLeftUp();
-        foreach (UIElement child in GetAllAt(x, y))
+        foreach (UIElement child in GetChildrenAt(x, y))
         {
             child.MouseLeftUp(x, y);
         }
@@ -422,7 +493,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of child elements containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetAllAt(int x, int y)
+    public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
     {
         foreach (UIElement element in ElementInternal.Children)
         {
@@ -437,7 +508,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of child elements not containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetAllNotAt(int x, int y)
+    public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
     {
         foreach (UIElement element in ElementInternal.Children)
         {

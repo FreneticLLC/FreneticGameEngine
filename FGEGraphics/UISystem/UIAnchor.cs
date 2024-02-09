@@ -15,20 +15,14 @@ using System.Threading.Tasks;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Helper class for placing UI elements relative to sections of the screen.</summary>
-public class UIAnchor
+/// <remarks>Generally don't construct directly. Use the static objects instead.</remarks>
+public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y)
 {
     /// <summary>Function for getting the relative X value.</summary>
-    public readonly Func<UIElement, int> GetX;
+    public readonly Func<UIElement, int> GetX = x;
 
     /// <summary>Function for getting the relative Y value.</summary>
-    public readonly Func<UIElement, int> GetY;
-
-    /// <summary>Generally for internal usage only. Use the static objects instead.</summary>
-    public UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y)
-    {
-        GetX = x;
-        GetY = y;
-    }
+    public readonly Func<UIElement, int> GetY = y;
 
     /// <summary>Helper function objects for the public static values.</summary>
     private static readonly Func<UIElement, int> LEFT_X = (element) => 0,

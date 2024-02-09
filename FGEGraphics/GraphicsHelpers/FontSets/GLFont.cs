@@ -448,4 +448,20 @@ public class GLFont : IDisposable
         GC.SuppressFinalize(this);
         Dispose(true);
     }
+
+    /// <summary>Determines if the specified object is equal to this <see cref="GLFont"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is GLFont font &&
+               Name == font.Name &&
+               Size == font.Size &&
+               Bold == font.Bold &&
+               Italic == font.Italic;
+    }
+
+    /// <summary>Returns a hash code for this <see cref="GLFont"/>.</summary>
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Size, Bold, Italic);
+    }
 }

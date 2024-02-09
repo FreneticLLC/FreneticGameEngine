@@ -55,7 +55,7 @@ public class UIScrollBox : UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of visible child elements containing the position.</returns>
-    public override List<UIElement> GetAllAt(int x, int y)
+    public override List<UIElement> GetChildrenAt(int x, int y)
     {
         List<UIElement> found = new();
         if (SelfContains(x, y))
@@ -95,7 +95,8 @@ public class UIScrollBox : UIElement
     /// <summary>Renders this scroll box on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public override void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         if (Color.A > 0)
         {

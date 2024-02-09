@@ -25,261 +25,53 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable button on a screen.</summary>
-public class UIButton : UIElement
+public class UIButton : UIClickableElement.Styled
 {
-    /// <summary>Represents the rendering style of a <see cref="UIButton"/>.</summary>
-    public class Style
-    {
-        /// <summary>Constructs a default <see cref="Style"/> instance.</summary>
-        public Style()
-        {
-        }
+    /// <summary>The pressable area of this button.</summary>
+    public UIBox Box;
 
-        /// <summary>Constructs a new style as a copy of another style.</summary>
-        public Style(Style style)
-        {
-            BackColor = style.BackColor;
-            BorderColor = style.BorderColor;
-            BorderWidth = style.BorderWidth;
-            DisplayTexture = style.DisplayTexture;
-            DropShadowLength = style.DropShadowLength;
-            TextBaseColor = style.TextBaseColor;
-        }
+    /// <summary>The text to render on this button.</summary>
+    public UIElementText Text;
 
-        /// <summary>What background box color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
-        public Color4F BackColor = Color4F.Transparent;
-
-        /// <summary>What background box border outline color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
-        public Color4F BorderColor = Color4F.Transparent;
-
-        /// <summary>How large the background box's border should be (or 0 for none).</summary>
-        public int BorderWidth = 0;
-
-        /// <summary>What texture to display (or null for none).</summary>
-        public Texture DisplayTexture;
-
-        /// <summary>How big the drop-shadow effect should be (or 0 for none).</summary>
-        public int DropShadowLength = 0;
-
-        /// <summary>The base color effect to use for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
-        public string TextBaseColor = TextStyle.Simple;
-
-        /// <summary>(Don't modify directly) the raw actual renderable text of the button.
-        /// <para>Use <see cref="Text"/> to modify the text value.</para></summary>
-        public RenderableText Internal_ActualText;
-    }
-
-    /// <summary>The render style to use when the button is not being interacted with.</summary>
-    public Style StyleNormal
-    {
-        get
-        {
-            return Internal.StyleNormal;
-        }
-        set
-        {
-            Internal.StyleNormal = new Style(value);
-            if (Internal.RawText is not null)
-            {
-                Internal.StyleNormal.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleNormal.TextBaseColor);
-            }
-        }
-    }
-
-    /// <summary>The render style to use when the user is hovering their mouse cursor over this button.</summary>
-    public Style StyleHover
-    {
-        get
-        {
-            return Internal.StyleHover;
-        }
-        set
-        {
-            Internal.StyleHover = new Style(value);
-            if (Internal.RawText is not null)
-            {
-                Internal.StyleHover.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleHover.TextBaseColor);
-            }
-        }
-    }
-
-    /// <summary>The render style to use when the user is clicking on this button.</summary>
-    public Style StyleClick
-    {
-        get
-        {
-            return Internal.StyleClick;
-        }
-        set
-        {
-            Internal.StyleClick = new Style(value);
-            if (Internal.RawText is not null)
-            {
-                Internal.StyleClick.Internal_ActualText = TextFont.ParseFancyText(Internal.RawText, Internal.StyleClick.TextBaseColor);
-            }
-        }
-    }
-
-    /// <summary>Holds internal data for <see cref="UIButton"/>.</summary>
-    public struct InternalData
-    {
-        /// <summary>The raw text of the button as input by the user.</summary>
-        public string RawText;
-
-        /// <summary>The render style to use when the button is not being interacted with.</summary>
-        public Style StyleNormal;
-
-        /// <summary>The render style to use when the user is hovering their mouse cursor over this button.</summary>
-        public Style StyleHover;
-
-        /// <summary>The render style to use when the user is clicking on this button.</summary>
-        public Style StyleClick;
-    }
-
-    /// <summary>Internal data for this button.</summary>
-    public InternalData Internal;
-
-    /// <summary>Gets or sets the text to render on this button.</summary>
-    public string Text
-    {
-        get => Internal.RawText;
-        set
-        {
-            Internal.RawText = value;
-            Internal.StyleNormal.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleNormal.TextBaseColor);
-            Internal.StyleHover.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleHover.TextBaseColor);
-            Internal.StyleClick.Internal_ActualText = TextFont.ParseFancyText(value, Internal.StyleClick.TextBaseColor);
-        }
-    }
-
-    /// <summary>The font to use.</summary>
-    public FontSet TextFont;
-
-    /// <summary>Ran when this button is clicked.</summary>
-    public Action ClickedTask;
-
-    /// <summary>Whether the mouse is hovering over this button.</summary>
-    public bool Hovered = false;
-
-    /// <summary>Whether this button is being clicked.</summary>
-    public bool Clicked = false;
-
-    /// <summary>Constructs a new button based on a render style.</summary>
+    /// <summary>Constructs a new style-based button.</summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="normal">The style to display when neither hovered nor clicked.</param>
     /// <param name="hover">The style to display when hovered.</param>
     /// <param name="click">The style to display when clicked.</param>
-    /// <param name="text">The text to display.</param>
-    /// <param name="font">The font to use.</param>
-    /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(Style normal, Style hover, Style click, string text, FontSet font, Action clicked, UIPositionHelper pos)
-        : base(pos)
+    public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
+        : base(normal, hover, click, pos, false, clicked)
     {
-        StyleNormal = new Style(normal);
-        StyleHover = new Style(hover);
-        StyleClick = new Style(click);
-        TextFont = font;
-        ClickedTask = clicked;
-        Text = text;
+        AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false));
+        Text = new(this, text, horizontalAlignment: TextAlignment.CENTER, verticalAlignment: TextAlignment.CENTER);
     }
 
     /// <summary>Constructs a new button based on a standard texture set.</summary>
-    /// <param name="buttontexname">The name of the texture set to use.</param>
+    /// <param name="style">The base button style.</param>
+    /// <param name="textures">The texture engine to get textures from.</param>
+    /// <param name="textureSet">The name of the texture set to use.</param>
     /// <param name="text">The text to display.</param>
-    /// <param name="font">The font to use.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(string buttontexname, string text, FontSet font, Action clicked, UIPositionHelper pos)
-        : this(new Style(), new Style(), new Style(), text, font, clicked, pos)
+    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UIPositionHelper pos)
     {
-        if (buttontexname is not null)
-        {
-            TextureEngine Textures = TextFont.Engine.GLFonts.Textures;
-            StyleNormal.DisplayTexture = Textures.GetTexture(buttontexname + "_none");
-            StyleHover.DisplayTexture = Textures.GetTexture(buttontexname + "_hover");
-            StyleClick.DisplayTexture = Textures.GetTexture(buttontexname + "_click");
-        }
-    }
-
-    /// <summary>Ran when the mouse enters the boundaries of this button.</summary>
-    public override void MouseEnter()
-    {
-        Hovered = true;
-    }
-
-    /// <summary>Ran when the mouse exits the boundaries of this button.</summary>
-    public override void MouseLeave()
-    {
-        Hovered = false;
-        Clicked = false;
-    }
-
-    /// <summary>Ran when the left mouse button is pressed down within the boundaries of this button.</summary>
-    public override void MouseLeftDown()
-    {
-        Hovered = true;
-        Clicked = true;
-    }
-
-    /// <summary>Ran when the left mouse button is released within the boundaries of this button.</summary>
-    public override void MouseLeftUp()
-    {
-        if (Clicked && Hovered)
-        {
-            ClickedTask.Invoke();
-        }
-        Clicked = false;
+        UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
+        UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
+        UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
+        return new UIButton(text, clicked, normal, hover, click, pos);
     }
 
     /// <summary>Renders this button on the screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public override void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Style style = StyleNormal;
-        if (Clicked)
+        Box.Render(view, delta, style);
+        if (style.CanRenderText(Text))
         {
-            style = StyleClick;
+            style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));
         }
-        else if (Hovered)
-        {
-            style = StyleHover;
-        }
-        int x = LastAbsolutePosition.X;
-        int y = LastAbsolutePosition.Y;
-        float width = LastAbsoluteSize.X;
-        float height = LastAbsoluteSize.Y;
-        Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
-        bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BackColor.A > 0;
-        if (any)
-        {
-            Engine.Textures.White.Bind();
-        }
-        if (style.DropShadowLength > 0)
-        {
-            Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width + style.DropShadowLength, y + height + style.DropShadowLength, rotation);
-        }
-        if (style.BorderColor.A > 0 && style.BorderWidth > 0)
-        {
-            Renderer2D.SetColor(style.BorderColor);
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, rotation);
-        }
-        if (style.BackColor.A > 0)
-        {
-            Renderer2D.SetColor(style.BackColor);
-            view.Rendering.RenderRectangle(view.UIContext, x + style.BorderWidth, y + style.BorderWidth, x + width - style.BorderWidth, y + height - style.BorderWidth, rotation);
-        }
-        if (any)
-        {
-            Renderer2D.SetColor(Color4F.White);
-        }
-        if (style.DisplayTexture is not null)
-        {
-            style.DisplayTexture.Bind();
-            view.Rendering.RenderRectangle(view.UIContext, x, y, x + width, y + height, rotation);
-        }
-        float textHeight = TextFont.FontDefault.Height * style.Internal_ActualText.Lines.Length;
-        TextFont.DrawFancyText(style.Internal_ActualText, new Location(Math.Round(x + width / 2 - style.Internal_ActualText.Width / 2), Math.Round(y + height / 2 - textHeight / 2), 0));
     }
 }

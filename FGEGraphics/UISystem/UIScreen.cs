@@ -32,22 +32,10 @@ public class UIScreen : UIElement
     private readonly GameClientWindow InternalClient;
 
     /// <summary>Gets the client game engine this screen is associated with.</summary>
-    public override GameEngineBase Engine
-    {
-        get
-        {
-            return InternalClient.CurrentEngine;
-        }
-    }
+    public override GameEngineBase Engine => InternalClient.CurrentEngine;
 
     /// <summary>Gets the client game window this screen is associated with.</summary>
-    public override GameClientWindow Window
-    {
-        get
-        {
-            return InternalClient;
-        }
-    }
+    public override GameClientWindow Window => InternalClient;
 
     /// <summary>
     /// Whether to erase the screen at the beginning of each render call.
@@ -76,7 +64,8 @@ public class UIScreen : UIElement
     /// <summary>Performs a render on this element.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public override void Render(ViewUI2D view, double delta)
+    /// <param name="style">The current element style.</param>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         if (ResetOnRender)
         {

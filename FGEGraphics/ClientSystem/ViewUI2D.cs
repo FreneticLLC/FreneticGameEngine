@@ -32,22 +32,10 @@ public class ViewUI2D
     public GameClientWindow Client;
 
     /// <summary>Gets the primary engine.</summary>
-    public GameEngineBase Engine
-    {
-        get
-        {
-            return Client.CurrentEngine;
-        }
-    }
+    public GameEngineBase Engine => Client.CurrentEngine;
 
     /// <summary>Gets the rendering helper for the engine.</summary>
-    public Renderer2D Rendering
-    {
-        get
-        {
-            return Client.Rendering2D;
-        }
-    }
+    public Renderer2D Rendering => Client.Rendering2D;
 
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
@@ -68,13 +56,10 @@ public class ViewUI2D
     /// </summary>
     public UIScreen InternalCurrentScreen;
 
-    /// <summary>The current main screen.</summary>
+    /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
     {
-        get
-        {
-            return InternalCurrentScreen;
-        }
+        get => InternalCurrentScreen;
         set
         {
             if (value != InternalCurrentScreen)
@@ -130,14 +115,21 @@ public class ViewUI2D
             RelativeYLast = 0;
             CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
+            foreach (UIElement elem in LastRenderedSet)
+            {
+                if (elem.IsValid)
+                {
+                    elem.UpdateStyle();
+                }
+            }
             foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
             {
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try
                 {
-                    if (elem.IsValid)
+                    if (elem.IsValid && elem.ShouldRender)
                     {
-                        elem.Render(this, Client.Delta);
+                        elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }
                 }
                 finally
