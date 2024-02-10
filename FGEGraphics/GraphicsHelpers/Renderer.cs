@@ -379,25 +379,26 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     }
 
     /// <summary>Renders a billboard along a line.</summary>
-    /// <param name="pos">Start position.</param>
-    /// <param name="p2">End position.</param>
+    /// <param name="start">Start position.</param>
+    /// <param name="end">End position.</param>
     /// <param name="width">Width of the line.</param>
-    /// <param name="facing">Facing target.</param>
+    /// <param name="facing">Facing target, normally the camera position.</param>
     /// <param name="view">Relevant view.</param>
-    public void RenderBilboardLine(Location pos, Location p2, float width, Location facing, View3D view)
+    public void RenderBilboardLine(Location start, Location end, float width, Location facing, View3D view)
     {
-        Location center = (pos + p2) * 0.5;
+        Location center = (start + end) * 0.5;
         double viewLength = center.Distance(facing);
-        Location lookDir = (center - facing) / viewLength;
-        double lineLength = pos.Distance(p2);
+        double lineLength = start.Distance(end);
         if (viewLength < 0.001 || lineLength < 0.001)
         {
             return;
         }
-        Location forwardDir = (p2 - pos) / lineLength;
+        Location lookDir = (center - facing) / viewLength;
+        Location forwardDir = (end - start) / lineLength;
         Location right = forwardDir.CrossProduct(lookDir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)lineLength * 0.5f, width, 1f);
-        Matrix4d m2 = new(right.X, forwardDir.X, lookDir.X, center.X,
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.Scale(width, lineLength, 1);
+        Matrix4d m2 = new(
+            right.X, forwardDir.X, lookDir.X, center.X,
             right.Y, forwardDir.Y, lookDir.Y, center.Y,
             right.Z, forwardDir.Z, lookDir.Z, center.Z,
             0, 0, 0, 1);
