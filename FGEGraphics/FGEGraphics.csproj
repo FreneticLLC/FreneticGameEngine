@@ -12,6 +12,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Optimize>false</Optimize>
+    <DefaultItemExcludes>$(DefaultItemExcludes);data\**\*.fs</DefaultItemExcludes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>TRACE</DefineConstants>
@@ -34,6 +35,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />
+    <Content Remove="data\**" />
+    <Compile Remove="data\**" />
+    <Content Remove="data\**\**" />
+    <Compile Remove="data\**\**" />
     <None Update="data\**\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
