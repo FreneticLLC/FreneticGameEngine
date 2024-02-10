@@ -205,6 +205,12 @@ public abstract class BasicEntity<T, T2> : BasicEntity where T : BasicEntity<T, 
     /// <summary>The owning engine.</summary>
     public override BasicEngine EngineGeneric => Engine;
 
+    /// <summary>The value of <see cref="BasicEngine.GlobalTickTime"/> for this entity's engine when the entity was first created.</summary>
+    public double CreatedEngineTime;
+
+    /// <summary>The delta time (seconds) between now and when this entity was first created.</summary>
+    public double DeltaExistedFor => Engine.GlobalTickTime - CreatedEngineTime;
+
     /// <summary>Construct the basic Entity.</summary>
     /// <param name="eng">The owning engine.</param>
     public BasicEntity(T2 eng)
@@ -212,7 +218,7 @@ public abstract class BasicEntity<T, T2> : BasicEntity where T : BasicEntity<T, 
         Engine = eng;
         OnSpawnEvent = new FreneticEvent<EntitySpawnEventArgs>(Engine.Schedule.EventHelper);
         OnDespawnEvent = new FreneticEvent<EntityDespawnEventArgs>(Engine.Schedule.EventHelper);
-
+        CreatedEngineTime = Engine.GlobalTickTime;
     }
 }
 

@@ -127,7 +127,7 @@ public static class SystemExtensions
             mat.M24, mat.M31, mat.M32, mat.M33, mat.M34, mat.M41, mat.M42, mat.M43, mat.M44);
     }
 
-    /// <summary>Converts a BEPU <see cref="System.Numerics.Matrix4x4"/> to an OpenTK <see cref="Matrix4"/>.</summary>
+    /// <summary>Converts a <see cref="System.Numerics.Matrix4x4"/> to an OpenTK <see cref="Matrix4"/>.</summary>
     /// <param name="mat">The input <see cref="System.Numerics.Matrix4x4"/>.</param>
     /// <returns>The output <see cref="Matrix4"/>.</returns>
     public static Matrix4 Convert(this System.Numerics.Matrix4x4 mat)
@@ -136,7 +136,7 @@ public static class SystemExtensions
            (float)mat.M24, (float)mat.M31, (float)mat.M32, (float)mat.M33, (float)mat.M34, (float)mat.M41, (float)mat.M42, (float)mat.M43, (float)mat.M44);
     }
 
-    /// <summary>Converts a BEPU <see cref="System.Numerics.Matrix4x4"/> to an OpenTK <see cref="Matrix4d"/>.</summary>
+    /// <summary>Converts a <see cref="System.Numerics.Matrix4x4"/> to an OpenTK <see cref="Matrix4d"/>.</summary>
     /// <param name="mat">The input <see cref="System.Numerics.Matrix4x4"/>.</param>
     /// <returns>The output <see cref="Matrix4d"/>.</returns>
     public static Matrix4d ConvertD(this System.Numerics.Matrix4x4 mat)
@@ -145,7 +145,7 @@ public static class SystemExtensions
             mat.M24, mat.M31, mat.M32, mat.M33, mat.M34, mat.M41, mat.M42, mat.M43, mat.M44);
     }
 
-    /// <summary>Converts an OpenTK <see cref="Matrix4d"/> to a BEPU <see cref="System.Numerics.Matrix4x4"/>.</summary>
+    /// <summary>Converts an OpenTK <see cref="Matrix4d"/> to a <see cref="System.Numerics.Matrix4x4"/>.</summary>
     /// <param name="mat">The input <see cref="Matrix4d"/>.</param>
     /// <returns>The output <see cref="System.Numerics.Matrix4x4"/>.</returns>
     public static System.Numerics.Matrix4x4 ConvertD(this Matrix4d mat)
@@ -154,7 +154,7 @@ public static class SystemExtensions
            (float)mat.M24, (float)mat.M31, (float)mat.M32, (float)mat.M33, (float)mat.M34, (float)mat.M41, (float)mat.M42, (float)mat.M43, (float)mat.M44);
     }
 
-    /// <summary>Converts an OpenTK <see cref="Matrix4"/> to a BEPU <see cref="System.Numerics.Matrix4x4"/>.</summary>
+    /// <summary>Converts an OpenTK <see cref="Matrix4"/> to a <see cref="System.Numerics.Matrix4x4"/>.</summary>
     /// <param name="mat">The input <see cref="Matrix4"/>.</param>
     /// <returns>The output <see cref="System.Numerics.Matrix4x4"/>.</returns>
     public static System.Numerics.Matrix4x4 ConvertD(this Matrix4 mat)
