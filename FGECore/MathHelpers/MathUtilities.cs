@@ -73,7 +73,7 @@ public static class MathUtilities
             }
             else
             {
-                return new Location(0, 180, 0);
+                return new Location(0, 90, 0);
             }
         }
         else
@@ -82,7 +82,15 @@ public static class MathUtilities
             double pitch;
             if (input.X != 0)
             {
-                yaw = (Math.Atan2(input.Y, input.X) * (180.0 / Math.PI));
+                yaw = Math.Atan2(input.Y, input.X) * (180.0 / Math.PI);
+                if (yaw < 0)
+                {
+                    yaw += 360;
+                }
+                if (yaw > 360)
+                {
+                    yaw -= 360;
+                }
             }
             else if (input.Y > 0)
             {
@@ -92,22 +100,14 @@ public static class MathUtilities
             {
                 yaw = 180;
             }
-            pitch = (Math.Atan2(input.Z, Math.Sqrt(input.X * input.X + input.Y * input.Y)) * (180.0 / Math.PI));
-            while (pitch < -180)
+            pitch = Math.Atan2(input.Z, Math.Sqrt(input.X * input.X + input.Y * input.Y)) * (180.0 / Math.PI);
+            if (pitch < -180)
             {
                 pitch += 360;
             }
-            while (pitch > 180)
+            if (pitch > 180)
             {
                 pitch -= 360;
-            }
-            while (yaw < 0)
-            {
-                yaw += 360;
-            }
-            while (yaw > 360)
-            {
-                yaw -= 360;
             }
             Location loc = new()
             {

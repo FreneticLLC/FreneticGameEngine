@@ -29,10 +29,10 @@ namespace FGEGraphics.GraphicsHelpers;
 /// Rendering utility.
 /// Construct and call <see cref="Init"/>.
 /// </summary>
-/// <param name="tengine">The relevant texture engine.</param>
-/// <param name="shaderdet">The relevant shader engine.</param>
-/// <param name="modelsdet">The relevant model engine.</param>
-public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine modelsdet)
+/// <param name="_textures">The relevant texture engine.</param>
+/// <param name="_shaders">The relevant shader engine.</param>
+/// <param name="_models">The relevant model engine.</param>
+public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngine _models)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -42,13 +42,23 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
         GenerateBoxVBO();
     }
 
-    /// <summary>A square.</summary>
+    /// <summary>A 2D square from (0,0,0) to (1,1,0) with normals all equal to (0,0,1).</summary>
     public Renderable Square;
 
-    /// <summary>A line.</summary>
-    Renderable Line;
-    /// <summary>A box.</summary>
-    Renderable Box;
+    /// <summary>A 2D line from (0,0,0) to (1,0,0).</summary>
+    public Renderable Line;
+
+    /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
+    public Renderable Box;
+
+    /// <summary>Texture engine.</summary>
+    public TextureEngine Textures = _textures;
+
+    /// <summary>Shader engine.</summary>
+    public ShaderEngine Shaders = _shaders;
+
+    /// <summary>Model engine.</summary>
+    public ModelEngine Models = _models;
 
     /// <summary>Generates a square.</summary>
     void GenerateSquareVBO()
@@ -145,15 +155,6 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
         Box = builder.Generate();
     }
 
-    /// <summary>Texture engine.</summary>
-    public TextureEngine TEngine = tengine;
-
-    /// <summary>Shader engine.</summary>
-    public ShaderEngine Shaders = shaderdet;
-
-    /// <summary>Model engine.</summary>
-    public ModelEngine Models = modelsdet;
-
     /// <summary>Renders a line box.</summary>
     /// <param name="min">The minimum coordinate.</param>
     /// <param name="max">The maximmum coordinate.</param>
@@ -169,7 +170,7 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
             return;
         }
         GL.ActiveTexture(TextureUnit.Texture0);
-        TEngine.White.Bind();
+        Textures.White.Bind();
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
         Matrix4d mat = Matrix4d.Scale(halfsize.ToOpenTK3D())
@@ -189,13 +190,12 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
     /// <param name="view">The relevant view.</param>
     public void RenderLine(Location start, Location end, View3D view)
     {
-        // TODO: Efficiency!
-        float len = (float)(end - start).Length();
+        double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
-        vecang.Yaw += 180;
+        vecang.Yaw += 180; // TODO: Why are we getting a backwards vector then flipping the yaw? Just get the vector `end - start`? (Is pitch inverted when you do that? If so, why?)
         Matrix4d mat = Matrix4d.Scale(len, 1, 1)
-            * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
-            * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
+            * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
+            * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
             * Matrix4d.CreateTranslation(start.ToOpenTK3D());
         view.SetMatrix(2, mat);
         GL.BindVertexArray(Line.Internal.VAO);
@@ -210,13 +210,13 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
     /// <param name="view">The relevant view.</param>
     public void RenderCylinder(RenderContext context, Location start, Location end, float width, View3D view)
     {
-        float len = (float)(end - start).Length();
+        double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180;
-        Matrix4d mat = Matrix4d.CreateRotationY((float)(90 * MathUtilities.PI180))
+        Matrix4d mat = Matrix4d.CreateRotationY(90 * MathUtilities.PI180)
             * Matrix4d.Scale(len, width, width)
-            * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
-            * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
+            * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
+            * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
              * Matrix4d.CreateTranslation(start.ToOpenTK3D());
         view.SetMatrix(2, mat);
         Models.Cylinder.Draw(context);
