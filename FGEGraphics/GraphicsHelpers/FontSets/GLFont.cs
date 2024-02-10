@@ -26,7 +26,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 
 /// <summary>A class for rendering text within OpenGL.</summary>
-public class GLFont : IDisposable
+public class GLFont : IDisposable, IEquatable<GLFont>
 {
     /// <summary>The base Font engine.</summary>
     public GLFontEngine Engine;
@@ -452,11 +452,16 @@ public class GLFont : IDisposable
     /// <summary>Determines if the specified object is equal to this <see cref="GLFont"/>.</summary>
     public override bool Equals(object obj)
     {
-        return obj is GLFont font &&
-               Name == font.Name &&
-               Size == font.Size &&
-               Bold == font.Bold &&
-               Italic == font.Italic;
+        return obj is GLFont font && Equals(font);
+    }
+
+    /// <summary>Determines if the specified <see cref="GLFont"/> is equal to this <see cref="GLFont"/>.</summary>
+    public bool Equals(GLFont other)
+    {
+        return Name == other.Name &&
+               Size == other.Size &&
+               Bold == other.Bold &&
+               Italic == other.Italic;
     }
 
     /// <summary>Returns a hash code for this <see cref="GLFont"/>.</summary>

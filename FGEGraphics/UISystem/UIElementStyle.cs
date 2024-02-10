@@ -27,8 +27,6 @@ public record UIElementStyle
     /// <summary>What base color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
     public Color4F BaseColor = Color4F.Transparent;
 
-#warning TODO: "Texture" as a class isn't compatible with records or lookup keys like this - need to have a wrapper class that contains textures in reliable ways
-    // TODO: Also is "Func" valid?
     /// <summary>What texture to display (or <c>null</c> for none).</summary>
     public Texture BaseTexture;
 
@@ -44,6 +42,7 @@ public record UIElementStyle
     /// <summary>The text font (or <c>null</c> for none).</summary>
     public FontSet TextFont;
 
+    // TODO: Does the usage of 'Func' work properly in the context of a 'record' that's going into a Dictionary (ie hashcode/equality checks)?
     /// <summary>The styling effect for text.</summary>
     public Func<string, string> TextStyling = str => str;
 
