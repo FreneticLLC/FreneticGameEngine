@@ -199,6 +199,9 @@ public abstract class UIElement
         /// <summary>Styles registered on this element.</summary>
         public List<UIElementStyle> Styles;
 
+        /// <summary>Text objects registered on this element.</summary>
+        public List<UIElementText> Texts;
+
         /// <summary>The current style of this element.</summary>
         public UIElementStyle CurrentStyle;
     }
@@ -209,7 +212,8 @@ public abstract class UIElement
         ToAdd = [],
         ToRemove = [],
         Children = [],
-        Styles = []
+        Styles = [],
+        Texts = []
     };
 
     /// <summary>Adds and removes any queued children.</summary>
@@ -250,13 +254,20 @@ public abstract class UIElement
     /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
     /// <param name="style">The style to register.</param>
     /// <param name="requireText">Whether the style must support text rendering.</param>
-    public UIElementStyle RegisterStyle(UIElementStyle style, bool requireText = false)
+    public UIElementStyle AddStyle(UIElementStyle style, bool requireText = false)
     {
         if (requireText && !style.CanRenderText())
         {
             throw new Exception("Style must support text rendering when 'requireText' is true");
         }
         ElementInternal.Styles.Add(style);
+        if (style.CanRenderText())
+        {
+            foreach (UIElementText text in ElementInternal.Texts)
+            {
+                text.RefreshRenderables();
+            }
+        }
         return style;
     }
 

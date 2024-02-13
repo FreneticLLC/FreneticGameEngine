@@ -86,11 +86,11 @@ public class UIElementText
             Internal.RenderableContent = [];
             RefreshRenderables();
         }
+        parent.ElementInternal.Texts.Add(this);
     }
 
-    // TODO: everything breaks if a style is registered after an element text is created
     /// <summary>Updates the renderable cache based on the parent element's registered styles.</summary>
-    private void RefreshRenderables()
+    public void RefreshRenderables()
     {
         Internal.RenderableContent.Clear();
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
@@ -103,7 +103,6 @@ public class UIElementText
             RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
             if (Internal.MaxWidth > 0)
             {
-                // TODO: this does not work
                 text = FontSet.SplitAppropriately(text, Internal.MaxWidth);
             }
             Internal.RenderableContent[style] = text;

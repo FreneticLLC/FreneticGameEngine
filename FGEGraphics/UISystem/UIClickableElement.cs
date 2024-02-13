@@ -112,9 +112,9 @@ public abstract class UIClickableElement(UIPositionHelper pos, Action onClick = 
         /// <param name="onClick">Ran when the element is clicked.</param>
         public Styled(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos, onClick)
         {
-            StyleNormal = RegisterStyle(normal, requireText);
-            StyleHover = RegisterStyle(hover, requireText);
-            StyleClick = RegisterStyle(click, requireText);
+            StyleNormal = AddStyle(normal, requireText);
+            StyleHover = AddStyle(hover, requireText);
+            StyleClick = AddStyle(click, requireText);
         }
 
         /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
