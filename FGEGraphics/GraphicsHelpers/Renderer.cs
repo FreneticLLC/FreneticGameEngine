@@ -29,10 +29,10 @@ namespace FGEGraphics.GraphicsHelpers;
 /// Rendering utility.
 /// Construct and call <see cref="Init"/>.
 /// </summary>
-/// <param name="tengine">The relevant texture engine.</param>
-/// <param name="shaderdet">The relevant shader engine.</param>
-/// <param name="modelsdet">The relevant model engine.</param>
-public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine modelsdet)
+/// <param name="_textures">The relevant texture engine.</param>
+/// <param name="_shaders">The relevant shader engine.</param>
+/// <param name="_models">The relevant model engine.</param>
+public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngine _models)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -42,13 +42,23 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
         GenerateBoxVBO();
     }
 
-    /// <summary>A square.</summary>
+    /// <summary>A 2D square from (0,0,0) to (1,1,0) with normals all equal to (0,0,1).</summary>
     public Renderable Square;
 
-    /// <summary>A line.</summary>
-    Renderable Line;
-    /// <summary>A box.</summary>
-    Renderable Box;
+    /// <summary>A 2D line from (0,0,0) to (1,0,0).</summary>
+    public Renderable Line;
+
+    /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
+    public Renderable Box;
+
+    /// <summary>Texture engine.</summary>
+    public TextureEngine Textures = _textures;
+
+    /// <summary>Shader engine.</summary>
+    public ShaderEngine Shaders = _shaders;
+
+    /// <summary>Model engine.</summary>
+    public ModelEngine Models = _models;
 
     /// <summary>Generates a square.</summary>
     void GenerateSquareVBO()
@@ -145,15 +155,6 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
         Box = builder.Generate();
     }
 
-    /// <summary>Texture engine.</summary>
-    public TextureEngine TEngine = tengine;
-
-    /// <summary>Shader engine.</summary>
-    public ShaderEngine Shaders = shaderdet;
-
-    /// <summary>Model engine.</summary>
-    public ModelEngine Models = modelsdet;
-
     /// <summary>Renders a line box.</summary>
     /// <param name="min">The minimum coordinate.</param>
     /// <param name="max">The maximmum coordinate.</param>
@@ -169,7 +170,7 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
             return;
         }
         GL.ActiveTexture(TextureUnit.Texture0);
-        TEngine.White.Bind();
+        Textures.White.Bind();
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
         Matrix4d mat = Matrix4d.Scale(halfsize.ToOpenTK3D())
@@ -189,13 +190,12 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
     /// <param name="view">The relevant view.</param>
     public void RenderLine(Location start, Location end, View3D view)
     {
-        // TODO: Efficiency!
-        float len = (float)(end - start).Length();
+        double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
-        vecang.Yaw += 180;
+        vecang.Yaw += 180; // TODO: Why are we getting a backwards vector then flipping the yaw? Just get the vector `end - start`? (Is pitch inverted when you do that? If so, why?)
         Matrix4d mat = Matrix4d.Scale(len, 1, 1)
-            * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
-            * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
+            * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
+            * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
             * Matrix4d.CreateTranslation(start.ToOpenTK3D());
         view.SetMatrix(2, mat);
         GL.BindVertexArray(Line.Internal.VAO);
@@ -210,13 +210,13 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
     /// <param name="view">The relevant view.</param>
     public void RenderCylinder(RenderContext context, Location start, Location end, float width, View3D view)
     {
-        float len = (float)(end - start).Length();
+        double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180;
-        Matrix4d mat = Matrix4d.CreateRotationY((float)(90 * MathUtilities.PI180))
+        Matrix4d mat = Matrix4d.CreateRotationY(90 * MathUtilities.PI180)
             * Matrix4d.Scale(len, width, width)
-            * Matrix4d.CreateRotationY((float)(vecang.Y * MathUtilities.PI180))
-            * Matrix4d.CreateRotationZ((float)(vecang.Z * MathUtilities.PI180))
+            * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
+            * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
              * Matrix4d.CreateTranslation(start.ToOpenTK3D());
         view.SetMatrix(2, mat);
         Models.Cylinder.Draw(context);
@@ -379,25 +379,26 @@ public class Renderer(TextureEngine tengine, ShaderEngine shaderdet, ModelEngine
     }
 
     /// <summary>Renders a billboard along a line.</summary>
-    /// <param name="pos">Start position.</param>
-    /// <param name="p2">End position.</param>
+    /// <param name="start">Start position.</param>
+    /// <param name="end">End position.</param>
     /// <param name="width">Width of the line.</param>
-    /// <param name="facing">Facing target.</param>
+    /// <param name="facing">Facing target, normally the camera position.</param>
     /// <param name="view">Relevant view.</param>
-    public void RenderBilboardLine(Location pos, Location p2, float width, Location facing, View3D view)
+    public void RenderBilboardLine(Location start, Location end, float width, Location facing, View3D view)
     {
-        Location center = (pos + p2) * 0.5;
+        Location center = (start + end) * 0.5;
         double viewLength = center.Distance(facing);
-        Location lookDir = (center - facing) / viewLength;
-        double lineLength = pos.Distance(p2);
+        double lineLength = start.Distance(end);
         if (viewLength < 0.001 || lineLength < 0.001)
         {
             return;
         }
-        Location forwardDir = (p2 - pos) / lineLength;
+        Location lookDir = (center - facing) / viewLength;
+        Location forwardDir = (end - start) / lineLength;
         Location right = forwardDir.CrossProduct(lookDir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)lineLength * 0.5f, width, 1f);
-        Matrix4d m2 = new(right.X, forwardDir.X, lookDir.X, center.X,
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.Scale(width, lineLength, 1);
+        Matrix4d m2 = new(
+            right.X, forwardDir.X, lookDir.X, center.X,
             right.Y, forwardDir.Y, lookDir.Y, center.Y,
             right.Z, forwardDir.Z, lookDir.Z, center.Z,
             0, 0, 0, 1);

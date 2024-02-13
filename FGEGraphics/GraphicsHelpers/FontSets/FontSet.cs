@@ -28,7 +28,7 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 /// <summary>Contains various <see cref="GLFont"/>s needed to render fancy text.</summary>
 /// <param name="_name">The name of the set.</param>
 /// <param name="engine">The backing engine.</param>
-public class FontSet(string _name, FontSetEngine engine)
+public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
 {
     /// <summary>The backing engine.</summary>
     public FontSetEngine Engine = engine;
@@ -827,10 +827,10 @@ public class FontSet(string _name, FontSetEngine engine)
         return FORMAT_CODES_MATCHER.IsMatch(c);
     }
 
-    /// <summary>Determines if the specified object is equal to this <see cref="FontSet"/>.</summary>
-    public override bool Equals(object obj)
+    /// <summary>Determines if the specified <see cref="FontSet"/> is equal to this <see cref="FontSet"/>.</summary>
+    public bool Equals(FontSet other)
     {
-        return obj is FontSet set && FontDefault.Equals(set.FontDefault);
+        return FontDefault.Equals(other.FontDefault);
     }
 
     /// <summary>Returns a hash code for this <see cref="FontSet"/>.</summary>

@@ -18,7 +18,9 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
-public class UIScrollBox : UIElement
+/// <remarks>Constructs the UI scroll box.</remarks>
+/// <param name="pos">The position of the element.</param>
+public class UIScrollBox(UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The current scroll position.</summary>
     public int Scroll = 0;
@@ -28,13 +30,6 @@ public class UIScrollBox : UIElement
     /// 0 for unlimited scrolling.
     /// </summary>
     public int MaxScroll = 0;
-
-    /// <summary>Constructs the UI scroll box.</summary>
-    /// <param name="pos">The position of the element.</param>
-    public UIScrollBox(UIPositionHelper pos)
-        : base(pos)
-    {
-    }
 
     /// <summary>(Internal) Whether to watch the mouse scroll wheel.</summary>
     public bool WatchMouse = false;
@@ -57,7 +52,7 @@ public class UIScrollBox : UIElement
     /// <returns>A list of visible child elements containing the position.</returns>
     public override List<UIElement> GetChildrenAt(int x, int y)
     {
-        List<UIElement> found = new();
+        List<UIElement> found = [];
         if (SelfContains(x, y))
         {
             foreach (UIElement element in ElementInternal.Children)

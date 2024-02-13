@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
@@ -69,8 +70,8 @@ public class UIScreen : UIElement
     {
         if (ResetOnRender)
         {
-            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0.5f, 0.5f, 1f });
-            GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
+            GL.ClearBuffer(ClearBuffer.Color, 0, [0f, 0.5f, 0.5f, 1f]);
+            GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
             GraphicsUtil.CheckError("RenderScreen - Reset");
         }
     }

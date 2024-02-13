@@ -24,7 +24,7 @@ namespace FGECore.MathHelpers;
 /// Occupies 16 bytes, calculated as 4 * 4, as it has 4 fields (R, G, B, A) each occupying 4 bytes (a float).
 /// </summary>
 [StructLayout(LayoutKind.Explicit)]
-public struct Color4F
+public struct Color4F : IEquatable<Color4F>
 {
     /// <summary>Constructs the color 4F with full alpha.</summary>
     /// <param name="_r">Red.</param>
@@ -43,7 +43,7 @@ public struct Color4F
     /// <param name="_g">Green.</param>
     /// <param name="_b">Blue.</param>
     /// <param name="_a">Alpha.</param>
-    public Color4F(float _r, float _g, float _b ,float _a)
+    public Color4F(float _r, float _g, float _b, float _a)
     {
         R = _r;
         G = _g;
@@ -91,10 +91,7 @@ public struct Color4F
     /// <summary>Integer R.</summary>
     public int IR
     {
-        readonly get
-        {
-            return (int)(R * 255);
-        }
+        readonly get => (int)(R * 255);
         set
         {
             R = value * BYTE_TO_FLOAT;
@@ -104,10 +101,7 @@ public struct Color4F
     /// <summary>Integer G.</summary>
     public int IG
     {
-        readonly get
-        {
-            return (int)(G * 255);
-        }
+        readonly get => (int)(G * 255);
         set
         {
             G = value * BYTE_TO_FLOAT;
@@ -117,10 +111,7 @@ public struct Color4F
     /// <summary>Integer B.</summary>
     public int IB
     {
-        readonly get
-        {
-            return (int)(B * 255);
-        }
+        readonly get => (int)(B * 255);
         set
         {
             B = value * BYTE_TO_FLOAT;
@@ -130,10 +121,7 @@ public struct Color4F
     /// <summary>Integer A.</summary>
     public int IA
     {
-        readonly get
-        {
-            return (int)(A * 255);
-        }
+        readonly get => (int)(A * 255);
         set
         {
             A = value * BYTE_TO_FLOAT;
@@ -143,23 +131,13 @@ public struct Color4F
     /// <summary>Gets or sets the RGB color object for this color.</summary>
     public Color3F RGB
     {
-        readonly get
-        {
-            return new Color3F(R, G, B);
-        }
+        readonly get => new(R, G, B);
         set
         {
             R = value.R;
             G = value.G;
             B = value.B;
         }
-    }
-
-    /// <summary>Returns a string form of this color.</summary>
-    /// <returns>The string form.</returns>
-    public override readonly string ToString()
-    {
-        return "(" + R + ", " + G + ", " + B + ", " + A + ")";
     }
 
     /// <summary>Returns a 16-byte set representation of this color (4 x 32-bit float).</summary>
@@ -323,4 +301,39 @@ public struct Color4F
 
     /// <summary>Sample Color4F (0, 0, 0, 0).</summary>
     public static readonly Color4F Transparent = new(0, 0, 0, 0);
+
+    #region Operators
+    /// <summary>Returns a string form of this color.</summary>
+    public override readonly string ToString() => $"({R}, {G}, {B}, {A})";
+
+    /// <summary>Returns a hash code for this <see cref="Color4F"/>.</summary>
+    public override readonly int GetHashCode()
+    {
+        return HashCode.Combine(R, G, B, A);
+    }
+
+    /// <summary>Determines if the specified object is equal to this <see cref="Color4F"/>.</summary>
+    public override readonly bool Equals(object obj)
+    {
+        return obj is Color4F f && Equals(f);
+    }
+
+    /// <summary>Determines if the specified <see cref="Color4F"/> is equal to this <see cref="Color4F"/>.</summary>
+    public readonly bool Equals(Color4F other)
+    {
+        return R == other.R && G == other.G && B == other.B && A == other.A;
+    }
+
+    /// <summary>Determines if the two <see cref="Color4F"/>'s are equal.</summary>
+    public static bool operator ==(Color4F left, Color4F right)
+    {
+        return left.Equals(right);
+    }
+
+    /// <summary>Determines if the two <see cref="Color4F"/>'s are not-equal.</summary>
+    public static bool operator !=(Color4F left, Color4F right)
+    {
+        return !left.Equals(right);
+    }
+    #endregion
 }

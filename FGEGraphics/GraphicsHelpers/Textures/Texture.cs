@@ -24,7 +24,7 @@ using OpenTK.Graphics.OpenGL4;
 namespace FGEGraphics.GraphicsHelpers.Textures;
 
 /// <summary>Wraps an OpenGL texture.</summary>
-public class Texture
+public class Texture : IEquatable<Texture>
 {
     /// <summary>The texture engine that owns this texture.</summary>
     public TextureEngine Engine;
@@ -118,5 +118,23 @@ public class Texture
     public override string ToString()
     {
         return Name;
+    }
+
+    /// <summary>Returns a hash code for this <see cref="Texture"/>.</summary>
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
+    }
+
+    /// <summary>Determines if the specified <see cref="Texture"/> is equal to this <see cref="Texture"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is Texture texture && Equals(texture);
+    }
+
+    /// <summary>Determines if the specified object is equal to this <see cref="Texture"/>.</summary>
+    public bool Equals(Texture other)
+    {
+        return Name == other.Name;
     }
 }

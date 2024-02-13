@@ -53,7 +53,7 @@ namespace FGECore.UtilitySystems;
 /// <summary>Simplex noise helper.</summary>
 public static class SimplexNoise
 {
-    /// <summary>Generate 2D simplex noise.</summary>
+    /// <summary>Generate 2D simplex noise, in a range of approximately [0..1].</summary>
     /// <param name="x">The X coordinate.</param>
     /// <param name="y">The Y coordinate.</param>
     /// <returns>The noise value.</returns>
@@ -63,7 +63,7 @@ public static class SimplexNoise
         return (SimplexNoiseInternal.Generate(Math.Abs(x), Math.Abs(y)) + 1.0) * 0.5;
     }
 
-    /// <summary>Generate 3D simplex noise.</summary>
+    /// <summary>Generate 3D simplex noise, in a range of approximately [0..1].</summary>
     /// <param name="x">The X coordinate.</param>
     /// <param name="y">The Y coordinate.</param>
     /// <param name="z">The Z coordinate.</param>

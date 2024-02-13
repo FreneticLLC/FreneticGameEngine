@@ -71,7 +71,7 @@ public class UIPositionHelper
             public Func<T> GetterVal;
 
             /// <summary>Gets the current value for this coordinate.</summary>
-            public T Get()
+            public readonly T Get()
             {
                 if (Mode == UIPosMode.CONSTANT)
                 {

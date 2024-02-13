@@ -42,6 +42,7 @@ public record UIElementStyle
     /// <summary>The text font (or <c>null</c> for none).</summary>
     public FontSet TextFont;
 
+    // TODO: Does the usage of 'Func' work properly in the context of a 'record' that's going into a Dictionary (ie hashcode/equality checks)?
     /// <summary>The styling effect for text.</summary>
     public Func<string, string> TextStyling = str => str;
 
