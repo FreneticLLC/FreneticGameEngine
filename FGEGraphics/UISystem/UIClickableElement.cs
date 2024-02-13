@@ -84,9 +84,9 @@ public abstract class UIClickableElement(UIPositionHelper pos, Action onClick = 
         }
         if (Clicked is not null && Pressed && Hovered)
         {
+            Pressed = false;
             Clicked();
         }
-        Pressed = false;
     }
 
     /// <summary>Represents a clickable UI element with distinct normal, hovering, and clicking styles.</summary>

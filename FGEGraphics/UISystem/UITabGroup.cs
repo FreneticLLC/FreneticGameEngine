@@ -46,6 +46,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
         if (main)
         {
             button.Enabled = false;
+            button.Pressed = true;
             SelectedButton = button;
             SelectedTab = tab;
         }
@@ -54,9 +55,11 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
             if (SelectedButton is not null)
             {
                 SelectedButton.Enabled = true;
+                SelectedButton.Pressed = false;
                 SelectedTab.SwitchFrom();
             }
             button.Enabled = false;
+            button.Pressed = true;
             tab.SwitchTo();
             TabSwitched(new(SelectedTab, tab));
             SelectedButton = button;
