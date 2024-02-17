@@ -40,6 +40,19 @@ public class ViewUI2D
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
 
+    /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
+    public struct InternalData()
+    {
+        /// <summary>The current main screen.</summary>
+        public UIScreen CurrentScreen;
+
+        /// <summary>Debug info about hovered UI elements.</summary>
+        public List<string> DebugInfo = [];
+    }
+
+    /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
+    public InternalData Internal;
+
     /// <summary>Constructs the view.</summary>
     /// <param name="gameClient">Backing client window.</param>
     public ViewUI2D(GameClientWindow gameClient)
@@ -48,25 +61,23 @@ public class ViewUI2D
         UIContext = new RenderContext2D();
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
+        Internal = new();
     }
 
-    /// <summary>
-    /// Generally do not set this directly.
-    /// Instead use <see cref="CurrentScreen"/>.
-    /// </summary>
-    public UIScreen InternalCurrentScreen;
+    /// <summary>Whether this UI view is in 'debug' mode.</summary>
+    public bool Debug;
 
     /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
     {
-        get => InternalCurrentScreen;
+        get => Internal.CurrentScreen;
         set
         {
-            if (value != InternalCurrentScreen)
+            if (value != Internal.CurrentScreen)
             {
-                InternalCurrentScreen?.SwitchFrom();
-                InternalCurrentScreen = value;
-                InternalCurrentScreen?.SwitchTo();
+                Internal.CurrentScreen?.SwitchFrom();
+                Internal.CurrentScreen = value;
+                Internal.CurrentScreen?.SwitchTo();
             }
         }
     }
@@ -131,14 +142,42 @@ public class ViewUI2D
                     {
                         elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }
+                    if (Debug)
+                    {
+                        Engine.Textures.White.Bind();
+                        Renderer2D.SetColor(Color4F.Red);
+
+                        // TODO: Not this!
+                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + 1, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
+                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y + elem.Height, elem.X + elem.Width, elem.Y + elem.Height + 1, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
+                        Rendering.RenderRectangle(UIContext, elem.X + elem.Width, elem.Y, elem.X + elem.Width + 1, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
+                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + 1, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
+
+                        /*Rendering.RenderLine((elem.X, elem.Y), (elem.X, elem.Y + elem.Height));
+                        Rendering.RenderLine((elem.X, elem.Y + elem.Height), (elem.X + elem.Width, elem.Y + elem.Height));
+                        Rendering.RenderLine((elem.X + elem.Width, elem.Y + elem.Height), (elem.X + elem.Width, elem.Y));
+                        Rendering.RenderLine((elem.X + elem.Width, elem.Y), (elem.X, elem.Y));*/
+                        Renderer2D.SetColor(Color4F.White);
+
+                        if (elem.Hovered)
+                        {
+                            Internal.DebugInfo.Add(elem.ToString());
+                        }
+                    }
                 }
                 finally
                 {
                     StackNoteHelper.Pop();
                 }
             }
+            if (Debug && Internal.DebugInfo.Count > 0)
+            {
+                string text = string.Join("\n\n", Internal.DebugInfo);
+                Client.FontSets.Standard.DrawFancyText(text, new(Client.MouseX, Client.MouseY, 0));
+            }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
+            Internal.DebugInfo.Clear();
         }
         finally
         {
