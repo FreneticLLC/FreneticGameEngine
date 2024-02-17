@@ -63,6 +63,30 @@ public abstract class UIElement
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender;
 
+    /// <summary>Gets or sets whether this element can be interacted with.</summary>
+    public bool Enabled
+    {
+        get => ElementInternal.Enabled;
+        set
+        {
+            ElementInternal.Enabled = value;
+            if (!value)
+            {
+                Hovered = false;
+                Pressed = false;
+            }
+        }
+    }
+
+    /// <summary>Whether the mouse is hovering over this element.</summary>
+    public bool Hovered = false;
+
+    /// <summary>Whether this element is being clicked.</summary>
+    public bool Pressed = false;
+
+    /// <summary>Ran when this element is clicked.</summary>
+    public event Action Clicked;
+
     /// <summary>
     /// Priority for rendering logic.
     /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
@@ -179,16 +203,16 @@ public abstract class UIElement
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public struct ElementInternalData
+    public struct ElementInternalData()
     {
         /// <summary>Current child elements.</summary>
-        public List<UIElement> Children;
+        public List<UIElement> Children = [];
 
         /// <summary>Elements queued to be added as children.</summary>
-        public List<UIElement> ToAdd;
+        public List<UIElement> ToAdd = [];
 
         /// <summary>Elements queued to be removed as children.</summary>
-        public List<UIElement> ToRemove;
+        public List<UIElement> ToRemove = [];
 
         /// <summary>Whether the mouse left button was previously down.</summary>
         public bool MousePreviouslyDown;
@@ -196,25 +220,21 @@ public abstract class UIElement
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
+        /// <summary>Whether this element can be interacted with.</summary>
+        public bool Enabled = true;
+
         /// <summary>Styles registered on this element.</summary>
-        public List<UIElementStyle> Styles;
+        public List<UIElementStyle> Styles = [];
 
         /// <summary>Text objects registered on this element.</summary>
-        public List<UIElementText> Texts;
+        public List<UIElementText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
         public UIElementStyle CurrentStyle;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public ElementInternalData ElementInternal = new()
-    {
-        ToAdd = [],
-        ToRemove = [],
-        Children = [],
-        Styles = [],
-        Texts = []
-    };
+    public ElementInternalData ElementInternal = new();
 
     /// <summary>Adds and removes any queued children.</summary>
     public void CheckChildren()
@@ -308,20 +328,38 @@ public abstract class UIElement
                 if (!element.ElementInternal.HoverInternal)
                 {
                     element.ElementInternal.HoverInternal = true;
+                    if (Enabled)
+                    {
+                        element.Hovered = true;
+                    }
                     element.MouseEnter();
                 }
                 if (mDown && !ElementInternal.MousePreviouslyDown)
                 {
+                    if (Enabled)
+                    {
+                        element.Pressed = true;
+                    }
                     element.MouseLeftDown(mX, mY);
                 }
                 else if (!mDown && ElementInternal.MousePreviouslyDown)
                 {
+                    if (Enabled && element.Clicked is not null)
+                    {
+                        element.Clicked();
+                        element.Pressed = false;
+                    }
                     element.MouseLeftUp(mX, mY);
                 }
             }
             else if (element.ElementInternal.HoverInternal)
             {
                 element.ElementInternal.HoverInternal = false;
+                if (Enabled)
+                {
+                    element.Hovered = false;
+                    element.Pressed = false;
+                }
                 element.MouseLeave();
                 if (mDown && !ElementInternal.MousePreviouslyDown)
                 {
@@ -539,4 +577,6 @@ public abstract class UIElement
     public virtual void Destroy()
     {
     }
+
+    public override string ToString() => $"{base.ToString()}\n  Position = {Position}\n  Current Style = {Style}";
 }
