@@ -35,9 +35,13 @@ public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsPropert
     public Location Axis = axis;
 
     /// <inheritdoc/>
-    public override LinearAxisLimit CreateJointDescription()
+    public override LinearAxisLimit CreateJointDescription() => new()
     {
-        // TODO: Assume the CPos values?
-        return new LinearAxisLimit() { LocalAxis = Axis.ToNumerics(), MinimumOffset = Min, MaximumOffset = Max, LocalOffsetA = RelativePositionOne.ToNumerics(), LocalOffsetB = RelativePositionTwo.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-    }
+        LocalAxis = Axis.ToNumerics(),
+        MinimumOffset = Min,
+        MaximumOffset = Max,
+        LocalOffsetA = RelativePositionOne.ToNumerics(),
+        LocalOffsetB = RelativePositionTwo.ToNumerics(),
+        SpringSettings = new SpringSettings(20, 1)
+    };
 }

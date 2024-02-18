@@ -22,9 +22,34 @@ public class JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Loc
     /// <summary>The direction of the slider axis.</summary>
     public Location Direction = dir.Normalize();
 
+    /// <summary>Offset from <see cref="PhysicsJointBase.One"/> to its anchor.</summary>
+    public Location OffsetOne = Location.Zero;
+
+    /// <summary>Offset from <see cref="PhysicsJointBase.Two"/> to its anchor.</summary>
+    public Location OffsetTwo = Location.Zero;
+
+    /// <summary>Maximum speed this servo can try to move at.</summary>
+    public float MaxSpeed = float.MaxValue;
+
+    /// <summary>Maximum amount of force this servo can output.</summary>
+    public float MaxForce = float.MaxValue;
+
+    /// <summary>(?) TODO: Explain what this done.</summary>
+    public float BaseSpeed = 0;
+
+    /// <summary>Target number of undamped oscillations per second.</summary>
+    public float SpringFrequency = 20;
+
+    /// <summary>Ratio of the spring's actual damping to its critical damping. 0 is undamped, 1 is critically damped, and higher values are overdamped.</summary>
+    public float SpringDamping = 1;
+
     /// <inheritdoc/>
-    public override PointOnLineServo CreateJointDescription()
+    public override PointOnLineServo CreateJointDescription() => new()
     {
-        return new PointOnLineServo() { LocalDirection = Direction.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default };
-    }
+        LocalDirection = Direction.ToNumerics(),
+        LocalOffsetA = OffsetOne.ToNumerics(),
+        LocalOffsetB = OffsetTwo.ToNumerics(),
+        SpringSettings = new(SpringFrequency, SpringDamping),
+        ServoSettings = new(MaxSpeed, BaseSpeed, MaxForce)
+    };
 }

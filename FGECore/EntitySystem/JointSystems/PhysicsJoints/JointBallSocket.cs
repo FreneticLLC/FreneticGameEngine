@@ -26,8 +26,10 @@ public class JointBallSocket(EntityPhysicsProperty e1, EntityPhysicsProperty e2,
     public Location PositionTwo = pos2;
 
     /// <inheritdoc/>
-    public override BallSocket CreateJointDescription()
+    public override BallSocket CreateJointDescription() => new()
     {
-        return new BallSocket() { LocalOffsetA = PositionOne.ToNumerics(), LocalOffsetB = PositionTwo.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-    }
+        LocalOffsetA = PositionOne.ToNumerics(),
+        LocalOffsetB = PositionTwo.ToNumerics(),
+        SpringSettings = new SpringSettings(20, 1)
+    };
 }

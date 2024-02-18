@@ -29,6 +29,6 @@ public class JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : Phy
         RigidPose rt2 = new(Two.Position.ToNumerics(), Two.Orientation.ToNumerics());
         RigidPose.Invert(rt2, out RigidPose rt2inv);
         RigidPose.MultiplyWithoutOverlap(rt1, rt2inv, out Offset);
-        return new Weld() { LocalOffset = Offset.Position, LocalOrientation = Offset.Orientation, SpringSettings = new SpringSettings(20, 1) };
+        return new() { LocalOffset = Offset.Position, LocalOrientation = Offset.Orientation, SpringSettings = new SpringSettings(20, 1) };
     }
 }

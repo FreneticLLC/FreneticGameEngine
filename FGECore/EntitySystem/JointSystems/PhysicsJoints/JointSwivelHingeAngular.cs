@@ -26,8 +26,10 @@ public class JointSwivelHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProp
     public Location WorldTwist = twist;
 
     /// <inheritdoc/>
-    public override AngularSwivelHinge CreateJointDescription()
+    public override AngularSwivelHinge CreateJointDescription() => new()
     {
-        return new AngularSwivelHinge() { LocalHingeAxisB = WorldHinge.ToNumerics(), LocalSwivelAxisA = WorldTwist.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-    }
+        LocalHingeAxisB = WorldHinge.ToNumerics(),
+        LocalSwivelAxisA = WorldTwist.ToNumerics(),
+        SpringSettings = new SpringSettings(20, 1)
+    };
 }

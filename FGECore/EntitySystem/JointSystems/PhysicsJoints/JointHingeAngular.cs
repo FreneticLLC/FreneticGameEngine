@@ -23,8 +23,10 @@ public class JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e
     public Location Axis = hingeAxis;
 
     /// <inheritdoc/>
-    public override AngularHinge CreateJointDescription()
+    public override AngularHinge CreateJointDescription() => new()
     {
-        return new AngularHinge() { LocalHingeAxisA = Axis.ToNumerics(), LocalHingeAxisB = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-    }
+        LocalHingeAxisA = Axis.ToNumerics(),
+        LocalHingeAxisB = Axis.ToNumerics(),
+        SpringSettings = new SpringSettings(20, 1)
+    };
 }

@@ -22,9 +22,38 @@ class JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Locatio
     /// <summary>The plane normal axis.</summary>
     public Location Axis = axis;
 
+    /// <summary>Target offset distance between the two entities' anchor points.</summary>
+    public float TargetOffset = 1f;
+
+    /// <summary>Maximum speed this servo can try to move at.</summary>
+    public float MaxSpeed = float.MaxValue;
+    
+    /// <summary>Maximum amount of force this servo can output.</summary>
+    public float MaxForce = float.MaxValue;
+
+    /// <summary>(?) TODO: Explain what this done.</summary>
+    public float BaseSpeed = 0;
+
+    /// <summary>Target number of undamped oscillations per second.</summary>
+    public float SpringFrequency = 20;
+
+    /// <summary>Ratio of the spring's actual damping to its critical damping. 0 is undamped, 1 is critically damped, and higher values are overdamped.</summary>
+    public float SpringDamping = 1;
+
+    /// <summary>Offset from <see cref="PhysicsJointBase.One"/> to its anchor.</summary>
+    public Location OffsetOne = Location.Zero;
+
+    /// <summary>Offset from <see cref="PhysicsJointBase.Two"/> to its anchor.</summary>
+    public Location OffsetTwo = Location.Zero;
+
     /// <inheritdoc/>
-    public override LinearAxisServo CreateJointDescription()
+    public override LinearAxisServo CreateJointDescription() => new()
     {
-        return new LinearAxisServo() { LocalPlaneNormal = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default, TargetOffset = 1f };
-    }
+        LocalPlaneNormal = Axis.ToNumerics(),
+        LocalOffsetA = OffsetOne.ToNumerics(),
+        LocalOffsetB = OffsetTwo.ToNumerics(),
+        SpringSettings = new SpringSettings(SpringFrequency, SpringDamping),
+        ServoSettings = new(MaxSpeed, BaseSpeed, MaxForce),
+        TargetOffset = TargetOffset
+    };
 }

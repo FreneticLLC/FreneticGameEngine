@@ -32,9 +32,5 @@ public class JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, f
     public Location Ent2Pos = e2pos;
 
     /// <inheritdoc/>
-    public override DistanceLimit CreateJointDescription()
-    {
-        DistanceLimit dl = new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
-        return dl;
-    }
+    public override DistanceLimit CreateJointDescription() => new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
 }
