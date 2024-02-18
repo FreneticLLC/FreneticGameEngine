@@ -25,11 +25,11 @@ public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsPropert
     /// <summary>The maximum distance between the two entities.</summary>
     public float Max = max;
 
-    /// <summary>The position relative to <see cref="PhysicsJointBase.One"/>.</summary>
-    public Location RelativePositionOne = relPos1;
+    /// <summary>Offset from <see cref="PhysicsJointBase.One"/> to its anchor.</summary>
+    public Location OffsetOne = relPos1;
 
-    /// <summary>The position relative to <see cref="PhysicsJointBase.Two"/>.</summary>
-    public Location RelativePositionTwo = relPos2;
+    /// <summary>Offset from <see cref="PhysicsJointBase.Two"/> to its anchor.</summary>
+    public Location OffsetTwo = relPos2;
 
     /// <summary>The constrained axis.</summary>
     public Location Axis = axis;
@@ -40,8 +40,8 @@ public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsPropert
         LocalAxis = Axis.ToNumerics(),
         MinimumOffset = Min,
         MaximumOffset = Max,
-        LocalOffsetA = RelativePositionOne.ToNumerics(),
-        LocalOffsetB = RelativePositionTwo.ToNumerics(),
+        LocalOffsetA = OffsetOne.ToNumerics(),
+        LocalOffsetB = OffsetTwo.ToNumerics(),
         SpringSettings = new SpringSettings(20, 1)
     };
 }
