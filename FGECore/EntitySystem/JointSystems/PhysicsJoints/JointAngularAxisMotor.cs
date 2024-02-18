@@ -23,6 +23,13 @@ public class JointAngularAxisMotor(EntityPhysicsProperty e1, EntityPhysicsProper
     /// <summary>Current target speed.</summary>
     public float TargetVelocity = 0;
 
+    /// <summary>Sets the target velocity and immediately reapplies.</summary>
+    public void SetTargetVelocity(float targetVel)
+    {
+        TargetVelocity = targetVel;
+        Reapply();
+    }
+
     /// <inheritdoc/>
     public override AngularAxisMotor CreateJointDescription() => new()
     {

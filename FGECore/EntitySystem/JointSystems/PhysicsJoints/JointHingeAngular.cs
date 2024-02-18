@@ -13,20 +13,35 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using BepuPhysics.Constraints;
+using BepuPhysics;
+using BepuUtilities;
+using System.Numerics;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
 /// <summary>A joint that works like the angular portion of a hinge. The two entities can only rotate relative to each other around the hinge axis.</summary>
-public class JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : PhysicsJointBase<AngularHinge>(e1, e2)
+public class JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : PhysicsJointBase<AngularHinge>(e1, e2)
 {
-    /// <summary>The hinge axis. For a door, this with be vertical.</summary>
-    public Location Axis = hingeAxis;
+    /// <summary>The hinge axis, relative to <see cref="PhysicsJointBase.One"/>.</summary>
+    public Location AxisOne = Location.UnitX;
+
+    /// <summary>The hinge axis, relative to <see cref="PhysicsJointBase.Two"/>.</summary>
+    public Location AxisTwo = Location.UnitY;
+
+    /// <summary>Assuming that <see cref="AxisTwo"/> is a car's up axis, updates <see cref="AxisOne"/> to be a wheel steering axis for the given angle around the car's up axis.</summary>
+    public void SetSteerAngle(float angle)
+    {
+        Matrix3x3.CreateFromAxisAngle(AxisTwo.ToNumerics(), -angle, out Matrix3x3 rotation);
+        Matrix3x3.Transform(AxisOne.ToNumerics(), rotation, out Vector3 newAxisA);
+        AxisOne = newAxisA.ToLocation();
+        Reapply();
+    }
 
     /// <inheritdoc/>
     public override AngularHinge CreateJointDescription() => new()
     {
-        LocalHingeAxisA = Axis.ToNumerics(),
-        LocalHingeAxisB = Axis.ToNumerics(),
+        LocalHingeAxisA = AxisOne.ToNumerics(),
+        LocalHingeAxisB = AxisTwo.ToNumerics(),
         SpringSettings = new SpringSettings(20, 1)
     };
 }
