@@ -19,11 +19,10 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>Constrains two entities to remain on a shared plane using a servo.</summary>
 class JointAxisServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : PhysicsJointBase<LinearAxisServo>(e1, e2)
 {
-
     /// <summary>The plane normal axis.</summary>
     public Location Axis = axis;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override LinearAxisServo CreateJointDescription()
     {
         return new LinearAxisServo() { LocalPlaneNormal = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default, TargetOffset = 1f };

@@ -19,11 +19,10 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>A joint that works like the angular portion of a hinge. The two entities can only rotate relative to each other around the hinge axis.</summary>
 public class JointHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hingeAxis) : PhysicsJointBase<AngularHinge>(e1, e2)
 {
-
     /// <summary>The hinge axis. For a door, this with be vertical.</summary>
     public Location Axis = hingeAxis;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override AngularHinge CreateJointDescription()
     {
         return new AngularHinge() { LocalHingeAxisA = Axis.ToNumerics(), LocalHingeAxisB = Axis.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };

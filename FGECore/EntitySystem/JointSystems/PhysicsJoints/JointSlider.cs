@@ -19,11 +19,10 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>A joint that constrains two entities to slide along a single line relative to each other.</summary>
 public class JointSlider(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location dir) : PhysicsJointBase<PointOnLineServo>(e1, e2)
 {
-
     /// <summary>The direction of the slider axis.</summary>
     public Location Direction = dir.Normalize();
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override PointOnLineServo CreateJointDescription()
     {
         return new PointOnLineServo() { LocalDirection = Direction.ToNumerics(), SpringSettings = new SpringSettings(20, 1), ServoSettings = ServoSettings.Default };

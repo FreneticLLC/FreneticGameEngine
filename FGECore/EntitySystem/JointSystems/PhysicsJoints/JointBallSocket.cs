@@ -19,14 +19,13 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>A joint that works like a ball in a socket (like how human arms are attached to shoulders).</summary>
 public class JointBallSocket(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location pos1, Location pos2) : PhysicsJointBase<BallSocket>(e1, e2)
 {
-
     /// <summary>The world space position that the ball is centered on.</summary>
     public Location PositionOne = pos1;
 
     /// <summary>The world space position that the ball is centered on.</summary>
     public Location PositionTwo = pos2;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override BallSocket CreateJointDescription()
     {
         return new BallSocket() { LocalOffsetA = PositionOne.ToNumerics(), LocalOffsetB = PositionTwo.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };

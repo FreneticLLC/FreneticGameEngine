@@ -19,11 +19,10 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>Constrains two bodies to be perfectly glued together.</summary>
 public class JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : PhysicsJointBase<Weld>(e1, e2)
 {
-
     /// <summary>The tracked offset between the entities.</summary>
     public RigidPose Offset;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override Weld CreateJointDescription()
     {
         RigidPose rt1 = new(One.Position.ToNumerics(), One.Orientation.ToNumerics());

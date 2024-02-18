@@ -19,7 +19,6 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>Limits the relative motion of two entities along a linear axis.</summary>
 public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float min, float max, Location relPos1, Location relPos2, Location axis) : PhysicsJointBase<LinearAxisLimit>(e1, e2)
 {
-
     /// <summary>The minimum distance between the two entities.</summary>
     public float Min = min;
 
@@ -35,7 +34,7 @@ public class JointLinearAxisLimit(EntityPhysicsProperty e1, EntityPhysicsPropert
     /// <summary>The constrained axis.</summary>
     public Location Axis = axis;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override LinearAxisLimit CreateJointDescription()
     {
         // TODO: Assume the CPos values?

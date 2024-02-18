@@ -19,7 +19,6 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>Constrains two entities to have a specific position on each body maintain a specific distance from each other.</summary>
 public class JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, float _min, float _max, Location e1pos, Location e2pos) : PhysicsJointBase<DistanceLimit>(e1, e2)
 {
-
     /// <summary>The minimum allowed distance.</summary>
     public float Min = _min;
 
@@ -32,7 +31,7 @@ public class JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, f
     /// <summary>The position relative to entity <see cref="PhysicsJointBase.Two"/>'s body.</summary>
     public Location Ent2Pos = e2pos;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
+    /// <inheritdoc/>
     public override DistanceLimit CreateJointDescription()
     {
         DistanceLimit dl = new(Ent1Pos.ToNumerics(), Ent2Pos.ToNumerics(), Min, Max, new SpringSettings(20, 1));
