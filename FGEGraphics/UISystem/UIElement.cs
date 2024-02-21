@@ -578,5 +578,5 @@ public abstract class UIElement
     {
     }
 
-    public override string ToString() => $"{base.ToString()}\n  Position = {Position}\n  Current Style = {Style}";
+    //public override string ToString() => $"{base.ToString()}\n  Position = {Position}\n  Current Style = {Style}";
 }

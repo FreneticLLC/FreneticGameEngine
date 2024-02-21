@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore;
@@ -16,6 +17,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
 using OpenTK;
@@ -161,7 +163,9 @@ public class ViewUI2D
 
                         if (elem.Hovered)
                         {
-                            Internal.DebugInfo.Add(elem.ToString());
+                            string name = $"^5^u{elem.GetType()}";
+                            string info = $"^r^0^e^7Position: ({elem.X}, {elem.Y}) ^&| ^7Dimensions: ({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: {elem.LastAbsoluteRotation}";
+                            Internal.DebugInfo.Add($"{name}\n{info}");
                         }
                     }
                 }
@@ -170,10 +174,14 @@ public class ViewUI2D
                     StackNoteHelper.Pop();
                 }
             }
-            if (Debug && Internal.DebugInfo.Count > 0)
+            if (Debug)
             {
-                string text = string.Join("\n\n", Internal.DebugInfo);
-                Client.FontSets.Standard.DrawFancyText(text, new(Client.MouseX, Client.MouseY, 0));
+                string content = string.Join("\n\n", Internal.DebugInfo);
+                RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
+                float x = Client.MouseX + text.Width < Client.WindowWidth
+                    ? Client.MouseX + 10.0f
+                    : Client.MouseX - text.Width - 10.0f;
+                Client.FontSets.Standard.DrawFancyText(text, new((int) x, Client.MouseY + 20, 0));
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
