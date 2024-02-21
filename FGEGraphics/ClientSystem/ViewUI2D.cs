@@ -148,19 +148,8 @@ public class ViewUI2D
                     {
                         Engine.Textures.White.Bind();
                         Renderer2D.SetColor(Color4F.Red);
-
-                        // TODO: Not this!
-                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + 1, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
-                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y + elem.Height, elem.X + elem.Width, elem.Y + elem.Height + 1, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
-                        Rendering.RenderRectangle(UIContext, elem.X + elem.Width, elem.Y, elem.X + elem.Width + 1, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
-                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + 1, new(-0.5f, -0.5f, elem.LastAbsoluteRotation));
-
-                        /*Rendering.RenderLine((elem.X, elem.Y), (elem.X, elem.Y + elem.Height));
-                        Rendering.RenderLine((elem.X, elem.Y + elem.Height), (elem.X + elem.Width, elem.Y + elem.Height));
-                        Rendering.RenderLine((elem.X + elem.Width, elem.Y + elem.Height), (elem.X + elem.Width, elem.Y));
-                        Rendering.RenderLine((elem.X + elem.Width, elem.Y), (elem.X, elem.Y));*/
+                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
                         Renderer2D.SetColor(Color4F.White);
-
                         if (elem.Hovered)
                         {
                             string name = $"^5^u{elem.GetType()}";

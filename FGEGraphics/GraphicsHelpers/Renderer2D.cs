@@ -157,8 +157,9 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
     /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
     /// <param name="ymax">The upper bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="hollow">Whether to render the edges of the rectangle only.</param>
     /// <param name="rot">The rotation, if any applies.</param>
-    public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null)
+    public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null, bool hollow = false)
     {
         Vector2 scaler = new(xmax - xmin, ymax - ymin);
         //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
@@ -171,7 +172,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
         {
             GL.Uniform3(ShaderLocations.Common2D.ROTATION, rot.Value);
         }
-        if (rc.CalcShadows && rc.Engine.OneDLights)
+        if (hollow || (rc.CalcShadows && rc.Engine.OneDLights))
         {
             GL.BindVertexArray(SquareOfLines.Internal.VAO);
             GL.DrawElements(PrimitiveType.LineStrip, 5, DrawElementsType.UnsignedInt, IntPtr.Zero);
