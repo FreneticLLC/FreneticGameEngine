@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore;
@@ -53,7 +52,7 @@ public class ViewUI2D
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
-    public InternalData Internal;
+    public InternalData Internal = new();
 
     /// <summary>Constructs the view.</summary>
     /// <param name="gameClient">Backing client window.</param>
@@ -63,7 +62,6 @@ public class ViewUI2D
         UIContext = new RenderContext2D();
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
-        Internal = new();
     }
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>

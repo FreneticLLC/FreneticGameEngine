@@ -577,6 +577,4 @@ public abstract class UIElement
     public virtual void Destroy()
     {
     }
-
-    //public override string ToString() => $"{base.ToString()}\n  Position = {Position}\n  Current Style = {Style}";
 }
