@@ -827,16 +827,16 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return FORMAT_CODES_MATCHER.IsMatch(c);
     }
 
-    /// <summary>Determines if the specified <see cref="FontSet"/> is equal to this <see cref="FontSet"/>.</summary>
-    public bool Equals(FontSet other)
-    {
-        return FontDefault.Equals(other.FontDefault);
-    }
-
     /// <summary>Determines if the specified object is equal to this <see cref="FontSet"/>.</summary>
     public override bool Equals(object obj)
     {
         return obj is FontSet set && Equals(set);
+    }
+
+    /// <summary>Determines if the specified <see cref="FontSet"/> is equal to this <see cref="FontSet"/>.</summary>
+    public bool Equals(FontSet other)
+    {
+        return FontDefault.Equals(other.FontDefault);
     }
 
     /// <summary>Returns a hash code for this <see cref="FontSet"/>.</summary>

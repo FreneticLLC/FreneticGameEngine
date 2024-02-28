@@ -449,6 +449,12 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         Dispose(true);
     }
 
+    /// <summary>Determines if the specified object is equal to this <see cref="GLFont"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is GLFont font && Equals(font);
+    }
+
     /// <summary>Determines if the specified <see cref="GLFont"/> is equal to this <see cref="GLFont"/>.</summary>
     public bool Equals(GLFont other)
     {
@@ -456,12 +462,6 @@ public class GLFont : IDisposable, IEquatable<GLFont>
                Size == other.Size &&
                Bold == other.Bold &&
                Italic == other.Italic;
-    }
-
-    /// <summary>Determines if the specified object is equal to this <see cref="GLFont"/>.</summary>
-    public override bool Equals(object obj)
-    {
-        return obj is GLFont font && Equals(font);
     }
 
     /// <summary>Returns a hash code for this <see cref="GLFont"/>.</summary>
