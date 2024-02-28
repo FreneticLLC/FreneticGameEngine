@@ -833,6 +833,12 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return FontDefault.Equals(other.FontDefault);
     }
 
+    /// <summary>Determines if the specified object is equal to this <see cref="FontSet"/>.</summary>
+    public override bool Equals(object obj)
+    {
+        return obj is FontSet set && Equals(set);
+    }
+
     /// <summary>Returns a hash code for this <see cref="FontSet"/>.</summary>
     public override int GetHashCode()
     {

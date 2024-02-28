@@ -166,8 +166,8 @@ public class ViewUI2D
                 string content = string.Join("\n\n", Internal.DebugInfo);
                 RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
                 float x = Client.MouseX + text.Width < Client.WindowWidth
-                    ? Client.MouseX + 10.0f
-                    : Client.MouseX - text.Width - 10.0f;
+                    ? Client.MouseX + 10
+                    : Client.MouseX - text.Width - 10;
                 Client.FontSets.Standard.DrawFancyText(text, new((int) x, Client.MouseY + 20, 0));
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");

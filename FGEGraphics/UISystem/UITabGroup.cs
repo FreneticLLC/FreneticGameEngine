@@ -20,8 +20,8 @@ namespace FGEGraphics.UISystem;
 public record TabSwitchedArgs(UIScreen From, UIScreen To);
 
 /// <summary>
-/// Represents a container of elements supporting <see cref="UIClickableElement"/>s that lead to <see cref="UIScreen"/>s,
-/// automatically handling the <see cref="UIClickableElement.Enabled"/> state.
+/// Represents a container of elements supporting clickable <see cref="UIElement"/>s that lead to <see cref="UIScreen"/>s,
+/// automatically handling the <see cref="UIElement.Enabled"/> state.
 /// <param name="pos">The position of the element.</param>
 /// <param name="onSwitch">Ran when the tab is switched.</param>
 /// </summary>
@@ -31,7 +31,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
     public event Action<TabSwitchedArgs> TabSwitched = onSwitch;
 
     /// <summary>The button leading to the currently selected tab.</summary>
-    public UIClickableElement SelectedButton;
+    public UIElement SelectedButton;
 
     /// <summary>The currently selected tab.</summary>
     public UIScreen SelectedTab;
@@ -41,7 +41,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
     /// <param name="tab">The screen to switch to when the button is pressed.</param>
     /// <param name="main">Whether this tab should be selected by default.</param>
     /// <param name="addChild">Whether to add the button as a child element of the group.</param>
-    public void AddTab(UIClickableElement button, UIScreen tab, bool main = false, bool addChild = true)
+    public void AddTab(UIElement button, UIScreen tab, bool main = false, bool addChild = true)
     {
         if (main)
         {

@@ -85,7 +85,7 @@ public abstract class UIElement
     public bool Pressed = false;
 
     /// <summary>Ran when this element is clicked.</summary>
-    public event Action Clicked;
+    public Action Clicked;
 
     /// <summary>
     /// Priority for rendering logic.
