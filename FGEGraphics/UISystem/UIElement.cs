@@ -63,6 +63,30 @@ public abstract class UIElement
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender;
 
+    /// <summary>Gets or sets whether this element can be interacted with.</summary>
+    public bool Enabled
+    {
+        get => ElementInternal.Enabled;
+        set
+        {
+            ElementInternal.Enabled = value;
+            if (!value)
+            {
+                Hovered = false;
+                Pressed = false;
+            }
+        }
+    }
+
+    /// <summary>Whether the mouse is hovering over this element.</summary>
+    public bool Hovered = false;
+
+    /// <summary>Whether this element is being clicked.</summary>
+    public bool Pressed = false;
+
+    /// <summary>Ran when this element is clicked.</summary>
+    public Action Clicked;
+
     /// <summary>
     /// Priority for rendering logic.
     /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
@@ -179,16 +203,16 @@ public abstract class UIElement
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public struct ElementInternalData
+    public struct ElementInternalData()
     {
         /// <summary>Current child elements.</summary>
-        public List<UIElement> Children;
+        public List<UIElement> Children = [];
 
         /// <summary>Elements queued to be added as children.</summary>
-        public List<UIElement> ToAdd;
+        public List<UIElement> ToAdd = [];
 
         /// <summary>Elements queued to be removed as children.</summary>
-        public List<UIElement> ToRemove;
+        public List<UIElement> ToRemove = [];
 
         /// <summary>Whether the mouse left button was previously down.</summary>
         public bool MousePreviouslyDown;
@@ -196,21 +220,21 @@ public abstract class UIElement
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
+        /// <summary>Whether this element can be interacted with.</summary>
+        public bool Enabled = true;
+
         /// <summary>Styles registered on this element.</summary>
-        public List<UIElementStyle> Styles;
+        public List<UIElementStyle> Styles = [];
+
+        /// <summary>Text objects registered on this element.</summary>
+        public List<UIElementText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
         public UIElementStyle CurrentStyle;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public ElementInternalData ElementInternal = new()
-    {
-        ToAdd = [],
-        ToRemove = [],
-        Children = [],
-        Styles = []
-    };
+    public ElementInternalData ElementInternal = new();
 
     /// <summary>Adds and removes any queued children.</summary>
     public void CheckChildren()
@@ -250,13 +274,20 @@ public abstract class UIElement
     /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
     /// <param name="style">The style to register.</param>
     /// <param name="requireText">Whether the style must support text rendering.</param>
-    public UIElementStyle RegisterStyle(UIElementStyle style, bool requireText = false)
+    public UIElementStyle AddStyle(UIElementStyle style, bool requireText = false)
     {
         if (requireText && !style.CanRenderText())
         {
             throw new Exception("Style must support text rendering when 'requireText' is true");
         }
         ElementInternal.Styles.Add(style);
+        if (style.CanRenderText())
+        {
+            foreach (UIElementText text in ElementInternal.Texts)
+            {
+                text.RefreshRenderables();
+            }
+        }
         return style;
     }
 
@@ -297,20 +328,38 @@ public abstract class UIElement
                 if (!element.ElementInternal.HoverInternal)
                 {
                     element.ElementInternal.HoverInternal = true;
+                    if (element.Enabled)
+                    {
+                        element.Hovered = true;
+                    }
                     element.MouseEnter();
                 }
                 if (mDown && !ElementInternal.MousePreviouslyDown)
                 {
+                    if (element.Enabled)
+                    {
+                        element.Pressed = true;
+                    }
                     element.MouseLeftDown(mX, mY);
                 }
                 else if (!mDown && ElementInternal.MousePreviouslyDown)
                 {
+                    if (element.Enabled && element.Clicked is not null)
+                    {
+                        element.Pressed = false;
+                        element.Clicked();
+                    }
                     element.MouseLeftUp(mX, mY);
                 }
             }
             else if (element.ElementInternal.HoverInternal)
             {
                 element.ElementInternal.HoverInternal = false;
+                if (element.Enabled)
+                {
+                    element.Hovered = false;
+                    element.Pressed = false;
+                }
                 element.MouseLeave();
                 if (mDown && !ElementInternal.MousePreviouslyDown)
                 {

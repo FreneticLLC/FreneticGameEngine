@@ -25,7 +25,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable button on a screen.</summary>
-public class UIButton : UIClickableElement.Styled
+public class UIButton : UIClickableElement
 {
     /// <summary>The pressable area of this button.</summary>
     public UIBox Box;

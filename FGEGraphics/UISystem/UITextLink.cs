@@ -24,7 +24,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable text link on a screen.</summary>
-public class UITextLink : UIClickableElement.Styled
+public class UITextLink : UIClickableElement
 {
     /// <summary>The text to display for this link.</summary>
     public UIElementText Text;

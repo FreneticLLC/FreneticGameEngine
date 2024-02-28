@@ -7,131 +7,47 @@ using FGEGraphics.UISystem;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Represents a clickable UI element on the screen.</summary>
-/// <param name="pos">The position of the element.</param>
-/// <param name="onClick">Ran when the element is clicked.</param>
-public abstract class UIClickableElement(UIPositionHelper pos, Action onClick = null) : UIElement(pos)
+/// <summary>Represents a styled clickable UI element on the screen.</summary>
+public abstract class UIClickableElement : UIElement
 {
-    /// <summary>Ran when this element is clicked.</summary>
-    public event Action Clicked = onClick;
+    /// <summary>The render style to use when the element is not being interacted with.</summary>
+    public UIElementStyle StyleNormal;
 
-    /// <summary>Whether the mouse is hovering over this element.</summary>
-    public bool Hovered = false;
+    /// <summary>The render style to use when the user is hovering their mouse cursor over this element.</summary>
+    public UIElementStyle StyleHover;
 
-    /// <summary>Whether this element is being clicked.</summary>
-    public bool Pressed = false;
+    /// <summary>The render style to use when the user is clicking on this element.</summary>
+    public UIElementStyle StyleClick;
 
-    /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
-    public struct InternalData()
+    /// <summary>Constructs the styled clickable element.</summary>
+    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
+    /// <param name="hover">The style to display when hovered.</param>
+    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="requireText">Whether the styles must support text rendering.</param>
+    /// <param name="onClick">Ran when the element is clicked.</param>
+    public UIClickableElement(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
     {
-        /// <summary>Whether this element can be interacted with.</summary>
-        public bool Enabled = true;
+        Clicked += onClick;
+        StyleNormal = AddStyle(normal, requireText);
+        StyleHover = AddStyle(hover, requireText);
+        StyleClick = AddStyle(click, requireText);
     }
 
-    /// <summary>Gets or sets whether this element can be interacted with.</summary>
-    public bool Enabled
+    /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
+    public override UIElementStyle Style
     {
-        get => Internal.Enabled;
-        set
+        get
         {
-            Internal.Enabled = value;
-            if (!value)
+            if (Pressed)
             {
-                Hovered = false;
-                Pressed = false;
+                return StyleClick;
             }
-        }
-    }
-
-    /// <summary>Data internal to a <see cref="UIClickableElement"/> instance.</summary>
-    public InternalData Internal = new();
-
-    /// <inheritdoc/>
-    public override void MouseEnter()
-    {
-        if (Enabled)
-        {
-            Hovered = true;
-        }
-    }
-
-    /// <inheritdoc/>
-    public override void MouseLeave()
-    {
-        if (Enabled)
-        {
-            Hovered = false;
-            Pressed = false;
-        }
-    }
-
-    /// <inheritdoc/>
-    public override void MouseLeftDown()
-    {
-        if (Enabled)
-        {
-            Hovered = true;
-            Pressed = true;
-        }
-    }
-
-    /// <inheritdoc/>
-    public override void MouseLeftUp()
-    {
-        if (!Enabled)
-        {
-            return;
-        }
-        if (Clicked is not null && Pressed && Hovered)
-        {
-            Clicked();
-        }
-        Pressed = false;
-    }
-
-    /// <summary>Represents a clickable UI element with distinct normal, hovering, and clicking styles.</summary>
-    // TODO: Style for when enabled is false?
-    // TODO: StyleGroup (or why haven't I done this yet?)
-    public abstract class Styled : UIClickableElement
-    {
-        /// <summary>The render style to use when the element is not being interacted with.</summary>
-        public UIElementStyle StyleNormal;
-
-        /// <summary>The render style to use when the user is hovering their mouse cursor over this element.</summary>
-        public UIElementStyle StyleHover;
-
-        /// <summary>The render style to use when the user is clicking on this element.</summary>
-        public UIElementStyle StyleClick;
-
-        /// <summary>Constructs the styled clickable element.</summary>
-        /// <param name="normal">The style to display when neither hovered nor clicked.</param>
-        /// <param name="hover">The style to display when hovered.</param>
-        /// <param name="click">The style to display when clicked.</param>
-        /// <param name="pos">The position of the element.</param>
-        /// <param name="requireText">Whether the styles must support text rendering.</param>
-        /// <param name="onClick">Ran when the element is clicked.</param>
-        public Styled(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos, onClick)
-        {
-            StyleNormal = RegisterStyle(normal, requireText);
-            StyleHover = RegisterStyle(hover, requireText);
-            StyleClick = RegisterStyle(click, requireText);
-        }
-
-        /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
-        public override UIElementStyle Style
-        {
-            get
+            if (Hovered)
             {
-                if (Pressed)
-                {
-                    return StyleClick;
-                }
-                if (Hovered)
-                {
-                    return StyleHover;
-                }
-                return StyleNormal;
+                return StyleHover;
             }
+            return StyleNormal;
         }
     }
 }

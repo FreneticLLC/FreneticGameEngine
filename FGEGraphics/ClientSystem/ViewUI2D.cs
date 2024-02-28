@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
 using OpenTK;
@@ -40,6 +41,19 @@ public class ViewUI2D
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
 
+    /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
+    public struct InternalData()
+    {
+        /// <summary>The current main screen.</summary>
+        public UIScreen CurrentScreen;
+
+        /// <summary>Debug info about hovered UI elements.</summary>
+        public List<string> DebugInfo = [];
+    }
+
+    /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
+    public InternalData Internal = new();
+
     /// <summary>Constructs the view.</summary>
     /// <param name="gameClient">Backing client window.</param>
     public ViewUI2D(GameClientWindow gameClient)
@@ -50,23 +64,20 @@ public class ViewUI2D
         CurrentScreen = DefaultScreen;
     }
 
-    /// <summary>
-    /// Generally do not set this directly.
-    /// Instead use <see cref="CurrentScreen"/>.
-    /// </summary>
-    public UIScreen InternalCurrentScreen;
+    /// <summary>Whether this UI view is in 'debug' mode.</summary>
+    public bool Debug;
 
     /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
     {
-        get => InternalCurrentScreen;
+        get => Internal.CurrentScreen;
         set
         {
-            if (value != InternalCurrentScreen)
+            if (value != Internal.CurrentScreen)
             {
-                InternalCurrentScreen?.SwitchFrom();
-                InternalCurrentScreen = value;
-                InternalCurrentScreen?.SwitchTo();
+                Internal.CurrentScreen?.SwitchFrom();
+                Internal.CurrentScreen = value;
+                Internal.CurrentScreen?.SwitchTo();
             }
         }
     }
@@ -131,14 +142,43 @@ public class ViewUI2D
                     {
                         elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }
+                    if (Debug)
+                    {
+                        Engine.Textures.White.Bind();
+                        Renderer2D.SetColor(Color4F.Red);
+                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
+                        Renderer2D.SetColor(Color4F.White);
+                        if (elem.ElementInternal.HoverInternal)
+                        {
+                            string name = $"^t^0^h^5^u{elem.GetType()}";
+                            string pos = $"^r^t^0^h^o^e^7Position: ^3({elem.X}, {elem.Y}) ^&| ^7Dimensions: ^3({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: ^3{elem.LastAbsoluteRotation}";
+                            string state = $"^7Enabled: ^{(elem.Enabled ? "2" : "1")}{elem.Enabled} ^&| ^7Hovered: ^{(elem.Hovered ? "2" : "1")}{elem.Hovered} ^&| ^7Pressed: ^{(elem.Pressed ? "2" : "1")}{elem.Pressed}";
+                            Internal.DebugInfo.Add($"{name}\n{pos}\n{state}");
+                        }
+                    }
                 }
                 finally
                 {
                     StackNoteHelper.Pop();
                 }
             }
+            if (Debug)
+            {
+                string content = string.Join("\n\n", Internal.DebugInfo);
+                RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
+                // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
+                float x = Client.MouseX + text.Width < Client.WindowWidth
+                    ? Client.MouseX + 10
+                    : Client.MouseX - text.Width - 10;
+                float textHeight = text.Lines.Length * Client.FontSets.Standard.FontDefault.Height;
+                float y = Client.MouseY + textHeight < Client.WindowHeight
+                    ? Client.MouseY + 20
+                    : Client.MouseY - textHeight - 20;
+                Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
+            }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
+            Internal.DebugInfo.Clear();
         }
         finally
         {
