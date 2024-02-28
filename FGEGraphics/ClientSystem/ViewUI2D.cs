@@ -148,11 +148,12 @@ public class ViewUI2D
                         Renderer2D.SetColor(Color4F.Red);
                         Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
                         Renderer2D.SetColor(Color4F.White);
-                        if (elem.Hovered)
+                        if (elem.ElementInternal.HoverInternal)
                         {
                             string name = $"^5^u{elem.GetType()}";
-                            string info = $"^r^0^e^7Position: ({elem.X}, {elem.Y}) ^&| ^7Dimensions: ({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: {elem.LastAbsoluteRotation}";
-                            Internal.DebugInfo.Add($"{name}\n{info}");
+                            string pos = $"^r^0^e^7Position: ({elem.X}, {elem.Y}) ^&| ^7Dimensions: ({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: {elem.LastAbsoluteRotation}";
+                            string state = $"^r^0^e^7Enabled: ^{(elem.Enabled ? "2" : "1")}{elem.Enabled} ^&| ^7Hovered: ^{(elem.Hovered ? "2" : "1")}{elem.Hovered} ^&| ^7Pressed: ^{(elem.Pressed ? "2" : "1")}{elem.Pressed}";
+                            Internal.DebugInfo.Add($"{name}\n{pos}\n{state}");
                         }
                     }
                 }
@@ -165,10 +166,15 @@ public class ViewUI2D
             {
                 string content = string.Join("\n\n", Internal.DebugInfo);
                 RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
+                // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
                 float x = Client.MouseX + text.Width < Client.WindowWidth
                     ? Client.MouseX + 10
                     : Client.MouseX - text.Width - 10;
-                Client.FontSets.Standard.DrawFancyText(text, new((int) x, Client.MouseY + 20, 0));
+                float textHeight = text.Lines.Length * Client.FontSets.Standard.FontDefault.Height;
+                float y = Client.MouseY + textHeight < Client.WindowHeight
+                    ? Client.MouseY + 20
+                    : Client.MouseY - textHeight - 20;
+                Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
