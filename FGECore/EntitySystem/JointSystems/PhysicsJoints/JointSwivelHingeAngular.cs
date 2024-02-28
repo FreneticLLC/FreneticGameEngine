@@ -19,16 +19,17 @@ namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 /// <summary>A joint that restricts one axis of rotation between two entities, like a hinge that can also swivel.</summary>
 public class JointSwivelHingeAngular(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location hinge, Location twist) : PhysicsJointBase<AngularSwivelHinge>(e1, e2)
 {
-
     /// <summary>The hinge axis. For a door, this with be vertical.</summary>
     public Location WorldHinge = hinge;
 
     /// <summary>The twist axis. This should be perpendicular to the hinge axis.</summary>
     public Location WorldTwist = twist;
 
-    /// <summary>Implements <see cref="PhysicsJointBase{T}.CreateJointDescription"/>.</summary>
-    public override AngularSwivelHinge CreateJointDescription()
+    /// <inheritdoc/>
+    public override AngularSwivelHinge CreateJointDescription() => new()
     {
-        return new AngularSwivelHinge() { LocalHingeAxisB = WorldHinge.ToNumerics(), LocalSwivelAxisA = WorldTwist.ToNumerics(), SpringSettings = new SpringSettings(20, 1) };
-    }
+        LocalHingeAxisB = WorldHinge.ToNumerics(),
+        LocalSwivelAxisA = WorldTwist.ToNumerics(),
+        SpringSettings = new SpringSettings(20, 1)
+    };
 }

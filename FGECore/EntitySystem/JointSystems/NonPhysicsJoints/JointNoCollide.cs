@@ -16,29 +16,34 @@ using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 
-/// <summary>Special pseudo-constraint to indicate two entities shouldn't collide with each other.</summary>
-public class JointNoCollide : PhysicsJointBase
+/// <summary>Special pseudo-constraint to indicate two physics entities shouldn't collide with each other.</summary>
+public class JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _two) : NonPhysicalJointBase(_one.Entity, _two.Entity)
 {
-    /// <summary>Constructs the <see cref="JointNoCollide"/>.</summary>
-    public JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _two)
-    {
-        One = _one;
-        Two = _two;
-    }
+    /// <summary>Reference to the first entity's physics property.</summary>
+    public EntityPhysicsProperty PhysicsOne = _one;
+
+    /// <summary>Reference to the second entity's physics property.</summary>
+    public EntityPhysicsProperty PhysicsTwo = _two;
 
     /// <summary>Implements <see cref="GenericBaseJoint.Enable"/>.</summary>
     public override void Enable()
     {
-        One.Internal.NoCollideIDs ??= new HashSet<long>(16);
-        One.Internal.NoCollideIDs.Add(Two.Entity.EID);
-        Two.Internal.NoCollideIDs ??= new HashSet<long>(16);
-        Two.Internal.NoCollideIDs.Add(One.Entity.EID);
+        PhysicsOne.Internal.NoCollideIDs ??= new HashSet<long>(16);
+        PhysicsOne.Internal.NoCollideIDs.Add(PhysicsTwo.Entity.EID);
+        PhysicsTwo.Internal.NoCollideIDs ??= new HashSet<long>(16);
+        PhysicsTwo.Internal.NoCollideIDs.Add(PhysicsOne.Entity.EID);
     }
 
     /// <summary>Implements <see cref="GenericBaseJoint.Disable"/>.</summary>
     public override void Disable()
     {
-        One.Internal.NoCollideIDs.Remove(Two.Entity.EID);
-        Two.Internal.NoCollideIDs.Remove(One.Entity.EID);
+        PhysicsOne.Internal.NoCollideIDs.Remove(PhysicsTwo.Entity.EID);
+        PhysicsTwo.Internal.NoCollideIDs.Remove(PhysicsOne.Entity.EID);
+    }
+
+    /// <summary>Implementation of <see cref="NonPhysicalJointBase.Solve"/> that does nothing.</summary>
+    public override void Solve()
+    {
+        // Do nothing
     }
 }

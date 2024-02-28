@@ -50,7 +50,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float SpeedStanding = 4, SpeedCrouching = 2, SpeedProne = 1;
 
-    /// <summary>How the multiplier over body height when the character's stance changes.</summary>
+    /// <summary>The multiplier over body height when the character's stance changes.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public float HeightModStanding = 1, HeightModCrouching = 0.5f, HeightModProne = 0.3f;
@@ -128,7 +128,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     public void SetStance(float heightMod, float speed)
     {
         CurrentSpeed = speed;
-        CurrentHeight = heightMod;
+        //CurrentHeight = heightMod * BaseHeight;
         // TODO: Actually resize the physics body
         // TODO: Reject or delay impossible growth
     }

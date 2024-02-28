@@ -31,6 +31,12 @@ public abstract class PhysicsJointBase : GenericBaseJoint
 
     /// <summary>Gets the relevant <see cref="PhysicsSpace"/>.</summary>
     public PhysicsSpace PhysicsWorld => One.PhysicsWorld;
+
+    /// <summary>Reapplies the joint description if the joint is spawned.</summary>
+    public abstract void Reapply();
+
+    /// <summary>A reference to the underlying physics constraint.</summary>
+    public ConstraintHandle CurrentJoint;
 }
 
 /// <summary>The base class for all physics-based joints, with a type reference to the underlying constraint.</summary>
@@ -42,9 +48,6 @@ public abstract class PhysicsJointBase<T> : PhysicsJointBase where T : unmanaged
         One = _one;
         Two = _two;
     }
-
-    /// <summary>A reference to the underlying physics constraint.</summary>
-    public ConstraintHandle CurrentJoint;
 
     /// <summary>Construct the applicable joint description object.</summary>
     public abstract T CreateJointDescription();
@@ -60,5 +63,14 @@ public abstract class PhysicsJointBase<T> : PhysicsJointBase where T : unmanaged
     {
         PhysicsWorld.Internal.CoreSimulation.Solver.Remove(CurrentJoint);
         CurrentJoint = default;
+    }
+
+    /// <inheritdoc/>
+    public override void Reapply()
+    {
+        if (Added)
+        {
+            PhysicsWorld.Internal.CoreSimulation.Solver.ApplyDescription(CurrentJoint, CreateJointDescription());
+        }
     }
 }
