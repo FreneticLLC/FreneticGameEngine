@@ -328,7 +328,7 @@ public abstract class UIElement
                 if (!element.ElementInternal.HoverInternal)
                 {
                     element.ElementInternal.HoverInternal = true;
-                    if (Enabled)
+                    if (element.Enabled)
                     {
                         element.Hovered = true;
                     }
@@ -336,7 +336,7 @@ public abstract class UIElement
                 }
                 if (mDown && !ElementInternal.MousePreviouslyDown)
                 {
-                    if (Enabled)
+                    if (element.Enabled)
                     {
                         element.Pressed = true;
                     }
@@ -344,10 +344,10 @@ public abstract class UIElement
                 }
                 else if (!mDown && ElementInternal.MousePreviouslyDown)
                 {
-                    if (Enabled && element.Clicked is not null)
+                    if (element.Enabled && element.Clicked is not null)
                     {
-                        element.Clicked();
                         element.Pressed = false;
+                        element.Clicked();
                     }
                     element.MouseLeftUp(mX, mY);
                 }
@@ -355,7 +355,7 @@ public abstract class UIElement
             else if (element.ElementInternal.HoverInternal)
             {
                 element.ElementInternal.HoverInternal = false;
-                if (Enabled)
+                if (element.Enabled)
                 {
                     element.Hovered = false;
                     element.Pressed = false;
