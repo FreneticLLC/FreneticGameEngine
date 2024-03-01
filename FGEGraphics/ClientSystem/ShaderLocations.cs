@@ -6,7 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGEGraphics.ClientSystem.ViewRenderSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,8 +62,8 @@ public static class ShaderLocations
         public const int SHOULD_SQRT = 5;
     }
 
-    /// <summary>Locations used in the FBO shader.</summary>
-    public static class FBO
+    /// <summary>Locations used in the gbuffer shader (Shader name is FBO).</summary>
+    public static class GBuffer
     {
         /// <summary>
         /// The screen size. Used for depth linearization.
@@ -183,7 +182,7 @@ public static class ShaderLocations
     }
 
     /// <summary>Locations used in the finalgodray shader.</summary>
-    public static class FinalGodray
+    public static class FinalPass
     {
         /// <summary>
         /// What position the camera is targeting in the world (ray traced).
@@ -204,10 +203,10 @@ public static class ShaderLocations
         public const int HDR_EXPOSURE = 10;
 
         /// <summary>
-        /// Camera position relative to rendering origin.
+        /// Camera position.
         /// Uniform: cameraPos
         /// </summary>
-        public const int CAMERA_RELATIVE_POSITION = 14;
+        public const int CAMERA_POSITION = 14;
 
         /// <summary>
         /// The distance fog should be around.
@@ -228,13 +227,15 @@ public static class ShaderLocations
         public const int FOG_COLOR = 18;
 
         /// <summary>
-        /// How much to desaturation the view by. 1.0 = fully desaturated.
+        /// How much to desaturate the view by. 1.0 = fully desaturated.
         /// Uniform: desaturationAmount
         /// </summary>
         public const int DESATURATION = 19;
 
         /// <summary>
         /// What position the eye of the 3D camera view is at in the world.
+        /// Important for reflection calculations by normalizing the fragment position subtracted by this value
+        /// in order to get the view direction.
         /// Uniform: eye_position
         /// </summary>
         public const int EYE_POSITION = 20;
@@ -264,7 +265,7 @@ public static class ShaderLocations
         public const int SCREEN_HEIGHT = 25;
 
         /// <summary>
-        /// A timer value, in seconds. Simply used for things that move.
+        /// Passes in the engine global tick time to the shader.
         /// Uniform: time
         /// </summary>
         public const int TIME = 26;
@@ -276,13 +277,13 @@ public static class ShaderLocations
         public const int MOTION_BLUR = 27;
 
         /// <summary>
-        /// Whether to gray-scale the view.
+        /// Whether to gray-scale the view. 0 for off, 1 for on.
         /// Uniform: do_grayscale
         /// </summary>
         public const int DO_GRAYSCALE = 28;
     }
 
-    /// <summary>Locations used in the transponly shader.</summary>
+    /// <summary>Locations used in the transparents-only shader.</summary>
     public static class TranspOnly
     {
         /// <summary>
@@ -298,10 +299,10 @@ public static class ShaderLocations
         public const int SCREEN_SIZE = 8;
 
         /// <summary>
-        /// Helper for lights used.
+        /// Data matrix for light data to be used in the shader.
         /// Uniform: lights_used_helper
         /// </summary>
-        public const int LIGHTS_USED_HELPER = 9;
+        public const int LIGHT_DATA_HELPER = 9;
 
         /// <summary>
         /// The matrices of the light sources (essentially their point of view this is used for shadow mapping).
@@ -316,13 +317,13 @@ public static class ShaderLocations
         public const int FOG_DISTANCE = 13;
 
         /// <summary>
-        /// Camera position, relative to rendering origin.
+        /// Camera position.
         /// Uniform: cameraPos
         /// </summary>
-        public const int CAMERA_RELATIVE_POSITION = 14;
+        public const int CAMERA_POSITION = 14;
     }
 
-    /// <summary>Locations used in the transpadder shader.</summary>
+    /// <summary>Locations used in the transparents data adder shader.</summary>
     public static class TranspAdder
     {
         /// <summary>
