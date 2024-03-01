@@ -897,11 +897,11 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.BindImageTexture(7, Internal.LL_TransparentTextures[3], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             GL.ActiveTexture(TextureUnit.Texture0);
             Shaders.Deferred.LLClearerPass.Bind();
-            GL.Uniform2(ShaderLocations.Clearer.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Matrix4 flatProj = Matrix4.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref flatProj);
             GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(ShaderLocations.Clearer.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
             //s_whatever.Bind(); lol
@@ -915,10 +915,10 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             RenderTranspInt(ref lightc, frustumToUse);
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
             Shaders.Deferred.LLFinalPass.Bind();
-            GL.Uniform2(ShaderLocations.FPass.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref flatProj);
             GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(ShaderLocations.FPass.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         }
         else

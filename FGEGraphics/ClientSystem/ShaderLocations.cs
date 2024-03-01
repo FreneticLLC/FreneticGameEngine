@@ -28,6 +28,9 @@ public static class ShaderLocations
 
         /// <summary>Camera position.</summary>
         public const int CAMERA_POSITION = 14;
+
+        /// <summary>The screen size</summary>
+        public const int SCREEN_SIZE = 4;
     }
 
     /// <summary>Locations shared by most 2D shaders.</summary>
@@ -46,7 +49,14 @@ public static class ShaderLocations
         public const int ROTATION = 4;
     }
 
-    /// <summary>Locations used in the shadow shader.</summary>
+    /// ===== FORWARD RENDERING SHADERS =====
+
+    /// =====================================
+
+
+    /// ===== DEFERRED RENDERING SHADERS =====
+    
+    /// <summary>Locations used in the shadow shader. Rendering: Deferred</summary>
     public static class Shadow
     {
         /// <summary>
@@ -62,7 +72,7 @@ public static class ShaderLocations
         public const int SHOULD_SQRT = 5;
     }
 
-    /// <summary>Locations used in the gbuffer shader (Shader name is FBO).</summary>
+    /// <summary>Locations used in the gbuffer shader (Shader name is FBO). Rendering: Deferred</summary>
     public static class GBuffer
     {
         /// <summary>
@@ -84,7 +94,7 @@ public static class ShaderLocations
         public const int FogColor = 18;
     }
 
-    /// <summary>Locations used in the lightadder shader.</summary>
+    /// <summary>Locations used in the lightadder shader. Rendering: Deferred</summary>
     public static class LightAdder
     {
         /// <summary>
@@ -92,7 +102,7 @@ public static class ShaderLocations
         /// Uniform: depth_jump
         /// </summary>
         public const int DEPTH_JUMP = 3;
-        
+
         /// <summary>
         /// How much ambient light to add.
         /// Uniform: ambient
@@ -124,64 +134,7 @@ public static class ShaderLocations
         public const int SHADOW_MATRIX_ARRAY = 10;
     }
 
-    /// <summary>Locations used in the hdrpass shader.</summary>
-    public static class HDRPass
-    {
-        /// <summary>
-        /// The screen size.
-        /// Uniform: u_screen_size
-        /// </summary>
-        public const int SCREEN_SIZE = 4;
-    }
-
-    /// <summary>Locations used in the godray shader.</summary>
-    public static class Godray
-    {
-        /// <summary>
-        /// The amount of exposure to apply.
-        /// Uniform: exposure
-        /// </summary>
-        public const int EXPOSURE = 6;
-
-        /// <summary>
-        /// The aspect ratio of the screen ensures the godray effect is properly scaled.
-        /// Uniform: aspect
-        /// </summary>
-        public const int ASPECT_RATIO = 7;
-
-        /// <summary>
-        /// The position of the light source (sun location).
-        /// Uniform: sunloc
-        /// </summary>
-        public const int SUN_LOCATION = 8;
-
-        /// <summary>
-        /// The density of the godray effect.
-        /// Higher values make the godray effect more dense and focused while lower values make it more spread out.
-        /// Uniform: density
-        /// </summary>
-        public const int DENSITY = 12;
-
-        /// <summary>
-        /// The minimum depth used for depth linearization.
-        /// Uniform: MIN_DEPTH
-        /// </summary>
-        public const int MIN_DEPTH = 14;
-
-        /// <summary>
-        /// The maximum depth used for depth linearization.
-        /// Uniform: MAX_DEPTH
-        /// </summary>
-        public const int MAX_DEPTH = 15;
-
-        /// <summary>
-        /// Distance that determines whether a pixel is in the sky or not.
-        /// Uniform: SKY_DIST
-        /// </summary>
-        public const int SKY_DISTANCE = 16;
-    }
-
-    /// <summary>Locations used in the finalgodray shader.</summary>
+    /// <summary>Locations used in the final pass (Shader name is finalgodray) shader. Rendering: Deferred</summary>
     public static class FinalPass
     {
         /// <summary>
@@ -283,7 +236,64 @@ public static class ShaderLocations
         public const int DO_GRAYSCALE = 28;
     }
 
-    /// <summary>Locations used in the transparents-only shader.</summary>
+    /// <summary>Locations used in the hdrpass shader. Rendering: Deferred</summary>
+    public static class HDRPass
+    {
+        /// <summary>
+        /// The screen size.
+        /// Uniform: u_screen_size
+        /// </summary>
+        public const int SCREEN_SIZE = 4;
+    }
+
+    /// <summary>Locations used in the godray shader. Rendering: Deferred</summary>
+    public static class Godray
+    {
+        /// <summary>
+        /// The amount of exposure to apply.
+        /// Uniform: exposure
+        /// </summary>
+        public const int EXPOSURE = 6;
+
+        /// <summary>
+        /// The aspect ratio of the screen ensures the godray effect is properly scaled.
+        /// Uniform: aspect
+        /// </summary>
+        public const int ASPECT_RATIO = 7;
+
+        /// <summary>
+        /// The position of the light source (sun location).
+        /// Uniform: sunloc
+        /// </summary>
+        public const int SUN_LOCATION = 8;
+
+        /// <summary>
+        /// The density of the godray effect.
+        /// Higher values make the godray effect more dense and focused while lower values make it more spread out.
+        /// Uniform: density
+        /// </summary>
+        public const int DENSITY = 12;
+
+        /// <summary>
+        /// The minimum depth used for depth linearization.
+        /// Uniform: MIN_DEPTH
+        /// </summary>
+        public const int MIN_DEPTH = 14;
+
+        /// <summary>
+        /// The maximum depth used for depth linearization.
+        /// Uniform: MAX_DEPTH
+        /// </summary>
+        public const int MAX_DEPTH = 15;
+
+        /// <summary>
+        /// Distance that determines whether a pixel is in the sky or not.
+        /// Uniform: SKY_DIST
+        /// </summary>
+        public const int SKY_DISTANCE = 16;
+    }
+
+    /// <summary>Locations used in the transparents-only shader. Rendering: Deferred</summary>
     public static class TranspOnly
     {
         /// <summary>
@@ -323,7 +333,7 @@ public static class ShaderLocations
         public const int CAMERA_POSITION = 14;
     }
 
-    /// <summary>Locations used in the transparents data adder shader.</summary>
+    /// <summary>Locations used in the transparents data adder shader. Rendering: Deferred</summary>
     public static class TranspAdder
     {
         /// <summary>
@@ -333,23 +343,5 @@ public static class ShaderLocations
         public const int LIGHTS_USED = 3;
     }
 
-    /// <summary>Locations used in the clearer shader.</summary>
-    public static class Clearer
-    {
-        /// <summary>
-        /// Screen size
-        /// Uniform: u_screen_size
-        /// </summary>
-        public const int SCREEN_SIZE = 4;
-    }
-
-    /// <summary>Locations used in the fpass shader.</summary>
-    public static class FPass
-    {
-        /// <summary>
-        /// Screen size
-        /// Uniform: u_screen_size
-        /// </summary>
-        public const int SCREEN_SIZE = 4;
-    }
+    /// ======================================
 }
