@@ -26,8 +26,8 @@ public static class ShaderLocations
         /// <summary>The general world offset.</summary>
         public const int WORLD = 2;
 
-        /// <summary>Camera position, relative to rendering origin.</summary>
-        public const int CAMERA_RELATIVE_POSITION = 14;
+        /// <summary>Camera position.</summary>
+        public const int CAMERA_POSITION = 14;
     }
 
     /// <summary>Locations shared by most 2D shaders.</summary>

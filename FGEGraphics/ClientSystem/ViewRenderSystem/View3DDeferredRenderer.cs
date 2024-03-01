@@ -104,7 +104,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 View.SetMatrix(2, Matrix4d.Identity);
                                 GL.Uniform1(ShaderLocations.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
                                 GL.Uniform1(ShaderLocations.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
-                                GL.Uniform3(ShaderLocations.Common.CAMERA_RELATIVE_POSITION, State.CameraRelativePosition);
+                                GL.Uniform3(ShaderLocations.Common.CAMERA_POSITION, State.CameraRelativePosition);
                                 subLight.SetProj(View);
                                 Shaders.Deferred.ShadowPass_NoBones = Shaders.Deferred.ShadowPass_NoBones.Bind();
                                 View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
