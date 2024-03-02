@@ -102,22 +102,22 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 Patches.ShadowLightPatch?.Invoke(light, subLight);
                                 Shaders.Deferred.ShadowPass_Particles = Shaders.Deferred.ShadowPass_Particles.Bind();
                                 View.SetMatrix(2, Matrix4d.Identity);
-                                GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);
-                                GL.Uniform1(4, subLight.TransparentShadows ? 1.0f : 0.0f);
-                                GL.Uniform3(14, State.CameraRelativePosition);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
+                                GL.Uniform3(ShaderLocations.Common.CAMERA_POSITION, State.CameraRelativePosition);
                                 subLight.SetProj(View);
                                 Shaders.Deferred.ShadowPass_NoBones = Shaders.Deferred.ShadowPass_NoBones.Bind();
-                                View.SetMatrix(2, Matrix4d.Identity);
+                                View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
                                 GraphicsUtil.CheckError("Pre-Prerender2.5 - Shadows");
-                                GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);
-                                GL.Uniform1(4, subLight.TransparentShadows ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
                                 State.TranspShadows = subLight.TransparentShadows;
                                 subLight.SetProj(View);
                                 Shaders.Deferred.ShadowPass_Basic = Shaders.Deferred.ShadowPass_Basic.Bind();
                                 View.SetMatrix(2, Matrix4d.Identity);
                                 GraphicsUtil.CheckError("Pre-Prerender3 - Shadows");
-                                GL.Uniform1(5, (subLight is LightOrtho) ? 1.0f : 0.0f);
-                                GL.Uniform1(4, subLight.TransparentShadows ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
                                 State.TranspShadows = subLight.TransparentShadows;
                                 subLight.SetProj(View);
                                 GraphicsUtil.CheckError("Pre-Prerender4 - Shadows");
@@ -194,20 +194,20 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         Statistics.FrameBuffer.Start();
         View.SetViewportTracked();
         Shaders.Deferred.GBuffer_Decals = Shaders.Deferred.GBuffer_Decals.Bind();
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform4(4, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
         Patches.PreFBOPatch?.Invoke();
         Shaders.Deferred.GBuffer_SkyBox = Shaders.Deferred.GBuffer_SkyBox.Bind();
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GL.Uniform4(18, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
+        GL.Uniform4(ShaderLocations.Deferred.GBuffer.FogColor, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
         GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
         Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
         GraphicsUtil.CheckError("Render - GBuffer - 0");
         State.FBOid = FBOID.MAIN;
         State.RenderingShadows = false;
@@ -229,9 +229,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
             Patches.VRFBOPatch?.Invoke();
             Shaders.Deferred.GBuffer_SkyBox = Shaders.Deferred.GBuffer_SkyBox.Bind();
-            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix_OffsetFor3D);
             Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
-            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix_OffsetFor3D);
             Matrix4 orig = State.PrimaryMatrix;
             State.PrimaryMatrix = State.PrimaryMatrix_OffsetFor3D;
             Matrix4 orig_out = State.OutViewMatrix;
@@ -279,7 +279,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             State.CurrentFrustum = State.SecondEyeFrustum;
             View.Viewport(0, 0, Config.Width / 2, Config.Height);
             Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
-            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix_OffsetFor3D);
             Matrix4 orig = State.PrimaryMatrix;
             State.PrimaryMatrix = State.PrimaryMatrix_OffsetFor3D;
             Matrix4 orig_out = State.OutViewMatrix;
@@ -310,9 +310,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         State.FBOid = FBOID.REFRACT;
         Patches.RefractionPatch?.Invoke();
         Shaders.Deferred.GBuffer_Refraction = Shaders.Deferred.GBuffer_Refraction.Bind();
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GL.DepthMask(false);
         GraphicsUtil.CheckError("Render - Refract - 0");
         if (Engine.Render3DView || Engine.Client.VR != null)
@@ -324,7 +324,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
             Patches.VRRefractionPatch?.Invoke();
             Shaders.Deferred.GBuffer_Refraction = Shaders.Deferred.GBuffer_Refraction.Bind();
-            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix_OffsetFor3D);
             Matrix4 orig = State.PrimaryMatrix;
             State.PrimaryMatrix = State.PrimaryMatrix_OffsetFor3D;
             Matrix4 orig_out = State.OutViewMatrix;
@@ -367,7 +367,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             {
                 Shaders.Deferred.ShadowAdderPass = Shaders.Deferred.ShadowAdderPass.Bind();
             }
-            GL.Uniform1(3, Config.ShadowBlur);
+            GL.Uniform1(ShaderLocations.Deferred.LightAdder.DEPTH_JUMP, Config.ShadowBlur);
         }
         else
         {
@@ -393,9 +393,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.RenderhintTexture);
         GL.ActiveTexture(TextureUnit.Texture6);
         GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DiffuseTexture);
-        GL.Uniform3(4, Config.Ambient.ToOpenTK());
-        GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform3(ShaderLocations.Deferred.LightAdder.AMBIENT, Config.Ambient.ToOpenTK());
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GL.Disable(EnableCap.CullFace);
         GL.Disable(EnableCap.DepthTest);
         View3D.TranspBlend();
@@ -497,10 +497,10 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         lights_apply:
             GL.ActiveTexture(TextureUnit.Texture4);
             GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
-            GL.Uniform2(7, new Vector2(Engine.ZNear, Engine.ZFar()));
-            GL.UniformMatrix4(8, false, ref State.PrimaryMatrix); // TODO: In 3D/VR, render both eyes separately here for SSAO accuracy?
-            GL.Uniform1(9, (float)c);
-            GL.UniformMatrix4(10, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
+            GL.Uniform2(ShaderLocations.Deferred.LightAdder.Z_DISTANCE, new Vector2(Engine.ZNear, Engine.ZFar()));
+            GL.UniformMatrix4(ShaderLocations.Deferred.LightAdder.SSAO_PROJECTION, false, ref State.PrimaryMatrix); // TODO: In 3D/VR, render both eyes separately here for SSAO accuracy?
+            GL.Uniform1(ShaderLocations.Deferred.LightAdder.LIGHTS_USED, (float)c);
+            GL.UniformMatrix4(ShaderLocations.Deferred.LightAdder.SHADOW_MATRIX_ARRAY, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
             GL.UniformMatrix4(10 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -530,9 +530,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_DynamicExposure);
             View.DrawBuffer(DrawBufferMode.ColorAttachment0);
-            GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform2(ShaderLocations.Deferred.HDRPass.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             View3D.StandardBlend();
             GraphicsUtil.CheckError("AfterHDRPass");
@@ -577,24 +577,24 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.ClearBuffer(ClearBuffer.Color, 0, [0f, 0f, 0f, 0f]);
         GL.ClearBuffer(ClearBuffer.Color, 1, [0f, 0f, 0f, 0f]);
         GL.BlendFuncSeparate(1, BlendingFactorSrc.SrcColor, BlendingFactorDest.Zero, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.Zero);
-        GL.Uniform3(8, Config.DOF_Target.ToOpenTK());
-        GL.Uniform1(9, Config.DOF_Factor);
-        GL.Uniform1(10, State.CurrentExposure * Engine.Exposure);
+        GL.Uniform3(ShaderLocations.Deferred.FinalPass.CAMERA_TARGET_POSITION, Config.DOF_Target.ToOpenTK());
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.CAMERA_TARGET_DEPTH, Config.DOF_Factor);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.HDR_EXPOSURE, State.CurrentExposure * Engine.Exposure);
         float fogDist = 1.0f / Engine.FogMaxDist();
         fogDist *= fogDist;
         Vector2 zfar_rel = new(Engine.ZNear, Engine.ZFar());
-        GL.Uniform3(14, State.CameraRelativePosition);
-        GL.Uniform1(16, fogDist);
-        GL.Uniform2(17, ref zfar_rel);
-        GL.Uniform4(18, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+        GL.Uniform3(ShaderLocations.Deferred.FinalPass.CAMERA_POSITION, State.CameraRelativePosition);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.FOG_DISTANCE, fogDist);
+        GL.Uniform2(ShaderLocations.Deferred.FinalPass.Z_DISTANCE, ref zfar_rel);
+        GL.Uniform4(ShaderLocations.Deferred.FinalPass.FOG_COLOR, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
         // TODO: If thick fog, blur the environment? Or some similar head-in-a-block effect!
-        GL.Uniform1(19, Config.DesaturationAmount);
-        GL.Uniform3(20, new Vector3(0, 0, 0));
-        GL.Uniform3(21, Config.DesaturationColor);
-        GL.UniformMatrix4(22, false, ref State.PrimaryMatrix);
-        GL.Uniform1(24, (float)Config.Width);
-        GL.Uniform1(25, (float)Config.Height);
-        GL.Uniform1(26, (float)Engine.GlobalTickTime);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.DESATURATION, Config.DesaturationAmount);
+        GL.Uniform3(ShaderLocations.Deferred.FinalPass.EYE_POSITION, new Vector3(0, 0, 0));
+        GL.Uniform3(ShaderLocations.Deferred.FinalPass.DESATURATION_COLOR, Config.DesaturationColor);
+        GL.UniformMatrix4(ShaderLocations.Deferred.FinalPass.PROJECTION_MATRIX, false, ref State.PrimaryMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.SCREEN_WIDTH, (float)Config.Width);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.SCREEN_HEIGHT, (float)Config.Height);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.TIME, (float)Engine.GlobalTickTime);
         Vector4 v = Vector4.TransformRow(new Vector4(State.PreviousForward.ToOpenTK(), 1f), State.PrimaryMatrix);
         Vector2 v2 = (v.Xy / v.W);
         Vector2 rel = (Internal.PreviousPFResult - v2) * 0.01f;
@@ -602,9 +602,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         {
             rel = new Vector2(0f, 0f);
         }
-        GL.Uniform2(27, ref rel);
+        GL.Uniform2(ShaderLocations.Deferred.FinalPass.MOTION_BLUR, ref rel);
         Internal.PreviousPFResult = v2;
-        GL.Uniform1(28, Engine.Deferred_Grayscale ? 1f : 0f);
+        GL.Uniform1(ShaderLocations.Deferred.FinalPass.DO_GRAYSCALE, Engine.Deferred_Grayscale ? 1f : 0f);
         GL.ActiveTexture(TextureUnit.Texture3);
         GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
         GL.ActiveTexture(TextureUnit.Texture4);
@@ -613,8 +613,8 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.Rh2Texture);
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DiffuseTexture);
-        GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GraphicsUtil.CheckError("FirstRenderToBasePassPre");
         Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         GraphicsUtil.CheckError("FirstRenderToBasePassComplete");
@@ -704,11 +704,11 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             }
         }
         GraphicsUtil.CheckError("PreTransp - 0");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(4, Config.DesaturationAmount);
-        GL.Uniform1(13, fogDist);
-        GL.Uniform3(14, State.CameraRelativePosition);
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.TranspOnly.DESATURATION, Config.DesaturationAmount);
+        GL.Uniform1(ShaderLocations.Deferred.TranspOnly.FOG_DISTANCE, fogDist);
+        GL.Uniform3(ShaderLocations.Deferred.TranspOnly.CAMERA_POSITION, State.CameraRelativePosition);
         GL.DepthMask(false);
         GraphicsUtil.CheckError("PreTransp - 1");
         if (Engine.AllowLL || !Engine.Deferred_BrightTransp)
@@ -780,7 +780,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                     State.FBOid = FBOID.TRANSP_UNLIT;
                 }
             }
-            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix_OffsetFor3D);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix_OffsetFor3D);
             Config.CameraPos = State.CameraBasePos - State.CameraAdjust;
             Matrix4 orig = State.PrimaryMatrix;
             State.PrimaryMatrix = State.PrimaryMatrix_OffsetFor3D;
@@ -827,32 +827,32 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_GodRay_Texture_2);
             Shaders.Deferred.Godrays = Shaders.Deferred.Godrays.Bind();
-            GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform1(6, State.CurrentExposure * Engine.Exposure);
-            GL.Uniform1(7, Config.Width / (float)Config.Height);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.Godray.EXPOSURE, State.CurrentExposure * Engine.Exposure);
+            GL.Uniform1(ShaderLocations.Deferred.Godray.ASPECT_RATIO, Config.Width / (float)Config.Height);
             if (Config.SunLocation.IsNaN())
             {
-                GL.Uniform2(8, new Vector2(-10f, -10f));
+                GL.Uniform2(ShaderLocations.Deferred.Godray.SUN_LOCATION, new Vector2(-10f, -10f));
             }
             else
             {
                 Vector4d v = Vector4d.TransformRow(new Vector4d(Config.SunLocation.ToOpenTK3D(), 1.0), State.PrimaryMatrixd);
                 if (v.Z / v.W > 1.0f || v.Z / v.W < 0.0f)
                 {
-                    GL.Uniform2(8, new Vector2(-10f, -10f));
+                    GL.Uniform2(ShaderLocations.Deferred.Godray.SUN_LOCATION, new Vector2(-10f, -10f));
                 }
                 else
                 {
                     Vector2d lp1 = (v.Xy / v.W) * 0.5f + new Vector2d(0.5f);
-                    GL.Uniform2(8, new Vector2((float)lp1.X, (float)lp1.Y));
+                    GL.Uniform2(ShaderLocations.Deferred.Godray.SUN_LOCATION, new Vector2((float)lp1.X, (float)lp1.Y));
                     float lplenadj = (float)((1.0 - Math.Min(lp1.Length, 1.0)) * (0.99 - 0.6) + 0.6);
-                    GL.Uniform1(12, 0.84f * lplenadj);
+                    GL.Uniform1(ShaderLocations.Deferred.Godray.DENSITY, 0.84f * lplenadj);
                 }
             }
-            GL.Uniform1(14, Engine.ZNear);
-            GL.Uniform1(15, Engine.ZFar());
-            GL.Uniform1(16, Engine.ZFarOut() * 0.5f);
+            GL.Uniform1(ShaderLocations.Deferred.Godray.MIN_DEPTH, Engine.ZNear);
+            GL.Uniform1(ShaderLocations.Deferred.Godray.MAX_DEPTH, Engine.ZFar());
+            GL.Uniform1(ShaderLocations.Deferred.Godray.SKY_DISTANCE, Engine.ZFarOut() * 0.5f);
             View3D.TranspBlend();
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             View3D.StandardBlend();
@@ -863,9 +863,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             //GL.Enable(EnableCap.DepthTest);
             GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Transparents_Texture);
             Shaders.Deferred.TransparentAdderPass = Shaders.Deferred.TransparentAdderPass.Bind();
-            GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform1(3, (float)lightc);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.TranspAdder.LIGHTS_USED, (float)lightc);
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         }
         GL.UseProgram(0);
@@ -897,14 +897,14 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.BindImageTexture(7, Internal.LL_TransparentTextures[3], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             GL.ActiveTexture(TextureUnit.Texture0);
             Shaders.Deferred.LLClearerPass.Bind();
-            GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Matrix4 flatProj = Matrix4.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
-            GL.UniformMatrix4(1, false, ref flatProj);
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref flatProj);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-            //s_whatever.Bind();
+            //s_whatever.Bind(); lol
             //GL.Uniform2(4, new Vector2(Window.Width, Window.Height));
             //GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0f, 0f, 0f, 1f });
             //GL.ClearBuffer(ClearBuffer.Depth, 0, new float[] { 1f });
@@ -915,10 +915,10 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             RenderTranspInt(ref lightc, frustumToUse);
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
             Shaders.Deferred.LLFinalPass.Bind();
-            GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
-            GL.UniformMatrix4(1, false, ref flatProj);
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(4, new Vector2(Config.Width, Config.Height));
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref flatProj);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform2(ShaderLocations.Common.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         }
         else
@@ -1034,11 +1034,11 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                     Shaders.Deferred.Transparents_Lights = Shaders.Deferred.Transparents_Lights.Bind();
                 }
             }
-            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-            GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
-            GL.UniformMatrix4(9, false, ref dataMatrix);
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.Uniform2(ShaderLocations.Deferred.TranspOnly.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
+            GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.LIGHT_DATA_HELPER, false, ref dataMatrix);
+            GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
+            GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
             GL.ActiveTexture(TextureUnit.Texture4);
             GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -1060,15 +1060,15 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                 Patches.LLPatch?.Invoke(matabc);
                 Shaders.Deferred.Transparents_LL.Bind();
                 //GL.UniformMatrix4(1, false, ref combined);
-                GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-                GL.UniformMatrix4(9, false, ref matabc);
+                GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+                GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.LIGHT_DATA_HELPER, false, ref matabc);
             }
             else
             {
                 Patches.TransparentRenderPatch?.Invoke();
                 Shaders.Deferred.Transparents.Bind();
                 //GL.UniformMatrix4(1, false, ref combined);
-                GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+                GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
             }
             Config.Render3D(View);
         }
@@ -1081,14 +1081,14 @@ public class View3DDeferredRenderer : View3DCoreDataSet
     public void ConfigureParticleLightsShader(Matrix4 dataMatrix, float[] lightData, float[] shadowMatrices)
     {
         GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(4, Config.DesaturationAmount);
+        GL.Uniform1(ShaderLocations.Deferred.TranspOnly.DESATURATION, Config.DesaturationAmount);
         //GL.Uniform1(7, (float)Client.GlobalTickTimeLocal);
-        GL.Uniform2(8, new Vector2(Config.Width, Config.Height));
+        GL.Uniform2(ShaderLocations.Deferred.TranspOnly.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
         GraphicsUtil.CheckError("PreRenderTranspLights - 1.75");
-        GL.UniformMatrix4(9, false, ref dataMatrix);
-        GL.Uniform3(14, State.CameraRelativePosition);
-        GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
-        GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
+        GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.LIGHT_DATA_HELPER, false, ref dataMatrix);
+        GL.Uniform3(ShaderLocations.Deferred.TranspOnly.CAMERA_POSITION, State.CameraRelativePosition);
+        GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
+        GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
         GraphicsUtil.CheckError("PreRenderTranspLights - 2");
     }
 
