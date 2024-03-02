@@ -102,7 +102,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 Patches.ShadowLightPatch?.Invoke(light, subLight);
                                 Shaders.Deferred.ShadowPass_Particles = Shaders.Deferred.ShadowPass_Particles.Bind();
                                 View.SetMatrix(2, Matrix4d.Identity);
-                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f); ;
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
                                 GL.Uniform3(ShaderLocations.Common.CAMERA_POSITION, State.CameraRelativePosition);
                                 subLight.SetProj(View);
