@@ -55,7 +55,10 @@ public static class ShaderLocations
 
     }
 
-    /// <summary>Locations used in deferred rendering shaders.</summary>
+    /// <summary>
+    /// Locations used in deferred rendering shaders.
+    /// Lighting is done in a separate pass.
+    /// </summary>
     public static class Deferred
     {
         /// <summary>Locations used in the shadow shader.</summary>
