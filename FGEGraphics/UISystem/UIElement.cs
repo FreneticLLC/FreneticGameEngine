@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using FGEGraphics.ClientSystem;
-using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 

@@ -29,7 +29,7 @@ public static class ShaderLocations
         /// <summary>Camera position.</summary>
         public const int CAMERA_POSITION = 14;
 
-        /// <summary>The screen size</summary>
+        /// <summary>The screen size.</summary>
         public const int SCREEN_SIZE = 4;
     }
 
@@ -49,16 +49,13 @@ public static class ShaderLocations
         public const int ROTATION = 4;
     }
 
-    /// <summary>Locations used in forward rendering shaders.</summary>
+    /// <summary>Locations used in Forward Rendering mode.</summary>
     public static class Forward
     {
-
+        // TODO
     }
 
-    /// <summary>
-    /// Locations used in deferred rendering shaders.
-    /// Lighting is done in a separate pass.
-    /// </summary>
+    /// <summary>Locations used in Deferred Rendering mode.</summary>
     public static class Deferred
     {
         /// <summary>Locations used in the shadow shader.</summary>
@@ -80,272 +77,152 @@ public static class ShaderLocations
         /// <summary>Locations used in the gbuffer shader (Shader name is FBO).</summary>
         public static class GBuffer
         {
-            /// <summary>
-            /// The screen size. Used for depth linearization.
-            /// Uniform: screen_size
-            /// </summary>
+            /// <summary>The screen size. Used for depth linearization.</summary>
             public const int SCREEN_SIZE = 4;
 
-            /// <summary>
-            /// Used in color_for for getting the color of a vertex based on time.
-            /// Uniform: time
-            /// </summary>
+            /// <summary>Used in color_for for getting the color of a vertex based on time.</summary>
             public const int TIME = 6;
 
-            /// <summary>
-            /// The fog color including alpha.
-            /// Uniform: fogCol
-            /// </summary>
+            /// <summary>The fog color including alpha.</summary>
             public const int FogColor = 18;
         }
 
         /// <summary>Locations used in the lightadder shader.</summary>
         public static class LightAdder
         {
-            /// <summary>
-            /// How much to blur the shadow (gives a soft shadow effect).
-            /// Uniform: depth_jump
-            /// </summary>
+            /// <summary>How much to blur the shadow (gives a soft shadow effect).</summary>
             public const int DEPTH_JUMP = 3;
 
-            /// <summary>
-            /// How much ambient light to add.
-            /// Uniform: ambient
-            /// </summary>
+            /// <summary>How much ambient light to add.</summary>
             public const int AMBIENT = 4;
 
-            /// <summary>
-            /// Z-near and Z-far for depth linearization.
-            /// Uniform: zdist
-            /// </summary>
+            /// <summary>Z-near and Z-far for depth linearization.</summary>
             public const int Z_DISTANCE = 7;
 
-            /// <summary>
-            /// Current projection for SSAO (Screen Space Ambient Occlusion) usage.
-            /// Uniform: ssao_projection
-            /// </summary>
+            /// <summary>Current projection for SSAO (Screen Space Ambient Occlusion) usage.</summary>
             public const int SSAO_PROJECTION = 8;
 
-            /// <summary>
-            /// How many lights are present.
-            /// Uniform: lights_used
-            /// </summary>
+            /// <summary>How many lights are present.</summary>
             public const int LIGHTS_USED = 9;
 
-            /// <summary>
-            /// The matrices of the light sources (essentially their point of view this is used for shadow mapping).
-            /// Uniform: shadow_matrix_array
-            /// </summary>
+            /// <summary>The matrices of the light sources (essentially their point of view this is used for shadow mapping).</summary>
             public const int SHADOW_MATRIX_ARRAY = 10;
         }
 
-        /// <summary>Locations used in the final pass (Shader name is finalgodray) shader.</summary>
+        /// <summary>Locations used in the final pass shader.</summary>
         public static class FinalPass
         {
-            /// <summary>
-            /// What position the camera is targeting in the world (ray traced).
-            /// Uniform: cameraTargetPos
-            /// </summary>
+            /// <summary>What position the camera is targeting in the world (ray traced).</summary>
             public const int CAMERA_TARGET_POSITION = 8;
 
-            /// <summary>
-            /// How far away the camera target position is from the camera.
-            /// Uniform: cameraTargetDepth
-            /// </summary>
+            /// <summary>How far away the camera target position is from the camera.</summary>
             public const int CAMERA_TARGET_DEPTH = 9;
 
-            /// <summary>
-            /// The HDR exposure value.
-            /// Uniform: hdrExposure
-            /// </summary>
+            /// <summary>The HDR exposure value.</summary>
             public const int HDR_EXPOSURE = 10;
 
-            /// <summary>
-            /// Camera position.
-            /// Uniform: cameraPos
-            /// </summary>
+            /// <summary>Camera position.</summary>
             public const int CAMERA_POSITION = 14;
 
-            /// <summary>
-            /// The distance fog should be around.
-            /// Uniform: fogDist
-            /// </summary>
+            /// <summary>The distance fog should be around.</summary>
             public const int FOG_DISTANCE = 16;
 
-            /// <summary>
-            /// The Z-Near and Z-Far value of the 3D projection.
-            /// Uniform: zdist
-            /// </summary>
+            /// <summary>The Z-Near and Z-Far value of the 3D projection.</summary>
             public const int Z_DISTANCE = 17;
 
-            /// <summary>
-            /// What color any fog to apply is. For no fog, the alpha value will be zero.
-            /// Uniform: fogCol
-            /// </summary>
+            /// <summary>What color any fog to apply is. For no fog, the alpha value will be zero.</summary>
             public const int FOG_COLOR = 18;
 
-            /// <summary>
-            /// How much to desaturate the view by. 1.0 = fully desaturated.
-            /// Uniform: desaturationAmount
-            /// </summary>
+            /// <summary>How much to desaturate the view by. 1.0 = fully desaturated.</summary>
             public const int DESATURATION = 19;
 
             /// <summary>
             /// What position the eye of the 3D camera view is at in the world.
-            /// Important for reflection calculations by normalizing the fragment position subtracted by this value
-            /// in order to get the view direction.
-            /// Uniform: eye_position
+            /// Important for reflection calculations by normalizing the fragment position subtracted by this value in order to get the view direction.
             /// </summary>
             public const int EYE_POSITION = 20;
 
-            /// <summary>
-            /// What color to desaturate too. Default is an orange-ish color.
-            /// Uniform: desaturationColor
-            /// </summary>
+            /// <summary>What color to desaturate too. Default is an orange-ish color.</summary>
             public const int DESATURATION_COLOR = 21;
 
-            /// <summary>
-            /// The full 3D projection matrix.
-            /// Uniform: proj_mat
-            /// </summary>
+            /// <summary>The full 3D projection matrix.</summary>
             public const int PROJECTION_MATRIX = 22;
 
-            /// <summary>
-            /// How wide the screen is.
-            /// Uniform: width
-            /// </summary>
-            public const int SCREEN_WIDTH = 24;
+            /// <summary>How wide the screen is.</summary>
+            public const int WIDTH = 24;
 
-            /// <summary>
-            /// How tall the screen is.
-            /// Uniform: height
-            /// </summary>
-            public const int SCREEN_HEIGHT = 25;
+            /// <summary>How tall the screen is.</summary>
+            public const int HEIGHT = 25;
 
-            /// <summary>
-            /// Passes in the engine global tick time to the shader.
-            /// Uniform: time
-            /// </summary>
+            /// <summary>Passes in the engine global tick time to the shader.</summary>
             public const int TIME = 26;
 
-            /// <summary>
-            /// How much motion blur to apply, and in what direction.
-            /// Uniform: mot_blur
-            /// </summary>
+            /// <summary>How much motion blur to apply, and in what direction.</summary>
             public const int MOTION_BLUR = 27;
 
-            /// <summary>
-            /// Whether to gray-scale the view. 0 for off, 1 for on.
-            /// Uniform: do_grayscale
-            /// </summary>
+            /// <summary>Whether to gray-scale the view. 0 for off, 1 for on.</summary>
             public const int DO_GRAYSCALE = 28;
         }
 
         /// <summary>Locations used in the hdrpass shader.</summary>
         public static class HDRPass
         {
-            /// <summary>
-            /// The screen size.
-            /// Uniform: u_screen_size
-            /// </summary>
+            /// <summary>The screen size.</summary>
             public const int SCREEN_SIZE = 4;
         }
 
         /// <summary>Locations used in the godray shader.</summary>
         public static class Godray
         {
-            /// <summary>
-            /// The amount of exposure to apply.
-            /// Uniform: exposure
-            /// </summary>
+            /// <summary>The amount of exposure to apply.</summary>
             public const int EXPOSURE = 6;
 
-            /// <summary>
-            /// The aspect ratio of the screen ensures the godray effect is properly scaled.
-            /// Uniform: aspect
-            /// </summary>
+            /// <summary>The aspect ratio of the screen to ensure the godray effect is properly scaled.</summary>
             public const int ASPECT_RATIO = 7;
 
-            /// <summary>
-            /// The position of the light source (sun location).
-            /// Uniform: sunloc
-            /// </summary>
+            /// <summary>The position of the light source (sun location).</summary>
             public const int SUN_LOCATION = 8;
 
-            /// <summary>
-            /// The density of the godray effect.
-            /// Higher values make the godray effect more dense and focused while lower values make it more spread out.
-            /// Uniform: density
-            /// </summary>
+            /// <summary>The density of the godray effect - Higher values make the godray effect more dense and focused while lower values make it more spread out.</summary>
             public const int DENSITY = 12;
 
-            /// <summary>
-            /// The minimum depth used for depth linearization.
-            /// Uniform: MIN_DEPTH
-            /// </summary>
+            /// <summary>The minimum depth, used for depth linearization.</summary>
             public const int MIN_DEPTH = 14;
 
-            /// <summary>
-            /// The maximum depth used for depth linearization.
-            /// Uniform: MAX_DEPTH
-            /// </summary>
+            /// <summary>The maximum depth, used for depth linearization.</summary>
             public const int MAX_DEPTH = 15;
 
-            /// <summary>
-            /// Distance that determines whether a pixel is in the sky or not.
-            /// Uniform: SKY_DIST
-            /// </summary>
+            /// <summary>Distance that determines whether a pixel is in the sky or not.</summary>
             public const int SKY_DISTANCE = 16;
         }
 
         /// <summary>Locations used in the transparents-only shader.</summary>
         public static class TranspOnly
         {
-            /// <summary>
-            /// Amount of desaturation to apply.
-            /// Uniform: desaturationAmount
-            /// </summary>
-            public const int DESATURATION = 4;
+            /// <summary>Amount of desaturation to apply.</summary>
+            public const int DESATURATION_AMOUNT = 4;
 
-            /// <summary>
-            /// Screen size.
-            /// Uniform: u_screen_size
-            /// </summary>
+            /// <summary>Screen size.</summary>
             public const int SCREEN_SIZE = 8;
 
-            /// <summary>
-            /// Data matrix for light data to be used in the shader.
-            /// Uniform: lights_used_helper
-            /// </summary>
-            public const int LIGHT_DATA_HELPER = 9;
+            /// <summary>Data matrix for light data to be used in the shader.</summary>
+            public const int LIGHTS_USED_HELPER = 9;
 
-            /// <summary>
-            /// The matrices of the light sources (essentially their point of view this is used for shadow mapping).
-            /// Uniform: shadow_matrix_array
-            /// </summary>
+            /// <summary>The matrices of the light sources (essentially their point of view this is used for shadow mapping).</summary>
             public const int SHADOW_MATRIX_ARRAY = 20;
 
-            /// <summary>
-            /// The distance fog should be around.
-            /// Uniform: fogDist
-            /// </summary>
+            /// <summary>The distance fog should be around.</summary>
             public const int FOG_DISTANCE = 13;
 
-            /// <summary>
-            /// Camera position.
-            /// Uniform: cameraPos
-            /// </summary>
+            /// <summary>Camera position.</summary>
             public const int CAMERA_POSITION = 14;
         }
 
         /// <summary>Locations used in the transparents data adder shader.</summary>
         public static class TranspAdder
         {
-            /// <summary>
-            /// The amount of lights used.
-            /// Uniform: lcount
-            /// </summary>
-            public const int LIGHTS_USED = 3;
+            /// <summary>The amount of lights used.</summary>
+            public const int LIGHT_COUNT = 3;
         }
     }
 }
