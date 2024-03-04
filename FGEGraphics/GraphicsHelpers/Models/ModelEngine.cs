@@ -66,8 +66,8 @@ public class ModelEngine
         LoadedModels = new Dictionary<string, Model>(128);
         Cube = GenerateCube();
         LoadedModels.Add("cube", Cube);
-        Cylinder = ShapeGenerators.GenerateCylinder(1, 5, 20, 30, this);
-        Sphere = ShapeGenerators.GenerateSphere(1, 10, 60, this);
+        Cylinder = GetModel("cylinder");
+        Sphere = GetModel("sphere");
         Clear = new Model("clear") { Engine = this, Skinned = true, Original = new Model3D() };
         LoadedModels.Add("clear", Clear);
     }
