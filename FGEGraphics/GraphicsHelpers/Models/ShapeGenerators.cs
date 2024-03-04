@@ -27,11 +27,15 @@ public static class ShapeGenerators
     /// <param name="slices"></param>
     /// <param name="modelEngine"></param>
     /// <param name="reverseOrder"></param>
-    /// <returns>The generated model.</returns>
     public static Model GenerateSphere(float radius, uint stacks, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
     {
+        if (stacks > slices)
+        {
+            Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
+        }
+
         // Calculate the number of vertices and indices
-        uint vertexCount = (stacks + 1) * (slices + 1);
+        uint vertexCount = stacks * slices;
         uint numIndices = stacks * slices * 6;  // 2 triangles per stack/slice, 3 indices per triangle
 
         List<Vector3> vertices = new((int)vertexCount);
@@ -58,10 +62,7 @@ public static class ShapeGenerators
                 float z = radius * sinPhi * sinTheta;
 
                 vertices.Add(new Vector3(x, y, z));
-
-                Vector3 normal = new(x, y, z);
-                normals.Add(normal.Normalized());
-
+                normals.Add(new Vector3(x, y, z).Normalized());
                 texCoords.Add(new Vector2((float)j / slices, (float)i / stacks));
 
                 if (i < stacks && j < slices)
@@ -80,14 +81,8 @@ public static class ShapeGenerators
             }
         }
 
-        if (vertices.Count != normals.Count || vertices.Count != texCoords.Count)
-            throw new ArgumentException("Position, normal, and texture coordinate lists must have the same length.");
-
         if (reverseOrder)
         {
-            vertices.Reverse();
-            texCoords.Reverse();
-            normals.Reverse();
             Array.Reverse(indices);
         }
 
@@ -99,12 +94,11 @@ public static class ShapeGenerators
     /// <param name="slices"></param>
     /// <param name="modelEngine"></param>
     /// <param name="reverseOrder"></param>
-    /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
     public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
     {
         // Calculate the number of vertices and indices
-        uint vertexCount = slices + 1;
+        uint vertexCount = slices;
         uint numIndices = slices * 3;  // 1 triangle per slice, 3 indices per triangle
 
         List<Vector3> vertices = new((int)vertexCount);
@@ -125,10 +119,7 @@ public static class ShapeGenerators
             float z = 0;
 
             vertices.Add(new Vector3(x, y, z));
-
-            Vector3 normal = new(x, y, z);
-            normals.Add(normal.Normalized());
-
+            normals.Add(new Vector3(x, y, z).Normalized());
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
 
             if (i < slices)
@@ -139,14 +130,8 @@ public static class ShapeGenerators
             }
         }
 
-        if (vertices.Count != normals.Count || vertices.Count != texCoords.Count)
-            throw new ArgumentException("Position, normal, and texture coordinate lists must have the same length.");
-
         if (reverseOrder)
         {
-            vertices.Reverse();
-            texCoords.Reverse();
-            normals.Reverse();
             Array.Reverse(indices);
         }
 
@@ -163,7 +148,7 @@ public static class ShapeGenerators
     public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine, bool reverseOrder = true)
     {
         // Calculate the number of vertices and indices
-        uint vertexCount = (stacks + 1) * (slices + 1);
+        uint vertexCount = stacks * slices;
         // We need to account for top and bottom faces, so we multiply by 2
         uint numIndices = (stacks * slices * 6) * 2;  // 2 triangles per stack/slice, 3 indices per triangle
 
@@ -186,7 +171,6 @@ public static class ShapeGenerators
             float z = height;
 
             vertices.Add(new Vector3(x, y, z));
-
             normals.Add(new Vector3(x, y, z));
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
 
@@ -215,10 +199,7 @@ public static class ShapeGenerators
                 float z = height * cosTheta;
 
                 vertices.Add(new Vector3(x, y, z));
-
-                Vector3 normal = new(x, y, 0);
-                normals.Add(normal.Normalized());
-
+                normals.Add(new Vector3(x, y, 0).Normalized());
                 texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
 
                 if (i < stacks && j < slices)
@@ -249,9 +230,7 @@ public static class ShapeGenerators
             float z = -height;
 
             vertices.Add(new Vector3(x, y, z));
-
-            normals.Add(new Vector3(x, y, z));
-
+            normals.Add(new Vector3(x, y, z).Normalized());
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
 
             if (i < slices)
@@ -262,15 +241,9 @@ public static class ShapeGenerators
             }
         }
 
-        if (vertices.Count != normals.Count || vertices.Count != texCoords.Count)
-            throw new ArgumentException("Position, normal, and texture coordinate lists must have the same length.");
-
         // Reverse order to account for winding order
         if (reverseOrder)
         {
-            vertices.Reverse();
-            texCoords.Reverse();
-            normals.Reverse();
             Array.Reverse(indices);
         }
 
@@ -295,7 +268,7 @@ public static class ShapeGenerators
         }
 
         // Calculate the number of vertices and indices
-        uint vertexCount = (rings + 1) * (sides + 1);
+        uint vertexCount = rings * sides + 1;
         uint numIndices = rings * sides * 6;  // 2 triangles per ring/side, 3 indices per triangle
 
         List<Vector3> vertices = new((int)vertexCount);
@@ -326,11 +299,9 @@ public static class ShapeGenerators
                 float z = (radius + tubeRadius * cosTheta) * sinPhi;
 
                 vertices.Add(new Vector3(x, y, z));
-
                 Vector3 pointOnSurface = new(x, y, z);
                 Vector3 centerToSurface = pointOnSurface - new Vector3(centerX, centerY, centerZ);
                 normals.Add(centerToSurface.Normalized());
-
                 textureCoords.Add(new Vector2((float)j / sides, (float)i / rings));
 
                 if (i < rings && j < sides)
@@ -349,27 +320,15 @@ public static class ShapeGenerators
             }
         }
 
-        if (vertices.Count != normals.Count || vertices.Count != textureCoords.Count)
-            throw new ArgumentException("Position, normal, and texture coordinate lists must have the same length.");
-
         if (reverseOrder)
         {
-            vertices.Reverse();
-            textureCoords.Reverse();
-            normals.Reverse();
             Array.Reverse(indices);
         }
 
         return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
     }
 
-    private static Model GetModelAfterGenerating(
-        ModelEngine engine,
-        string name,
-        List<Vector3> vertices,
-        List<Vector3> normals,
-        List<Vector2> texCoords,
-        uint[] indices)
+    private static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
     {
         Model generatedModel = new(name)
         {
