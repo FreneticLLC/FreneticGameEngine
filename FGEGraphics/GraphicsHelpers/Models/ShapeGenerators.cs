@@ -22,11 +22,6 @@ public static class ShapeGenerators
     /// Generates a 3D sphere model.
     /// Note that the stacks should be lower than the slices to avoid incorrect normals a good example is 10 stacks and 60 slices.
     /// </summary>
-    /// <param name="radius">The radius of the sphere.</param>
-    /// <param name="stacks">The amount of stacks.</param>
-    /// <param name="slices">The amount of slices.</param>
-    /// <param name="modelEngine">The model engine to use.</param>
-    /// <param name="reverseOrder">Whether to reverse the order of the indices.</param>
     public static Model GenerateSphere(float radius, uint stacks, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
     {
         if (stacks > slices)
@@ -90,10 +85,6 @@ public static class ShapeGenerators
     }
 
     /// <summary>Generates a 2D circle model.</summary>
-    /// <param name="radius">The radius of the circle.</param>
-    /// <param name="slices">The amount of slices.</param>
-    /// <param name="modelEngine">The model engine to use.</param>
-    /// <param name="reverseOrder">Whether to reverse the order of the indices.</param>
     public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
     {
         // Calculate the number of vertices and indices
@@ -138,12 +129,6 @@ public static class ShapeGenerators
     }
 
     /// <summary>Generates a 3D cylinder model.</summary>
-    /// <param name="radius">The radius of the cylinder.</param>
-    /// <param name="height">The height of the cylinder.</param>
-    /// <param name="slices">The amount of slices.</param>
-    /// <param name="stacks">The amount of stacks.</param>
-    /// <param name="modelEngine">The model engine to use.</param>
-    /// <param name="reverseOrder">Whether to reverse the order of the indices.</param>
     public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine, bool reverseOrder = true)
     {
         // Calculate the number of vertices and indices
@@ -253,12 +238,6 @@ public static class ShapeGenerators
     /// Generates a 3D torus (donut) model.
     /// Note that the number of sides should be less than or equal to the number of rings to avoid incorrect normals.
     /// </summary>
-    /// <param name="radius">The radius of the torus.</param>
-    /// <param name="tubeRadius">The inner radius of the torus.</param>
-    /// <param name="sides">The amount of sides.</param>
-    /// <param name="rings">The amount of rings.</param>
-    /// <param name="modelEngine">The model engine to use.</param>
-    /// <param name="reverseOrder">Whether to reverse the order of the indices.</param>
     public static Model GenerateTorus(float radius, float tubeRadius, uint sides, uint rings, ModelEngine modelEngine, bool reverseOrder = true)
     {
         if (sides > rings)
