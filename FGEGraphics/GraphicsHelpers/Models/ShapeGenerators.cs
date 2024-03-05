@@ -308,15 +308,6 @@ public static class ShapeGenerators
 
     private static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
     {
-        Model generatedModel = new(name)
-        {
-            Engine = engine,
-            Skinned = true,
-            ModelMin = new Location(-0.5),
-            ModelMax = new Location(0.5),
-            Original = new Model3D()
-        };
-        ModelMesh generatedModelMesh = new(name);
         Renderable.ListBuilder builder = new();
         builder.Prepare();
         builder.Vertices = vertices;
@@ -336,7 +327,20 @@ public static class ShapeGenerators
             TexCoords = [.. texCoords.ConvertAll(t => new System.Numerics.Vector2(t.X, t.Y))],
             Indices = indices
         };
-        generatedModel.Original.Meshes = [mesh];
+
+        Model generatedModel = new(name)
+        {
+            Engine = engine,
+            Skinned = true,
+            ModelMin = new Location(-0.5),
+            ModelMax = new Location(0.5),
+            Original = new Model3D()
+        };
+        generatedModel.Original = new()
+        {
+            Meshes = [mesh]
+        };
+        ModelMesh generatedModelMesh = new(name);
         generatedModelMesh.BaseRenderable.GenerateVBO(builder);
         generatedModel.AddMesh(generatedModelMesh);
 
