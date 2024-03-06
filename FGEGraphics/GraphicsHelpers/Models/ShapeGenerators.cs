@@ -29,9 +29,8 @@ public static class ShapeGenerators
             Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
         }
 
-        // Calculate the number of vertices and indices
         uint vertexCount = stacks * slices;
-        uint numIndices = stacks * slices * 6;  // 2 triangles per stack/slice, 3 indices per triangle
+        uint numIndices = stacks * slices * 6;
 
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
@@ -87,9 +86,8 @@ public static class ShapeGenerators
     /// <summary>Generates a 2D circle model.</summary>
     public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
     {
-        // Calculate the number of vertices and indices
         uint vertexCount = slices;
-        uint numIndices = slices * 3;  // 1 triangle per slice, 3 indices per triangle
+        uint numIndices = slices * 3;
 
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
@@ -131,10 +129,8 @@ public static class ShapeGenerators
     /// <summary>Generates a 3D cylinder model.</summary>
     public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine, bool reverseOrder = true)
     {
-        // Calculate the number of vertices and indices
         uint vertexCount = stacks * slices;
-        // We need to account for top and bottom faces, so we multiply by 2
-        uint numIndices = (stacks * slices * 6) * 2;  // 2 triangles per stack/slice, 3 indices per triangle
+        uint numIndices = (stacks * slices * 6) * 2;
 
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
@@ -143,7 +139,6 @@ public static class ShapeGenerators
         uint[] indices = new uint[numIndices];
         int index = 0;
 
-        // Top
         for (int i = 0; i <= slices; i++)
         {
             float phi = i * 2 * MathHelper.Pi / slices;
@@ -166,7 +161,6 @@ public static class ShapeGenerators
             }
         }
 
-        // Middle
         for (int i = 0; i <= stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
@@ -202,7 +196,6 @@ public static class ShapeGenerators
             }
         }
 
-        // Bottom
         for (int i = 0; i <= slices; i++)
         {
             float phi = i * 2 * MathHelper.Pi / slices;
@@ -225,7 +218,6 @@ public static class ShapeGenerators
             }
         }
 
-        // Reverse order to account for winding order
         if (reverseOrder)
         {
             Array.Reverse(indices);
@@ -245,9 +237,8 @@ public static class ShapeGenerators
             Logs.Warning("Torus has more sides than rings, this may result in incorrect normals.");
         }
 
-        // Calculate the number of vertices and indices
         uint vertexCount = rings * sides + 1;
-        uint numIndices = rings * sides * 6;  // 2 triangles per ring/side, 3 indices per triangle
+        uint numIndices = rings * sides * 6;
 
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
