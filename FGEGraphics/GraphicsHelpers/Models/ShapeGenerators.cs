@@ -308,17 +308,6 @@ public static class ShapeGenerators
 
     private static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
     {
-        Renderable.ListBuilder builder = new();
-        builder.Prepare();
-        builder.Vertices = vertices;
-        builder.Normals = normals;
-        builder.TexCoords = texCoords.ConvertAll(t => new Vector3(t.X, t.Y, 0));
-        builder.Indices = new List<uint>(indices);
-        for (int i = 0; i < vertices.Count; i++)
-        {
-            builder.AddEmptyBoneInfo();
-            builder.Colors.Add(new Vector4(1, 1, 1, 1));
-        }
         Model3DMesh mesh = new()
         {
             Name = name,
