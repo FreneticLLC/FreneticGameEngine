@@ -325,25 +325,22 @@ public static class ShapeGenerators
             Vertices = [.. vertices.ConvertAll(v => v.ToLocation().ToNumerics())],
             Normals = [.. normals.ConvertAll(n => n.ToLocation().ToNumerics())],
             TexCoords = [.. texCoords.ConvertAll(t => new System.Numerics.Vector2(t.X, t.Y))],
-            Indices = indices
+            Indices = indices,
+            Bones = []
         };
 
-        Model generatedModel = new(name)
+        Model3D model3D = new()
         {
-            Engine = engine,
-            Skinned = true,
-            ModelMin = new Location(-0.5),
-            ModelMax = new Location(0.5),
-            Original = new Model3D()
-        };
-        generatedModel.Original = new()
-        {
+            RootNode = new Model3DNode()
+            {
+                Name = name,
+                Children = [],
+            },            
             Meshes = [mesh]
         };
-        ModelMesh generatedModelMesh = new(name);
-        generatedModelMesh.BaseRenderable.GenerateVBO(builder);
-        generatedModel.AddMesh(generatedModelMesh);
 
-        return generatedModel;
+        Model model = engine.FromScene(model3D, name);
+
+        return model;
     }
 }
