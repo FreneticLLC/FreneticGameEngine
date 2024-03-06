@@ -339,8 +339,6 @@ public static class ShapeGenerators
             Meshes = [mesh]
         };
 
-        Model model = engine.FromScene(model3D, name);
-
-        return model;
+        return engine.FromScene(model3D, name);
     }
 }
