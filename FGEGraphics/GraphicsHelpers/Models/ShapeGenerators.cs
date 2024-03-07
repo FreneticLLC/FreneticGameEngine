@@ -6,7 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGECore.MathHelpers;
 using FGECore.ModelSystems;
 using System;
 using System.Collections.Generic;
@@ -74,12 +73,10 @@ public static class ShapeGenerators
                 }
             }
         }
-
         if (reverseOrder)
         {
             Array.Reverse(indices);
         }
-
         return GetModelAfterGenerating(modelEngine, "sphere", vertices, normals, texCoords, indices);
     }
 
@@ -217,12 +214,10 @@ public static class ShapeGenerators
                 indices[index++] = (uint)(i + 2);
             }
         }
-
         if (reverseOrder)
         {
             Array.Reverse(indices);
         }
-
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
@@ -288,12 +283,10 @@ public static class ShapeGenerators
                 }
             }
         }
-
         if (reverseOrder)
         {
             Array.Reverse(indices);
         }
-
         return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
     }
 
