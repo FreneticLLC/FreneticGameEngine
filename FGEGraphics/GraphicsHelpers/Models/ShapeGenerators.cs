@@ -29,7 +29,7 @@ public static class ShapeGenerators
             Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
         }
 
-        uint vertexCount = stacks * slices;
+        uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = stacks * slices * 6;
 
         List<Vector3> vertices = new((int)vertexCount);
@@ -129,7 +129,7 @@ public static class ShapeGenerators
     /// <summary>Generates a 3D cylinder model.</summary>
     public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine, bool reverseOrder = true)
     {
-        uint vertexCount = stacks * slices;
+        uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = (stacks * slices * 6) * 2;
 
         List<Vector3> vertices = new((int)vertexCount);
