@@ -27,49 +27,39 @@ public static class ShapeGenerators
         {
             Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
         }
-
         uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = stacks * slices * 6;
-
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
-
         uint[] indices = new uint[numIndices];
         int index = 0;
-
-        for (int i = 0; i <= stacks; i++)
+        for (uint i = 0; i <= stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
             float sinTheta = (float)Math.Sin(theta);
             float cosTheta = (float)Math.Cos(theta);
-
-            for (int j = 0; j <= slices; j++)
+            for (uint j = 0; j <= slices; j++)
             {
                 float phi = j * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
                 float cosPhi = (float)Math.Cos(phi);
-
                 float x = radius * cosPhi * sinTheta;
                 float y = radius * cosTheta;
                 float z = radius * sinPhi * sinTheta;
-
                 vertices.Add(new Vector3(x, y, z));
                 normals.Add(new Vector3(x, y, z).Normalized());
                 texCoords.Add(new Vector2((float)j / slices, (float)i / stacks));
-
                 if (i < stacks && j < slices)
                 {
-                    uint currentRow = (uint)(i * (slices + 1));
-                    uint nextRow = (uint)((i + 1) * (slices + 1));
-
-                    indices[index++] = (uint)(currentRow + j);
-                    indices[index++] = (uint)(nextRow + j);
-                    indices[index++] = (uint)(currentRow + j + 1);
-
-                    indices[index++] = (uint)(currentRow + j + 1);
-                    indices[index++] = (uint)(nextRow + j);
-                    indices[index++] = (uint)(nextRow + j + 1);
+                    uint currentRow = i * (slices + 1);
+                    uint nextRow = (i + 1) * (slices + 1);
+                    indices[index++] = currentRow + j;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = nextRow + j + 1;
                 }
             }
         }
@@ -85,41 +75,33 @@ public static class ShapeGenerators
     {
         uint vertexCount = slices;
         uint numIndices = slices * 3;
-
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
-
         uint[] indices = new uint[numIndices];
         int index = 0;
-
-        for (int i = 0; i <= slices; i++)
+        for (uint i = 0; i <= slices; i++)
         {
             float phi = i * 2 * MathHelper.Pi / slices;
             float sinPhi = (float)Math.Sin(phi);
             float cosPhi = (float)Math.Cos(phi);
-
             float x = radius * cosPhi;
             float y = radius * sinPhi;
             float z = 0;
-
             vertices.Add(new Vector3(x, y, z));
             normals.Add(new Vector3(x, y, z).Normalized());
-            texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
-
+            texCoords.Add(new Vector2(cosPhi, sinPhi));
             if (i < slices)
             {
                 indices[index++] = 0;
-                indices[index++] = (uint)(i + 1);
-                indices[index++] = (uint)(i + 2);
+                indices[index++] = i + 1;
+                indices[index++] = i + 2;
             }
         }
-
         if (reverseOrder)
         {
             Array.Reverse(indices);
         }
-
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
     }
 
@@ -128,15 +110,12 @@ public static class ShapeGenerators
     {
         uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = (stacks * slices * 6) * 2;
-
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
-
         uint[] indices = new uint[numIndices];
         int index = 0;
-
-        for (int i = 0; i <= slices; i++)
+        for (uint i = 0; i <= slices; i++)
         {
             float phi = i * 2 * MathHelper.Pi / slices;
             float sinPhi = (float)Math.Sin(phi);
@@ -152,66 +131,55 @@ public static class ShapeGenerators
 
             if (i < slices)
             {
-                indices[index++] = (vertexCount - 1);
-                indices[index++] = (uint)(vertexCount - 2 - i);
-                indices[index++] = (uint)(vertexCount - 2 - i - 1);
+                indices[index++] = vertexCount - 1;
+                indices[index++] = vertexCount - 2 - i;
+                indices[index++] = vertexCount - 2 - i - 1;
             }
         }
-
-        for (int i = 0; i <= stacks; i++)
+        for (uint i = 0; i <= stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
             float cosTheta = (float)Math.Cos(theta);
-
-            for (int j = 0; j <= slices; j++)
+            for (uint j = 0; j <= slices; j++)
             {
                 float phi = j * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
                 float cosPhi = (float)Math.Cos(phi);
-
                 float x = radius * cosPhi;
                 float y = radius * sinPhi;
                 float z = height * cosTheta;
-
                 vertices.Add(new Vector3(x, y, z));
                 normals.Add(new Vector3(x, y, 0).Normalized());
-                texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
-
+                texCoords.Add(new Vector2(cosPhi, sinPhi));
                 if (i < stacks && j < slices)
                 {
-                    uint currentRow = (uint)(i * (slices + 1));
-                    uint nextRow = (uint)((i + 1) * (slices + 1));
-
-                    indices[index++] = (uint)(currentRow + j);
-                    indices[index++] = (uint)(nextRow + j);
-                    indices[index++] = (uint)(currentRow + j + 1);
-
-                    indices[index++] = (uint)(currentRow + j + 1);
-                    indices[index++] = (uint)(nextRow + j);
-                    indices[index++] = (uint)(nextRow + j + 1);
+                    uint currentRow = i * (slices + 1);
+                    uint nextRow = (i + 1) * (slices + 1);
+                    indices[index++] = currentRow + j;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = nextRow + j + 1;
                 }
             }
         }
-
-        for (int i = 0; i <= slices; i++)
+        for (uint i = 0; i <= slices; i++)
         {
             float phi = i * 2 * MathHelper.Pi / slices;
             float sinPhi = (float)Math.Sin(phi);
             float cosPhi = (float)Math.Cos(phi);
-
             float x = radius * cosPhi;
             float y = radius * sinPhi;
             float z = -height;
-
             vertices.Add(new Vector3(x, y, z));
             normals.Add(new Vector3(x, y, z).Normalized());
-            texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
-
+            texCoords.Add(new Vector2(cosPhi, sinPhi));
             if (i < slices)
             {
                 indices[index++] = 0;
-                indices[index++] = (uint)(i + 1);
-                indices[index++] = (uint)(i + 2);
+                indices[index++] = i + 1;
+                indices[index++] = i + 2;
             }
         }
         if (reverseOrder)
@@ -231,55 +199,44 @@ public static class ShapeGenerators
         {
             Logs.Warning("Torus has more sides than rings, this may result in incorrect normals.");
         }
-
         uint vertexCount = rings * sides + 1;
         uint numIndices = rings * sides * 6;
-
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> textureCoords = new((int)vertexCount);
-
         uint[] indices = new uint[numIndices];
         int indexIndex = 0;
-
-        for (int i = 0; i <= rings; i++)
+        for (uint i = 0; i <= rings; i++)
         {
             float theta = i * MathHelper.TwoPi / rings;
             float sinTheta = (float)Math.Sin(theta);
             float cosTheta = (float)Math.Cos(theta);
-
-            for (int j = 0; j <= sides; j++)
+            for (uint j = 0; j <= sides; j++)
             {
                 float phi = j * MathHelper.TwoPi / sides;
                 float sinPhi = (float)Math.Sin(phi);
                 float cosPhi = (float)Math.Cos(phi);
-
                 float centerX = radius * cosPhi;
                 float centerY = 0;
                 float centerZ = radius * sinPhi;
-
                 float x = (radius + tubeRadius * cosTheta) * cosPhi;
                 float y = tubeRadius * sinTheta;
                 float z = (radius + tubeRadius * cosTheta) * sinPhi;
-
                 vertices.Add(new Vector3(x, y, z));
                 Vector3 pointOnSurface = new(x, y, z);
                 Vector3 centerToSurface = pointOnSurface - new Vector3(centerX, centerY, centerZ);
                 normals.Add(centerToSurface.Normalized());
                 textureCoords.Add(new Vector2((float)j / sides, (float)i / rings));
-
                 if (i < rings && j < sides)
                 {
-                    uint currentRow = (uint)(i * (sides + 1));
-                    uint nextRow = (uint)((i + 1) * (sides + 1));
-
-                    indices[indexIndex++] = (uint)(currentRow + j);
-                    indices[indexIndex++] = (uint)(nextRow + j);
-                    indices[indexIndex++] = (uint)(nextRow + j + 1);
-
-                    indices[indexIndex++] = (uint)(currentRow + j);
-                    indices[indexIndex++] = (uint)(nextRow + j + 1);
-                    indices[indexIndex++] = (uint)(currentRow + j + 1);
+                    uint currentRow = i * (sides + 1);
+                    uint nextRow = (i + 1) * (sides + 1);
+                    indices[indexIndex++] = currentRow + j;
+                    indices[indexIndex++] = nextRow + j;
+                    indices[indexIndex++] = nextRow + j + 1;
+                    indices[indexIndex++] = currentRow + j;
+                    indices[indexIndex++] = nextRow + j + 1;
+                    indices[indexIndex++] = currentRow + j + 1;
                 }
             }
         }
@@ -290,7 +247,8 @@ public static class ShapeGenerators
         return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
     }
 
-    private static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
+    /// <summary>Returns a shape model after generating it.</summary>
+    public static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
     {
         Model3DMesh mesh = new()
         {
@@ -301,7 +259,6 @@ public static class ShapeGenerators
             Indices = indices,
             Bones = []
         };
-
         Model3D model3D = new()
         {
             RootNode = new Model3DNode()
@@ -311,7 +268,6 @@ public static class ShapeGenerators
             },            
             Meshes = [mesh]
         };
-
         return engine.FromScene(model3D, name);
     }
 }
