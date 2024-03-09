@@ -10,28 +10,37 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a styled clickable UI element on the screen.</summary>
 public abstract class UIClickableElement : UIElement
 {
-    /// <summary>The render style to use when the element is not being interacted with.</summary>
-    public UIElementStyle StyleNormal;
+    /// <summary>Grouped styles for a <see cref="UIClickableElement"/>.</summary>
+    /// <param name="normal"></param>
+    /// <param name="hover"></param>
+    /// <param name="click"></param>
+    public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click)
+    {
+        /// <summary>The render style to use when the element is not being interacted with.</summary>
+        public UIElementStyle Normal = normal;
 
-    /// <summary>The render style to use when the user is hovering their mouse cursor over this element.</summary>
-    public UIElementStyle StyleHover;
+        /// <summary>The render style to use when the user is hovering their mouse cursor over this element.</summary>
+        public UIElementStyle Hover = hover;
 
-    /// <summary>The render style to use when the user is clicking on this element.</summary>
-    public UIElementStyle StyleClick;
+        /// <summary>The render style to use when the user is clicking on this element.</summary>
+        public UIElementStyle Click = click;
+    }
+
+    /// <summary>The clickable style group.</summary>
+    public StyleGroup Styles;
 
     /// <summary>Constructs the styled clickable element.</summary>
-    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
-    /// <param name="hover">The style to display when hovered.</param>
-    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
     /// <param name="requireText">Whether the styles must support text rendering.</param>
     /// <param name="onClick">Ran when the element is clicked.</param>
-    public UIClickableElement(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
+    public UIClickableElement(StyleGroup styles, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
     {
         Clicked += onClick;
-        StyleNormal = AddStyle(normal, requireText);
-        StyleHover = AddStyle(hover, requireText);
-        StyleClick = AddStyle(click, requireText);
+        Styles = styles;
+        AddStyle(Styles.Normal, requireText);
+        AddStyle(Styles.Hover, requireText);
+        AddStyle(Styles.Click, requireText);
     }
 
     /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
@@ -41,13 +50,13 @@ public abstract class UIClickableElement : UIElement
         {
             if (Pressed)
             {
-                return StyleClick;
+                return Styles.Click;
             }
             if (Hovered)
             {
-                return StyleHover;
+                return Styles.Hover;
             }
-            return StyleNormal;
+            return Styles.Normal;
         }
     }
 }

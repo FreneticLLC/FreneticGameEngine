@@ -36,12 +36,9 @@ public class UIButton : UIClickableElement
     /// <summary>Constructs a new style-based button.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
-    /// <param name="hover">The style to display when hovered.</param>
-    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(string text, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos)
-        : base(normal, hover, click, pos, false, clicked)
+    public UIButton(string text, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, clicked)
     {
         AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false));
         Text = new(this, text, horizontalAlignment: TextAlignment.CENTER, verticalAlignment: TextAlignment.CENTER);
@@ -56,10 +53,11 @@ public class UIButton : UIClickableElement
     /// <param name="pos">The position of the element.</param>
     public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UIPositionHelper pos)
     {
+        // TODO: Move this to a method on UIClickableElement.StyleGroup
         UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
         UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
         UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
-        return new UIButton(text, clicked, normal, hover, click, pos);
+        return new UIButton(text, clicked, new(normal, hover, click), pos);
     }
 
     /// <summary>Renders this button on the screen.</summary>
