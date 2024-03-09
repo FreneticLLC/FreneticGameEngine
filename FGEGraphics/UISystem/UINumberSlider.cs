@@ -17,27 +17,41 @@ using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.UISystem;
 
+/// <summary>The options for a <see cref="UINumberSlider"/> or <see cref="UILabeledNumberSlider"/>.</summary>
+/// <param name="min">The minimum slider value.</param>
+/// <param name="max">The maximum slider value.</param>
+/// <param name="initial">The initial slider value.</param>
+/// <param name="intMode">Whether to use an integer grid instead of decimals.</param>
+public struct UINumberSliderOptions(double min, double max, double initial, bool intMode)
+{
+    /// <summary>The minimum slider value.</summary>
+    public double Min = min;
+
+    /// <summary>The maximum slider value.</summary>
+    public double Max = max;
+
+    /// <summary>The initial slider value.</summary>
+    public double Initial = initial;
+
+    /// <summary>Whether to use an integer grid instead of decimals.</summary>
+    // TODO: Implement
+    public bool IntMode = intMode;
+}
+
 /// <summary>
 /// Represents a slider element that can choose between a range of real number values.
 /// For a labeled number slider, use <see cref="UILabeledNumberSlider"/>.
 /// </summary>
 public class UINumberSlider : UIClickableElement
 {
-    /// <summary>Whether the number slider uses integers instead of decimal numbers.</summary>
-    // TODO: Implement
-    public bool IntMode;
-
-    /// <summary>The minimum slider value.</summary>
-    public double Min = 0.0;
-
-    /// <summary>The maximum slider value.</summary>
-    public double Max = 10.0;
+    /// <summary>The slider options.</summary>
+    public UINumberSliderOptions Options;
 
     /// <summary>The current slider value.</summary>
-    public double Value = 0.0;
+    public double Value;
 
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
-    public double Progress = 0.0;
+    public double Progress;
 
     /// <summary>
     /// The box placed at the current slider progress.
@@ -45,10 +59,15 @@ public class UINumberSlider : UIClickableElement
     /// </summary>
     public UIBox Button;
 
-    public UINumberSlider(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : base(normal, hover, click, pos, false, null)
+    /// <summary>Constructs a number slider.</summary>
+    /// <param name="options">The slider options.</param>
+    /// <param name="styles">The clickable styles.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UINumberSlider(UINumberSliderOptions options, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
     {
-        Progress = (Value - Min) / (Max - Min);
-        AddChild(Button = new(normal, pos.AtOrigin().ConstantWidth(pos.Height / 2), false));
+        Options = options;
+        Progress = (Options.Initial - Options.Min) / (Options.Max - Options.Min);
+        AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2), false));
         TickButton();
     }
 
@@ -61,7 +80,7 @@ public class UINumberSlider : UIClickableElement
         if (Pressed)
         {
             Progress = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0);
-            Value = Progress * (Max - Min) + Min;
+            Value = Progress * (Options.Max - Options.Min) + Options.Min;
             TickButton();
         }
         base.Tick(delta);
@@ -71,7 +90,7 @@ public class UINumberSlider : UIClickableElement
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         Engine.Textures.White.Bind();
-        Renderer2D.SetColor(StyleNormal.BorderColor);
+        Renderer2D.SetColor(Styles.Normal.BorderColor);
         view.Rendering.RenderRectangle(view.UIContext, X, Y + Height / 2 - style.BorderThickness / 2, X + Width, Y + Height / 2 + style.BorderThickness / 2);
         Renderer2D.SetColor(Color4F.White);
         Button.Render(view, delta, style);
