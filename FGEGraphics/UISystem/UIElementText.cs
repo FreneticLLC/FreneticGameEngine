@@ -159,7 +159,7 @@ public class UIElementText
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont.FontDefault.Height ?? 0;
+    public int Height => Renderable?.Lines?.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont?.FontDefault.Height ?? 0;
 
     /// <summary>Returns the render position of the text given a starting position.</summary>
     /// <param name="startX">The left-oriented anchor X value.</param>

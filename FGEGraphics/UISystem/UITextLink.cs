@@ -46,10 +46,8 @@ public class UITextLink : UIClickableElement
         Text = new(this, text, true, horizontalAlignment: alignment);
         Icon = icon;
         UpdateStyle();
+        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
     }
-
-    /// <summary>Fixes this text link's width and height based on <see cref="Text"/> and the current style.</summary>
-    public override void SwitchToStyle(UIElementStyle style) => Position.ConstantWidthHeight(Text.Width, Text.Height);
 
     /// <summary>Performs a render on this link.</summary>
     /// <param name="view">The UI view.</param>
