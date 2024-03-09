@@ -344,10 +344,10 @@ public abstract class UIElement
                 }
                 else if (!mDown && ElementInternal.MousePreviouslyDown)
                 {
-                    if (element.Enabled && element.Clicked is not null)
+                    if (element.Enabled)
                     {
                         element.Pressed = false;
-                        element.Clicked();
+                        element.Clicked?.Invoke();
                     }
                     element.MouseLeftUp(mX, mY);
                 }
