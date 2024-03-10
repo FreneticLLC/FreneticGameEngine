@@ -30,14 +30,13 @@ public class UINumberSlider : UIClickableElement
     public double Max;
 
     /// <summary>Whether to use an integer grid instead of decimals.</summary>
-    // TODO: Implement
     public bool IsInt;
 
     /// <summary>The current slider value.</summary>
     public double Value;
 
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
-    public double Progress;
+    public double Progress => (Value - Min) / (Max - Min);
 
     /// <summary>
     /// The box placed at the current slider progress.
@@ -46,19 +45,18 @@ public class UINumberSlider : UIClickableElement
     public UIBox Button;
 
     /// <summary>Constructs a number slider.</summary>
+    /// <param name="isInt">Whether to use integers instead of decimals.</param>
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>
     /// <param name="initial">The initial slider value.</param>
-    /// <param name="isInt">Whether to use integers instead of decimals.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
     public UINumberSlider(double min, double max, double initial, bool isInt, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
     {
         Min = min;
         Max = max;
-        Value = initial;
         IsInt = isInt;
-        Progress = (Value - Min) / (Max - Min);
+        Value = IsInt ? (int)initial : initial;
         AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2), false));
         Button.Position.GetterX(() => (int)(Progress * Width) - Button.Width / 2);
     }
@@ -71,8 +69,11 @@ public class UINumberSlider : UIClickableElement
         {
             return;
         }
-        Progress = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0);
-        Value = Progress * (Max - Min) + Min;
+        Value = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
+        if (IsInt)
+        {
+            Value = Math.Round(Value);
+        }
     }
 
     /// <inheritdoc/>
@@ -80,7 +81,20 @@ public class UINumberSlider : UIClickableElement
     {
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(Styles.Normal.BorderColor);
-        view.Rendering.RenderRectangle(view.UIContext, X, Y + Height / 2 - style.BorderThickness / 2, X + Width, Y + Height / 2 + style.BorderThickness / 2);
+        int lineWidth = style.BorderThickness / 2;
+        int centerY = Y + Height / 2;
+        view.Rendering.RenderRectangle(view.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);
+        if (IsInt)
+        {
+            int values = (int)(Max - Min);
+            int spacing = Width / values;
+            for (int i = 0; i < values + 1; i++)
+            {
+                int x = X + i * spacing;
+                int height = Height / 6; // TODO: Make this value customizable
+                view.Rendering.RenderRectangle(view.UIContext, x - lineWidth, centerY - height, x + lineWidth, centerY + height);
+            }
+        }
         Renderer2D.SetColor(Color4F.White);
         Button.Render(view, delta, style);
     }

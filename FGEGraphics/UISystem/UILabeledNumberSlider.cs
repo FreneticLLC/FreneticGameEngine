@@ -47,6 +47,6 @@ public class UILabeledNumberSlider : UINumberSlider
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        Label.Text.Content = $"{Value:0.0}";
+        Label.Text.Content = IsInt ? $"{(int)Value}" : $"{Value:0.0}";
     }
 }
