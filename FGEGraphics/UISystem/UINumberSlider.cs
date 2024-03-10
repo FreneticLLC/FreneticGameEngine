@@ -17,35 +17,21 @@ using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>The options for a <see cref="UINumberSlider"/> or <see cref="UILabeledNumberSlider"/>.</summary>
-/// <param name="min">The minimum slider value.</param>
-/// <param name="max">The maximum slider value.</param>
-/// <param name="initial">The initial slider value.</param>
-/// <param name="intMode">Whether to use an integer grid instead of decimals.</param>
-public struct UINumberSliderOptions(double min, double max, double initial, bool intMode)
-{
-    /// <summary>The minimum slider value.</summary>
-    public double Min = min;
-
-    /// <summary>The maximum slider value.</summary>
-    public double Max = max;
-
-    /// <summary>The initial slider value.</summary>
-    public double Initial = initial;
-
-    /// <summary>Whether to use an integer grid instead of decimals.</summary>
-    // TODO: Implement
-    public bool IntMode = intMode;
-}
-
 /// <summary>
 /// Represents a slider element that can choose between a range of real number values.
 /// For a labeled number slider, use <see cref="UILabeledNumberSlider"/>.
 /// </summary>
 public class UINumberSlider : UIClickableElement
 {
-    /// <summary>The slider options.</summary>
-    public UINumberSliderOptions Options;
+    /// <summary>The minimum slider value.</summary>
+    public double Min;
+
+    /// <summary>The maximum slider value.</summary>
+    public double Max;
+
+    /// <summary>Whether to use an integer grid instead of decimals.</summary>
+    // TODO: Implement
+    public bool IsInt;
 
     /// <summary>The current slider value.</summary>
     public double Value;
@@ -60,30 +46,33 @@ public class UINumberSlider : UIClickableElement
     public UIBox Button;
 
     /// <summary>Constructs a number slider.</summary>
-    /// <param name="options">The slider options.</param>
+    /// <param name="min">The minimum slider value.</param>
+    /// <param name="max">The maximum slider value.</param>
+    /// <param name="initial">The initial slider value.</param>
+    /// <param name="isInt">Whether to use integers instead of decimals.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UINumberSlider(UINumberSliderOptions options, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
+    public UINumberSlider(double min, double max, double initial, bool isInt, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
     {
-        Options = options;
-        Progress = (Options.Initial - Options.Min) / (Options.Max - Options.Min);
+        Min = min;
+        Max = max;
+        Value = initial;
+        IsInt = isInt;
+        Progress = (Value - Min) / (Max - Min);
         AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2), false));
-        TickButton();
+        Button.Position.GetterX(() => (int)(Progress * Width) - Button.Width / 2);
     }
-
-    /// <summary>Fixes the <see cref="Button"/>'s position in accordance to the <see cref="Progress"/> value.</summary>
-    public void TickButton() => Button.Position.ConstantX((int)(Progress * Width) - Button.Width / 2);
 
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
-        if (Pressed)
-        {
-            Progress = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0);
-            Value = Progress * (Options.Max - Options.Min) + Options.Min;
-            TickButton();
-        }
         base.Tick(delta);
+        if (!Pressed)
+        {
+            return;
+        }
+        Progress = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0);
+        Value = Progress * (Max - Min) + Min;
     }
 
     /// <inheritdoc/>
