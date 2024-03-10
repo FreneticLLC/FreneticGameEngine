@@ -21,8 +21,9 @@ public class UILabeledNumberSlider : UINumberSlider
     public UILabeledNumberSlider(double min, double max, double initial, bool isInt, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIPositionHelper pos) : base(min, max, initial, isInt, sliderStyles, pos)
     {
         AddStyle(labelStyle, true);
-        AddChild(Label = new UILabel(string.Empty, labelStyle, pos.AtOrigin().ConstantX(labelLeft ? -labelPadding : pos.Width + labelPadding)));
-        Label.Position.GetterY(() => (pos.Height - Label.Height) / 2);
+        AddChild(Label = new UILabel(string.Empty, labelStyle, pos.AtOrigin()));
+        // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
+        Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
     }
 
     /// <inheritdoc/>

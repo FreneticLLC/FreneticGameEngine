@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
+// TODO: Replace this with a *draw* anchor point system in UIPositionHelper.
 /// <summary>Simple enumeration of text alignment modes.</summary>
 public enum TextAlignment
 {
