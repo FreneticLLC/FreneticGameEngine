@@ -217,16 +217,15 @@ public static class ShapeGenerators
                 {
                     uint currentRow = i * (sides + 1);
                     uint nextRow = (i + 1) * (sides + 1);
-                    indices[indexIndex++] = currentRow + j;
-                    indices[indexIndex++] = nextRow + j;
-                    indices[indexIndex++] = nextRow + j + 1;
-                    indices[indexIndex++] = currentRow + j;
-                    indices[indexIndex++] = nextRow + j + 1;
                     indices[indexIndex++] = currentRow + j + 1;
+                    indices[indexIndex++] = nextRow + j + 1;
+                    indices[indexIndex++] = currentRow + j;
+                    indices[indexIndex++] = nextRow + j + 1;
+                    indices[indexIndex++] = nextRow + j;
+                    indices[indexIndex++] = currentRow + j;
                 }
             }
         }
-        Array.Reverse(indices);
         return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
     }
 
