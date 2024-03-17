@@ -112,20 +112,17 @@ public static class ShapeGenerators
             float phi = i * 2 * MathHelper.Pi / slices;
             float sinPhi = (float)Math.Sin(phi);
             float cosPhi = (float)Math.Cos(phi);
-
             float x = radius * cosPhi;
             float y = radius * sinPhi;
             float z = height;
-
             vertices.Add(new Vector3(x, y, z));
             normals.Add(new Vector3(x, y, z));
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
-
             if (i < slices)
             {
                 indices[index++] = vertexCount - 1;
                 indices[index++] = vertexCount - 2 - i;
-                indices[index++] = vertexCount - 2 - i - 1;
+                indices[index++] = vertexCount - 3 - i;
             }
         }
         for (uint i = 0; i <= stacks; i++)
