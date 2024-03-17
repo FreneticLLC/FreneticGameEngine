@@ -21,7 +21,7 @@ public static class ShapeGenerators
     /// Generates a 3D sphere model.
     /// Note that the stacks should be lower than the slices to avoid incorrect normals a good example is 10 stacks and 60 slices.
     /// </summary>
-    public static Model GenerateSphere(float radius, uint stacks, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
+    public static Model GenerateSphere(float radius, uint stacks, uint slices, ModelEngine modelEngine)
     {
         if (stacks > slices)
         {
@@ -63,15 +63,11 @@ public static class ShapeGenerators
                 }
             }
         }
-        if (reverseOrder)
-        {
-            Array.Reverse(indices);
-        }
         return GetModelAfterGenerating(modelEngine, "sphere", vertices, normals, texCoords, indices);
     }
 
     /// <summary>Generates a 2D circle model.</summary>
-    public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool reverseOrder = false)
+    public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine)
     {
         uint vertexCount = slices;
         uint numIndices = slices * 3;
@@ -98,15 +94,11 @@ public static class ShapeGenerators
                 indices[index++] = i + 2;
             }
         }
-        if (reverseOrder)
-        {
-            Array.Reverse(indices);
-        }
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
     }
 
     /// <summary>Generates a 3D cylinder model.</summary>
-    public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine, bool reverseOrder = true)
+    public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine)
     {
         uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = (stacks * slices * 6) * 2;
@@ -182,10 +174,7 @@ public static class ShapeGenerators
                 indices[index++] = i + 2;
             }
         }
-        if (reverseOrder)
-        {
-            Array.Reverse(indices);
-        }
+        Array.Reverse(indices);
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
@@ -193,7 +182,7 @@ public static class ShapeGenerators
     /// Generates a 3D torus (donut) model.
     /// Note that the number of sides should be less than or equal to the number of rings to avoid incorrect normals.
     /// </summary>
-    public static Model GenerateTorus(float radius, float tubeRadius, uint sides, uint rings, ModelEngine modelEngine, bool reverseOrder = true)
+    public static Model GenerateTorus(float radius, float tubeRadius, uint sides, uint rings, ModelEngine modelEngine)
     {
         if (sides > rings)
         {
@@ -240,10 +229,7 @@ public static class ShapeGenerators
                 }
             }
         }
-        if (reverseOrder)
-        {
-            Array.Reverse(indices);
-        }
+        Array.Reverse(indices);
         return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
     }
 
