@@ -67,7 +67,7 @@ public static class ShapeGenerators
     }
 
     /// <summary>Generates a 2D circle model.</summary>
-    public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool flip = false)
+    public static Model Generate2DCircle(float radius, uint slices, ModelEngine modelEngine, bool flip = false)
     {
         uint vertexCount = slices;
         uint numIndices = slices * 3;
@@ -76,24 +76,12 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        for (uint i = 0; i <= slices; i++)
+        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, flip, 0, (uint i) =>
         {
-            float phi = i * 2 * MathHelper.Pi / slices;
-            float sinPhi = (float)Math.Sin(phi);
-            float cosPhi = (float)Math.Cos(phi);
-            float x = radius * cosPhi;
-            float y = radius * sinPhi;
-            float z = 0;
-            vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(0, 0, flip ? -1 : 1));
-            texCoords.Add(new Vector2(cosPhi, sinPhi));
-            if (i < slices)
-            {
-                indices[index++] = 0;
-                indices[index++] = flip ? i + 1 : i + 2;
-                indices[index++] = flip ? i + 2 : i + 1;
-            }
-        }
+            indices[index++] = 0;
+            indices[index++] = flip ? i + 1 : i + 2;
+            indices[index++] = flip ? i + 2 : i + 1;
+        });
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
     }
 
@@ -107,24 +95,12 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        for (uint i = 0; i <= slices; i++)
+        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, false, height, (uint i) =>
         {
-            float phi = i * 2 * MathHelper.Pi / slices;
-            float sinPhi = (float)Math.Sin(phi);
-            float cosPhi = (float)Math.Cos(phi);
-            float x = radius * cosPhi;
-            float y = radius * sinPhi;
-            float z = height;
-            vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(0, 0, 1));
-            texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
-            if (i < slices)
-            {
-                indices[index++] = vertexCount - 3 - i;
-                indices[index++] = vertexCount - 2 - i;
-                indices[index++] = vertexCount - 1;
-            }
-        }
+            indices[index++] = vertexCount - 3 - i;
+            indices[index++] = vertexCount - 2 - i;
+            indices[index++] = vertexCount - 1;
+        });
         for (uint i = 0; i <= stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
@@ -153,24 +129,12 @@ public static class ShapeGenerators
                 }
             }
         }
-        for (uint i = 0; i <= slices; i++)
+        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, true, -height, (uint i) =>
         {
-            float phi = i * 2 * MathHelper.Pi / slices;
-            float sinPhi = (float)Math.Sin(phi);
-            float cosPhi = (float)Math.Cos(phi);
-            float x = radius * cosPhi;
-            float y = radius * sinPhi;
-            float z = -height;
-            vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(0, 0, -1));
-            texCoords.Add(new Vector2(cosPhi, sinPhi));
-            if (i < slices)
-            {
-                indices[index++] = i + 2;
-                indices[index++] = i + 1;
-                indices[index++] = 0;
-            }
-        }
+            indices[index++] = i + 2;
+            indices[index++] = i + 1;
+            indices[index++] = 0;
+        });
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
@@ -250,5 +214,26 @@ public static class ShapeGenerators
             Meshes = [mesh]
         };
         return engine.FromScene(model3D, name);
+    }
+
+    /// <summary>Generates a circle and provides the necessary information.</summary>
+    public static void GenerateCircle(ref List<Vector3> vecs, ref List<Vector3> norm, ref List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
+    {
+        for (uint i = 0; i <= slices; i++)
+        {
+            float phi = i * 2 * MathHelper.Pi / slices;
+            float sinPhi = (float)Math.Sin(phi);
+            float cosPhi = (float)Math.Cos(phi);
+            float x = radius * cosPhi;
+            float y = radius * sinPhi;
+            float z = zC;
+            vecs.Add(new Vector3(x, y, z));
+            norm.Add(new Vector3(0, 0, flip ? -1 : 1));
+            tc.Add(new Vector2(cosPhi, sinPhi));
+            if (i < slices)
+            {
+                idxAction(i);
+            }
+        }
     }
 }
