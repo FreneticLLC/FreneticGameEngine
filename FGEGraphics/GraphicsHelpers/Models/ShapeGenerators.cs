@@ -67,7 +67,7 @@ public static class ShapeGenerators
     }
 
     /// <summary>Generates a 2D circle model.</summary>
-    public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine)
+    public static Model Generated2DCircle(float radius, uint slices, ModelEngine modelEngine, bool flip = false)
     {
         uint vertexCount = slices;
         uint numIndices = slices * 3;
@@ -85,13 +85,13 @@ public static class ShapeGenerators
             float y = radius * sinPhi;
             float z = 0;
             vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(x, y, z).Normalized());
+            normals.Add(new Vector3(0, 0, flip ? -1 : 1));
             texCoords.Add(new Vector2(cosPhi, sinPhi));
             if (i < slices)
             {
                 indices[index++] = 0;
-                indices[index++] = i + 1;
-                indices[index++] = i + 2;
+                indices[index++] = flip ? i + 1 : i + 2;
+                indices[index++] = flip ? i + 2 : i + 1;
             }
         }
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
@@ -116,7 +116,7 @@ public static class ShapeGenerators
             float y = radius * sinPhi;
             float z = height;
             vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(x, y, z).Normalized());
+            normals.Add(new Vector3(0, 0, 1));
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
             if (i < slices)
             {
@@ -162,7 +162,7 @@ public static class ShapeGenerators
             float y = radius * sinPhi;
             float z = -height;
             vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(x, y, z).Normalized());
+            normals.Add(new Vector3(0, 0, -1));
             texCoords.Add(new Vector2(cosPhi, sinPhi));
             if (i < slices)
             {
