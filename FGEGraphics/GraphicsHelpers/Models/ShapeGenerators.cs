@@ -116,13 +116,13 @@ public static class ShapeGenerators
             float y = radius * sinPhi;
             float z = height;
             vertices.Add(new Vector3(x, y, z));
-            normals.Add(new Vector3(x, y, z));
+            normals.Add(new Vector3(x, y, z).Normalized());
             texCoords.Add(new Vector2((float)cosPhi, (float)sinPhi));
             if (i < slices)
             {
-                indices[index++] = vertexCount - 1;
-                indices[index++] = vertexCount - 2 - i;
                 indices[index++] = vertexCount - 3 - i;
+                indices[index++] = vertexCount - 2 - i;
+                indices[index++] = vertexCount - 1;
             }
         }
         for (uint i = 0; i <= stacks; i++)
@@ -144,12 +144,12 @@ public static class ShapeGenerators
                 {
                     uint currentRow = i * (slices + 1);
                     uint nextRow = (i + 1) * (slices + 1);
-                    indices[index++] = currentRow + j;
-                    indices[index++] = nextRow + j;
-                    indices[index++] = currentRow + j + 1;
-                    indices[index++] = currentRow + j + 1;
-                    indices[index++] = nextRow + j;
                     indices[index++] = nextRow + j + 1;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = currentRow + j;
                 }
             }
         }
@@ -166,12 +166,11 @@ public static class ShapeGenerators
             texCoords.Add(new Vector2(cosPhi, sinPhi));
             if (i < slices)
             {
-                indices[index++] = 0;
-                indices[index++] = i + 1;
                 indices[index++] = i + 2;
+                indices[index++] = i + 1;
+                indices[index++] = 0;
             }
         }
-        Array.Reverse(indices);
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
