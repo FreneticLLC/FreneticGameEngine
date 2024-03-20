@@ -76,7 +76,7 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, flip, 0, (uint i) =>
+        GenerateCircle(vertices, normals, texCoords, radius, slices, flip, 0, (uint i) =>
         {
             indices[index++] = 0;
             indices[index++] = flip ? i + 1 : i + 2;
@@ -95,7 +95,7 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, false, height, (uint i) =>
+        GenerateCircle(vertices, normals, texCoords, radius, slices, false, height, (uint i) =>
         {
             indices[index++] = vertexCount - 3 - i;
             indices[index++] = vertexCount - 2 - i;
@@ -129,7 +129,7 @@ public static class ShapeGenerators
                 }
             }
         }
-        GenerateCircle(ref vertices, ref normals, ref texCoords, radius, slices, true, -height, (uint i) =>
+        GenerateCircle(vertices, normals, texCoords, radius, slices, true, -height, (uint i) =>
         {
             indices[index++] = i + 2;
             indices[index++] = i + 1;
@@ -217,7 +217,7 @@ public static class ShapeGenerators
     }
 
     /// <summary>Generates a circle and provides the necessary information.</summary>
-    public static void GenerateCircle(ref List<Vector3> vecs, ref List<Vector3> norm, ref List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
+    public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
     {
         for (uint i = 0; i <= slices; i++)
         {
