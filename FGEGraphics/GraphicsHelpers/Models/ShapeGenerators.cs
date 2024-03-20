@@ -27,7 +27,7 @@ public static class ShapeGenerators
         {
             Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
         }
-        uint vertexCount = (stacks + 1) * (slices + 1);
+        uint vertexCount = stacks * slices;
         uint numIndices = stacks * slices * 6;
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
@@ -148,7 +148,7 @@ public static class ShapeGenerators
         {
             Logs.Warning("Torus has more sides than rings, this may result in incorrect normals.");
         }
-        uint vertexCount = rings * sides + 1;
+        uint vertexCount = rings * sides;
         uint numIndices = rings * sides * 6;
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
