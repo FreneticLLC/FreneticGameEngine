@@ -76,7 +76,7 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        GenerateCircle(vertices, normals, texCoords, radius, slices, flip, 0, (uint i) =>
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, flip, 0, (uint i) =>
         {
             indices[index++] = 0;
             indices[index++] = flip ? i + 1 : i + 2;
@@ -95,7 +95,7 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        GenerateCircle(vertices, normals, texCoords, radius, slices, false, height, (uint i) =>
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, false, height, (uint i) =>
         {
             indices[index++] = vertexCount - 3 - i;
             indices[index++] = vertexCount - 2 - i;
@@ -129,7 +129,7 @@ public static class ShapeGenerators
                 }
             }
         }
-        GenerateCircle(vertices, normals, texCoords, radius, slices, true, -height, (uint i) =>
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, true, -height, (uint i) =>
         {
             indices[index++] = i + 2;
             indices[index++] = i + 1;
@@ -216,23 +216,27 @@ public static class ShapeGenerators
         return engine.FromScene(model3D, name);
     }
 
-    /// <summary>Generates a circle and provides the necessary information.</summary>
-    public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
+    /// <summary>Internal methods for shape generation.</summary>
+    public class InternalMethods
     {
-        for (uint i = 0; i <= slices; i++)
+        /// <summary>Generates a circle and provides the necessary information.</summary>
+        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
         {
-            float phi = i * 2 * MathHelper.Pi / slices;
-            float sinPhi = (float)Math.Sin(phi);
-            float cosPhi = (float)Math.Cos(phi);
-            float x = radius * cosPhi;
-            float y = radius * sinPhi;
-            float z = zC;
-            vecs.Add(new Vector3(x, y, z));
-            norm.Add(new Vector3(0, 0, flip ? -1 : 1));
-            tc.Add(new Vector2(cosPhi, sinPhi));
-            if (i < slices)
+            for (uint i = 0; i <= slices; i++)
             {
-                idxAction(i);
+                float phi = i * 2 * MathHelper.Pi / slices;
+                float sinPhi = (float)Math.Sin(phi);
+                float cosPhi = (float)Math.Cos(phi);
+                float x = radius * cosPhi;
+                float y = radius * sinPhi;
+                float z = zC;
+                vecs.Add(new Vector3(x, y, z));
+                norm.Add(new Vector3(0, 0, flip ? -1 : 1));
+                tc.Add(new Vector2(cosPhi, sinPhi));
+                if (i < slices)
+                {
+                    idxAction(i);
+                }
             }
         }
     }
