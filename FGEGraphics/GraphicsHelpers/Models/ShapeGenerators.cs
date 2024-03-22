@@ -28,7 +28,7 @@ public static class ShapeGenerators
             Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
         }
         uint vertexCount = stacks * slices;
-        uint numIndices = stacks * slices * 6;
+        uint numIndices = stacks * slices * 7;
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
@@ -50,17 +50,14 @@ public static class ShapeGenerators
                 vertices.Add(new Vector3(x, y, z));
                 normals.Add(new Vector3(x, y, z).Normalized());
                 texCoords.Add(new Vector2((float)j / slices, (float)i / stacks));
-                if (i < stacks && j < slices)
-                {
-                    uint currentRow = i * (slices + 1);
-                    uint nextRow = (i + 1) * (slices + 1);
-                    indices[index++] = currentRow + j;
-                    indices[index++] = nextRow + j;
-                    indices[index++] = currentRow + j + 1;
-                    indices[index++] = currentRow + j + 1;
-                    indices[index++] = nextRow + j;
-                    indices[index++] = nextRow + j + 1;
-                }
+                uint currentRow = i * slices;
+                uint nextRow = (i + 1) * slices;
+                indices[index++] = currentRow + j;
+                indices[index++] = nextRow + j;
+                indices[index++] = currentRow + j + 1;
+                indices[index++] = currentRow + j + 1;
+                indices[index++] = nextRow + j;
+                indices[index++] = nextRow + j + 1;
             }
         }
         return GetModelAfterGenerating(modelEngine, "sphere", vertices, normals, texCoords, indices);
@@ -154,7 +151,7 @@ public static class ShapeGenerators
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> textureCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
-        int indexIndex = 0;
+        int index = 0;
         for (uint i = 0; i <= rings; i++)
         {
             float theta = i * MathHelper.TwoPi / rings;
@@ -180,12 +177,12 @@ public static class ShapeGenerators
                 {
                     uint currentRow = i * (sides + 1);
                     uint nextRow = (i + 1) * (sides + 1);
-                    indices[indexIndex++] = currentRow + j + 1;
-                    indices[indexIndex++] = nextRow + j + 1;
-                    indices[indexIndex++] = currentRow + j;
-                    indices[indexIndex++] = nextRow + j + 1;
-                    indices[indexIndex++] = nextRow + j;
-                    indices[indexIndex++] = currentRow + j;
+                    indices[index++] = currentRow + j + 1;
+                    indices[index++] = nextRow + j + 1;
+                    indices[index++] = currentRow + j;
+                    indices[index++] = nextRow + j + 1;
+                    indices[index++] = nextRow + j;
+                    indices[index++] = currentRow + j;
                 }
             }
         }
