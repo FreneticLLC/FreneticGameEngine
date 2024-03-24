@@ -28,13 +28,14 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>
     /// <param name="initial">The initial slider value.</param>
-    /// <param name="isInt">Whether to use integers instead of decimals.</param>
+    /// <param name="interval">The grid-snapping interval, if any.</param>
+    /// <param name="integral">Whether to use integers instead of decimals.</param>
     /// <param name="sliderStyles">The slider styles.</param>
     /// <param name="labelLeft">Whether the label should be on the left of the slider.</param>
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
     /// <param name="labelStyle">The label style.</param>
     /// <param name="pos">The position of the slider.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, bool isInt, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIPositionHelper pos) : base(min, max, initial, isInt, sliderStyles, pos)
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integral, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIPositionHelper pos) : base(min, max, initial, interval, integral, sliderStyles, pos)
     {
         AddStyle(labelStyle, true);
         AddChild(Label = new UILabel(string.Empty, labelStyle, pos.AtOrigin()));
@@ -47,6 +48,6 @@ public class UILabeledNumberSlider : UINumberSlider
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        Label.Text.Content = IsInt ? $"{(int)Value}" : $"{Value:0.0}";
+        Label.Text.Content = Integral ? $"{(int)Value}" : $"{Value:0.0}";
     }
 }
