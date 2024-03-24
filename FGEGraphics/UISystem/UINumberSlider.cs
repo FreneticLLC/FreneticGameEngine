@@ -36,20 +36,14 @@ public class UINumberSlider : UIClickableElement
     /// </summary>
     public double Interval;
 
-    /// <summary>
-    /// Whether the slider should use integers instead of decimals.
-    /// If true, <see cref="Interval"/> should be <c>1.0</c>.
-    /// </summary>
-    public bool Integral;
+    /// <summary>Whether the slider should use integers instead of decimals.</summary>
+    public bool Integer;
 
     /// <summary>The current slider value.</summary>
     public double Value;
 
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
     public double Progress => (Value - Min) / (Max - Min);
-
-    /// <summary>Whether the slider snaps to a grid.</summary>
-    public bool UseInterval => Interval > 0.0;
 
     /// <summary>
     /// The box placed at the current slider progress.
@@ -62,21 +56,21 @@ public class UINumberSlider : UIClickableElement
     /// <param name="max">The maximum slider value.</param>
     /// <param name="initial">The initial slider value.</param>
     /// <param name="interval">The grid-snapping interval, if any.</param>
-    /// <param name="integral">Whether to use integers instead of decimals.</param>
+    /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UINumberSlider(double min, double max, double initial, double interval, bool integral, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
+    public UINumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, null)
     {
-        Integral = integral;
-        Interval = Integral ? 1.0 : interval;
-        Min = Integral ? (int)min : min;
-        Max = Integral ? (int)max : max;
-        if (UseInterval)
+        Integer = integer;
+        Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
+        Min = Integer ? (int)min : min;
+        Max = Integer ? (int)max : max;
+        if (Interval > 0.0)
         {
             int maxStep = (int)((Max - Min) / Interval);
             Max = Min + Interval * maxStep;
         }
-        Value = Math.Clamp(Integral ? (int)initial : initial, Min, Max);
+        Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
         AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2), false));
         Button.Position.GetterX(() => (int)(Progress * Width) - Button.Width / 2);
     }
@@ -90,11 +84,13 @@ public class UINumberSlider : UIClickableElement
             return;
         }
         Value = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
-        if (Integral || (UseInterval && !Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))) // TODO: Better way?
+        // TODO: Better way to check left shift down?
+        double interval = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift) ? (Integer ? 1.0 : 0.0) : Interval;
+        if (interval > 0.0)
         {
-            int step = (int)Math.Round((Value - Min) / Interval);
-            double lower = Min + Interval * step;
-            double higher = Min + Interval * (step + 1);
+            int step = (int)Math.Round((Value - Min) / interval);
+            double lower = Min + interval * step;
+            double higher = Min + interval * (step + 1);
             Value = (Value - lower) <= (higher - Value) ? lower : higher;
         }
     }
@@ -107,7 +103,7 @@ public class UINumberSlider : UIClickableElement
         int lineWidth = style.BorderThickness / 2;
         int centerY = Y + Height / 2;
         view.Rendering.RenderRectangle(view.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);
-        if (UseInterval)
+        if (Interval > 0.0)
         {
             double values = (Max - Min) / Interval;
             double spacing = Width / values;
