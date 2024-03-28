@@ -28,7 +28,7 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
 {
     /// <summary>Ran when the tab is switched.</summary>
-    public event Action<TabSwitchedArgs> TabSwitched = onSwitch;
+    public Action<TabSwitchedArgs> TabSwitched = onSwitch;
 
     /// <summary>The button leading to the currently selected tab.</summary>
     public UIElement SelectedButton;

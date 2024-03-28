@@ -32,19 +32,17 @@ public class UICheckbox : UIElement
     /// <summary>Constructs a new button-based checkbox.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="label">The text label style.</param>
-    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
-    /// <param name="hover">The style to display when hovered.</param>
-    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UICheckbox(string text, UIElementStyle label, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : base(pos)
+    public UICheckbox(string text, UIElementStyle label, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : base(pos)
     {
-        AddChild(Button = new UIButton(null, Toggle, normal, hover, click, pos.AtOrigin()));
+        AddChild(Button = new UIButton(null, Toggle, styles, pos.AtOrigin()));
         AddChild(Label = new UILabel(text, label, pos.AtOrigin().ConstantWidth(-1)));
         Label.Position.GetterXY(() => Label.Text.GetPosition(X + Width + 10, Y + Height / 2));
     }
 
     /// <summary>Constructs a new checkbox using the normal button style as the label style.</summary>
-    public UICheckbox(string text, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos) : this(text, new(normal) { BaseColor = Color4F.Transparent }, normal, hover, click, pos)
+    public UICheckbox(string text, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(text, new(styles.Normal) { BaseColor = Color4F.Transparent }, styles, pos)
     {
     }
 

@@ -229,7 +229,7 @@ public abstract class UIElement
         public List<UIElementText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
-        public UIElementStyle CurrentStyle;
+        public UIElementStyle CurrentStyle = UIElementStyle.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -343,10 +343,10 @@ public abstract class UIElement
                 }
                 else if (!mDown && ElementInternal.MousePreviouslyDown)
                 {
-                    if (element.Enabled && element.Clicked is not null)
+                    if (element.Enabled)
                     {
                         element.Pressed = false;
-                        element.Clicked();
+                        element.Clicked?.Invoke();
                     }
                     element.MouseLeftUp(mX, mY);
                 }
@@ -429,13 +429,14 @@ public abstract class UIElement
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
     public void UpdateStyle()
     {
-        if (Style != ElementInternal.CurrentStyle)
+        UIElementStyle newStyle = Style ?? UIElementStyle.Empty;
+        if (newStyle != ElementInternal.CurrentStyle)
         {
             if (ElementInternal.CurrentStyle is not null)
             {
                 SwitchFromStyle(ElementInternal.CurrentStyle);
             }
-            SwitchToStyle(ElementInternal.CurrentStyle = Style);
+            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
         }
     }
 
