@@ -34,12 +34,12 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         int index = 0;
-        for (uint i = 0; i <= stacks; i++)
+        for (uint i = 0; i < stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
             float sinTheta = (float)Math.Sin(theta);
             float cosTheta = (float)Math.Cos(theta);
-            for (uint j = 0; j <= slices; j++)
+            for (uint j = 0; j < slices; j++)
             {
                 float phi = j * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
