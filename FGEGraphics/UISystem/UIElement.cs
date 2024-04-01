@@ -367,11 +367,11 @@ public abstract class UIElement
         if (ElementInternal.HoverInternal && !(mouseDown && Position.View.InteractingElement == this))
         {
             ElementInternal.HoverInternal = false;
-            Position.View.InteractingElement = null;
             if (Enabled)
             {
                 Hovered = false;
                 Pressed = false;
+                Position.View.InteractingElement = null;
             }
             if (Position.View.Internal.MousePreviouslyDown)
             {
