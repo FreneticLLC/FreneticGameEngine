@@ -23,6 +23,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.ClientSystem;
 
@@ -47,8 +48,14 @@ public class ViewUI2D
         /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen;
 
+        /// <summary>Whether the mouse left button was previously down.</summary>
+        public bool MousePreviouslyDown;
+
         /// <summary>Debug info about hovered UI elements.</summary>
         public List<string> DebugInfo = [];
+
+        /// <summary>The stack of elements that were rendered.</summary>
+        public List<UIElement> RenderStack = [];
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -66,6 +73,9 @@ public class ViewUI2D
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
     public bool Debug;
+
+    /// <summary>The UI element currently being interacted with.</summary>
+    public UIElement InteractingElement;
 
     /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
@@ -91,7 +101,11 @@ public class ViewUI2D
     /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
     public int RelativeYLast = 0;
 
+    /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
+    public bool SortToPriority = false;
+
     /// <summary>Draw the menu to the relevant back buffer.</summary>
+    // TODO: Clean this up
     public void Draw()
     {
         StackNoteHelper.Push("Draw ViewUI2D", this);
@@ -122,18 +136,18 @@ public class ViewUI2D
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-            LastRenderedSet.Clear();
+            Internal.RenderStack.Clear();
             RelativeYLast = 0;
-            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
+            CurrentScreen.UpdatePositions(Internal.RenderStack, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            foreach (UIElement elem in LastRenderedSet)
+            foreach (UIElement elem in Internal.RenderStack)
             {
                 if (elem.IsValid)
                 {
                     elem.UpdateStyle();
                 }
             }
-            foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
+            foreach (UIElement elem in (SortToPriority ? Internal.RenderStack.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)Internal.RenderStack))
             {
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try
@@ -183,18 +197,29 @@ public class ViewUI2D
         finally
         {
             StackNoteHelper.Pop();
+            Internal.RenderStack.Reverse();
+            int mouseX = (int)Client.MouseX, mouseY = (int)Client.MouseY;
+            bool mouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
+            foreach (UIElement elem in Internal.RenderStack)
+            {
+                elem.TickInteraction(mouseX, mouseY, mouseDown);
+            }
+            Internal.MousePreviouslyDown = mouseDown;
         }
     }
-
-    /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
-    public bool SortToPriority = false;
-
-    /// <summary>The last set of elements that were rendered (not sorted).</summary>
-    public List<UIElement> LastRenderedSet = [];
 
     /// <summary>Ticks all elements attached to this view.</summary>
     public void Tick()
     {
         CurrentScreen.FullTick(Client.Delta);
+        // TODO: why isn't this running??
+        /*Internal.RenderStack.Reverse();
+        int mouseX = (int)Client.MouseX, mouseY = (int)Client.MouseY;
+        bool mouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
+        foreach (UIElement elem in Internal.RenderStack)
+        {
+            elem.TickInteraction(mouseX, mouseY, mouseDown);
+        }
+        Internal.MousePreviouslyDown = mouseDown;*/
     }
 }

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
@@ -214,9 +215,6 @@ public abstract class UIElement
         /// <summary>Elements queued to be removed as children.</summary>
         public List<UIElement> ToRemove = [];
 
-        /// <summary>Whether the mouse left button was previously down.</summary>
-        public bool MousePreviouslyDown;
-
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
@@ -310,71 +308,83 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Performs a tick on this element's children.</summary>
-    /// <param name="delta">The time since the last tick.</param>
     public virtual void TickChildren(double delta)
     {
-        int mX = (int)Window.MouseX; // TODO: Propagate float support.
-        int mY = (int)Window.MouseY;
-        bool mDown = Window.CurrentMouse.IsButtonDown(MouseButton.Left);
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement child in ElementInternal.Children)
         {
-            if (!element.IsValid)
+            if (child.IsValid)
             {
-                continue;
-            }
-            if (element.Contains(mX, mY))
-            {
-                if (!element.ElementInternal.HoverInternal)
-                {
-                    element.ElementInternal.HoverInternal = true;
-                    if (element.Enabled)
-                    {
-                        element.Hovered = true;
-                    }
-                    element.MouseEnter();
-                }
-                if (mDown && !ElementInternal.MousePreviouslyDown)
-                {
-                    if (element.Enabled)
-                    {
-                        element.Pressed = true;
-                    }
-                    element.MouseLeftDown(mX, mY);
-                }
-                else if (!mDown && ElementInternal.MousePreviouslyDown)
-                {
-                    if (element.Enabled)
-                    {
-                        element.Pressed = false;
-                        element.Clicked?.Invoke();
-                    }
-                    element.MouseLeftUp(mX, mY);
-                }
-            }
-            else if (element.ElementInternal.HoverInternal)
-            {
-                element.ElementInternal.HoverInternal = false;
-                if (element.Enabled)
-                {
-                    element.Hovered = false;
-                    element.Pressed = false;
-                }
-                element.MouseLeave();
-                if (mDown && !ElementInternal.MousePreviouslyDown)
-                {
-                    element.MouseLeftDownOutside(mX, mY);
-                }
-            }
-            else if (mDown && !ElementInternal.MousePreviouslyDown)
-            {
-                element.MouseLeftDownOutside(mX, mY);
-            }
-            element.FullTick(delta);
+                child.FullTick(delta);
+            }   
         }
-        ElementInternal.MousePreviouslyDown = mDown;
     }
 
+    public virtual void TickInteraction(int mouseX, int mouseY, bool mouseDown)
+    {
+        bool containsMouse = SelfContains(mouseX, mouseY);
+        // if contains mouse
+            // if hovered over and no interacting element, hover
+            // if pressed and no interacting element, pressed + set interacting
+            // if released inside while interacting element, clicked + set not interacting
+        // if not contains mouse
+            // if was hovered over
+                // if pressed, AND it's the interacting element, keep it hovered
+                // otherwise, not hovered and make not interacting
+                    // if released, release outside
+            // if pressed, press outside
+        if (containsMouse)
+        {
+            if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
+            {
+                ElementInternal.HoverInternal = true;
+                if (Enabled)
+                {
+                    Hovered = true;
+                }
+                MouseEnter();
+            }
+            if (mouseDown && !Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement is null)
+            {
+                if (Enabled)
+                {
+                    Pressed = true;
+                    Position.View.InteractingElement = this;
+                }
+                MouseLeftDown(mouseX, mouseY);
+            }
+            else if (!mouseDown && Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement == this)
+            {
+                if (Enabled)
+                {
+                    Pressed = false;
+                    Clicked?.Invoke();
+                    Position.View.InteractingElement = null;
+                }
+                MouseLeftUp(mouseX, mouseY);
+            }
+            return;
+        }
+        if (ElementInternal.HoverInternal && !(mouseDown && Position.View.InteractingElement == this))
+        {
+            ElementInternal.HoverInternal = false;
+            Position.View.InteractingElement = null;
+            if (Enabled)
+            {
+                Hovered = false;
+                Pressed = false;
+            }
+            if (Position.View.Internal.MousePreviouslyDown)
+            {
+                // TODO: MouseLeftUpOutside
+            }
+        }
+        if (mouseDown)
+        {
+            MouseLeftDownOutside(mouseX, mouseY);
+        }
+    }
+
+    // TODO: Don't pass the stack directly
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
