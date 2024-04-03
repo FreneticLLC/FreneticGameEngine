@@ -113,19 +113,13 @@ public class UIElementText
         set
         {
             Internal.Content = value ?? (Required ? Null : null);
-            if (value is null)
+            if (Empty)
             {
-                if (!Empty)
-                {
-                    Internal.RenderableContent = null;
-                }
+                Internal.RenderableContent = null;
             }
             else
             {
-                if (Empty)
-                {
-                    Internal.RenderableContent = [];
-                }
+                Internal.RenderableContent = [];
                 RefreshRenderables();
             }
         }
