@@ -40,7 +40,7 @@ public class UIButton : UIClickableElement
     /// <param name="pos">The position of the element.</param>
     public UIButton(string text, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, clicked)
     {
-        AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false));
+        AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin(), false, false));
         Text = new(this, text, horizontalAlignment: TextAlignment.CENTER, verticalAlignment: TextAlignment.CENTER);
     }
 

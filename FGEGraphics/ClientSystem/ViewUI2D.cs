@@ -197,14 +197,6 @@ public class ViewUI2D
         finally
         {
             StackNoteHelper.Pop();
-            Internal.RenderStack.Reverse();
-            int mouseX = (int)Client.MouseX, mouseY = (int)Client.MouseY;
-            bool mouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
-            foreach (UIElement elem in Internal.RenderStack)
-            {
-                elem.TickInteraction(mouseX, mouseY, mouseDown);
-            }
-            Internal.MousePreviouslyDown = mouseDown;
         }
     }
 
@@ -212,14 +204,16 @@ public class ViewUI2D
     public void Tick()
     {
         CurrentScreen.FullTick(Client.Delta);
-        // TODO: why isn't this running??
-        /*Internal.RenderStack.Reverse();
+        Internal.RenderStack.Reverse();
         int mouseX = (int)Client.MouseX, mouseY = (int)Client.MouseY;
         bool mouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         foreach (UIElement elem in Internal.RenderStack)
         {
-            elem.TickInteraction(mouseX, mouseY, mouseDown);
+            if (elem.IsValid)
+            {
+                elem.TickInteraction(mouseX, mouseY, mouseDown);
+            } 
         }
-        Internal.MousePreviouslyDown = mouseDown;*/
+        Internal.MousePreviouslyDown = mouseDown;
     }
 }

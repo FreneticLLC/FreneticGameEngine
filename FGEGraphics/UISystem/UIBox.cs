@@ -26,7 +26,8 @@ namespace FGEGraphics.UISystem;
 /// <param name="style">The style of the element.</param>
 /// <param name="pos">The position of the element.</param>
 /// <param name="shouldRender">Whether the element should render automatically.</param>
-public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true) : UIElement(pos, shouldRender)
+/// <param name="enabled">Whether the element can be interacted with.</param>
+public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true, bool enabled = true) : UIElement(pos, shouldRender, enabled)
 {
     /// <summary>The style of the box.</summary>
     public override UIElementStyle Style { get; } = style;

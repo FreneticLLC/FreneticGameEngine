@@ -100,11 +100,13 @@ public abstract class UIElement
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
     /// <param name="shouldRender">Whether the element should render automatically.</param>
-    public UIElement(UIPositionHelper pos, bool shouldRender = true)
+    /// <param name="enabled">Whether the element can be interacted with.</param>
+    public UIElement(UIPositionHelper pos, bool shouldRender = true, bool enabled = true)
     {
         Position = pos;
         Position.For = this;
         ShouldRender = shouldRender;
+        Enabled = enabled;
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
@@ -218,7 +220,7 @@ public abstract class UIElement
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
-        /// <summary>Whether this element can be interacted with.</summary>
+        /// <summary>Whether this element's interaction state can change.</summary>
         public bool Enabled = true;
 
         /// <summary>Styles registered on this element.</summary>
@@ -308,6 +310,8 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Recursively ticks this element's children.</summary>
+    /// <param name="delta">The time since the last tick.</param>
     public virtual void TickChildren(double delta)
     {
         foreach (UIElement child in ElementInternal.Children)
@@ -319,19 +323,16 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>
+    /// Ticks this element's interaction state. Should be called in the reverse of the rendering order.
+    /// Elements with <see cref="Enabled"/> set to <c>false</c> are ignored by the interaction system.
+    /// </summary>
+    /// <param name="mouseX">The X position of the mouse.</param>
+    /// <param name="mouseY">The Y position of the mouse.</param>
+    /// <param name="mouseDown">Whether the mouse is currently pressed.</param>
     public virtual void TickInteraction(int mouseX, int mouseY, bool mouseDown)
     {
         bool containsMouse = SelfContains(mouseX, mouseY);
-        // if contains mouse
-            // if hovered over and no interacting element, hover
-            // if pressed and no interacting element, pressed + set interacting
-            // if released inside while interacting element, clicked + set not interacting
-        // if not contains mouse
-            // if was hovered over
-                // if pressed, AND it's the interacting element, keep it hovered
-                // otherwise, not hovered and make not interacting
-                    // if released, release outside
-            // if pressed, press outside
         if (containsMouse)
         {
             if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
@@ -375,7 +376,7 @@ public abstract class UIElement
             }
             if (Position.View.Internal.MousePreviouslyDown)
             {
-                // TODO: MouseLeftUpOutside
+                MouseLeftUpOutside(mouseX, mouseY);
             }
         }
         if (mouseDown)
@@ -524,6 +525,18 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>Fires <see cref="MouseLeftUpOutside()"/> for all children included in the position.</summary>
+    /// <param name="x">The X position of the mouse.</param>
+    /// <param name="y">The Y position of the mouse.</param>
+    public void MouseLeftUpOutside(int x, int y)
+    {
+        MouseLeftUp();
+        foreach (UIElement child in GetChildrenAt(x, y))
+        {
+            child.MouseLeftUpOutside(x, y);
+        }
+    }
+
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
     public virtual void MouseEnter()
     {
@@ -546,6 +559,11 @@ public abstract class UIElement
 
     /// <summary>Ran when the left mouse button is released within the boundaries of this element or its children.</summary>
     public virtual void MouseLeftUp()
+    {
+    }
+
+    /// <summary>Ran when the left mouse button is released outside of the boundaries of this element or its children.</summary>
+    public virtual void MouseLeftUpOutside()
     {
     }
 

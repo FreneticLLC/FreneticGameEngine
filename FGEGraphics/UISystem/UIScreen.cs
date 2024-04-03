@@ -51,17 +51,15 @@ public class UIScreen : UIElement
         Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
         Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
         RenderPriority = SCREEN_PRIORITY_DEFAULT;
-        Enabled = false;
     }
 
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
     /// <param name="client">The client game window.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
+    public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos, enabled: false)
     {
         InternalClient = client;
         IsValid = true;
-        Enabled = false;
     }
 
     /// <summary>Performs a render on this element.</summary>
