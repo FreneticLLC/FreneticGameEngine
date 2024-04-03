@@ -436,6 +436,10 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
     public void DrawFancyText(RenderableText text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false)
     {
+        if (text.Lines is null)
+        {
+            return;
+        }
         StackNoteHelper.Push("FontSet - Draw fancy text", text);
         try
         {

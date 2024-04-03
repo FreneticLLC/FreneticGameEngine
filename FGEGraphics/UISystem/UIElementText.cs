@@ -32,9 +32,6 @@ public class UIElementText
         /// <summary>The raw string content of this text.</summary>
         public string Content;
 
-        /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
-        public bool Empty;
-
         /// <summary>The maximum total width of this text, if any.</summary>
         public int MaxWidth;
 
@@ -49,7 +46,7 @@ public class UIElementText
     public TextAlignment VerticalAlignment;
 
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
-    public bool Empty => Internal.Empty;
+    public bool Empty => (Internal.Content?.Length ?? 0) == 0;
 
     /// <summary>Whether the text is required to display some content.</summary>
     public bool Required;
@@ -68,10 +65,6 @@ public class UIElementText
     public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, TextAlignment horizontalAlignment = TextAlignment.LEFT, TextAlignment verticalAlignment = TextAlignment.TOP)
     {
         content ??= (required ? Null : null);
-        if (content is null)
-        {
-            Internal.Empty = true;
-        }
         Internal = new InternalData()
         {
             ParentElement = parent,
@@ -92,6 +85,10 @@ public class UIElementText
     /// <summary>Updates the renderable cache based on the parent element's registered styles.</summary>
     public void RefreshRenderables()
     {
+        if (Empty)
+        {
+            return;
+        }
         Internal.RenderableContent.Clear();
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
         {
@@ -120,7 +117,6 @@ public class UIElementText
             {
                 if (!Empty)
                 {
-                    Internal.Empty = true;
                     Internal.RenderableContent = null;
                 }
             }
@@ -128,7 +124,6 @@ public class UIElementText
             {
                 if (Empty)
                 {
-                    Internal.Empty = false;
                     Internal.RenderableContent = [];
                 }
                 RefreshRenderables();
@@ -148,12 +143,11 @@ public class UIElementText
         }
     }
 
-    // TODO: make these not NPE when empty
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
     /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
-    public RenderableText Renderable => Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty);
+    public RenderableText Renderable => !Empty ? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) : RenderableText.Empty;
 
     /// <summary>The total width of the text.</summary>
     public int Width => Renderable?.Width ?? 0;
