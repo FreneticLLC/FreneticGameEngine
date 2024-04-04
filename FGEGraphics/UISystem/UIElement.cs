@@ -530,7 +530,7 @@ public abstract class UIElement
     /// <param name="y">The Y position of the mouse.</param>
     public void MouseLeftUpOutside(int x, int y)
     {
-        MouseLeftUp();
+        MouseLeftUpOutside();
         foreach (UIElement child in GetChildrenAt(x, y))
         {
             child.MouseLeftUpOutside(x, y);
