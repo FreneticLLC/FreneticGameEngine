@@ -15,18 +15,10 @@ namespace FGEGraphics.UISystem;
 
 public class UIInputLabel : UIClickableElement
 {
-    public UIElementText Text;
     public UIElementText Info;
 
-    public struct InternalData()
-    {
-        public int CursorLeft = 0;
-        public int CursorRight = 0;
-        public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
-        public readonly int IndexRight => CursorRight > CursorLeft ? CursorRight : CursorLeft;
-        public UIElementText TextLeft;
-        public UIElementText TextRight;
-    }
+    public UIElementStyle InputStyle;
+    public UIElementStyle HighlightStyle;
 
     public bool Selected = false; // TODO: Provide a UIElement-native solution for this
     public InternalData Internal = new();
@@ -35,12 +27,50 @@ public class UIInputLabel : UIClickableElement
     public Action<string> TextSubmitted;
     public Action Closed;
 
-    public UIInputLabel(string text, string info, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, requireText: true)
+    public string TextContent
     {
-        Text = new(this, text, false);
+        get => Internal.TextContent;
+        set
+        {
+            if (Internal.TextContent == value)
+            {
+                return;
+            }
+            Internal.TextContent = value ?? string.Empty;
+            Internal.CursorLeft = Math.Clamp(Internal.IndexLeft, 0, Internal.TextContent.Length);
+            Internal.CursorRight = Math.Clamp(Internal.IndexRight, 0, Internal.TextContent.Length);
+            UpdateInternalText();
+        }
+    }
+
+    public struct InternalData()
+    {
+        public string TextContent = string.Empty;
+        public int CursorLeft = 0;
+        public int CursorRight = 0;
+        public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
+        public readonly int IndexRight => CursorRight > CursorLeft ? CursorRight : CursorLeft;
+        public UIElementText TextLeft;
+        public UIElementText TextBetween;
+        public UIElementText TextRight;
+
+        public IEnumerable<UIElementText> TextPieces()
+        {
+            yield return TextLeft;
+            yield return TextBetween;
+            yield return TextRight;
+        }
+    }
+
+    public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
+    {
+        InputStyle = inputStyle ?? infoStyles.Normal;
+        HighlightStyle = highlightStyle ?? infoStyles.Click;
         Info = new(this, info, true);
-        Internal.TextLeft = new(this, null, false);
-        Internal.TextRight = new(this, null, false);
+        Internal.TextLeft = new(this, null, false, style: InputStyle);
+        Internal.TextBetween = new(this, null, false, style: HighlightStyle);
+        Internal.TextRight = new(this, null, false, style: InputStyle);
+        TextContent = defaultText;
         Closed += HandleClose;
     }
 
@@ -65,15 +95,15 @@ public class UIInputLabel : UIClickableElement
 
     public void UpdateInternalText()
     {
-        Internal.TextLeft.Content = Text.Content[..Internal.IndexLeft];
-        Internal.TextRight.Content = Internal.IndexLeft != Internal.IndexRight ? Text.Content[..Internal.IndexRight] : null;
+        Internal.TextLeft.Content = TextContent[..Internal.IndexLeft];
+        Internal.TextBetween.Content = TextContent[Internal.IndexLeft..Internal.IndexRight];
+        Internal.TextRight.Content = TextContent[Internal.IndexRight..];
     }
 
     public void ModifyText(string text, bool edit = true)
     {
-        string result = edit ? ValidateEdit(text) : ValidateSubmission(text);
-        Text.Content = result;
-        (edit ? TextEdited : TextSubmitted)?.Invoke(result);
+        TextContent = edit ? ValidateEdit(text) : ValidateSubmission(text);
+        (edit ? TextEdited : TextSubmitted)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
@@ -83,20 +113,21 @@ public class UIInputLabel : UIClickableElement
 
     public void TickBackspaces(KeyHandlerState keys)
     {
-        if (keys.InitBS == 0 || Text.Content.Length == 0 || Internal.IndexRight == 0)
+        if (keys.InitBS == 0 || TextContent.Length == 0 || Internal.IndexRight == 0)
         {
             return;
         }
         if (Internal.CursorLeft != Internal.CursorRight)
         {
-            ModifyText(Text.Content[..Internal.IndexLeft] + Text.Content[Internal.IndexRight..]);
+            ModifyText(TextContent[..Internal.IndexLeft] + TextContent[Internal.IndexRight..]);
             Internal.CursorLeft = Internal.CursorRight = Internal.IndexLeft;
             keys.InitBS--;
         }
         if (keys.InitBS > 0)
         {
-            ModifyText(Text.Content[..Math.Max(Internal.IndexLeft - keys.InitBS, 0)] + Text.Content[Internal.IndexRight..]);
-            Internal.CursorRight = --Internal.CursorLeft;
+            int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
+            ModifyText(TextContent[..index] + TextContent[Internal.IndexRight..]);
+            Internal.CursorLeft = Internal.CursorRight = index;
         }
         UpdateInternalText();
     }
@@ -107,7 +138,7 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        ModifyText(Text.Content[..Internal.IndexLeft] + keys.KeyboardString + Text.Content[Internal.IndexRight..]);
+        ModifyText(TextContent[..Internal.IndexLeft] + keys.KeyboardString + TextContent[Internal.IndexRight..]);
         Internal.CursorRight = Internal.CursorLeft += keys.KeyboardString.Length;
         UpdateInternalText();
     }
@@ -120,7 +151,7 @@ public class UIInputLabel : UIClickableElement
         }
         else if (keys.LeftRights > 0)
         {
-            Internal.CursorRight = Math.Min(Internal.CursorRight + keys.LeftRights, Text.Content.Length);
+            Internal.CursorRight = Math.Min(Internal.CursorRight + keys.LeftRights, TextContent.Length);
         }
         if (keys.LeftRights == 0)
         {
@@ -144,7 +175,7 @@ public class UIInputLabel : UIClickableElement
         KeyHandlerState keys = Window.Keyboard.BuildingState;
         if (keys.Escaped)
         {
-            ModifyText(Text.Content, false);
+            ModifyText(TextContent, false);
             Closed?.Invoke();
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
@@ -156,10 +187,19 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        UIElementText renderText = Text.Empty ? Info : Text;
-        if (style.CanRenderText(renderText))
+        if (TextContent.Length == 0)
         {
-            style.TextFont.DrawFancyText(renderText, renderText.GetPosition(X, Y));
+            style.TextFont.DrawFancyText(Info, Info.GetPosition(X, Y));
+            return;
+        }
+        float textX = X;
+        foreach (UIElementText text in Internal.TextPieces())
+        {
+            if (text.CurrentStyle.CanRenderText(text))
+            {
+                text.CurrentStyle.TextFont.DrawFancyText(text, text.GetPosition(textX, Y));
+            }
+            textX += text.Width;
         }
         if (!Selected)
         {
@@ -167,7 +207,7 @@ public class UIInputLabel : UIClickableElement
         }
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(Color4F.Red);
-        view.Rendering.RenderRectangle(view.UIContext, X + Internal.TextLeft.Width - 2, Y, X + Internal.TextLeft.Width + 2, Y + Text.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderRectangle(view.UIContext, X + Internal.TextLeft.Width - 2, Y, X + Internal.TextLeft.Width + 2, Y + Internal.TextLeft.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         Renderer2D.SetColor(Color4.White);
         style.TextFont.DrawFancyText($"{Internal.IndexLeft} {Internal.IndexRight}", new(X, Y + 30, 0));
     }
