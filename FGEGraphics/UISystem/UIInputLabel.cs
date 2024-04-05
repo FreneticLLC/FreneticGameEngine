@@ -127,6 +127,9 @@ public class UIInputLabel : UIClickableElement
         UpdateInternalText();
     }
 
+    // TODO: Handle multiline properly
+        // have option for it at all and disallow \n in validate
+        // with: need fix in RenderChain (render lines separately? needs DrawFancyText update)
     public void TickContent(KeyHandlerState keys)
     {
         if (keys.KeyboardString.Length == 0)
@@ -138,6 +141,7 @@ public class UIInputLabel : UIClickableElement
         UpdateInternalText();
     }
 
+    // TODO: Handle ctrl left/right, handle up/down arrows
     public void TickArrowKeys(KeyHandlerState keys, bool shiftDown)
     {
         if (keys.LeftRights == 0)
@@ -173,6 +177,9 @@ public class UIInputLabel : UIClickableElement
         TickBackspaces(keys);
         TickContent(keys);
         TickArrowKeys(keys, shiftDown);
+        // TODO: handle ctrl+A
+        // TODO: handle ctrl+Z, ctrl+Y
+        // TODO: handle mouse clicking
     }
 
     /// <inheritdoc/>
@@ -191,6 +198,7 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
+        // TODO: Cursor blink modes
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(style.BorderColor);
         RenderableTextLine[] lines = Internal.TextLeft.Renderable.Lines;
