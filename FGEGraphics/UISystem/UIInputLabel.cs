@@ -53,13 +53,6 @@ public class UIInputLabel : UIClickableElement
         public UIElementText TextLeft;
         public UIElementText TextBetween;
         public UIElementText TextRight;
-
-        public IEnumerable<UIElementText> TextPieces()
-        {
-            yield return TextLeft;
-            yield return TextBetween;
-            yield return TextRight;
-        }
     }
 
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
@@ -192,15 +185,7 @@ public class UIInputLabel : UIClickableElement
             style.TextFont.DrawFancyText(Info, Info.GetPosition(X, Y));
             return;
         }
-        float textX = X;
-        foreach (UIElementText text in Internal.TextPieces())
-        {
-            if (text.CurrentStyle.CanRenderText(text))
-            {
-                text.CurrentStyle.TextFont.DrawFancyText(text, text.GetPosition(textX, Y));
-            }
-            textX += text.Width;
-        }
+        UIElementText.RenderChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], X, Y);
         if (!Selected)
         {
             return;

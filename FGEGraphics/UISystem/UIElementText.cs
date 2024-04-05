@@ -184,4 +184,17 @@ public class UIElementText
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
+
+    public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y)
+    {
+        foreach (UIElementText text in chain)
+        {
+            if (text.CurrentStyle.CanRenderText(text))
+            {
+                text.CurrentStyle.TextFont.DrawFancyText(text, text.GetPosition(x, y));
+                x += text.Width;
+                y += (text.Renderable.Lines.Length - 1) * text.CurrentStyle.TextFont.FontDefault.Height;
+            }
+        }
+    }
 }
