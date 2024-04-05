@@ -7,6 +7,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -37,8 +38,8 @@ public class UIInputLabel : UIClickableElement
                 return;
             }
             Internal.TextContent = value ?? string.Empty;
-            Internal.CursorLeft = Math.Clamp(Internal.IndexLeft, 0, Internal.TextContent.Length);
-            Internal.CursorRight = Math.Clamp(Internal.IndexRight, 0, Internal.TextContent.Length);
+            Internal.CursorLeft = Math.Clamp(Internal.CursorLeft, 0, Internal.TextContent.Length);
+            Internal.CursorRight = Math.Clamp(Internal.CursorRight, 0, Internal.TextContent.Length);
             UpdateInternalText();
         }
     }
@@ -50,6 +51,7 @@ public class UIInputLabel : UIClickableElement
         public int CursorRight = 0;
         public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
         public readonly int IndexRight => CursorRight > CursorLeft ? CursorRight : CursorLeft;
+        public readonly bool IsSelection => CursorLeft != CursorRight;
         public UIElementText TextLeft;
         public UIElementText TextBetween;
         public UIElementText TextRight;
@@ -110,7 +112,7 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        if (Internal.CursorLeft != Internal.CursorRight)
+        if (Internal.IsSelection)
         {
             ModifyText(TextContent[..Internal.IndexLeft] + TextContent[Internal.IndexRight..]);
             Internal.CursorLeft = Internal.CursorRight = Internal.IndexLeft;
@@ -138,18 +140,14 @@ public class UIInputLabel : UIClickableElement
 
     public void TickArrowKeys(KeyHandlerState keys, bool shiftDown)
     {
-        if (keys.LeftRights < 0)
-        {
-            Internal.CursorRight = Math.Max(Internal.CursorRight + keys.LeftRights, 0);
-        }
-        else if (keys.LeftRights > 0)
-        {
-            Internal.CursorRight = Math.Min(Internal.CursorRight + keys.LeftRights, TextContent.Length);
-        }
         if (keys.LeftRights == 0)
         {
             return;
         }
+        bool wasSelection = Internal.IsSelection && !shiftDown;
+        Internal.CursorRight = keys.LeftRights < 0
+            ? (wasSelection ? Internal.IndexLeft : Math.Max(Internal.CursorRight + keys.LeftRights, 0))
+            : (wasSelection ? Internal.IndexRight : Math.Min(Internal.CursorRight + keys.LeftRights, TextContent.Length));
         if (!shiftDown)
         {
             Internal.CursorLeft = Internal.CursorRight;
@@ -180,20 +178,27 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        if (TextContent.Length == 0)
+        bool info = TextContent.Length == 0;
+        if (info)
         {
             style.TextFont.DrawFancyText(Info, Info.GetPosition(X, Y));
-            return;
         }
-        UIElementText.RenderChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], X, Y);
-        if (!Selected)
+        else
+        {
+            UIElementText.RenderChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], X, Y);
+        }
+        if (!Selected || Internal.IsSelection)
         {
             return;
         }
         Engine.Textures.White.Bind();
-        Renderer2D.SetColor(Color4F.Red);
-        view.Rendering.RenderRectangle(view.UIContext, X + Internal.TextLeft.Width - 2, Y, X + Internal.TextLeft.Width + 2, Y + Internal.TextLeft.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        Renderer2D.SetColor(style.BorderColor);
+        RenderableTextLine[] lines = Internal.TextLeft.Renderable.Lines;
+        int lineWidth = style.BorderThickness / 2;
+        int lineX = X + (lines?.Last().Width ?? 0);
+        int lineCount = lines?.Length ?? 1;
+        int lineHeight = (info ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+        view.Rendering.RenderRectangle(view.UIContext, lineX - lineWidth, Y + (lineCount - 1) * lineHeight, lineX + lineWidth, Y + lineCount * lineHeight, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         Renderer2D.SetColor(Color4.White);
-        style.TextFont.DrawFancyText($"{Internal.IndexLeft} {Internal.IndexRight}", new(X, Y + 30, 0));
     }
 }
