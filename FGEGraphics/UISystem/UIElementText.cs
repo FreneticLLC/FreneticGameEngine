@@ -14,10 +14,7 @@ using FGEGraphics.GraphicsHelpers.FontSets;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>
-/// A text object that automatically updates its renderable content
-/// based on a <see cref="UIElement"/>'s <see cref="UIElementStyle"/>s.
-/// </summary>
+/// <summary>A text object that automatically updates its renderable content based on a <see cref="UIElement"/>'s <see cref="UIElementStyle"/>s.</summary>
 public class UIElementText
 {
     /// <summary>The state to display when a required text value is empty.</summary>
@@ -35,10 +32,14 @@ public class UIElementText
         /// <summary>The maximum total width of this text, if any.</summary>
         public int MaxWidth;
 
+        /// <summary>A style/renderable pair internal to this text object.</summary>
+        public (UIElementStyle Style, RenderableText Text) InternalRenderable;
+
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 
+    // TODO: Get rid of text alignments
     /// <summary>The horizontal alignment of the text, if any.</summary>
     public TextAlignment HorizontalAlignment;
 
@@ -47,6 +48,9 @@ public class UIElementText
 
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
     public bool Empty => (Internal.Content?.Length ?? 0) == 0;
+
+    /// <summary>The UI style to use for rendering this text.</summary>
+    public UIElementStyle CurrentStyle => Internal.InternalRenderable.Style ?? Internal.ParentElement.ElementInternal.CurrentStyle;
 
     /// <summary>Whether the text is required to display some content.</summary>
     public bool Required;
@@ -59,50 +63,67 @@ public class UIElementText
     /// <param name="content">The initial text content.</param>
     /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
+    /// <param name="style">An internal style to use instead of the parent element's.</param>
     /// <param name="horizontalAlignment">The horizontal text alignment, if any.</param>
     /// <param name="verticalAlignment">The vertical text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, TextAlignment horizontalAlignment = TextAlignment.LEFT, TextAlignment verticalAlignment = TextAlignment.TOP)
+    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, UIElementStyle style = null, TextAlignment horizontalAlignment = TextAlignment.LEFT, TextAlignment verticalAlignment = TextAlignment.TOP)
     {
         content ??= (required ? Null : null);
+        if (style is not null && !style.CanRenderText())
+        {
+            throw new Exception("Internal text style must support text rendering");
+        }
         Internal = new InternalData()
         {
             ParentElement = parent,
             Content = content,
-            MaxWidth = maxWidth
+            MaxWidth = maxWidth,
+            InternalRenderable = (style, null)
         };
         Required = required;
         HorizontalAlignment = horizontalAlignment;
         VerticalAlignment = verticalAlignment;
         if (!Empty)
         {
-            Internal.RenderableContent = [];
             RefreshRenderables();
         }
         parent.ElementInternal.Texts.Add(this);
     }
 
-    /// <summary>Updates the renderable cache based on the parent element's registered styles.</summary>
+    /// <summary>Creates a <see cref="RenderableText"/> of the text <see cref="Content"/> given a style.</summary>
+    /// <param name="style">The UI style to use.</param>
+    /// <returns>The resulting renderable object.</returns>
+    public RenderableText CreateRenderable(UIElementStyle style)
+    {
+        string styled = style.TextStyling(Content);
+        RenderableText renderable = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
+        if (Internal.MaxWidth > 0)
+        {
+            renderable = FontSet.SplitAppropriately(renderable, Internal.MaxWidth);
+        }
+        return renderable;
+    }
+
+    /// <summary>Updates the renderable cache based on the registered styles.</summary>
     public void RefreshRenderables()
     {
         if (Empty)
         {
             return;
         }
-        Internal.RenderableContent.Clear();
+        if (Internal.InternalRenderable.Style is UIElementStyle internalStyle)
+        {
+            Internal.InternalRenderable.Text = CreateRenderable(internalStyle);
+            return;
+        }
+        Internal.RenderableContent = [];
         foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
         {
-            if (!style.CanRenderText())
+            if (style.CanRenderText())
             {
-                continue;
+                Internal.RenderableContent[style] = CreateRenderable(style);
             }
-            string styled = style.TextStyling(Internal.Content);
-            RenderableText text = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
-            if (Internal.MaxWidth > 0)
-            {
-                text = FontSet.SplitAppropriately(text, Internal.MaxWidth);
-            }
-            Internal.RenderableContent[style] = text;
         }
     }
 
@@ -115,11 +136,11 @@ public class UIElementText
             Internal.Content = value ?? (Required ? Null : null);
             if (Empty)
             {
+                Internal.InternalRenderable.Text = null;
                 Internal.RenderableContent = null;
             }
             else
             {
-                Internal.RenderableContent = [];
                 RefreshRenderables();
             }
         }
@@ -138,16 +159,18 @@ public class UIElementText
     }
 
     /// <summary>
-    /// The <see cref="RenderableText"/> object corresponding to the parent element's current style.
+    /// The <see cref="RenderableText"/> object corresponding to the current style.
     /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
-    public RenderableText Renderable => !Empty ? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) : RenderableText.Empty;
+    public RenderableText Renderable => !Empty 
+        ? Internal.InternalRenderable.Text ?? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) 
+        : RenderableText.Empty;
 
     /// <summary>The total width of the text.</summary>
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines?.Length * Internal.ParentElement.ElementInternal.CurrentStyle.TextFont?.FontDefault.Height ?? 0;
+    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.FontDefault.Height ?? 0;
 
     /// <summary>Returns the render position of the text given a starting position.</summary>
     /// <param name="startX">The left-oriented anchor X value.</param>

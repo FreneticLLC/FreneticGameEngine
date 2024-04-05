@@ -281,6 +281,7 @@ public abstract class UIElement
             throw new Exception("Style must support text rendering when 'requireText' is true");
         }
         ElementInternal.Styles.Add(style);
+        // TODO: Find a way to avoid doing this on each call
         if (style.CanRenderText())
         {
             foreach (UIElementText text in ElementInternal.Texts)
