@@ -187,13 +187,27 @@ public class UIElementText
 
     public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y)
     {
+        float textX = x;
         foreach (UIElementText text in chain)
         {
-            if (text.CurrentStyle.CanRenderText(text))
+            if (!text.CurrentStyle.CanRenderText(text))
             {
-                text.CurrentStyle.TextFont.DrawFancyText(text, text.GetPosition(x, y));
-                x += text.Width;
-                y += (text.Renderable.Lines.Length - 1) * text.CurrentStyle.TextFont.FontDefault.Height;
+                continue;
+            }
+            for (int i = 0; i < text.Renderable.Lines.Length; i++)
+            {
+                if (i != 0)
+                {
+                    textX = x;
+                    y += text.CurrentStyle.TextFont.FontDefault.Height;
+                }
+                RenderableTextLine line = text.Renderable.Lines[i];
+                RenderableText renderable = new() { Lines = [line], Width = line.Width };
+                text.CurrentStyle.TextFont.DrawFancyText(renderable, text.GetPosition(textX, y));
+                if (i == text.Renderable.Lines.Length - 1)
+                {
+                    textX += renderable.Width;
+                }
             }
         }
     }
