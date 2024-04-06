@@ -531,7 +531,7 @@ public abstract class UIElement
     public void MouseLeftUpOutside(int x, int y)
     {
         MouseLeftUpOutside();
-        foreach (UIElement child in GetChildrenAt(x, y))
+        foreach (UIElement child in GetChildrenNotAt(x, y))
         {
             child.MouseLeftUpOutside(x, y);
         }
