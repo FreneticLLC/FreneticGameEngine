@@ -17,6 +17,6 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple container of several UI elements.</summary>
 /// <remarks>Constructs a new group.</remarks>
 /// <param name="pos">The position of the element.</param>
-public class UIGroup(UIPositionHelper pos) : UIElement(pos)
+public class UIGroup(UIPositionHelper pos) : UIElement(pos, enabled: false)
 {
 }

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -98,11 +99,13 @@ public abstract class UIElement
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
     /// <param name="shouldRender">Whether the element should render automatically.</param>
-    public UIElement(UIPositionHelper pos, bool shouldRender = true)
+    /// <param name="enabled">Whether the element can be interacted with.</param>
+    public UIElement(UIPositionHelper pos, bool shouldRender = true, bool enabled = true)
     {
         Position = pos;
         Position.For = this;
         ShouldRender = shouldRender;
+        Enabled = enabled;
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
@@ -213,13 +216,10 @@ public abstract class UIElement
         /// <summary>Elements queued to be removed as children.</summary>
         public List<UIElement> ToRemove = [];
 
-        /// <summary>Whether the mouse left button was previously down.</summary>
-        public bool MousePreviouslyDown;
-
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
-        /// <summary>Whether this element can be interacted with.</summary>
+        /// <summary>Whether this element's interaction state can change.</summary>
         public bool Enabled = true;
 
         /// <summary>Styles registered on this element.</summary>
@@ -229,7 +229,7 @@ public abstract class UIElement
         public List<UIElementText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
-        public UIElementStyle CurrentStyle;
+        public UIElementStyle CurrentStyle = UIElementStyle.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -309,71 +309,82 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Performs a tick on this element's children.</summary>
+    /// <summary>Recursively ticks this element's children.</summary>
     /// <param name="delta">The time since the last tick.</param>
     public virtual void TickChildren(double delta)
     {
-        int mX = (int)Window.MouseX; // TODO: Propagate float support.
-        int mY = (int)Window.MouseY;
-        bool mDown = Window.CurrentMouse.IsButtonDown(MouseButton.Left);
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement child in ElementInternal.Children)
         {
-            if (!element.IsValid)
+            if (child.IsValid)
             {
-                continue;
-            }
-            if (element.Contains(mX, mY))
-            {
-                if (!element.ElementInternal.HoverInternal)
-                {
-                    element.ElementInternal.HoverInternal = true;
-                    if (element.Enabled)
-                    {
-                        element.Hovered = true;
-                    }
-                    element.MouseEnter();
-                }
-                if (mDown && !ElementInternal.MousePreviouslyDown)
-                {
-                    if (element.Enabled)
-                    {
-                        element.Pressed = true;
-                    }
-                    element.MouseLeftDown(mX, mY);
-                }
-                else if (!mDown && ElementInternal.MousePreviouslyDown)
-                {
-                    if (element.Enabled && element.Clicked is not null)
-                    {
-                        element.Pressed = false;
-                        element.Clicked();
-                    }
-                    element.MouseLeftUp(mX, mY);
-                }
-            }
-            else if (element.ElementInternal.HoverInternal)
-            {
-                element.ElementInternal.HoverInternal = false;
-                if (element.Enabled)
-                {
-                    element.Hovered = false;
-                    element.Pressed = false;
-                }
-                element.MouseLeave();
-                if (mDown && !ElementInternal.MousePreviouslyDown)
-                {
-                    element.MouseLeftDownOutside(mX, mY);
-                }
-            }
-            else if (mDown && !ElementInternal.MousePreviouslyDown)
-            {
-                element.MouseLeftDownOutside(mX, mY);
-            }
-            element.FullTick(delta);
+                child.FullTick(delta);
+            }   
         }
-        ElementInternal.MousePreviouslyDown = mDown;
     }
 
+    /// <summary>
+    /// Ticks this element's interaction state. Should be called in the reverse of the rendering order.
+    /// Elements with <see cref="Enabled"/> set to <c>false</c> are ignored by the interaction system.
+    /// </summary>
+    /// <param name="mouseX">The X position of the mouse.</param>
+    /// <param name="mouseY">The Y position of the mouse.</param>
+    /// <param name="mouseDown">Whether the mouse is currently pressed.</param>
+    public virtual void TickInteraction(int mouseX, int mouseY, bool mouseDown)
+    {
+        bool containsMouse = SelfContains(mouseX, mouseY);
+        if (containsMouse)
+        {
+            if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
+            {
+                ElementInternal.HoverInternal = true;
+                if (Enabled)
+                {
+                    Hovered = true;
+                }
+                MouseEnter();
+            }
+            if (mouseDown && !Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement is null)
+            {
+                if (Enabled)
+                {
+                    Pressed = true;
+                    Position.View.InteractingElement = this;
+                }
+                MouseLeftDown(mouseX, mouseY);
+            }
+            else if (!mouseDown && Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement == this)
+            {
+                if (Enabled)
+                {
+                    Pressed = false;
+                    Clicked?.Invoke();
+                    Position.View.InteractingElement = null;
+                }
+                MouseLeftUp(mouseX, mouseY);
+            }
+            return;
+        }
+        if (ElementInternal.HoverInternal && !(mouseDown && Position.View.InteractingElement == this))
+        {
+            ElementInternal.HoverInternal = false;
+            if (Enabled)
+            {
+                Hovered = false;
+                Pressed = false;
+                Position.View.InteractingElement = null;
+            }
+            if (Position.View.Internal.MousePreviouslyDown)
+            {
+                MouseLeftUpOutside(mouseX, mouseY);
+            }
+        }
+        if (mouseDown)
+        {
+            MouseLeftDownOutside(mouseX, mouseY);
+        }
+    }
+
+    // TODO: Don't pass the stack directly
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -429,13 +440,14 @@ public abstract class UIElement
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
     public void UpdateStyle()
     {
-        if (Style != ElementInternal.CurrentStyle)
+        UIElementStyle newStyle = Style ?? UIElementStyle.Empty;
+        if (newStyle != ElementInternal.CurrentStyle)
         {
             if (ElementInternal.CurrentStyle is not null)
             {
                 SwitchFromStyle(ElementInternal.CurrentStyle);
             }
-            SwitchToStyle(ElementInternal.CurrentStyle = Style);
+            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
         }
     }
 
@@ -512,6 +524,18 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>Fires <see cref="MouseLeftUpOutside()"/> for all children included in the position.</summary>
+    /// <param name="x">The X position of the mouse.</param>
+    /// <param name="y">The Y position of the mouse.</param>
+    public void MouseLeftUpOutside(int x, int y)
+    {
+        MouseLeftUpOutside();
+        foreach (UIElement child in GetChildrenNotAt(x, y))
+        {
+            child.MouseLeftUpOutside(x, y);
+        }
+    }
+
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
     public virtual void MouseEnter()
     {
@@ -534,6 +558,11 @@ public abstract class UIElement
 
     /// <summary>Ran when the left mouse button is released within the boundaries of this element or its children.</summary>
     public virtual void MouseLeftUp()
+    {
+    }
+
+    /// <summary>Ran when the left mouse button is released outside of the boundaries of this element or its children.</summary>
+    public virtual void MouseLeftUpOutside()
     {
     }
 

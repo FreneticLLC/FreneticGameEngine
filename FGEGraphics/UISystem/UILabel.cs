@@ -42,10 +42,9 @@ public class UILabel : UIElement
     {
         Style = AddStyle(style, true);
         Text = new(this, text, true, Position.Width);
+        UpdateStyle();
+        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
     }
-
-    /// <summary>Fixes this label's width and height based on <see cref="Text"/> and <see cref="Style"/>.</summary>
-    public override void SwitchToStyle(UIElementStyle style) => Position.ConstantWidthHeight(Text.Renderable.Width, Text.Renderable.Lines.Length * style.TextFont.FontDefault.Height);
 
     /// <summary>Renders this label on the screen.</summary>
     /// <param name="view">The UI view.</param>

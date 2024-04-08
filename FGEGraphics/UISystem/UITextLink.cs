@@ -38,20 +38,16 @@ public class UITextLink : UIClickableElement
     /// <param name="alignment">The text alignment to use.</param>
     /// <param name="icon">The icon to display alongside the text.</param>
     /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="normal">The style to display when neither hovered nor clicked.</param>
-    /// <param name="hover">The style to display when hovered.</param>
-    /// <param name="click">The style to display when clicked.</param>
+    /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UITextLink(string text, Texture icon, Action clicked, UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT)
-        : base(normal, hover, click, pos, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT)
+        : base(styles, pos, true, clicked)
     {
         Text = new(this, text, true, horizontalAlignment: alignment);
         Icon = icon;
         UpdateStyle();
+        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
     }
-
-    /// <summary>Fixes this text link's width and height based on <see cref="Text"/> and the current style.</summary>
-    public override void SwitchToStyle(UIElementStyle style) => Position.ConstantWidthHeight(Text.Width, Text.Height);
 
     /// <summary>Performs a render on this link.</summary>
     /// <param name="view">The UI view.</param>

@@ -20,7 +20,7 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a scrollable box containing other elements.</summary>
 /// <remarks>Constructs the UI scroll box.</remarks>
 /// <param name="pos">The position of the element.</param>
-public class UIScrollBox(UIPositionHelper pos) : UIElement(pos)
+public class UIScrollBox(UIPositionHelper pos) : UIElement(pos, enabled: false)
 {
     /// <summary>The current scroll position.</summary>
     public int Scroll = 0;
