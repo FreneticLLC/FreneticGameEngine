@@ -72,16 +72,8 @@ public static class ShapeGenerators
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
-        int index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, flip, 0, (uint i) =>
-        {
-            if (i < (slices - 2))
-            {
-                indices[index++] = 0;
-                indices[index++] = flip ? i + 1 : i + 2;
-                indices[index++] = flip ? i + 2 : i + 1;
-            }
-        });
+        uint index = 0;
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, 0, flip, true);
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
     }
 
@@ -94,13 +86,8 @@ public static class ShapeGenerators
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
-        int index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, false, height, (uint i) =>
-        {
-            indices[index++] = vertexCount - 3 - i;
-            indices[index++] = vertexCount - 2 - i;
-            indices[index++] = vertexCount - 1;
-        });
+        uint index = 0;
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, vertexCount, height, false, false);
         for (uint i = 0; i < stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
@@ -126,12 +113,7 @@ public static class ShapeGenerators
                 indices[index++] = currentRow + j;
             }
         }
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, radius, slices, true, -height, (uint i) =>
-        {
-            indices[index++] = i + 2;
-            indices[index++] = i + 1;
-            indices[index++] = 0;
-        });
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, -height, true, false);
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
@@ -217,9 +199,10 @@ public static class ShapeGenerators
     public class InternalMethods
     {
         /// <summary>Generates a circle and provides the necessary information.</summary>
-        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, float radius, uint slices, bool flip, float zC, Action<uint> idxAction)
+        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, uint[] idx, float radius, uint slices, ref uint currentIdx, uint startIdx, float zC, bool flip, bool increase = false)
         {
-            for (uint i = 0; i < slices; i++)
+            uint stoppage = increase ? slices : slices + 1;
+            for (uint i = 0; (increase ? i <= slices : i < slices); i++)
             {
                 float phi = i * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
@@ -228,9 +211,20 @@ public static class ShapeGenerators
                 float y = radius * sinPhi;
                 float z = zC;
                 vecs.Add(new Vector3(x, y, z));
-                norm.Add(new Vector3(0, 0, flip ? -1 : 1));
+                norm.Add(new Vector3(0, 0, flip ? 1 : -1));
                 tc.Add(new Vector2(cosPhi, sinPhi));
-                idxAction(i);
+                if (flip && i < stoppage)
+                {
+                    idx[currentIdx++] = startIdx;
+                    idx[currentIdx++] = startIdx + i + 1;
+                    idx[currentIdx++] = startIdx + i;
+                }
+                else if (!flip && i < stoppage)
+                {
+                    idx[currentIdx++] = startIdx + i;
+                    idx[currentIdx++] = startIdx + i + 1;
+                    idx[currentIdx++] = startIdx;
+                }
             }
         }
     }
