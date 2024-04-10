@@ -73,26 +73,26 @@ public static class ShapeGenerators
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         uint index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, 0, flip, true);
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, 0, flip);
         return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
     }
 
     /// <summary>Generates a 3D cylinder model.</summary>
     public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine)
     {
-        uint vertexCount = stacks * slices;
+        uint vertexCount = (stacks + 1) * (slices + 1);
         uint numIndices = (stacks * slices * 6) * 2;
         List<Vector3> vertices = new((int)vertexCount);
         List<Vector3> normals = new((int)vertexCount);
         List<Vector2> texCoords = new((int)vertexCount);
         uint[] indices = new uint[numIndices];
         uint index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, vertexCount, height, false, false);
-        for (uint i = 0; i < stacks; i++)
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, vertexCount, height, false);
+        for (uint i = 0; i <= stacks; i++)
         {
             float theta = i * MathHelper.Pi / stacks;
             float cosTheta = (float)Math.Cos(theta);
-            for (uint j = 0; j < slices; j++)
+            for (uint j = 0; j <= slices; j++)
             {
                 float phi = j * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
@@ -103,8 +103,8 @@ public static class ShapeGenerators
                 vertices.Add(new Vector3(x, y, z));
                 normals.Add(new Vector3(x, y, 0).Normalized());
                 texCoords.Add(new Vector2(cosPhi, sinPhi));
-                uint currentRow = i * slices;
-                uint nextRow = (i + 1) * slices;
+                uint currentRow = i * (slices + 1);
+                uint nextRow = (i + 1) * (slices + 1);
                 indices[index++] = nextRow + j + 1;
                 indices[index++] = nextRow + j;
                 indices[index++] = currentRow + j + 1;
@@ -113,7 +113,7 @@ public static class ShapeGenerators
                 indices[index++] = currentRow + j;
             }
         }
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, -height, true, false);
+        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, -height, true);
         return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
     }
 
@@ -199,10 +199,12 @@ public static class ShapeGenerators
     public class InternalMethods
     {
         /// <summary>Generates a circle and provides the necessary information.</summary>
-        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, uint[] idx, float radius, uint slices, ref uint currentIdx, uint startIdx, float zC, bool flip, bool increase = false)
+        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, uint[] idx, float radius, uint slices, ref uint currentIdx, uint startIdx, float zC, bool flip)
         {
-            uint stoppage = increase ? slices : slices + 1;
-            for (uint i = 0; (increase ? i <= slices : i < slices); i++)
+            vecs.Add(new Vector3(0, 0, zC));
+            norm.Add(new Vector3(0, 0, flip ? 1 : -1));
+            tc.Add(new Vector2(0.5f, 0.5f));
+            for (uint i = 0; i <= slices; i++)
             {
                 float phi = i * 2 * MathHelper.Pi / slices;
                 float sinPhi = (float)Math.Sin(phi);
@@ -213,17 +215,11 @@ public static class ShapeGenerators
                 vecs.Add(new Vector3(x, y, z));
                 norm.Add(new Vector3(0, 0, flip ? 1 : -1));
                 tc.Add(new Vector2(cosPhi, sinPhi));
-                if (flip && i < stoppage)
+                if (i < slices)
                 {
                     idx[currentIdx++] = startIdx;
-                    idx[currentIdx++] = startIdx + i + 1;
-                    idx[currentIdx++] = startIdx + i;
-                }
-                else if (!flip && i < stoppage)
-                {
-                    idx[currentIdx++] = startIdx + i;
-                    idx[currentIdx++] = startIdx + i + 1;
-                    idx[currentIdx++] = startIdx;
+                    idx[currentIdx++] = startIdx + (flip ? i + 2 : i + 1);
+                    idx[currentIdx++] = startIdx + (flip ? i + 1 : i + 2);
                 }
             }
         }
