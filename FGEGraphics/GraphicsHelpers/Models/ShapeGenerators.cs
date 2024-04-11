@@ -196,7 +196,7 @@ public static class ShapeGenerators
     }
 
     /// <summary>Internal methods for shape generation.</summary>
-    public class InternalMethods
+    public static class InternalMethods
     {
         /// <summary>Generates a circle and provides the necessary information.</summary>
         public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, uint[] idx, float radius, uint slices, ref uint currentIdx, uint startIdx, float zC, bool flip)
