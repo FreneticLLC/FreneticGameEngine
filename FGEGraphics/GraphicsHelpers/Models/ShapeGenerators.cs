@@ -218,8 +218,8 @@ public static class ShapeGenerators
                 if (i < slices)
                 {
                     idx[currentIdx++] = startIdx;
-                    idx[currentIdx++] = startIdx + (flip ? i + 2 : i + 1);
-                    idx[currentIdx++] = startIdx + (flip ? i + 1 : i + 2);
+                    idx[currentIdx++] = startIdx + i + (flip ? 2u : 1u);
+                    idx[currentIdx++] = startIdx + i + (flip ? 1u : 2u);
                 }
             }
         }
