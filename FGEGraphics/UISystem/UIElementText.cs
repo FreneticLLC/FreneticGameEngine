@@ -185,9 +185,11 @@ public class UIElementText
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
 
-    public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y)
+    public record ChainPiece(UIElementText Text, RenderableTextLine Line, float XOffset, float YOffset);
+
+    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain)
     {
-        float textX = x;
+        float x = 0, y = 0;
         foreach (UIElementText text in chain)
         {
             if (!text.CurrentStyle.CanRenderText(text))
@@ -198,17 +200,26 @@ public class UIElementText
             {
                 if (i != 0)
                 {
-                    textX = x;
+                    x = 0;
                     y += text.CurrentStyle.TextFont.FontDefault.Height;
                 }
                 RenderableTextLine line = text.Renderable.Lines[i];
-                RenderableText renderable = new() { Lines = [line], Width = line.Width };
-                text.CurrentStyle.TextFont.DrawFancyText(renderable, text.GetPosition(textX, y));
+                yield return new(text, line, x, y);
                 if (i == text.Renderable.Lines.Length - 1)
                 {
-                    textX += renderable.Width;
+                    x += line.Width;
                 }
             }
+        }
+    }
+
+    public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y)
+    {
+        foreach (ChainPiece piece in IterateChain(chain))
+        {
+            // TODO: DrawFancyText variant that takes one RenderableTextLine
+            RenderableText renderable = new() { Lines = [piece.Line], Width = piece.Line.Width };
+            piece.Text.CurrentStyle.TextFont.DrawFancyText(renderable, piece.Text.GetPosition(x + piece.XOffset, y + piece.YOffset));
         }
     }
 }
