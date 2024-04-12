@@ -175,15 +175,18 @@ public class UIInputLabel : UIClickableElement
             string content = piece.Line.ToString();
             if (piece.YOffset + piece.Text.CurrentStyle.TextFont.FontDefault.Height >= relMouseY)
             {
+                float lastWidth = 0;
                 for (int i = 0; i < content.Length; i++)
                 {
                     float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..i]);
                     if (piece.XOffset + width >= relMouseX)
                     {
-                        Internal.CursorLeft = Internal.CursorRight = indexOffset + i - 1;
+                        int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
+                        Internal.CursorLeft = Internal.CursorRight = indexOffset + i - diff;
                         UpdateInternalText();
                         return;
                     }
+                    lastWidth = width;
                 }
             }
             indexOffset += content.Length;
