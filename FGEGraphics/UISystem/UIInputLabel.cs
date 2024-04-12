@@ -55,6 +55,7 @@ public class UIInputLabel : UIClickableElement
         public UIElementText TextLeft;
         public UIElementText TextBetween;
         public UIElementText TextRight;
+        public List<UIElementText> TextChain;
     }
 
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
@@ -65,6 +66,7 @@ public class UIInputLabel : UIClickableElement
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
+        Internal.TextChain = [Internal.TextLeft, Internal.TextBetween, Internal.TextRight];
         TextContent = defaultText;
         Closed += HandleClose;
     }
@@ -159,6 +161,35 @@ public class UIInputLabel : UIClickableElement
         UpdateInternalText();
     }
 
+    public void TickMouse()
+    {
+        if (!MouseDown || MousePreviouslyDown)
+        {
+            return;
+        }
+        int indexOffset = 0;
+        float relMouseX = Window.MouseX - X;
+        float relMouseY = Window.MouseY - Y;
+        foreach (UIElementText.ChainPiece piece in UIElementText.IterateChain(Internal.TextChain))
+        {
+            string content = piece.Line.ToString();
+            if (piece.YOffset + piece.Text.CurrentStyle.TextFont.FontDefault.Height >= relMouseY)
+            {
+                for (int i = 0; i < content.Length; i++)
+                {
+                    float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..i]);
+                    if (piece.XOffset + width >= relMouseX)
+                    {
+                        Internal.CursorLeft = Internal.CursorRight = indexOffset + i - 1;
+                        UpdateInternalText();
+                        return;
+                    }
+                }
+            }
+            indexOffset += content.Length;
+        }
+    }
+
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
@@ -177,6 +208,7 @@ public class UIInputLabel : UIClickableElement
         TickBackspaces(keys);
         TickContent(keys);
         TickArrowKeys(keys, shiftDown);
+        TickMouse();
         // TODO: handle ctrl+A
         // TODO: handle ctrl+Z, ctrl+Y
         // TODO: handle mouse clicking
@@ -192,7 +224,7 @@ public class UIInputLabel : UIClickableElement
         }
         else
         {
-            UIElementText.RenderChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], X, Y);
+            UIElementText.RenderChain(Internal.TextChain, X, Y);
         }
         if (!Selected || Internal.IsSelection)
         {
