@@ -48,6 +48,9 @@ public class ViewUI2D
         /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen;
 
+        /// <summary>Whether the mouse left button is currently down.</summary>
+        public bool MouseDown;
+
         /// <summary>Whether the mouse left button was previously down.</summary>
         public bool MousePreviouslyDown;
 
@@ -203,17 +206,18 @@ public class ViewUI2D
     /// <summary>Ticks all elements attached to this view.</summary>
     public void Tick()
     {
+        int mouseX = (int)Client.MouseX;
+        int mouseY = (int)Client.MouseY;
+        Internal.MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.FullTick(Client.Delta);
         Internal.RenderStack.Reverse();
-        int mouseX = (int)Client.MouseX, mouseY = (int)Client.MouseY;
-        bool mouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         foreach (UIElement elem in Internal.RenderStack)
         {
             if (elem.IsValid)
             {
-                elem.TickInteraction(mouseX, mouseY, mouseDown);
+                elem.TickInteraction(mouseX, mouseY);
             } 
         }
-        Internal.MousePreviouslyDown = mouseDown;
+        Internal.MousePreviouslyDown = Internal.MouseDown;
     }
 }
