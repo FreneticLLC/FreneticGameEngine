@@ -9,218 +9,238 @@
 using FGECore.ModelSystems;
 using System;
 using System.Collections.Generic;
-using OpenTK.Mathematics;
 using FGECore.CoreSystems;
+using System.Numerics;
 
 namespace FGEGraphics.GraphicsHelpers.Models;
 
 /// <summary>Generates shapes and returns them as a model.</summary>
 public static class ShapeGenerators
 {
-    /// <summary>
-    /// Generates a 3D sphere model.
-    /// Note that the stacks should be lower than the slices to avoid incorrect normals a good example is 10 stacks and 60 slices.
-    /// </summary>
-    public static Model GenerateSphere(float radius, uint stacks, uint slices, ModelEngine modelEngine)
+    /// <summary>Generates a 3D UV-Sphere model, centered at 0,0,0. A UV-sphere is characterized by quad sidings, with triangles on top/bottom.
+    /// This is type of sphere most people visualize, sometimes also known as a globe model.</summary>
+    /// <param name="radius">Distance from center to an edge, standard round-object radius.</param>
+    /// <param name="vstacks">Total number of vertical stacks of vertices (lines of latitude). Minimum 3.</param>
+    /// <param name="hslices">Total number of horizontal slices of vertices (lines of longitude). Minimum 3.</param>
+    public static Model3D GenerateUVSphere(float radius, uint vstacks, uint hslices)
     {
-        if (stacks > slices)
-        {
-            Logs.Warning("Sphere has more stacks than slices, this may result in incorrect normals.");
-        }
-        uint vertexCount = stacks * slices;
-        uint numIndices = stacks * slices * 7;
-        List<Vector3> vertices = new((int)vertexCount);
-        List<Vector3> normals = new((int)vertexCount);
-        List<Vector2> texCoords = new((int)vertexCount);
+        vstacks -= 2; // Account for top/bottom.
+        uint vstacksPlus1 = vstacks + 1;
+        uint vstacksMin1 = vstacks - 1;
+        uint vertexCount = 2 + vstacks * hslices;
+        uint numIndices = hslices * vstacks * 6;
+        Vector3[] vertices = new Vector3[vertexCount];
+        Vector3[] normals = new Vector3[vertexCount];
+        Vector2[] texCoords = new Vector2[vertexCount];
         uint[] indices = new uint[numIndices];
-        int index = 0;
-        for (uint i = 0; i < stacks; i++)
+        vertices[0] = new(0, 0, radius);
+        normals[0] = new(0, 0, 1);
+        texCoords[0] = new(0.5f, 0.5f);
+        for (uint vi = 0; vi < vstacks; vi++)
         {
-            float theta = i * MathHelper.Pi / stacks;
-            float sinTheta = (float)Math.Sin(theta);
-            float cosTheta = (float)Math.Cos(theta);
-            for (uint j = 0; j < slices; j++)
+            float radianStack = MathF.PI * (vi + 1) / vstacksPlus1;
+            float sinStack = MathF.Sin(radianStack);
+            float cosStack = MathF.Cos(radianStack);
+            for (uint hi = 0; hi < hslices; hi++)
             {
-                float phi = j * 2 * MathHelper.Pi / slices;
-                float sinPhi = (float)Math.Sin(phi);
-                float cosPhi = (float)Math.Cos(phi);
-                float x = radius * cosPhi * sinTheta;
-                float y = radius * cosTheta;
-                float z = radius * sinPhi * sinTheta;
-                vertices.Add(new Vector3(x, y, z));
-                normals.Add(new Vector3(x, y, z).Normalized());
-                texCoords.Add(new Vector2((float)j / slices, (float)i / stacks));
-                uint currentRow = i * slices;
-                uint nextRow = (i + 1) * slices;
-                indices[index++] = currentRow + j;
-                indices[index++] = nextRow + j;
-                indices[index++] = currentRow + j + 1;
-                indices[index++] = currentRow + j + 1;
-                indices[index++] = nextRow + j;
-                indices[index++] = nextRow + j + 1;
+                float radianSlice = MathF.Tau * hi / hslices;
+                float sinSlice = MathF.Sin(radianSlice);
+                float cosSlice = MathF.Cos(radianSlice);
+                float x = radius * cosSlice * sinStack;
+                float y = radius * sinSlice * sinStack;
+                float z = radius * cosStack;
+                Vector3 vec = new(x, y, z);
+                uint vInd = vi * hslices + hi + 1;
+                vertices[vInd] = vec;
+                normals[vInd] = vec / radius;
+                texCoords[vInd] = new((float)hi / hslices, (float)vi / vstacksPlus1);
             }
         }
-        return GetModelAfterGenerating(modelEngine, "sphere", vertices, normals, texCoords, indices);
-    }
-
-    /// <summary>Generates a 2D circle model.</summary>
-    public static Model Generate2DCircle(float radius, uint slices, ModelEngine modelEngine, bool flip = false)
-    {
-        uint vertexCount = slices;
-        uint numIndices = slices * 3;
-        List<Vector3> vertices = new((int)vertexCount);
-        List<Vector3> normals = new((int)vertexCount);
-        List<Vector2> texCoords = new((int)vertexCount);
-        uint[] indices = new uint[numIndices];
-        uint index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, 0, flip);
-        return GetModelAfterGenerating(modelEngine, "circle", vertices, normals, texCoords, indices);
-    }
-
-    /// <summary>Generates a 3D cylinder model.</summary>
-    public static Model GenerateCylinder(float radius, float height, uint slices, uint stacks, ModelEngine modelEngine)
-    {
-        uint vertexCount = (stacks + 1) * (slices + 1);
-        uint numIndices = (stacks * slices * 6) * 2;
-        List<Vector3> vertices = new((int)vertexCount);
-        List<Vector3> normals = new((int)vertexCount);
-        List<Vector2> texCoords = new((int)vertexCount);
-        uint[] indices = new uint[numIndices];
-        uint index = 0;
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, vertexCount, height, false);
-        for (uint i = 0; i <= stacks; i++)
+        uint bottomInd = vertexCount - 1;
+        vertices[bottomInd] = new(0, 0, -radius);
+        normals[bottomInd] = new(0, 0, -1);
+        texCoords[bottomInd] = new(0.5f, 0.5f);
+        // Triangles for top/bottom
+        for (uint hi = 0; hi < hslices; hi++)
         {
-            float theta = i * MathHelper.Pi / stacks;
-            float cosTheta = (float)Math.Cos(theta);
-            for (uint j = 0; j <= slices; j++)
+            indices[hi * 6] = 0;
+            indices[hi * 6 + 1] = (hi + 1) % hslices + 1;
+            indices[hi * 6 + 2] = hi + 1;
+            indices[hi * 6 + 3] = bottomInd;
+            indices[hi * 6 + 4] = hi + hslices * vstacksMin1 + 1;
+            indices[hi * 6 + 5] = (hi + 1) % hslices + hslices * vstacksMin1 + 1;
+        }
+        // The rest of the sides (quads)
+        for (uint vi = 0; vi < vstacksMin1; vi++)
+        {
+            uint row = vi * hslices + 1;
+            uint nextRow = (vi + 1) * hslices + 1;
+            for (uint hi = 0; hi < hslices; hi++)
             {
-                float phi = j * 2 * MathHelper.Pi / slices;
-                float sinPhi = (float)Math.Sin(phi);
-                float cosPhi = (float)Math.Cos(phi);
-                float x = radius * cosPhi;
-                float y = radius * sinPhi;
-                float z = height * cosTheta;
-                vertices.Add(new Vector3(x, y, z));
-                normals.Add(new Vector3(x, y, 0).Normalized());
-                texCoords.Add(new Vector2(cosPhi, sinPhi));
-                uint currentRow = i * (slices + 1);
-                uint nextRow = (i + 1) * (slices + 1);
-                indices[index++] = nextRow + j + 1;
-                indices[index++] = nextRow + j;
-                indices[index++] = currentRow + j + 1;
-                indices[index++] = currentRow + j + 1;
-                indices[index++] = nextRow + j;
-                indices[index++] = currentRow + j;
+                uint index = (vi * hslices + hi + hslices) * 6;
+                uint column = (hi + 1) % hslices;
+                indices[index] = row + hi;
+                indices[index + 1] = row + column;
+                indices[index + 2] = nextRow + column;
+                indices[index + 3] = row + hi;
+                indices[index + 4] = nextRow + column;
+                indices[index + 5] = nextRow + hi;
             }
         }
-        InternalMethods.GenerateCircle(vertices, normals, texCoords, indices, radius, slices, ref index, 0, -height, true);
-        return GetModelAfterGenerating(modelEngine, "cylinder", vertices, normals, texCoords, indices);
+        return Internal.GetModelAfterGenerating("sphere", vertices, normals, texCoords, indices);
     }
 
-    /// <summary>
-    /// Generates a 3D torus (donut) model.
-    /// Note that the number of sides should be less than or equal to the number of rings to avoid incorrect normals.
-    /// </summary>
-    public static Model GenerateTorus(float radius, float tubeRadius, uint sides, uint rings, ModelEngine modelEngine)
+    /// <summary>Generates a 2D circle model, centered at 0,0,0.</summary>
+    public static Model3D Generate2DCircle(float radius, uint corners, bool flip = false)
     {
-        if (sides > rings)
+        uint vertexCount = corners + 1;
+        uint numIndices = corners * 3;
+        Vector3[] vertices = new Vector3[vertexCount];
+        Vector3[] normals = new Vector3[vertexCount];
+        Vector2[] texCoords = new Vector2[vertexCount];
+        uint[] indices = new uint[numIndices];
+        Internal.GenerateCircle(vertices, normals, texCoords, indices, radius, corners, 0, 0, 0, flip);
+        return Internal.GetModelAfterGenerating("circle", vertices, normals, texCoords, indices);
+    }
+
+    /// <summary>Generates a 3D cylinder model, centered at 0,0,0.</summary>
+    public static Model3D GenerateCylinder(float radius, float height, uint corners)
+    {
+        height /= 2;
+        uint cornersPlus1 = corners + 1;
+        uint sideVertices = cornersPlus1 * 2;
+        uint sideIndices = cornersPlus1 * 6;
+        uint circleVertices = cornersPlus1;
+        uint circleIndices = corners * 3;
+        uint vertexCount = sideVertices + (circleVertices * 2);
+        uint numIndices = sideIndices + (circleIndices * 2);
+        Vector3[] vertices = new Vector3[vertexCount];
+        Vector3[] normals = new Vector3[vertexCount];
+        Vector2[] texCoords = new Vector2[vertexCount];
+        uint[] indices = new uint[numIndices];
+        for (uint i = 0; i < cornersPlus1; i++)
         {
-            Logs.Warning("Torus has more sides than rings, this may result in incorrect normals.");
+            float phi = i * 2 * MathF.PI / corners;
+            float sinPhi = (float)Math.Sin(phi);
+            float cosPhi = (float)Math.Cos(phi);
+            float x = radius * cosPhi;
+            float y = radius * sinPhi;
+            Vector3 norm = new(x, y, 0);
+            vertices[i] = new(x, y, height);
+            vertices[i + cornersPlus1] = new(x, y, -height);
+            normals[i] = norm / norm.Length();
+            normals[i + cornersPlus1] = norm / norm.Length();
+            texCoords[i] = new(cosPhi, sinPhi);
+            texCoords[i + cornersPlus1] = new(cosPhi, sinPhi);
+            uint index = i * 6;
+            indices[index] = i + cornersPlus1 + 1;
+            indices[index + 1] = i + cornersPlus1;
+            indices[index + 2] = i + 1;
+            indices[index + 3] = i + 1;
+            indices[index + 4] = i + cornersPlus1;
+            indices[index + 5] = i;
         }
+        Internal.GenerateCircle(vertices, normals, texCoords, indices, radius, corners, sideIndices, sideVertices, height, false);
+        Internal.GenerateCircle(vertices, normals, texCoords, indices, radius, corners, sideIndices + circleIndices, sideVertices + circleVertices, -height, true);
+        return Internal.GetModelAfterGenerating("cylinder", vertices, normals, texCoords, indices);
+    }
+
+    /// <summary>Generates a 3D torus (donut) model, centered at 0,0,0.</summary>
+    public static Model3D GenerateTorus(float radius, float tubeRadius, uint sides, uint rings)
+    {
         uint vertexCount = rings * sides;
         uint numIndices = rings * sides * 6;
-        List<Vector3> vertices = new((int)vertexCount);
-        List<Vector3> normals = new((int)vertexCount);
-        List<Vector2> textureCoords = new((int)vertexCount);
+        Vector3[] vertices = new Vector3[vertexCount];
+        Vector3[] normals = new Vector3[vertexCount];
+        Vector2[] texCoords = new Vector2[vertexCount];
         uint[] indices = new uint[numIndices];
-        int index = 0;
-        for (uint i = 0; i <= rings; i++)
+        for (uint ri = 0; ri < rings; ri++)
         {
-            float theta = i * MathHelper.TwoPi / rings;
-            float sinTheta = (float)Math.Sin(theta);
-            float cosTheta = (float)Math.Cos(theta);
-            for (uint j = 0; j <= sides; j++)
+            float radRing = ri * MathF.Tau / rings;
+            float sinRing = (float)Math.Sin(radRing);
+            float cosRing = (float)Math.Cos(radRing);
+            for (uint si = 0; si < sides; si++)
             {
-                float phi = j * MathHelper.TwoPi / sides;
-                float sinPhi = (float)Math.Sin(phi);
-                float cosPhi = (float)Math.Cos(phi);
-                float centerX = radius * cosPhi;
-                float centerY = 0;
-                float centerZ = radius * sinPhi;
-                float x = (radius + tubeRadius * cosTheta) * cosPhi;
-                float y = tubeRadius * sinTheta;
-                float z = (radius + tubeRadius * cosTheta) * sinPhi;
-                vertices.Add(new Vector3(x, y, z));
+                uint vInd = ri * sides + si;
+                float radSide = si * MathF.Tau / sides;
+                float sinSide = (float)Math.Sin(radSide);
+                float cosSide = (float)Math.Cos(radSide);
+                float centerX = radius * cosSide;
+                float centerY = radius * sinSide;
+                float centerZ = 0;
+                float x = (radius + tubeRadius * cosRing) * cosSide;
+                float y = (radius + tubeRadius * cosRing) * sinSide;
+                float z = tubeRadius * sinRing;
                 Vector3 pointOnSurface = new(x, y, z);
+                vertices[vInd] = pointOnSurface;
                 Vector3 centerToSurface = pointOnSurface - new Vector3(centerX, centerY, centerZ);
-                normals.Add(centerToSurface.Normalized());
-                textureCoords.Add(new Vector2((float)j / sides, (float)i / rings));
-                if (i < rings && j < sides)
-                {
-                    uint currentRow = i * (sides + 1);
-                    uint nextRow = (i + 1) * (sides + 1);
-                    indices[index++] = currentRow + j + 1;
-                    indices[index++] = nextRow + j + 1;
-                    indices[index++] = currentRow + j;
-                    indices[index++] = nextRow + j + 1;
-                    indices[index++] = nextRow + j;
-                    indices[index++] = currentRow + j;
-                }
+                normals[vInd] = centerToSurface / centerToSurface.Length();
+                texCoords[vInd] = new((float)si / sides, (float)ri / rings);
+                uint index = (ri * sides + si) * 6;
+                uint currentRow = ri * sides;
+                uint nextRow = ((ri + 1) % rings) * sides;
+                uint nextSide = (si + 1) % sides;
+                indices[index] = currentRow + si;
+                indices[index + 1] = nextRow + nextSide;
+                indices[index + 2] = currentRow + nextSide;
+                indices[index + 3] = currentRow + si;
+                indices[index + 4] = nextRow + si;
+                indices[index + 5] = nextRow + nextSide;
             }
         }
-        return GetModelAfterGenerating(modelEngine, "torus", vertices, normals, textureCoords, indices);
-    }
-
-    /// <summary>Returns a shape model after generating it.</summary>
-    public static Model GetModelAfterGenerating(ModelEngine engine, string name, List<Vector3> vertices, List<Vector3> normals, List<Vector2> texCoords, uint[] indices)
-    {
-        Model3DMesh mesh = new()
-        {
-            Name = name,
-            Vertices = [.. vertices.ConvertAll(v => v.ToLocation().ToNumerics())],
-            Normals = [.. normals.ConvertAll(n => n.ToLocation().ToNumerics())],
-            TexCoords = [.. texCoords.ConvertAll(t => new System.Numerics.Vector2(t.X, t.Y))],
-            Indices = indices,
-            Bones = []
-        };
-        Model3D model3D = new()
-        {
-            RootNode = new Model3DNode()
-            {
-                Name = name,
-                Children = [],
-            },            
-            Meshes = [mesh]
-        };
-        return engine.FromScene(model3D, name);
+        return Internal.GetModelAfterGenerating("torus", vertices, normals, texCoords, indices);
     }
 
     /// <summary>Internal methods for shape generation.</summary>
-    public static class InternalMethods
+    public static class Internal
     {
-        /// <summary>Generates a circle and provides the necessary information.</summary>
-        public static void GenerateCircle(List<Vector3> vecs, List<Vector3> norm, List<Vector2> tc, uint[] idx, float radius, uint slices, ref uint currentIdx, uint startIdx, float zC, bool flip)
+        /// <summary>Builds an actual <see cref="Model3D"/> for a given shape's raw data.</summary>
+        public static Model3D GetModelAfterGenerating(string name, Vector3[] vertices, Vector3[] normals, Vector2[] texCoords, uint[] indices)
         {
-            vecs.Add(new Vector3(0, 0, zC));
-            norm.Add(new Vector3(0, 0, flip ? 1 : -1));
-            tc.Add(new Vector2(0.5f, 0.5f));
-            for (uint i = 0; i <= slices; i++)
+            Model3DMesh mesh = new()
             {
-                float phi = i * 2 * MathHelper.Pi / slices;
-                float sinPhi = (float)Math.Sin(phi);
-                float cosPhi = (float)Math.Cos(phi);
-                float x = radius * cosPhi;
-                float y = radius * sinPhi;
-                float z = zC;
-                vecs.Add(new Vector3(x, y, z));
-                norm.Add(new Vector3(0, 0, flip ? 1 : -1));
-                tc.Add(new Vector2(cosPhi, sinPhi));
-                if (i < slices)
+                Name = name,
+                Vertices = vertices,
+                Normals = normals,
+                TexCoords = texCoords,
+                Indices = indices,
+                Bones = []
+            };
+            Model3D model3D = new()
+            {
+                RootNode = new()
                 {
-                    idx[currentIdx++] = startIdx;
-                    idx[currentIdx++] = startIdx + i + (flip ? 2u : 1u);
-                    idx[currentIdx++] = startIdx + i + (flip ? 1u : 2u);
-                }
+                    Name = name,
+                    Children = [],
+                },
+                Meshes = [mesh]
+            };
+            return model3D;
+        }
+
+        /// <summary>Generates a a circle into an existing shape generation.</summary>
+        public static void GenerateCircle(Vector3[] vertices, Vector3[] normals, Vector2[] texCoords, uint[] indices, float radius, uint corners, uint startIndex, uint startVertex, float z, bool flip)
+        {
+            Vector3 normal = new(0, 0, flip ? -1 : 1);
+            vertices[startVertex] = new(0, 0, z);
+            normals[startVertex] = normal;
+            texCoords[startVertex] = new(0.5f, 0.5f);
+            uint firstRealVert = startVertex + 1;
+            for (uint i = 0; i < corners; i++)
+            {
+                float radian = i * MathF.Tau / corners;
+                float sin = MathF.Sin(radian);
+                float cos = MathF.Cos(radian);
+                float x = radius * cos;
+                float y = radius * sin;
+                vertices[firstRealVert + i] = new(x, y, z);
+                normals[firstRealVert + i] = normal;
+                texCoords[firstRealVert + i] = new(cos, sin);
+                uint index = startIndex + i * 3;
+                uint next = (i + 1) % corners;
+                indices[index] = startVertex;
+                indices[index + 1] = firstRealVert + (flip ? i : next);
+                indices[index + 2] = firstRealVert + (flip ? next : i);
             }
         }
     }
