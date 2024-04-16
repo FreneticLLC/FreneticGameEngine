@@ -200,7 +200,14 @@ public class UIInputLabel : UIClickableElement
                     lastWidth = width;
                 }
             }
-            indexOffset += content.Length;
+            if (i < pieces.Count - 1)
+            {
+                indexOffset += content.Length;
+                if (pieces[i + 1].XOffset == 0)
+                {
+                    indexOffset++;
+                }
+            }
             /*if (i == pieces.Count - 1)
             {
                 Internal.SetPosition(indexOffset + 1);
