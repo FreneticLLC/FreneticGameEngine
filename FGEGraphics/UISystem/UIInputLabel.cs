@@ -1,4 +1,12 @@
-﻿using System;
+﻿//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+// See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
+// If neither of these are available, assume that neither you nor anyone other than the copyright holder
+// hold any right or permission to use this software until such time as the official license is identified.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +28,8 @@ public class UIInputLabel : UIClickableElement
 
     public UIElementStyle InputStyle;
     public UIElementStyle HighlightStyle;
+    public int Lines = 1; // TODO: Implement
+    public int MaxLength; // TODO: Implement
 
     public bool Selected = false; // TODO: Provide a UIElement-native solution for this
     public InternalData Internal = new();
@@ -40,7 +50,7 @@ public class UIInputLabel : UIClickableElement
             Internal.TextContent = value ?? string.Empty;
             Internal.CursorLeft = Math.Clamp(Internal.CursorLeft, 0, Internal.TextContent.Length);
             Internal.CursorRight = Math.Clamp(Internal.CursorRight, 0, Internal.TextContent.Length);
-            UpdateInternalText();
+            Internal.UpdateText();
         }
     }
 
@@ -56,6 +66,15 @@ public class UIInputLabel : UIClickableElement
         public UIElementText TextBetween;
         public UIElementText TextRight;
         public List<UIElementText> TextChain;
+        
+        public void SetPosition(int cursorPos) => CursorLeft = CursorRight = cursorPos;
+
+        public void UpdateText()
+        {
+            TextLeft.Content = TextContent[..IndexLeft];
+            TextBetween.Content = TextContent[IndexLeft..IndexRight];
+            TextRight.Content = TextContent[IndexRight..];
+        }
     }
 
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
@@ -90,13 +109,6 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void MouseLeftDownOutside() => HandleClose();
 
-    public void UpdateInternalText()
-    {
-        Internal.TextLeft.Content = TextContent[..Internal.IndexLeft];
-        Internal.TextBetween.Content = TextContent[Internal.IndexLeft..Internal.IndexRight];
-        Internal.TextRight.Content = TextContent[Internal.IndexRight..];
-    }
-
     public void ModifyText(string text, bool edit = true)
     {
         TextContent = edit ? ValidateEdit(text) : ValidateSubmission(text);
@@ -117,21 +129,18 @@ public class UIInputLabel : UIClickableElement
         if (Internal.IsSelection)
         {
             ModifyText(TextContent[..Internal.IndexLeft] + TextContent[Internal.IndexRight..]);
-            Internal.CursorLeft = Internal.CursorRight = Internal.IndexLeft;
+            Internal.SetPosition(Internal.IndexLeft);
             keys.InitBS--;
         }
         if (keys.InitBS > 0)
         {
             int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
             ModifyText(TextContent[..index] + TextContent[Internal.IndexRight..]);
-            Internal.CursorLeft = Internal.CursorRight = index;
+            Internal.SetPosition(index);
         }
-        UpdateInternalText();
+        Internal.UpdateText();
     }
 
-    // TODO: Handle multiline properly
-        // have option for it at all and disallow \n in validate
-        // with: need fix in RenderChain (render lines separately? needs DrawFancyText update)
     public void TickContent(KeyHandlerState keys)
     {
         if (keys.KeyboardString.Length == 0)
@@ -140,7 +149,7 @@ public class UIInputLabel : UIClickableElement
         }
         ModifyText(TextContent[..Internal.IndexLeft] + keys.KeyboardString + TextContent[Internal.IndexRight..]);
         Internal.CursorRight = Internal.CursorLeft += keys.KeyboardString.Length;
-        UpdateInternalText();
+        Internal.UpdateText();
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
@@ -158,7 +167,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
-        UpdateInternalText();
+        Internal.UpdateText();
     }
 
     public void TickMouse()
@@ -167,23 +176,29 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        int indexOffset = 0;
+        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
+        if (pieces.Count == 0)
+        {
+            return;
+        }
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
         foreach (UIElementText.ChainPiece piece in UIElementText.IterateChain(Internal.TextChain))
+        int indexOffset = 0;
+        for (int i = 0; i < pieces.Count; i++)
         {
             string content = piece.Line.ToString();
-            if (piece.YOffset + piece.Text.CurrentStyle.TextFont.FontDefault.Height >= relMouseY)
+            if (piece.YOffset + piece.Text.CurrentStyle.FontHeight < relMouseY)
             {
                 float lastWidth = 0;
-                for (int i = 0; i < content.Length; i++)
+                for (int j = 0; j < content.Length; j++)
                 {
-                    float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..i]);
+                    float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..j]);
                     if (piece.XOffset + width >= relMouseX)
                     {
                         int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
-                        Internal.CursorLeft = Internal.CursorRight = indexOffset + i - diff;
-                        UpdateInternalText();
+                        Internal.SetPosition(indexOffset + j - diff);
+                        Internal.UpdateText();
                         return;
                     }
                     lastWidth = width;
@@ -214,7 +229,6 @@ public class UIInputLabel : UIClickableElement
         TickMouse();
         // TODO: handle ctrl+A
         // TODO: handle ctrl+Z, ctrl+Y
-        // TODO: handle mouse clicking
     }
 
     /// <inheritdoc/>
