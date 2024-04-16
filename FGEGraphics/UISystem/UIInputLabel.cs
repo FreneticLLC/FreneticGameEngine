@@ -176,16 +176,32 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        int indexOffset = 0;
+        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
-        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
+        if (pieces[^1].YOffset + pieces[^1].Text.CurrentStyle.FontHeight < relMouseY)
+        {
+            Internal.SetPosition(TextContent.Length);
+            Internal.UpdateText();
+            return;
+        }
+        int indexOffset = 0;
         for (int i = 0; i < pieces.Count; i++)
         {
             UIElementText.ChainPiece piece = pieces[i];
-            string content = piece.Line.ToString();
-            if (piece.YOffset + piece.Text.CurrentStyle.TextFont.FontDefault.Height >= relMouseY)
+            if (i != 0 && piece.XOffset == 0)
             {
+                indexOffset++;
+            }    
+            string content = piece.Line.ToString();
+            if (piece.YOffset + piece.Text.CurrentStyle.FontHeight >= relMouseY)
+            {
+                if (piece.XOffset + piece.Line.Width < relMouseX && (i == pieces.Count - 1 || pieces[i + 1].XOffset == 0))
+                {
+                    Internal.SetPosition(indexOffset + content.Length);
+                    Internal.UpdateText();
+                    return;
+                }
                 float lastWidth = 0;
                 for (int j = 0; j <= content.Length; j++)
                 {
@@ -200,19 +216,7 @@ public class UIInputLabel : UIClickableElement
                     lastWidth = width;
                 }
             }
-            if (i < pieces.Count - 1)
-            {
-                indexOffset += content.Length;
-                if (pieces[i + 1].XOffset == 0)
-                {
-                    indexOffset++;
-                }
-            }
-            /*if (i == pieces.Count - 1)
-            {
-                Internal.SetPosition(indexOffset + 1);
-                Internal.UpdateText();
-            }*/
+            indexOffset += content.Length;
         }
     }
 
