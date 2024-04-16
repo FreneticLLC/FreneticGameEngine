@@ -98,11 +98,14 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void MouseLeftDown()
     {
-        Selected = true;
-        Enabled = false;
-        Pressed = true;
-        Position.View.InteractingElement = null;
-        TickMouse();
+        if (Enabled)
+        {
+            Selected = true;
+            Enabled = false;
+            Pressed = true;
+            Position.View.InteractingElement = null;
+            TickMouse(false);
+        }
     }
 
     public void HandleClose()
@@ -176,17 +179,17 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateText();
     }
 
-    public void TickMousePosition(int cursorPos)
+    public void TickMousePosition(int cursorPos, bool shiftDown)
     {
         Internal.CursorRight = Math.Max(cursorPos, 0);
-        if (!MousePreviouslyDown)
+        if (!MousePreviouslyDown && !shiftDown)
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
         Internal.UpdateText();
     }
 
-    public void TickMouse()
+    public void TickMouse(bool shiftDown)
     {
         if (!MouseDown)
         {
@@ -197,7 +200,7 @@ public class UIInputLabel : UIClickableElement
         float relMouseY = Window.MouseY - Y;
         if (pieces[^1].YOffset + pieces[^1].Text.CurrentStyle.FontHeight < relMouseY)
         {
-            TickMousePosition(TextContent.Length);
+            TickMousePosition(TextContent.Length, shiftDown);
             return;
         }
         int indexOffset = 0;
@@ -213,7 +216,7 @@ public class UIInputLabel : UIClickableElement
             {
                 if (piece.XOffset + piece.Line.Width < relMouseX && (i == pieces.Count - 1 || pieces[i + 1].XOffset == 0))
                 {
-                    TickMousePosition(indexOffset + content.Length);
+                    TickMousePosition(indexOffset + content.Length, shiftDown);
                     return;
                 }
                 float lastWidth = 0;
@@ -223,7 +226,7 @@ public class UIInputLabel : UIClickableElement
                     if (piece.XOffset + width >= relMouseX)
                     {
                         int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
-                        TickMousePosition(indexOffset + j - diff);
+                        TickMousePosition(indexOffset + j - diff, shiftDown);
                         return;
                     }
                     lastWidth = width;
@@ -265,7 +268,7 @@ public class UIInputLabel : UIClickableElement
         TickBackspaces(keys);
         TickContent(keys);
         TickArrowKeys(keys, shiftDown);
-        TickMouse();
+        TickMouse(shiftDown);
         TickControlKeys(keys);
         // TODO: handle ctrl+Z, ctrl+Y
     }
