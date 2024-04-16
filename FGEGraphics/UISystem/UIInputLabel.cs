@@ -170,9 +170,19 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateText();
     }
 
+    public void TickMousePosition(int cursorPos)
+    {
+        Internal.CursorLeft = cursorPos;
+        if (!MousePreviouslyDown)
+        {
+            Internal.CursorRight = Internal.CursorLeft;
+        }
+        Internal.UpdateText();
+    }
+
     public void TickMouse()
     {
-        if (!MouseDown || MousePreviouslyDown)
+        if (!MouseDown)
         {
             return;
         }
@@ -181,8 +191,7 @@ public class UIInputLabel : UIClickableElement
         float relMouseY = Window.MouseY - Y;
         if (pieces[^1].YOffset + pieces[^1].Text.CurrentStyle.FontHeight < relMouseY)
         {
-            Internal.SetPosition(TextContent.Length);
-            Internal.UpdateText();
+            TickMousePosition(TextContent.Length);
             return;
         }
         int indexOffset = 0;
@@ -198,8 +207,7 @@ public class UIInputLabel : UIClickableElement
             {
                 if (piece.XOffset + piece.Line.Width < relMouseX && (i == pieces.Count - 1 || pieces[i + 1].XOffset == 0))
                 {
-                    Internal.SetPosition(indexOffset + content.Length);
-                    Internal.UpdateText();
+                    TickMousePosition(indexOffset + content.Length);
                     return;
                 }
                 float lastWidth = 0;
@@ -209,8 +217,7 @@ public class UIInputLabel : UIClickableElement
                     if (piece.XOffset + width >= relMouseX)
                     {
                         int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
-                        Internal.SetPosition(indexOffset + j - diff);
-                        Internal.UpdateText();
+                        TickMousePosition(indexOffset + j - diff);
                         return;
                     }
                     lastWidth = width;
