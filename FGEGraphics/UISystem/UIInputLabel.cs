@@ -48,8 +48,7 @@ public class UIInputLabel : UIClickableElement
                 return;
             }
             Internal.TextContent = value ?? string.Empty;
-            Internal.CursorLeft = Math.Clamp(Internal.CursorLeft, 0, Internal.TextContent.Length);
-            Internal.CursorRight = Math.Clamp(Internal.CursorRight, 0, Internal.TextContent.Length);
+            Internal.ClampPositions();
             Internal.UpdateText();
         }
     }
@@ -68,6 +67,12 @@ public class UIInputLabel : UIClickableElement
         public List<UIElementText> TextChain;
         
         public void SetPosition(int cursorPos) => CursorLeft = CursorRight = cursorPos;
+        
+        public void ClampPositions()
+        {
+            CursorLeft = Math.Clamp(CursorLeft, 0, TextContent.Length);
+            CursorRight = Math.Clamp(CursorRight, 0, TextContent.Length);
+        }
 
         public void UpdateText()
         {
@@ -97,6 +102,7 @@ public class UIInputLabel : UIClickableElement
         Enabled = false;
         Pressed = true;
         Position.View.InteractingElement = null;
+        TickMouse();
     }
 
     public void HandleClose()
@@ -172,10 +178,10 @@ public class UIInputLabel : UIClickableElement
 
     public void TickMousePosition(int cursorPos)
     {
-        Internal.CursorLeft = cursorPos;
+        Internal.CursorRight = Math.Max(cursorPos, 0);
         if (!MousePreviouslyDown)
         {
-            Internal.CursorRight = Internal.CursorLeft;
+            Internal.CursorLeft = Internal.CursorRight;
         }
         Internal.UpdateText();
     }
