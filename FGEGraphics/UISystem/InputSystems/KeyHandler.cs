@@ -280,6 +280,12 @@ public class KeyHandler
                     BuildingState.CopyPressed = true;
                 }
                 break;
+            case Keys.A:
+                if (BuildingState.ControlDown)
+                {
+                    BuildingState.AllPressed = true;
+                }
+                break;
             case Keys.Backspace:
                 if (BuildingState.KeyboardString.Length == 0)
                 {
@@ -346,6 +352,7 @@ public class KeyHandler
         BuildingState.KeyboardString = "";
         BuildingState.InitBS = 0;
         BuildingState.CopyPressed = false;
+        BuildingState.AllPressed = false;
         BuildingState.EndDelete = 0;
         BuildingState.LeftRights = 0;
         BuildingState.Pages = 0;

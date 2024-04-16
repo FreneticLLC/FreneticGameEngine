@@ -32,6 +32,9 @@ public class KeyHandlerState
     /// <summary>Whether COPY (CTRL+C) was pressed.</summary>
     public bool CopyPressed = false;
 
+    /// <summary>Whether ALL (CTRL+A) was pressed.</summary>
+    public bool AllPressed = false;
+
     /// <summary>The number of times PageUp was pressed minus the number of times PageDown was pressed.</summary>
     public int Pages = 0;
 

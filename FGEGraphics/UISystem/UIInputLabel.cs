@@ -233,6 +233,20 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    public void TickControlKeys(KeyHandlerState keys)
+    {
+        if (keys.CopyPressed && Internal.IsSelection)
+        {
+            TextCopy.ClipboardService.SetText(Internal.TextBetween.Content);
+        }
+        if (keys.AllPressed)
+        {
+            Internal.CursorLeft = 0;
+            Internal.CursorRight = TextContent.Length;
+            Internal.UpdateText();
+        }
+    }
+
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
@@ -252,7 +266,7 @@ public class UIInputLabel : UIClickableElement
         TickContent(keys);
         TickArrowKeys(keys, shiftDown);
         TickMouse();
-        // TODO: handle ctrl+A
+        TickControlKeys(keys);
         // TODO: handle ctrl+Z, ctrl+Y
     }
 
