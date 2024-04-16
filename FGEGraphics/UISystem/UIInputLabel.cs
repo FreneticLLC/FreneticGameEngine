@@ -176,22 +176,18 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
-        if (pieces.Count == 0)
-        {
-            return;
-        }
+        int indexOffset = 0;
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
-        foreach (UIElementText.ChainPiece piece in UIElementText.IterateChain(Internal.TextChain))
-        int indexOffset = 0;
+        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
         for (int i = 0; i < pieces.Count; i++)
         {
+            UIElementText.ChainPiece piece = pieces[i];
             string content = piece.Line.ToString();
-            if (piece.YOffset + piece.Text.CurrentStyle.FontHeight < relMouseY)
+            if (piece.YOffset + piece.Text.CurrentStyle.TextFont.FontDefault.Height >= relMouseY)
             {
                 float lastWidth = 0;
-                for (int j = 0; j < content.Length; j++)
+                for (int j = 0; j <= content.Length; j++)
                 {
                     float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..j]);
                     if (piece.XOffset + width >= relMouseX)
@@ -205,6 +201,11 @@ public class UIInputLabel : UIClickableElement
                 }
             }
             indexOffset += content.Length;
+            /*if (i == pieces.Count - 1)
+            {
+                Internal.SetPosition(indexOffset + 1);
+                Internal.UpdateText();
+            }*/
         }
     }
 
