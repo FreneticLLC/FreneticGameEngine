@@ -22,29 +22,50 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem;
 
+/// <summary>Represents an editable text area.</summary>
 public class UIInputLabel : UIClickableElement
 {
+    /// <summary>An enumeration of <see cref="EditText(EditType, string, string)"/> operations.</summary>
     public enum EditType
     {
+        /// <summary>Replaces the space between the indices with the diff.</summary>
         Add,
+        /// <summary>
+        /// If the indices are not equal, deletes the selection. Otherwise, deletes the character preceding the left index.
+        /// The deleted content becomes the diff.
+        /// </summary>
         Delete,
+        /// <summary>Submits the 'result' text on close (without a diff).</summary>
         Submit
     }
 
+    /// <summary>The text to display when the input is empty.</summary>
     public UIElementText Info;
 
+    /// <summary>The UI style of normal input content.</summary>
     public UIElementStyle InputStyle;
+
+    /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
     public int Lines = 1; // TODO: Implement
     public int MaxLength; // TODO: Implement
 
+    /// <summary>Whether the input label is currently selected.</summary>
     public bool Selected = false; // TODO: Provide a UIElement-native solution for this
+
+    /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public InternalData Internal = new();
 
+    /// <summary>Fired when the text is edited by the user.</summary>
     public Action<string> TextEdited;
-    public Action<string> TextSubmitted;
-    public Action Closed;
 
+    /// <summary>Fired when the user submits the text content.</summary>
+    public Action<string> TextSubmitted;
+
+    /// <summary>Fired when the user de-selects the input label.</summary>
+    public Action Closed;
+    
+    /// <summary>Gets or sets the input text content.</summary>
     public string TextContent
     {
         get => Internal.TextContent;
@@ -60,28 +81,54 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
+        /// <summary>The raw text content.</summary>
         public string TextContent = string.Empty;
+
+        /// <summary>The left cursor position. Acts as an anchorpoint for the right cursor.</summary>
         public int CursorLeft = 0;
+
+        /// <summary>The right cursor position.</summary>
         public int CursorRight = 0;
+
+        /// <summary>The minimum cursor position.</summary>
         public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
+
+        /// <summary>The maximum cursor position.</summary>
         public readonly int IndexRight => CursorRight > CursorLeft ? CursorRight : CursorLeft;
+
+        /// <summary>Whether a string of text is selected between the indices.</summary>
         public readonly bool IsSelection => CursorLeft != CursorRight;
+
+        /// <summary>The text preceding <see cref="IndexLeft"/>.</summary>
         public UIElementText TextLeft;
+
+        /// <summary>The text between <see cref="IndexLeft"/> and <see cref="IndexRight"/>.</summary>
         public UIElementText TextBetween;
+
+        /// <summary>The text following <see cref="IndexRight"/>.</summary>
         public UIElementText TextRight;
+
+        /// <summary>A list containing <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
         public List<UIElementText> TextChain;
+        public UIPositionHelper OriginalBounds;
+        public int Lines;
         
+        /// <summary>Sets both cursor positions at a single index.</summary>
+        /// <param name="cursorPos">The cursor positions.</param>
         public void SetPosition(int cursorPos) => CursorLeft = CursorRight = cursorPos;
         
+        /// <summary>Clamps the cursor positionst to the <see cref="TextContent"/> bounds.</summary>
         public void ClampPositions()
         {
             CursorLeft = Math.Clamp(CursorLeft, 0, TextContent.Length);
             CursorRight = Math.Clamp(CursorRight, 0, TextContent.Length);
         }
 
-        public void UpdateText()
+        /// <summary>Updates the <see cref="TextChain"/> values based on the cursor positions.</summary>
+        public readonly void UpdateText()
         {
             TextLeft.Content = TextContent[..IndexLeft];
             TextBetween.Content = TextContent[IndexLeft..IndexRight];
@@ -89,6 +136,13 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    /// <summary>Constructs an input label.</summary>
+    /// <param name="info">The text to display when the input is empty.</param>
+    /// <param name="defaultText">The default input text.</param>
+    /// <param name="infoStyles">The clickable styles for the info text.</param>
+    /// <param name="inputStyle">The style of normal input content.</param>
+    /// <param name="highlightStyle">The style of highlighted input content.</param>
+    /// <param name="pos">The position of the element.</param>
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
     {
         InputStyle = inputStyle ?? infoStyles.Normal;
@@ -115,6 +169,7 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    /// <summary>Submits and de-selects the input label.</summary>
     public void HandleClose()
     {
         SubmitText();
@@ -124,8 +179,12 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void MouseLeftDownOutside() => HandleClose();
+    public override void MouseLeftDownOutside() => Closed?.Invoke();
 
+    /// <summary>Performs a user edit on the text content.</summary>
+    /// <param name="type">The edit operation.</param>
+    /// <param name="diff">The added or deleted text.</param>
+    /// <param name="result">The result of the operation pre-validation.</param>
     public void EditText(EditType type, string diff, string result)
     {
         TextContent = ValidateEdit(type, diff, result);
@@ -133,8 +192,17 @@ public class UIInputLabel : UIClickableElement
     }
 
     // TODO: Cap length
+    /// <summary>Validates a user edit of the text content.</summary>
+    /// <param name="type">The edit operation.</param>
+    /// <param name="diff">The added or deleted text.</param>
+    /// <param name="result">The result of the operation pre-validation.</param>
+    /// <returns>A validated <see cref="TextContent"/> string.</returns>
     public virtual string ValidateEdit(EditType type, string diff, string result) => result;
 
+    /// <summary>Adds text given two selection indices.</summary>
+    /// <param name="text">The text to add.</param>
+    /// <param name="indexLeft">The left index position.</param>
+    /// <param name="indexRight">The right index position.</param>
     public void AddText(string text, int indexLeft, int indexRight)
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
@@ -142,14 +210,20 @@ public class UIInputLabel : UIClickableElement
         Internal.CursorRight = Internal.CursorLeft += text.Length;
     }
 
+    /// <summary>Deletes text between two indices.</summary>
+    /// <param name="indexLeft">The left index position.</param>
+    /// <param name="indexRight">The right index position.</param>
     public void DeleteText(int indexLeft, int indexRight)
     {
         EditText(EditType.Delete, TextContent[indexLeft..indexRight], TextContent[..indexLeft] + TextContent[indexRight..]);
         Internal.SetPosition(indexLeft);
     }
 
+    /// <summary>Submits the current text content.</summary>
     public void SubmitText() => EditText(EditType.Submit, string.Empty, TextContent);
 
+    /// <summary>Deletes text based on the <see cref="KeyHandlerState.InitBS"/> value.</summary>
+    /// <param name="keys">The current keyboard state.</param>
     public void TickBackspaces(KeyHandlerState keys)
     {
         if (keys.InitBS == 0 || TextContent.Length == 0 || Internal.IndexRight == 0)
@@ -169,6 +243,8 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateText();
     }
 
+    /// <summary>Adds text based on the <see cref="KeyHandlerState.KeyboardString"/> value.</summary>
+    /// <param name="keys">The current keyboard state.</param>
     public void TickContent(KeyHandlerState keys)
     {
         if (keys.KeyboardString.Length > 0)
@@ -179,6 +255,9 @@ public class UIInputLabel : UIClickableElement
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
+    /// <summary>Modifies the current selection based on the <see cref="KeyHandlerState.LeftRights"/> value.</summary>
+    /// <param name="keys">The current keyboard state.</param>
+    /// <param name="shiftDown">Whether the shift key is being held.</param>
     public void TickArrowKeys(KeyHandlerState keys, bool shiftDown)
     {
         if (keys.LeftRights == 0)
@@ -196,6 +275,9 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateText();
     }
 
+    /// <summary>Handles the mouse being pressed at a cursor position.</summary>
+    /// <param name="cursorPos">The cursor position.</param>
+    /// <param name="shiftDown">Whether the shift key is being held.</param>
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
         Internal.CursorRight = Math.Max(cursorPos, 0);
@@ -206,6 +288,8 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateText();
     }
 
+    /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
+    /// <param name="shiftDown">Whether the shift key is being held.</param>
     public void TickMouse(bool shiftDown)
     {
         if (!MouseDown)
@@ -253,6 +337,8 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    /// <summary>Handles various control key combinations.</summary>
+    /// <param name="keys">The current keyboard state.</param>
     public void TickControlKeys(KeyHandlerState keys)
     {
         if (keys.CopyPressed && Internal.IsSelection)

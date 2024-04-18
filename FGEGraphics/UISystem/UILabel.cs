@@ -23,7 +23,7 @@ using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Represents a simple piece text on a screen.</summary>
+/// <summary>Represents a simple piece of text on a screen.</summary>
 public class UILabel : UIElement
 {
     /// <summary>The text to display on this label.</summary>
