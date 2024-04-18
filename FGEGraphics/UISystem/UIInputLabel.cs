@@ -24,6 +24,13 @@ namespace FGEGraphics.UISystem;
 
 public class UIInputLabel : UIClickableElement
 {
+    public enum EditType
+    {
+        Add,
+        Delete,
+        Submit
+    }
+
     public UIElementText Info;
 
     public UIElementStyle InputStyle;
@@ -110,6 +117,7 @@ public class UIInputLabel : UIClickableElement
 
     public void HandleClose()
     {
+        SubmitText();
         Selected = false;
         Enabled = true;
         Pressed = false;
@@ -118,16 +126,29 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void MouseLeftDownOutside() => HandleClose();
 
-    public void ModifyText(string text, bool edit = true)
+    public void EditText(EditType type, string diff, string result)
     {
-        TextContent = edit ? ValidateEdit(text) : ValidateSubmission(text);
-        (edit ? TextEdited : TextSubmitted)?.Invoke(TextContent);
+        TextContent = ValidateEdit(type, diff, result);
+        (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
-    public virtual string ValidateEdit(string text) => text;
+    public virtual string ValidateEdit(EditType type, string diff, string result) => result;
 
-    public virtual string ValidateSubmission(string text) => text;
+    public void AddText(string text, int indexLeft, int indexRight)
+    {
+        string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
+        EditText(EditType.Add, text, result);
+        Internal.CursorRight = Internal.CursorLeft += text.Length;
+    }
+
+    public void DeleteText(int indexLeft, int indexRight)
+    {
+        EditText(EditType.Delete, TextContent[indexLeft..indexRight], TextContent[..indexLeft] + TextContent[indexRight..]);
+        Internal.SetPosition(indexLeft);
+    }
+
+    public void SubmitText() => EditText(EditType.Submit, string.Empty, TextContent);
 
     public void TickBackspaces(KeyHandlerState keys)
     {
@@ -137,28 +158,24 @@ public class UIInputLabel : UIClickableElement
         }
         if (Internal.IsSelection)
         {
-            ModifyText(TextContent[..Internal.IndexLeft] + TextContent[Internal.IndexRight..]);
-            Internal.SetPosition(Internal.IndexLeft);
+            DeleteText(Internal.IndexLeft, Internal.IndexRight);
             keys.InitBS--;
         }
         if (keys.InitBS > 0)
         {
             int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
-            ModifyText(TextContent[..index] + TextContent[Internal.IndexRight..]);
-            Internal.SetPosition(index);
+            DeleteText(index, Internal.IndexRight);
         }
         Internal.UpdateText();
     }
 
     public void TickContent(KeyHandlerState keys)
     {
-        if (keys.KeyboardString.Length == 0)
+        if (keys.KeyboardString.Length > 0)
         {
-            return;
+            AddText(keys.KeyboardString, Internal.IndexLeft, Internal.IndexRight);
+            Internal.UpdateText();
         }
-        ModifyText(TextContent[..Internal.IndexLeft] + keys.KeyboardString + TextContent[Internal.IndexRight..]);
-        Internal.CursorRight = Internal.CursorLeft += keys.KeyboardString.Length;
-        Internal.UpdateText();
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
@@ -261,8 +278,8 @@ public class UIInputLabel : UIClickableElement
         KeyHandlerState keys = Window.Keyboard.BuildingState;
         if (keys.Escaped)
         {
-            ModifyText(TextContent, false);
             Closed?.Invoke();
+            return;
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         TickBackspaces(keys);
