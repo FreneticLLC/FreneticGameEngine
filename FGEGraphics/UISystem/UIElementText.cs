@@ -185,8 +185,19 @@ public class UIElementText
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
 
+    /// <summary>An individual UI text chain piece, guaranteed to be single-line.</summary>
+    /// <param name="Text">The text object this piece takes from.</param>
+    /// <param name="Line">The chain piece line.</param>
+    /// <param name="XOffset">The x-offset relative to the first piece.</param>
+    /// <param name="YOffset">The y-offset relative to the first piece.</param>
     public record ChainPiece(UIElementText Text, RenderableTextLine Line, float XOffset, float YOffset);
 
+    /// <summary>
+    /// Iterates through some UI text objects and returns <see cref="ChainPiece"/>s, where each chain piece contains a single line.
+    /// This properly handles consecutive text objects even spanning multiple lines.
+    /// </summary>
+    /// <param name="chain">The UI text objects.</param>
+    /// <returns>The text chain.</returns>
     public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain)
     {
         float x = 0, y = 0;
@@ -213,6 +224,11 @@ public class UIElementText
         }
     }
 
+    /// <summary>Renders a text chain.</summary>
+    /// <seealso cref="IterateChain(IEnumerable{UIElementText})"/>
+    /// <param name="chain">The UI text objects.</param>
+    /// <param name="x">The starting x position.</param>
+    /// <param name="y">The starting y position.</param>
     public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y)
     {
         foreach (ChainPiece piece in IterateChain(chain))
