@@ -45,6 +45,9 @@ public class UINumberSlider : UIClickableElement
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
     public double Progress => (Value - Min) / (Max - Min);
 
+    /// <summary>Fired when the user edits the slider value.</summary>
+    public Action<double> ValueEdited;
+
     /// <summary>
     /// The box placed at the current slider progress.
     /// Not actually a <see cref="UIButton"/> for better UX.
@@ -75,6 +78,23 @@ public class UINumberSlider : UIClickableElement
         Button.Position.GetterX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 
+    /// <summary>Corrects a slider value to the closest valid position.</summary>
+    /// <param name="value">The uncorrected slider value.</param>
+    /// <param name="interval">The grid-snapping interval.</param>
+    /// <returns>The corrected slider value.</returns>
+    public double GetCorrectedValue(double value, double interval)
+    {
+        value = Math.Clamp(value, Min, Max);
+        if (interval <= 0.0)
+        {
+            return value;
+        }
+        int step = (int)Math.Round((value - Min) / interval);
+        double lower = Min + interval * step;
+        double higher = Min + interval * (step + 1);
+        return (value - lower) <= (higher - value) ? lower : higher;
+    }
+
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
@@ -83,15 +103,13 @@ public class UINumberSlider : UIClickableElement
         {
             return;
         }
-        Value = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
-        // TODO: Better way to check left shift down?
+        double previousValue = Value;
+        double mouseValue = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
         double interval = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift) ? (Integer ? 1.0 : 0.0) : Interval;
-        if (interval > 0.0)
+        Value = GetCorrectedValue(mouseValue, interval);
+        if (Value != previousValue)
         {
-            int step = (int)Math.Round((Value - Min) / interval);
-            double lower = Min + interval * step;
-            double higher = Min + interval * (step + 1);
-            Value = (Value - lower) <= (higher - Value) ? lower : higher;
+            ValueEdited?.Invoke(Value);
         }
     }
 
