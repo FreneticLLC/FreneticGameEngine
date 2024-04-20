@@ -23,10 +23,6 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <summary>The slider's value label.</summary>
     public UINumberInputLabel Label;
 
-    public string LabelFormat;
-
-    public string FormattedValue => Value.ToString(LabelFormat);
-
     /// <summary>Constructs a labeled number slider.</summary>
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>
@@ -38,20 +34,23 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
     /// <param name="labelStyle">The label style.</param>
     /// <param name="pos">The position of the slider.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIPositionHelper pos, string labelFormat = null) : base(min, max, initial, interval, integer, sliderStyles, pos)
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIElementStyle labelHighlight, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true) : base(min, max, initial, interval, integer, sliderStyles, pos)
     {
-        LabelFormat = labelFormat ?? (Integer ? "0" : "0.0");
+        labelFormat ??= Integer ? "0" : "0.0";
         AddStyle(labelStyle, true);
-        AddChild(Label = new UINumberInputLabel(integer, string.Empty, FormattedValue, sliderStyles, labelStyle, labelStyle, pos.AtOrigin()));
+        AddChild(Label = new UINumberInputLabel(Value, integer, labelFormat, labelStyle, labelHighlight, pos.AtOrigin()));
         // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
         // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
-        ValueEdited += _ => Label.TextContent = FormattedValue;
+        ValueEdited += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.TextSubmitted += _ =>
         {
             double newValue = GetCorrectedValue(Label.Value, Integer ? 1.0 : 0.0);
-            Value = newValue;
-            ValueEdited.Invoke(Value);
+            ValueEdited.Invoke(Value = newValue);
         };
+        if (updateOnEdit)
+        {
+            Label.TextEdited += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
+        }
     }
 }

@@ -10,12 +10,15 @@ namespace FGEGraphics.UISystem;
 public class UINumberInputLabel : UIInputLabel
 {
     public bool Integer;
+    public string Format;
 
     public double Value => double.Parse(TextContent);
 
-    public UINumberInputLabel(bool integer, string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(info, defaultText, infoStyles, inputStyle, highlightStyle, pos)
+    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(string.Empty, initial.ToString(), StyleGroup.Empty, inputStyle, highlightStyle, pos)
     {
         Integer = integer;
+        Format = format;
+        TextContent = initial.ToString(Format);
     }
 
     public override string ValidateEdit(EditType type, string diff, string result)
@@ -26,15 +29,8 @@ public class UINumberInputLabel : UIInputLabel
         }
         if (type == EditType.Submit)
         {
-            if (result.Length == 0)
-            {
-                result = "0";
-            }
-            if (!Integer && !result.Contains('.'))
-            {
-                result += ".0";
-            }
-            return result;
+            double value = result.Length > 0 && result != "-" && result != "." ? double.Parse(result) : 0;
+            return value.ToString(Format);
         }
         bool hasDecimal = TextContent.Contains('.');
         bool negative = false;

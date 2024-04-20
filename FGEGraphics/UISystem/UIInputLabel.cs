@@ -144,6 +144,7 @@ public class UIInputLabel : UIClickableElement
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
+    public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: info.Length > 0)
     {
         InputStyle = inputStyle ?? infoStyles.Normal;
         HighlightStyle = highlightStyle ?? infoStyles.Click;
@@ -385,8 +386,9 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        bool info = TextContent.Length == 0;
-        if (info)
+        bool isInfo = TextContent.Length == 0;
+        bool renderInfo = isInfo && style.CanRenderText(Info);
+        if (renderInfo)
         {
             style.TextFont.DrawFancyText(Info, Info.GetPosition(X, Y));
         }
@@ -400,12 +402,12 @@ public class UIInputLabel : UIClickableElement
         }
         // TODO: Cursor blink modes
         Engine.Textures.White.Bind();
-        Renderer2D.SetColor(style.BorderColor);
+        Renderer2D.SetColor(InputStyle.BorderColor);
         RenderableTextLine[] lines = Internal.TextLeft.Renderable.Lines;
-        int lineWidth = style.BorderThickness / 2;
+        int lineWidth = InputStyle.BorderThickness / 2;
         int lineX = X + (lines?.Last().Width ?? 0);
         int lineCount = lines?.Length ?? 1;
-        int lineHeight = (info ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+        int lineHeight = (renderInfo ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
         view.Rendering.RenderRectangle(view.UIContext, lineX - lineWidth, Y + (lineCount - 1) * lineHeight, lineX + lineWidth, Y + lineCount * lineHeight, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         Renderer2D.SetColor(Color4.White);
     }

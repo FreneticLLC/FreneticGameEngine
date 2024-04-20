@@ -16,6 +16,9 @@ public abstract class UIClickableElement : UIElement
     /// <param name="click"></param>
     public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click)
     {
+        /// <summary>An empty style group.</summary>
+        public static readonly StyleGroup Empty = new(UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty);
+
         /// <summary>The render style to use when the element is not being interacted with.</summary>
         public UIElementStyle Normal = normal;
 
