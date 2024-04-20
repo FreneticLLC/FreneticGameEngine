@@ -32,8 +32,11 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="sliderStyles">The slider styles.</param>
     /// <param name="labelLeft">Whether the label should be on the left of the slider.</param>
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
-    /// <param name="labelStyle">The label style.</param>
+    /// <param name="labelStyle">The normal label style.</param>
+    /// <param name="labelHighlight">The highlighted label style.</param>
     /// <param name="pos">The position of the slider.</param>
+    /// <param name="labelFormat">A format string for the label value.</param>
+    /// <param name="updateOnEdit">Whether to update the slider value while the user edits the label.</param>
     public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIElementStyle labelHighlight, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true) : base(min, max, initial, interval, integer, sliderStyles, pos)
     {
         labelFormat ??= Integer ? "0" : "0.0";
