@@ -206,8 +206,8 @@ public class UIInputLabel : UIClickableElement
     public void AddText(string text, int indexLeft, int indexRight)
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
-        EditText(EditType.Add, text, result);
         Internal.CursorRight = Internal.CursorLeft += text.Length;
+        EditText(EditType.Add, text, result);
     }
 
     /// <summary>Deletes text between two indices.</summary>
@@ -215,7 +215,9 @@ public class UIInputLabel : UIClickableElement
     /// <param name="indexRight">The right index position.</param>
     public void DeleteText(int indexLeft, int indexRight)
     {
-        EditText(EditType.Delete, TextContent[indexLeft..indexRight], TextContent[..indexLeft] + TextContent[indexRight..]);
+        string diff = TextContent[indexLeft..indexRight];
+        string result = TextContent[..indexLeft] + TextContent[indexRight..];
+        EditText(EditType.Delete, diff, result);
         Internal.SetPosition(indexLeft);
     }
 
@@ -297,6 +299,10 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
+        if (pieces.Count == 0)
+        {
+            return;
+        }
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
         if (pieces[^1].YOffset + pieces[^1].Text.CurrentStyle.FontHeight < relMouseY)
