@@ -56,7 +56,7 @@ public class PointLight : LightObject
         for (int i = 0; i < 6; i++)
         {
             Light li = new();
-            li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color.ToOpenTK());
+            li.Create(pos.ToOpenTK3D(), (pos + Location.UnitX).ToOpenTK3D(), 90f, Radius, Color);
             InternalLights.Add(li);
         }
         InternalLights[4].UpVector = new Vector3(0, 1, 0);

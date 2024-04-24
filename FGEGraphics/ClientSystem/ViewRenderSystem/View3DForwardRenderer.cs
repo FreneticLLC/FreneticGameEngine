@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.LightingSystem;
 using OpenTK;
@@ -65,13 +66,13 @@ public class View3DForwardRenderer : View3DCoreDataSet
                         {
                             Matrix4 smat = Matrix4.Identity;
                             Vector3d eyep = light.InternalLights[0].EyePosition - Config.CameraPos.ToOpenTK3D();
-                            Vector3 col = light.InternalLights[0].Color * (float)maxrangemult;
+                            Color3F col = light.InternalLights[0].Color * (float)maxrangemult;
                             Matrix4 light_data = new(
                                 (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                 0.7f, // diffuse_albedo
                                 0.7f, // specular_albedo
                                 0.0f, // should_sqrt
-                                col.X, col.Y, col.Z, // light_color
+                                col.R, col.G, col.B, // light_color
                                 (light.InternalLights[0].MaxRange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : light.InternalLights[0].MaxRange), // light_radius
                                 0f, 0f, 0f, // eye_pos
                                 2.0f, // light_type
@@ -97,7 +98,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
                         {
                             for (int x = 0; x < light.InternalLights.Count; x++)
                             {
-                                if (light.InternalLights[x].Color.LengthSquared <= 0.01)
+                                if (light.InternalLights[x].Color.StrengthSquared <= 0.01)
                                 {
                                     continue;
                                 }
@@ -108,13 +109,13 @@ public class View3DForwardRenderer : View3DCoreDataSet
                                 }
                                 Matrix4 smat = light.InternalLights[x].GetMatrix(View);
                                 Vector3d eyep = light is SkyLight se ? -se.Direction.ToOpenTK3D() : light.InternalLights[x].EyePosition - Config.CameraPos.ToOpenTK3D();
-                                Vector3 col = light.InternalLights[x].Color * (float)maxrangemult;
+                                Color3F col = light.InternalLights[x].Color * (float)maxrangemult;
                                 Matrix4 light_data = new(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                     0.7f, // diffuse_albedo
                                     0.7f, // specular_albedo
                                     light.InternalLights[x] is LightOrtho ? 1.0f : 0.0f, // should_sqrt
-                                    col.X, col.Y, col.Z, // light_color
+                                    col.R, col.G, col.B, // light_color
                                     light.InternalLights[x] is LightOrtho ? View3DInternalData.LIGHT_MAXIUM_RADIUS : (light.InternalLights[0].MaxRange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : light.InternalLights[0].MaxRange), // light_radius
                                     0f, 0f, 0f, // eye_pos
                                     light is SpotLight ? 1.0f : 0.0f, // light_type

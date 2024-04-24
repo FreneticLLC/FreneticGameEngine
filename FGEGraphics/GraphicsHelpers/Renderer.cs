@@ -244,6 +244,14 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <summary>Set the color of rendered objects.</summary>
     /// <param name="c">The color.</param>
     /// <param name="view">The relevant view.</param>
+    public void SetColor(Color3F c, View3D view)
+    {
+        SetColor(new Vector4(c.R, c.G, c.B, 1), view);
+    }
+
+    /// <summary>Set the color of rendered objects.</summary>
+    /// <param name="c">The color.</param>
+    /// <param name="view">The relevant view.</param>
     public void SetColor(Color4F c, View3D view)
     {
         SetColor(new Vector4(c.R, c.G, c.B, c.A), view);

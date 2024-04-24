@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
@@ -37,7 +38,7 @@ public class Light
     public float MaxRange;
 
     /// <summary>The color of the light.</summary>
-    public Vector3 Color;
+    public Color3F Color;
 
     /// <summary>Whether this light needs an update.</summary>
     public bool NeedsUpdate = true;
@@ -49,12 +50,12 @@ public class Light
     public bool CastShadows = true;
 
     /// <summary>Creates the light object.</summary>
-    /// <param name="pos">Position.</param>
-    /// <param name="targ">Target.</param>
-    /// <param name="fov">Field of view.</param>
-    /// <param name="max_range">Range.</param>
-    /// <param name="col">Color.</param>
-    public void Create(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
+    /// <param name="pos">The light's center position.</param>
+    /// <param name="targ">Target location.</param>
+    /// <param name="fov">Field of view (how wide the light is, as an angle).</param>
+    /// <param name="max_range">Maximum effective range (distance of effect) for the light.</param>
+    /// <param name="col">Color of the light.</param>
+    public void Create(Vector3d pos, Vector3d targ, float fov, float max_range, Color3F col)
     {
         EyePosition = pos;
         TargetPosition = targ;

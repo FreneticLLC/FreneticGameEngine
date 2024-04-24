@@ -64,7 +64,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                         {
                             foreach (Light subLight in light.InternalLights)
                             {
-                                if (subLight.Color.LengthSquared <= 0.01)
+                                if (subLight.Color.StrengthSquared <= 0.01)
                                 {
                                     continue;
                                 }
@@ -426,13 +426,13 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                         {
                             Matrix4 smat = Matrix4.Identity;
                             Vector3d eyep = pl.EyePos.ToOpenTK3D() - Config.CameraPos.ToOpenTK3D();
-                            Vector3 col = light.InternalLights[0].Color * (float)maxrangemult;
+                            Color3F col = light.InternalLights[0].Color * (float)maxrangemult;
                             Matrix4 light_data = new(
                                 (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                 0.7f, // diffuse_albedo
                                 0.7f, // specular_albedo
                                0.0f, // should_sqrt
-                                col.X, col.Y, col.Z, // light_color
+                                col.R, col.G, col.B, // light_color
                                 (light.InternalLights[0].MaxRange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : light.InternalLights[0].MaxRange), // light_radius
                                 0f, 0f, 0f, // eye_pos
                                 2.0f, // light_type
@@ -457,19 +457,19 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                         {
                             foreach (Light subLight in light.InternalLights)
                             {
-                                if (subLight.Color.LengthSquared <= 0.01)
+                                if (subLight.Color.StrengthSquared <= 0.01)
                                 {
                                     continue;
                                 }
                                 Matrix4 smat = subLight.GetMatrix(View);
                                 Vector3d eyep = light is SkyLight se ? -se.Direction.ToOpenTK3D() : subLight.EyePosition - Config.CameraPos.ToOpenTK3D();
-                                Vector3 col = subLight.Color * (float)maxrangemult;
+                                Color3F col = subLight.Color * (float)maxrangemult;
                                 Matrix4 light_data = new(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
                                     0.7f, // diffuse_albedo
                                     0.7f, // specular_albedo
                                     subLight is LightOrtho ? 1.0f : 0.0f, // should_sqrt
-                                    col.X, col.Y, col.Z, // light_color
+                                    col.R, col.G, col.B, // light_color
                                     subLight is LightOrtho ? View3DInternalData.LIGHT_MAXIUM_RADIUS : (light.InternalLights[0].MaxRange <= 0 ? View3DInternalData.LIGHT_MAXIUM_RADIUS : light.InternalLights[0].MaxRange), // light_radius
                                     0f, 0f, 0f, // eye_pos
                                     light is SpotLight ? 1.0f : 0.0f, // light_type
@@ -957,9 +957,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                         lightDataMatrix[0, 1] = (float)(light.EyePos.X - State.RenderRelative.X);
                         lightDataMatrix[0, 2] = (float)(light.EyePos.Y - State.RenderRelative.Y);
                         lightDataMatrix[0, 3] = (float)(light.EyePos.Z - State.RenderRelative.Z);
-                        lightDataMatrix[1, 0] = subLight.Color.X;
-                        lightDataMatrix[1, 1] = subLight.Color.Y;
-                        lightDataMatrix[1, 2] = subLight.Color.Z;
+                        lightDataMatrix[1, 0] = subLight.Color.R;
+                        lightDataMatrix[1, 1] = subLight.Color.G;
+                        lightDataMatrix[1, 2] = subLight.Color.B;
                         lightDataMatrix[1, 3] = (light is SpotLight) ? 1f : 0f;
                         lightDataMatrix[2, 0] = (subLight is LightOrtho) ? 1f : 0f;
                         lightDataMatrix[2, 1] = 1f / Config.ShadowTexSize();

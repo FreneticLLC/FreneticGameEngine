@@ -26,7 +26,7 @@ public class SpotLight : LightObject
     public float Radius;
 
     /// <summary>Color of the light.</summary>
-    public Location Color;
+    public Color3F Color;
 
     /// <summary>Direction of the light.</summary>
     public Location Direction;
@@ -40,7 +40,7 @@ public class SpotLight : LightObject
     /// <param name="col">Color.</param>
     /// <param name="dir">Direction.</param>
     /// <param name="size">FOV.</param>
-    public SpotLight(Location pos, float radius, Location col, Location dir, float size)
+    public SpotLight(Location pos, float radius, Color3F col, Location dir, float size)
     {
         EyePos = pos;
         Radius = radius;
@@ -56,7 +56,7 @@ public class SpotLight : LightObject
             InternalLights[0].UpVector = new Vector3(0, 0, 1);
         }
         Direction = dir;
-        InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color.ToOpenTK());
+        InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color);
         MaxDistance = radius;
     }
 
