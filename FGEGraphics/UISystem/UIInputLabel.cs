@@ -77,7 +77,7 @@ public class UIInputLabel : UIClickableElement
             }
             Internal.TextContent = value ?? string.Empty;
             Internal.ClampPositions();
-            Internal.UpdateText();
+            Internal.UpdateText(Position.Width);
         }
     }
 
@@ -111,8 +111,8 @@ public class UIInputLabel : UIClickableElement
         /// <summary>The text following <see cref="IndexRight"/>.</summary>
         public UIElementText TextRight;
 
-        /// <summary>A list containing <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
-        public List<UIElementText> TextChain;
+        /// <summary>A chain of <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
+        public List<UIElementText.ChainPiece> TextChain;
         public UIPositionHelper OriginalBounds;
         public int Lines;
         
@@ -128,11 +128,12 @@ public class UIInputLabel : UIClickableElement
         }
 
         /// <summary>Updates the <see cref="TextChain"/> values based on the cursor positions.</summary>
-        public readonly void UpdateText()
+        public void UpdateText(int maxWidth)
         {
             TextLeft.Content = TextContent[..IndexLeft];
             TextBetween.Content = TextContent[IndexLeft..IndexRight];
             TextRight.Content = TextContent[IndexRight..];
+            TextChain = UIElementText.IterateChain([TextLeft, TextBetween, TextRight], maxWidth).ToList();
         }
     }
 
@@ -143,7 +144,6 @@ public class UIInputLabel : UIClickableElement
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: true)
     public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: info.Length > 0)
     {
         InputStyle = inputStyle ?? infoStyles.Normal;
@@ -152,7 +152,6 @@ public class UIInputLabel : UIClickableElement
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
-        Internal.TextChain = [Internal.TextLeft, Internal.TextBetween, Internal.TextRight];
         TextContent = defaultText;
         Closed += HandleClose;
     }
@@ -243,7 +242,7 @@ public class UIInputLabel : UIClickableElement
             int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
             DeleteText(index, Internal.IndexRight);
         }
-        Internal.UpdateText();
+        Internal.UpdateText(Position.Width);
     }
 
     /// <summary>Adds text based on the <see cref="KeyHandlerState.KeyboardString"/> value.</summary>
@@ -275,7 +274,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
-        Internal.UpdateText();
+        Internal.UpdateText(Position.Width);
     }
 
     /// <summary>Handles the mouse being pressed at a cursor position.</summary>
@@ -288,7 +287,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
-        Internal.UpdateText();
+        Internal.UpdateText(Position.Width);
     }
 
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
@@ -299,30 +298,29 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        List<UIElementText.ChainPiece> pieces = UIElementText.IterateChain(Internal.TextChain).ToList();
-        if (pieces.Count == 0)
+        if (Internal.TextChain.Count == 0)
         {
             return;
         }
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
-        if (pieces[^1].YOffset + pieces[^1].Text.CurrentStyle.FontHeight < relMouseY)
+        if (Internal.TextChain[^1].YOffset + Internal.TextChain[^1].Font.FontDefault.Height < relMouseY)
         {
             TickMousePosition(TextContent.Length, shiftDown);
             return;
         }
         int indexOffset = 0;
-        for (int i = 0; i < pieces.Count; i++)
+        for (int i = 0; i < Internal.TextChain.Count; i++)
         {
-            UIElementText.ChainPiece piece = pieces[i];
+            UIElementText.ChainPiece piece = Internal.TextChain[i];
             if (i != 0 && piece.XOffset == 0)
             {
                 indexOffset++;
             }    
             string content = piece.Line.ToString();
-            if (piece.YOffset + piece.Text.CurrentStyle.FontHeight >= relMouseY)
+            if (piece.YOffset + piece.Font.FontDefault.Height >= relMouseY)
             {
-                if (piece.XOffset + piece.Line.Width < relMouseX && (i == pieces.Count - 1 || pieces[i + 1].XOffset == 0))
+                if (piece.XOffset + piece.Line.Width < relMouseX && (i == Internal.TextChain.Count - 1 || Internal.TextChain[i + 1].XOffset == 0))
                 {
                     TickMousePosition(indexOffset + content.Length, shiftDown);
                     return;
@@ -330,7 +328,7 @@ public class UIInputLabel : UIClickableElement
                 float lastWidth = 0;
                 for (int j = 0; j <= content.Length; j++)
                 {
-                    float width = piece.Text.CurrentStyle.TextFont.MeasureFancyText(content[..j]);
+                    float width = piece.Font.MeasureFancyText(content[..j]);
                     if (piece.XOffset + width >= relMouseX)
                     {
                         int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
@@ -356,7 +354,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = 0;
             Internal.CursorRight = TextContent.Length;
-            Internal.UpdateText();
+            Internal.UpdateText(Position.Width);
         }
     }
 
@@ -394,7 +392,7 @@ public class UIInputLabel : UIClickableElement
         }
         else
         {
-            UIElementText.RenderChain(Internal.TextChain, X, Y);
+            UIElementText.RenderChain(Internal.TextChain, X, Y, Width, Height);
         }
         if (!Selected || Internal.IsSelection)
         {
