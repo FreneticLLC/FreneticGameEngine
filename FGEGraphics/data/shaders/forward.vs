@@ -118,7 +118,7 @@ void main()
 	pos1 *= simplebone_matrix;
 	norm1 *= simplebone_matrix;
 	vec4 fnorm = mv_mat_simple * norm1;
-    fi.color = color_for(mv_matrix * vec4(pos1.xyz, 1.0), color * v_color);
+	fi.color = color_for(mv_matrix * vec4(pos1.xyz, 1.0), color * v_color);
 	vec4 posser = mv_matrix * vec4(pos1.xyz, 1.0);
 	fi.pos = posser.xyz;
 	gl_Position = proj_matrix * posser;

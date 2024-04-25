@@ -21,7 +21,7 @@ layout (location = 1) out vec2 f_texcoord;
 
 void main()
 {
-    f_color = color * v_color;
+	f_color = color * v_color;
 	f_texcoord = texcoords;
 	gl_Position = vec4(position, 1.0) * vec4(scaler.xy, 1.0, 1.0) + vec4(adder, 0.0, 0.0);
 }

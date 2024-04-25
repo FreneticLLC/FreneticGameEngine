@@ -50,7 +50,7 @@ vec3 RGBtoHSV(in float r, in float g, in float b)
 	res.x = res.x * 60.0;
 	if(res.x < 0.0)
 	{
-      res.x = res.x + 360.0;
+	  res.x = res.x + 360.0;
 	}
 	return res;
 }

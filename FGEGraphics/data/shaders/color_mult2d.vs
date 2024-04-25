@@ -22,7 +22,7 @@ layout (location = 1) out vec2 f_texcoord;
 
 void main()
 {
-    f_color = color * v_color;
+	f_color = color * v_color;
 	f_texcoord = texcoords;
 	vec3 rotter = vec3(rotation.xy, 0.0) * vec3(scaler.xy, 1.0);
 	vec3 prerot_pos = (position * vec3(scaler.xy, 1.0)) + rotter;

@@ -18,9 +18,9 @@ out vec4 color;
 void main()
 {
 	vec4 tcolor = texture(tex, f_texcoord) * f_color;
-    if (tcolor.w < 0.01)
-    {
-        discard;
-    }
+	if (tcolor.w < 0.01)
+	{
+		discard;
+	}
 	color = vec4(0.0, 1.0, 0.0, 1.0);
 }
