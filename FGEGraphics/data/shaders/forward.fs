@@ -101,19 +101,18 @@ void applyFog()
 	float fmza = 1.0 - max(min((fi.pos.z - 1000.0) / 2000.0, 1.0), 0.0);
 	color.xyz = min(color.xyz * (1.0 - fmza) + fogCol.xyz * fmza, vec3(1.0));
 #endif
+    float fogW = fogCol.w;
 #if MCM_BRIGHT
-	if (fogCol.w > 1.0)
+    fogW -= 1.0;
 #endif
-	{
-		vec3 pos = fi.pos - cameraPos;
-		float dist = pow(dot(pos, pos) * fogDist, 0.6);
-		float fogMod = dist * exp(fogCol.w) * fogCol.w;
-		float fmz = min(fogMod, 1.0);
+    vec3 pos = fi.pos - cameraPos;
+    float dist = pow(dot(pos, pos) * fogDist, 0.6);
+    float fogMod = dist * exp(fogW) * fogW;
+    float fmz = min(fogMod, 1.0);
 #if MCM_SPECIAL_FOG
-		fmz *= fmz * fmz * fmz;
+	fmz *= fmz * fmz * fmz;
 #endif
-		color.xyz = min(color.xyz * (1.0 - fmz) + fogCol.xyz * fmz, vec3(1.0));
-	}
+	color.xyz = min(color.xyz * (1.0 - fmz) + fogCol.xyz * fmz, vec3(1.0));
 }
 
 float fix_sqr(in float inTemp)
