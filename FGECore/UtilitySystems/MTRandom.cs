@@ -61,9 +61,16 @@ public class MTRandom
     public MTRandom(ulong bufferSize, ulong seed)
     {
         Internal.Buffer = new ulong[bufferSize];
-        Internal.BufferIndex = bufferSize;
+        FillBuffer(seed);
+    }
+
+    /// <summary>Fill the internal buffer based on a given seed.</summary>
+    public void FillBuffer(ulong seed)
+    {
+        ulong len = (ulong)Internal.Buffer.LongLength;
+        Internal.BufferIndex = len;
         Internal.Buffer[0] = seed;
-        for (ulong i = 1; i < bufferSize; i++)
+        for (ulong i = 1; i < len; i++)
         {
             Internal.Buffer[i] = 6364136223846793005UL * (Internal.Buffer[i - 1] ^ (Internal.Buffer[i - 1] >> 62)) + i;
         }
