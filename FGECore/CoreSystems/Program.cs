@@ -38,6 +38,11 @@ public abstract class Program(string _name, string _version, string _versdesc)
         Instance = p;
         SystemCulture = SpecialTools.Internationalize();
         Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+        ThreadPool.GetMinThreads(out int work, out int comp);
+        if (work < 256 || comp < 256)
+        {
+            ThreadPool.SetMinThreads(256, 256);
+        }
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, e) =>
         {
             Console.WriteLine($"Unhandled exception: {e}");
