@@ -161,7 +161,7 @@ public class RenderableTextLine
 }
 
 /// <summary>Represents a section of renderable text.</summary>
-public class RenderableText
+public class RenderableText()
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
     public static readonly RenderableText Empty = new();
@@ -171,6 +171,14 @@ public class RenderableText
 
     /// <summary>The maximum width of the text.</summary>
     public int Width;
+
+    /// <summary>Constructs renderable text from a single line.</summary>
+    /// <param name="singleLine">The text line.</param>
+    public RenderableText(RenderableTextLine singleLine) : this()
+    {
+        Lines = [singleLine];
+        Width = singleLine.Width;
+    }
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);

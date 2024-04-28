@@ -729,6 +729,34 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return SplitAppropriately(ParseFancyText(text), maxX);
     }
 
+    public record struct RenderableTextWord(List<RenderableTextPart> Parts, float Width)
+    {
+        public static RenderableTextWord Empty => new([], 0);
+    }
+
+    public static List<RenderableTextWord> SplitLineIntoWords(RenderableTextLine line)
+    {
+        List<RenderableTextWord> words = [RenderableTextWord.Empty];
+        foreach (RenderableTextPart part in line.Parts)
+        {
+            string[] textWords = part.Text.Split(' ');
+            for (int i = 0; i < textWords.Length; i++)
+            {
+                RenderableTextWord lastWord = words.Last();
+                RenderableTextPart wordPart = part.Clone();
+                wordPart.Text = textWords[i];
+                wordPart.Width = wordPart.Font.MeasureString(wordPart.Text);
+                lastWord.Parts.Add(wordPart);
+                lastWord.Width += wordPart.Width;
+                if (wordPart.Text == string.Empty || i < textWords.Length - 1)
+                {
+                    words.Add(RenderableTextWord.Empty);
+                }
+            }
+        }
+        return words;
+    }
+
     /// <summary>Splits some text at a maximum render width.</summary>
     /// <param name="text">The original (un-split) text.</param>
     /// <param name="maxX">The maximum width.</param>
