@@ -729,9 +729,11 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return SplitAppropriately(ParseFancyText(text), maxX);
     }
 
-    public record struct RenderableTextWord(List<RenderableTextPart> Parts, float Width)
+    public class RenderableTextWord(List<RenderableTextPart> parts, float width)
     {
         public static RenderableTextWord Empty => new([], 0);
+        public List<RenderableTextPart> Parts = parts;
+        public float Width = width;
     }
 
     public static List<RenderableTextWord> SplitLineIntoWords(RenderableTextLine line)
@@ -755,6 +757,45 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             }
         }
         return words;
+    }
+
+    public static List<RenderableTextWord> SplitWordAppropriately(RenderableTextWord word, float maxWidth)
+    {
+        List<RenderableTextWord> result = [RenderableTextWord.Empty];
+        List<RenderableTextPart> parts = [.. word.Parts];
+        for (int i = 0; i < parts.Count; i++)
+        {
+            RenderableTextWord lastWord = result.Last();
+            RenderableTextPart part = parts[i];
+            if (lastWord.Width + part.Width <= maxWidth)
+            {
+                lastWord.Parts.Add(part);
+                lastWord.Width += part.Width;
+                continue;
+            }
+            float lastWidth = 0;
+            for (int j = 1; j <= part.Text.Length; j++)
+            {
+                float width = part.Font.MeasureString(part.Text[..j]);
+                if (lastWord.Width + width > maxWidth)
+                {
+                    // TODO: Range operator support on RenderableTextPart
+                    RenderableTextPart firstPart = part.Clone();
+                    firstPart.Text = part.Text[..(j - 1)];
+                    firstPart.Width = lastWidth;
+                    RenderableTextPart secondPart = part.Clone();
+                    secondPart.Text = part.Text[(j - 1)..];
+                    secondPart.Width = part.Width - lastWidth;
+                    lastWord.Parts.Add(firstPart);
+                    lastWord.Width += lastWidth;
+                    result.Add(RenderableTextWord.Empty);
+                    parts.Insert(i + 1, secondPart);
+                    break;
+                }
+                lastWidth = width;
+            }
+        }
+        return result;
     }
 
     /// <summary>Splits some text at a maximum render width.</summary>
