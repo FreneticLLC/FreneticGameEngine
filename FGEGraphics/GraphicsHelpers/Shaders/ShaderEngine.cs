@@ -312,7 +312,7 @@ public class ShaderEngine
         if (SHD_Status != 1)
         {
 #if DEBUG
-            File.WriteAllText($"temp_shd_{fileName}.txt", fileText);
+            File.WriteAllText($"temp_shd_{fileName.Replace('\\', '/').Replace("/", "_")}.txt", fileText);
 #endif
             throw new Exception($"Error creating ComputeShader '{fileName}'. Error status: {SHD_Status}, info: {SHD_Info}");
         }
