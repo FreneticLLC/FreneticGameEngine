@@ -261,6 +261,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
                 GL.UniformMatrix4(6, false, ref State.PrimaryMatrix);
                 GL.Uniform2(5, new Vector2(Engine.ZNear, Engine.ZFar()));
                 GL.Uniform2(7, new Vector2(60f, Engine.ZFarOut())); // TODO: View3D-level Vars!
+                GL.Uniform3(8, State.CameraRelativePosition);
                 GL.ActiveTexture(TextureUnit.Texture5);
                 GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture);
                 GL.ActiveTexture(TextureUnit.Texture4);

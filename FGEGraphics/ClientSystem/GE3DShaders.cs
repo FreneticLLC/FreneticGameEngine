@@ -63,7 +63,7 @@ public class GE3DShaders
             Deferred.LLFinalPass = Shaders.GetShader("fpass" + def);
         }
         Deferred.HDRPass = Shaders.GetShader("hdrpass" + def);
-        Forward.PostProcess = Shaders.GetShader("postfast" + def + ",ADVANCED_REFLECTION");
+        Forward.PostProcess = Shaders.GetShader("postfast" + def);
         Deferred.ShadowPass_Particles = Shaders.GetShader("shadow" + def + ",MCM_GEOM_ACTIVE,MCM_PRETTY,MCM_SHADOWS,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH,MCM_IS_A_SHADOW?particles");
         Forward.Particles = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP,MCM_FADE_DEPTH" + forw_extra + "?particles");
         Forward.ParticlesNoFade = Shaders.GetShader("forward" + def + ",MCM_GEOM_ACTIVE,MCM_TRANSP,MCM_BRIGHT,MCM_NO_ALPHA_CAP" + forw_extra + "?particles");
