@@ -22,7 +22,6 @@ layout (location = 1) uniform mat4 proj_matrix = mat4(1.0);
 layout (location = 5) uniform float should_sqrt = 0.0;
 #endif
 layout (location = 6) uniform float time = 0.0;
-layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
 // ...
 layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 
@@ -107,7 +106,7 @@ void main()
 	float tid = f[0].texcoord.y;
 	vec3 right = cross(up, pos_norm);
 	fi.color = f[0].color;
-	fi.tbn = transpose(mat3(vec3(0.0), vec3(0.0), sunlightDir));
+	fi.tbn = transpose(mat3(vec3(0.0), vec3(0.0), vec3(0.0, 0.0, 1.0)));
 #if MCM_FADE_DEPTH
 	fi.size = 1.0 / scale;
 #endif

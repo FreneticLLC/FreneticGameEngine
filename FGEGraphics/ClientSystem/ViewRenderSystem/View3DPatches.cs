@@ -20,8 +20,11 @@ namespace FGEGraphics.ClientSystem.ViewRenderSystem;
 /// <summary>Path methods to be called by <see cref="View3DForwardRenderer"/>.</summary>
 public class View3DPatchesForward
 {
+    /// <summary>Executable view patch: pre-render shader setup, ran for every shader one by one.</summary>
+    public Action PerShaderPatch;
+
     /// <summary>Executable view patch: pre-solid-render shader setup.</summary>
-    public Action<float[], float[], float, Vector3, int> PreSolidPatch;
+    public Action<float[], float[], float, int> PreSolidPatch;
 
     /// <summary>Executable view patch: solid VR shader setup.</summary>
     public Action VRSolidPatch;

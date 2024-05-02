@@ -151,149 +151,59 @@ public class View3DForwardRenderer : View3DCoreDataSet
             GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
             GL.ActiveTexture(TextureUnit.Texture0);
         }
+        float fogDist = 1.0f / Engine.FogMaxDist();
+        fogDist *= fogDist;
+        void basicUniforms(bool lights)
+        {
+            GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
+            GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
+            Engine.Rendering.SetColor(Color4.White, View);
+            GL.Uniform4(4, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
+            GL.Uniform1(6, (float)Engine.GlobalTickTime);
+            GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+            GL.Uniform1(13, fogDist);
+            GL.Uniform3(14, State.CameraRelativePosition);
+            if (lights)
+            {
+                GL.Uniform1(15, (float)c);
+                GL.UniformMatrix4(25, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
+                GL.UniformMatrix4(25 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
+            }
+            GL.Uniform3(18, -Engine.SunAdjustDirection.ToOpenTK());
+            GL.Uniform3(19, Engine.SunAdjustBackupLight.Xyz);
+            Patches.PerShaderPatch?.Invoke();
+        }
         GraphicsUtil.CheckError("Render/Fast - Uniforms 1");
         State.RenderingShadows = false;
         State.RenderLights = Engine.Forward_Lights;
         GL.ActiveTexture(TextureUnit.Texture0);
         State.FBOid = FBOID.FORWARD_SOLID;
-        Vector3 maxLit = Engine.SunAdjustBackupLight.Xyz;
         Shaders.Forward.Particles.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 1.3");
-        GL.Uniform4(4, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 1.4");
-        //GL.Uniform1(6, (float)Engine.GlobalTickTimeLocal);
-        //CheckError("Render/Fast - Uniforms 1.43");
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 1.46");
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, new Vector2(Engine.ZNear, Engine.ZFar()));
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 1.5");
-        /*if (Engine.CVars.r_forward_lights.ValueB)
-        {
-            GL.Uniform1(15, (float)c);
-            CheckError("Render/Fast - Uniforms 1.7");
-            GL.UniformMatrix4(20, LIGHTS_MAX, false, shadowmat_dat);
-            CheckError("Render/Fast - Uniforms 1.8");
-            GL.UniformMatrix4(20 + LIGHTS_MAX, LIGHTS_MAX, false, light_dat);
-            CheckError("Render/Fast - Uniforms 2");
-        }*/
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardParticles");
+        Shaders.Forward.ParticlesNoFade.Bind();
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardParticlesNoFade");
         Shaders.Forward.Decals.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 2.6");
-        if (Engine.Forward_Lights)
-        {
-            GL.Uniform1(15, (float)c);
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 2.7");
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 2.8");
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 2.9");
-        }
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 3");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 3.2");
-        GL.Uniform4(4, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
-        //GL.Uniform1(6, (float)Engine.GlobalTickTimeLocal);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 3.3");
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GL.Uniform3(14, State.CameraRelativePosition);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 3.5");
-        float fogDist = 1.0f / Engine.FogMaxDist();
-        fogDist *= fogDist;
-        Vector2 zfar_rel = new(Engine.ZNear, Engine.ZFar());
-        GL.Uniform1(13, fogDist);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 3.9");
-        //GL.Uniform2(14, zfar_rel);
-        Engine.Rendering.SetColor(Color4.White, View);
+        basicUniforms(Engine.Forward_Lights);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardDecals");
         Shaders.Forward.AllTransparencies_Sky.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.1");
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.2");
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.3");
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.4");
-        GL.Uniform1(13, fogDist);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.5");
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, zfar_rel);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.6");
-        Engine.Rendering.SetColor(Color4.White, View);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.7");
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardAllTransparenciesSky");
         Shaders.Forward.AllTransparencies_NoFog.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4.8");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GL.Uniform1(13, fogDist);
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, zfar_rel);
-        Engine.Rendering.SetColor(Color4.White, View);
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardAllTransparenciesNoFog");
         Shaders.Forward.AllTransparencies_Objects.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 4");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GL.Uniform1(13, fogDist);
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, zfar_rel);
-        Engine.Rendering.SetColor(Color4.White, View);
-        Patches.PreSolidPatch?.Invoke(shadowmat_dat, light_dat, fogDist, maxLit, c);
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardAllTransparenciesObjects");
+        Patches.PreSolidPatch?.Invoke(shadowmat_dat, light_dat, fogDist, c);
         Shaders.Forward.BasicSolid_NoBones.Bind();
-        if (Engine.Forward_Lights)
-        {
-            GL.Uniform1(15, (float)c);
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
-        }
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.5");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.51");
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.52");
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.53");
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.54");
-        GL.Uniform1(13, fogDist);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.55");
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, zfar_rel);
-        Engine.Rendering.SetColor(Color4.White, View);
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.56");
-        if (!Engine.Forward_Lights)
-        {
-            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
-            GraphicsUtil.CheckError("Render/Fast - Uniforms 5.57");
-            GL.Uniform3(11, maxLit);
-        }
+        basicUniforms(Engine.Forward_Lights);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - Forward BasicSolidNoBones");
         GraphicsUtil.CheckError("Render/Fast - Uniforms 5.58");
         Shaders.Forward.BasicSolid.Bind();
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.59");
-        if (Engine.Forward_Lights)
-        {
-            GL.Uniform1(15, (float)c);
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
-        }
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 6");
-        GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
-        GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
-        GL.Uniform1(6, (float)Engine.GlobalTickTime);
-        GL.Uniform4(12, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
-        GL.Uniform1(13, fogDist);
-        GL.Uniform3(14, State.CameraRelativePosition);
-        //GL.Uniform2(14, zfar_rel);
-        Engine.Rendering.SetColor(Color4.White, View);
-        if (!Engine.Forward_Lights)
-        {
-            GL.Uniform3(10, -Engine.SunAdjustDirection.ToOpenTK());
-            GL.Uniform3(11, maxLit);
-        }
+        basicUniforms(Engine.Forward_Lights);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - Forward BasicSolid");
         GraphicsUtil.CheckError("Render/Fast - Uniforms");
         if (Engine.Render3DView || Engine.Client.VR != null)
         {
@@ -351,7 +261,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
                 GL.UniformMatrix4(1, false, ref View3DInternalData.SimpleOrthoMatrix);
                 GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
                 GL.UniformMatrix4(6, false, ref State.PrimaryMatrix);
-                GL.Uniform2(5, zfar_rel);
+                GL.Uniform2(5, new Vector2(Engine.ZNear, Engine.ZFar()));
                 GL.Uniform2(7, new Vector2(60f, Engine.ZFarOut())); // TODO: View3D-level Vars!
                 GL.ActiveTexture(TextureUnit.Texture5);
                 GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture);
@@ -430,8 +340,8 @@ public class View3DForwardRenderer : View3DCoreDataSet
         if (Engine.Forward_Lights)
         {
             GL.Uniform1(15, (float)c);
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
+            GL.UniformMatrix4(25, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
+            GL.UniformMatrix4(25 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
         }
         //GL.Uniform2(14, zfar_rel);
         Engine.Rendering.SetColor(Color4.White, View);
@@ -445,8 +355,8 @@ public class View3DForwardRenderer : View3DCoreDataSet
         if (Engine.Forward_Lights)
         {
             GL.Uniform1(15, (float)c);
-            GL.UniformMatrix4(20, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
-            GL.UniformMatrix4(20 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
+            GL.UniformMatrix4(25, View3DInternalData.LIGHTS_MAX, false, shadowmat_dat);
+            GL.UniformMatrix4(25 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
         }
         //GL.Uniform2(14, zfar_rel);
         Engine.Rendering.SetColor(Color4.White, View);
