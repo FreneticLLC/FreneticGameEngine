@@ -200,11 +200,9 @@ public class View3DForwardRenderer : View3DCoreDataSet
         Shaders.Forward.BasicSolid_NoBones.Bind();
         basicUniforms(Engine.Forward_Lights);
         GraphicsUtil.CheckError("Render/Fast - Uniforms - Forward BasicSolidNoBones");
-        GraphicsUtil.CheckError("Render/Fast - Uniforms 5.58");
         Shaders.Forward.BasicSolid.Bind();
         basicUniforms(Engine.Forward_Lights);
         GraphicsUtil.CheckError("Render/Fast - Uniforms - Forward BasicSolid");
-        GraphicsUtil.CheckError("Render/Fast - Uniforms");
         if (Engine.Render3DView || Engine.Client.VR != null)
         {
             View.Viewport(Config.Width / 2, 0, Config.Width / 2, Config.Height);

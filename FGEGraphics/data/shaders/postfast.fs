@@ -8,6 +8,8 @@
 
 #version 430 core
 
+#define ADVANCED_REFLECTION 0
+
 layout (binding = 0) uniform sampler2D rht;
 layout (binding = 1) uniform sampler2D colortex;
 layout (binding = 2) uniform sampler2D normaltex;
