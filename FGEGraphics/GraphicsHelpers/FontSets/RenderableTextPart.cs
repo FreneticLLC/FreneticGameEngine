@@ -143,6 +143,14 @@ public class RenderableTextPart
     /// <summary>Returns a perfect copy of the part.</summary>
     public RenderableTextPart Clone() => MemberwiseClone() as RenderableTextPart;
 
+    public RenderableTextPart CloneWithText(string text)
+    {
+        RenderableTextPart cloned = Clone();
+        cloned.Text = text;
+        cloned.Width = Font.MeasureString(text);
+        return cloned;
+    }
+
     /// <summary>Implements <see cref="Object.ToString"/> to return the raw text.</summary>
     public override string ToString() => Text;
 }

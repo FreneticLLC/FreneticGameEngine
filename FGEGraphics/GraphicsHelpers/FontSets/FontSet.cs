@@ -729,43 +729,57 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return SplitAppropriately(ParseFancyText(text), maxX);
     }
 
-    public class RenderableTextWord(List<RenderableTextPart> parts, float width)
+    public class EditableTextLine(List<RenderableTextPart> parts, float width, bool whitespace)
     {
-        public static RenderableTextWord Empty => new([], 0);
+        public static EditableTextLine Empty => new([], 0, false);
+        public static EditableTextLine Whitespace => new([], 0, true);
         public List<RenderableTextPart> Parts = parts;
         public float Width = width;
+        public bool IsWhitespace = whitespace;
+        public RenderableTextLine ToRenderable() => new() { Parts = [.. Parts], Width = (int)Width };
     }
 
-    public static List<RenderableTextWord> SplitLineIntoWords(RenderableTextLine line)
+    public static List<EditableTextLine> SplitLineIntoWords(RenderableTextLine line)
     {
-        List<RenderableTextWord> words = [RenderableTextWord.Empty];
+        List<EditableTextLine> words = [EditableTextLine.Empty];
         foreach (RenderableTextPart part in line.Parts)
         {
             string[] textWords = part.Text.Split(' ');
             for (int i = 0; i < textWords.Length; i++)
             {
-                RenderableTextWord lastWord = words.Last();
-                RenderableTextPart wordPart = part.Clone();
-                wordPart.Text = textWords[i];
-                wordPart.Width = wordPart.Font.MeasureString(wordPart.Text);
-                lastWord.Parts.Add(wordPart);
-                lastWord.Width += wordPart.Width;
-                if (wordPart.Text == string.Empty || i < textWords.Length - 1)
+                EditableTextLine lastWord = words.Last();
+                if (textWords[i].Length != 0)
                 {
-                    words.Add(RenderableTextWord.Empty);
+                    RenderableTextPart wordPart = part.CloneWithText(textWords[i]);
+                    lastWord.Parts.Add(wordPart);
+                    lastWord.Width += wordPart.Width;
+                }
+                if (i < textWords.Length - 1)
+                {
+                    RenderableTextPart space = part.CloneWithText(" ");
+                    EditableTextLine spaceWord = new([space], space.Width, true);
+                    if (lastWord.Parts.Count == 0)
+                    {
+                        words[^1] = spaceWord;
+                    }
+                    else
+                    {
+                        words.Add(spaceWord);
+                    }
+                    words.Add(EditableTextLine.Empty);
                 }
             }
         }
         return words;
     }
 
-    public static List<RenderableTextWord> SplitWordAppropriately(RenderableTextWord word, float maxWidth)
+    public static List<EditableTextLine> SplitWordAppropriately(EditableTextLine word, float maxWidth)
     {
-        List<RenderableTextWord> result = [RenderableTextWord.Empty];
+        List<EditableTextLine> result = [EditableTextLine.Empty];
         List<RenderableTextPart> parts = [.. word.Parts];
         for (int i = 0; i < parts.Count; i++)
         {
-            RenderableTextWord lastWord = result.Last();
+            EditableTextLine lastWord = result.Last();
             RenderableTextPart part = parts[i];
             if (lastWord.Width + part.Width <= maxWidth)
             {
@@ -779,7 +793,6 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                 float width = part.Font.MeasureString(part.Text[..j]);
                 if (lastWord.Width + width > maxWidth)
                 {
-                    // TODO: Range operator support on RenderableTextPart
                     RenderableTextPart firstPart = part.Clone();
                     firstPart.Text = part.Text[..(j - 1)];
                     firstPart.Width = lastWidth;
@@ -788,7 +801,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     secondPart.Width = part.Width - lastWidth;
                     lastWord.Parts.Add(firstPart);
                     lastWord.Width += lastWidth;
-                    result.Add(RenderableTextWord.Empty);
+                    result.Add(EditableTextLine.Empty);
                     parts.Insert(i + 1, secondPart);
                     break;
                 }
@@ -796,6 +809,64 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             }
         }
         return result;
+    }
+
+    public static RenderableText SplitLineAppropriately(RenderableTextLine line, float maxWidth)
+    {
+        if (line.Width < maxWidth)
+        {
+            return new(line);
+        }
+        float totalWidth = 0;
+        EditableTextLine currentLine = EditableTextLine.Whitespace;
+        List<RenderableTextLine> lines = [];
+        void BuildLine()
+        {
+            if (currentLine.Parts.Count > 0 && !currentLine.IsWhitespace)
+            {
+                lines.Add(currentLine.ToRenderable());
+            }
+            currentLine = EditableTextLine.Whitespace;
+        }
+        List<EditableTextLine> words = SplitLineIntoWords(line);
+        for (int i = 0; i < words.Count; i++)
+        {
+            EditableTextLine word = words[i];
+            bool needsSplit = word.Width > maxWidth;
+            bool needsNewLine = currentLine.Width + word.Width > maxWidth;
+            if (needsSplit || needsNewLine)
+            {
+                BuildLine();
+                if (word.IsWhitespace)
+                {
+                    continue;
+                }
+            }
+            if (needsSplit)
+            {
+                List<EditableTextLine> splitWords = SplitWordAppropriately(word, maxWidth);
+                foreach (EditableTextLine splitWord in splitWords[..^1])
+                {
+                    lines.Add(splitWord.ToRenderable());
+                }
+                currentLine = new(splitWords[^1].Parts, splitWords[^1].Width, false);
+            }
+            else
+            {
+                currentLine.Width += word.Width;
+                currentLine.Parts.AddRange(word.Parts);
+                if (currentLine.IsWhitespace && !word.IsWhitespace)
+                {
+                    currentLine.IsWhitespace = false;
+                }
+                if (currentLine.Width > totalWidth)
+                {
+                    totalWidth = currentLine.Width;
+                }
+            }
+        }
+        BuildLine();
+        return new() { Lines = [.. lines], Width = (int)totalWidth };
     }
 
     /// <summary>Splits some text at a maximum render width.</summary>
