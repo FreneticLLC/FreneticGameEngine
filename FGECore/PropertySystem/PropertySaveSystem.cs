@@ -49,19 +49,19 @@ public class PropertySaveSystem
             // Core Helpers
             TypeSavers.Add(typeof(bool), new PropertySaverLoader()
             {
-                Saver = (o) => new byte[] { (byte)(((bool)o) ? 1 : 0) },
+                Saver = (o) => [(byte)(((bool)o) ? 1 : 0)],
                 Loader = (b) => b[0] != 0,
                 SaveString = "C/bool"
             });
             TypeSavers.Add(typeof(byte), new PropertySaverLoader()
             {
-                Saver = (o) => new byte[] { (byte)o },
+                Saver = (o) => [(byte)o],
                 Loader = (b) => b[0],
                 SaveString = "C/byte"
             });
             TypeSavers.Add(typeof(sbyte), new PropertySaverLoader()
             {
-                Saver = (o) => new byte[] { unchecked((byte)((sbyte)o)) },
+                Saver = (o) => [unchecked((byte)((sbyte)o))],
                 Loader = (b) => unchecked((sbyte)(b[0])),
                 SaveString = "C/sbyte"
             });
