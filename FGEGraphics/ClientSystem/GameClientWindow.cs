@@ -392,6 +392,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.BindVertexArray(0);
             GL.UseProgram(0);
+            ShaderEngine.BoundNow = null;
             // Semi-final step: Tick logic!
             GraphicsUtil.CheckError("GameClient - PreTick");
             // Main instance tick.

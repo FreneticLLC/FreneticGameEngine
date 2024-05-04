@@ -43,6 +43,9 @@ public class ShaderEngine
     /// <summary>The backing file engine.</summary>
     public FileEngine Files;
 
+    /// <summary>What shader is currently bound.</summary>
+    public static Shader BoundNow = null;
+
     /// <summary>Starts or restarts the shader system.</summary>
     /// <param name="files">The backing file engine.</param>
     public void InitShaderSystem(FileEngine files)

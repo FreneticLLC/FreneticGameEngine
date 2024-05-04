@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.LightingSystem;
 using OpenTK;
 using OpenTK.Graphics;
@@ -869,6 +870,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         }
         GL.UseProgram(0);
+        ShaderEngine.BoundNow = null;
         GL.BindTexture(TextureTarget.Texture2D, 0);
         GL.DepthMask(true);
         GL.Enable(EnableCap.DepthTest);
