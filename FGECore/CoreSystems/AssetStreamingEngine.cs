@@ -34,13 +34,13 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
 
     /// <summary>
     /// All currently waiting asset streaming goals.
-    /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
+    /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
     /// </summary>
     public ConcurrentQueue<StreamGoal> Goals = new();
 
     /// <summary>
     /// Reset event for when the files thread has more goals to process.
-    /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
+    /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
     /// </summary>
     public AutoResetEvent GoalWaitingReset = new(false);
 
