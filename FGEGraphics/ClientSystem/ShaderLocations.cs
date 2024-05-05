@@ -6,6 +6,9 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.MathHelpers;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -224,5 +227,68 @@ public static class ShaderLocations
             /// <summary>The amount of lights used.</summary>
             public const int LIGHT_COUNT = 3;
         }
+    }
+
+    /// <summary>Abstract base class that represents some type of shader uniform data.</summary>
+    public abstract class ShaderUniform(int location)
+    {
+        /// <summary>The location index of the uniform in the shader.</summary>
+        public int Location = location;
+    }
+
+    /// <summary>Represents a shader uniform with a simple float data type.</summary>
+    public class ShaderUniformFloat(int location) : ShaderUniform(location)
+    {
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(float value) => GL.Uniform1(Location, value);
+    }
+
+    /// <summary>Represents a shader uniform with a vec2 float data type.</summary>
+    public class ShaderUniformVec2(int location) : ShaderUniform(location)
+    {
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(Vector2 value) => GL.Uniform2(Location, value);
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(float x, float y) => GL.Uniform2(Location, x, y);
+    }
+
+    /// <summary>Represents a shader uniform with a vec3 float data type.</summary>
+    public class ShaderUniformVec3(int location) : ShaderUniform(location)
+    {
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(Vector3 value) => GL.Uniform3(Location, value);
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(float x, float y, float z) => GL.Uniform3(Location, x, y, z);
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void SetNumerics(System.Numerics.Vector3 value) => GL.Uniform3(Location, value.ToOpenTK());
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void SetLocation(Location value) => GL.Uniform3(Location, value.ToOpenTK());
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void SetColor(Color3F value) => GL.Uniform3(Location, value.ToOpenTK());
+    }
+
+    /// <summary>Represents a shader uniform with a vec4 float data type.</summary>
+    public class ShaderUniformVec4(int location) : ShaderUniform(location)
+    {
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(Vector4 value) => GL.Uniform4(Location, value);
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(float x, float y, float z, float w) => GL.Uniform4(Location, x, y, z, w);
+
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void SetColor(Color4F value) => GL.Uniform4(Location, value.ToOpenTK());
+    }
+
+    /// <summary>Represents a shader uniform with a mat4 matrix float data type.</summary>
+    public class ShaderUniformMat4(int location) : ShaderUniform(location)
+    {
+        /// <summary>Sets the value of the uniform in the shader.</summary>
+        public void Set(Matrix4 value) => GL.UniformMatrix4(Location, false, ref value);
     }
 }
