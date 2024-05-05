@@ -19,7 +19,6 @@ using FGECore;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
-using FGECore.MathHelpers;
 using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers.Textures;
@@ -74,6 +73,9 @@ public class TextureEngine : IDisposable
 
     /// <summary>The relevant scheduler.</summary>
     public Scheduler Schedule;
+
+    /// <summary>File extensions for textures that will be accepted, aside from default "png".</summary>
+    public string[] AlternateImageFileExtensions = ["jpg"];
 
     /// <summary>Starts or restarts the texture system.</summary>
     /// <param name="files">The relevant file helper.</param>
@@ -208,7 +210,7 @@ public class TextureEngine : IDisposable
             Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
             texture.LoadedProperly = false;
         }
-        AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
+        AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions);
         return texture;
     }
 
@@ -295,8 +297,20 @@ public class TextureEngine : IDisposable
             filename = FileEngine.CleanFileName(filename);
             if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureFile))
             {
-                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
-                return null;
+                bool found = false;
+                foreach (string ext in AlternateImageFileExtensions)
+                {
+                    if (Files.TryReadFileData($"textures/{filename}.{ext}", out textureFile))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                    return null;
+                }
             }
             return BitmapForBytes(textureFile, twidth);
         }
@@ -350,13 +364,7 @@ public class TextureEngine : IDisposable
         try
         {
             // TODO: store!
-            filename = FileEngine.CleanFileName(filename);
-            if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureData))
-            {
-                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
-                return;
-            }
-            using Bitmap bmp = BitmapForBytes(textureData, twidth);
+            using Bitmap bmp = LoadBitmapForTexture(filename, twidth);
             LockBitmapToTexture(bmp, depth);
         }
         catch (Exception ex)
