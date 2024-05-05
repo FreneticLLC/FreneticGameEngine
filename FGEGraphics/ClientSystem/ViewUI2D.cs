@@ -131,7 +131,7 @@ public class ViewUI2D
             Client.Shaders.ColorMult2DShader.Bind();
             Renderer2D.SetColor(Color4F.White);
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
-            GL.Uniform2(ShaderLocations.Common2D.ADDER, ref UIContext.Adder);
+            ShaderLocations.Common2D.ADDER.Set(UIContext.Adder);
             GL.Disable(EnableCap.DepthTest);
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;

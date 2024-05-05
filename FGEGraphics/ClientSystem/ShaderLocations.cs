@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.ClientSystem;
 
+// TODO: Replace all of this class's `const int` with `ShaderUniform(X)` instances.
+// TODO: Also, actually add all relevant shader locs into here.
+
 /// <summary>Represents shader target locations.</summary>
 public static class ShaderLocations
 {
@@ -30,10 +33,10 @@ public static class ShaderLocations
         public const int WORLD = 2;
 
         /// <summary>Camera position.</summary>
-        public const int CAMERA_POSITION = 14;
+        public static ShaderUniformVec3 CAMERA_POSITION = new(14);
 
         /// <summary>The screen size.</summary>
-        public const int SCREEN_SIZE = 4;
+        public static ShaderUniformVec2 SCREEN_SIZE = new(4);
     }
 
     /// <summary>Locations shared by most 2D shaders.</summary>
@@ -43,13 +46,13 @@ public static class ShaderLocations
         public const int SCALER = 1;
 
         /// <summary>The adder value.</summary>
-        public const int ADDER = 2;
+        public static ShaderUniformVec2 ADDER = new(2);
 
         /// <summary>The color multiplier to add.</summary>
-        public const int COLOR = 3;
+        public static ShaderUniformVec4 COLOR = new(3);
 
         /// <summary>The rotation effect to apply.</summary>
-        public const int ROTATION = 4;
+        public static ShaderUniformVec3 ROTATION = new(4);
     }
 
     /// <summary>Locations used in Forward Rendering mode.</summary>

@@ -15,8 +15,6 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -134,21 +132,21 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     /// <param name="c">The color.</param>
     public static void SetColor(Color4F c)
     {
-        SetColor(new Vector4(c.R, c.G, c.B, c.A));
+        ShaderLocations.Common2D.COLOR.SetColor(c);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="col">The color.</param>
     public static void SetColor(Vector4 col)
     {
-        GL.Uniform4(ShaderLocations.Common2D.COLOR, ref col);
+        ShaderLocations.Common2D.COLOR.Set(col);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="c">The color.</param>
     public static void SetColor(Color4 c)
     {
-        SetColor(new Vector4(c.R, c.G, c.B, c.A));
+        ShaderLocations.Common2D.COLOR.Set(c.R, c.G, c.B, c.A);
     }
 
     /// <summary>Renders a 2D rectangle.</summary>
@@ -168,10 +166,10 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
         Vector2 tscaler = rc.Scaler * scaler;
         GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));
         Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
-        GL.Uniform2(ShaderLocations.Common2D.ADDER, tadder);
+        ShaderLocations.Common2D.ADDER.Set(tadder);
         if (rot is not null)
         {
-            GL.Uniform3(ShaderLocations.Common2D.ROTATION, rot.Value);
+            ShaderLocations.Common2D.ROTATION.Set(rot.Value);
         }
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Setup");
         if (hollow || (rc.CalcShadows && rc.Engine.OneDLights))
@@ -186,7 +184,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
         }
         if (rot is not null)
         {
-            GL.Uniform3(ShaderLocations.Common2D.ROTATION, Vector3.Zero);
+            ShaderLocations.Common2D.ROTATION.Set(Vector3.Zero);
         }
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Post");
     }
