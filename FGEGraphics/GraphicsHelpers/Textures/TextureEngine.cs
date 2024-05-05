@@ -13,6 +13,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore;
@@ -266,8 +267,9 @@ public class TextureEngine : IDisposable
     /// <summary>Gets the a bitmap object for a texture by name.</summary>
     /// <param name="texturename">The name of the texture.</param>
     /// <param name="twidth">The texture width, if any.</param>
+    /// <param name="docache">If true, use caching. If false, always fetch a fresh copy.</param>
     /// <returns>A valid bitmap object, or null.</returns>
-    public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth)
+    public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth, bool docache = false)
     {
         texturename = FileEngine.CleanFileName(texturename);
         if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture) && foundTexture.LoadedProperly)
@@ -277,7 +279,7 @@ public class TextureEngine : IDisposable
                 return foundTexture.SaveToBMP();
             }
         }
-        return LoadBitmapForTexture(texturename, twidth);
+        return LoadBitmapForTexture(texturename, twidth, docache);
     }
 
     /// <summary>Fired when a texture is loaded.</summary>
@@ -286,33 +288,91 @@ public class TextureEngine : IDisposable
     /// <summary>Whether textures should use linear mode usually.</summary>
     public bool DefaultLinear = true;
 
+    /// <summary>Short-lived cached of texture image raw data, to allow rapid multi calls to not run the entire file loading engine.</summary>
+    public Dictionary<string, byte[]> TempBitmapBytesCache = [];
+
+    /// <summary>Short-lived cached of texture bitmaps, to allow rapid multi calls to not run the entire file loading engine.</summary>
+    public Dictionary<(string, int), Bitmap> TempBitmapCache = [];
+
+    /// <summary>If true, the temp-cache will be cleared soon.</summary>
+    public bool CacheHasClearScheduled = false;
+
+    /// <summary>Schedules the temp-cache to be cleared soon, if needed.</summary>
+    public void ScheduleClearCache()
+    {
+        if (CacheHasClearScheduled)
+        {
+            return;
+        }
+        CacheHasClearScheduled = true;
+        Schedule.ScheduleSyncTask(() =>
+        {
+            CacheHasClearScheduled = false;
+            if (TempBitmapCache.Count != 0)
+            {
+                Bitmap[] bmps = [.. TempBitmapCache.Values];
+                TempBitmapCache.Clear();
+                Schedule.StartAsyncTask(() =>
+                {
+                    foreach (Bitmap bmp in bmps)
+                    {
+                        bmp.Dispose();
+                    }
+                });
+            }
+            TempBitmapBytesCache.Clear();
+        }, 0.1);
+    }
+
     /// <summary>Loads a texture's bitmap from file.</summary>
     /// <param name="filename">The name of the file to use.</param>
     /// <param name="twidth">The texture width, if any.</param>
+    /// <param name="docache">If true, use caching. If false, always create a fresh copy.</param>
     /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
-    public Bitmap LoadBitmapForTexture(string filename, int twidth)
+    public Bitmap LoadBitmapForTexture(string filename, int twidth, bool docache = false)
     {
+        filename = FileEngine.CleanFileName(filename);
+        if (docache && TempBitmapCache.TryGetValue((filename, twidth), out Bitmap cachedBitmap))
+        {
+            return cachedBitmap;
+        }
         try
         {
-            filename = FileEngine.CleanFileName(filename);
-            if (!Files.TryReadFileData($"textures/{filename}.png", out byte[] textureFile))
+            byte[] getBytes(string filename)
             {
-                bool found = false;
+                if (TempBitmapBytesCache.TryGetValue(filename, out byte[] textureFile))
+                {
+                    return textureFile;
+                }
+                if (Files.TryReadFileData($"textures/{filename}.png", out textureFile))
+                {
+                    TempBitmapBytesCache[filename] = textureFile;
+                    ScheduleClearCache();
+                    return textureFile;
+                }
                 foreach (string ext in AlternateImageFileExtensions)
                 {
                     if (Files.TryReadFileData($"textures/{filename}.{ext}", out textureFile))
                     {
-                        found = true;
-                        break;
+                        TempBitmapBytesCache[filename] = textureFile;
+                        return textureFile;
                     }
                 }
-                if (!found)
-                {
-                    Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
-                    return null;
-                }
+                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
+                return null;
             }
-            return BitmapForBytes(textureFile, twidth);
+            byte[] textureFile = getBytes(filename);
+            if (textureFile is null)
+            {
+                return null;
+            }
+            Bitmap result = BitmapForBytes(textureFile, twidth);
+            if (docache)
+            {
+                TempBitmapCache[(filename, twidth)] = result;
+                ScheduleClearCache();
+            }
+            return result;
         }
         catch (Exception ex)
         {
@@ -335,8 +395,8 @@ public class TextureEngine : IDisposable
             Engine = this,
             Name = filename
         };
-        using Bitmap bmp = LoadBitmapForTexture(filename, twidth);
-        if (bmp == null)
+        Bitmap bmp = LoadBitmapForTexture(filename, twidth);
+        if (bmp is null)
         {
             return null;
         }
@@ -363,8 +423,7 @@ public class TextureEngine : IDisposable
     {
         try
         {
-            // TODO: store!
-            using Bitmap bmp = LoadBitmapForTexture(filename, twidth);
+            Bitmap bmp = LoadBitmapForTexture(filename, twidth);
             LockBitmapToTexture(bmp, depth);
         }
         catch (Exception ex)
@@ -402,15 +461,28 @@ public class TextureEngine : IDisposable
         return texture;
     }
 
+    /// <summary>Gets the raw bytes of a bitmap as a binary array.</summary>
+    public static byte[] BitmapBytes(Bitmap bmp)
+    {
+        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        byte[] bytes = new byte[bmp_data.Width * bmp_data.Height * 4];
+        Marshal.Copy(bmp_data.Scan0, bytes, 0, bytes.Length);
+        bmp.UnlockBits(bmp_data);
+        return bytes;
+    }
+
     /// <summary>Locks a bitmap file's data to a GL texture.</summary>
     /// <param name="bmp">The bitmap to use.</param>
     /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
     public static void LockBitmapToTexture(Bitmap bmp, bool linear)
     {
-        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
-        GL.Flush();
-        bmp.UnlockBits(bmp_data);
+#if DEBUG
+        if (bmp.Width <= 0 || bmp.Height <= 0 || bmp.Width > 1024 * 256 || bmp.Height > 1024 * 256)
+        {
+            throw new InvalidOperationException($"Bitmap contains invalid dimensions: {bmp.Width}x{bmp.Height}");
+        }
+#endif
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp.Width, bmp.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, BitmapBytes(bmp));
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, linear ? (int)TextureMinFilter.Linear : (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, linear ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -423,9 +495,12 @@ public class TextureEngine : IDisposable
     /// <param name="depth">The depth in a 3D texture.</param>
     public static void LockBitmapToTexture(Bitmap bmp, int depth)
     {
-        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
-        GL.Flush();
-        bmp.UnlockBits(bmp_data);
+#if DEBUG
+        if (bmp.Width <= 0 || bmp.Height <= 0 || bmp.Width > 1024 * 256 || bmp.Height > 1024 * 256)
+        {
+            throw new InvalidOperationException($"Bitmap contains invalid dimensions: {bmp.Width}x{bmp.Height}");
+        }
+#endif
+        GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, BitmapBytes(bmp));
     }
 }

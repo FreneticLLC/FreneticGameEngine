@@ -160,7 +160,6 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
                     string noExt = goal.FileName.BeforeLast('.');
                     foreach (string ext in goal.AltExtensions)
                     {
-                        Logs.Debug($"Try alt {noExt}.{ext}");
                         if (Files.TryReadFileData($"{noExt}.{ext}", out data))
                         {
                             found = true;
