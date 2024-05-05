@@ -99,7 +99,7 @@ public class View3DGenerationHelper : View3DCoreDataSet
             GenBuffer(1, false);
             GenBuffer(2, true);
             GL.ActiveTexture(TextureUnit.Texture7);
-            int cspb = GL.GenBuffer();
+            uint cspb = GraphicsUtil.GenBuffer("View3DGenerationHelper_cspb");
             GL.BindBuffer(BufferTarget.ArrayBuffer, cspb);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)sizeof(uint), IntPtr.Zero, BufferUsageHint.StaticDraw);
             int csp = GL.GenTexture();
@@ -129,13 +129,13 @@ public class View3DGenerationHelper : View3DCoreDataSet
     }
 
     /// <summary>Internal call to generate a buffer, for the Linked-List Transparency trick.</summary>
-    /// <param name="c">The ID.</param>
+    /// <param name="c">The texture target ID.</param>
     /// <param name="flip">Whether it needs to be flipped.</param>
     /// <returns>The buffer.</returns>
-    public int GenBuffer(int c, bool flip)
+    public uint GenBuffer(int c, bool flip)
     {
         GL.ActiveTexture(TextureUnit.Texture4 + c);
-        int temp = GL.GenBuffer();
+        uint temp = GraphicsUtil.GenBuffer("View3DGenerationHelper_GenBuffer");
         GL.BindBuffer(BufferTarget.TextureBuffer, temp);
         GL.BufferData(BufferTarget.TextureBuffer, (IntPtr)(flip ? View3DInternalData.LL_AB_SIZE / View3DInternalData.LL_P_SIZE * sizeof(uint) : View3DInternalData.LL_AB_SIZE * sizeof(float) * 4), IntPtr.Zero, BufferUsageHint.StaticDraw);
         int ttex = GL.GenTexture();

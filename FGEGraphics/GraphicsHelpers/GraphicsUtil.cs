@@ -14,13 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore;
 using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers;
 
@@ -54,4 +50,92 @@ public static class GraphicsUtil
         Logs.Error($"{errorMessage}");
     }
 
+#if DEBUG
+    /// <summary>Map of all current active/allocated buffers (VBOs) to their source strings.</summary>
+    public static Dictionary<uint, string> ActiveBuffers = [];
+
+    /// <summary>Map of all current active/allocated vertex arrays (VAOs) to their source strings.</summary>
+    public static Dictionary<uint, string> ActiveVertexArrays = [];
+#endif
+
+    /// <summary>Generates a new buffer. Equivalent to <see cref="GL.GenBuffers(int, out uint)"/> with a count of 1.</summary>
+    /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
+    public static uint GenBuffer(string source)
+    {
+        GL.GenBuffers(1, out uint buffer);
+#if DEBUG
+        ActiveBuffers[buffer] = source;
+        CheckError($"GraphicsUtil GenBuffer", source);
+#endif
+        return buffer;
+    }
+
+    /// <summary>Generates new buffers. Equivalent to <see cref="GL.GenBuffers(int, uint[])"/>.</summary>
+    /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
+    /// <param name="count">How many to generate.</param>
+    /// <param name="arr">Where to store them.</param>
+    public static void GenBuffers(string source, int count, uint[] arr)
+    {
+        GL.GenBuffers(count, arr);
+#if DEBUG
+        for (int i = 0; i < count; i++)
+        {
+            ActiveBuffers[arr[i]] = source;
+        }
+        CheckError($"GraphicsUtil GenBuffers", source);
+#endif
+    }
+
+    /// <summary>Deletes a buffer. Equivalent to <see cref="GL.DeleteBuffer(uint)"/>.</summary>
+    public static void DeleteBuffer(uint buffer)
+    {
+        GL.DeleteBuffer(buffer);
+#if DEBUG
+        ActiveBuffers.Remove(buffer);
+        CheckError($"GraphicsUtil DeleteBuffer", buffer);
+#endif
+    }
+
+    /// <summary>Represents a buffer in a trackable, single-dispoable way.</summary>
+    /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
+    public class TrackedBuffer(string source)
+    {
+        /// <summary>The buffer ID.</summary>
+        public uint ID = GenBuffer(source);
+
+        /// <summary>If true, the buffer is generated. If false, it is gone.</summary>
+        public bool IsValid = true;
+
+        /// <summary>Dipose the buffer.</summary>
+        public void Dispose()
+        {
+            if (IsValid)
+            {
+                DeleteBuffer(ID);
+                IsValid = false;
+            }
+        }
+    }
+
+    /// <summary>Generates a new vertex array. Equivalent to <see cref="GL.GenVertexArrays(int, out uint)"/> with a count of 1.</summary>
+    /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
+    public static uint GenVertexArray(string source)
+    {
+        GL.GenVertexArrays(1, out uint buffer);
+#if DEBUG
+        ActiveVertexArrays[buffer] = source;
+        CheckError($"GraphicsUtil GenVertexArray", source);
+#endif
+        return buffer;
+    }
+
+    /// <summary>Deletes a vertex array. Equivalent to <see cref="GL.DeleteVertexArray(uint)"/>.</summary>
+    public static void DeleteVertexArray(uint buffer)
+    {
+        GL.DeleteVertexArray(buffer);
+#if DEBUG
+        ActiveVertexArrays.Remove(buffer);
+        CheckError($"GraphicsUtil DeleteVertexArray", buffer);
+#endif
+    }
 }
