@@ -140,12 +140,13 @@ public class UIInputLabel : UIClickableElement
             int cursorIndex = IndexLeft;
             int currentIndex = 0;
             cursorIndex -= TextChain.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
-            foreach (UIElementText.ChainPiece piece in TextChain)
+            for (int i = 0; i < TextChain.Count; i++)
             {
-                for (int i = 0; i < piece.Text.Lines.Length; i++)
+                UIElementText.ChainPiece piece = TextChain[i];
+                for (int j = 0; j < piece.Text.Lines.Length; j++)
                 {
-                    RenderableTextPart[] parts = piece.Text.Lines[i].Parts;
-                    if (parts.Length == 0)
+                    RenderableTextPart[] parts = piece.Text.Lines[j].Parts;
+                    if (parts.Length == 0 && i == TextChain.Count - 1)
                     {
                         return new Location(0, piece.YOffset, 0);
                     }
@@ -159,7 +160,7 @@ public class UIInputLabel : UIClickableElement
                         }
                         int relIndex = cursorIndex - currentIndex;
                         double x = xOffset + piece.Font.MeasureFancyText(part.Text[..relIndex]);
-                        double y = piece.YOffset + i * piece.Font.FontDefault.Height;
+                        double y = piece.YOffset + j * piece.Font.FontDefault.Height;
                         return new Location(x, y, 0);
                     }
                     xOffset = 0;
@@ -450,14 +451,8 @@ public class UIInputLabel : UIClickableElement
         // TODO: Cursor blink modes
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(InputStyle.BorderColor);
-        RenderableTextLine[] lines = Internal.TextLeft.Renderable.Lines;
         int lineWidth = InputStyle.BorderThickness / 2;
-        int lineX = X + (lines?.Last().Width ?? 0);
-        int lineCount = lines?.Length ?? 1;
         int lineHeight = (renderInfo ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-        //view.Rendering.RenderRectangle(view.UIContext, lineX - lineWidth, Y + (lineCount - 1) * lineHeight, lineX + lineWidth, Y + lineCount * lineHeight, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-
-        Renderer2D.SetColor(Color4F.Blue);
         view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
