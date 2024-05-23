@@ -23,9 +23,11 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an editable text area.</summary>
+// TODO: Text alignment
+// TODO: Horizontal scrolling within bounds
 public class UIInputLabel : UIClickableElement
 {
-    /// <summary>An enumeration of <see cref="EditText(EditType, string, string)"/> operations.</summary>
+    /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
     {
         /// <summary>Replaces the space between the indices with the diff.</summary>
@@ -47,8 +49,9 @@ public class UIInputLabel : UIClickableElement
 
     /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
-    public int Lines = 1; // TODO: Implement
-    public int MaxLength; // TODO: Implement
+
+    /// <summary>The maximum number of lines allowed for the input label.</summary>
+    public int MaxLines;
 
     /// <summary>Whether the input label is currently selected.</summary>
     public bool Selected = false; // TODO: Provide a UIElement-native solution for this
@@ -72,9 +75,12 @@ public class UIInputLabel : UIClickableElement
         set
         {
             Internal.SetTextContent(value);
-            Internal.UpdateText(Position.Width);
+            UpdateText();
         }
     }
+
+    /// <summary>The current number of input text lines.</summary>
+    public int Lines => Internal.TextChain.Sum(piece => piece.Text.Lines.Length);
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
@@ -88,6 +94,7 @@ public class UIInputLabel : UIClickableElement
         /// <summary>The right cursor position.</summary>
         public int CursorRight = 0;
 
+        /// <summary>The drawn cursor offset location.</summary>
         public Location CursorOffset;
 
         /// <summary>The minimum cursor position.</summary>
@@ -111,7 +118,6 @@ public class UIInputLabel : UIClickableElement
         /// <summary>A chain of <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
         public List<UIElementText.ChainPiece> TextChain;
         public UIPositionHelper OriginalBounds;
-        public int Lines;
         
         /// <summary>Sets both cursor positions at a single index.</summary>
         /// <param name="cursorPos">The cursor positions.</param>
@@ -124,6 +130,8 @@ public class UIInputLabel : UIClickableElement
             CursorRight = Math.Clamp(CursorRight, 0, TextContent.Length);
         }
 
+        /// <summary>Sets the input text content.</summary>
+        /// <param name="content">The new text content.</param>
         public void SetTextContent(string content)
         {
             if (TextContent == content)
@@ -134,7 +142,16 @@ public class UIInputLabel : UIClickableElement
             ClampPositions();
         }
 
-        public Location GetCursorOffset()
+        /// <summary>Updates the text components based on the cursor positions.</summary>
+        public readonly void UpdateTextComponents()
+        {
+            TextLeft.Content = TextContent[..IndexLeft];
+            TextBetween.Content = TextContent[IndexLeft..IndexRight];
+            TextRight.Content = TextContent[IndexRight..];
+        }
+
+        /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>.</summary>
+        public readonly Location GetCursorOffset()
         {
             double xOffset = 0;
             int cursorIndex = IndexLeft;
@@ -159,7 +176,7 @@ public class UIInputLabel : UIClickableElement
                             continue;
                         }
                         int relIndex = cursorIndex - currentIndex;
-                        double x = xOffset + piece.Font.MeasureFancyText(part.Text[..relIndex]);
+                        double x = xOffset + (part.Text.Length > 0 ? piece.Font.MeasureFancyText(part.Text[..relIndex]) : 0);
                         double y = piece.YOffset + j * piece.Font.FontDefault.Height;
                         return new Location(x, y, 0);
                     }
@@ -168,16 +185,6 @@ public class UIInputLabel : UIClickableElement
                 currentIndex++;
             }
             return Location.NaN; // Should never happen.
-        }
-
-        /// <summary>Updates the <see cref="TextChain"/> values based on the cursor positions.</summary>
-        public void UpdateText(float maxWidth)
-        {
-            TextLeft.Content = TextContent[..IndexLeft];
-            TextBetween.Content = TextContent[IndexLeft..IndexRight];
-            TextRight.Content = TextContent[IndexRight..];
-            TextChain = UIElementText.IterateChain([TextLeft, TextBetween, TextRight], maxWidth).ToList();
-            CursorOffset = IsSelection ? Location.NaN : GetCursorOffset();
         }
     }
 
@@ -225,16 +232,29 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void MouseLeftDownOutside() => Closed?.Invoke();
 
+    /// <summary>Updates the text components based on the cursor positions.</summary>
+    public void UpdateText()
+    {
+        Internal.UpdateTextComponents();
+        Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
+        Internal.CursorOffset = Internal.IsSelection ? Location.NaN : Internal.GetCursorOffset();
+    }
+
+    /// <summary>Fires <see cref="TextSubmitted"/> or <see cref="TextEdited"/> depending on the edit <paramref name="type"/>.</summary>
+    /// <param name="type">The text edit type.</param>
+    public void HandleEdit(EditType type) => (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
+
     /// <summary>Performs a user edit on the text content.</summary>
     /// <param name="type">The edit operation.</param>
     /// <param name="diff">The added or deleted text.</param>
     /// <param name="result">The result of the operation pre-validation.</param>
+    /// <param name="beforeUpdate">Fires after the text content is set but before internal values are updated.</param>
     public void EditText(EditType type, string diff, string result, Action beforeUpdate = null)
     {
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
-        Internal.UpdateText(Position.Width);
-        (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
+        UpdateText();
+        HandleEdit(type);
     }
 
     // TODO: Cap length
@@ -251,9 +271,23 @@ public class UIInputLabel : UIClickableElement
     /// <param name="indexRight">The right index position.</param>
     public void AddText(string text, int indexLeft, int indexRight)
     {
+        string content = TextContent;
+        List<UIElementText.ChainPiece> textChain = [.. Internal.TextChain];
+        Location cursorOffset = Internal.CursorOffset;
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
+        Internal.SetTextContent(ValidateEdit(EditType.Add, text, result));
         Internal.CursorRight = Internal.CursorLeft += text.Length;
-        EditText(EditType.Add, text, result);
+        UpdateText();
+        if (MaxLines <= 0 || Lines <= MaxLines)
+        {
+            HandleEdit(EditType.Add);
+            return;
+        }
+        Internal.CursorRight = Internal.CursorLeft -= text.Length;
+        Internal.SetTextContent(content);
+        Internal.UpdateTextComponents();
+        Internal.TextChain = textChain;
+        Internal.CursorOffset = cursorOffset;
     }
 
     /// <summary>Deletes text between two indices.</summary>
@@ -293,16 +327,10 @@ public class UIInputLabel : UIClickableElement
     /// <param name="keys">The current keyboard state.</param>
     public void TickContent(KeyHandlerState keys)
     {
-        string content = keys.KeyboardString;
-        if (content.Length == 0)
+        if (keys.KeyboardString.Length > 0)
         {
-            return;
+            AddText(keys.KeyboardString, Internal.IndexLeft, Internal.IndexRight);
         }
-        if (MaxLines >= 1 && content.Contains('\n') && Lines >= MaxLines)
-        {
-            content = content.Replace("\n", string.Empty);
-        }
-        AddText(content, Internal.IndexLeft, Internal.IndexRight);
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
@@ -323,7 +351,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
-        Internal.UpdateText(Position.Width);
+        UpdateText();
     }
 
     /// <summary>Handles the mouse being pressed at a cursor position.</summary>
@@ -331,23 +359,23 @@ public class UIInputLabel : UIClickableElement
     /// <param name="shiftDown">Whether the shift key is being held.</param>
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
+        if (Internal.CursorRight == cursorPos && MousePreviouslyDown == shiftDown)
+        {
+            return;
+        }
         Internal.CursorRight = Math.Max(cursorPos, 0);
         if (!MousePreviouslyDown && !shiftDown)
         {
             Internal.CursorLeft = Internal.CursorRight;
         }
-        Internal.UpdateText(Position.Width);
+        UpdateText();
     }
 
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
     /// <param name="shiftDown">Whether the shift key is being held.</param>
     public void TickMouse(bool shiftDown)
     {
-        if (!MouseDown)
-        {
-            return;
-        }
-        if (Internal.TextChain.Count == 0)
+        if (!MouseDown || Internal.TextChain.Count == 0)
         {
             return;
         }
@@ -404,7 +432,7 @@ public class UIInputLabel : UIClickableElement
         {
             Internal.CursorLeft = 0;
             Internal.CursorRight = TextContent.Length;
-            Internal.UpdateText(Position.Width);
+            UpdateText();
         }
     }
 

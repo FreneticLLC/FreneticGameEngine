@@ -150,7 +150,6 @@ public class UIElementText
         }
     }
 
-    // TODO: check for 0 or negative?
     /// <summary>Gets or sets the maximum total width of the text.</summary>
     public int MaxWidth
     {
@@ -212,7 +211,7 @@ public class UIElementText
             {
                 continue;
             }
-            List<RenderableTextLine> textLines = text.Renderable.Lines.ToList();
+            List<RenderableTextLine> textLines = [.. text.Renderable.Lines.ToList()];
             if (lines.Count != 0)
             {
                 RenderableTextLine combinedLine = new()
