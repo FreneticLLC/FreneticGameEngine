@@ -8,10 +8,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FGEGraphics.UISystem;
 
@@ -186,20 +189,21 @@ public class UIElementText
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
 
-    /// <summary>An individual UI text chain piece, guaranteed to be single-line.</summary>
-    /// <param name="Text">The text object this piece takes from.</param>
-    /// <param name="Line">The chain piece line.</param>
-    /// <param name="XOffset">The x-offset relative to the first piece.</param>
+    /// <summary>An individual UI text chain piece.</summary>
+    /// <param name="Font">The font to render the chain piece with.</param>
+    /// <param name="Text">The chain piece text.</param>
     /// <param name="YOffset">The y-offset relative to the first piece.</param>
-    public record ChainPiece(FontSet Font, RenderableTextLine Line, float XOffset, float YOffset);
+    /// <param name="SkippedIndices"></param>
+    public record ChainPiece(FontSet Font, RenderableText Text, float YOffset, List<int> SkippedIndices);
 
     /// <summary>
     /// Iterates through some UI text objects and returns <see cref="ChainPiece"/>s, where each chain piece contains a single line.
     /// This properly handles consecutive text objects even spanning multiple lines.
     /// </summary>
     /// <param name="chain">The UI text objects.</param>
+    /// <param name="maxWidth">The wrapping width of the chain.</param>
     /// <returns>The text chain.</returns>
-    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain, int maxWidth = -1, int maxHeight = -1)
+    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain, float maxWidth = -1)
     {
         List<(FontSet Font, RenderableTextLine Line)> lines = [];
         foreach (UIElementText text in chain)
@@ -224,70 +228,27 @@ public class UIElementText
                 lines.Add((text.CurrentStyle.TextFont, line));
             }
         }
-        Logs.Debug("---------------------------");
         float y = 0;
         foreach ((FontSet font, RenderableTextLine line) in lines)
         {
-            Logs.Debug(line.ToString());
-            Logs.Debug("Parts:");
-            foreach (RenderableTextPart part in line.Parts)
-            {
-                Logs.Debug("- " + part.ToString());
-            }
             RenderableText renderable = new() { Lines = [line], Width = line.Width };
-            RenderableText splitText = maxWidth > 0 ? FontSet.SplitAppropriately(renderable, maxWidth) : renderable;
-            Logs.Debug("Split:");
-            foreach (RenderableTextLine splitLine in splitText.Lines)
-            {
-                Logs.Debug("- " + splitLine.ToString());
-                yield return new(font, splitLine, 0, y);
-                y += font.FontDefault.Height;
-            }
+            List<int> skippedIndices = null;
+            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : renderable;
+            yield return new(font, splitText, y, skippedIndices ?? []);
+            y += font.FontDefault.Height * splitText.Lines.Length;
         }
-
-        /*float x = 0, y = 0;
-        foreach (UIElementText text in chain)
-        {
-            if (!text.CurrentStyle.CanRenderText(text))
-            {
-                continue;
-            }
-            for (int i = 0; i < text.Renderable.Lines.Length; i++)
-            {
-                if (i != 0)
-                {
-                    x = 0;
-                    y += text.CurrentStyle.TextFont.FontDefault.Height;
-                }
-                RenderableTextLine line = text.Renderable.Lines[i];
-                yield return new(text.CurrentStyle.TextFont, line, x, y);
-                if (i == text.Renderable.Lines.Length - 1)
-                {
-                    x += line.Width;
-                }
-            }
-        }*/
     }
 
     /// <summary>Renders a text chain.</summary>
-    /// <seealso cref="IterateChain(IEnumerable{UIElementText})"/>
+    /// <seealso cref="IterateChain(IEnumerable{UIElementText}, float)"/>
     /// <param name="chain">The UI text objects.</param>
     /// <param name="x">The starting x position.</param>
     /// <param name="y">The starting y position.</param>
-    public static void RenderChain(IEnumerable<ChainPiece> chain, float x, float y, int maxWidth, int maxHeight)
+    public static void RenderChain(IEnumerable<ChainPiece> chain, float x, float y)
     {
         foreach (ChainPiece piece in chain)
         {
-            // TODO: DrawFancyText variant that takes one RenderableTextLine
-            RenderableText renderable = new() { Lines = [piece.Line], Width = piece.Line.Width };
-            piece.Font.DrawFancyText(renderable, new Location(x + piece.XOffset, y + piece.YOffset, 0));
+            piece.Font.DrawFancyText(piece.Text, new Location(x, y + piece.YOffset, 0));
         }
     }
-
-    /// <summary>Renders a text chain.</summary>
-    /// <seealso cref="IterateChain(IEnumerable{UIElementText})"/>
-    /// <param name="chain">The UI text objects.</param>
-    /// <param name="x">The starting x position.</param>
-    /// <param name="y">The starting y position.</param>
-    public static void RenderChain(IEnumerable<UIElementText> chain, float x, float y, int maxWidth, int maxHeight) => RenderChain(IterateChain(chain), x, y, maxWidth, maxHeight);
 }

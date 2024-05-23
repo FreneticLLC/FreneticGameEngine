@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
@@ -143,6 +144,8 @@ public class RenderableTextPart
     /// <summary>Returns a perfect copy of the part.</summary>
     public RenderableTextPart Clone() => MemberwiseClone() as RenderableTextPart;
 
+    /// <summary>Returns a copy of the part with different text.</summary>
+    /// <param name="text">The new part text.</param>
     public RenderableTextPart CloneWithText(string text)
     {
         RenderableTextPart cloned = Clone();
@@ -166,6 +169,8 @@ public class RenderableTextLine
 
     /// <summary>Implements <see cref="Object.ToString"/> to make an un-separated string of the contents.</summary>
     public override string ToString() => string.Concat<RenderableTextPart>(Parts);
+
+    public int Length => Parts.Sum(part => part.Text.Length);
 }
 
 /// <summary>Represents a section of renderable text.</summary>
@@ -190,4 +195,38 @@ public class RenderableText()
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
+}
+
+public class EditableTextLine(List<RenderableTextPart> parts, int length, float width, bool whitespace)
+{
+    public static EditableTextLine Empty => new([], 0, 0, false);
+    public static EditableTextLine Whitespace => new([], 0, 0, true);
+    public List<RenderableTextPart> Parts = parts;
+    public int Length = length;
+    public float Width = width;
+    public bool IsWhitespace = whitespace;
+
+    public void AddPart(RenderableTextPart part)
+    {
+        Parts.Add(part);
+        Length += part.Text.Length;
+        Width += part.Width;
+        if (IsWhitespace && !string.IsNullOrWhiteSpace(part.Text))
+        {
+            IsWhitespace = false;
+        }
+    }
+
+    public void AddLine(EditableTextLine line)
+    {
+        Parts.AddRange(line.Parts);
+        Length += line.Length;
+        Width += line.Width;
+        if (IsWhitespace && !line.IsWhitespace)
+        {
+            IsWhitespace = false;
+        }
+    }
+
+    public RenderableTextLine ToRenderable() => new() { Parts = [.. Parts], Width = (int)Width };
 }

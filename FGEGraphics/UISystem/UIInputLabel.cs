@@ -71,12 +71,7 @@ public class UIInputLabel : UIClickableElement
         get => Internal.TextContent;
         set
         {
-            if (Internal.TextContent == value)
-            {
-                return;
-            }
-            Internal.TextContent = value ?? string.Empty;
-            Internal.ClampPositions();
+            Internal.SetTextContent(value);
             Internal.UpdateText(Position.Width);
         }
     }
@@ -92,6 +87,8 @@ public class UIInputLabel : UIClickableElement
 
         /// <summary>The right cursor position.</summary>
         public int CursorRight = 0;
+
+        public Location CursorOffset;
 
         /// <summary>The minimum cursor position.</summary>
         public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
@@ -127,13 +124,59 @@ public class UIInputLabel : UIClickableElement
             CursorRight = Math.Clamp(CursorRight, 0, TextContent.Length);
         }
 
+        public void SetTextContent(string content)
+        {
+            if (TextContent == content)
+            {
+                return;
+            }
+            TextContent = content ?? string.Empty;
+            ClampPositions();
+        }
+
+        public Location GetCursorOffset()
+        {
+            double xOffset = 0;
+            int cursorIndex = IndexLeft;
+            int currentIndex = 0;
+            cursorIndex -= TextChain.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
+            foreach (UIElementText.ChainPiece piece in TextChain)
+            {
+                for (int i = 0; i < piece.Text.Lines.Length; i++)
+                {
+                    RenderableTextPart[] parts = piece.Text.Lines[i].Parts;
+                    if (parts.Length == 0)
+                    {
+                        return new Location(0, piece.YOffset, 0);
+                    }
+                    foreach (RenderableTextPart part in parts)
+                    {
+                        if (currentIndex + part.Text.Length < cursorIndex)
+                        {
+                            currentIndex += part.Text.Length;
+                            xOffset += part.Width;
+                            continue;
+                        }
+                        int relIndex = cursorIndex - currentIndex;
+                        double x = xOffset + piece.Font.MeasureFancyText(part.Text[..relIndex]);
+                        double y = piece.YOffset + i * piece.Font.FontDefault.Height;
+                        return new Location(x, y, 0);
+                    }
+                    xOffset = 0;
+                }
+                currentIndex++;
+            }
+            return Location.NaN; // Should never happen.
+        }
+
         /// <summary>Updates the <see cref="TextChain"/> values based on the cursor positions.</summary>
-        public void UpdateText(int maxWidth)
+        public void UpdateText(float maxWidth)
         {
             TextLeft.Content = TextContent[..IndexLeft];
             TextBetween.Content = TextContent[IndexLeft..IndexRight];
             TextRight.Content = TextContent[IndexRight..];
             TextChain = UIElementText.IterateChain([TextLeft, TextBetween, TextRight], maxWidth).ToList();
+            CursorOffset = IsSelection ? Location.NaN : GetCursorOffset();
         }
     }
 
@@ -185,9 +228,11 @@ public class UIInputLabel : UIClickableElement
     /// <param name="type">The edit operation.</param>
     /// <param name="diff">The added or deleted text.</param>
     /// <param name="result">The result of the operation pre-validation.</param>
-    public void EditText(EditType type, string diff, string result)
+    public void EditText(EditType type, string diff, string result, Action beforeUpdate = null)
     {
-        TextContent = ValidateEdit(type, diff, result);
+        Internal.SetTextContent(ValidateEdit(type, diff, result));
+        beforeUpdate?.Invoke();
+        Internal.UpdateText(Position.Width);
         (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
     }
 
@@ -217,8 +262,7 @@ public class UIInputLabel : UIClickableElement
     {
         string diff = TextContent[indexLeft..indexRight];
         string result = TextContent[..indexLeft] + TextContent[indexRight..];
-        EditText(EditType.Delete, diff, result);
-        Internal.SetPosition(indexLeft);
+        EditText(EditType.Delete, diff, result, () => Internal.SetPosition(indexLeft));
     }
 
     /// <summary>Submits the current text content.</summary>
@@ -242,18 +286,22 @@ public class UIInputLabel : UIClickableElement
             int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
             DeleteText(index, Internal.IndexRight);
         }
-        Internal.UpdateText(Position.Width);
     }
 
     /// <summary>Adds text based on the <see cref="KeyHandlerState.KeyboardString"/> value.</summary>
     /// <param name="keys">The current keyboard state.</param>
     public void TickContent(KeyHandlerState keys)
     {
-        if (keys.KeyboardString.Length > 0)
+        string content = keys.KeyboardString;
+        if (content.Length == 0)
         {
-            AddText(keys.KeyboardString, Internal.IndexLeft, Internal.IndexRight);
-            Internal.UpdateText();
+            return;
         }
+        if (MaxLines >= 1 && content.Contains('\n') && Lines >= MaxLines)
+        {
+            content = content.Replace("\n", string.Empty);
+        }
+        AddText(content, Internal.IndexLeft, Internal.IndexRight);
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
@@ -304,41 +352,42 @@ public class UIInputLabel : UIClickableElement
         }
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
-        if (Internal.TextChain[^1].YOffset + Internal.TextChain[^1].Font.FontDefault.Height < relMouseY)
+        UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
+        if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
             TickMousePosition(TextContent.Length, shiftDown);
             return;
         }
         int indexOffset = 0;
-        for (int i = 0; i < Internal.TextChain.Count; i++)
+        foreach (UIElementText.ChainPiece piece in Internal.TextChain)
         {
-            UIElementText.ChainPiece piece = Internal.TextChain[i];
-            if (i != 0 && piece.XOffset == 0)
+            for (int i = 0; i < piece.Text.Lines.Length; i++)
             {
-                indexOffset++;
-            }    
-            string content = piece.Line.ToString();
-            if (piece.YOffset + piece.Font.FontDefault.Height >= relMouseY)
-            {
-                if (piece.XOffset + piece.Line.Width < relMouseX && (i == Internal.TextChain.Count - 1 || Internal.TextChain[i + 1].XOffset == 0))
+                RenderableTextLine line = piece.Text.Lines[i];
+                string content = line.ToString();
+                if (piece.YOffset + (i + 1) * piece.Font.FontDefault.Height >= relMouseY)
                 {
-                    TickMousePosition(indexOffset + content.Length, shiftDown);
-                    return;
-                }
-                float lastWidth = 0;
-                for (int j = 0; j <= content.Length; j++)
-                {
-                    float width = piece.Font.MeasureFancyText(content[..j]);
-                    if (piece.XOffset + width >= relMouseX)
+                    if (line.Width < relMouseX)
                     {
-                        int diff = relMouseX - (piece.XOffset + lastWidth) >= piece.XOffset + width - relMouseX ? 0 : 1;
-                        TickMousePosition(indexOffset + j - diff, shiftDown);
+                        TickMousePosition(indexOffset + content.Length, shiftDown);
                         return;
                     }
-                    lastWidth = width;
+                    float lastWidth = 0;
+                    for (int j = 0; j <= content.Length; j++)
+                    {
+                        float width = piece.Font.MeasureFancyText(content[..j]);
+                        if (width >= relMouseX)
+                        {
+                            int diff = relMouseX - lastWidth >= width - relMouseX ? 0 : 1;
+                            TickMousePosition(indexOffset + j - diff, shiftDown);
+                            return;
+                        }
+                        lastWidth = width;
+                    }
                 }
+                indexOffset += content.Length;
             }
-            indexOffset += content.Length;
+            indexOffset++;
         }
     }
 
@@ -392,7 +441,7 @@ public class UIInputLabel : UIClickableElement
         }
         else
         {
-            UIElementText.RenderChain(Internal.TextChain, X, Y, Width, Height);
+            UIElementText.RenderChain(Internal.TextChain, X, Y);
         }
         if (!Selected || Internal.IsSelection)
         {
@@ -406,7 +455,10 @@ public class UIInputLabel : UIClickableElement
         int lineX = X + (lines?.Last().Width ?? 0);
         int lineCount = lines?.Length ?? 1;
         int lineHeight = (renderInfo ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-        view.Rendering.RenderRectangle(view.UIContext, lineX - lineWidth, Y + (lineCount - 1) * lineHeight, lineX + lineWidth, Y + lineCount * lineHeight, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        //view.Rendering.RenderRectangle(view.UIContext, lineX - lineWidth, Y + (lineCount - 1) * lineHeight, lineX + lineWidth, Y + lineCount * lineHeight, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+
+        Renderer2D.SetColor(Color4F.Blue);
+        view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
 }
