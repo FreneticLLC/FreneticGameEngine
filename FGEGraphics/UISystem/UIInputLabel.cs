@@ -50,9 +50,6 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
 
-    /// <summary>The maximum number of lines allowed for the input label.</summary>
-    public int MaxLines;
-
     /// <summary>Whether the input label is currently selected.</summary>
     public bool Selected = false; // TODO: Provide a UIElement-native solution for this
 
@@ -240,10 +237,6 @@ public class UIInputLabel : UIClickableElement
         Internal.CursorOffset = Internal.IsSelection ? Location.NaN : Internal.GetCursorOffset();
     }
 
-    /// <summary>Fires <see cref="TextSubmitted"/> or <see cref="TextEdited"/> depending on the edit <paramref name="type"/>.</summary>
-    /// <param name="type">The text edit type.</param>
-    public void HandleEdit(EditType type) => (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
-
     /// <summary>Performs a user edit on the text content.</summary>
     /// <param name="type">The edit operation.</param>
     /// <param name="diff">The added or deleted text.</param>
@@ -254,7 +247,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
         UpdateText();
-        HandleEdit(type);
+        (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
@@ -271,23 +264,9 @@ public class UIInputLabel : UIClickableElement
     /// <param name="indexRight">The right index position.</param>
     public void AddText(string text, int indexLeft, int indexRight)
     {
-        string content = TextContent;
-        List<UIElementText.ChainPiece> textChain = [.. Internal.TextChain];
-        Location cursorOffset = Internal.CursorOffset;
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
-        Internal.SetTextContent(ValidateEdit(EditType.Add, text, result));
         Internal.CursorRight = Internal.CursorLeft += text.Length;
-        UpdateText();
-        if (MaxLines <= 0 || Lines <= MaxLines)
-        {
-            HandleEdit(EditType.Add);
-            return;
-        }
-        Internal.CursorRight = Internal.CursorLeft -= text.Length;
-        Internal.SetTextContent(content);
-        Internal.UpdateTextComponents();
-        Internal.TextChain = textChain;
-        Internal.CursorOffset = cursorOffset;
+        EditText(EditType.Add, text, result);
     }
 
     /// <summary>Deletes text between two indices.</summary>
