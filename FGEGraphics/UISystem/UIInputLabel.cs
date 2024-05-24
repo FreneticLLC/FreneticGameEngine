@@ -24,7 +24,9 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an editable text area.</summary>
 // TODO: Text alignment
-// TODO: Horizontal scrolling within bounds
+// TODO: Horizontal scrolling within bounds, with option
+// TODO: Vertical scrolling when bounds exceeded
+// TODO: Cap text length
 public class UIInputLabel : UIClickableElement
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
@@ -114,7 +116,6 @@ public class UIInputLabel : UIClickableElement
 
         /// <summary>A chain of <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
         public List<UIElementText.ChainPiece> TextChain;
-        public UIPositionHelper OriginalBounds;
         
         /// <summary>Sets both cursor positions at a single index.</summary>
         /// <param name="cursorPos">The cursor positions.</param>
@@ -148,6 +149,7 @@ public class UIInputLabel : UIClickableElement
         }
 
         /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>.</summary>
+        // TODO: Account for formatting codes
         public readonly Location GetCursorOffset()
         {
             double xOffset = 0;
@@ -336,6 +338,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Handles the mouse being pressed at a cursor position.</summary>
     /// <param name="cursorPos">The cursor position.</param>
     /// <param name="shiftDown">Whether the shift key is being held.</param>
+    // TODO: Account for formatting codes
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
         if (Internal.CursorRight == cursorPos && MousePreviouslyDown == shiftDown)
@@ -435,7 +438,7 @@ public class UIInputLabel : UIClickableElement
         TickArrowKeys(keys, shiftDown);
         TickMouse(shiftDown);
         TickControlKeys(keys);
-        // TODO: handle ctrl+Z, ctrl+Y
+        // TODO: Handle ctrl+Z, ctrl+Y
     }
 
     /// <inheritdoc/>

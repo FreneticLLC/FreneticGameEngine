@@ -729,9 +729,12 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return SplitAppropriately(ParseFancyText(text), maxX);
     }
 
+    /// <summary>Splits a renderable text line into individual words.</summary>
+    /// <param name="line">The line to split.</param>
+    // TODO: Split hyphenated text into words as well
     public static List<EditableTextLine> SplitLineIntoWords(RenderableTextLine line)
     {
-        List<EditableTextLine> words = [EditableTextLine.Empty];
+        List<EditableTextLine> words = [new()];
         foreach (RenderableTextPart part in line.Parts)
         {
             string[] textWords = part.Text.Split(' ');
@@ -745,7 +748,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                 if (i < textWords.Length - 1)
                 {
                     RenderableTextPart space = part.CloneWithText(" ");
-                    EditableTextLine spaceWord = new([space], 1, space.Width, true);
+                    EditableTextLine spaceWord = new([space], space.Width, 1, true);
                     if (lastWord.Parts.Count == 0)
                     {
                         words[^1] = spaceWord;
@@ -754,46 +757,19 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     {
                         words.Add(spaceWord);
                     }
-                    words.Add(EditableTextLine.Empty);
+                    words.Add(new());
                 }
             }
-            //List<string> textWords = [.. part.Text.Split(' ')];
-            /*for (int i = 0; i < textWords.Count; i++)
-            {
-                int hyphen = textWords[i].LastIndexOf('-');
-                if (hyphen != -1)
-                {
-                    textWords[i] = textWords[i][..(hyphen + 1)];
-                    textWords.Insert(i + 1, textWords[i][hyphen..]);
-                    i++;
-                }
-            }*/
-            /*if (textWords[i].Length != 0)
-            {
-                string[] hyphenWords = textWords[i].Split('-');
-                for (int j = 0; j < hyphenWords.Length; j++)
-                {
-                    if (j < hyphenWords[j].Length - 1)
-                    {
-
-                    }
-                }
-                foreach (string word in textWords[i].Split('-'))
-                {
-                    if (word.Length != 0)
-                    {
-                        lastWord.AddPart(part.CloneWithText(textWords[i]));
-                    }
-
-                }
-            }*/
         }
         return words;
     }
 
+    /// <summary>Splits a single word onto multiple lines if it exceeds a maximum render width.</summary>
+    /// <param name="word">The word to split.</param>
+    /// <param name="maxWidth">The maximum render width.</param>
     public static List<EditableTextLine> SplitWordAppropriately(EditableTextLine word, float maxWidth)
     {
-        List<EditableTextLine> result = [EditableTextLine.Empty];
+        List<EditableTextLine> result = [new()];
         List<RenderableTextPart> parts = [.. word.Parts];
         for (int i = 0; i < parts.Count; i++)
         {
@@ -817,7 +793,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     secondPart.Text = part.Text[(j - 1)..];
                     secondPart.Width = part.Width - lastWidth;
                     lastWord.AddPart(firstPart);
-                    result.Add(EditableTextLine.Empty);
+                    result.Add(new());
                     parts.Insert(i + 1, secondPart);
                     break;
                 }
@@ -827,6 +803,11 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return result;
     }
 
+    /// <summary>Splits a renderable text line at a maximum render width.</summary>
+    /// <param name="line">The line to split.</param>
+    /// <param name="maxWidth">The maximum render width.</param>
+    /// <param name="skippedIndices">A list of character indices ignored in the final result.</param>
+    /// <returns>The multiple-line renderable result.</returns>
     public static RenderableText SplitLineAppropriately(RenderableTextLine line, float maxWidth, out List<int> skippedIndices)
     {
         skippedIndices = [];
@@ -836,7 +817,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         }
         int charIndex = 0;
         float totalWidth = 0;
-        EditableTextLine currentLine = EditableTextLine.Whitespace;
+        EditableTextLine currentLine = new(true);
         List<RenderableTextLine> lines = [];
         void BuildLine()
         {
@@ -844,7 +825,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             {
                 lines.Add(currentLine.ToRenderable());
             }
-            currentLine = EditableTextLine.Whitespace;
+            currentLine = new(true);
         }
         List<EditableTextLine> words = SplitLineIntoWords(line);
         for (int i = 0; i < words.Count; i++)

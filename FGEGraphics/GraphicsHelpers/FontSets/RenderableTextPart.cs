@@ -170,6 +170,7 @@ public class RenderableTextLine
     /// <summary>Implements <see cref="Object.ToString"/> to make an un-separated string of the contents.</summary>
     public override string ToString() => string.Concat<RenderableTextPart>(Parts);
 
+    /// <summary>The total text length of this line.</summary>
     public int Length => Parts.Sum(part => part.Text.Length);
 }
 
@@ -197,15 +198,33 @@ public class RenderableText()
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
 }
 
-public class EditableTextLine(List<RenderableTextPart> parts, int length, float width, bool whitespace)
+/// <summary>A mutable <see cref="RenderableTextLine"/> builder.</summary>
+/// <param name="parts">A list of parts within the line.</param>
+/// <param name="width">The line width.</param>
+/// <param name="length">The total text length.</param>
+/// <param name="whitespace">Whether the line is empty or whitespace.</param>
+public class EditableTextLine(List<RenderableTextPart> parts, float width, int length, bool whitespace)
 {
-    public static EditableTextLine Empty => new([], 0, 0, false);
-    public static EditableTextLine Whitespace => new([], 0, 0, true);
+    /// <summary>The current list of parts within the line.</summary>
     public List<RenderableTextPart> Parts = parts;
-    public int Length = length;
+
+    /// <summary>The current line width.</summary>
     public float Width = width;
+
+    /// <summary>The current total text length.</summary>
+    public int Length = length;
+
+    /// <summary>Whether the line is empty or whitespace.</summary>
     public bool IsWhitespace = whitespace;
 
+    /// <summary>Constructs an empty <see cref="EditableTextLine"/>.</summary>
+    /// <param name="whitespace">Whether the line is empty or whitespace.</param>
+    public EditableTextLine(bool whitespace = false) : this([], 0, 0, whitespace)
+    {
+    }
+
+    /// <summary>Adds a text part to the line.</summary>
+    /// <param name="part">The text part to add.</param>
     public void AddPart(RenderableTextPart part)
     {
         Parts.Add(part);
@@ -217,6 +236,8 @@ public class EditableTextLine(List<RenderableTextPart> parts, int length, float 
         }
     }
 
+    /// <summary>Appends another text line.</summary>
+    /// <param name="line"></param>
     public void AddLine(EditableTextLine line)
     {
         Parts.AddRange(line.Parts);
@@ -228,5 +249,6 @@ public class EditableTextLine(List<RenderableTextPart> parts, int length, float 
         }
     }
 
+    /// <summary>Builds a new <see cref="RenderableTextLine"/> from the editable values.</summary>
     public RenderableTextLine ToRenderable() => new() { Parts = [.. Parts], Width = (int)Width };
 }
