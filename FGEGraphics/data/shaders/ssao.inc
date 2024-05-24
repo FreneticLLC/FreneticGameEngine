@@ -8,16 +8,16 @@
 
 /*
 GENERATION CODE (C#):
-            Random random = new Random();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 32; i++)
-            {
-                double x = random.NextDouble() * 2.0 - 1.0;
-                double y = random.NextDouble() * 2.0 - 1.0;
-                double len = Math.Sqrt(x * x + y * y);
-                sb.Append("vec2(" + (x / len) + ", " + (y / len) + "),\n");
-            }
-            File.WriteAllText("result.txt", sb.ToString());
+			Random random = new Random();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < 32; i++)
+			{
+				double x = random.NextDouble() * 2.0 - 1.0;
+				double y = random.NextDouble() * 2.0 - 1.0;
+				double len = Math.Sqrt(x * x + y * y);
+				sb.Append("vec2(" + (x / len) + ", " + (y / len) + "),\n");
+			}
+			File.WriteAllText("result.txt", sb.ToString());
 */
 const vec2 noise[] = vec2[](
 	vec2(0.816974284739033, -0.576674100402598),
@@ -57,17 +57,17 @@ const vec2 noise[] = vec2[](
 /*
 GENERATION CODE(C#):
 
-            Random random = nw Random();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 64; i++)
-            {
-                double x = random.NextDouble() * 2.0 - 1.0;
-                double y = random.NextDouble() * 2.0 - 1.0;
-                double z = random.NextDouble();
-                double len = Math.Sqrt(x * x + y * y + z * z);
-                sb.Append("vec3(" + (x / len) + ", " + (y / len) + ", " + (z / len) + "),\n");
-            }
-            File.WriteAllText("result.txt", sb.ToString());
+			Random random = nw Random();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < 64; i++)
+			{
+				double x = random.NextDouble() * 2.0 - 1.0;
+				double y = random.NextDouble() * 2.0 - 1.0;
+				double z = random.NextDouble();
+				double len = Math.Sqrt(x * x + y * y + z * z);
+				sb.Append("vec3(" + (x / len) + ", " + (y / len) + ", " + (z / len) + "),\n");
+			}
+			File.WriteAllText("result.txt", sb.ToString());
 */
 const vec3 kernel[] = vec3[](
 	vec3(0.50523790717783, 0.638495093231913, 0.580567543933811),

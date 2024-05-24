@@ -44,15 +44,11 @@ If you make any changes that could benefit the community as a whole, please cont
 
 You can do basically whatever you want (as long as you give credit), except you may not hold any developer liable for what you do with the software.
 
-### Previous License
-
-Copyright (C) 2017-2019 Frenetic LLC, All Rights Reserved.
-
 ### The long version of the license follows:
 
 The MIT License (MIT)
 
-Copyright (c) 2019-2022 Frenetic LLC
+Copyright (c) 2019-2024 Frenetic LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

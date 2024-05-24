@@ -14,10 +14,7 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>
-/// Represents a <see cref="UINumberSlider"/> element with an editable number
-/// label alongside the interactable area.
-/// </summary>
+/// <summary>Represents a <see cref="UINumberSlider"/> element with an editable number label alongside the interactable area.</summary>
 public class UILabeledNumberSlider : UINumberSlider
 {
     /// <summary>The slider's value label.</summary>

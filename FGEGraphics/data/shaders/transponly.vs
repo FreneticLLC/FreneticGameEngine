@@ -75,11 +75,11 @@ void main()
 	pos1 = vec4(position, 1.0);
 	nor1 = vec4(normal, 1.0);
 	f.color = color;
-    if (f.color == vec4(0.0, 0.0, 0.0, 1.0))
-    {
-        f.color = vec4(1.0);
-    }
-    f.color = f.color * v_color;
+	if (f.color == vec4(0.0, 0.0, 0.0, 1.0))
+	{
+		f.color = vec4(1.0);
+	}
+	f.color = f.color * v_color;
 	f.texcoord = texcoords;
 	vec4 tpos = model_matrix * vec4(pos1.xyz, 1.0);
 	f.position = tpos / tpos.w;

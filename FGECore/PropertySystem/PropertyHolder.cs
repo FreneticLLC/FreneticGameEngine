@@ -28,7 +28,7 @@ public class PropertyHolder
         public Dictionary<Type, List<object>> HeldInterfaces;
 
         /// <summary>Special helper: Default empty list for some returns.</summary>
-        public static readonly IReadOnlyList<object> DefaultReturnEmptyList = new List<object>();
+        public static readonly IReadOnlyList<object> DefaultReturnEmptyList = [];
 
         /// <summary>Notice a property (called when a property is added).</summary>
         /// <param name="holder">The holder instance.</param>
@@ -141,7 +141,7 @@ public class PropertyHolder
         {
             return objs.Cast<T>().ToList();
         }
-        return new List<T>();
+        return [];
     }
 
     /// <summary>Sends a signal to all properties with a specific interface.</summary>

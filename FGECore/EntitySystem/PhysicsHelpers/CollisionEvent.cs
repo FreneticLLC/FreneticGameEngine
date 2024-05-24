@@ -19,7 +19,7 @@ namespace FGECore.EntitySystem.PhysicsHelpers;
 /// <summary>Event that represents the collision between two physics entities.</summary>
 public abstract class CollisionEvent : EventArgs
 {
-    /// <summary>The two entities colliding. One or both can potentially be null.</summary>
+    /// <summary>The two entities colliding. One or both can potentially be null (eg if an entity hits the worldsolid).</summary>
     public EntityPhysicsProperty One, Two;
 
     /// <summary>Can be set 'true' to deny the collision.</summary>

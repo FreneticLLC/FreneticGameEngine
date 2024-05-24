@@ -8,6 +8,8 @@
 
 #version 430 core
 
+#define ADVANCED_REFLECTION 0
+
 layout (binding = 0) uniform sampler2D rht;
 layout (binding = 1) uniform sampler2D colortex;
 layout (binding = 2) uniform sampler2D normaltex;
@@ -23,6 +25,7 @@ in struct vox_out
 layout (location = 5) uniform vec2 zdist = vec2(0.1, 1000.0); // The Z-Near and Z-Far value of the 3D projection.
 layout (location = 6) uniform mat4 proj_mat = mat4(1.0);
 layout (location = 7) uniform vec2 odist = vec2(0.1, 1000.0); // The Z-Near and Z-Far value of the out-view 3D projection.
+layout (location = 8) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 
 out vec4 color;
 
@@ -58,7 +61,7 @@ vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray acro
 		{
 			sampledDepth = linearizeDepth(sD);
 		}
-		if(currentDepth > sampledDepth)
+		if (currentDepth > sampledDepth)
 		{
 			float delta = currentDepth - sampledDepth;
 			if(delta < 0.03)
@@ -113,9 +116,9 @@ void main()
 		vec3 norm = texture(normaltex, f.texcoord + offsets[i]).xyz;
 		vec3 normal = normalize(norm);
 		float currDepth = linearizeDepth(texture(depthtex, f.texcoord + offsets[i]).x);
-		vec3 eyePosition = normalize(-pos);
+		vec3 eyePosition = normalize(cameraPos - pos);
 		vec4 reflectionVector = proj_mat * vec4(reflect(eyePosition, normal), 0.0);
-		reflectionVector.x = 0.0; // TODO: ???
+		reflectionVector.x = 0.0;
 		vec4 SSR = raytrace(reflectionVector.xyz / reflectionVector.w, currDepth);
 		ssr_res += SSR;
 	}

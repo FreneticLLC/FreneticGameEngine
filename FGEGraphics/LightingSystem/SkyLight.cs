@@ -28,7 +28,7 @@ public class SkyLight : LightObject
     public float Radius;
 
     /// <summary>The color of the light.</summary>
-    public Location Color;
+    public Color3F Color;
 
     /// <summary>The direction of the light.</summary>
     public Location Direction;
@@ -56,7 +56,7 @@ public class SkyLight : LightObject
     /// <param name="size">Effective size (horizontal).</param>
     /// <param name="transp">Whether to include transparents for shadow effects.</param>
     /// <param name="twidth">The shadow texture width.</param>
-    public SkyLight(Location pos, float radius, Location col, Location dir, float size, bool transp, int twidth)
+    public SkyLight(Location pos, float radius, Color3F col, Location dir, float size, bool transp, int twidth)
     {
         EyePos = pos;
         Radius = radius;
@@ -73,7 +73,7 @@ public class SkyLight : LightObject
         }
         InternalLights[0].TransparentShadows = transp;
         Direction = dir;
-        InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color.ToOpenTK());
+        InternalLights[0].Create(pos.ToOpenTK3D(), (pos + dir).ToOpenTK3D(), Width, Radius, Color);
         MaxDistance = radius;
         TexWidth = twidth;
         FBO = GL.GenFramebuffer();

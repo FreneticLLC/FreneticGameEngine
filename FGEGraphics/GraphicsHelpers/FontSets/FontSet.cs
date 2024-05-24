@@ -277,7 +277,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                                             else if (subTextLow.StartsWith("hover="))
                                             {
                                                 // TODO: Better newline method than this?
-                                                addedPart.HoverText = ParseFancyText(subText["hover=".Length..].Replace("\\n", "\n").BeforeAndAfter('|', out addedPart.Text), "^R^)");
+                                                addedPart.HoverText = ParseFancyText(subText["hover=".Length..].Replace("\\n", "\n").BeforeAndAfter('|', out addedPart.Text), "^r^)");
                                             }
                                             else if (subTextLow == "lb")
                                             {
@@ -441,6 +441,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             return;
         }
         StackNoteHelper.Push("FontSet - Draw fancy text", text);
+        GraphicsUtil.CheckError("FontSet - Render - PreParts");
         try
         {
             float lineY = (float)position.Y;
@@ -473,6 +474,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                         {
                             DrawRectangle(X, Y + 2f, part.Width, 2, TransModify(part.OverlineColor, transmod), ReusableTextVBO);
                         }
+                        GraphicsUtil.CheckError("FontSet - Render - Part - Boxes", line);
                         if (extraShadow)
                         {
                             foreach (Point point in ShadowPoints)
@@ -502,17 +504,20 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                                 part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
                             }
                         }
+                        GraphicsUtil.CheckError("FontSet - Render - Part - Wrap Strings", line);
                         RenderBaseText(ReusableTextVBO, X, Y, part, transmod);
+                        GraphicsUtil.CheckError("FontSet - Render - Part - Text", line);
                         if (part.Strike)
                         {
                             DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, TransModify(part.StrikeColor, transmod), ReusableTextVBO);
                         }
                         X += part.Width;
+                        GraphicsUtil.CheckError("FontSet - Render - Part - Strike", line);
                     }
                 }
                 lineY += FontDefault.Height;
             }
-            GraphicsUtil.CheckError("FontSet - Render - Pre");
+            GraphicsUtil.CheckError("FontSet - Render - PostParts");
             Engine.GLFonts.Shaders.TextCleanerShader.Bind();
             Matrix4 ortho = Engine.GetOrtho();
             GL.UniformMatrix4(1, false, ref ortho);
@@ -521,9 +526,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             ReusableTextVBO.Build();
             GraphicsUtil.CheckError("FontSet - Render - PostBuild");
             ReusableTextVBO.Render(Engine.GLFonts);
-            if (Engine.FixToShader == null)
+            if (Engine.FixToShader is null)
             {
-                Engine.GLFonts.Shaders.ColorMultShader.Bind();
+                Engine.GLFonts.Shaders.ColorMult2DShader.Bind();
             }
             else
             {

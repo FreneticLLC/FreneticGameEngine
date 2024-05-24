@@ -15,8 +15,6 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -134,21 +132,21 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     /// <param name="c">The color.</param>
     public static void SetColor(Color4F c)
     {
-        SetColor(new Vector4(c.R, c.G, c.B, c.A));
+        ShaderLocations.Common2D.COLOR.SetColor(c);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="col">The color.</param>
     public static void SetColor(Vector4 col)
     {
-        GL.Uniform4(ShaderLocations.Common2D.COLOR, ref col);
+        ShaderLocations.Common2D.COLOR.Set(col);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="c">The color.</param>
     public static void SetColor(Color4 c)
     {
-        SetColor(new Vector4(c.R, c.G, c.B, c.A));
+        ShaderLocations.Common2D.COLOR.Set(c.R, c.G, c.B, c.A);
     }
 
     /// <summary>Renders a 2D rectangle.</summary>
@@ -161,17 +159,19 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     /// <param name="rot">The rotation, if any applies.</param>
     public void RenderRectangle(RenderContext2D rc, float xmin, float ymin, float xmax, float ymax, Vector3? rot = null, bool hollow = false)
     {
+        GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Pre");
         Vector2 scaler = new(xmax - xmin, ymax - ymin);
         //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
         Vector2 adder = new(xmin, ymin);
         Vector2 tscaler = rc.Scaler * scaler;
         GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));
         Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
-        GL.Uniform2(ShaderLocations.Common2D.ADDER, tadder);
-        if (rot != null)
+        ShaderLocations.Common2D.ADDER.Set(tadder);
+        if (rot is not null)
         {
-            GL.Uniform3(ShaderLocations.Common2D.ROTATION, rot.Value);
+            ShaderLocations.Common2D.ROTATION.Set(rot.Value);
         }
+        GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Setup");
         if (hollow || (rc.CalcShadows && rc.Engine.OneDLights))
         {
             GL.BindVertexArray(SquareOfLines.Internal.VAO);
@@ -182,9 +182,10 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
             GL.BindVertexArray(Square.Internal.VAO);
             GL.DrawElements(PrimitiveType.TriangleStrip, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);
         }
-        if (rot != null)
+        if (rot is not null)
         {
-            GL.Uniform3(ShaderLocations.Common2D.ROTATION, Vector3.Zero);
+            ShaderLocations.Common2D.ROTATION.Set(Vector3.Zero);
         }
+        GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Post");
     }
 }

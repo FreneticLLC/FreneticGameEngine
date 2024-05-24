@@ -22,24 +22,21 @@ namespace FGECore.MathHelpers;
 /// Represents a 3-piece floating point color.
 /// Occupies 12 bytes, calculated as 4 * 3, as it has 3 fields (R, G, B) each occupying 4 bytes (a float).
 /// </summary>
-/// <param name="_r">Red.</param>
-/// <param name="_g">Green.</param>
-/// <param name="_b">Blue.</param>
 [StructLayout(LayoutKind.Explicit)]
-public struct Color3F(float _r, float _g, float _b)
+public struct Color3F
 {
 
     /// <summary>The red component.</summary>
     [FieldOffset(0)]
-    public float R = _r;
+    public float R;
 
     /// <summary>The green component.</summary>
     [FieldOffset(4)]
-    public float G = _g;
+    public float G;
 
     /// <summary>The blue component.</summary>
     [FieldOffset(8)]
-    public float B = _b;
+    public float B;
 
     /// <summary>Integer R.</summary>
     public int IR
@@ -80,8 +77,29 @@ public struct Color3F(float _r, float _g, float _b)
         }
     }
 
+    /// <summary>Returns the average value of the R, G, and B components of this color. That is, (R+G+B)/3.</summary>
+    public readonly float AverageValue => (R + G + B) * (1f / 3f);
+
+    /// <summary>Returns the squared strength of this color, equivalent to LengthSquared of a vector. That is, R^2 + G^2 + B^2.</summary>
+    public readonly float StrengthSquared => (R * R) + (G * G) + (B * B);
+
+    /// <summary>Constructs a basic <see cref="Color3F"/>.</summary>
+    public Color3F(float red, float green, float blue)
+    {
+        R = red;
+        G = green;
+        B = blue;
+    }
+
+    /// <summary>Constructs a <see cref="Color3F"/> from a <see cref="Location"/> (using X, Y, Z as R, G, B).</summary>
+    public Color3F(Location loc)
+    {
+        R = loc.XF;
+        G = loc.YF;
+        B = loc.ZF;
+    }
+
     /// <summary>Returns a 12-byte set representation of this color.</summary>
-    /// <returns>The color bytes.</returns>
     public readonly byte[] ToBytes()
     {
         byte[] b = new byte[12];
@@ -90,7 +108,6 @@ public struct Color3F(float _r, float _g, float _b)
     }
 
     /// <summary>Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.</summary>
-    /// <returns>The location value.</returns>
     public readonly Location ToLocation() => new(R, G, B);
 
     /// <summary>
@@ -112,7 +129,6 @@ public struct Color3F(float _r, float _g, float _b)
     /// </summary>
     /// <param name="b">The byte input.</param>
     /// <param name="offset">The offset in the byte array.</param>
-    /// <returns>The color.</returns>
     public static Color3F FromBytes(byte[] b, int offset = 0)
     {
         return new Color3F(
@@ -123,13 +139,12 @@ public struct Color3F(float _r, float _g, float _b)
     }
 
     /// <summary>Returns a string form of this color.</summary>
-    /// <returns>The string form.</returns>
     public override readonly string ToString() => $"({R}, {G}, {B})";
 
+    /// <summary>Adds two colors together.</summary>
+    public static Color3F operator +(Color3F c1, Color3F c2) => new(c1.R + c2.R, c1.G + c2.G, c1.B + c2.B);
+
     /// <summary>Multiplies a color by a scale.</summary>
-    /// <param name="v">The color.</param>
-    /// <param name="scale">The scale.</param>
-    /// <returns>Result.</returns>
     public static Color3F operator *(Color3F v, float scale) => new(v.R * scale, v.G * scale, v.B * scale);
 
     /// <summary>Sample Color3F (1, 1, 1).</summary>

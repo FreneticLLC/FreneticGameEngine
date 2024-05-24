@@ -41,9 +41,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FreneticLLC.FreneticUtilities" Version="1.0.24" />
-    <PackageReference Include="K4os.Compression.LZ4" Version="1.3.6" />
-    <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.3.6" />
+    <PackageReference Include="FreneticLLC.FreneticUtilities" Version="1.0.29" />
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
+    <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.3.8" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
   </ItemGroup>

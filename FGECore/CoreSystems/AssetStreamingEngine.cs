@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FGECore.FileSystems;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.CoreSystems;
 
@@ -33,13 +34,13 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
 
     /// <summary>
     /// All currently waiting asset streaming goals.
-    /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
+    /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
     /// </summary>
     public ConcurrentQueue<StreamGoal> Goals = new();
 
     /// <summary>
     /// Reset event for when the files thread has more goals to process.
-    /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string})"/>.
+    /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
     /// </summary>
     public AutoResetEvent GoalWaitingReset = new(false);
 
@@ -66,6 +67,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         /// <summary>The name of the file to load. MUST be set.</summary>
         public string FileName;
 
+        /// <summary>Optional, alternate file extensions that will be accepted.</summary>
+        public string[] AltExtensions;
+
         /// <summary>
         /// Action to call in the case of an error. The first parameter is the error message.
         /// If unset, errors go to the <see cref="SysConsole"/>.
@@ -89,13 +93,13 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         {
             try
             {
-                if (OnFileMissing != null)
+                if (OnFileMissing is not null)
                 {
                     OnFileMissing();
                 }
                 else
                 {
-                    HandleError("File '" + FileName + "' not found.");
+                    HandleError($"File '{FileName}' not found.");
                 }
             }
             catch (Exception ex2)
@@ -110,7 +114,7 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         {
             try
             {
-                if (OnError != null)
+                if (OnError is not null)
                 {
                     OnError(message);
                 }
@@ -150,8 +154,24 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         {
             if (!Files.TryReadFileData(goal.FileName, out byte[] data))
             {
-                goal.HandleFileMissing();
-                return;
+                bool found = false;
+                if (goal.AltExtensions is not null)
+                {
+                    string noExt = goal.FileName.BeforeLast('.');
+                    foreach (string ext in goal.AltExtensions)
+                    {
+                        if (Files.TryReadFileData($"{noExt}.{ext}", out data))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found)
+                {
+                    goal.HandleFileMissing();
+                    return;
+                }
             }
             void CallProcData()
             {
@@ -178,8 +198,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
     /// <param name="processAction">Called to process the file data once loaded.</param>
     /// <param name="onFileMissing">(Optional) called to handle a file-missing situation.</param>
     /// <param name="onError">(Optional) called to handle an error message. If unset, errors go to the <see cref="SysConsole"/>.</param>
+    /// <param name="altExtensions">Alternate file extensions that are also acceptable.</param>
     /// <returns>The created <see cref="StreamGoal"/>.</returns>
-    public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null)
+    public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null, string[] altExtensions = null)
     {
         StreamGoal goal = new()
         {
@@ -187,7 +208,8 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
             ShouldSyncToMainThread = processOnMainThread,
             ProcessData = processAction,
             OnFileMissing = onFileMissing,
-            OnError = onError
+            OnError = onError,
+            AltExtensions = altExtensions
         };
         Goals.Enqueue(goal);
         GoalWaitingReset.Set();

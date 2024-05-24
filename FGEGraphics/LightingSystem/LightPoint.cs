@@ -30,7 +30,7 @@ class LightPoint : Light
     /// <param name="fov">Field of view.</param>
     /// <param name="max_range">Maximum range.</param>
     /// <param name="col">Color.</param>
-    public void Setup(Vector3d pos, Vector3d targ, float fov, float max_range, Vector3 col)
+    public void Setup(Vector3d pos, Vector3d targ, float fov, float max_range, Color3F col)
     {
         EyePosition = pos;
         TargetPosition = targ;

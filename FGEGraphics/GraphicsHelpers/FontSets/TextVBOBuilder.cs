@@ -69,21 +69,21 @@ public struct TextVBOBuilder
     /// <summary>Destroys the internal VBO, so this can be safely deleted.</summary>
     public void Destroy()
     {
-        GL.DeleteBuffer(VBO);
-        GL.DeleteBuffer(VBOTexCoords);
-        GL.DeleteBuffer(VBOColors);
-        GL.DeleteBuffer(VBOIndices);
-        GL.DeleteVertexArray(VAO);
+        GraphicsUtil.DeleteBuffer(VBO);
+        GraphicsUtil.DeleteBuffer(VBOTexCoords);
+        GraphicsUtil.DeleteBuffer(VBOColors);
+        GraphicsUtil.DeleteBuffer(VBOIndices);
+        GraphicsUtil.DeleteVertexArray(VAO);
         hasBuffers = false;
     }
 
     /// <summary>Builds the buffers pre-emptively.</summary>
     public void BuildBuffers()
     {
-        GL.GenBuffers(1, out VBO);
-        GL.GenBuffers(1, out VBOTexCoords);
-        GL.GenBuffers(1, out VBOColors);
-        GL.GenBuffers(1, out VBOIndices);
+        VBO = GraphicsUtil.GenBuffer("TextVBO_VBO");
+        VBOTexCoords = GraphicsUtil.GenBuffer("TextVBO_VBOTexCoords");
+        VBOColors = GraphicsUtil.GenBuffer("TextVBO_VBOColors");
+        VBOIndices = GraphicsUtil.GenBuffer("TextVBO_VBOIndices");
         GL.GenVertexArrays(1, out VAO);
         hasBuffers = true;
     }

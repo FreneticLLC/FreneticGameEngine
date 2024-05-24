@@ -35,7 +35,7 @@ layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, r
 layout (location = 16) uniform float fogDist = 1.0 / 100000.0; // The distance fog should be around.
 layout (location = 17) uniform vec2 zdist = vec2(0.1, 1000.0); // The Z-Near and Z-Far value of the 3D projection.
 layout (location = 18) uniform vec4 fogCol = vec4(0.0); // What color any fog to apply is. For no fog, the alpha value will be zero.
-layout (location = 19) uniform float desaturationAmount = 0.0; // How much to desaturation the view by. 1.0 = fully desaturated.
+layout (location = 19) uniform float desaturationAmount = 0.0; // How much to desaturate the view by. 1.0 = fully desaturated.
 layout (location = 20) uniform vec3 eye_position = vec3(0.0); // What position the eye of the 3D camera view is at in the world.
 layout (location = 21) uniform vec3 desaturationColor = vec3(0.95, 0.77, 0.55); // What color to desaturate too. Default is an orange-ish color.
 layout (location = 22) uniform mat4 proj_mat = mat4(1.0); // The full 3D projection matrix.
@@ -161,13 +161,13 @@ void main() // The central entry point of the shader. Handles everything!
 	// This section applies toonify if it is enabled generally.
 #if MCM_TOONIFY
 	// TODO: Toonify option per pixel: block paint?
-    vec3 vHSV = RGBtoHSV(light_color.x, light_color.y, light_color.z);
-    vHSV.x = nearestLevel(vHSV.x, 0);
-    vHSV.y = nearestLevel(vHSV.y, 1);
-    vHSV.z = nearestLevel(vHSV.z, 2);
-    float edg = IsEdge(f_texcoord, hdrExposure, mblen);
-    vec3 vRGB = (edg >= edge_thres) ? vec3(0.0, 0.0, 0.0) : HSVtoRGB(vHSV.x, vHSV.y, vHSV.z);
-    light_color = vec4(vRGB.x, vRGB.y, vRGB.z, light_color.w);
+	vec3 vHSV = RGBtoHSV(light_color.x, light_color.y, light_color.z);
+	vHSV.x = nearestLevel(vHSV.x, 0);
+	vHSV.y = nearestLevel(vHSV.y, 1);
+	vHSV.z = nearestLevel(vHSV.z, 2);
+	float edg = IsEdge(f_texcoord, hdrExposure, mblen);
+	vec3 vRGB = (edg >= edge_thres) ? vec3(0.0, 0.0, 0.0) : HSVtoRGB(vHSV.x, vHSV.y, vHSV.z);
+	light_color = vec4(vRGB.x, vRGB.y, vRGB.z, light_color.w);
 	// TODO: Maybe just return here?
 #endif
 	// Fancy effects are only available to quality graphics cards. Cut out quick if one's not available.

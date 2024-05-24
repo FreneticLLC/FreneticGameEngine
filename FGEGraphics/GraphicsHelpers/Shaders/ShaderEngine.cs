@@ -43,6 +43,9 @@ public class ShaderEngine
     /// <summary>The backing file engine.</summary>
     public FileEngine Files;
 
+    /// <summary>What shader is currently bound.</summary>
+    public static Shader BoundNow = null;
+
     /// <summary>Starts or restarts the shader system.</summary>
     /// <param name="files">The backing file engine.</param>
     public void InitShaderSystem(FileEngine files)
@@ -312,7 +315,7 @@ public class ShaderEngine
         if (SHD_Status != 1)
         {
 #if DEBUG
-            File.WriteAllText($"temp_shd_{fileName}.txt", fileText);
+            File.WriteAllText($"temp_shd_{fileName.Replace('\\', '/').Replace("/", "_")}.txt", fileText);
 #endif
             throw new Exception($"Error creating ComputeShader '{fileName}'. Error status: {SHD_Status}, info: {SHD_Info}");
         }

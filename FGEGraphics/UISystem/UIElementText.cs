@@ -161,6 +161,7 @@ public class UIElementText
         }
     }
 
+    // TODO: make these not NPE when empty
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the current style.
     /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.

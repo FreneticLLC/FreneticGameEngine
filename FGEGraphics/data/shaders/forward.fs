@@ -65,16 +65,18 @@ layout (location = 4) uniform vec4 screen_size = vec4(1024, 1024, 0.1, 1000.0);
 // ...
 layout (location = 6) uniform float time;
 // ...
-layout (location = 10) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
-layout (location = 11) uniform vec3 maximum_light = vec3(0.9, 0.9, 0.9);
 layout (location = 12) uniform vec4 fogCol = vec4(0.0);
 layout (location = 13) uniform float fogDist = 1.0 / 100000.0;
 layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 layout (location = 15) uniform float lights_used = 0.0;
 layout (location = 16) uniform float minimum_light = 0.2;
+layout (location = 18) uniform vec3 sunlightDir = vec3(0.0, 0.0, -1.0);
+layout (location = 19) uniform vec3 sunlightColor = vec3(1.0);
+layout (location = 20) uniform vec3 sunlightDir2 = vec3(0.0, 0.0, -1.0);
+layout (location = 21) uniform vec3 sunlightColor2 = vec3(0.0);
 #if MCM_LIGHTS
-layout (location = 20) uniform mat4 shadow_matrix_array[LIGHTS_MAX];
-layout (location = 52) uniform mat4 light_data_array[LIGHTS_MAX];
+layout (location = 25) uniform mat4 shadow_matrix_array[LIGHTS_MAX];
+layout (location = 57) uniform mat4 light_data_array[LIGHTS_MAX];
 #endif
 
 layout (location = 0) out vec4 color;
@@ -87,12 +89,20 @@ float snoise2(in vec3 v);
 
 vec4 unused_nonsense() // Prevent shader compiler from claiming variables are unused (Even if they /are/ unused!)
 {
-	return screen_size + fogCol;
+	vec3 sunlights = sunlightDir + sunlightDir2 + sunlightColor + sunlightColor2 + cameraPos;
+	return screen_size + fogCol + vec4(sunlights, time);
 }
 
 float linearizeDepth(in float rinput) // Convert standard depth (stretched) to a linear distance (still from 0.0 to 1.0).
 {
 	return (2.0 * screen_size.z) / (screen_size.w + screen_size.z - rinput * (screen_size.w - screen_size.z));
+}
+
+vec4 calcLight(in vec3 normal, in vec3 lightPathNorm, in vec3 relPos, in float diffuseAlbedo, in float specularAlbedo, in float specularStrength, in float atten, in vec3 lightColor)
+{
+	vec3 diffuse = max(dot(normal, lightPathNorm), 0.0) * vec3(diffuseAlbedo);
+	float specular = max(0.0, pow(max(dot(reflect(lightPathNorm, -normal), normalize(relPos)), 0.0), 16.0) * specularAlbedo * specularStrength);
+	return vec4((vec3(atten) * (diffuse * lightColor) * color.xyz) + (vec3(min(specular, 1.0)) * lightColor * atten), specular);
 }
 
 void applyFog()
@@ -101,19 +111,18 @@ void applyFog()
 	float fmza = 1.0 - max(min((fi.pos.z - 1000.0) / 2000.0, 1.0), 0.0);
 	color.xyz = min(color.xyz * (1.0 - fmza) + fogCol.xyz * fmza, vec3(1.0));
 #endif
+	float fogW = fogCol.w;
 #if MCM_BRIGHT
-	if (fogCol.w > 1.0)
+	fogW -= 1.0;
 #endif
-	{
-		vec3 pos = fi.pos - cameraPos;
-		float dist = pow(dot(pos, pos) * fogDist, 0.6);
-		float fogMod = dist * exp(fogCol.w) * fogCol.w;
-		float fmz = min(fogMod, 1.0);
+	vec3 pos = fi.pos - cameraPos;
+	float dist = pow(dot(pos, pos) * fogDist, 0.6);
+	float fogMod = dist * exp(fogW) * fogW;
+	float fmz = min(fogMod, 1.0);
 #if MCM_SPECIAL_FOG
-		fmz *= fmz * fmz * fmz;
+	fmz *= fmz * fmz * fmz;
 #endif
-		color.xyz = min(color.xyz * (1.0 - fmz) + fogCol.xyz * fmz, vec3(1.0));
-	}
+	color.xyz = min(color.xyz * (1.0 - fmz) + fogCol.xyz * fmz, vec3(1.0));
 }
 
 float fix_sqr(in float inTemp)
@@ -301,19 +310,17 @@ void main()
 		const float depth = 1.0;
 #endif // else - MCM_SHADOWS
 #endif // else - MCM_SIMPLE_LIGHT
-		vec3 L = light_path / light_length; // Get the light's movement direction as a vector
-		vec3 diffuse = max(dot(tf_normal, L), 0.0) * vec3(diffuse_albedo); // Find out how much diffuse light to apply
-		vec3 reller = normalize(fi.pos - eye_pos);
-		float spec_res = pow(max(dot(reflect(L, -tf_normal), reller), 0.0), 200.0) * specular_albedo * specularStrength;
-		opac_min += spec_res;
-		vec3 specular = vec3(spec_res); // Find out how much specular light to apply.
-		res_color += (vec3(depth, depth, depth) * atten * (diffuse * light_color) * color.xyz) + (min(specular, 1.0) * light_color * atten * depth); // Put it all together now.
+		vec4 contrib = calcLight(tf_normal, light_path / light_length, fi.pos - eye_pos, diffuse_albedo, specular_albedo, specularStrength, depth * atten, light_color);
+		res_color += contrib.xyz;
+		opac_min += contrib.w;
 	}
 	color.xyz = min(res_color * (1.0 - max(0.2, minimum_light)) + color.xyz * max(0.2, minimum_light), vec3(1.0));
 #else // MCM_LIGHTS
-	float dotted = dot(-tf_normal, sunlightDir);
-	dotted = dotted <= 0.0 ? 0.0 : sqrt(dotted);
-	color.xyz *= min(max(dotted * maximum_light, max(0.2, minimum_light)), 1.0) * 0.75;
+	vec4 sunContrib = calcLight(tf_normal, -sunlightDir, fi.pos - cameraPos, 1.0, 1.0, specularStrength, 1.0, sunlightColor);
+	vec4 sunContrib2 = calcLight(tf_normal, -sunlightDir2, fi.pos - cameraPos, 1.0, 1.0, specularStrength, 1.0, sunlightColor2);
+	vec3 res_color = sunContrib.xyz + sunContrib2.xyz;
+	opac_min += sunContrib.w + sunContrib2.w;
+	color.xyz = min(res_color * (1.0 - max(0.2, minimum_light)) + color.xyz * max(0.2, minimum_light), vec3(1.0));
 #endif // else - MCM_LIGHTS
 #endif // else - MCM_BRIGHT
 	applyFog();

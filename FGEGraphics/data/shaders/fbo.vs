@@ -83,7 +83,7 @@ void main()
 #else
 	f.texcoord = texcoords.xy;
 #endif
-    f.color = color * v_color;
+	f.color = color * v_color;
 	gl_Position = mv_matrix * vec4(pos1.xyz, 1.0);
 #else
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
@@ -112,7 +112,7 @@ void main()
 	fi.texcoord = texcoords.xy;
 	fi.position = mv_matrix * vec4(pos1.xyz, 1.0);
 	fi.position /= fi.position.w;
-    fi.color = color_for(fi.position, color * v_color);
+	fi.color = color_for(fi.position, color * v_color);
 	gl_Position = proj_matrix * mv_matrix * vec4(pos1.xyz, 1.0);
 	mat4 mv_mat_simple = mv_matrix;
 	mv_mat_simple[3][0] = 0.0;

@@ -61,10 +61,10 @@ public class EntitySkyLight3DProperty : ClientEntityProperty
     [PropertyAutoSavable]
     public float Size = 128f;
 
-    /// <summary>The current color of the light as (X,Y,Z) => (R,G,B).</summary>
+    /// <summary>The current color of the light.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public Location LightColor = Location.One * 0.75;
+    public Color3F LightColor = Color3F.White * 0.75f;
 
     /// <summary>The represented 3D sky light.</summary>
     public SkyLight InternalLight;

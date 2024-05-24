@@ -178,7 +178,7 @@ public class RenderableTextLine
 public class RenderableText()
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
-    public static readonly RenderableText Empty = new();
+    public static readonly RenderableText Empty = new() { Lines = [], Width = 0 };
 
     /// <summary>An array of all lines of text.</summary>
     public RenderableTextLine[] Lines;

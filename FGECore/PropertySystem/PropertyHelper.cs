@@ -262,7 +262,7 @@ public abstract class PropertyHelper
         ilgen.Emit(OpCodes.Ret);
         generatedType.DefineMethodOverride(debugTypedMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutputTyped);
         // Create a helper method that automatically type-casts.
-        MethodBuilder debugOutMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(Object), typeof(Dictionary<string, string>) });
+        MethodBuilder debugOutMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), [typeof(object), typeof(Dictionary<string, string>)]);
         ILGenerator ilgen2 = debugOutMethodBuilder.GetILGenerator();
         ilgen2.Emit(OpCodes.Ldarg_0);
         ilgen2.Emit(OpCodes.Ldarg_1);
@@ -351,7 +351,7 @@ public abstract class PropertyHelper
         public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), []);
 
         /// <summary>The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.</summary>
-        public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), new Type[] { typeof(string), typeof(string) });
+        public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), [typeof(string), typeof(string)]);
 
         /// <summary>The <see cref="GetDebuggableInfoOutput"/> method.</summary>
         public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutput));

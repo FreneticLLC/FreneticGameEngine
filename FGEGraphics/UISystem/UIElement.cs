@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
-using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -537,8 +536,8 @@ public abstract class UIElement
     /// <param name="y">The Y position of the mouse.</param>
     public void MouseLeftUpOutside(int x, int y)
     {
-        MouseLeftUp();
-        foreach (UIElement child in GetChildrenAt(x, y))
+        MouseLeftUpOutside();
+        foreach (UIElement child in GetChildrenNotAt(x, y))
         {
             child.MouseLeftUpOutside(x, y);
         }

@@ -11,9 +11,9 @@ namespace FGEGraphics.UISystem;
 public abstract class UIClickableElement : UIElement
 {
     /// <summary>Grouped styles for a <see cref="UIClickableElement"/>.</summary>
-    /// <param name="normal"></param>
-    /// <param name="hover"></param>
-    /// <param name="click"></param>
+    /// <param name="normal">The default style to use.</param>
+    /// <param name="hover">The style to use on hover.</param>
+    /// <param name="click">The style to use on click.</param>
     public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click)
     {
         /// <summary>An empty style group.</summary>
