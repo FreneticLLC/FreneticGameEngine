@@ -14,7 +14,6 @@ using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FGEGraphics.UISystem;
 
@@ -36,8 +35,11 @@ public class UIElementText
         /// <summary>The maximum total width of this text, if any.</summary>
         public int MaxWidth;
 
-        /// <summary>A style/renderable pair internal to this text object.</summary>
-        public (UIElementStyle Style, RenderableText Text) InternalRenderable;
+        /// <summary>A renderable text object internal to this text.</summary>
+        public RenderableText InternalRenderable;
+
+        /// <summary>An element style internal to this text.</summary>
+        public UIElementStyle InternalStyle;
 
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
@@ -54,7 +56,7 @@ public class UIElementText
     public bool Empty => (Internal.Content?.Length ?? 0) == 0;
 
     /// <summary>The UI style to use for rendering this text.</summary>
-    public UIElementStyle CurrentStyle => Internal.InternalRenderable.Style ?? Internal.ParentElement.ElementInternal.CurrentStyle;
+    public UIElementStyle CurrentStyle => Internal.InternalStyle ?? Internal.ParentElement.ElementInternal.CurrentStyle;
 
     /// <summary>Whether the text is required to display some content.</summary>
     public bool Required;
@@ -83,7 +85,8 @@ public class UIElementText
             ParentElement = parent,
             Content = content,
             MaxWidth = maxWidth,
-            InternalRenderable = (style, null)
+            InternalStyle = style,
+            InternalRenderable = null
         };
         Required = required;
         HorizontalAlignment = horizontalAlignment;
@@ -116,9 +119,9 @@ public class UIElementText
         {
             return;
         }
-        if (Internal.InternalRenderable.Style is UIElementStyle internalStyle)
+        if (Internal.InternalStyle is UIElementStyle internalStyle)
         {
-            Internal.InternalRenderable.Text = CreateRenderable(internalStyle);
+            Internal.InternalRenderable = CreateRenderable(internalStyle);
             return;
         }
         Internal.RenderableContent = [];
@@ -140,7 +143,7 @@ public class UIElementText
             Internal.Content = value ?? (Required ? Null : null);
             if (Empty)
             {
-                Internal.InternalRenderable.Text = null;
+                Internal.InternalRenderable = null;
                 Internal.RenderableContent = null;
             }
             else
@@ -167,7 +170,7 @@ public class UIElementText
     /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
     public RenderableText Renderable => !Empty 
-        ? Internal.InternalRenderable.Text ?? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) 
+        ? Internal.InternalRenderable ?? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) 
         : RenderableText.Empty;
 
     /// <summary>The total width of the text.</summary>
@@ -193,7 +196,7 @@ public class UIElementText
     /// <param name="Font">The font to render the chain piece with.</param>
     /// <param name="Text">The chain piece text.</param>
     /// <param name="YOffset">The y-offset relative to the first piece.</param>
-    /// <param name="SkippedIndices"></param>
+    /// <param name="SkippedIndices">A list of character indices ignored in <see cref="FontSet.SplitLineAppropriately(RenderableTextLine, float, out List{int})"/>.</param>
     public record ChainPiece(FontSet Font, RenderableText Text, float YOffset, List<int> SkippedIndices);
 
     /// <summary>
@@ -212,7 +215,7 @@ public class UIElementText
             {
                 continue;
             }
-            List<RenderableTextLine> textLines = [.. text.Renderable.Lines.ToList()];
+            List<RenderableTextLine> textLines = [.. text.Renderable.Lines];
             if (lines.Count != 0)
             {
                 RenderableTextLine combinedLine = new()

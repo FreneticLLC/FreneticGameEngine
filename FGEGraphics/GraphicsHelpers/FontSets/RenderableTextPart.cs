@@ -237,7 +237,7 @@ public class EditableTextLine(List<RenderableTextPart> parts, float width, int l
     }
 
     /// <summary>Appends another text line.</summary>
-    /// <param name="line"></param>
+    /// <param name="line">The text line to add.</param>
     public void AddLine(EditableTextLine line)
     {
         Parts.AddRange(line.Parts);

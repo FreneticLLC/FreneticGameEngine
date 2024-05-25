@@ -44,7 +44,7 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>The text to display when the input is empty.</summary>
-    public UIElementText Info;
+    public UIElementText PlaceholderInfo;
 
     /// <summary>The UI style of normal input content.</summary>
     public UIElementStyle InputStyle;
@@ -65,7 +65,7 @@ public class UIInputLabel : UIClickableElement
     public Action<string> TextSubmitted;
 
     /// <summary>Fired when the user de-selects the input label.</summary>
-    public Action Closed;
+    public Action Deselected;
     
     /// <summary>Gets or sets the input text content.</summary>
     public string TextContent
@@ -85,25 +85,25 @@ public class UIInputLabel : UIClickableElement
     public struct InternalData()
     {
         /// <summary>The raw text content.</summary>
-        public string TextContent = string.Empty;
+        public string TextContent = "";
 
-        /// <summary>The left cursor position. Acts as an anchorpoint for the right cursor.</summary>
-        public int CursorLeft = 0;
+        /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
+        public int CursorStart = 0;
 
-        /// <summary>The right cursor position.</summary>
-        public int CursorRight = 0;
+        /// <summary>The end cursor position.</summary>
+        public int CursorEnd = 0;
 
         /// <summary>The drawn cursor offset location.</summary>
         public Location CursorOffset;
 
         /// <summary>The minimum cursor position.</summary>
-        public readonly int IndexLeft => CursorLeft < CursorRight ? CursorLeft : CursorRight;
+        public readonly int IndexLeft => CursorStart < CursorEnd ? CursorStart : CursorEnd;
 
         /// <summary>The maximum cursor position.</summary>
-        public readonly int IndexRight => CursorRight > CursorLeft ? CursorRight : CursorLeft;
+        public readonly int IndexRight => CursorEnd > CursorStart ? CursorEnd : CursorStart;
 
         /// <summary>Whether a string of text is selected between the indices.</summary>
-        public readonly bool IsSelection => CursorLeft != CursorRight;
+        public readonly bool HasSelection => CursorStart != CursorEnd;
 
         /// <summary>The text preceding <see cref="IndexLeft"/>.</summary>
         public UIElementText TextLeft;
@@ -119,13 +119,13 @@ public class UIInputLabel : UIClickableElement
         
         /// <summary>Sets both cursor positions at a single index.</summary>
         /// <param name="cursorPos">The cursor positions.</param>
-        public void SetPosition(int cursorPos) => CursorLeft = CursorRight = cursorPos;
+        public void SetPosition(int cursorPos) => CursorStart = CursorEnd = cursorPos;
         
-        /// <summary>Clamps the cursor positionst to the <see cref="TextContent"/> bounds.</summary>
+        /// <summary>Clamps the cursor positions to the <see cref="TextContent"/> bounds.</summary>
         public void ClampPositions()
         {
-            CursorLeft = Math.Clamp(CursorLeft, 0, TextContent.Length);
-            CursorRight = Math.Clamp(CursorRight, 0, TextContent.Length);
+            CursorStart = Math.Clamp(CursorStart, 0, TextContent.Length);
+            CursorEnd = Math.Clamp(CursorEnd, 0, TextContent.Length);
         }
 
         /// <summary>Sets the input text content.</summary>
@@ -136,7 +136,7 @@ public class UIInputLabel : UIClickableElement
             {
                 return;
             }
-            TextContent = content ?? string.Empty;
+            TextContent = content ?? "";
             ClampPositions();
         }
 
@@ -188,22 +188,22 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>Constructs an input label.</summary>
-    /// <param name="info">The text to display when the input is empty.</param>
+    /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
     /// <param name="infoStyles">The clickable styles for the info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIInputLabel(string info, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: info.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: placeholderInfo.Length > 0)
     {
         InputStyle = inputStyle ?? infoStyles.Normal;
         HighlightStyle = highlightStyle ?? infoStyles.Click;
-        Info = new(this, info, true);
+        PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
-        Closed += HandleClose;
+        Deselected += HandleClose;
     }
 
     /// <inheritdoc/>
@@ -229,14 +229,14 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void MouseLeftDownOutside() => Closed?.Invoke();
+    public override void MouseLeftDownOutside() => Deselected?.Invoke();
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
     public void UpdateText()
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
-        Internal.CursorOffset = Internal.IsSelection ? Location.NaN : Internal.GetCursorOffset();
+        Internal.CursorOffset = Internal.HasSelection ? Location.NaN : Internal.GetCursorOffset();
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -267,7 +267,7 @@ public class UIInputLabel : UIClickableElement
     public void AddText(string text, int indexLeft, int indexRight)
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
-        Internal.CursorRight = Internal.CursorLeft += text.Length;
+        Internal.CursorEnd = Internal.CursorStart += text.Length;
         EditText(EditType.Add, text, result);
     }
 
@@ -292,7 +292,7 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        if (Internal.IsSelection)
+        if (Internal.HasSelection)
         {
             DeleteText(Internal.IndexLeft, Internal.IndexRight);
             keys.InitBS--;
@@ -324,14 +324,19 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        bool wasSelection = Internal.IsSelection && !shiftDown;
-        Internal.CursorRight = keys.LeftRights < 0
-            ? (wasSelection ? Internal.IndexLeft : Math.Max(Internal.CursorRight + keys.LeftRights, 0))
-            : (wasSelection ? Internal.IndexRight : Math.Min(Internal.CursorRight + keys.LeftRights, TextContent.Length));
+        if (Internal.HasSelection && !shiftDown)
+        {
+            Internal.CursorEnd = keys.LeftRights < 0 ? Internal.IndexLeft : Internal.IndexRight;
+        }
+        else
+        {
+            Internal.CursorEnd += keys.LeftRights;
+        }
         if (!shiftDown)
         {
-            Internal.CursorLeft = Internal.CursorRight;
+            Internal.CursorStart = Internal.CursorEnd;
         }
+        Internal.ClampPositions();
         UpdateText();
     }
 
@@ -341,14 +346,14 @@ public class UIInputLabel : UIClickableElement
     // TODO: Account for formatting codes
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
-        if (Internal.CursorRight == cursorPos && MousePreviouslyDown == shiftDown)
+        if (Internal.CursorEnd == cursorPos && MousePreviouslyDown == shiftDown)
         {
             return;
         }
-        Internal.CursorRight = Math.Max(cursorPos, 0);
+        Internal.CursorEnd = Math.Max(cursorPos, 0);
         if (!MousePreviouslyDown && !shiftDown)
         {
-            Internal.CursorLeft = Internal.CursorRight;
+            Internal.CursorStart = Internal.CursorEnd;
         }
         UpdateText();
     }
@@ -406,14 +411,14 @@ public class UIInputLabel : UIClickableElement
     /// <param name="keys">The current keyboard state.</param>
     public void TickControlKeys(KeyHandlerState keys)
     {
-        if (keys.CopyPressed && Internal.IsSelection)
+        if (keys.CopyPressed && Internal.HasSelection)
         {
             TextCopy.ClipboardService.SetText(Internal.TextBetween.Content);
         }
         if (keys.AllPressed)
         {
-            Internal.CursorLeft = 0;
-            Internal.CursorRight = TextContent.Length;
+            Internal.CursorStart = 0;
+            Internal.CursorEnd = TextContent.Length;
             UpdateText();
         }
     }
@@ -429,7 +434,7 @@ public class UIInputLabel : UIClickableElement
         KeyHandlerState keys = Window.Keyboard.BuildingState;
         if (keys.Escaped)
         {
-            Closed?.Invoke();
+            Deselected?.Invoke();
             return;
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
@@ -439,22 +444,23 @@ public class UIInputLabel : UIClickableElement
         TickMouse(shiftDown);
         TickControlKeys(keys);
         // TODO: Handle ctrl+Z, ctrl+Y
+        // TODO: Handle HOME, END
     }
 
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         bool isInfo = TextContent.Length == 0;
-        bool renderInfo = isInfo && style.CanRenderText(Info);
+        bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(Info, Info.GetPosition(X, Y));
+            style.TextFont.DrawFancyText(PlaceholderInfo, PlaceholderInfo.GetPosition(X, Y));
         }
         else
         {
             UIElementText.RenderChain(Internal.TextChain, X, Y);
         }
-        if (!Selected || Internal.IsSelection)
+        if (!Selected || Internal.HasSelection)
         {
             return;
         }
@@ -462,7 +468,7 @@ public class UIInputLabel : UIClickableElement
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
-        int lineHeight = (renderInfo ? Info : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
         view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
