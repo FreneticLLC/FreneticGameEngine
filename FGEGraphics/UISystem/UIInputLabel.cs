@@ -114,7 +114,7 @@ public class UIInputLabel : UIClickableElement
         /// <summary>The text following <see cref="IndexRight"/>.</summary>
         public UIElementText TextRight;
 
-        /// <summary>A chain of <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
+        /// <summary>A text chain generated from <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
         public List<UIElementText.ChainPiece> TextChain;
         
         /// <summary>Sets both cursor positions at a single index.</summary>
@@ -132,12 +132,11 @@ public class UIInputLabel : UIClickableElement
         /// <param name="content">The new text content.</param>
         public void SetTextContent(string content)
         {
-            if (TextContent == content)
+            if (TextContent != content)
             {
-                return;
+                TextContent = content ?? "";
+                ClampPositions();
             }
-            TextContent = content ?? "";
-            ClampPositions();
         }
 
         /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -148,7 +147,7 @@ public class UIInputLabel : UIClickableElement
             TextRight.Content = TextContent[IndexRight..];
         }
 
-        /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>.</summary>
+        /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>, or <see cref="Location.NaN"/> if none.</summary>
         // TODO: Account for formatting codes
         public readonly Location GetCursorOffset()
         {
@@ -203,7 +202,7 @@ public class UIInputLabel : UIClickableElement
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
-        Deselected += HandleClose;
+        Deselected += HandleDeselect;
     }
 
     /// <inheritdoc/>
@@ -220,9 +219,10 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>Submits and de-selects the input label.</summary>
-    public void HandleClose()
+    public void HandleDeselect()
     {
         SubmitText();
+        Internal.SetPosition(0);
         Selected = false;
         Enabled = true;
         Pressed = false;
@@ -282,7 +282,7 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>Submits the current text content.</summary>
-    public void SubmitText() => EditText(EditType.Submit, string.Empty, TextContent);
+    public void SubmitText() => EditText(EditType.Submit, "", TextContent);
 
     /// <summary>Deletes text based on the <see cref="KeyHandlerState.InitBS"/> value.</summary>
     /// <param name="keys">The current keyboard state.</param>
