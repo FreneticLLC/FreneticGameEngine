@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGEGraphics.UISystem;
 
@@ -41,6 +42,10 @@ public class UINumberInputLabel : UIInputLabel
         TextContent = initial.ToString(Format);
     }
 
+    /// <summary>Returns whether a character can be added to this label.</summary>
+    /// <param name="c">The character to add.</param>
+    public bool IsValidCharacter(char c) => c == '-' || char.IsAsciiDigit(c) || (!Integer && c == '.' || c == 'e');
+
     /// <inheritdoc/>
     public override string ValidateEdit(EditType type, string diff, string result)
     {
@@ -48,39 +53,34 @@ public class UINumberInputLabel : UIInputLabel
         {
             return result;
         }
-        if (type == EditType.Submit)
+        if (type == EditType.Add)
         {
-            double value = result.Length > 0 && result != "-" && result != "." ? double.Parse(result) : 0;
-            return value.ToString(Format);
+            string toAdd = new(diff.ToLower().Where(IsValidCharacter).ToArray());
+            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexLeft..];
+            Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
+            return result;
         }
-        bool hasDecimal = TextContent.Contains('.');
-        bool negative = false;
-        string cleanDiff = string.Empty;
-        foreach (char c in diff)
+        int expIndex = result.LastIndexOf('e');
+        if (expIndex != -1 && (expIndex == result.Length - 1 || result[..expIndex].Where(char.IsAsciiDigit).IsEmpty()))
         {
-            if (c == '-')
-            {
-                negative = true;
-                continue;
-            }
-            if (c >= '0' && c <= '9')
-            {
-                cleanDiff += c;
-            }
-            if (c == '.' && !Integer && !hasDecimal)
-            {
-                cleanDiff += c;
-                hasDecimal = true;
-            }
+            expIndex = -1;
         }
-        result = result[..(Internal.IndexLeft - diff.Length)] + cleanDiff + result[Internal.IndexLeft..];
-        int indexLeft = Internal.IndexLeft;
-        if (negative && (result.Length == 0 || result[0] != '-'))
+        int signIndex = result.IndexOf('-');
+        int decimalIndex = (signIndex != -1 && (expIndex == -1 || signIndex < expIndex))
+            ? result[signIndex..].IndexOf('.') + signIndex
+            : result.IndexOf('.');
+        if (decimalIndex != -1 && expIndex != -1 && decimalIndex > expIndex)
         {
-            result = '-' + result;
-            indexLeft++;
+            decimalIndex = -1;
         }
-        Internal.SetPosition(indexLeft - diff.Length + cleanDiff.Length);
-        return result;
+        IEnumerable<char> filtered = result.Where((c, index) => c switch
+        {
+            'e' => index == expIndex,
+            '.' => index == decimalIndex,
+            '-' => index == signIndex || (expIndex != -1 && index == expIndex + 1),
+            _ => true
+        });
+        result = new string(filtered.ToArray());
+        return double.TryParse(result, out double value) ? value.ToString(Format) : "0";
     }
 }

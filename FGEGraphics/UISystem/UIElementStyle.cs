@@ -76,5 +76,5 @@ public record UIElementStyle
 
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
-    public bool CanRenderText(UIElementText text) => !text.Empty && CanRenderText() && (text.Internal.InternalRenderable.Style == this || (text.Internal.RenderableContent?.ContainsKey(this) ?? false));
+    public bool CanRenderText(UIElementText text) => !text.Empty && CanRenderText() && (text.Internal.InternalStyle == this || (text.Internal.RenderableContent?.ContainsKey(this) ?? false));
 }

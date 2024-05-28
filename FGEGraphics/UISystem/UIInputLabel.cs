@@ -229,7 +229,13 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void MouseLeftDownOutside() => Deselected?.Invoke();
+    public override void MouseLeftDownOutside()
+    {
+        if (Selected)
+        {
+            Deselected?.Invoke();
+        }
+    }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
     public void UpdateText()
