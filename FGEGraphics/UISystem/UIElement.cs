@@ -282,6 +282,10 @@ public abstract class UIElement
     /// <param name="requireText">Whether the style must support text rendering.</param>
     public UIElementStyle AddStyle(UIElementStyle style, bool requireText = false)
     {
+        if (ElementInternal.Styles.Contains(style))
+        {
+            return style;
+        }
         if (requireText && !style.CanRenderText())
         {
             throw new Exception("Style must support text rendering when 'requireText' is true");

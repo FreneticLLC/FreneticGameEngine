@@ -1,4 +1,12 @@
-﻿using System;
+﻿//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+// See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
+// If neither of these are available, assume that neither you nor anyone other than the copyright holder
+// hold any right or permission to use this software until such time as the official license is identified.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,10 +48,7 @@ public abstract class UIClickableElement : UIElement
     public UIClickableElement(StyleGroup styles, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
     {
         Clicked += onClick;
-        Styles = styles;
-        AddStyle(Styles.Normal, requireText);
-        AddStyle(Styles.Hover, requireText);
-        AddStyle(Styles.Click, requireText);
+        Styles = AddStyles(styles);
     }
 
     /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
@@ -61,5 +66,16 @@ public abstract class UIClickableElement : UIElement
             }
             return Styles.Normal;
         }
+    }
+
+    /// <summary>Calls <see cref="UIElement.AddStyle(UIElementStyle, bool)"/> on each member of the style group.</summary>
+    /// <param name="styles">The clickable styles.</param>
+    /// <param name="requireText">Whether each style must support text rendering.</param>
+    public StyleGroup AddStyles(StyleGroup styles, bool requireText = false)
+    {
+        AddStyle(styles.Normal, requireText);
+        AddStyle(styles.Hover, requireText);
+        AddStyle(styles.Click, requireText);
+        return styles;
     }
 }
