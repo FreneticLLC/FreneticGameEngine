@@ -18,33 +18,39 @@ namespace FGEGraphics.UISystem;
 public class UILabeledNumberSlider : UINumberSlider
 {
     /// <summary>The slider's value label.</summary>
-    // TODO: Make editable
-    public UILabel Label;
+    public UINumberInputLabel Label;
 
     /// <summary>Constructs a labeled number slider.</summary>
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>
     /// <param name="initial">The initial slider value.</param>
     /// <param name="interval">The grid-snapping interval, if any.</param>
-    /// <param name="integral">Whether to use integers instead of decimals.</param>
+    /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="sliderStyles">The slider styles.</param>
     /// <param name="labelLeft">Whether the label should be on the left of the slider.</param>
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
-    /// <param name="labelStyle">The label style.</param>
+    /// <param name="labelStyle">The normal label style.</param>
+    /// <param name="labelHighlight">The highlighted label style.</param>
     /// <param name="pos">The position of the slider.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integral, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIPositionHelper pos) : base(min, max, initial, interval, integral, sliderStyles, pos)
+    /// <param name="labelFormat">A format string for the label value.</param>
+    /// <param name="updateOnEdit">Whether to update the slider value while the user edits the label.</param>
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIElementStyle labelHighlight, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true) : base(min, max, initial, interval, integer, sliderStyles, pos)
     {
+        labelFormat ??= Integer ? "0" : "0.0";
         AddStyle(labelStyle, true);
-        AddChild(Label = new UILabel(string.Empty, labelStyle, pos.AtOrigin()));
+        AddChild(Label = new UINumberInputLabel(Value, integer, labelFormat, labelStyle, labelHighlight, pos.AtOrigin()));
         // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
         // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
-    }
-
-    /// <inheritdoc/>
-    public override void Tick(double delta)
-    {
-        base.Tick(delta);
-        Label.Text.Content = Integer ? $"{(int)Value}" : $"{Value:0.0}";
+        ValueEdited += _ => Label.TextContent = Value.ToString(Label.Format);
+        Label.TextSubmitted += _ =>
+        {
+            double newValue = GetCorrectedValue(Label.Value, Integer ? 1.0 : 0.0);
+            ValueEdited.Invoke(Value = newValue);
+        };
+        if (updateOnEdit)
+        {
+            Label.TextEdited += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
+        }
     }
 }

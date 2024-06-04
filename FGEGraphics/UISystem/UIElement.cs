@@ -51,8 +51,15 @@ public abstract class UIElement
     /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
     public int Height => LastAbsoluteSize.Y;
 
+    // TODO: Remove?
     /// <summary>Whether the element has a parent element.</summary>
     public bool HasParent => Parent is not null && !Parent.ElementInternal.ToRemove.Contains(this);
+
+    /// <summary>Whether the mouse left button is currently down.</summary>
+    public bool MouseDown => Position.View.Internal.MouseDown;
+
+    /// <summary>Whether the mouse left button was previously down.</summary>
+    public bool MousePreviouslyDown => Position.View.Internal.MousePreviouslyDown;
 
     /// <summary>Last known aboslute rotation.</summary>
     public float LastAbsoluteRotation;
@@ -275,11 +282,16 @@ public abstract class UIElement
     /// <param name="requireText">Whether the style must support text rendering.</param>
     public UIElementStyle AddStyle(UIElementStyle style, bool requireText = false)
     {
+        if (ElementInternal.Styles.Contains(style))
+        {
+            return style;
+        }
         if (requireText && !style.CanRenderText())
         {
             throw new Exception("Style must support text rendering when 'requireText' is true");
         }
         ElementInternal.Styles.Add(style);
+        // TODO: Find a way to avoid doing this on each call
         if (style.CanRenderText())
         {
             foreach (UIElementText text in ElementInternal.Texts)
@@ -328,8 +340,7 @@ public abstract class UIElement
     /// </summary>
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
-    /// <param name="mouseDown">Whether the mouse is currently pressed.</param>
-    public virtual void TickInteraction(int mouseX, int mouseY, bool mouseDown)
+    public virtual void TickInteraction(int mouseX, int mouseY)
     {
         bool containsMouse = SelfContains(mouseX, mouseY);
         if (containsMouse)
@@ -343,7 +354,7 @@ public abstract class UIElement
                 }
                 MouseEnter();
             }
-            if (mouseDown && !Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement is null)
+            if (MouseDown && !MousePreviouslyDown && Position.View.InteractingElement is null)
             {
                 if (Enabled)
                 {
@@ -352,7 +363,7 @@ public abstract class UIElement
                 }
                 MouseLeftDown(mouseX, mouseY);
             }
-            else if (!mouseDown && Position.View.Internal.MousePreviouslyDown && Position.View.InteractingElement == this)
+            else if (!MouseDown && MousePreviouslyDown && Position.View.InteractingElement == this)
             {
                 if (Enabled)
                 {
@@ -364,7 +375,7 @@ public abstract class UIElement
             }
             return;
         }
-        if (ElementInternal.HoverInternal && !(mouseDown && Position.View.InteractingElement == this))
+        if (ElementInternal.HoverInternal && !(MouseDown && Position.View.InteractingElement == this))
         {
             ElementInternal.HoverInternal = false;
             if (Enabled)
@@ -373,12 +384,12 @@ public abstract class UIElement
                 Pressed = false;
                 Position.View.InteractingElement = null;
             }
-            if (Position.View.Internal.MousePreviouslyDown)
+            if (MousePreviouslyDown)
             {
                 MouseLeftUpOutside(mouseX, mouseY);
             }
         }
-        if (mouseDown)
+        if (MouseDown)
         {
             MouseLeftDownOutside(mouseX, mouseY);
         }

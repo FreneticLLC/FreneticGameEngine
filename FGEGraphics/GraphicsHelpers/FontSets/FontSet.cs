@@ -436,6 +436,10 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
     public void DrawFancyText(RenderableText text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false)
     {
+        if (text.Lines is null)
+        {
+            return;
+        }
         StackNoteHelper.Push("FontSet - Draw fancy text", text);
         GraphicsUtil.CheckError("FontSet - Render - PreParts");
         try
@@ -728,6 +732,145 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     public RenderableText SplitAppropriately(string text, string baseColor, int maxX)
     {
         return SplitAppropriately(ParseFancyText(text), maxX);
+    }
+
+    /// <summary>Splits a renderable text line into individual words.</summary>
+    /// <param name="line">The line to split.</param>
+    // TODO: Split hyphenated text into words as well
+    public static List<EditableTextLine> SplitLineIntoWords(RenderableTextLine line)
+    {
+        List<EditableTextLine> words = [new()];
+        foreach (RenderableTextPart part in line.Parts)
+        {
+            string[] textWords = part.Text.Split(' ');
+            for (int i = 0; i < textWords.Length; i++)
+            {
+                EditableTextLine lastWord = words.Last();
+                if (textWords[i].Length != 0)
+                {
+                    lastWord.AddPart(part.CloneWithText(textWords[i]));
+                }
+                if (i < textWords.Length - 1)
+                {
+                    RenderableTextPart space = part.CloneWithText(" ");
+                    EditableTextLine spaceWord = new([space], space.Width, 1, true);
+                    if (lastWord.Parts.Count == 0)
+                    {
+                        words[^1] = spaceWord;
+                    }
+                    else
+                    {
+                        words.Add(spaceWord);
+                    }
+                    words.Add(new());
+                }
+            }
+        }
+        return words;
+    }
+
+    /// <summary>Splits a single word onto multiple lines if it exceeds a maximum render width.</summary>
+    /// <param name="word">The word to split.</param>
+    /// <param name="maxWidth">The maximum render width.</param>
+    public static List<EditableTextLine> SplitWordAppropriately(EditableTextLine word, float maxWidth)
+    {
+        List<EditableTextLine> result = [new()];
+        List<RenderableTextPart> parts = [.. word.Parts];
+        for (int i = 0; i < parts.Count; i++)
+        {
+            EditableTextLine lastWord = result.Last();
+            RenderableTextPart part = parts[i];
+            if (lastWord.Width + part.Width <= maxWidth)
+            {
+                lastWord.AddPart(part);
+                continue;
+            }
+            float lastWidth = 0;
+            for (int j = 1; j <= part.Text.Length; j++)
+            {
+                float width = part.Font.MeasureString(part.Text[..j]);
+                if (lastWord.Width + width > maxWidth)
+                {
+                    RenderableTextPart firstPart = part.Clone();
+                    firstPart.Text = part.Text[..(j - 1)];
+                    firstPart.Width = lastWidth;
+                    RenderableTextPart secondPart = part.Clone();
+                    secondPart.Text = part.Text[(j - 1)..];
+                    secondPart.Width = part.Width - lastWidth;
+                    lastWord.AddPart(firstPart);
+                    result.Add(new());
+                    parts.Insert(i + 1, secondPart);
+                    break;
+                }
+                lastWidth = width;
+            }
+        }
+        return result;
+    }
+
+    /// <summary>Splits a renderable text line at a maximum render width.</summary>
+    /// <param name="line">The line to split.</param>
+    /// <param name="maxWidth">The maximum render width.</param>
+    /// <param name="skippedIndices">A list of character indices ignored in the final result.</param>
+    /// <returns>The multiple-line renderable result.</returns>
+    public static RenderableText SplitLineAppropriately(RenderableTextLine line, float maxWidth, out List<int> skippedIndices)
+    {
+        skippedIndices = [];
+        if (line.Width < maxWidth)
+        {
+            return new(line);
+        }
+        int charIndex = 0;
+        float totalWidth = 0;
+        EditableTextLine currentLine = new(true);
+        List<RenderableTextLine> lines = [];
+        void BuildLine()
+        {
+            if (currentLine.Parts.Count > 0)
+            {
+                lines.Add(currentLine.ToRenderable());
+            }
+            currentLine = new(true);
+        }
+        List<EditableTextLine> words = SplitLineIntoWords(line);
+        for (int i = 0; i < words.Count; i++)
+        {
+            EditableTextLine word = words[i];
+            bool needsSplit = word.Width > maxWidth;
+            bool needsNewLine = currentLine.Width + word.Width > maxWidth;
+            if (needsSplit || needsNewLine)
+            {
+                BuildLine();
+                if (word.IsWhitespace)
+                {
+                    skippedIndices.Add(++charIndex);
+                    continue;
+                }
+            }
+            if (needsSplit)
+            {
+                List<EditableTextLine> splitWords = SplitWordAppropriately(word, maxWidth);
+                for (int j = 0; j < splitWords.Count; j++)
+                {
+                    if (j < splitWords.Count - 1)
+                    {
+                        lines.Add(splitWords[j].ToRenderable());
+                    }
+                }
+                currentLine = splitWords[^1];
+            }
+            else
+            {
+                currentLine.AddLine(word);
+                if (currentLine.Width > totalWidth)
+                {
+                    totalWidth = currentLine.Width;
+                }
+            }
+            charIndex += word.Length;
+        }
+        BuildLine();
+        return new() { Lines = [.. lines], Width = (int)totalWidth };
     }
 
     /// <summary>Splits some text at a maximum render width.</summary>

@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
@@ -143,6 +144,16 @@ public class RenderableTextPart
     /// <summary>Returns a perfect copy of the part.</summary>
     public RenderableTextPart Clone() => MemberwiseClone() as RenderableTextPart;
 
+    /// <summary>Returns a copy of the part with different text.</summary>
+    /// <param name="text">The new part text.</param>
+    public RenderableTextPart CloneWithText(string text)
+    {
+        RenderableTextPart cloned = Clone();
+        cloned.Text = text;
+        cloned.Width = Font.MeasureString(text);
+        return cloned;
+    }
+
     /// <summary>Implements <see cref="Object.ToString"/> to return the raw text.</summary>
     public override string ToString() => Text;
 }
@@ -158,10 +169,13 @@ public class RenderableTextLine
 
     /// <summary>Implements <see cref="Object.ToString"/> to make an un-separated string of the contents.</summary>
     public override string ToString() => string.Concat<RenderableTextPart>(Parts);
+
+    /// <summary>The total text length of this line.</summary>
+    public int Length => Parts.Sum(part => part.Text.Length);
 }
 
 /// <summary>Represents a section of renderable text.</summary>
-public class RenderableText
+public class RenderableText()
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
     public static readonly RenderableText Empty = new() { Lines = [], Width = 0 };
@@ -172,6 +186,69 @@ public class RenderableText
     /// <summary>The maximum width of the text.</summary>
     public int Width;
 
+    /// <summary>Constructs renderable text from a single line.</summary>
+    /// <param name="singleLine">The text line.</param>
+    public RenderableText(RenderableTextLine singleLine) : this()
+    {
+        Lines = [singleLine];
+        Width = singleLine.Width;
+    }
+
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
+}
+
+/// <summary>A mutable <see cref="RenderableTextLine"/> builder.</summary>
+/// <param name="parts">A list of parts within the line.</param>
+/// <param name="width">The line width.</param>
+/// <param name="length">The total text length.</param>
+/// <param name="whitespace">Whether the line is empty or whitespace.</param>
+public class EditableTextLine(List<RenderableTextPart> parts, float width, int length, bool whitespace)
+{
+    /// <summary>The current list of parts within the line.</summary>
+    public List<RenderableTextPart> Parts = parts;
+
+    /// <summary>The current line width.</summary>
+    public float Width = width;
+
+    /// <summary>The current total text length.</summary>
+    public int Length = length;
+
+    /// <summary>Whether the line is empty or whitespace.</summary>
+    public bool IsWhitespace = whitespace;
+
+    /// <summary>Constructs an empty <see cref="EditableTextLine"/>.</summary>
+    /// <param name="whitespace">Whether the line is empty or whitespace.</param>
+    public EditableTextLine(bool whitespace = false) : this([], 0, 0, whitespace)
+    {
+    }
+
+    /// <summary>Adds a text part to the line.</summary>
+    /// <param name="part">The text part to add.</param>
+    public void AddPart(RenderableTextPart part)
+    {
+        Parts.Add(part);
+        Length += part.Text.Length;
+        Width += part.Width;
+        if (IsWhitespace && !string.IsNullOrWhiteSpace(part.Text))
+        {
+            IsWhitespace = false;
+        }
+    }
+
+    /// <summary>Appends another text line.</summary>
+    /// <param name="line">The text line to add.</param>
+    public void AddLine(EditableTextLine line)
+    {
+        Parts.AddRange(line.Parts);
+        Length += line.Length;
+        Width += line.Width;
+        if (IsWhitespace && !line.IsWhitespace)
+        {
+            IsWhitespace = false;
+        }
+    }
+
+    /// <summary>Builds a new <see cref="RenderableTextLine"/> from the editable values.</summary>
+    public RenderableTextLine ToRenderable() => new() { Parts = [.. Parts], Width = (int)Width };
 }
