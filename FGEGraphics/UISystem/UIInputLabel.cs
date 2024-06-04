@@ -182,7 +182,7 @@ public class UIInputLabel : UIClickableElement
                 }
                 currentIndex++;
             }
-            return Location.NaN; // Should never happen.
+            return Location.NaN;
         }
     }
 
@@ -223,6 +223,7 @@ public class UIInputLabel : UIClickableElement
     {
         SubmitText();
         Internal.SetPosition(0);
+        Internal.CursorOffset = Location.NaN;
         Selected = false;
         Enabled = true;
         Pressed = false;
@@ -466,7 +467,7 @@ public class UIInputLabel : UIClickableElement
         {
             UIElementText.RenderChain(Internal.TextChain, X, Y);
         }
-        if (!Selected || Internal.HasSelection)
+        if (Internal.CursorOffset.IsNaN())
         {
             return;
         }
