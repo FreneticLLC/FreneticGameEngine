@@ -612,4 +612,13 @@ public abstract class UIElement
     public virtual void Destroy()
     {
     }
+
+    /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
+    public virtual List<string> GetDebugInfo()
+    {
+        string type = $"^t^0^h^5^u{GetType()}";
+        string pos = $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}";
+        string state = $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}";
+        return [type, pos, state];
+    }
 }

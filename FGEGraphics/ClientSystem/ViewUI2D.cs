@@ -167,10 +167,7 @@ public class ViewUI2D
                         Renderer2D.SetColor(Color4F.White);
                         if (elem.ElementInternal.HoverInternal)
                         {
-                            string name = $"^t^0^h^5^u{elem.GetType()}";
-                            string pos = $"^r^t^0^h^o^e^7Position: ^3({elem.X}, {elem.Y}) ^&| ^7Dimensions: ^3({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: ^3{elem.LastAbsoluteRotation}";
-                            string state = $"^7Enabled: ^{(elem.Enabled ? "2" : "1")}{elem.Enabled} ^&| ^7Hovered: ^{(elem.Hovered ? "2" : "1")}{elem.Hovered} ^&| ^7Pressed: ^{(elem.Pressed ? "2" : "1")}{elem.Pressed}";
-                            Internal.DebugInfo.Add($"{name}\n{pos}\n{state}");
+                            Internal.DebugInfo.Add(string.Join('\n', elem.GetDebugInfo()));
                         }
                     }
                 }
