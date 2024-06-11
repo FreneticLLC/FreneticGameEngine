@@ -40,8 +40,7 @@ public class UITextLink : UIClickableElement
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT)
-        : base(styles, pos, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT) : base(styles, pos, true, clicked)
     {
         Text = new(this, text, true, horizontalAlignment: alignment);
         Icon = icon;

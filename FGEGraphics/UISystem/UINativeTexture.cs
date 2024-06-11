@@ -23,15 +23,13 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="pos">The position of the element.</param>
-/// <param name="shouldRender">Whether the element should render automatically.</param>
-/// <param name="enabled">Whether the element can be interacted with.</param>
-public class UINativeTexture(Func<int> texture, UIPositionHelper pos, bool shouldRender = true, bool enabled = true) : UIElement(pos, shouldRender, enabled)
+public class UINativeTexture(Func<int> texture, UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The texture to display.</summary>
     public Func<int> Texture = texture;
 
     /// <summary>Whether the texture is flipped vertically.</summary>
-    // TODO: Put this on UIPositionHelper
+    // TODO: Put transforms on UIPositionHelper
     public bool Flip;
 
     /// <summary>Renders the texture on a screen.</summary>

@@ -74,7 +74,7 @@ public class UINumberSlider : UIClickableElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
-        AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2), false, false));
+        AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().ConstantWidth(pos.Height / 2)) { ShouldRender = false, Enabled = false });
         Button.Position.GetterX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 

@@ -27,7 +27,7 @@ public class UIDropdown : UIElement
     public UIClickableElement SelectedElement;
     public string SelectedValue;
 
-    public UIDropdown(string text, int maxHeight, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos, bool shouldRender = true, bool enabled = true) : base(pos, shouldRender, enabled)
+    public UIDropdown(string text, int maxHeight, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos) : base(pos)
     {
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
         Box = new UIBox(boxStyle, pos.AtOrigin());
