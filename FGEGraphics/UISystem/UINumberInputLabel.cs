@@ -62,7 +62,8 @@ public class UINumberInputLabel : UIInputLabel
         if (type == EditType.Add)
         {
             string toAdd = CharacterMatcher.TrimToMatches(diff);
-            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexLeft..];
+            // FIXME: range errors when replacing text. maybe need EditType.Replace
+            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexRight..];
             Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
             return result;
         }

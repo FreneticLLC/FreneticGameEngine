@@ -202,7 +202,6 @@ public class UIInputLabel : UIClickableElement
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
-        Internal.CursorOffset = Location.NaN;
         Deselected += HandleDeselect;
     }
 
@@ -244,7 +243,7 @@ public class UIInputLabel : UIClickableElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
-        Internal.CursorOffset = Internal.HasSelection ? Location.NaN : Internal.GetCursorOffset();
+        Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
