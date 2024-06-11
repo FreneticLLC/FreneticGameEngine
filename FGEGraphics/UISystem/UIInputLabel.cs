@@ -202,6 +202,7 @@ public class UIInputLabel : UIClickableElement
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
+        Internal.CursorOffset = Location.NaN;
         Deselected += HandleDeselect;
     }
 

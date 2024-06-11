@@ -46,11 +46,10 @@ public class UINumberInputLabel : UIInputLabel
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base("", initial.ToString(), StyleGroup.Empty, inputStyle, highlightStyle, pos)
+    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base("", initial.ToString(format), StyleGroup.Empty, inputStyle, highlightStyle, pos)
     {
         Integer = integer;
         Format = format;
-        TextContent = initial.ToString(Format);
     }
 
     /// <inheritdoc/>
