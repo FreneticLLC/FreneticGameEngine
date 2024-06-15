@@ -14,10 +14,16 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-public class UIListGroup(UIPositionHelper pos, int spacing) : UIGroup(pos.ConstantWidthHeight(0, 0))
+/// <summary>Represents an expandable list container of UI elements.</summary>
+/// <param name="spacing">The spacing between each child.</param>
+/// <param name="pos">The position of the element.</param>
+// TODO: Support all UI directions
+public class UIListGroup(int spacing, UIPositionHelper pos) : UIGroup(pos.ConstantWidthHeight(0, 0))
 {
+    /// <summary>The spacing between each child.</summary>
     public int Spacing = spacing;
 
+    /// <inheritdoc/>
     public override void AddChild(UIElement child, bool priority = true)
     {
         base.AddChild(child, priority);

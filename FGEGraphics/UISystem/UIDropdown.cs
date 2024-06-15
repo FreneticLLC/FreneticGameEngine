@@ -16,31 +16,62 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
+/// <summary>Represents an interactable dropdown of different choices.</summary>
+// TODO: Choice search
+// TODO: Arrow key + ENTER navigation
+// TODO: Scroll if exceed max width
+// TODO: Dropdown icon next to placeholder info?
 public class UIDropdown : UIElement
 {
+    /// <summary>A mapping of <see cref="List"/> clickables to their string values.</summary>
     public Dictionary<UIClickableElement, string> Choices = [];
 
+    /// <summary>The text to display when no choice is selected.</summary>
+    public string PlaceholderInfo;
+
+    /// <summary>The button to open the dropdown.</summary>
     public UIButton Button;
+
+    /// <summary>The dropdown list of choices.</summary>
     public UIListGroup List;
+
+    /// <summary>The box container surrounding the <see cref="List"/>.</summary>
     public UIBox Box;
 
+    /// <summary>The currently selected entry in the <see cref="List"/>.</summary>
     public UIClickableElement SelectedElement;
+
+    /// <summary>The currently selected dropdown value.</summary>
     public string SelectedValue;
 
-    public UIDropdown(string text, int maxHeight, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos) : base(pos)
+    /// <summary>Fired when a choice is selected.</summary>
+    public Action<string> ChoiceSelected;
+
+    /// <summary>Constructs a new UI dropdown.</summary>
+    /// <param name="text">The text to display when no choice is selected.</param>
+    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="List"/> entries.</param>
+    /// <param name="listSpacing">The spacing betwene <see cref="List"/> entries.</param>
+    /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
+    /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
+    /// <param name="pos">The position of the element.</param>
+    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos) : base(pos)
     {
+        PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
         Box = new UIBox(boxStyle, pos.AtOrigin());
-        Box.AddChild(List = new(new UIPositionHelper(pos.View), 10));
-        Box.Position.GetterHeight(() => Math.Min(List.Position.Height, maxHeight));
+        Box.AddChild(List = new(listSpacing, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, boxPadding)));
+        Box.Position.GetterHeight(() => List.Position.Height + boxPadding * 2);
     }
 
+    /// <summary>Opens the dropdown list.</summary>
     public void HandleOpen()
     {
         RemoveChild(Button);
         AddChild(Box);
     }
 
+    /// <summary>Selects one of the choices and closes the dropdown list.</summary>
+    /// <param name="element">The selected choice.</param>
     public void HandleSelect(UIClickableElement element)
     {
         SelectedElement = element;
@@ -48,8 +79,20 @@ public class UIDropdown : UIElement
         RemoveChild(Box);
         AddChild(Button);
         Button.Text.Content = SelectedValue;
+        ChoiceSelected?.Invoke(SelectedValue);
     }
 
+    /// <summary>Reverts the dropdown to its pre-chosen state.</summary>
+    public void Deselect()
+    {
+        Button.Text.Content = PlaceholderInfo;
+        SelectedElement = null;
+        SelectedValue = null;
+    }
+
+    /// <summary>Adds a choice to the dropdown.</summary>
+    /// <param name="choice">The choice text.</param>
+    /// <param name="element">The clickable choice element.</param>
     public void AddChoice(string choice, UIClickableElement element)
     {
         List.AddChild(element);
@@ -57,9 +100,14 @@ public class UIDropdown : UIElement
         element.Clicked += () => HandleSelect(element);
     }
 
-    public void AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
+    /// <summary>Adds a <see cref="UITextLink"/> as a choice to the dropdown.</summary>
+    /// <param name="choice">The choice text.</param>
+    /// <param name="linkStyles">The link styles.</param>
+    /// <returns>The added text link.</returns>
+    public UITextLink AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
     {
         UITextLink link = new(choice, null, null, linkStyles, new UIPositionHelper(Position.View));
         AddChoice(choice, link);
+        return link;
     }
 }

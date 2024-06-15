@@ -19,6 +19,7 @@ namespace FGEGraphics.UISystem;
 /// Represents a single generic item in a UI.
 /// <para>Sub-classes implement rendering and general logic for a specific type of UI element.</para>
 /// </summary>
+// TODO: Hover text
 public abstract class UIElement
 {
     /// <summary>The parent of this element.</summary>
