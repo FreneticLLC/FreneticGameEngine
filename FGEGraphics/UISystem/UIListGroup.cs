@@ -29,5 +29,9 @@ public class UIListGroup(int spacing, UIPositionHelper pos) : UIGroup(pos.Consta
         base.AddChild(child, priority);
         child.Position.Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, Position.Height > 0 ? Position.Height + Spacing : 0);
         Position.ConstantHeight(child.Position.Y + child.Position.Height);
+        if (child.Position.Width > Position.Width)
+        {
+            Position.ConstantWidth(child.Position.Width);
+        }
     }
 }
