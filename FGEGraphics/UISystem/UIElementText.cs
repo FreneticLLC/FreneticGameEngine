@@ -70,10 +70,8 @@ public class UIElementText
     /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
     /// <param name="style">An internal style to use instead of the parent element's.</param>
-    /// <param name="horizontalAlignment">The horizontal text alignment, if any.</param>
-    /// <param name="verticalAlignment">The vertical text alignment, if any.</param>
     /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, UIElementStyle style = null, TextAlignment horizontalAlignment = TextAlignment.LEFT, TextAlignment verticalAlignment = TextAlignment.TOP)
+    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, UIElementStyle style = null)
     {
         content ??= (required ? Null : null);
         if (style is not null && !style.CanRenderText())
@@ -89,8 +87,6 @@ public class UIElementText
             InternalRenderable = null
         };
         Required = required;
-        HorizontalAlignment = horizontalAlignment;
-        VerticalAlignment = verticalAlignment;
         if (!Empty)
         {
             RefreshRenderables();
@@ -178,16 +174,6 @@ public class UIElementText
 
     /// <summary>The total height of the text.</summary>
     public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.FontDefault.Height ?? 0;
-
-    /// <summary>Returns the render position of the text given a starting position.</summary>
-    /// <param name="startX">The left-oriented anchor X value.</param>
-    /// <param name="startY">The top-oriented anchor Y value.</param>
-    public Location GetPosition(double startX, double startY)
-    {
-        double x = Math.Round(startX + HorizontalAlignment.SizeMultiplier() * -Width);
-        double y = Math.Round(startY + VerticalAlignment.SizeMultiplier() * -Height);
-        return new(x, y, 0);
-    }
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;

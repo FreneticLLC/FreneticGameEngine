@@ -461,7 +461,7 @@ public class UIInputLabel : UIClickableElement
         bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(PlaceholderInfo, PlaceholderInfo.GetPosition(X, Y));
+            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(X, Y, 0));
         }
         else
         {

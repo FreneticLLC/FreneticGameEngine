@@ -41,7 +41,7 @@ public class UIButton : UIClickableElement
     public UIButton(string text, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, clicked)
     {
         AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin()) { ShouldRender = false, Enabled = false });
-        Text = new(this, text, horizontalAlignment: TextAlignment.CENTER, verticalAlignment: TextAlignment.CENTER);
+        Text = new(this, text);
     }
 
     /// <summary>Constructs a new button based on a standard texture set.</summary>
@@ -69,7 +69,7 @@ public class UIButton : UIClickableElement
         Box.Render(view, delta, style);
         if (style.CanRenderText(Text))
         {
-            style.TextFont.DrawFancyText(Text, Text.GetPosition(X + Width / 2, Y + Height / 2));
+            style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));
         }
     }
 }

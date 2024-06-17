@@ -190,10 +190,6 @@ public class UIPositionHelper
         return this;
     }
 
-    /// <summary>Sets getter X and Y values using a <see cref="Location"/>.</summary>
-    /// <returns>This object.</returns>
-    public UIPositionHelper GetterXY(Func<Location> location) => GetterXY(() => (int) location().X, () => (int) location().Y);
-
     /// <summary>Sets a getter Width value.</summary>
     /// <returns>This object.</returns>
     public UIPositionHelper GetterWidth(Func<int> width)
