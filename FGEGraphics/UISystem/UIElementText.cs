@@ -45,13 +45,6 @@ public class UIElementText
         public Dictionary<UIElementStyle, RenderableText> RenderableContent;
     }
 
-    // TODO: Get rid of text alignments
-    /// <summary>The horizontal alignment of the text, if any.</summary>
-    public TextAlignment HorizontalAlignment;
-
-    /// <summary>The vertical alignment of the text, if any.</summary>
-    public TextAlignment VerticalAlignment;
-
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
     public bool Empty => (Internal.Content?.Length ?? 0) == 0;
 
