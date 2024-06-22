@@ -22,10 +22,11 @@ public abstract class UIClickableElement : UIElement
     /// <param name="normal">The default style to use.</param>
     /// <param name="hover">The style to use on hover.</param>
     /// <param name="click">The style to use on click.</param>
-    public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click)
+    /// <param name="disabled">The style to use when disabled.</param>
+    public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIElementStyle disabled)
     {
         /// <summary>An empty style group.</summary>
-        public static readonly StyleGroup Empty = new(UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty);
+        public static readonly StyleGroup Empty = new(UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty);
 
         /// <summary>The render style to use when the element is not being interacted with.</summary>
         public UIElementStyle Normal = normal;
@@ -35,6 +36,9 @@ public abstract class UIClickableElement : UIElement
 
         /// <summary>The render style to use when the user is clicking on this element.</summary>
         public UIElementStyle Click = click;
+
+        /// <summary>The style to use when the element is disabled.</summary>
+        public UIElementStyle Disabled = disabled;
     }
 
     /// <summary>The clickable style group.</summary>
@@ -64,6 +68,10 @@ public abstract class UIClickableElement : UIElement
             {
                 return Styles.Hover;
             }
+            if (!Enabled)
+            {
+                return Styles.Disabled;
+            }
             return Styles.Normal;
         }
     }
@@ -76,6 +84,7 @@ public abstract class UIClickableElement : UIElement
         AddStyle(styles.Normal, requireText);
         AddStyle(styles.Hover, requireText);
         AddStyle(styles.Click, requireText);
+        AddStyle(styles.Disabled, requireText);
         return styles;
     }
 }

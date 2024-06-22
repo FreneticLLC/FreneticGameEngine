@@ -57,7 +57,8 @@ public class UIButton : UIClickableElement
         UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
         UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
         UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
-        return new UIButton(text, clicked, new(normal, hover, click), pos);
+        UIElementStyle disabled = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
+        return new UIButton(text, clicked, new(normal, hover, click, disabled), pos);
     }
 
     /// <summary>Renders this button on the screen.</summary>
