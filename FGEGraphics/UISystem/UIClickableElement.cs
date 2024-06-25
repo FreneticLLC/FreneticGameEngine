@@ -56,25 +56,10 @@ public abstract class UIClickableElement : UIElement
     }
 
     /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
-    public override UIElementStyle Style
-    {
-        get
-        {
-            if (Pressed)
-            {
-                return Styles.Click;
-            }
-            if (Hovered)
-            {
-                return Styles.Hover;
-            }
-            if (!Enabled)
-            {
-                return Styles.Disabled;
-            }
-            return Styles.Normal;
-        }
-    }
+    public override UIElementStyle Style => Pressed ? Styles.Click
+        : Hovered ? Styles.Hover
+        : !Enabled ? Styles.Disabled
+        : Styles.Normal;
 
     /// <summary>Calls <see cref="UIElement.AddStyle(UIElementStyle, bool)"/> on each member of the style group.</summary>
     /// <param name="styles">The clickable styles.</param>

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
 using OpenTK.Mathematics;
@@ -51,10 +52,6 @@ public abstract class UIElement
 
     /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
     public int Height => LastAbsoluteSize.Y;
-
-    // TODO: Remove?
-    /// <summary>Whether the element has a parent element.</summary>
-    public bool HasParent => Parent is not null && !Parent.ElementInternal.ToRemove.Contains(this);
 
     /// <summary>Whether the mouse left button is currently down.</summary>
     public bool MouseDown => Position.View.Internal.MouseDown;
@@ -617,9 +614,15 @@ public abstract class UIElement
     /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
     public virtual List<string> GetDebugInfo()
     {
-        string type = $"^t^0^h^5^u{GetType()}";
-        string pos = $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}";
-        string state = $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}";
-        return [type, pos, state];
+        List<string> info = [];
+        info.Add($"^t^0^h^5^u{GetType()}");
+        info.Add($"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}");
+        info.Add($"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}");
+        if (ElementInternal.Styles.Count > 0)
+        {
+            List<string> styleNames = ElementInternal.Styles.Select(style => style.Name is string name ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{name}" : "^1unnamed").ToList();
+            info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+        }
+        return info;
     }
 }
