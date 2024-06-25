@@ -155,14 +155,18 @@ public class ViewUI2D
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try
                 {
-                    if (elem.IsValid && elem.ShouldRender)
+                    if (!elem.IsValid)
+                    {
+                        continue;
+                    }
+                    if (elem.ShouldRender)
                     {
                         elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
                     }
                     if (Debug)
                     {
                         Engine.Textures.White.Bind();
-                        Renderer2D.SetColor(Color4F.Red);
+                        Renderer2D.SetColor(elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red);
                         Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
                         Renderer2D.SetColor(Color4F.White);
                         if (elem.ElementInternal.HoverInternal)
