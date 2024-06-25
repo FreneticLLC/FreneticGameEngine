@@ -213,9 +213,8 @@ public class UIElementText
         float y = 0;
         foreach ((FontSet font, RenderableTextLine line) in lines)
         {
-            RenderableText renderable = new() { Lines = [line], Width = line.Width };
             List<int> skippedIndices = null;
-            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : renderable;
+            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new(line);
             yield return new(font, splitText, y, skippedIndices ?? []);
             y += font.FontDefault.Height * splitText.Lines.Length;
         }
