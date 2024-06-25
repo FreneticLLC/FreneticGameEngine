@@ -14,9 +14,13 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Represents an expandable list container of UI elements.</summary>
+/// <summary>
+/// Represents an expandable list container of UI elements.
+/// List expansion is in the opposite direction of the supplied <see cref="UIAnchor"/>. 
+/// </summary>
 public class UIListGroup : UIGroup
 {
+    /// <summary>Whether the list should expand vertically.</summary>
     public bool Vertical;
 
     /// <summary>The spacing between each child.</summary>
@@ -25,7 +29,8 @@ public class UIListGroup : UIGroup
     /// <summary>Constructs a new list group.</summary>
     /// <param name="spacing">The spacing between each child.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIListGroup(bool vertical, int spacing, UIPositionHelper pos) : base(pos.ConstantWidthHeight(0, 0))
+    /// <param name="vertical">Whether the list should expand vertically.</param>
+    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true) : base(pos.ConstantWidthHeight(0, 0))
     {
         if ((vertical && Position.MainAnchor.VerticalAlignment == UIAlignment.CENTER) || (!vertical && Position.MainAnchor.HorizontalAlignment == UIAlignment.CENTER))
         {
