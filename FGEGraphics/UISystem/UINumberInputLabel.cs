@@ -46,11 +46,10 @@ public class UINumberInputLabel : UIInputLabel
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base("", initial.ToString(), StyleGroup.Empty, inputStyle, highlightStyle, pos)
+    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base("", initial.ToString(format), StyleGroup.Empty, inputStyle, highlightStyle, pos)
     {
         Integer = integer;
         Format = format;
-        TextContent = initial.ToString(Format);
     }
 
     /// <inheritdoc/>
@@ -63,7 +62,8 @@ public class UINumberInputLabel : UIInputLabel
         if (type == EditType.Add)
         {
             string toAdd = CharacterMatcher.TrimToMatches(diff);
-            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexLeft..];
+            // FIXME: range errors when replacing text. maybe need EditType.Replace
+            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexRight..];
             Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
             return result;
         }

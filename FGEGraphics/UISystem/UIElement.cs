@@ -19,6 +19,7 @@ namespace FGEGraphics.UISystem;
 /// Represents a single generic item in a UI.
 /// <para>Sub-classes implement rendering and general logic for a specific type of UI element.</para>
 /// </summary>
+// TODO: Hover text
 public abstract class UIElement
 {
     /// <summary>The parent of this element.</summary>
@@ -68,7 +69,7 @@ public abstract class UIElement
     public UIPositionHelper Position;
 
     /// <summary>Whether this element should render automatically.</summary>
-    public bool ShouldRender;
+    public bool ShouldRender = true;
 
     /// <summary>Gets or sets whether this element can be interacted with.</summary>
     public bool Enabled
@@ -105,14 +106,10 @@ public abstract class UIElement
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
-    /// <param name="shouldRender">Whether the element should render automatically.</param>
-    /// <param name="enabled">Whether the element can be interacted with.</param>
-    public UIElement(UIPositionHelper pos, bool shouldRender = true, bool enabled = true)
+    public UIElement(UIPositionHelper pos)
     {
         Position = pos;
         Position.For = this;
-        ShouldRender = shouldRender;
-        Enabled = enabled;
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
@@ -615,5 +612,14 @@ public abstract class UIElement
     /// <summary>Destroys any data tracked by the element.</summary>
     public virtual void Destroy()
     {
+    }
+
+    /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
+    public virtual List<string> GetDebugInfo()
+    {
+        string type = $"^t^0^h^5^u{GetType()}";
+        string pos = $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}";
+        string state = $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}";
+        return [type, pos, state];
     }
 }

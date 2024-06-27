@@ -243,7 +243,7 @@ public class UIInputLabel : UIClickableElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
-        Internal.CursorOffset = Internal.HasSelection ? Location.NaN : Internal.GetCursorOffset();
+        Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -478,5 +478,13 @@ public class UIInputLabel : UIClickableElement
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
         view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
+    }
+
+    /// <inheritdoc/>
+    public override List<string> GetDebugInfo()
+    {
+        List<string> info = base.GetDebugInfo();
+        info.Add($"^7Indices: ^3[{Internal.IndexLeft} {Internal.IndexRight}] ^&| ^7Cursors: ^3[{Internal.CursorStart} {Internal.CursorEnd}]");
+        return info;
     }
 }

@@ -18,9 +18,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
-/// <remarks>Constructs the UI scroll box.</remarks>
-/// <param name="pos">The position of the element.</param>
-public class UIScrollBox(UIPositionHelper pos) : UIElement(pos, enabled: false)
+public class UIScrollBox : UIElement
 {
     /// <summary>The current scroll position.</summary>
     public int Scroll = 0;
@@ -33,6 +31,13 @@ public class UIScrollBox(UIPositionHelper pos) : UIElement(pos, enabled: false)
 
     /// <summary>(Internal) Whether to watch the mouse scroll wheel.</summary>
     public bool WatchMouse = false;
+
+    /// <summary>Constructs the UI scroll box.</summary>
+    /// <param name="pos">The position of the element.</param>
+    public UIScrollBox(UIPositionHelper pos) : base(pos)
+    {
+        Enabled = false;
+    }
 
     /// <summary>Begins watching the mouse.</summary>
     public override void MouseEnter()
@@ -72,6 +77,7 @@ public class UIScrollBox(UIPositionHelper pos) : UIElement(pos, enabled: false)
     {
         if (WatchMouse)
         {
+            // FIXME: This uses Scroll instead of ScrollDelta
             Scroll -= (int)Window.CurrentMouse.Scroll.Y * 10; // TODO: Why is scroll a Vector2?
             if (Scroll < 0)
             {

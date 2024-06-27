@@ -25,9 +25,7 @@ namespace FGEGraphics.UISystem;
 /// <remarks>Constructs a simple colored box.</remarks>
 /// <param name="style">The style of the element.</param>
 /// <param name="pos">The position of the element.</param>
-/// <param name="shouldRender">Whether the element should render automatically.</param>
-/// <param name="enabled">Whether the element can be interacted with.</param>
-public class UIBox(UIElementStyle style, UIPositionHelper pos, bool shouldRender = true, bool enabled = true) : UIElement(pos, shouldRender, enabled)
+public class UIBox(UIElementStyle style, UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The style of the box.</summary>
     public override UIElementStyle Style { get; } = style;

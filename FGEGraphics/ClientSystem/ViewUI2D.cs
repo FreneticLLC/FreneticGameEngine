@@ -19,6 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -167,10 +168,7 @@ public class ViewUI2D
                         Renderer2D.SetColor(Color4F.White);
                         if (elem.ElementInternal.HoverInternal)
                         {
-                            string name = $"^t^0^h^5^u{elem.GetType()}";
-                            string pos = $"^r^t^0^h^o^e^7Position: ^3({elem.X}, {elem.Y}) ^&| ^7Dimensions: ^3({elem.Width}w, {elem.Height}h) ^&| ^7Rotation: ^3{elem.LastAbsoluteRotation}";
-                            string state = $"^7Enabled: ^{(elem.Enabled ? "2" : "1")}{elem.Enabled} ^&| ^7Hovered: ^{(elem.Hovered ? "2" : "1")}{elem.Hovered} ^&| ^7Pressed: ^{(elem.Pressed ? "2" : "1")}{elem.Pressed}";
-                            Internal.DebugInfo.Add($"{name}\n{pos}\n{state}");
+                            Internal.DebugInfo.Add(elem.GetDebugInfo().JoinString("\n"));
                         }
                     }
                 }
@@ -181,7 +179,7 @@ public class ViewUI2D
             }
             if (Debug)
             {
-                string content = string.Join("\n\n", Internal.DebugInfo);
+                string content = Internal.DebugInfo.JoinString("\n\n");
                 RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
                 // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
                 float x = Client.MouseX + text.Width < Client.WindowWidth
