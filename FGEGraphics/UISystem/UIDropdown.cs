@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Dropdown icon next to placeholder info?
 public class UIDropdown : UIElement
 {
-    /// <summary>A mapping of <see cref="List"/> clickables to their string values.</summary>
+    /// <summary>A mapping of <see cref="ListGroup"/> clickables to their string values.</summary>
     public Dictionary<UIClickableElement, string> Choices = [];
 
     /// <summary>The text to display when no choice is selected.</summary>
@@ -33,12 +33,12 @@ public class UIDropdown : UIElement
     public UIButton Button;
 
     /// <summary>The dropdown list of choices.</summary>
-    public UIListGroup List;
+    public UIListGroup ListGroup;
 
-    /// <summary>The box container surrounding the <see cref="List"/>.</summary>
+    /// <summary>The box container surrounding the <see cref="ListGroup"/>.</summary>
     public UIBox Box;
 
-    /// <summary>The currently selected entry in the <see cref="List"/>.</summary>
+    /// <summary>The currently selected entry in the <see cref="ListGroup"/>.</summary>
     public UIClickableElement SelectedElement;
 
     /// <summary>The currently selected dropdown value.</summary>
@@ -49,8 +49,8 @@ public class UIDropdown : UIElement
 
     /// <summary>Constructs a new UI dropdown.</summary>
     /// <param name="text">The text to display when no choice is selected.</param>
-    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="List"/> entries.</param>
-    /// <param name="listSpacing">The spacing betwene <see cref="List"/> entries.</param>
+    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="ListGroup"/> entries.</param>
+    /// <param name="listSpacing">The spacing betwene <see cref="ListGroup"/> entries.</param>
     /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
     /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
     /// <param name="pos">The position of the element.</param>
@@ -59,8 +59,8 @@ public class UIDropdown : UIElement
         PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
         Box = new UIBox(boxStyle, pos.AtOrigin());
-        Box.AddChild(List = new(listSpacing, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, boxPadding)));
-        Box.Position.GetterHeight(() => List.Position.Height + boxPadding * 2);
+        Box.AddChild(ListGroup = new(listSpacing, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, boxPadding)));
+        Box.Position.GetterHeight(() => ListGroup.Position.Height + boxPadding * 2);
     }
 
     /// <summary>Opens the dropdown list.</summary>
@@ -95,7 +95,7 @@ public class UIDropdown : UIElement
     /// <param name="element">The clickable choice element.</param>
     public void AddChoice(string choice, UIClickableElement element)
     {
-        List.AddChild(element);
+        ListGroup.AddChild(element);
         Choices[element] = choice;
         element.Clicked += () => HandleSelect(element);
     }
