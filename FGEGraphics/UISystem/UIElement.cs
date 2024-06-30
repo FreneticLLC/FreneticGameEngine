@@ -342,6 +342,7 @@ public abstract class UIElement
                 {
                     Pressed = true;
                     Position.View.InteractingElement = this;
+                    Select();
                 }
                 MouseLeftDown(mouseX, mouseY);
             }
