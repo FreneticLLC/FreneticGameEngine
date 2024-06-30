@@ -51,7 +51,7 @@ public abstract class UIClickableElement : UIElement
     /// <param name="onClick">Ran when the element is clicked.</param>
     public UIClickableElement(StyleGroup styles, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
     {
-        Clicked += onClick;
+        OnClick += onClick;
         Styles = AddStyles(styles);
     }
 

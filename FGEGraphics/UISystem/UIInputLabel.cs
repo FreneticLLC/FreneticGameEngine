@@ -52,9 +52,6 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
 
-    /// <summary>Whether the input label is currently selected.</summary>
-    public bool Selected = false; // TODO: Provide a UIElement-native solution for this
-
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public InternalData Internal = new();
 
@@ -63,9 +60,6 @@ public class UIInputLabel : UIClickableElement
 
     /// <summary>Fired when the user submits the text content.</summary>
     public Action<string> TextSubmitted;
-
-    /// <summary>Fired when the user de-selects the input label.</summary>
-    public Action Deselected;
     
     /// <summary>Gets or sets the input text content.</summary>
     public string TextContent
@@ -202,40 +196,25 @@ public class UIInputLabel : UIClickableElement
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
-        Deselected += HandleDeselect;
     }
 
     /// <inheritdoc/>
-    public override void MouseLeftDown()
+    public override void OnSelect()
     {
-        if (Enabled)
-        {
-            Selected = true;
-            Enabled = false;
-            Pressed = true;
-            Position.View.InteractingElement = null;
-            TickMouse(false);
-        }
+        Enabled = false;
+        Pressed = true;
+        Position.View.InteractingElement = null;
+        TickMouse(false);
     }
 
-    /// <summary>Submits and de-selects the input label.</summary>
-    public void HandleDeselect()
+    /// <inheritdoc/>
+    public override void OnDeselect()
     {
         SubmitText();
         Internal.SetPosition(0);
         Internal.CursorOffset = Location.NaN;
-        Selected = false;
         Enabled = true;
         Pressed = false;
-    }
-
-    /// <inheritdoc/>
-    public override void MouseLeftDownOutside()
-    {
-        if (Selected)
-        {
-            Deselected?.Invoke();
-        }
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -439,11 +418,6 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         KeyHandlerState keys = Window.Keyboard.BuildingState;
-        if (keys.Escaped)
-        {
-            Deselected?.Invoke();
-            return;
-        }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         TickBackspaces(keys);
         TickContent(keys);

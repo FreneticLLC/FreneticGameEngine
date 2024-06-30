@@ -50,7 +50,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
             SelectedButton = button;
             SelectedTab = tab;
         }
-        button.Clicked += () =>
+        button.OnClick += () =>
         {
             if (SelectedButton is not null)
             {

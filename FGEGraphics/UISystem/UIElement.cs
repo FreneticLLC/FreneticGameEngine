@@ -68,20 +68,8 @@ public abstract class UIElement
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender = true;
 
-    /// <summary>Gets or sets whether this element can be interacted with.</summary>
-    public bool Enabled
-    {
-        get => ElementInternal.Enabled;
-        set
-        {
-            ElementInternal.Enabled = value;
-            if (!value)
-            {
-                Hovered = false;
-                Pressed = false;
-            }
-        }
-    }
+    /// <summary>Whether this element can be interacted with.</summary>
+    public bool Enabled = true;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
@@ -89,8 +77,11 @@ public abstract class UIElement
     /// <summary>Whether this element is being clicked.</summary>
     public bool Pressed = false;
 
+    /// <summary>Whether the element is the last being interacted with.</summary>
+    public bool Selected = false;
+
     /// <summary>Ran when this element is clicked.</summary>
-    public Action Clicked;
+    public Action OnClick;
 
     /// <summary>
     /// Priority for rendering logic.
@@ -219,9 +210,6 @@ public abstract class UIElement
 
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
-
-        /// <summary>Whether this element's interaction state can change.</summary>
-        public bool Enabled = true;
 
         /// <summary>Styles registered on this element.</summary>
         public List<UIElementStyle> Styles = [];
@@ -362,7 +350,7 @@ public abstract class UIElement
                 if (Enabled)
                 {
                     Pressed = false;
-                    Clicked?.Invoke();
+                    OnClick?.Invoke();
                     Position.View.InteractingElement = null;
                 }
                 MouseLeftUp(mouseX, mouseY);
@@ -385,6 +373,10 @@ public abstract class UIElement
         }
         if (MouseDown)
         {
+            if (Selected)
+            {
+                Deselect();
+            }
             MouseLeftDownOutside(mouseX, mouseY);
         }
     }
@@ -568,6 +560,26 @@ public abstract class UIElement
 
     /// <summary>Ran when the left mouse button is released outside of the boundaries of this element or its children.</summary>
     public virtual void MouseLeftUpOutside()
+    {
+    }
+
+    public void Select()
+    {
+        Selected = true;
+        OnSelect();
+    }
+
+    public void Deselect()
+    {
+        Selected = false;
+        OnDeselect();
+    }
+
+    public virtual void OnSelect()
+    {
+    }
+
+    public virtual void OnDeselect()
     {
     }
 
