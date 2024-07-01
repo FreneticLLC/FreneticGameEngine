@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -255,6 +256,7 @@ public abstract class UIElement
     {
         CheckChildren();
         UpdateStyle();
+        TickInput();
         Tick(delta);
         TickChildren(delta);
     }
@@ -379,6 +381,20 @@ public abstract class UIElement
                 Deselect();
             }
             MouseLeftDownOutside(mouseX, mouseY);
+        }
+    }
+
+    /// <summary>Ticks the <see cref="KeyHandler.BuildingState"/> on this element.</summary>
+    public void TickInput()
+    {
+        if (!Selected)
+        {
+            return;
+        }
+        KeyHandlerState keys = Window.Keyboard.BuildingState;
+        if (keys.Escaped)
+        {
+            Deselect();
         }
     }
 
@@ -564,22 +580,26 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Selects the element and fires <see cref="OnSelect"/>.</summary>
     public void Select()
     {
         Selected = true;
         OnSelect();
     }
 
+    /// <summary>Deselects the element and fires <see cref="OnDeselect"/>.</summary>
     public void Deselect()
     {
         Selected = false;
         OnDeselect();
     }
 
+    /// <summary>Ran when the user has begun interacting with the element.</summary>
     public virtual void OnSelect()
     {
     }
 
+    /// <summary>Ran when the user has stopped interacting with the element.</summary>
     public virtual void OnDeselect()
     {
     }
