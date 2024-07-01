@@ -19,6 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -171,7 +172,7 @@ public class ViewUI2D
                         Renderer2D.SetColor(Color4F.White);
                         if (elem.ElementInternal.HoverInternal)
                         {
-                            Internal.DebugInfo.Add(string.Join('\n', elem.GetDebugInfo()));
+                            Internal.DebugInfo.Add(elem.GetDebugInfo().JoinString("\n"));
                         }
                     }
                 }
@@ -182,7 +183,7 @@ public class ViewUI2D
             }
             if (Debug)
             {
-                string content = string.Join("\n\n", Internal.DebugInfo);
+                string content = Internal.DebugInfo.JoinString("\n\n");
                 RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
                 // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
                 float x = Client.MouseX + text.Width < Client.WindowWidth
