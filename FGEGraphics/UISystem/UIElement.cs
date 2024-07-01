@@ -396,6 +396,14 @@ public abstract class UIElement
         {
             Deselect();
         }
+        if (keys.LeftRights != 0)
+        {
+            NavigateLeftRight(keys.LeftRights);
+        }
+        if (keys.Scrolls != 0)
+        {
+            NavigateUpDown(keys.Scrolls);
+        }
     }
 
     // TODO: Don't pass the stack directly
@@ -577,6 +585,19 @@ public abstract class UIElement
 
     /// <summary>Ran when the left mouse button is released outside of the boundaries of this element or its children.</summary>
     public virtual void MouseLeftUpOutside()
+    {
+    }
+
+    // TODO: Gamepad input
+    /// <summary>Ran when the user navigates horizontally while the element is <see cref="Selected"/>.</summary>
+    /// <param name="value">The horizontal shift (positive for right, negative for left).</param>
+    public virtual void NavigateLeftRight(int value)
+    {
+    }
+
+    /// <summary>Ran when the user navigates vertically while the element is <see cref="Selected"/>.</summary>
+    /// <param name="value">The vertical shift (positive for up, negative for down).</param>
+    public virtual void NavigateUpDown(int value)
     {
     }
 

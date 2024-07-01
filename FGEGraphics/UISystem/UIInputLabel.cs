@@ -204,7 +204,7 @@ public class UIInputLabel : UIClickableElement
         Enabled = false;
         Pressed = true;
         Position.View.InteractingElement = null;
-        TickMouse(false);
+        TickMouse();
     }
 
     /// <inheritdoc/>
@@ -212,7 +212,7 @@ public class UIInputLabel : UIClickableElement
     {
         SubmitText();
         Internal.SetPosition(0);
-        Internal.CursorOffset = Location.NaN;
+        UpdateText();
         Enabled = true;
         Pressed = false;
     }
@@ -301,22 +301,17 @@ public class UIInputLabel : UIClickableElement
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
-    /// <summary>Modifies the current selection based on the <see cref="KeyHandlerState.LeftRights"/> value.</summary>
-    /// <param name="keys">The current keyboard state.</param>
-    /// <param name="shiftDown">Whether the shift key is being held.</param>
-    public void TickArrowKeys(KeyHandlerState keys, bool shiftDown)
+    /// <inheritdoc/>
+    public override void NavigateLeftRight(int value)
     {
-        if (keys.LeftRights == 0)
-        {
-            return;
-        }
+        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         if (Internal.HasSelection && !shiftDown)
         {
-            Internal.CursorEnd = keys.LeftRights < 0 ? Internal.IndexLeft : Internal.IndexRight;
+            Internal.CursorEnd = value < 0 ? Internal.IndexLeft : Internal.IndexRight;
         }
         else
         {
-            Internal.CursorEnd += keys.LeftRights;
+            Internal.CursorEnd += value;
         }
         if (!shiftDown)
         {
@@ -345,13 +340,13 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
-    /// <param name="shiftDown">Whether the shift key is being held.</param>
-    public void TickMouse(bool shiftDown)
+    public void TickMouse()
     {
         if (!MouseDown || Internal.TextChain.Count == 0)
         {
             return;
         }
+        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
@@ -418,11 +413,9 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         KeyHandlerState keys = Window.Keyboard.BuildingState;
-        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         TickBackspaces(keys);
         TickContent(keys);
-        TickArrowKeys(keys, shiftDown);
-        TickMouse(shiftDown);
+        TickMouse();
         TickControlKeys(keys);
         // TODO: Handle ctrl+Z, ctrl+Y
         // TODO: Handle HOME, END
