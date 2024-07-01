@@ -56,10 +56,10 @@ public class UIInputLabel : UIClickableElement
     public InternalData Internal = new();
 
     /// <summary>Fired when the text is edited by the user.</summary>
-    public Action<string> TextEdited;
+    public Action<string> OnTextEdit;
 
     /// <summary>Fired when the user submits the text content.</summary>
-    public Action<string> TextSubmitted;
+    public Action<string> OnTextSubmit;
     
     /// <summary>Gets or sets the input text content.</summary>
     public string TextContent
@@ -235,7 +235,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
         UpdateText();
-        (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
+        (type == EditType.Submit ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
     }
 
     // TODO: Cap length

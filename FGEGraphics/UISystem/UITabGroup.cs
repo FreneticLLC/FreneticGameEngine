@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Arguments for a <see cref="UITabGroup.TabSwitched"/> event handler.</summary>
+/// <summary>Arguments for a <see cref="UITabGroup.OnTabSwitch"/> event handler.</summary>
 /// <param name="From">The tab screen being switched from.</param>
 /// <param name="To">The tab screen being switched to.</param>
 public record TabSwitchedArgs(UIScreen From, UIScreen To);
@@ -28,7 +28,7 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
 {
     /// <summary>Ran when the tab is switched.</summary>
-    public Action<TabSwitchedArgs> TabSwitched = onSwitch;
+    public Action<TabSwitchedArgs> OnTabSwitch = onSwitch;
 
     /// <summary>The button leading to the currently selected tab.</summary>
     public UIElement SelectedButton;
@@ -61,7 +61,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
             button.Enabled = false;
             button.Pressed = true;
             tab.SwitchTo();
-            TabSwitched(new(SelectedTab, tab));
+            OnTabSwitch(new(SelectedTab, tab));
             SelectedButton = button;
             SelectedTab = tab;
         };
