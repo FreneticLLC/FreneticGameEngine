@@ -30,7 +30,7 @@ public enum UIAlignment
 }
 
 /// <summary>Helper methods for <see cref="UIAlignment"/>.</summary>
-public static class TextAlignmentExtensions
+public static class UIAlignmentExtensions
 {
     /// <summary>Returns the fraction of width or height to multiply in to get the proper offset for this alignment. Returns 0, 0.5, or 1.</summary>
     public static float SizeMultiplier(this UIAlignment align) => ((float)align) * 0.5f;
