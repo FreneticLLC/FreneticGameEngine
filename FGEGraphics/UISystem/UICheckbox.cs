@@ -38,7 +38,7 @@ public class UICheckbox : UIElement
     {
         AddChild(Button = new UIButton(null, Toggle, styles, pos.AtOrigin()));
         AddChild(Label = new UILabel(text, label, pos.AtOrigin().ConstantWidth(-1)));
-        Label.Position.GetterXY(() => Label.Text.GetPosition(X + Width + 10, Y + Height / 2));
+        Label.Position.GetterXY(() => X + Width / 2 - Label.Width / 2, () => Y + Height / 2 - Label.Height / 2);
     }
 
     /// <summary>Constructs a new checkbox using the normal button style as the label style.</summary>

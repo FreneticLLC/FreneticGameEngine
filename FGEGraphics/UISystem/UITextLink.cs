@@ -35,14 +35,13 @@ public class UITextLink : UIClickableElement
 
     /// <summary>Constructs an interactable text link.</summary>
     /// <param name="text">The text to display.</param>
-    /// <param name="alignment">The text alignment to use.</param>
     /// <param name="icon">The icon to display alongside the text.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos, TextAlignment alignment = TextAlignment.LEFT) : base(styles, pos, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, true, clicked)
     {
-        Text = new(this, text, true, horizontalAlignment: alignment);
+        Text = new(this, text, true);
         Icon = icon;
         UpdateStyle();
         Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
@@ -54,7 +53,7 @@ public class UITextLink : UIClickableElement
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Location textLocation = Text.GetPosition(X, Y);
+        Location textLocation = new(X, Y, 0);
         if (Icon is null)
         {
             style.TextFont.DrawFancyText(Text, textLocation);

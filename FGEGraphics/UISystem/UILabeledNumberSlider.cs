@@ -43,14 +43,14 @@ public class UILabeledNumberSlider : UINumberSlider
         // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
         ValueEdited += _ => Label.TextContent = Value.ToString(Label.Format);
-        Label.TextSubmitted += _ =>
+        Label.OnTextSubmit += _ =>
         {
             double newValue = GetCorrectedValue(Label.Value, Integer ? 1.0 : 0.0);
             ValueEdited.Invoke(Value = newValue);
         };
         if (updateOnEdit)
         {
-            Label.TextEdited += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
+            Label.OnTextEdit += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
         }
     }
 }

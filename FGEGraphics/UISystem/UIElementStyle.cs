@@ -22,7 +22,7 @@ namespace FGEGraphics.UISystem;
 public record UIElementStyle
 {
     /// <summary>An empty element style.</summary>
-    public static readonly UIElementStyle Empty = new();
+    public static readonly UIElementStyle Empty = new() { Name = "Empty" };
 
     /// <summary>What base color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
     public Color4F BaseColor = Color4F.Transparent;
@@ -48,6 +48,9 @@ public record UIElementStyle
 
     /// <summary>The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
     public string TextBaseColor = TextStyle.Simple;
+
+    /// <summary>The name of the element style (for debug info).</summary>
+    public string Name;
 
     /// <summary>Constructs a default element style.</summary>
     public UIElementStyle()
