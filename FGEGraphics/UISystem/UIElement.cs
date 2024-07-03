@@ -676,7 +676,7 @@ public abstract class UIElement
         };
         if (ElementInternal.Styles.Count > 0)
         {
-            List<string> styleNames = ElementInternal.Styles.Select(style => style.Name is string name ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{name}" : "^1unnamed").ToList();
+            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is string name ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{name}" : "^1unnamed")];
             info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
         }
         return info;
