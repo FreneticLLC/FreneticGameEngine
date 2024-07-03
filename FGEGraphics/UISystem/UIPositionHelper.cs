@@ -128,10 +128,6 @@ public class UIPositionHelper
         return this;
     }
 
-    /// <summary>Sets a constant X and Y value using a <see cref="Location"/>.</summary>
-    /// <returns>This object.</returns>
-    public UIPositionHelper ConstantXY(Location location) => ConstantXY((int) location.X, (int) location.Y);
-
     /// <summary>Sets a constant Width value.</summary>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantWidth(int width)

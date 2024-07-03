@@ -384,6 +384,7 @@ public abstract class UIElement
         }
     }
 
+    // TODO: Gamepad input
     /// <summary>Ticks the <see cref="KeyHandler.BuildingState"/> on this element.</summary>
     public void TickInput()
     {
@@ -588,7 +589,6 @@ public abstract class UIElement
     {
     }
 
-    // TODO: Gamepad input
     /// <summary>Ran when the user navigates horizontally while the element is <see cref="Selected"/>.</summary>
     /// <param name="value">The horizontal shift (positive for right, negative for left).</param>
     public virtual void NavigateLeftRight(int value)
@@ -668,10 +668,12 @@ public abstract class UIElement
     /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
     public virtual List<string> GetDebugInfo()
     {
-        List<string> info = [];
-        info.Add($"^t^0^h^5^u{GetType()}");
-        info.Add($"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}");
-        info.Add($"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}");
+        List<string> info = new(4)
+        {
+            $"^t^0^h^5^u{GetType()}",
+            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
+            $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}"
+        };
         if (ElementInternal.Styles.Count > 0)
         {
             List<string> styleNames = ElementInternal.Styles.Select(style => style.Name is string name ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{name}" : "^1unnamed").ToList();
