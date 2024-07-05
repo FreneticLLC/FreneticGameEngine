@@ -43,6 +43,12 @@ public class UIInputLabel : UIClickableElement
         Submit
     }
 
+    /// <summary>The box behind the input label.</summary>
+    public UIBox Box = null;
+
+    /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
+    public int BoxPadding;
+
     /// <summary>The text to display when the input is empty.</summary>
     public UIElementText PlaceholderInfo;
 
@@ -183,14 +189,22 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Constructs an input label.</summary>
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
-    /// <param name="infoStyles">The clickable styles for the info text.</param>
+    /// <param name="styles">The clickable styles for the box and info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: placeholderInfo.Length > 0)
+    /// <param name="renderBox">Whether to render a box behind the input label.</param>
+    /// <param name="boxPadding">The padding between the box and the label.</param>
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
-        InputStyle = inputStyle ?? infoStyles.Normal;
-        HighlightStyle = highlightStyle ?? infoStyles.Click;
+        if (renderBox)
+        {
+            BoxPadding = boxPadding;
+            pos.ConstantWidthHeight(pos.Width + BoxPadding * 2, pos.Height + BoxPadding * 2);
+            AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
+        }
+        InputStyle = inputStyle ?? styles.Normal;
+        HighlightStyle = highlightStyle ?? styles.Click;
         PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
@@ -215,6 +229,7 @@ public class UIInputLabel : UIClickableElement
         UpdateText();
         Enabled = true;
         Pressed = false;
+        Hovered = false;
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -424,15 +439,18 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
+        Box?.Render(view, delta, style);
+        int x = X + BoxPadding;
+        int y = Y + BoxPadding;
         bool isInfo = TextContent.Length == 0;
         bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(X, Y, 0));
+            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
         }
         else
         {
-            UIElementText.RenderChain(Internal.TextChain, X, Y);
+            UIElementText.RenderChain(Internal.TextChain, x, y);
         }
         if (Internal.CursorOffset.IsNaN())
         {
@@ -443,7 +461,7 @@ public class UIInputLabel : UIClickableElement
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-        view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
+        view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
 
