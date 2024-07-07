@@ -149,6 +149,60 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
         ShaderLocations.Common2D.COLOR.Set(c.R, c.G, c.B, c.A);
     }
 
+    /// <summary>Renders a 2D texture fitted to a given rectangle.</summary>
+    /// <param name="rc">The render context.</param>
+    /// <param name="texture">The texture to render. Will be automatically bound, and used to source the fitting reference size.</param>
+    /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymax">The upper bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="fit">How to adjust the rectangle to fit the texture's aspect ratio.</param>
+    /// <param name="rot">The rotation, if any applies.</param>
+    public void RenderFittedTextureRectangle(RenderContext2D rc, Texture texture, float xmin, float ymin, float xmax, float ymax, TextureFit fit, Vector3? rot = null)
+    {
+        texture.Bind();
+        float aspect = texture.Width / (float)texture.Height;
+        float xsize = xmax - xmin;
+        float ysize = ymax - ymin;
+        float rectAspect = xsize / ysize;
+        switch (fit)
+        {
+            case TextureFit.STRETCH:
+                break;
+            case TextureFit.CONTAIN:
+                if (rectAspect > aspect)
+                {
+                    float shift = (xsize - (ysize * aspect)) * 0.5f;
+                    xmin += shift;
+                    xmax -= shift;
+                }
+                else
+                {
+                    float shift = (ysize - (xsize / aspect)) * 0.5f;
+                    ymin += shift;
+                    ymax -= shift;
+                }
+                break;
+            case TextureFit.OVEREXTEND:
+                if (rectAspect > aspect)
+                {
+                    float shift = (xsize - (ysize * aspect)) * 0.5f;
+                    ymin -= shift;
+                    ymax += shift;
+                }
+                else
+                {
+                    float shift = (ysize - (xsize / aspect)) * 0.5f;
+                    xmin -= shift;
+                    xmax += shift;
+                }
+                break;
+            default:
+                throw new InvalidOperationException($"Unrecognized {nameof(TextureFit)} value: {fit}");
+        }
+        RenderRectangle(rc, xmin, ymin, xmax, ymax, rot);
+    }
+
     /// <summary>Renders a 2D rectangle.</summary>
     /// <param name="rc">The render context.</param>
     /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>

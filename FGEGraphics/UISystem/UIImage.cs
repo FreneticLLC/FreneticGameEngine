@@ -28,13 +28,15 @@ public class UIImage(Texture image, UIPositionHelper pos) : UIElement(pos)
     /// <summary>The image to display.</summary>
     public Texture Image = image;
 
+    /// <summary>How to fit the image within this element's bounding box.</summary>
+    public TextureFit Fit = TextureFit.STRETCH;
+
     /// <summary>Renders the image on a screen.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Image.Bind();
-        view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
     }
 }
