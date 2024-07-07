@@ -616,13 +616,45 @@ public class FileEngine
     /// <param name="text">The file's text.</param>
     public void WriteFileText(string filename, string text)
     {
-        WriteFileData(filename, StringConversionHelper.UTF8Encoding.GetBytes(text));
+        WriteFileData(filename, text.EncodeUTF8());
     }
 
     /// <summary>
     /// Writes a file to disk with the given filename containing the given data, using journalling mode.
     /// This is a special helper to avoid unreadable files if the system crashes during a write.
     /// Note that all file reads check for journalling files.
+    /// This is detached and safe to run async.
+    /// </summary>
+    /// <param name="exactFileName">The exact full final path to the file.</param>
+    /// <param name="data">The file's raw data.</param>
+    public static void WriteFileDataJournallingDetached(string exactFileName, byte[] data)
+    {
+        string directoryName = Path.GetDirectoryName(exactFileName);
+        if (!Directory.Exists(directoryName))
+        {
+            Directory.CreateDirectory(directoryName);
+        }
+        File.WriteAllBytes(exactFileName + "~1", data);
+        if (File.Exists(exactFileName))
+        {
+            if (File.Exists(exactFileName + "~2"))
+            {
+                File.Delete(exactFileName + "~2");
+            }
+            File.Move(exactFileName, exactFileName + "~2");
+        }
+        File.Move(exactFileName + "~1", exactFileName);
+        if (File.Exists(exactFileName + "~2"))
+        {
+            File.Delete(exactFileName + "~2");
+        }
+    }
+
+    /// <summary>
+    /// Writes a file to disk with the given filename containing the given data, using journalling mode.
+    /// This is a special helper to avoid unreadable files if the system crashes during a write.
+    /// Note that all file reads check for journalling files.
+    /// <para>This contains local logic that is not async-safe. If you need to run async, prefer <see cref="WriteFileDataJournallingDetached(string, byte[])"/>.</para>
     /// </summary>
     /// <param name="filename">The name of the file.</param>
     /// <param name="data">The file's raw data.</param>
@@ -630,38 +662,20 @@ public class FileEngine
     {
         filename = CleanFileName(filename);
         Internal.SavedFiles.Add(filename);
-        string fullPath = Internal.SavesFolder + "/" + filename;
-        string directoryName = Path.GetDirectoryName(fullPath);
-        if (!Directory.Exists(directoryName))
-        {
-            Directory.CreateDirectory(directoryName);
-        }
-        File.WriteAllBytes(fullPath + "~1", data);
-        if (File.Exists(fullPath))
-        {
-            if (File.Exists(fullPath + "~2"))
-            {
-                File.Delete(fullPath + "~2");
-            }
-            File.Move(fullPath, fullPath + "~2");
-        }
-        File.Move(fullPath + "~1", fullPath);
-        if (File.Exists(fullPath + "~2"))
-        {
-            File.Delete(fullPath + "~2");
-        }
+        WriteFileDataJournallingDetached($"{Internal.SavesFolder}/{filename}", data);
     }
 
     /// <summary>
     /// Writes a file to disk with the given filename containing the given text, using journalling mode.
     /// This is a special helper to avoid unreadable files if the system crashes during a write.
     /// Note that all file reads check for journalling files.
+    /// <para>This contains local logic that is not async-safe. If you need to run async, prefer <see cref="WriteFileDataJournallingDetached(string, byte[])"/>.</para>
     /// </summary>
     /// <param name="filename">The name of the file.</param>
     /// <param name="text">The file's text.</param>
     public void WriteFileTextJournalling(string filename, string text)
     {
-        WriteFileDataJournalling(filename, StringConversionHelper.UTF8Encoding.GetBytes(text));
+        WriteFileDataJournalling(filename, text.EncodeUTF8());
     }
     #endregion
 }
