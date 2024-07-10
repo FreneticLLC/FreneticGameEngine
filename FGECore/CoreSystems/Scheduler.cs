@@ -133,6 +133,18 @@ public class Scheduler
     }
 
     /// <summary>Starts an async task.</summary>
+    /// <param name="label">A clear simple label for this task, especially for error messages.</param>
+    /// <param name="action">The action to launch async.</param>
+    /// <param name="isImportant">Whether this action is considered important.</param>
+    /// <returns>The scheduled item.</returns>
+    public ASyncScheduleItem StartAsyncTask(string label, Action action, bool isImportant = false)
+    {
+        ASyncScheduleItem asyncer = new() { OwningEngine = this, MyAction = action, UnImportant = !isImportant, Label = label };
+        asyncer.RunMe();
+        return asyncer;
+    }
+
+    /// <summary>Starts an async task.</summary>
     /// <param name="action">The action to launch async.</param>
     /// <param name="isImportant">Whether this action is considered important.</param>
     /// <returns>The scheduled item.</returns>
@@ -198,8 +210,11 @@ public class ASyncScheduleItem : ScheduleItem
     /// <summary>Whether the item is complete.</summary>
     bool Done = false;
 
-    /// <summary>Whether this event is unimportant, and thus can be treated as lower priority.</summary>
+    /// <summary>Whether this action is unimportant, and thus can be treated as lower priority.</summary>
     public bool UnImportant = true;
+
+    /// <summary>Optional label to identify this task, especially for error messages.</summary>
+    public string Label = null;
 
     /// <summary>Gets whether the item has started.</summary>
     public bool HasStarted()
@@ -304,7 +319,7 @@ public class ASyncScheduleItem : ScheduleItem
             {
                 throw;
             }
-            SysConsole.Output("Running Asynchronous task", ex);
+            SysConsole.Output(string.IsNullOrWhiteSpace(Label) ? "Running Asynchronous task" : $"(Async Task) {Label}", ex);
         }
         finally
         {

@@ -302,6 +302,59 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GL.Uniform1(8, 0.0f);
     }
 
+    /// <summary>Renders a 2D texture fitted to a given rectangle.</summary>
+    /// <param name="texture">The texture to render. Will be automatically bound, and used to source the fitting reference size.</param>
+    /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymax">The upper bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="fit">How to adjust the rectangle to fit the texture's aspect ratio.</param>
+    /// <param name="rot">The rotation matrix, if any.</param>
+    public void RenderFittedTextureRectangle(Texture texture, float xmin, float ymin, float xmax, float ymax, TextureFit fit, Matrix4? rot = null)
+    {
+        texture.Bind();
+        float aspect = texture.Width / (float)texture.Height;
+        float xsize = xmax - xmin;
+        float ysize = ymax - ymin;
+        float rectAspect = xsize / ysize;
+        switch (fit)
+        {
+            case TextureFit.STRETCH:
+                break;
+            case TextureFit.CONTAIN:
+                if (rectAspect > aspect)
+                {
+                    float shift = (xsize - (ysize * aspect)) * 0.5f;
+                    xmin += shift;
+                    xmax -= shift;
+                }
+                else
+                {
+                    float shift = (ysize - (xsize / aspect)) * 0.5f;
+                    ymin += shift;
+                    ymax -= shift;
+                }
+                break;
+            case TextureFit.OVEREXTEND:
+                if (rectAspect > aspect)
+                {
+                    float shift = (xsize - (ysize * aspect)) * 0.5f;
+                    ymin -= shift;
+                    ymax += shift;
+                }
+                else
+                {
+                    float shift = (ysize - (xsize / aspect)) * 0.5f;
+                    xmin -= shift;
+                    xmax += shift;
+                }
+                break;
+            default:
+                throw new InvalidOperationException($"Unrecognized {nameof(TextureFit)} value: {fit}");
+        }
+        RenderRectangle(xmin, ymin, xmax, ymax, rot);
+    }
+
     /// <summary>Renders a 3D rectangle.</summary>
     /// <param name="mat">The matrix.</param>
     public void RenderRectangle3D(Matrix4 mat)
@@ -320,7 +373,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <param name="rot">The rotation matrix, if any.</param>
     public void RenderRectangle(float xmin, float ymin, float xmax, float ymax, Matrix4? rot = null)
     {
-        Matrix4 mat = Matrix4.CreateScale(xmax - xmin, ymax - ymin, 1) * (rot != null && rot.HasValue ? rot.Value : Matrix4.Identity) * Matrix4.CreateTranslation(xmin, ymin, 0);
+        Matrix4 mat = Matrix4.CreateScale(xmax - xmin, ymax - ymin, 1) * (rot ?? Matrix4.Identity) * Matrix4.CreateTranslation(xmin, ymin, 0);
         GL.UniformMatrix4(2, false, ref mat);
         GL.BindVertexArray(Square.Internal.VAO);
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);

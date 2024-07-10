@@ -128,6 +128,10 @@ public class UIPositionHelper
         return this;
     }
 
+    /// <summary>Sets a constant X and Y value using a <see cref="Location"/>.</summary>
+    /// <returns>This object.</returns>
+    public UIPositionHelper ConstantXY(Location location) => ConstantXY((int)location.X, (int)location.Y);
+
     /// <summary>Sets a constant Width value.</summary>
     /// <returns>This object.</returns>
     public UIPositionHelper ConstantWidth(int width)
@@ -185,6 +189,10 @@ public class UIPositionHelper
         Internal.Y = new() { Mode = UIPosMode.GETTER, GetterVal = y };
         return this;
     }
+
+    /// <summary>Sets getter X and Y values using a <see cref="Location"/>.</summary>
+    /// <returns>This object.</returns>
+    public UIPositionHelper GetterXY(Func<Location> location) => GetterXY(() => (int)location().X, () => (int)location().Y);
 
     /// <summary>Sets a getter Width value.</summary>
     /// <returns>This object.</returns>

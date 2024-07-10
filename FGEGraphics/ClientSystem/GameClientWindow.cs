@@ -121,6 +121,13 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>The currently rendering UI for this engine.</summary>
     public ViewUI2D MainUI;
 
+    /// <summary>Standard framerate (FPS) limit when playing. See also <see cref="MaxFpsWhenUnselected"/>.</summary>
+    public int MaxFps = 1000;
+
+    /// <summary>Optional framerate limit when the window is unselected/unfocused. <c>0</c> means no limit, <c>30</c> means a 30 FPS cap when the window is unselected.
+    /// Does nothing when the window is selected/focused. See also <see cref="MaxFps"/>.</summary>
+    public int MaxFpsWhenUnselected = 0;
+
     /// <summary>Internal data for the <see cref="GameClientWindow"/>.</summary>
     public struct InternalData
     {
@@ -237,7 +244,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         {
             StackNoteHelper.Push("GameClientWindow - Start, run", this);
             Logs.ClientInit("GameEngine loading...");
-            Window = new GameWindow(new GameWindowSettings(), new NativeWindowSettings()
+            Window = new GameWindow(new GameWindowSettings() { UpdateFrequency = MaxFps }, new NativeWindowSettings()
             {
                 ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
                 Title = StartingWindowTitle,
@@ -255,6 +262,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             Window.MouseMove += Mouse_Move;
             Window.Closing += Window_Closed;
             Window.Resize += Window_Resize;
+            Window.FocusedChanged += Window_FocusedChanged;
             Logs.ClientInit("GameEngine calling SetUp event...");
             OnWindowSetUp?.Invoke();
             Logs.ClientInit("GameEngine running...");
@@ -325,8 +333,21 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         Internal.Loaded = true;
     }
 
+    /// <summary>Called when the window is focused or unfocused.</summary>
+    public void Window_FocusedChanged(FocusedChangedEventArgs e)
+    {
+        if (e.IsFocused)
+        {
+            Window.UpdateFrequency = MaxFps;
+        }
+        else
+        {
+            Window.UpdateFrequency = MaxFpsWhenUnselected <= 0 ? MaxFps : MaxFpsWhenUnselected;
+        }
+    }
+
     /// <summary>Called when the window is closed.</summary>
-    private void Window_Closed(CancelEventArgs args)
+    public void Window_Closed(CancelEventArgs args)
     {
         OnWindowClosed?.Invoke();
         if (ExitOnClose)
@@ -336,7 +357,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     }
 
     /// <summary>Renders a single frame of the game, and also ticks.</summary>
-    private void Window_RenderFrame(FrameEventArgs e)
+    public void Window_RenderFrame(FrameEventArgs e)
     {
         try
         {
