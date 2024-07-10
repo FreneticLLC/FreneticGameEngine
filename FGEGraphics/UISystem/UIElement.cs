@@ -511,6 +511,22 @@ public abstract class UIElement
         }
     }
 
+    public void Propagate(Action<UIElement> action, bool toAdd = false)
+    {
+        action(this);
+        foreach (UIElement element in ElementInternal.Children)
+        {
+            element.Propagate(action, toAdd);
+        }
+        if (toAdd)
+        {
+            foreach (UIElement element in ElementInternal.ToAdd)
+            {
+                element.Propagate(action, toAdd);
+            }
+        }
+    }
+
     /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>
     /// <param name="x">The X position of the mouse.</param>
     /// <param name="y">The Y position of the mouse.</param>
