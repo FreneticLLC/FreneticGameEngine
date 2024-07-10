@@ -8,8 +8,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -52,10 +54,6 @@ public abstract class UIElement
     /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
     public int Height => LastAbsoluteSize.Y;
 
-    // TODO: Remove?
-    /// <summary>Whether the element has a parent element.</summary>
-    public bool HasParent => Parent is not null && !Parent.ElementInternal.ToRemove.Contains(this);
-
     /// <summary>Whether the mouse left button is currently down.</summary>
     public bool MouseDown => Position.View.Internal.MouseDown;
 
@@ -71,20 +69,8 @@ public abstract class UIElement
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender = true;
 
-    /// <summary>Gets or sets whether this element can be interacted with.</summary>
-    public bool Enabled
-    {
-        get => ElementInternal.Enabled;
-        set
-        {
-            ElementInternal.Enabled = value;
-            if (!value)
-            {
-                Hovered = false;
-                Pressed = false;
-            }
-        }
-    }
+    /// <summary>Whether this element can be interacted with.</summary>
+    public bool Enabled = true;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
     public bool Hovered = false;
@@ -92,8 +78,11 @@ public abstract class UIElement
     /// <summary>Whether this element is being clicked.</summary>
     public bool Pressed = false;
 
+    /// <summary>Whether the element is the last being interacted with.</summary>
+    public bool Selected = false;
+
     /// <summary>Ran when this element is clicked.</summary>
-    public Action Clicked;
+    public Action OnClick;
 
     /// <summary>
     /// Priority for rendering logic.
@@ -223,9 +212,6 @@ public abstract class UIElement
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
-        /// <summary>Whether this element's interaction state can change.</summary>
-        public bool Enabled = true;
-
         /// <summary>Styles registered on this element.</summary>
         public List<UIElementStyle> Styles = [];
 
@@ -270,6 +256,7 @@ public abstract class UIElement
     {
         CheckChildren();
         UpdateStyle();
+        TickInput();
         Tick(delta);
         TickChildren(delta);
     }
@@ -357,6 +344,7 @@ public abstract class UIElement
                 {
                     Pressed = true;
                     Position.View.InteractingElement = this;
+                    Select();
                 }
                 MouseLeftDown(mouseX, mouseY);
             }
@@ -365,7 +353,7 @@ public abstract class UIElement
                 if (Enabled)
                 {
                     Pressed = false;
-                    Clicked?.Invoke();
+                    OnClick?.Invoke();
                     Position.View.InteractingElement = null;
                 }
                 MouseLeftUp(mouseX, mouseY);
@@ -388,7 +376,34 @@ public abstract class UIElement
         }
         if (MouseDown)
         {
+            if (Selected)
+            {
+                Deselect();
+            }
             MouseLeftDownOutside(mouseX, mouseY);
+        }
+    }
+
+    // TODO: Gamepad input
+    /// <summary>Ticks the <see cref="KeyHandler.BuildingState"/> on this element.</summary>
+    public void TickInput()
+    {
+        if (!Selected)
+        {
+            return;
+        }
+        KeyHandlerState keys = Window.Keyboard.BuildingState;
+        if (keys.Escaped)
+        {
+            Deselect();
+        }
+        if (keys.LeftRights != 0)
+        {
+            NavigateLeftRight(keys.LeftRights);
+        }
+        if (keys.Scrolls != 0)
+        {
+            NavigateUpDown(keys.Scrolls);
         }
     }
 
@@ -574,6 +589,42 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Ran when the user navigates horizontally while the element is <see cref="Selected"/>.</summary>
+    /// <param name="value">The horizontal shift (positive for right, negative for left).</param>
+    public virtual void NavigateLeftRight(int value)
+    {
+    }
+
+    /// <summary>Ran when the user navigates vertically while the element is <see cref="Selected"/>.</summary>
+    /// <param name="value">The vertical shift (positive for up, negative for down).</param>
+    public virtual void NavigateUpDown(int value)
+    {
+    }
+
+    /// <summary>Selects the element and fires <see cref="OnSelect"/>.</summary>
+    public void Select()
+    {
+        Selected = true;
+        OnSelect();
+    }
+
+    /// <summary>Deselects the element and fires <see cref="OnDeselect"/>.</summary>
+    public void Deselect()
+    {
+        Selected = false;
+        OnDeselect();
+    }
+
+    /// <summary>Ran when the user has begun interacting with the element.</summary>
+    public virtual void OnSelect()
+    {
+    }
+
+    /// <summary>Ran when the user has stopped interacting with the element.</summary>
+    public virtual void OnDeselect()
+    {
+    }
+
     /// <summary>Gets all children that contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
@@ -617,9 +668,17 @@ public abstract class UIElement
     /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
     public virtual List<string> GetDebugInfo()
     {
-        string type = $"^t^0^h^5^u{GetType()}";
-        string pos = $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}";
-        string state = $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}";
-        return [type, pos, state];
+        List<string> info = new(4)
+        {
+            $"^t^0^h^5^u{GetType()}",
+            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
+            $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}"
+        };
+        if (ElementInternal.Styles.Count > 0)
+        {
+            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{style.Name}" : "^1unnamed")];
+            info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+        }
+        return info;
     }
 }

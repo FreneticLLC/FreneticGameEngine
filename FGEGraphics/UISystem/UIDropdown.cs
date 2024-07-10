@@ -97,7 +97,7 @@ public class UIDropdown : UIElement
     {
         ListGroup.AddChild(element);
         Choices[element] = choice;
-        element.Clicked += () => HandleSelect(element);
+        element.OnClick += () => HandleSelect(element);
     }
 
     /// <summary>Adds a <see cref="UITextLink"/> as a choice to the dropdown.</summary>

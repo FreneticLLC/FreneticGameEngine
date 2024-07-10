@@ -52,20 +52,14 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
 
-    /// <summary>Whether the input label is currently selected.</summary>
-    public bool Selected = false; // TODO: Provide a UIElement-native solution for this
-
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public InternalData Internal = new();
 
     /// <summary>Fired when the text is edited by the user.</summary>
-    public Action<string> TextEdited;
+    public Action<string> OnTextEdit;
 
     /// <summary>Fired when the user submits the text content.</summary>
-    public Action<string> TextSubmitted;
-
-    /// <summary>Fired when the user de-selects the input label.</summary>
-    public Action Deselected;
+    public Action<string> OnTextSubmit;
     
     /// <summary>Gets or sets the input text content.</summary>
     public string TextContent
@@ -202,40 +196,25 @@ public class UIInputLabel : UIClickableElement
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
         TextContent = defaultText;
-        Deselected += HandleDeselect;
     }
 
     /// <inheritdoc/>
-    public override void MouseLeftDown()
+    public override void OnSelect()
     {
-        if (Enabled)
-        {
-            Selected = true;
-            Enabled = false;
-            Pressed = true;
-            Position.View.InteractingElement = null;
-            TickMouse(false);
-        }
+        Enabled = false;
+        Pressed = true;
+        Position.View.InteractingElement = null;
+        TickMouse();
     }
 
-    /// <summary>Submits and de-selects the input label.</summary>
-    public void HandleDeselect()
+    /// <inheritdoc/>
+    public override void OnDeselect()
     {
         SubmitText();
         Internal.SetPosition(0);
-        Internal.CursorOffset = Location.NaN;
-        Selected = false;
+        UpdateText();
         Enabled = true;
         Pressed = false;
-    }
-
-    /// <inheritdoc/>
-    public override void MouseLeftDownOutside()
-    {
-        if (Selected)
-        {
-            Deselected?.Invoke();
-        }
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -256,7 +235,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
         UpdateText();
-        (type == EditType.Submit ? TextSubmitted : TextEdited)?.Invoke(TextContent);
+        (type == EditType.Submit ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
@@ -322,22 +301,17 @@ public class UIInputLabel : UIClickableElement
     }
 
     // TODO: Handle ctrl left/right, handle up/down arrows
-    /// <summary>Modifies the current selection based on the <see cref="KeyHandlerState.LeftRights"/> value.</summary>
-    /// <param name="keys">The current keyboard state.</param>
-    /// <param name="shiftDown">Whether the shift key is being held.</param>
-    public void TickArrowKeys(KeyHandlerState keys, bool shiftDown)
+    /// <inheritdoc/>
+    public override void NavigateLeftRight(int value)
     {
-        if (keys.LeftRights == 0)
-        {
-            return;
-        }
+        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         if (Internal.HasSelection && !shiftDown)
         {
-            Internal.CursorEnd = keys.LeftRights < 0 ? Internal.IndexLeft : Internal.IndexRight;
+            Internal.CursorEnd = value < 0 ? Internal.IndexLeft : Internal.IndexRight;
         }
         else
         {
-            Internal.CursorEnd += keys.LeftRights;
+            Internal.CursorEnd += value;
         }
         if (!shiftDown)
         {
@@ -366,13 +340,13 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
-    /// <param name="shiftDown">Whether the shift key is being held.</param>
-    public void TickMouse(bool shiftDown)
+    public void TickMouse()
     {
         if (!MouseDown || Internal.TextChain.Count == 0)
         {
             return;
         }
+        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = Window.MouseX - X;
         float relMouseY = Window.MouseY - Y;
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
@@ -439,16 +413,9 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         KeyHandlerState keys = Window.Keyboard.BuildingState;
-        if (keys.Escaped)
-        {
-            Deselected?.Invoke();
-            return;
-        }
-        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         TickBackspaces(keys);
         TickContent(keys);
-        TickArrowKeys(keys, shiftDown);
-        TickMouse(shiftDown);
+        TickMouse();
         TickControlKeys(keys);
         // TODO: Handle ctrl+Z, ctrl+Y
         // TODO: Handle HOME, END
@@ -461,7 +428,7 @@ public class UIInputLabel : UIClickableElement
         bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(PlaceholderInfo, PlaceholderInfo.GetPosition(X, Y));
+            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(X, Y, 0));
         }
         else
         {
