@@ -511,6 +511,8 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>Yields this element and all child elements recursively.</summary>
+    /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
     public IEnumerable<UIElement> AllChildren(bool toAdd = false)
     {
         yield return this;
