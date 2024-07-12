@@ -18,42 +18,62 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
-/// <remarks>Constructs the UI scroll box.</remarks>
-/// <param name="pos">The position of the element.</param>
 // TODO: handle navigational scroll
-public class UIScrollGroup(UIPositionHelper pos) : UIScissorGroup(pos)
+public class UIScrollGroup : UIScissorGroup
 {
     /// <summary>The current scroll position.</summary>
-    public int Scroll = 0;
+    public int Value = 0;
 
-    /// <summary>An upper limit on how far the scroll box can be scrolled. 0 for unlimited scrolling.</summary>
-    public int MaxScroll = 0;
+    /// <summary>An upper limit on how far the group can be scrolled. 0 for unlimited scrolling.</summary>
+    public int MaxValue = 0;
+
+    /// <summary>How fast the group can be scrolled (in position units per scroll tick).</summary>
+    public int ScrollSpeed = 10;
+
+    /// <summary>The scroll bar box.</summary>
+    public UIBox ScrollBar;
+
+    /// <summary>Constructs the UI scroll group.</summary>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="barStyle">The <see cref="ScrollBar"/> style.</param>
+    /// <param name="barWidth">The width of the <see cref="ScrollBar"/>.</param>
+    public UIScrollGroup(UIPositionHelper pos, UIElementStyle barStyle = null, int barWidth = 0) : base(pos)
+    {
+        if (barStyle is not null && barWidth > 0)
+        {
+            int BarHeight() => (int)((double)pos.Height / (MaxValue + pos.Height) * pos.Height);
+            base.AddChild(ScrollBar = new(barStyle, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT).ConstantWidth(barWidth)
+                .GetterHeight(BarHeight)
+                .GetterY(() => (int) ((pos.Height - BarHeight()) * ((double) Value / MaxValue)))));
+        }
+    }
 
     /// <inheritdoc/>
     public override void AddChild(UIElement child, bool priority = true)
     {
         UIPositionHelper original = new(child.Position);
-        child.Position.GetterY(() => original.Internal.Y.Get() - Scroll);
+        child.Position.GetterY(() => original.Internal.Y.Get() - Value);
         base.AddChild(child, priority);
     }
 
     /// <summary>Checks the mouse scroll wheel if necessary and changes the scroll position.</summary>
     /// <param name="delta">The time since the last tick.</param>
     // TODO: Handle horizontal scroll
+    // TODO: Click/hold scroll bar
     public override void Tick(double delta)
     {
         if (!ElementInternal.HoverInternal)
         {
             return;
         }
-        Scroll -= (int)Window.CurrentMouse.ScrollDelta.Y * 10;
-        if (Scroll < 0)
+        Value -= (int)Window.CurrentMouse.ScrollDelta.Y * ScrollSpeed;
+        if (Value < 0)
         {
-            Scroll = 0;
+            Value = 0;
         }
-        if (MaxScroll != 0 && Scroll > MaxScroll)
+        if (MaxValue != 0 && Value > MaxValue)
         {
-            Scroll = MaxScroll;
+            Value = MaxValue;
         }
     }
 
@@ -61,7 +81,7 @@ public class UIScrollGroup(UIPositionHelper pos) : UIScissorGroup(pos)
     public override List<string> GetDebugInfo()
     {
         List<string> info = base.GetDebugInfo();
-        info.Add($"^7Scroll: ^3{Scroll}");
+        info.Add($"^7Scroll: ^3{Value}");
         return info;
     }
 }
