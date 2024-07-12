@@ -511,18 +511,24 @@ public abstract class UIElement
         }
     }
 
-    public void Propagate(Action<UIElement> action, bool toAdd = false)
+    public IEnumerable<UIElement> AllChildren(bool toAdd = false)
     {
-        action(this);
+        yield return this;
         foreach (UIElement element in ElementInternal.Children)
         {
-            element.Propagate(action, toAdd);
+            foreach (UIElement child in element.AllChildren(toAdd))
+            {
+                yield return child;
+            }
         }
         if (toAdd)
         {
             foreach (UIElement element in ElementInternal.ToAdd)
             {
-                element.Propagate(action, toAdd);
+                foreach (UIElement child in element.AllChildren(toAdd))
+                {
+                    yield return child;
+                }
             }
         }
     }

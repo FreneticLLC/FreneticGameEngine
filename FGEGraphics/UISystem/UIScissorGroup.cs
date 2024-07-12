@@ -20,7 +20,10 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override void AddChild(UIElement child, bool priority = true)
     {
         base.AddChild(child, priority);
-        child.Propagate(element => element.ShouldRender = false, toAdd: true);
+        foreach (UIElement element in child.AllChildren(toAdd: true))
+        {
+            element.ShouldRender = false;
+        }
     }
 
     /// <inheritdoc/>
@@ -30,7 +33,10 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
         GL.Scissor(X, Engine.Window.ClientSize.Y - Y - Height, Width, Height);
         foreach (UIElement child in ElementInternal.Children)
         {
-            child.Propagate(element => element.Render(view, delta));
+            foreach (UIElement element in child.AllChildren())
+            {
+                element.Render(view, delta);
+            }
         }
         GL.Scissor(0, 0, Engine.Window.ClientSize.X, Engine.Window.ClientSize.Y); // TODO: Bump around a stack, for embedded scroll groups?
         GL.Disable(EnableCap.ScissorTest);
