@@ -198,7 +198,7 @@ public class UIInputLabel : UIClickableElement
     /// <param name="pos">The position of the element.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIElementStyle scrollBarStyle = null, int scrollBarWidth = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
@@ -207,7 +207,7 @@ public class UIInputLabel : UIClickableElement
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
         int outline = renderBox ? styles.Hover.BorderThickness : 0;
-        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2));
+        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2), scrollBarStyle, scrollBarWidth);
         ScrollGroup.AddChild(new Renderable(this, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_LEFT)));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? styles.Normal;
@@ -247,13 +247,13 @@ public class UIInputLabel : UIClickableElement
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
         if (Internal.TextChain.Count > 1)
         {
-            UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
-            Logs.Debug($"yoffset: {lastPiece.YOffset}, font height: {lastPiece.Font.FontDefault.Height}, container height: {Position.Height}");
-            ScrollGroup.MaxValue = Math.Max((int) lastPiece.YOffset, 0);
+            ScrollGroup.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
+            // TODO: Clamp scroll value to cursor view
         }
         else
         {
             ScrollGroup.MaxValue = 0;
+            ScrollGroup.Value = 0;
         }
     }
 
