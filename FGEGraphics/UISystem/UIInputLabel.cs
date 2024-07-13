@@ -46,8 +46,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The box behind the input label.</summary>
     public UIBox Box = null;
 
-    /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
-    public int BoxPadding;
+    public UIScrollGroup ScrollGroup;
 
     /// <summary>The text to display when the input is empty.</summary>
     public UIElementText PlaceholderInfo;
@@ -86,6 +85,9 @@ public class UIInputLabel : UIClickableElement
     {
         /// <summary>The raw text content.</summary>
         public string TextContent = "";
+
+        /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
+        public int BoxPadding;
 
         /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
         public int CursorStart = 0;
@@ -149,6 +151,7 @@ public class UIInputLabel : UIClickableElement
 
         /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>, or <see cref="Location.NaN"/> if none.</summary>
         // TODO: Account for formatting codes
+        // TODO: out of range exception here somewhere
         public readonly Location GetCursorOffset()
         {
             double xOffset = 0;
@@ -199,10 +202,14 @@ public class UIInputLabel : UIClickableElement
     {
         if (renderBox)
         {
-            BoxPadding = boxPadding;
-            pos.ConstantWidthHeight(pos.Width + BoxPadding * 2, pos.Height + BoxPadding * 2);
+            Internal.BoxPadding = boxPadding;
+            pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2);
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
+        int outline = renderBox ? styles.Hover.BorderThickness : 0;
+        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2));
+        ScrollGroup.AddChild(new Renderable(this, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_LEFT)));
+        AddChild(ScrollGroup);
         InputStyle = inputStyle ?? styles.Normal;
         HighlightStyle = highlightStyle ?? styles.Click;
         PlaceholderInfo = new(this, placeholderInfo, true);
@@ -238,6 +245,16 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
+        if (Internal.TextChain.Count > 1)
+        {
+            UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
+            Logs.Debug($"yoffset: {lastPiece.YOffset}, font height: {lastPiece.Font.FontDefault.Height}, container height: {Position.Height}");
+            ScrollGroup.MaxValue = Math.Max((int) lastPiece.YOffset, 0);
+        }
+        else
+        {
+            ScrollGroup.MaxValue = 0;
+        }
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -363,7 +380,7 @@ public class UIInputLabel : UIClickableElement
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = Window.MouseX - X;
-        float relMouseY = Window.MouseY - Y;
+        float relMouseY = Window.MouseY - Y + ScrollGroup.Value;
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -436,33 +453,43 @@ public class UIInputLabel : UIClickableElement
         // TODO: Handle HOME, END
     }
 
+    public class Renderable(UIInputLabel label, UIPositionHelper pos) : UIElement(pos)
+    {
+        public UIInputLabel Label = label;
+
+        public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+        {
+            int inset = Label.Box is not null ? Label.Styles.Hover.BorderThickness : 0;
+            int x = X + Label.Internal.BoxPadding - inset;
+            int y = Y + Label.Internal.BoxPadding - inset;
+            bool isInfo = Label.TextContent.Length == 0;
+            bool renderInfo = isInfo && style.CanRenderText(Label.PlaceholderInfo);
+            if (renderInfo)
+            {
+                style.TextFont.DrawFancyText(Label.PlaceholderInfo, new Location(x, y, 0));
+            }
+            else
+            {
+                UIElementText.RenderChain(Label.Internal.TextChain, x, y);
+            }
+            if (Label.Internal.CursorOffset.IsNaN())
+            {
+                return;
+            }
+            // TODO: Cursor blink modes
+            Engine.Textures.White.Bind();
+            Renderer2D.SetColor(Label.InputStyle.BorderColor);
+            int lineWidth = Label.InputStyle.BorderThickness / 2;
+            int lineHeight = (renderInfo ? Label.PlaceholderInfo : Label.Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+            view.Rendering.RenderRectangle(view.UIContext, x + Label.Internal.CursorOffset.XF - lineWidth, y + Label.Internal.CursorOffset.YF, x + Label.Internal.CursorOffset.XF + lineWidth, y + Label.Internal.CursorOffset.YF + lineHeight);
+            Renderer2D.SetColor(Color4.White);
+        }
+    }
+
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         Box?.Render(view, delta, style);
-        int x = X + BoxPadding;
-        int y = Y + BoxPadding;
-        bool isInfo = TextContent.Length == 0;
-        bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
-        if (renderInfo)
-        {
-            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
-        }
-        else
-        {
-            UIElementText.RenderChain(Internal.TextChain, x, y);
-        }
-        if (Internal.CursorOffset.IsNaN())
-        {
-            return;
-        }
-        // TODO: Cursor blink modes
-        Engine.Textures.White.Bind();
-        Renderer2D.SetColor(InputStyle.BorderColor);
-        int lineWidth = InputStyle.BorderThickness / 2;
-        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-        view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
-        Renderer2D.SetColor(Color4.White);
     }
 
     /// <inheritdoc/>

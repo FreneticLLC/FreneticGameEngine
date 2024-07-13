@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using OpenTK.Mathematics;
@@ -24,8 +25,8 @@ public class UIScrollGroup : UIScissorGroup
     /// <summary>The current scroll position.</summary>
     public int Value = 0;
 
-    /// <summary>An upper limit on how far the group can be scrolled. 0 for unlimited scrolling.</summary>
-    public int MaxValue = 0;
+    /// <summary>An upper limit on how far the group can be scrolled. -1 for unlimited scrolling, 0 for no scrolling.</summary>
+    public int MaxValue = -1;
 
     /// <summary>How fast the group can be scrolled (in position units per scroll tick).</summary>
     public int ScrollSpeed = 10;
@@ -41,10 +42,10 @@ public class UIScrollGroup : UIScissorGroup
     {
         if (barStyle is not null && barWidth > 0)
         {
-            int BarHeight() => (int)((double)pos.Height / (MaxValue + pos.Height) * pos.Height);
+            int BarHeight() => MaxValue > 0 ? (int)((double)pos.Height / (MaxValue + pos.Height) * pos.Height) : 0;
             base.AddChild(ScrollBar = new(barStyle, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT).ConstantWidth(barWidth)
                 .GetterHeight(BarHeight)
-                .GetterY(() => (int) ((pos.Height - BarHeight()) * ((double) Value / MaxValue)))));
+                .GetterY(() => MaxValue > 0 ? (int) ((pos.Height - BarHeight()) * ((double) Value / MaxValue)) : 0)));
         }
     }
 
@@ -71,7 +72,7 @@ public class UIScrollGroup : UIScissorGroup
         {
             Value = 0;
         }
-        if (MaxValue != 0 && Value > MaxValue)
+        if (MaxValue != -1 && Value > MaxValue)
         {
             Value = MaxValue;
         }
