@@ -46,6 +46,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The box behind the input label.</summary>
     public UIBox Box = null;
 
+    /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
 
     /// <summary>The text to display when the input is empty.</summary>
@@ -198,7 +199,7 @@ public class UIInputLabel : UIClickableElement
     /// <param name="pos">The position of the element.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIElementStyle scrollBarStyle = null, int scrollBarWidth = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
@@ -207,8 +208,8 @@ public class UIInputLabel : UIClickableElement
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
         int outline = renderBox ? styles.Hover.BorderThickness : 0;
-        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2), scrollBarStyle, scrollBarWidth);
         ScrollGroup.AddChild(new Renderable(this, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_LEFT)));
+        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2), scrollBarStyles, scrollBarWidth);
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? styles.Normal;
         HighlightStyle = highlightStyle ?? styles.Click;

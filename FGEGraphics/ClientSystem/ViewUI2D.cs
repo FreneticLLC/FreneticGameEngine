@@ -162,7 +162,7 @@ public class ViewUI2D
                     }
                     if (elem.ShouldRender)
                     {
-                        elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
+                        elem.Render(this, Client.Delta);
                     }
                     if (Debug)
                     {

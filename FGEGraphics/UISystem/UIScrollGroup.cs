@@ -31,21 +31,33 @@ public class UIScrollGroup : UIScissorGroup
     /// <summary>How fast the group can be scrolled (in position units per scroll tick).</summary>
     public int ScrollSpeed = 10;
 
-    /// <summary>The scroll bar box.</summary>
-    public UIBox ScrollBar;
+    /// <summary>The scroll bar button.</summary>
+    public UIButton ScrollBar;
+
+    /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
+    public InternalData Internal = new();
+
+    /// <summary>The height of the <see cref="ScrollBar"/>.</summary>
+    public int ScrollBarHeight => MaxValue > 0 ? (int)((double)Position.Height / (MaxValue + Position.Height) * Position.Height) : 0;
+
+    /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
+    public struct InternalData()
+    {
+        /// <summary>The held Y offset of the vertical scroll bar.</summary>
+        public int HeldY = -1;
+    }
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="pos">The position of the element.</param>
-    /// <param name="barStyle">The <see cref="ScrollBar"/> style.</param>
+    /// <param name="barStyles">The <see cref="ScrollBar"/> styles.</param>
     /// <param name="barWidth">The width of the <see cref="ScrollBar"/>.</param>
-    public UIScrollGroup(UIPositionHelper pos, UIElementStyle barStyle = null, int barWidth = 0) : base(pos)
+    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0) : base(pos)
     {
-        if (barStyle is not null && barWidth > 0)
+        if (barStyles is not null && barWidth > 0)
         {
-            int BarHeight() => MaxValue > 0 ? (int)((double)pos.Height / (MaxValue + pos.Height) * pos.Height) : 0;
-            base.AddChild(ScrollBar = new(barStyle, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT).ConstantWidth(barWidth)
-                .GetterHeight(BarHeight)
-                .GetterY(() => MaxValue > 0 ? (int) ((pos.Height - BarHeight()) * ((double) Value / MaxValue)) : 0)));
+            base.AddChild(ScrollBar = new(null, null, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT).ConstantWidth(barWidth)
+                .GetterHeight(() => ScrollBarHeight)
+                .GetterY(() => MaxValue > 0 ? (int) ((pos.Height - ScrollBarHeight) * ((double) Value / MaxValue)) : 0)));
         }
     }
 
@@ -57,16 +69,26 @@ public class UIScrollGroup : UIScissorGroup
         base.AddChild(child, priority);
     }
 
-    /// <summary>Checks the mouse scroll wheel if necessary and changes the scroll position.</summary>
-    /// <param name="delta">The time since the last tick.</param>
-    // TODO: Handle horizontal scroll
-    // TODO: Click/hold scroll bar
-    public override void Tick(double delta)
+    /// <summary>Ticks the mouse dragging the scroll bar.</summary>
+    public void TickMouseDrag()
     {
-        if (!ElementInternal.HoverInternal)
+        if (!ScrollBar.Pressed)
         {
+            Internal.HeldY = -1;
             return;
         }
+        if (Internal.HeldY == -1)
+        {
+            Internal.HeldY = (int)Window.MouseY - ScrollBar.Y;
+        }
+        Value = (int)((double)(Window.MouseY - Y - Internal.HeldY) / (Position.Height - ScrollBarHeight) * MaxValue);
+        Value = Math.Clamp(Value, 0, MaxValue);
+    }
+
+    /// <summary>Ticks the scroll wheel and modifies the scroll value.</summary>
+    // TODO: Handle horizontal scroll
+    public void TickMouseScroll()
+    {
         Value -= (int)Window.CurrentMouse.ScrollDelta.Y * ScrollSpeed;
         if (Value < 0)
         {
@@ -75,6 +97,20 @@ public class UIScrollGroup : UIScissorGroup
         if (MaxValue != -1 && Value > MaxValue)
         {
             Value = MaxValue;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void Tick(double delta)
+    {
+        base.Tick(delta);
+        if (ScrollBar is not null)
+        {
+            TickMouseDrag();
+        }
+        if (ElementInternal.HoverInternal && (!ScrollBar?.Pressed ?? true))
+        {
+            TickMouseScroll();
         }
     }
 

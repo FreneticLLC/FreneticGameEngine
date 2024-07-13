@@ -45,11 +45,11 @@ public class UILabeledNumberSlider : UINumberSlider
         // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
         // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
-        ValueEdited += _ => Label.TextContent = Value.ToString(Label.Format);
+        OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.OnTextSubmit += _ =>
         {
             double newValue = GetCorrectedValue(Label.Value, Integer ? 1.0 : 0.0);
-            ValueEdited.Invoke(Value = newValue);
+            OnValueEdit.Invoke(Value = newValue);
         };
         if (updateOnEdit)
         {
