@@ -248,13 +248,13 @@ public class UIInputLabel : UIClickableElement
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
         if (Internal.TextChain.Count > 1)
         {
-            ScrollGroup.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
+            ScrollGroup.MaxValues.Y = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
             // TODO: Clamp scroll value to cursor view
         }
         else
         {
-            ScrollGroup.MaxValue = 0;
-            ScrollGroup.Value = 0;
+            ScrollGroup.MaxValues.Y = 0;
+            ScrollGroup.Values.Y = 0;
         }
     }
 
