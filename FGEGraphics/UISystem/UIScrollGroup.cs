@@ -8,10 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 
@@ -21,33 +17,104 @@ namespace FGEGraphics.UISystem;
 // TODO: handle navigational scroll
 public class UIScrollGroup : UIScissorGroup
 {
+    public class ScrollDirection(bool vertical, Func<int> rangeLength)
+    {
+        public bool Vertical = vertical;
+
+        public int Value = 0;
+
+        public int MaxValue = -1;
+
+        public int ScrollSpeed = 10;
+
+        public UIButton ScrollBar = null;
+
+        public int BarHeldOffset = -1;
+
+        public int RangeLength => rangeLength();
+
+        public int BarLength => MaxValue > 0 ? (int)((double)RangeLength / (MaxValue + RangeLength) * RangeLength) : 0;
+
+        public int BarPosition => MaxValue > 0 ? (int)((RangeLength - BarLength) * ((double)Value / MaxValue)) : 0;
+
+        public ScrollDirection(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(vertical, rangeLength)
+        {
+            if (!hasBar)
+            {
+                return;
+            }
+            if (vertical)
+            {
+                pos.GetterY(() => BarPosition).GetterHeight(() => BarLength).ConstantWidth(width);
+            }
+            else
+            {
+                pos.GetterX(() => BarPosition).GetterWidth(() => BarLength).ConstantHeight(width);
+            }
+            ScrollBar = new(null, null, styles, pos);
+        }
+
+        public bool TickMouseDrag(float mousePos, int groupPos)
+        {
+            if (!ScrollBar.Pressed)
+            {
+                BarHeldOffset = -1;
+                return false;
+            }
+            if (BarHeldOffset == -1)
+            {
+                BarHeldOffset = (int)mousePos - (Vertical ? ScrollBar.Y : ScrollBar.X);
+            }
+            Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
+            Value = Math.Clamp(Value, 0, MaxValue);
+            return true;
+        }
+
+        public void TickMouseScroll(float scrollDelta)
+        {
+            Value -= (int)scrollDelta * ScrollSpeed;
+            if (Value < 0)
+            {
+                Value = 0;
+            }
+            if (MaxValue != -1 && Value > MaxValue)
+            {
+                Value = MaxValue;
+            }
+        }
+    }
+
     /// <summary>The current scroll position.</summary>
-    public Vector2i Values = Vector2i.Zero;
+    //public Vector2i Values = Vector2i.Zero;
 
     /// <summary>An upper limit on how far the group can be scrolled. -1 for unlimited scrolling, 0 for no scrolling.</summary>
-    public Vector2i MaxValues = new(-1, -1);
+    //public Vector2i MaxValues = new(-1, -1);
 
     /// <summary>How fast the group can be scrolled (in position units per scroll tick).</summary>
-    public Vector2i ScrollSpeeds = new(10, 10);
+    //public Vector2i ScrollSpeeds = new(10, 10);
+
+    public ScrollDirection ScrollY;
+
+    public ScrollDirection ScrollX;
 
     /// <summary>The vertical scroll bar button.</summary>
-    public UIButton VerticalScrollBar;
+    //public UIButton VerticalScrollBar;
 
     /// <summary>The horizontal scroll bar button.</summary>
-    public UIButton HorizontalScrollBar;
+    //public UIButton HorizontalScrollBar;
 
     /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
-    public InternalData Internal = new();
+    //public InternalData Internal = new();
 
     /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
-    public struct InternalData()
-    {
+    //public struct InternalData()
+    //{
         /// <summary>The held Y offset of the vertical scroll bar.</summary>
-        public int HeldY = -1;
+    //    public int HeldY = -1;
 
         /// <summary>The held X offset of the horizontal scroll bar.</summary>
-        public int HeldX = -1;
-    }
+    //    public int HeldX = -1;
+    //}
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="pos">The position of the element.</param>
@@ -55,105 +122,55 @@ public class UIScrollGroup : UIScissorGroup
     /// <param name="barWidth">The width of the <see cref="VerticalScrollBar"/>.</param>
     public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool verticalBar = false, bool horizontalBar = false) : base(pos)
     {
-        if (barStyles is null || barWidth == 0)
-        {
-            return;
-        }
+        ScrollY = new(true, () => Position.Height, verticalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT));
+        ScrollX = new(false, () => Position.Width, horizontalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.BOTTOM_LEFT));
         if (verticalBar)
         {
-            base.AddChild(VerticalScrollBar = new(null, null, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT).ConstantWidth(barWidth)
-                .GetterHeight(() => GetScrollBarSize(true))
-                .GetterY(() => MaxValues.Y > 0 ? (int)((pos.Height - GetScrollBarSize(true)) * ((double)Values.Y / MaxValues.Y)) : 0)));
+            base.AddChild(ScrollY.ScrollBar);
         }
         if (horizontalBar)
         {
-            base.AddChild(HorizontalScrollBar = new(null, null, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.BOTTOM_LEFT).ConstantHeight(barWidth)
-                .GetterWidth(() => GetScrollBarSize(false))
-                .GetterX(() => MaxValues.X > 0 ? (int)((pos.Width - GetScrollBarSize(false)) * ((double)Values.X / MaxValues.X)) : 0)));
+            base.AddChild(ScrollX.ScrollBar);
         }
-    }
-
-    /// <summary>Returns the size of the vertical/horizontal scroll bar.</summary>
-    /// <param name="vertical">True for the vertical scroll bar, false for the horizontal scroll bar.</param>
-    public int GetScrollBarSize(bool vertical)
-    {
-        int maxValue = vertical ? MaxValues.Y : MaxValues.X;
-        int groupSize = vertical ? Position.Height : Position.Width;
-        return maxValue > 0 ? (int)((double)groupSize / (maxValue + groupSize) * groupSize) : 0;
     }
 
     /// <inheritdoc/>
     public override void AddChild(UIElement child, bool priority = true)
     {
         UIPositionHelper original = new(child.Position);
-        child.Position.GetterXY(() => original.Internal.X.Get() - Values.X, () => original.Internal.Y.Get() - Values.Y);
+        child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
         base.AddChild(child, priority);
     }
 
     /// <summary>Ticks the mouse dragging the scroll bar.</summary>
-    public void TickMouseDrag()
+    public bool TickMouseDrag()
     {
-        if (!VerticalScrollBar.Pressed)
+        bool pressed = false;
+        if (ScrollY.ScrollBar is not null)
         {
-            Internal.HeldY = -1;
+            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Position.Y);
         }
-        else
+        if (ScrollX.ScrollBar is not null)
         {
-            if (Internal.HeldY == -1)
-            {
-                Internal.HeldY = (int)Window.MouseY - VerticalScrollBar.Y;
-            }
-            Values.Y = (int)((double)(Window.MouseY - Y - Internal.HeldY) / (Position.Height - GetScrollBarSize(true)) * MaxValues.Y);
-            Values.Y = Math.Clamp(Values.Y, 0, MaxValues.Y);
+            pressed |= ScrollX.TickMouseDrag(Window.MouseX, Position.X);
         }
-        if (!HorizontalScrollBar.Pressed)
-        {
-            Internal.HeldX = -1;
-        }
-        else
-        {
-            if (Internal.HeldX == -1)
-            {
-                Internal.HeldX = (int)Window.MouseX - HorizontalScrollBar.X;
-            }
-            Values.X = (int)((double)(Window.MouseX - X - Internal.HeldX) / (Position.Height - GetScrollBarSize(false)) * MaxValues.X);
-            Values.X = Math.Clamp(Values.X, 0, MaxValues.X);
-        }
+        return pressed;
     }
 
     /// <summary>Ticks the scroll wheel and modifies the scroll value.</summary>
     // TODO: Handle horizontal scroll
     public void TickMouseScroll()
     {
-        Values.Y -= (int)Window.CurrentMouse.ScrollDelta.Y * ScrollSpeeds.Y;
-        if (Values.Y < 0)
-        {
-            Values.Y = 0;
-        }
-        if (MaxValues.Y != -1 && Values.Y > MaxValues.Y)
-        {
-            Values.Y = MaxValues.Y;
-        }
-        Values.X -= (int)Window.CurrentMouse.ScrollDelta.X * ScrollSpeeds.X;
-        if (Values.X < 0)
-        {
-            Values.X = 0;
-        }
-        if (MaxValues.X != -1 && Values.X > MaxValues.X)
-        {
-            Values.X = MaxValues.X;
-        }
+        ScrollY.TickMouseScroll(Window.CurrentMouse.ScrollDelta.Y);
+        ScrollX.TickMouseScroll(Window.CurrentMouse.ScrollDelta.X);
     }
 
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        if (VerticalScrollBar is not null)
-        {
-            TickMouseDrag();
-        }
-        if (ElementInternal.HoverInternal && (!VerticalScrollBar?.Pressed ?? true))
+        bool barPressed = TickMouseDrag();
+        if (ElementInternal.HoverInternal && !barPressed)
         {
             TickMouseScroll();
         }
@@ -163,7 +180,7 @@ public class UIScrollGroup : UIScissorGroup
     public override List<string> GetDebugInfo()
     {
         List<string> info = base.GetDebugInfo();
-        info.Add($"^7Scroll: ^3{Values}");
+        info.Add($"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value})");
         return info;
     }
 }

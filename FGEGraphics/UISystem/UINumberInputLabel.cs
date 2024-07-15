@@ -52,11 +52,11 @@ public class UINumberInputLabel(double initial, bool integer, string format, UIE
     /// <inheritdoc/>
     public override string ValidateEdit(EditType type, string diff, string result)
     {
-        if (type == EditType.Delete)
+        if (type == EditType.DELETE)
         {
             return result;
         }
-        if (type == EditType.Add)
+        if (type == EditType.ADD)
         {
             string toAdd = CharacterMatcher.TrimToMatches(diff);
             // FIXME: range errors when replacing text. maybe need EditType.Replace

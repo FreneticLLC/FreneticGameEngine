@@ -33,14 +33,14 @@ public class UIInputLabel : UIClickableElement
     public enum EditType
     {
         /// <summary>Replaces the space between the indices with the diff.</summary>
-        Add,
+        ADD,
         /// <summary>
         /// If the indices are not equal, deletes the selection. Otherwise, deletes the character preceding the left index.
         /// The deleted content becomes the diff.
         /// </summary>
-        Delete,
+        DELETE,
         /// <summary>Submits the 'result' text on close (without a diff).</summary>
-        Submit
+        SUBMIT
     }
 
     /// <summary>The box behind the input label.</summary>
@@ -248,13 +248,13 @@ public class UIInputLabel : UIClickableElement
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
         if (Internal.TextChain.Count > 1)
         {
-            ScrollGroup.MaxValues.Y = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
+            ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
             // TODO: Clamp scroll value to cursor view
         }
         else
         {
-            ScrollGroup.MaxValues.Y = 0;
-            ScrollGroup.Values.Y = 0;
+            ScrollGroup.ScrollY.MaxValue = 0;
+            ScrollGroup.ScrollY.Value = 0;
         }
     }
 
@@ -268,7 +268,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
         UpdateText();
-        (type == EditType.Submit ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
+        (type == EditType.SUBMIT ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
@@ -287,7 +287,7 @@ public class UIInputLabel : UIClickableElement
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
         Internal.CursorEnd = Internal.CursorStart += text.Length;
-        EditText(EditType.Add, text, result);
+        EditText(EditType.ADD, text, result);
     }
 
     /// <summary>Deletes text between two indices.</summary>
@@ -297,11 +297,11 @@ public class UIInputLabel : UIClickableElement
     {
         string diff = TextContent[indexLeft..indexRight];
         string result = TextContent[..indexLeft] + TextContent[indexRight..];
-        EditText(EditType.Delete, diff, result, () => Internal.SetPosition(indexLeft));
+        EditText(EditType.DELETE, diff, result, () => Internal.SetPosition(indexLeft));
     }
 
     /// <summary>Submits the current text content.</summary>
-    public void SubmitText() => EditText(EditType.Submit, "", TextContent);
+    public void SubmitText() => EditText(EditType.SUBMIT, "", TextContent);
 
     /// <summary>Deletes text based on the <see cref="KeyHandlerState.InitBS"/> value.</summary>
     /// <param name="keys">The current keyboard state.</param>
@@ -381,7 +381,7 @@ public class UIInputLabel : UIClickableElement
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = Window.MouseX - X;
-        float relMouseY = Window.MouseY - Y + ScrollGroup.Value;
+        float relMouseY = Window.MouseY - Y + ScrollGroup.ScrollY.Value;
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
