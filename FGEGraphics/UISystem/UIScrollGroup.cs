@@ -17,26 +17,45 @@ namespace FGEGraphics.UISystem;
 // TODO: handle navigational scroll
 public class UIScrollGroup : UIScissorGroup
 {
+    /// <summary>Contains scroll state for a direction.</summary>
+    /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
+    /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
     public class ScrollDirection(bool vertical, Func<int> rangeLength)
     {
+        /// <summary>Whether the direction is vertical or horizontal.</summary>
         public bool Vertical = vertical;
 
+        /// <summary>The current scroll position.</summary>
         public int Value = 0;
 
+        /// <summary>An upper limit on how far the direction can be scrolled. -1 for unlimited scrolling, 0 for no scrolling.</summary>
         public int MaxValue = -1;
 
+        /// <summary>How fast the direction can be scrolled (in position units per scroll tick).</summary>
         public int ScrollSpeed = 10;
 
+        /// <summary>The scroll bar button, if any.</summary>
         public UIButton ScrollBar = null;
 
+        /// <summary>The held position offset of the scroll bar.</summary>
         public int BarHeldOffset = -1;
 
+        /// <summary>The length of the outer group's relevant dimension.</summary>
         public int RangeLength => rangeLength();
 
+        /// <summary>The length of the scroll bar.</summary>
         public int BarLength => MaxValue > 0 ? (int)((double)RangeLength / (MaxValue + RangeLength) * RangeLength) : 0;
 
+        /// <summary>The scroll bar's position offset.</summary>
         public int BarPosition => MaxValue > 0 ? (int)((RangeLength - BarLength) * ((double)Value / MaxValue)) : 0;
 
+        /// <summary>Constructs a scroll direction.</summary>
+        /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
+        /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
+        /// <param name="hasBar">Whether to create the <see cref="ScrollBar"/>.</param>
+        /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
+        /// <param name="styles">The <see cref="ScrollBar"/> styles.</param>
+        /// <param name="pos">The base position for the <see cref="ScrollBar"/>.</param>
         public ScrollDirection(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(vertical, rangeLength)
         {
             if (!hasBar)
@@ -54,6 +73,10 @@ public class UIScrollGroup : UIScissorGroup
             ScrollBar = new(null, null, styles, pos);
         }
 
+        /// <summary>Ticks the mouse dragging the <see cref="ScrollBar"/>.</summary>
+        /// <param name="mousePos">The relevant mouse position.</param>
+        /// <param name="groupPos">The relevant scroll group position.</param>
+        /// <returns></returns>
         public bool TickMouseDrag(float mousePos, int groupPos)
         {
             if (!ScrollBar.Pressed)
@@ -70,6 +93,8 @@ public class UIScrollGroup : UIScissorGroup
             return true;
         }
 
+        /// <summary>Ticks the scroll value based on the <paramref name="scrollDelta"/>.</summary>
+        /// <param name="scrollDelta">The relevant scroll change.</param>
         public void TickMouseScroll(float scrollDelta)
         {
             Value -= (int)scrollDelta * ScrollSpeed;
@@ -84,53 +109,29 @@ public class UIScrollGroup : UIScissorGroup
         }
     }
 
-    /// <summary>The current scroll position.</summary>
-    //public Vector2i Values = Vector2i.Zero;
-
-    /// <summary>An upper limit on how far the group can be scrolled. -1 for unlimited scrolling, 0 for no scrolling.</summary>
-    //public Vector2i MaxValues = new(-1, -1);
-
-    /// <summary>How fast the group can be scrolled (in position units per scroll tick).</summary>
-    //public Vector2i ScrollSpeeds = new(10, 10);
-
-    public ScrollDirection ScrollY;
-
+    /// <summary>The horizontal scroll direction.</summary>
     public ScrollDirection ScrollX;
 
-    /// <summary>The vertical scroll bar button.</summary>
-    //public UIButton VerticalScrollBar;
-
-    /// <summary>The horizontal scroll bar button.</summary>
-    //public UIButton HorizontalScrollBar;
-
-    /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
-    //public InternalData Internal = new();
-
-    /// <summary>Data internal to a <see cref="UIScrollGroup"/> instance.</summary>
-    //public struct InternalData()
-    //{
-        /// <summary>The held Y offset of the vertical scroll bar.</summary>
-    //    public int HeldY = -1;
-
-        /// <summary>The held X offset of the horizontal scroll bar.</summary>
-    //    public int HeldX = -1;
-    //}
+    /// <summary>The vertical scroll direction.</summary>
+    public ScrollDirection ScrollY;
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="pos">The position of the element.</param>
-    /// <param name="barStyles">The <see cref="VerticalScrollBar"/> styles.</param>
-    /// <param name="barWidth">The width of the <see cref="VerticalScrollBar"/>.</param>
-    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool verticalBar = false, bool horizontalBar = false) : base(pos)
+    /// <param name="barStyles">The scroll bar styles.</param>
+    /// <param name="barWidth">The width of the scroll bars.</param>
+    /// <param name="horizontalBar">Whether to add a horizontal scroll bar.</param>
+    /// <param name="verticalBar">Whether to add a vertical scroll bar.</param>
+    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool horizontalBar = false, bool verticalBar = false) : base(pos)
     {
-        ScrollY = new(true, () => Position.Height, verticalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT));
         ScrollX = new(false, () => Position.Width, horizontalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.BOTTOM_LEFT));
-        if (verticalBar)
-        {
-            base.AddChild(ScrollY.ScrollBar);
-        }
+        ScrollY = new(true, () => Position.Height, verticalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT));
         if (horizontalBar)
         {
             base.AddChild(ScrollX.ScrollBar);
+        }
+        if (verticalBar)
+        {
+            base.AddChild(ScrollY.ScrollBar);
         }
     }
 
@@ -146,13 +147,13 @@ public class UIScrollGroup : UIScissorGroup
     public bool TickMouseDrag()
     {
         bool pressed = false;
-        if (ScrollY.ScrollBar is not null)
-        {
-            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Position.Y);
-        }
         if (ScrollX.ScrollBar is not null)
         {
             pressed |= ScrollX.TickMouseDrag(Window.MouseX, Position.X);
+        }
+        if (ScrollY.ScrollBar is not null)
+        {
+            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Position.Y);
         }
         return pressed;
     }
@@ -161,8 +162,8 @@ public class UIScrollGroup : UIScissorGroup
     // TODO: Handle horizontal scroll
     public void TickMouseScroll()
     {
-        ScrollY.TickMouseScroll(Window.CurrentMouse.ScrollDelta.Y);
         ScrollX.TickMouseScroll(Window.CurrentMouse.ScrollDelta.X);
+        ScrollY.TickMouseScroll(Window.CurrentMouse.ScrollDelta.Y);
     }
 
     /// <inheritdoc/>
