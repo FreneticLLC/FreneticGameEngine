@@ -167,11 +167,17 @@ public class UIScrollGroup : UIScissorGroup
     }
 
     /// <summary>Ticks the scroll wheel and modifies the scroll value.</summary>
-    // TODO: Handle horizontal scroll
     public void TickMouseScroll()
     {
-        ScrollX.TickMouseScroll(Window.CurrentMouse.ScrollDelta.X);
-        ScrollY.TickMouseScroll(Window.CurrentMouse.ScrollDelta.Y);
+        float deltaX = Window.CurrentMouse.ScrollDelta.X;
+        float deltaY = Window.CurrentMouse.ScrollDelta.Y;
+        if (Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        {
+            deltaX = deltaY;
+            deltaY = 0;
+        }
+        ScrollX.TickMouseScroll(deltaX);
+        ScrollY.TickMouseScroll(deltaY);
     }
 
     /// <inheritdoc/>
