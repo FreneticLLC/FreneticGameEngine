@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
@@ -49,6 +50,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
 
+    /// <summary>The label text to render within the <see cref="ScrollGroup"/>.</summary>
     public UIRenderable LabelRenderable;
 
     /// <summary>The text to display when the input is empty.</summary>
@@ -201,7 +203,10 @@ public class UIInputLabel : UIClickableElement
     /// <param name="pos">The position of the element.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0) : base(styles, pos, requireText: placeholderInfo.Length > 0)
+    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
+    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
+    /// <param name="scrollBarAnchor">The anchor of the scroll bar.</param>
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, UIAnchor scrollBarAnchor = null) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
@@ -211,7 +216,7 @@ public class UIInputLabel : UIClickableElement
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
         UIPositionHelper original = new(pos);
-        ScrollGroup = new(pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => original.Width - Inset() * 2, () => original.Height - Inset() * 2), scrollBarStyles, scrollBarWidth);
+        ScrollGroup = new(pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => original.Width - Inset() * 2, () => original.Height - Inset() * 2), scrollBarStyles, scrollBarWidth, barY: scrollBarStyles is not null, barYAnchor: scrollBarAnchor);
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
         ScrollGroup.ScrollX.MaxValue = 0;
         AddChild(ScrollGroup);
@@ -262,6 +267,7 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    /// <summary>Returns the position of the text to be rendered.</summary>
     public Location GetTextPosition()
     {
         int padding = Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
@@ -465,6 +471,7 @@ public class UIInputLabel : UIClickableElement
         // TODO: Handle HOME, END
     }
 
+    /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
         UIElementStyle style = ElementInternal.CurrentStyle;
