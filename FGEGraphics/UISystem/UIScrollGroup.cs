@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem;
 
@@ -119,17 +120,24 @@ public class UIScrollGroup : UIScissorGroup
     /// <param name="pos">The position of the element.</param>
     /// <param name="barStyles">The scroll bar styles.</param>
     /// <param name="barWidth">The width of the scroll bars.</param>
-    /// <param name="horizontalBar">Whether to add a horizontal scroll bar.</param>
-    /// <param name="verticalBar">Whether to add a vertical scroll bar.</param>
-    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool horizontalBar = false, bool verticalBar = false) : base(pos)
+    /// <param name="barX">Whether to add a horizontal scroll bar.</param>
+    /// <param name="barY">Whether to add a vertical scroll bar.</param>
+    /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
+    /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
+    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(pos)
     {
-        ScrollX = new(false, () => Position.Width, horizontalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Position.Height, verticalBar, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_RIGHT));
-        if (horizontalBar)
+        if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
+        {
+            throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
+        }
+        // TODO: Fix scroll bar overlap
+        ScrollX = new(false, () => Position.Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Position.Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        if (barX)
         {
             base.AddChild(ScrollX.ScrollBar);
         }
-        if (verticalBar)
+        if (barY)
         {
             base.AddChild(ScrollY.ScrollBar);
         }
