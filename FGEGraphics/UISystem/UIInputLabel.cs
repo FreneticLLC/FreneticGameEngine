@@ -49,6 +49,8 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
 
+    public UIRenderable LabelRenderable;
+
     /// <summary>The text to display when the input is empty.</summary>
     public UIElementText PlaceholderInfo;
 
@@ -207,9 +209,11 @@ public class UIInputLabel : UIClickableElement
             pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2);
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
-        int outline = renderBox ? styles.Hover.BorderThickness : 0;
-        ScrollGroup.AddChild(new Renderable(this, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_LEFT)));
-        ScrollGroup = new(pos.AtOrigin().ConstantXY(outline, outline).ConstantWidthHeight(pos.Width - outline * 2, pos.Height - outline * 2), scrollBarStyles, scrollBarWidth);
+        int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
+        UIPositionHelper original = new(pos);
+        ScrollGroup = new(pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => original.Width - Inset() * 2, () => original.Height - Inset() * 2), scrollBarStyles, scrollBarWidth);
+        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
+        ScrollGroup.ScrollX.MaxValue = 0;
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? styles.Normal;
         HighlightStyle = highlightStyle ?? styles.Click;
@@ -256,6 +260,12 @@ public class UIInputLabel : UIClickableElement
             ScrollGroup.ScrollY.MaxValue = 0;
             ScrollGroup.ScrollY.Value = 0;
         }
+    }
+
+    public Location GetTextPosition()
+    {
+        int padding = Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
+        return new(LabelRenderable.X + padding, LabelRenderable.Y + padding, 0);
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -380,8 +390,9 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        float relMouseX = Window.MouseX - X;
-        float relMouseY = Window.MouseY - Y + ScrollGroup.ScrollY.Value;
+        Location textPos = GetTextPosition();
+        float relMouseX = Window.MouseX - textPos.XF;
+        float relMouseY = Window.MouseY - textPos.YF;
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -454,37 +465,33 @@ public class UIInputLabel : UIClickableElement
         // TODO: Handle HOME, END
     }
 
-    public class Renderable(UIInputLabel label, UIPositionHelper pos) : UIElement(pos)
+    public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
-        public UIInputLabel Label = label;
-
-        public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+        UIElementStyle style = ElementInternal.CurrentStyle;
+        Location textPos = GetTextPosition();
+        int x = (int)textPos.X;
+        int y = (int)textPos.Y;
+        bool isInfo = TextContent.Length == 0;
+        bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
+        if (renderInfo)
         {
-            int inset = Label.Box is not null ? Label.Styles.Hover.BorderThickness : 0;
-            int x = X + Label.Internal.BoxPadding - inset;
-            int y = Y + Label.Internal.BoxPadding - inset;
-            bool isInfo = Label.TextContent.Length == 0;
-            bool renderInfo = isInfo && style.CanRenderText(Label.PlaceholderInfo);
-            if (renderInfo)
-            {
-                style.TextFont.DrawFancyText(Label.PlaceholderInfo, new Location(x, y, 0));
-            }
-            else
-            {
-                UIElementText.RenderChain(Label.Internal.TextChain, x, y);
-            }
-            if (Label.Internal.CursorOffset.IsNaN())
-            {
-                return;
-            }
-            // TODO: Cursor blink modes
-            Engine.Textures.White.Bind();
-            Renderer2D.SetColor(Label.InputStyle.BorderColor);
-            int lineWidth = Label.InputStyle.BorderThickness / 2;
-            int lineHeight = (renderInfo ? Label.PlaceholderInfo : Label.Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-            view.Rendering.RenderRectangle(view.UIContext, x + Label.Internal.CursorOffset.XF - lineWidth, y + Label.Internal.CursorOffset.YF, x + Label.Internal.CursorOffset.XF + lineWidth, y + Label.Internal.CursorOffset.YF + lineHeight);
-            Renderer2D.SetColor(Color4.White);
+            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
         }
+        else
+        {
+            UIElementText.RenderChain(Internal.TextChain, x, y);
+        }
+        if (Internal.CursorOffset.IsNaN())
+        {
+            return;
+        }
+        // TODO: Cursor blink modes
+        Engine.Textures.White.Bind();
+        Renderer2D.SetColor(InputStyle.BorderColor);
+        int lineWidth = InputStyle.BorderThickness / 2;
+        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+        view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
+        Renderer2D.SetColor(Color4.White);
     }
 
     /// <inheritdoc/>
