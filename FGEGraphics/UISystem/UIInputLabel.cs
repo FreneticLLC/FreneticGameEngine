@@ -246,6 +246,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetPosition(0);
         UpdateText();
         ScrollGroup.ScrollY.MaxValue = 0;
+        ScrollGroup.ScrollY.Value = 0;
         Enabled = true;
         Pressed = false;
         Hovered = false;
