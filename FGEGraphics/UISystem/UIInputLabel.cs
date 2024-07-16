@@ -244,6 +244,7 @@ public class UIInputLabel : UIClickableElement
         SubmitText();
         Internal.SetPosition(0);
         UpdateText();
+        ScrollGroup.RemoveChild(ScrollGroup.ScrollY.ScrollBar);
         Enabled = true;
         Pressed = false;
         Hovered = false;
@@ -258,7 +259,15 @@ public class UIInputLabel : UIClickableElement
         if (Internal.TextChain.Count > 1)
         {
             ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
-            // TODO: Clamp scroll value to cursor view
+            if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
+            {
+                ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
+            }
+            int cursorBottom = (int)Internal.CursorOffset.Y + Internal.TextLeft.CurrentStyle.FontHeight - ScrollGroup.ScrollY.Value;
+            if (cursorBottom > ScrollGroup.Height)
+            {
+                ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
+            }
         }
         else
         {
