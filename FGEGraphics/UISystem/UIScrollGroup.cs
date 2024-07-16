@@ -195,7 +195,7 @@ public class UIScrollGroup : UIScissorGroup
     public override List<string> GetDebugInfo()
     {
         List<string> info = base.GetDebugInfo();
-        info.Add($"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value})");
+        info.Add($"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})");
         return info;
     }
 }
