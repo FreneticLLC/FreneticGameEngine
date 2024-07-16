@@ -185,6 +185,7 @@ public class UIElementText
     /// <param name="chain">The UI text objects.</param>
     /// <param name="maxWidth">The wrapping width of the chain.</param>
     /// <returns>The text chain.</returns>
+    // TODO: Fix blank lines not being counted
     public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain, float maxWidth = -1)
     {
         List<(FontSet Font, RenderableTextLine Line)> lines = [];

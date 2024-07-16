@@ -236,6 +236,7 @@ public class UIInputLabel : UIClickableElement
         Pressed = true;
         Position.View.InteractingElement = null;
         TickMouse();
+        UpdateScrollGroup();
     }
 
     /// <inheritdoc/>
@@ -244,10 +245,30 @@ public class UIInputLabel : UIClickableElement
         SubmitText();
         Internal.SetPosition(0);
         UpdateText();
-        ScrollGroup.RemoveChild(ScrollGroup.ScrollY.ScrollBar);
+        ScrollGroup.ScrollY.MaxValue = 0;
         Enabled = true;
         Pressed = false;
         Hovered = false;
+    }
+
+    public void UpdateScrollGroup()
+    {
+        if (Internal.TextChain.Count <= 1)
+        {
+            ScrollGroup.ScrollY.MaxValue = 0;
+            ScrollGroup.ScrollY.Value = 0;
+            return;
+        }
+        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
+        if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
+        {
+            ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
+        }
+        int cursorBottom = (int)Internal.CursorOffset.Y + Internal.TextLeft.CurrentStyle.FontHeight - ScrollGroup.ScrollY.Value;
+        if (cursorBottom > ScrollGroup.Height)
+        {
+            ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
+        }
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -256,24 +277,7 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
-        if (Internal.TextChain.Count > 1)
-        {
-            ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
-            if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
-            {
-                ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
-            }
-            int cursorBottom = (int)Internal.CursorOffset.Y + Internal.TextLeft.CurrentStyle.FontHeight - ScrollGroup.ScrollY.Value;
-            if (cursorBottom > ScrollGroup.Height)
-            {
-                ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
-            }
-        }
-        else
-        {
-            ScrollGroup.ScrollY.MaxValue = 0;
-            ScrollGroup.ScrollY.Value = 0;
-        }
+        UpdateScrollGroup();
     }
 
     /// <summary>Returns the position of the text to be rendered.</summary>
@@ -401,6 +405,10 @@ public class UIInputLabel : UIClickableElement
     public void TickMouse()
     {
         if (!MouseDown || Internal.TextChain.Count == 0)
+        {
+            return;
+        }
+        if (ScrollGroup.ScrollY.ScrollBar is not null && (ScrollGroup.ScrollY.ScrollBar.Pressed || ScrollGroup.ScrollY.ScrollBar.SelfContains((int)Window.MouseX, (int)Window.MouseY)))
         {
             return;
         }

@@ -23,9 +23,6 @@ public class UIScrollGroup : UIScissorGroup
     /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
     public class ScrollDirection(bool vertical, Func<int> rangeLength)
     {
-        /// <summary>Whether the direction is vertical or horizontal.</summary>
-        public bool Vertical = vertical;
-
         /// <summary>The current scroll position.</summary>
         public int Value = 0;
 
@@ -87,7 +84,7 @@ public class UIScrollGroup : UIScissorGroup
             }
             if (BarHeldOffset == -1)
             {
-                BarHeldOffset = (int)mousePos - (Vertical ? ScrollBar.Y : ScrollBar.X);
+                BarHeldOffset = (int)mousePos - (vertical ? ScrollBar.Y : ScrollBar.X);
             }
             Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
             Value = Math.Clamp(Value, 0, MaxValue);
@@ -157,11 +154,11 @@ public class UIScrollGroup : UIScissorGroup
         bool pressed = false;
         if (ScrollX.ScrollBar is not null)
         {
-            pressed |= ScrollX.TickMouseDrag(Window.MouseX, Position.X);
+            pressed |= ScrollX.TickMouseDrag(Window.MouseX, X);
         }
         if (ScrollY.ScrollBar is not null)
         {
-            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Position.Y);
+            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Y);
         }
         return pressed;
     }
