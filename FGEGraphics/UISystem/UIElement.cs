@@ -360,21 +360,24 @@ public abstract class UIElement
             }
             return;
         }
-        if (ElementInternal.HoverInternal && !(MouseDown && Position.View.InteractingElement == this))
+        if (ElementInternal.HoverInternal && (!MouseDown || Position.View.InteractingElement != this))
         {
             ElementInternal.HoverInternal = false;
             if (Enabled)
             {
                 Hovered = false;
                 Pressed = false;
-                Position.View.InteractingElement = null;
+                if (Position.View.InteractingElement == this)
+                {
+                    Position.View.InteractingElement = null;
+                }
             }
             if (MousePreviouslyDown)
             {
                 MouseLeftUpOutside(mouseX, mouseY);
             }
         }
-        if (MouseDown)
+        if (MouseDown && Position.View.InteractingElement != this)
         {
             if (Selected)
             {
@@ -694,9 +697,9 @@ public abstract class UIElement
     {
         List<string> info = new(4)
         {
-            $"^t^0^h^5^u{GetType()}",
+            $"^t^0^h^{(this == Position.View.InteractingElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
-            $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed}"
+            $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
         };
         if (ElementInternal.Styles.Count > 0)
         {

@@ -85,6 +85,12 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The current number of input text lines.</summary>
     public int Lines => Internal.TextChain.Sum(piece => piece.Text.Lines.Length);
 
+    /// <summary>The padding offset for the rendered text, if any.</summary>
+    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
+
+    /// <inheritdoc/>
+    public override UIElementStyle Style => Selected ? Styles.Click : base.Style;
+
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
@@ -232,9 +238,6 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void OnSelect()
     {
-        Enabled = false;
-        Pressed = true;
-        Position.View.InteractingElement = null;
         TickMouse();
         UpdateScrollGroup();
     }
@@ -242,16 +245,19 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void OnDeselect()
     {
+        if (ScrollGroup.ScrollY.ScrollBar?.Pressed ?? false)
+        {
+            Selected = true;
+            return;
+        }
         SubmitText();
         Internal.SetPosition(0);
         UpdateText();
         ScrollGroup.ScrollY.MaxValue = 0;
         ScrollGroup.ScrollY.Value = 0;
-        Enabled = true;
-        Pressed = false;
-        Hovered = false;
     }
 
+    /// <summary>Updates the <see cref="ScrollGroup"/> values based on the text height and cursor position.</summary>
     public void UpdateScrollGroup()
     {
         if (Internal.TextChain.Count <= 1)
@@ -260,12 +266,13 @@ public class UIInputLabel : UIClickableElement
             ScrollGroup.ScrollY.Value = 0;
             return;
         }
-        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset, 0);
+        int lastLineHeight = Internal.TextLeft.CurrentStyle.FontHeight + TextPadding * 2;
+        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
         if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
         {
             ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
         }
-        int cursorBottom = (int)Internal.CursorOffset.Y + Internal.TextLeft.CurrentStyle.FontHeight - ScrollGroup.ScrollY.Value;
+        int cursorBottom = (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value;
         if (cursorBottom > ScrollGroup.Height)
         {
             ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
@@ -279,13 +286,6 @@ public class UIInputLabel : UIClickableElement
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
         UpdateScrollGroup();
-    }
-
-    /// <summary>Returns the position of the text to be rendered.</summary>
-    public Location GetTextPosition()
-    {
-        int padding = Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
-        return new(LabelRenderable.X + padding, LabelRenderable.Y + padding, 0);
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -414,9 +414,8 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        Location textPos = GetTextPosition();
-        float relMouseX = Window.MouseX - textPos.XF;
-        float relMouseY = Window.MouseY - textPos.YF;
+        float relMouseX = Window.MouseX - (LabelRenderable.X + TextPadding);
+        float relMouseY = Window.MouseY - (LabelRenderable.Y + TextPadding);
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -493,9 +492,8 @@ public class UIInputLabel : UIClickableElement
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
         UIElementStyle style = ElementInternal.CurrentStyle;
-        Location textPos = GetTextPosition();
-        int x = (int)textPos.X;
-        int y = (int)textPos.Y;
+        int x = elem.X + TextPadding;
+        int y = elem.Y + TextPadding;
         bool isInfo = TextContent.Length == 0;
         bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
@@ -520,10 +518,7 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
-    {
-        Box?.Render(view, delta, style);
-    }
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style) => Box?.Render(view, delta, style);
 
     /// <inheritdoc/>
     public override List<string> GetDebugInfo()
