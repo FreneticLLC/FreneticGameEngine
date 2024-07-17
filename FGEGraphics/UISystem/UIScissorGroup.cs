@@ -11,6 +11,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a container of elements that only renders children within its bounds.</summary>
 /// <param name="pos">The position of the element.</param>
+// TODO: disable elements outside of the scissor view
 public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
 {
     /// <inheritdoc/>
