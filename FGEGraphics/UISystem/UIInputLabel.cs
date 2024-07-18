@@ -168,7 +168,7 @@ public class UIInputLabel : UIClickableElement
         public readonly Location GetCursorOffset()
         {
             double xOffset = 0;
-            int cursorIndex = IndexLeft;
+            int cursorIndex = CursorEnd;
             int currentIndex = 0;
             cursorIndex -= TextChain.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
             for (int i = 0; i < TextChain.Count; i++)
@@ -259,6 +259,7 @@ public class UIInputLabel : UIClickableElement
         ScrollGroup.ScrollY.Reset();
     }
 
+    // TODO: Put these in ScrollGroup.ScrollDirection, "ScrollToPos" or smth
     public void UpdateScrollGroupX()
     {
         int maxWidth = 0;
@@ -270,6 +271,15 @@ public class UIInputLabel : UIClickableElement
             }
         }
         ScrollGroup.ScrollX.MaxValue = Math.Max(maxWidth + TextPadding * 2 - ScrollGroup.Width, 0);
+        if (Internal.CursorOffset.X < ScrollGroup.ScrollX.Value)
+        {
+            ScrollGroup.ScrollX.Value = (int)Internal.CursorOffset.X;
+        }
+        int cursorRight = (int)Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value;
+        if (cursorRight > ScrollGroup.Width)
+        {
+            ScrollGroup.ScrollX.Value += cursorRight - ScrollGroup.Width;
+        }
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values based on the text height and cursor position.</summary>
@@ -307,7 +317,7 @@ public class UIInputLabel : UIClickableElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Position.Width : -1).ToList();
-        Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
+        Internal.CursorOffset = Selected ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }
 
