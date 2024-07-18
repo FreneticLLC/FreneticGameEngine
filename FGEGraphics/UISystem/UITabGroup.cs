@@ -36,6 +36,28 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
     /// <summary>The currently selected tab.</summary>
     public UIScreen SelectedTab;
 
+    /// <summary>Switches the selected tab and fires <see cref="OnTabSwitch"/>.</summary>
+    /// <param name="button">The button to disable or <c>null</c> if not necessary.</param>
+    /// <param name="tab">The tab to switch to.</param>
+    public void SwitchTab(UIElement button, UIScreen tab)
+    {
+        if (SelectedButton is not null)
+        {
+            SelectedButton.Enabled = true;
+            SelectedButton.Pressed = false;
+            SelectedTab.SwitchFrom();
+        }
+        if (button is not null)
+        {
+            button.Enabled = false;
+            button.Pressed = true;
+        }
+        tab.SwitchTo();
+        OnTabSwitch(new(SelectedTab, tab));
+        SelectedButton = button;
+        SelectedTab = tab;
+    }
+
     /// <summary>Adds a button and a screen as a tab to the group.</summary>
     /// <param name="button">The button linked to the screen.</param>
     /// <param name="tab">The screen to switch to when the button is pressed.</param>
@@ -50,21 +72,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
             SelectedButton = button;
             SelectedTab = tab;
         }
-        button.OnClick += () =>
-        {
-            if (SelectedButton is not null)
-            {
-                SelectedButton.Enabled = true;
-                SelectedButton.Pressed = false;
-                SelectedTab.SwitchFrom();
-            }
-            button.Enabled = false;
-            button.Pressed = true;
-            tab.SwitchTo();
-            OnTabSwitch(new(SelectedTab, tab));
-            SelectedButton = button;
-            SelectedTab = tab;
-        };
+        button.OnClick += () => SwitchTab(button, tab);
         if (addChild)
         {
             AddChild(button);

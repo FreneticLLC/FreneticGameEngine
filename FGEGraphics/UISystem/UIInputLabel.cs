@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
@@ -33,15 +34,24 @@ public class UIInputLabel : UIClickableElement
     public enum EditType
     {
         /// <summary>Replaces the space between the indices with the diff.</summary>
-        Add,
+        ADD,
         /// <summary>
         /// If the indices are not equal, deletes the selection. Otherwise, deletes the character preceding the left index.
         /// The deleted content becomes the diff.
         /// </summary>
-        Delete,
+        DELETE,
         /// <summary>Submits the 'result' text on close (without a diff).</summary>
-        Submit
+        SUBMIT
     }
+
+    /// <summary>The box behind the input label.</summary>
+    public UIBox Box = null;
+
+    /// <summary>The scroll group containing the label text.</summary>
+    public UIScrollGroup ScrollGroup;
+
+    /// <summary>The label text to render within the <see cref="ScrollGroup"/>.</summary>
+    public UIRenderable LabelRenderable;
 
     /// <summary>The text to display when the input is empty.</summary>
     public UIElementText PlaceholderInfo;
@@ -75,11 +85,20 @@ public class UIInputLabel : UIClickableElement
     /// <summary>The current number of input text lines.</summary>
     public int Lines => Internal.TextChain.Sum(piece => piece.Text.Lines.Length);
 
+    /// <summary>The padding offset for the rendered text, if any.</summary>
+    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
+
+    /// <inheritdoc/>
+    public override UIElementStyle Style => Selected ? Styles.Click : base.Style;
+
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
         /// <summary>The raw text content.</summary>
         public string TextContent = "";
+
+        /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
+        public int BoxPadding;
 
         /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
         public int CursorStart = 0;
@@ -143,6 +162,7 @@ public class UIInputLabel : UIClickableElement
 
         /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>, or <see cref="Location.NaN"/> if none.</summary>
         // TODO: Account for formatting codes
+        // TODO: out of range exception here somewhere
         public readonly Location GetCursorOffset()
         {
             double xOffset = 0;
@@ -183,14 +203,31 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Constructs an input label.</summary>
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
-    /// <param name="infoStyles">The clickable styles for the info text.</param>
+    /// <param name="styles">The clickable styles for the box and info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup infoStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos) : base(infoStyles, pos, requireText: placeholderInfo.Length > 0)
+    /// <param name="renderBox">Whether to render a box behind the input label.</param>
+    /// <param name="boxPadding">The padding between the box and the label.</param>
+    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
+    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
+    /// <param name="scrollBarAnchor">The anchor of the scroll bar.</param>
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, UIAnchor scrollBarAnchor = null) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
-        InputStyle = inputStyle ?? infoStyles.Normal;
-        HighlightStyle = highlightStyle ?? infoStyles.Click;
+        if (renderBox)
+        {
+            Internal.BoxPadding = boxPadding;
+            pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2);
+            AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
+        }
+        int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
+        UIPositionHelper original = new(pos);
+        ScrollGroup = new(pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => original.Width - Inset() * 2, () => original.Height - Inset() * 2), scrollBarStyles, scrollBarWidth, barY: scrollBarStyles is not null, barYAnchor: scrollBarAnchor);
+        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
+        ScrollGroup.ScrollX.MaxValue = 0;
+        AddChild(ScrollGroup);
+        InputStyle = inputStyle ?? styles.Normal;
+        HighlightStyle = highlightStyle ?? styles.Click;
         PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
@@ -201,20 +238,45 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void OnSelect()
     {
-        Enabled = false;
-        Pressed = true;
-        Position.View.InteractingElement = null;
         TickMouse();
+        UpdateScrollGroup();
     }
 
     /// <inheritdoc/>
     public override void OnDeselect()
     {
+        if (ScrollGroup.ScrollY.ScrollBar?.Pressed ?? false)
+        {
+            Selected = true;
+            return;
+        }
         SubmitText();
         Internal.SetPosition(0);
         UpdateText();
-        Enabled = true;
-        Pressed = false;
+        ScrollGroup.ScrollY.MaxValue = 0;
+        ScrollGroup.ScrollY.Value = 0;
+    }
+
+    /// <summary>Updates the <see cref="ScrollGroup"/> values based on the text height and cursor position.</summary>
+    public void UpdateScrollGroup()
+    {
+        if (Internal.TextChain.Count <= 1)
+        {
+            ScrollGroup.ScrollY.MaxValue = 0;
+            ScrollGroup.ScrollY.Value = 0;
+            return;
+        }
+        int lastLineHeight = Internal.TextLeft.CurrentStyle.FontHeight + TextPadding * 2;
+        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
+        if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
+        {
+            ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
+        }
+        int cursorBottom = (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value;
+        if (cursorBottom > ScrollGroup.Height)
+        {
+            ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
+        }
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -223,6 +285,7 @@ public class UIInputLabel : UIClickableElement
         Internal.UpdateTextComponents();
         Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
+        UpdateScrollGroup();
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -235,7 +298,7 @@ public class UIInputLabel : UIClickableElement
         Internal.SetTextContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
         UpdateText();
-        (type == EditType.Submit ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
+        (type == EditType.SUBMIT ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
     }
 
     // TODO: Cap length
@@ -254,7 +317,7 @@ public class UIInputLabel : UIClickableElement
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
         Internal.CursorEnd = Internal.CursorStart += text.Length;
-        EditText(EditType.Add, text, result);
+        EditText(EditType.ADD, text, result);
     }
 
     /// <summary>Deletes text between two indices.</summary>
@@ -264,11 +327,11 @@ public class UIInputLabel : UIClickableElement
     {
         string diff = TextContent[indexLeft..indexRight];
         string result = TextContent[..indexLeft] + TextContent[indexRight..];
-        EditText(EditType.Delete, diff, result, () => Internal.SetPosition(indexLeft));
+        EditText(EditType.DELETE, diff, result, () => Internal.SetPosition(indexLeft));
     }
 
     /// <summary>Submits the current text content.</summary>
-    public void SubmitText() => EditText(EditType.Submit, "", TextContent);
+    public void SubmitText() => EditText(EditType.SUBMIT, "", TextContent);
 
     /// <summary>Deletes text based on the <see cref="KeyHandlerState.InitBS"/> value.</summary>
     /// <param name="keys">The current keyboard state.</param>
@@ -346,9 +409,13 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
+        if (ScrollGroup.ScrollY.ScrollBar is not null && (ScrollGroup.ScrollY.ScrollBar.Pressed || ScrollGroup.ScrollY.ScrollBar.SelfContains((int)Window.MouseX, (int)Window.MouseY)))
+        {
+            return;
+        }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        float relMouseX = Window.MouseX - X;
-        float relMouseY = Window.MouseY - Y;
+        float relMouseX = Window.MouseX - (LabelRenderable.X + TextPadding);
+        float relMouseY = Window.MouseY - (LabelRenderable.Y + TextPadding);
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -421,18 +488,21 @@ public class UIInputLabel : UIClickableElement
         // TODO: Handle HOME, END
     }
 
-    /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
+    public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
+        UIElementStyle style = ElementInternal.CurrentStyle;
+        int x = elem.X + TextPadding;
+        int y = elem.Y + TextPadding;
         bool isInfo = TextContent.Length == 0;
         bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(X, Y, 0));
+            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
         }
         else
         {
-            UIElementText.RenderChain(Internal.TextChain, X, Y);
+            UIElementText.RenderChain(Internal.TextChain, x, y);
         }
         if (Internal.CursorOffset.IsNaN())
         {
@@ -443,9 +513,12 @@ public class UIInputLabel : UIClickableElement
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
-        view.Rendering.RenderRectangle(view.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
+        view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
+
+    /// <inheritdoc/>
+    public override void Render(ViewUI2D view, double delta, UIElementStyle style) => Box?.Render(view, delta, style);
 
     /// <inheritdoc/>
     public override List<string> GetDebugInfo()

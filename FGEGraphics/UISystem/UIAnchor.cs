@@ -16,7 +16,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Helper class for placing UI elements relative to sections of the screen.</summary>
 /// <remarks>Generally don't construct directly. Use the static objects instead.</remarks>
-public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y, UIAlignment horizontalAlignment, UIAlignment verticalAlignment)
+public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y, UIAlignment alignmentX, UIAlignment alignmentY)
 {
     /// <summary>Function for getting the relative X value.</summary>
     public readonly Func<UIElement, int> GetX = x;
@@ -25,10 +25,10 @@ public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y, UIAlignmen
     public readonly Func<UIElement, int> GetY = y;
 
     /// <summary>The horizontal position alignment.</summary>
-    public readonly UIAlignment HorizontalAlignment = horizontalAlignment;
+    public readonly UIAlignment AlignmentX = alignmentX;
 
     /// <summary>The vertical position alignment.</summary>
-    public readonly UIAlignment VerticalAlignment = verticalAlignment;
+    public readonly UIAlignment AlignmentY = alignmentY;
 
     /// <summary>Helper function objects for the public static values.</summary>
     private static readonly Func<UIElement, int> LEFT_X = element => 0,

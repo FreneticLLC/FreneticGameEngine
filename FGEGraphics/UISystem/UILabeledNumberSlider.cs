@@ -29,24 +29,27 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="sliderStyles">The slider styles.</param>
     /// <param name="labelLeft">Whether the label should be on the left of the slider.</param>
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
-    /// <param name="labelStyle">The normal label style.</param>
-    /// <param name="labelHighlight">The highlighted label style.</param>
+    /// <param name="labelInputStyle">The normal label style.</param>
+    /// <param name="labelHighlightStyle">The highlighted label style.</param>
     /// <param name="pos">The position of the slider.</param>
     /// <param name="labelFormat">A format string for the label value.</param>
     /// <param name="updateOnEdit">Whether to update the slider value while the user edits the label.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelStyle, UIElementStyle labelHighlight, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true) : base(min, max, initial, interval, integer, sliderStyles, pos)
+    /// <param name="labelRenderBox">Whether to render a box behind the number label.</param>
+    /// <param name="labelBoxPadding">The padding between the box and the number label.</param>
+    /// <param name="labelBoxStyles">The box styles for the number label.</param>
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup sliderStyles, bool labelLeft, int labelPadding, UIElementStyle labelInputStyle, UIElementStyle labelHighlightStyle, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelBoxStyles = null) : base(min, max, initial, interval, integer, sliderStyles, pos)
     {
         labelFormat ??= Integer ? "0" : "0.0";
-        AddStyle(labelStyle, true);
-        AddChild(Label = new UINumberInputLabel(Value, integer, labelFormat, labelStyle, labelHighlight, pos.AtOrigin()));
+        AddStyle(labelInputStyle, true);
+        AddChild(Label = new UINumberInputLabel(Value, integer, labelFormat, labelInputStyle, labelHighlightStyle, pos.AtOrigin(), labelRenderBox, labelBoxPadding, labelBoxStyles));
         // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
         // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
-        ValueEdited += _ => Label.TextContent = Value.ToString(Label.Format);
+        OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.OnTextSubmit += _ =>
         {
             double newValue = GetCorrectedValue(Label.Value, Integer ? 1.0 : 0.0);
-            ValueEdited.Invoke(Value = newValue);
+            OnValueEdit.Invoke(Value = newValue);
         };
         if (updateOnEdit)
         {

@@ -83,7 +83,7 @@ public class UIDropdown : UIElement
     }
 
     /// <summary>Reverts the dropdown to its pre-chosen state.</summary>
-    public void Deselect()
+    public void DeselectChoice()
     {
         Button.Text.Content = PlaceholderInfo;
         SelectedElement = null;

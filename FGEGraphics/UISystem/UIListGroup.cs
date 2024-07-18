@@ -32,7 +32,7 @@ public class UIListGroup : UIGroup
     /// <param name="vertical">Whether the list should expand vertically.</param>
     public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true) : base(pos.ConstantWidthHeight(0, 0))
     {
-        if ((vertical && Position.MainAnchor.VerticalAlignment == UIAlignment.CENTER) || (!vertical && Position.MainAnchor.HorizontalAlignment == UIAlignment.CENTER))
+        if ((vertical && Position.MainAnchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Position.MainAnchor.AlignmentX == UIAlignment.CENTER))
         {
             throw new Exception("UIListGroup must have a non-central expansion direction");
         }
@@ -48,7 +48,7 @@ public class UIListGroup : UIGroup
         if (Vertical)
         {
             int maxY = Position.Height > 0 ? Position.Height + Spacing : 0;
-            if (Position.MainAnchor.VerticalAlignment == UIAlignment.BOTTOM)
+            if (Position.MainAnchor.AlignmentY == UIAlignment.BOTTOM)
             {
                 maxY = -maxY;
             }
@@ -62,7 +62,7 @@ public class UIListGroup : UIGroup
         else
         {
             int maxX = Position.Width > 0 ? Position.Width + Spacing : 0;
-            if (Position.MainAnchor.HorizontalAlignment == UIAlignment.RIGHT)
+            if (Position.MainAnchor.AlignmentX == UIAlignment.RIGHT)
             {
                 maxX = -maxX;
             }

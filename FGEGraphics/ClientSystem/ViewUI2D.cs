@@ -162,12 +162,13 @@ public class ViewUI2D
                     }
                     if (elem.ShouldRender)
                     {
-                        elem.Render(this, Client.Delta, elem.ElementInternal.CurrentStyle);
+                        elem.Render(this, Client.Delta);
                     }
                     if (Debug)
                     {
                         Engine.Textures.White.Bind();
-                        Renderer2D.SetColor(elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red);
+                        Color4F outlineColor = elem == InteractingElement ? Color4F.Green : elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
+                        Renderer2D.SetColor(outlineColor);
                         Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
                         Renderer2D.SetColor(Color4F.White);
                         if (elem.ElementInternal.HoverInternal)

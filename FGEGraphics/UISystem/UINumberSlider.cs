@@ -46,7 +46,7 @@ public class UINumberSlider : UIClickableElement
     public double Progress => (Value - Min) / (Max - Min);
 
     /// <summary>Fired when the user edits the slider value.</summary>
-    public Action<double> ValueEdited;
+    public Action<double> OnValueEdit;
 
     /// <summary>
     /// The box placed at the current slider progress.
@@ -109,7 +109,7 @@ public class UINumberSlider : UIClickableElement
         Value = GetCorrectedValue(mouseValue, interval);
         if (Value != previousValue)
         {
-            ValueEdited?.Invoke(Value);
+            OnValueEdit?.Invoke(Value);
         }
     }
 
