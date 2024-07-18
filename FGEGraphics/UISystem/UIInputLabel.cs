@@ -100,6 +100,8 @@ public class UIInputLabel : UIClickableElement
         /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
         public int BoxPadding;
 
+        public bool MaxWidth;
+
         /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
         public int CursorStart = 0;
 
@@ -211,24 +213,24 @@ public class UIInputLabel : UIClickableElement
     /// <param name="boxPadding">The padding between the box and the label.</param>
     /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
     /// <param name="scrollBarWidth">The width of the scroll bar.</param>
-    /// <param name="scrollBarAnchor">The anchor of the scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, UIAnchor scrollBarAnchor = null) : base(styles, pos, requireText: placeholderInfo.Length > 0)
+    /// <param name="scrollBarYAnchor">The anchor of the scroll bar.</param>
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
-            pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2);
+            pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2); // TODO: GetterWidthHeight
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
-        UIPositionHelper original = new(pos);
-        ScrollGroup = new(pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => original.Width - Inset() * 2, () => original.Height - Inset() * 2), scrollBarStyles, scrollBarWidth, barY: scrollBarStyles is not null, barYAnchor: scrollBarAnchor);
+        UIPositionHelper scrollGroupPos = pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => pos.Width - Inset() * 2, () => pos.Height - Inset() * 2);
+        ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor);
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
-        ScrollGroup.ScrollX.MaxValue = 0;
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? styles.Normal;
         HighlightStyle = highlightStyle ?? styles.Click;
         PlaceholderInfo = new(this, placeholderInfo, true);
+        Internal.MaxWidth = maxWidth;
         Internal.TextLeft = new(this, null, false, style: InputStyle);
         Internal.TextBetween = new(this, null, false, style: HighlightStyle);
         Internal.TextRight = new(this, null, false, style: InputStyle);
@@ -245,7 +247,7 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void OnDeselect()
     {
-        if (ScrollGroup.ScrollY.ScrollBar?.Pressed ?? false)
+        if (ScrollGroup.ScrollX.ScrollBar?.Pressed ?? ScrollGroup.ScrollY.ScrollBar?.Pressed ?? false)
         {
             Selected = true;
             return;
@@ -253,17 +255,29 @@ public class UIInputLabel : UIClickableElement
         SubmitText();
         Internal.SetPosition(0);
         UpdateText();
-        ScrollGroup.ScrollY.MaxValue = 0;
-        ScrollGroup.ScrollY.Value = 0;
+        ScrollGroup.ScrollX.Reset();
+        ScrollGroup.ScrollY.Reset();
+    }
+
+    public void UpdateScrollGroupX()
+    {
+        int maxWidth = 0;
+        foreach (UIElementText.ChainPiece piece in Internal.TextChain)
+        {
+            if (piece.Text.Width > maxWidth)
+            {
+                maxWidth = piece.Text.Width;
+            }
+        }
+        ScrollGroup.ScrollX.MaxValue = Math.Max(maxWidth + TextPadding * 2 - ScrollGroup.Width, 0);
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values based on the text height and cursor position.</summary>
-    public void UpdateScrollGroup()
+    public void UpdateScrollGroupY()
     {
         if (Internal.TextChain.Count <= 1)
         {
-            ScrollGroup.ScrollY.MaxValue = 0;
-            ScrollGroup.ScrollY.Value = 0;
+            ScrollGroup.ScrollY.Reset();
             return;
         }
         int lastLineHeight = Internal.TextLeft.CurrentStyle.FontHeight + TextPadding * 2;
@@ -279,11 +293,20 @@ public class UIInputLabel : UIClickableElement
         }
     }
 
+    public void UpdateScrollGroup()
+    {
+        if (!Internal.MaxWidth)
+        {
+            UpdateScrollGroupX();
+        }
+        UpdateScrollGroupY();
+    }
+
     /// <summary>Updates the text components based on the cursor positions.</summary>
     public void UpdateText()
     {
         Internal.UpdateTextComponents();
-        Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Position.Width).ToList();
+        Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Position.Width : -1).ToList();
         Internal.CursorOffset = (!Selected || Internal.HasSelection) ? Location.NaN : Internal.GetCursorOffset();
         UpdateScrollGroup();
     }
@@ -409,7 +432,8 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        if (ScrollGroup.ScrollY.ScrollBar is not null && (ScrollGroup.ScrollY.ScrollBar.Pressed || ScrollGroup.ScrollY.ScrollBar.SelfContains((int)Window.MouseX, (int)Window.MouseY)))
+        bool BarPressed(UIButton bar) => bar?.Pressed ?? bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY) ?? false;
+        if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
         {
             return;
         }

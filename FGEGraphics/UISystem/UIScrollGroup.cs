@@ -71,6 +71,12 @@ public class UIScrollGroup : UIScissorGroup
             ScrollBar = new(null, null, styles, pos);
         }
 
+        public void Reset()
+        {
+            Value = 0;
+            MaxValue = 0;
+        }
+
         /// <summary>Ticks the mouse dragging the <see cref="ScrollBar"/>.</summary>
         /// <param name="mousePos">The relevant mouse position.</param>
         /// <param name="groupPos">The relevant scroll group position.</param>

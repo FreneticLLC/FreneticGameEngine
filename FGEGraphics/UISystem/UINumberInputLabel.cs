@@ -29,7 +29,7 @@ namespace FGEGraphics.UISystem;
 /// <param name="boxPadding">The padding between the box and the label.</param>
 /// <param name="boxStyles">The box styles for the label.</param>
 // TODO: Cache raw value internally & independent of format
-public class UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIClickableElement.StyleGroup boxStyles = null) : UIInputLabel("", initial.ToString(format), boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, renderBox, boxPadding)
+public class UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIClickableElement.StyleGroup boxStyles = null) : UIInputLabel("", initial.ToString(format), boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, renderBox, false, boxPadding)
 {
     /// <summary>Character matcher for integer number labels.</summary>
     public static readonly AsciiMatcher IntegerMatcher = new(AsciiMatcher.Digits + "-");
