@@ -106,8 +106,7 @@ public abstract class UIElement
 
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
-    /// <param name="priority">Whether the child element has render priority over this element.</param>
-    public virtual void AddChild(UIElement child, bool priority = true)
+    public virtual void AddChild(UIElement child)
     {
         if (child.Parent is not null)
         {
@@ -126,7 +125,6 @@ public abstract class UIElement
         }
         child.Parent = this;
         child.IsValid = true;
-        child.ChildPriority = priority;
         child.Init();
     }
 

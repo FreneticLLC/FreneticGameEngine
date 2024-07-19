@@ -163,11 +163,11 @@ public class UIScrollGroup : UIScissorGroup
     }
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child, bool priority = true)
+    public override void AddChild(UIElement child)
     {
         UIPositionHelper original = new(child.Position);
         child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
-        base.AddChild(child, priority);
+        base.AddChild(child);
     }
 
     /// <summary>Ticks the mouse dragging the scroll bar.</summary>

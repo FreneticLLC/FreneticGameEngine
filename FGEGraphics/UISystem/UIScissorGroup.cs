@@ -18,9 +18,9 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child, bool priority = true)
+    public override void AddChild(UIElement child)
     {
-        base.AddChild(child, priority);
+        base.AddChild(child);
         foreach (UIElement element in child.AllChildren(toAdd: true))
         {
             element.ShouldRender = false;
