@@ -185,15 +185,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>Whether the position is within any of the boundaries.</returns>
-    public bool SelfContains(int x, int y)
-    {
-        int lowX = LastAbsolutePosition.X;
-        int lowY = LastAbsolutePosition.Y;
-        int highX = lowX + LastAbsoluteSize.X;
-        int highY = lowY + LastAbsoluteSize.Y;
-        return x > lowX && x < highX
-            && y > lowY && y < highY;
-    }
+    public bool SelfContains(int x, int y) => x > X && x < X + Width && y > Y && y < Y + Height;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()

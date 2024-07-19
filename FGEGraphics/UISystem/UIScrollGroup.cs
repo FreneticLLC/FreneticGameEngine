@@ -152,14 +152,25 @@ public class UIScrollGroup : UIScissorGroup
         // TODO: Fix scroll bar overlap
         ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
         ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
-        if (barX)
+    }
+
+    /// <inheritdoc/>
+    public override void Init()
+    {
+        if (ScrollX.ScrollBar is null && ScrollY.ScrollBar is null)
         {
-            base.AddChild(ScrollX.ScrollBar);
+            return;
         }
-        if (barY)
+        UIGroup group = new(new UIPositionHelper(Position));
+        if (ScrollX.ScrollBar is not null)
         {
-            base.AddChild(ScrollY.ScrollBar);
+            group.AddChild(ScrollX.ScrollBar);
         }
+        if (ScrollY.ScrollBar is not null)
+        {
+            group.AddChild(ScrollY.ScrollBar);
+        }
+        Parent.AddChild(group);
     }
 
     /// <inheritdoc/>
