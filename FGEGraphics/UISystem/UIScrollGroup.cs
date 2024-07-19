@@ -71,10 +71,26 @@ public class UIScrollGroup : UIScissorGroup
             ScrollBar = new(null, null, styles, pos);
         }
 
+        /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
         public void Reset()
         {
             Value = 0;
             MaxValue = 0;
+        }
+
+        /// <summary>Scrolls to encompass a min/max offset pair.</summary>
+        /// <param name="min">The min offset.</param>
+        /// <param name="max">The max offset.</param>
+        public void ScrollToPos(int min, int max)
+        {
+            if (min < Value)
+            {
+                Value = min;
+            }
+            else if (max > RangeLength)
+            {
+                Value += max - RangeLength;
+            }
         }
 
         /// <summary>Ticks the mouse dragging the <see cref="ScrollBar"/>.</summary>
@@ -134,8 +150,8 @@ public class UIScrollGroup : UIScissorGroup
             throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
         }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Position.Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Position.Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
         if (barX)
         {
             base.AddChild(ScrollX.ScrollBar);

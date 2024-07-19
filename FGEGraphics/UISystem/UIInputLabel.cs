@@ -100,6 +100,7 @@ public class UIInputLabel : UIClickableElement
         /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
         public int BoxPadding;
 
+        /// <summary>Whether to enforce max width or use a horizontal scroll group.</summary>
         public bool MaxWidth;
 
         /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
@@ -205,16 +206,20 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Constructs an input label.</summary>
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
-    /// <param name="styles">The clickable styles for the box and info text.</param>
+    /// <param name="baseStyles">The clickable styles for the box and info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
+    /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
     /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
     /// <param name="scrollBarWidth">The width of the scroll bar.</param>
-    /// <param name="scrollBarYAnchor">The anchor of the scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup styles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styles, pos, requireText: placeholderInfo.Length > 0)
+    /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
+    /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
+    /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
+    /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
@@ -227,8 +232,8 @@ public class UIInputLabel : UIClickableElement
         ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor);
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
         AddChild(ScrollGroup);
-        InputStyle = inputStyle ?? styles.Normal;
-        HighlightStyle = highlightStyle ?? styles.Click;
+        InputStyle = inputStyle ?? baseStyles.Normal;
+        HighlightStyle = highlightStyle ?? baseStyles.Click;
         PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.MaxWidth = maxWidth;
         Internal.TextLeft = new(this, null, false, style: InputStyle);
@@ -259,9 +264,13 @@ public class UIInputLabel : UIClickableElement
         ScrollGroup.ScrollY.Reset();
     }
 
-    // TODO: Put these in ScrollGroup.ScrollDirection, "ScrollToPos" or smth
+    /// <summary>Updates the horizontal scroll values based on the text width and cursor position.</summary>
     public void UpdateScrollGroupX()
     {
+        if (Internal.MaxWidth)
+        {
+            return;
+        }
         int maxWidth = 0;
         foreach (UIElementText.ChainPiece piece in Internal.TextChain)
         {
@@ -271,18 +280,10 @@ public class UIInputLabel : UIClickableElement
             }
         }
         ScrollGroup.ScrollX.MaxValue = Math.Max(maxWidth + TextPadding * 2 - ScrollGroup.Width, 0);
-        if (Internal.CursorOffset.X < ScrollGroup.ScrollX.Value)
-        {
-            ScrollGroup.ScrollX.Value = (int)Internal.CursorOffset.X;
-        }
-        int cursorRight = (int)Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value;
-        if (cursorRight > ScrollGroup.Width)
-        {
-            ScrollGroup.ScrollX.Value += cursorRight - ScrollGroup.Width;
-        }
+        ScrollGroup.ScrollX.ScrollToPos((int)Internal.CursorOffset.X, (int)Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
     }
 
-    /// <summary>Updates the <see cref="ScrollGroup"/> values based on the text height and cursor position.</summary>
+    /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
     public void UpdateScrollGroupY()
     {
         if (Internal.TextChain.Count <= 1)
@@ -292,23 +293,13 @@ public class UIInputLabel : UIClickableElement
         }
         int lastLineHeight = Internal.TextLeft.CurrentStyle.FontHeight + TextPadding * 2;
         ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        if (Internal.CursorOffset.Y < ScrollGroup.ScrollY.Value)
-        {
-            ScrollGroup.ScrollY.Value = (int)Internal.CursorOffset.Y;
-        }
-        int cursorBottom = (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value;
-        if (cursorBottom > ScrollGroup.Height)
-        {
-            ScrollGroup.ScrollY.Value += cursorBottom - ScrollGroup.Height;
-        }
+        ScrollGroup.ScrollY.ScrollToPos((int)Internal.CursorOffset.Y, (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
     }
 
+    /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        if (!Internal.MaxWidth)
-        {
-            UpdateScrollGroupX();
-        }
+        UpdateScrollGroupX();
         UpdateScrollGroupY();
     }
 
