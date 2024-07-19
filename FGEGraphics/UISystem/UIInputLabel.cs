@@ -252,7 +252,7 @@ public class UIInputLabel : UIClickableElement
     /// <inheritdoc/>
     public override void OnDeselect()
     {
-        if (ScrollGroup.ScrollX.ScrollBar?.Pressed ?? ScrollGroup.ScrollY.ScrollBar?.Pressed ?? false)
+        if ((ScrollGroup.ScrollX.ScrollBar?.Pressed | ScrollGroup.ScrollY.ScrollBar?.Pressed) ?? false)
         {
             Selected = true;
             return;
@@ -433,7 +433,7 @@ public class UIInputLabel : UIClickableElement
         {
             return;
         }
-        bool BarPressed(UIButton bar) => bar?.Pressed ?? bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY) ?? false;
+        bool BarPressed(UIButton bar) => (bar?.Pressed | bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
         {
             return;
