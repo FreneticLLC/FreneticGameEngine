@@ -18,6 +18,7 @@ using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -61,6 +62,12 @@ public class UIInputLabel : UIClickableElement
 
     /// <summary>The UI style of highlighted input content.</summary>
     public UIElementStyle HighlightStyle;
+
+    /// <summary>Whether the input label supports multiple lines.</summary>
+    public bool Multiline = true;
+
+    /// <summary>The max length of the text, or 0 if uncapped.</summary>
+    public int MaxLength = 0;
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public InternalData Internal = new();
@@ -325,13 +332,29 @@ public class UIInputLabel : UIClickableElement
         (type == EditType.SUBMIT ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
     }
 
-    // TODO: Cap length
     /// <summary>Validates a user edit of the text content.</summary>
     /// <param name="type">The edit operation.</param>
     /// <param name="diff">The added or deleted text.</param>
     /// <param name="result">The result of the operation pre-validation.</param>
     /// <returns>A validated <see cref="TextContent"/> string.</returns>
-    public virtual string ValidateEdit(EditType type, string diff, string result) => result;
+    public virtual string ValidateEdit(EditType type, string diff, string result)
+    {
+        if (type != EditType.ADD)
+        {
+            return result;
+        }
+        int originalLength = result.Length;
+        if (result.Length > MaxLength)
+        {
+            result = result[..MaxLength];
+        }
+        if (!Multiline && result.Contains('\n'))
+        {
+            result = result.Replace("\n", "");
+        }
+        Internal.SetPosition(Internal.IndexLeft - (originalLength - result.Length));
+        return result;
+    }
 
     /// <summary>Adds text given two selection indices.</summary>
     /// <param name="text">The text to add.</param>
