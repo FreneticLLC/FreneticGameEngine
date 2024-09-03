@@ -134,9 +134,13 @@ public class ViewUI2D
             // TODO: alternate Ortho setting from scaler/adder def!
             Client.Shaders.ColorMult2DShader.Bind();
             Renderer2D.SetColor(Color4F.White);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetColor");
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetScaler");
             ShaderLocations.Common2D.ADDER.Set(UIContext.Adder);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetAdder");
             GL.Disable(EnableCap.DepthTest);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - DisableDepth");
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");

@@ -24,6 +24,7 @@ using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -288,6 +289,13 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         Window.Focus();
         Logs.ClientInit("GameClient starting load sequence...");
+        string GLVendor = GL.GetString(StringName.Vendor);
+        string GLVersion = GL.GetString(StringName.Version);
+        string GLRenderer = GL.GetString(StringName.Renderer);
+        int maxVertComp = GL.GetInteger(GetPName.MaxVertexUniformComponents);
+        int maxFragComp = GL.GetInteger(GetPName.MaxFragmentUniformComponents);
+        Logs.ClientInit($"Vendor: {GLVendor}, GLVersion: {GLVersion}, Renderer: {GLRenderer}");
+        Logs.Debug($"Max uniform components: {maxVertComp} vertex, {maxFragComp} fragment");
         GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -297,6 +305,12 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         InstanceInit();
         Logs.ClientInit("GameClient loading shader helpers...");
         Shaders = new ShaderEngine();
+        if (GLVendor.ToLowerFast().Contains("intel"))
+        {
+            Logs.ClientInit($"Disabling good graphics (Appears to be Intel: '{GLVendor}')");
+            Shaders.MCM_GOOD_GRAPHICS = false;
+            Shaders.ShutUpIntel = true;
+        }
         Shaders.InitShaderSystem(Files);
         Logs.ClientInit("GameClient loading texture helpers...");
         Textures = new TextureEngine();
