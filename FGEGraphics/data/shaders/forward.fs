@@ -22,6 +22,7 @@
 #define MCM_ANTI_TRANSP 0
 #define MCM_SIMPLE_LIGHT 0
 #define MCM_SPECIAL_FOG 0
+#define MCM_SHUT_UP_INTEL 0
 
 #if MCM_GEOM_ACTIVE
 layout (binding = 0) uniform sampler2DArray s;
@@ -144,7 +145,11 @@ vec4 read_texture(in sampler2D samp_in, in vec2 texcrd)
 
 void main()
 {
+#if MCM_SHUT_UP_INTEL
+	position = vec4(fi.pos, 1.0) + unused_nonsense() * 0.0;
+#else
 	position = vec4(fi.pos, 1.0);
+#endif
 	vec4 col = read_texture(s, fi.texcoord);
 #if MCM_LIGHTS
 	float specularStrength = read_texture(spec, fi.texcoord).x;

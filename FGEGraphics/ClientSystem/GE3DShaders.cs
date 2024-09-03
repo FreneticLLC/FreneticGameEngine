@@ -19,6 +19,9 @@ namespace FGEGraphics.ClientSystem;
 /// <summary>Holds the default shader references for a GameEngine3D.</summary>
 public class GE3DShaders
 {
+    /// <summary>If true, this GPU's shader compiler acts like an annoying Intel compiler and needs to be told to shut up and do its job.</summary>
+    public bool ShutUpIntel = false;
+
     /// <summary>Loads all shaders from the backing engine given.</summary>
     /// <param name="Shaders">The given backing shader engine.</param>
     /// <param name="AllowLL">Whether to allow and load the LL lighting helper.</param>
@@ -27,7 +30,12 @@ public class GE3DShaders
     /// <param name="forShad">Whether to enable forward-mode shadow effects.</param>
     public void LoadAll(ShaderEngine Shaders, bool AllowLL, bool forNorm, bool forLight, bool forShad)
     {
-        string def = Shaders.MCM_GOOD_GRAPHICS ? "#MCM_GOOD_GRAPHICS" : "#";
+        string def = Shaders.MCM_GOOD_GRAPHICS ? "#MCM_GOOD_GRAPHICS," : "#";
+        if (ShutUpIntel)
+        {
+            def += "MCM_SHUT_UP_INTEL,";
+        }
+        def = def.TrimEnd(',');
         Deferred.ShadowPass_Basic = Shaders.GetShader("shadow" + def);
         Deferred.ShadowPass_NoBones = Shaders.GetShader("shadow" + def + ",MCM_NO_BONES");
         Deferred.GBufferSolid = Shaders.GetShader("fbo" + def);
