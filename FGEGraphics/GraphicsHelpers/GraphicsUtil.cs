@@ -36,7 +36,7 @@ public static class GraphicsUtil
         }
         StringBuilder errorMessage = new();
         string contextText = context is null ? "" : $"(context=`{context}`): ";
-        errorMessage.Append($"OpenGL error [{callerLocationLabel} {contextText} (bound shader=`{ShaderEngine.BoundNow?.Name ?? "(none)"}`)]: ");
+        errorMessage.Append($"OpenGL error [{callerLocationLabel} {contextText}(bound shader=`{ShaderEngine.BoundNow?.Name ?? "(none)"}`)]: ");
         while (ec != ErrorCode.NoError)
         {
             errorMessage.Append($"{ec}");
