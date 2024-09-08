@@ -344,9 +344,11 @@ public class UIInputLabel : UIClickableElement
             return result;
         }
         int originalLength = result.Length;
-        if (result.Length > MaxLength)
+        int overflow = result.Length - MaxLength;
+        if (MaxLength > 0 && overflow > 0)
         {
-            result = result[..MaxLength];
+            string newDiff = overflow < diff.Length ? diff[..(diff.Length - overflow)] : "";
+            result = result[..(Internal.IndexLeft - diff.Length)] + newDiff + result[Internal.IndexRight..];
         }
         if (!Multiline && result.Contains('\n'))
         {
@@ -363,7 +365,7 @@ public class UIInputLabel : UIClickableElement
     public void AddText(string text, int indexLeft, int indexRight)
     {
         string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
-        Internal.CursorEnd = Internal.CursorStart += text.Length;
+        Internal.SetPosition(Internal.IndexLeft + text.Length);
         EditText(EditType.ADD, text, result);
     }
 
