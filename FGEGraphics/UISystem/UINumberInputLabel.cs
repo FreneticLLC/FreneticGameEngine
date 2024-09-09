@@ -18,18 +18,8 @@ using FreneticUtilities.FreneticToolkit;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an editable number label.</summary>
-/// <remarks>Constructs a number input label.</remarks>
-/// <param name="initial">The initial number value.</param>
-/// <param name="integer">Whether the label should be an integer.</param>
-/// <param name="format">The format string for the label.</param>
-/// <param name="inputStyle">The style of normal input content.</param>
-/// <param name="highlightStyle">The style of highlighted input content.</param>
-/// <param name="pos">The position of the element.</param>
-/// <param name="renderBox">Whether to render a box behind the label.</param>
-/// <param name="boxPadding">The padding between the box and the label.</param>
-/// <param name="boxStyles">The box styles for the label.</param>
 // TODO: Cache raw value internally & independent of format
-public class UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIClickableElement.StyleGroup boxStyles = null) : UIInputLabel("", initial.ToString(format), boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, renderBox, false, boxPadding)
+public class UINumberInputLabel : UIInputLabel
 {
     /// <summary>Character matcher for integer number labels.</summary>
     public static readonly AsciiMatcher IntegerMatcher = new(AsciiMatcher.Digits + "-");
@@ -38,16 +28,33 @@ public class UINumberInputLabel(double initial, bool integer, string format, UIE
     public static readonly AsciiMatcher DecimalMatcher = new(AsciiMatcher.Digits + "-.e");
 
     /// <summary>Whether the label should be an integer instead of a decimal.</summary>
-    public bool Integer = integer;
+    public bool Integer;
 
     /// <summary>The format string to apply to the label on submission.</summary>
-    public string Format = format;
+    public string Format;
 
     /// <summary>The character matcher for this number label type.</summary>
     public AsciiMatcher CharacterMatcher => Integer ? IntegerMatcher : DecimalMatcher;
 
     /// <summary>The decimal value of the label.</summary>
     public double Value => double.Parse(TextContent);
+
+    /// <remarks>Constructs a number input label.</remarks>
+    /// <param name="initial">The initial number value.</param>
+    /// <param name="integer">Whether the label should be an integer.</param>
+    /// <param name="format">The format string for the label.</param>
+    /// <param name="inputStyle">The style of normal input content.</param>
+    /// <param name="highlightStyle">The style of highlighted input content.</param>
+    /// <param name="pos">The position of the element.</param>-
+    /// <param name="renderBox">Whether to render a box behind the label.</param>
+    /// <param name="boxPadding">The padding between the box and the label.</param>
+    /// <param name="boxStyles">The box styles for the label.</param>
+    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIClickableElement.StyleGroup boxStyles = null) : base("", initial.ToString(format), boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, false, renderBox, boxPadding)
+    {
+        Integer = integer;
+        Format = format;
+        Multiline = false;
+    }
 
     /// <inheritdoc/>
     public override string ValidateEdit(EditType type, string diff, string result)

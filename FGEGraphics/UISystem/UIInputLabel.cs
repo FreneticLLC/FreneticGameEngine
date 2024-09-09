@@ -544,8 +544,7 @@ public class UIInputLabel : UIClickableElement
         UIElementStyle style = ElementInternal.CurrentStyle;
         int x = elem.X + TextPadding;
         int y = elem.Y + TextPadding;
-        bool isInfo = TextContent.Length == 0;
-        bool renderInfo = isInfo && style.CanRenderText(PlaceholderInfo);
+        bool renderInfo = TextContent.Length == 0 && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
             style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));

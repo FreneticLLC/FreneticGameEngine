@@ -582,6 +582,7 @@ public abstract class UIElement
     }
 
     /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
+    // TODO: Account for in interaction logic
     public virtual void MouseLeave()
     {
     }

@@ -201,7 +201,7 @@ public class UIScrollGroup : UIScissorGroup
     {
         float deltaX = Window.CurrentMouse.ScrollDelta.X;
         float deltaY = Window.CurrentMouse.ScrollDelta.Y;
-        if (Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
             deltaX = deltaY;
             deltaY = 0;
