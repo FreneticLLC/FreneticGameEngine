@@ -188,7 +188,7 @@ public class AudioEnforcer
                 float dist = MathF.Sqrt(distSq);
                 float distanceGain = 1.0f / Math.Max(1.0f, distSq);
                 Volume = angleVolume * distanceGain;
-                float timeOffsetSeconds = -dist / instance.SpeedOfSound;
+                float timeOffsetSeconds = dist / instance.SpeedOfSound;
                 TimeOffset = (int)(timeOffsetSeconds * FREQUENCY);
             }
         }
@@ -204,13 +204,13 @@ public class AudioEnforcer
             if (Instance.Left)
             {
                 Location leftEarPos = Instance.Position - rightDirection * (Instance.HeadWidth * 0.5);
-                float angleVolume = Math.Max(0f, (float)Math.Cos(angle + QUARTER_PI));
+                float angleVolume = Math.Max(0, (float)Math.Cos(angle + QUARTER_PI)) * 0.5f + 0.5f;
                 left.Fill(position, leftEarPos, angleVolume, Instance);
             }
             if (Instance.Right)
             {
                 Location rightEarPos = Instance.Position + rightDirection * (Instance.HeadWidth * 0.5);
-                float angleVolume = Math.Max(0f, (float)Math.Sin(angle + QUARTER_PI));
+                float angleVolume = Math.Max(0, (float)Math.Sin(angle + QUARTER_PI)) * 0.5f + 0.5f;
                 right.Fill(position, rightEarPos, angleVolume, Instance);
             }
             return (left, right);
@@ -316,7 +316,7 @@ public class AudioEnforcer
                 }
                 outBufPosition += 2;
             }
-            if (toAdd.CurrentSample >= clipData.Length)
+            if (!toAdd.Loop && toAdd.CurrentSample + Math.Max(leftEar.TimeOffset, rightEar.TimeOffset) * 2 >= clipData.Length)
             {
                 toAdd.CurrentSample = 0;
                 toAdd.State = AudioState.DONE;
