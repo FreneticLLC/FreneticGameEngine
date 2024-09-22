@@ -80,6 +80,9 @@ public class SoundEngine : IDisposable
     /// <summary>Current global pitch.</summary>
     public float GlobalPitch = 1.0f;
 
+    /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
+    public float MaxSoundVolume = 2;
+
     /// <summary>Initialize the sound engine.</summary>
     /// <param name="tclient">The backing client.</param>
     public void Init(GameEngineBase tclient)
@@ -383,10 +386,11 @@ public class SoundEngine : IDisposable
         {
             return;
         }
-        if (volume <= 0 || volume > 1)
+        if (volume < 0)
         {
-            throw new ArgumentException("Must be between 0 and 1", nameof(volume));
+            throw new ArgumentException("volume cannot be less than zero", nameof(volume));
         }
+        volume = Math.Min(volume, MaxSoundVolume);
         void playSound()
         {
             if (sfx.Clip is null && sfx.Internal < 0)
