@@ -29,7 +29,7 @@ public class AudioEnforcer
     public static long AudioID = 1;
 
     /// <summary>The thread for the enforcer.</summary>
-    public Thread AudioForcer;
+    public Thread AudioThread;
 
     /// <summary>Whether the system is running.</summary>
     public bool Run = false;
@@ -58,6 +58,12 @@ public class AudioEnforcer
     /// <summary>Whether the right channel is enabled.</summary>
     public bool Right = true;
 
+    /// <summary>The speed of sound, in units per second (on Earth in air this is 343 m/s).</summary>
+    public float SpeedOfSound = 343;
+
+    /// <summary>How far apart the ears are.</summary>
+    public float HeadWidth = 0.2f; // TODO: SoundEngine control of this var
+
     /// <summary>Add an audio instance to the enforcer.</summary>
     /// <param name="inst">The instance to add.</param>
     public void Add(ActiveSound inst)
@@ -85,11 +91,11 @@ public class AudioEnforcer
         }
         Internal.Context = acontext;
         Run = true;
-        AudioForcer = new Thread(new ThreadStart(Internal.ForceAudioLoop))
+        AudioThread = new Thread(new ThreadStart(Internal.ForceAudioLoop))
         {
             Name = "Audio_" + Interlocked.Increment(ref AudioID)
         };
-        AudioForcer.Start();
+        AudioThread.Start();
     }
 
     /// <summary>Shuts down the enforcer. May take a moment before the enforcer thread stops.</summary>
@@ -113,7 +119,7 @@ public class AudioEnforcer
         /// <summary>One quarter of PI. A constant.</summary>
         public const float QUARTER_PI = (float)Math.PI * 0.25f;
 
-        /// <summary>The audio frequency, in Hz.</summary>
+        /// <summary>The audio frequency, in Hz (samples per second).</summary>
         public const int FREQUENCY = 44100;
 
         /// <summary>Audio channels to use.</summary>
@@ -165,23 +171,49 @@ public class AudioEnforcer
             ByteBufferID %= REUSABLE_BUFFER_ARRAY_SIZE;
             for (int i = 0; i < toReturn.Length; i++)
             {
-                toReturn[i] = 0; // TODO: Is 0 correct for a no-audio buffer?
+                toReturn[i] = 0;
             }
             return toReturn;
         }
 
-        /// <summary>Calculates the correct positional audio volume for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
-        public readonly (float, float) GetPositionalVolume(Location position)
+        /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
+        /// <param name="Volume">The volume to this ear.</param>
+        /// <param name="TimeOffset">The time offset to this ear, in samples.</param>
+        public record struct AudioPositionalEarData(float Volume, int TimeOffset)
         {
-            float distanceGain = 1.0f / Math.Max(1.0f, (float)position.DistanceSquared(Instance.Position));
+            /// <summary>Fills the data for this ear based on relevant audio data.</summary>
+            public void Fill(Location soundPosition, Location earPosition, float angleVolume, AudioEnforcer instance)
+            {
+                float distSq = (float)soundPosition.DistanceSquared(earPosition);
+                float dist = MathF.Sqrt(distSq);
+                float distanceGain = 1.0f / Math.Max(1.0f, distSq);
+                Volume = angleVolume * distanceGain;
+                float timeOffsetSeconds = -dist / instance.SpeedOfSound;
+                TimeOffset = (int)(timeOffsetSeconds * FREQUENCY);
+            }
+        }
+
+        /// <summary>Calculates the correct positional audio data for each ear for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
+        public readonly (AudioPositionalEarData, AudioPositionalEarData) GetPositionalData(Location position)
+        {
             Location relativeDirectionVector = (position - Instance.Position).Normalize();
             Quaternion direction = Quaternion.GetQuaternionBetween(relativeDirectionVector, Instance.ForwardDirection);
             float angle = (float)direction.AxisAngleForRadians(Instance.UpDirection);
-            float volumeRight = Instance.Right ? Math.Max(0f, (float)Math.Sin(angle + QUARTER_PI)) : 0f;
-            float volumeLeft = Instance.Left ? Math.Max(0f, (float)Math.Cos(angle + QUARTER_PI)) : 0f;
-            volumeRight *= volumeRight * distanceGain;
-            volumeLeft *= volumeLeft * distanceGain;
-            return (volumeLeft, volumeRight);
+            Location rightDirection = Instance.ForwardDirection.CrossProduct(Instance.UpDirection);
+            AudioPositionalEarData left = new(), right = new();
+            if (Instance.Left)
+            {
+                Location leftEarPos = Instance.Position - rightDirection * (Instance.HeadWidth * 0.5);
+                float angleVolume = Math.Max(0f, (float)Math.Cos(angle + QUARTER_PI));
+                left.Fill(position, leftEarPos, angleVolume, Instance);
+            }
+            if (Instance.Right)
+            {
+                Location rightEarPos = Instance.Position + rightDirection * (Instance.HeadWidth * 0.5);
+                float angleVolume = Math.Max(0f, (float)Math.Sin(angle + QUARTER_PI));
+                right.Fill(position, rightEarPos, angleVolume, Instance);
+            }
+            return (left, right);
         }
 
         /// <summary>Completely closes and stops the audio enforcer system.</summary>
@@ -202,43 +234,81 @@ public class AudioEnforcer
         public readonly void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
         {
             int outBufPosition = 0;
-            float volumeLeft = 1f, volumeRight = 1f;
+            AudioPositionalEarData leftEar = new(1, 0), rightEar = new(1, 0);
             if (toAdd.UsePosition)
             {
-                (volumeLeft, volumeRight) = GetPositionalVolume(toAdd.Position);
+                (leftEar, rightEar) = GetPositionalData(toAdd.Position);
             }
             float gain = toAdd.Gain * Instance.Volume;
             gain *= gain;
-            int volumeModifierRight = (int)((volumeRight * gain) * ushort.MaxValue);
-            int volumeModifierLeft = (int)((volumeLeft * gain) * ushort.MaxValue);
+            int volumeModifierRight = (int)((rightEar.Volume * gain) * ushort.MaxValue);
+            int volumeModifierLeft = (int)((leftEar.Volume * gain) * ushort.MaxValue);
             byte[] clipData = toAdd.Clip.Data;
-            int maxBytePosition = toAdd.Loop ? ACTUAL_SAMPLES : Math.Min(clipData.Length - toAdd.CurrentSample, ACTUAL_SAMPLES);
+            int maxBytePositionLeft = ACTUAL_SAMPLES;
+            int maxBytePositionRight = ACTUAL_SAMPLES;
+            if (!toAdd.Loop)
+            {
+                maxBytePositionLeft = Math.Min(clipData.Length - (toAdd.CurrentSample + leftEar.TimeOffset * 2), ACTUAL_SAMPLES);
+                maxBytePositionRight = Math.Min(clipData.Length - (toAdd.CurrentSample + rightEar.TimeOffset * 2), ACTUAL_SAMPLES);
+            }
+            int maxBytePosition = Math.Max(maxBytePositionLeft, maxBytePositionRight);
             while (outBufPosition < maxBytePosition && outBufPosition + 3 < ACTUAL_SAMPLES)
             {
                 // TODO: pitch, velocity, etc.?
-                int rawSampleInLeft = (short)((clipData[toAdd.CurrentSample + 1] << 8) | clipData[toAdd.CurrentSample]);
-                int outSampleLeft = (rawSampleInLeft * volumeModifierLeft) >> 16;
-                int rawPreValueLeft = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
-                outSampleLeft += rawPreValueLeft; // TODO: Better scaled adder?
-                outSampleLeft = Math.Max(short.MinValue, Math.Min(short.MaxValue, outSampleLeft));
-                outBuffer[outBufPosition] = (byte)outSampleLeft;
-                outBuffer[outBufPosition + 1] = (byte)(outSampleLeft >> 8);
+                int rawSampleInLeft = 0;
+                if (outBufPosition < maxBytePositionLeft)
+                {
+                    int leftSample = toAdd.CurrentSample + leftEar.TimeOffset * 2;
+                    if (toAdd.Loop)
+                    {
+                        leftSample %= clipData.Length;
+                        if (leftSample < 0)
+                        {
+                            leftSample += clipData.Length;
+                        }
+                    }
+                    if (leftSample >= 0 && leftSample + 1 < clipData.Length)
+                    {
+                        rawSampleInLeft = (short)((clipData[leftSample + 1] << 8) | clipData[leftSample]);
+                        int outSampleLeft = (rawSampleInLeft * volumeModifierLeft) >> 16;
+                        int rawPreValueLeft = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
+                        outSampleLeft += rawPreValueLeft; // TODO: Better scaled adder?
+                        outSampleLeft = Math.Max(short.MinValue, Math.Min(short.MaxValue, outSampleLeft));
+                        outBuffer[outBufPosition] = (byte)outSampleLeft;
+                        outBuffer[outBufPosition + 1] = (byte)(outSampleLeft >> 8);
+                    }
+                }
                 outBufPosition += 2;
-                int outSampleRight;
-                if (toAdd.Clip.Channels == 2)
+                if (outBufPosition < maxBytePositionRight)
                 {
-                    toAdd.CurrentSample += 2;
-                    int rawSampleInRight = (short)((clipData[toAdd.CurrentSample + 1] << 8) | clipData[toAdd.CurrentSample]);
-                    outSampleRight = (rawSampleInRight * volumeModifierRight) >> 16;
+                    int outSampleRight = 0;
+                    if (toAdd.Clip.Channels == 2)
+                    {
+                        toAdd.CurrentSample += 2;
+                        int rightSample = toAdd.CurrentSample + rightEar.TimeOffset * 2;
+                        if (toAdd.Loop)
+                        {
+                            rightSample %= clipData.Length;
+                            if (rightSample < 0)
+                            {
+                                rightSample += clipData.Length;
+                            }
+                        }
+                        if (rightSample >= 0 && rightSample + 1 < clipData.Length)
+                        {
+                            int rawSampleInRight = (short)((clipData[rightSample + 1] << 8) | clipData[rightSample]);
+                            outSampleRight = (rawSampleInRight * volumeModifierRight) >> 16;
+                        }
+                    }
+                    else
+                    {
+                        outSampleRight = (rawSampleInLeft * volumeModifierRight) >> 16;
+                    }
+                    int rawPreValueRight = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
+                    outSampleRight += rawPreValueRight; // TODO: Better scaled adder?
+                    outBuffer[outBufPosition] = (byte)outSampleRight;
+                    outBuffer[outBufPosition + 1] = (byte)(outSampleRight >> 8);
                 }
-                else
-                {
-                    outSampleRight = (rawSampleInLeft * volumeModifierRight) >> 16;
-                }
-                int rawPreValueRight = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
-                outSampleRight += rawPreValueRight; // TODO: Better scaled adder?
-                outBuffer[outBufPosition] = (byte)outSampleRight;
-                outBuffer[outBufPosition + 1] = (byte)(outSampleRight >> 8);
                 toAdd.CurrentSample += 2;
                 if (toAdd.Loop)
                 {

@@ -80,6 +80,9 @@ public class SoundEngine : IDisposable
     /// <summary>Current global pitch.</summary>
     public float GlobalPitch = 1.0f;
 
+    /// <summary>The speed of sound, in units per second (on Earth in air this is 343 m/s).</summary>
+    public float SpeedOfSound = 343;
+
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
     public float MaxSoundVolume = 2;
 
@@ -288,6 +291,7 @@ public class SoundEngine : IDisposable
             EnforcerInternal.ForwardDirection = forward;
             EnforcerInternal.UpDirection = up;
             EnforcerInternal.Volume = globvol;
+            EnforcerInternal.SpeedOfSound = SpeedOfSound;
         }
         TimeTowardsNextClean += Client.Delta;
         if (TimeTowardsNextClean > 10.0)
