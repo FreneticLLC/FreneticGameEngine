@@ -367,13 +367,13 @@ public partial class SysConsole
     /// <summary>Outputs an exception with a message explaining the source of the exception.</summary>
     public static void Output(string message, Exception ex)
     {
-        Output(OutputType.ERROR, $"{message}: {ex}\n\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
+        Output(OutputType.ERROR, $"{message}: {ex}\n\n{StackNoteHelper.Notes}");
     }
 
     /// <summary>Outputs an exception.</summary>
     public static void Output(Exception ex)
     {
-        Output(OutputType.ERROR, $"{ex}\n\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
+        Output(OutputType.ERROR, $"{ex}\n\n{StackNoteHelper.Notes}");
     }
 
     /// <summary>Gets a date-time-string for output.</summary>
