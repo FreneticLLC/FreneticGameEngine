@@ -178,7 +178,7 @@ public class AudioEnforcer
 
         /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
         /// <param name="Volume">The volume to this ear.</param>
-        /// <param name="TimeOffset">The time offset to this ear, in samples.</param>
+        /// <param name="TimeOffset">The time offset to this ear, in samples. This is usually a negative number, to indicate the position in the clip should be earlier, ie the playback of real audio should come later.</param>
         public record struct AudioPositionalEarData(float Volume, int TimeOffset)
         {
             /// <summary>Fills the data for this ear based on relevant audio data.</summary>
@@ -188,7 +188,7 @@ public class AudioEnforcer
                 float dist = MathF.Sqrt(distSq);
                 float distanceGain = 1.0f / Math.Max(1.0f, distSq);
                 Volume = angleVolume * distanceGain;
-                float timeOffsetSeconds = dist / instance.SpeedOfSound;
+                float timeOffsetSeconds = -dist / instance.SpeedOfSound;
                 TimeOffset = (int)(timeOffsetSeconds * FREQUENCY);
             }
         }
