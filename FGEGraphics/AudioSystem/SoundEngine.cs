@@ -26,6 +26,7 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
 using NVorbis;
+using FGECore.ConsoleHelpers;
 
 namespace FGEGraphics.AudioSystem;
 
@@ -89,6 +90,7 @@ public class SoundEngine : IDisposable
             ALC.DestroyContext(Context);
         }
         Client = tclient;
+        string[] devices = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
         string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
         ALDevice device = ALC.OpenDevice(deviceName);
         Context = ALC.CreateContext(device, (int[])null);
@@ -123,6 +125,8 @@ public class SoundEngine : IDisposable
         }
         Effects = [];
         PlayingNow = [];
+        string actualName = ALC.GetString(device, AlcGetString.DeviceSpecifier);
+        Logs.ClientInit($"Audio system initialized, using device '{actualName}', available='{devices.JoinString(",")}', Enforcer={Client.EnforceAudio}, MaxBeforeEnforce={MaxBeforeEnforce}");
     }
 
     /// <summary>Stop all sounds.</summary>
@@ -477,6 +481,7 @@ public class SoundEngine : IDisposable
             Effects.Add(namelow, sfx);
             return sfx;
         }
+        Logs.Warning($"Unable to find sound named '{TextStyle.Standout}{namelow}{TextStyle.Base}'");
         sfx = new SoundEffect()
         {
             Name = namelow,
