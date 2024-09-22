@@ -87,7 +87,7 @@ public class AudioEnforcer
         Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
         for (int i = 0; i < 10; i++)
         {
-            Internal.ReusableBuffers[i] = new byte[InternalData.ACTUAL_SAMPLES];
+            Internal.ReusableBuffers[i] = new byte[InternalData.BYTES_PER_BUFFER];
         }
         Internal.Context = acontext;
         Run = true;
@@ -134,8 +134,8 @@ public class AudioEnforcer
         /// <summary>The maximum pause, in milliseconds, between audio crunching passes.</summary>
         public const int PAUSE = 10;
 
-        /// <summary>How many samples to load at once.</summary>
-        public const int SAMPLE_LOAD = 33;
+        /// <summary>How many milliseconds to load at once in any one buffer.</summary>
+        public const int MS_LOAD = 33;
 
         /// <summary>Nubmer of audio buffers to use at the same time.</summary>
         public const int BUFFERS_AT_ONCE = 2;
@@ -144,7 +144,7 @@ public class AudioEnforcer
         public const int REUSABLE_BUFFER_ARRAY_SIZE = 10;
 
         /// <summary>Actual byte space to load at once.</summary>
-        public const int ACTUAL_SAMPLES = (int)((FREQUENCY * SAMPLE_LOAD) / 1000.0) * CHANNELS * BYTERATE;
+        public const int BYTES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0) * CHANNELS * BYTERATE;
 
         /// <summary>Relevant OpenAL audio context.</summary>
         public ALContext Context;
@@ -244,15 +244,15 @@ public class AudioEnforcer
             int volumeModifierRight = (int)((rightEar.Volume * gain) * ushort.MaxValue);
             int volumeModifierLeft = (int)((leftEar.Volume * gain) * ushort.MaxValue);
             byte[] clipData = toAdd.Clip.Data;
-            int maxBytePositionLeft = ACTUAL_SAMPLES;
-            int maxBytePositionRight = ACTUAL_SAMPLES;
+            int maxBytePositionLeft = BYTES_PER_BUFFER;
+            int maxBytePositionRight = BYTES_PER_BUFFER;
             if (!toAdd.Loop)
             {
-                maxBytePositionLeft = Math.Min(clipData.Length - (toAdd.CurrentSample + leftEar.TimeOffset * 2), ACTUAL_SAMPLES);
-                maxBytePositionRight = Math.Min(clipData.Length - (toAdd.CurrentSample + rightEar.TimeOffset * 2), ACTUAL_SAMPLES);
+                maxBytePositionLeft = Math.Min(clipData.Length - (toAdd.CurrentSample + leftEar.TimeOffset * 2), BYTES_PER_BUFFER);
+                maxBytePositionRight = Math.Min(clipData.Length - (toAdd.CurrentSample + rightEar.TimeOffset * 2), BYTES_PER_BUFFER);
             }
             int maxBytePosition = Math.Max(maxBytePositionLeft, maxBytePositionRight);
-            while (outBufPosition < maxBytePosition && outBufPosition + 3 < ACTUAL_SAMPLES)
+            while (outBufPosition < maxBytePosition && outBufPosition + 3 < BYTES_PER_BUFFER)
             {
                 // TODO: pitch, velocity, etc.?
                 int rawSampleInLeft = 0;
