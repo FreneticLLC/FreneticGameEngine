@@ -67,7 +67,7 @@ public class SoundEngine : IDisposable
     /// Maximum number of sound effects playing simultaneously before the next one gets fed to the enforcer instead of directly into OpenAL.
     /// If set to 0, the enforcer is always used.
     /// </summary>
-    public int MaxBeforeEnforce = 50;
+    public int MaxBeforeEnforce = 0;//50;
 
     //public MicrophoneHandler Microphone = null;
 
