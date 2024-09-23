@@ -80,8 +80,11 @@ public class SoundEngine : IDisposable
     /// <summary>Current global pitch.</summary>
     public float GlobalPitch = 1.0f;
 
-    /// <summary>The speed of sound, in units per second (on Earth in air this is 343 m/s).</summary>
-    public float SpeedOfSound = 343;
+    /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
+    public const float SPEED_OF_SOUND = 343;
+
+    /// <summary>The speed of sound, in units per second, defaults to <see cref="SPEED_OF_SOUND"/>.</summary>
+    public float SpeedOfSound = SPEED_OF_SOUND;
 
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
     public float MaxSoundVolume = 2;
