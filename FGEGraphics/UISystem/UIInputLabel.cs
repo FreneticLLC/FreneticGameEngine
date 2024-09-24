@@ -189,7 +189,7 @@ public class UIInputLabel : UIClickableElement
                         }
                         int relIndex = cursorIndex - currentIndex;
                         double x = xOffset + (part.Text.Length > 0 ? piece.Font.MeasureFancyText(part.Text[..relIndex]) : 0);
-                        double y = piece.YOffset + j * piece.Font.FontDefault.Height;
+                        double y = piece.YOffset + j * piece.Font.Height;
                         return new Location(x, y, 0);
                     }
                     xOffset = 0;
@@ -417,7 +417,7 @@ public class UIInputLabel : UIClickableElement
         float relMouseX = Window.MouseX - (LabelRenderable.X + TextPadding);
         float relMouseY = Window.MouseY - (LabelRenderable.Y + TextPadding);
         UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
-        if (lastPiece.YOffset + (lastPiece.Font.FontDefault.Height * lastPiece.Text.Lines.Length) < relMouseY)
+        if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
             TickMousePosition(TextContent.Length, shiftDown);
             return;
@@ -429,7 +429,7 @@ public class UIInputLabel : UIClickableElement
             {
                 RenderableTextLine line = piece.Text.Lines[i];
                 string content = line.ToString();
-                if (piece.YOffset + (i + 1) * piece.Font.FontDefault.Height >= relMouseY)
+                if (piece.YOffset + (i + 1) * piece.Font.Height >= relMouseY)
                 {
                     if (line.Width < relMouseX)
                     {
@@ -512,7 +512,7 @@ public class UIInputLabel : UIClickableElement
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
-        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.FontDefault.Height;
+        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.Height;
         view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }

@@ -59,7 +59,7 @@ public class UITextLink : UIClickableElement
             style.TextFont.DrawFancyText(Text, textLocation);
             return;
         }
-        int fontHeight = style.TextFont.FontDefault.Height;
+        int fontHeight = style.TextFont.Height;
         textLocation += new Location(fontHeight, fontHeight, 0);
         Icon.Bind();
         Renderer2D.SetColor(style.BaseColor);

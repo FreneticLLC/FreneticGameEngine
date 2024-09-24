@@ -166,7 +166,7 @@ public class UIElementText
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.FontDefault.Height ?? 0;
+    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.Height ?? 0;
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
@@ -217,7 +217,7 @@ public class UIElementText
             List<int> skippedIndices = null;
             RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new(line);
             yield return new(font, splitText, y, skippedIndices ?? []);
-            y += font.FontDefault.Height * splitText.Lines.Length;
+            y += font.Height * splitText.Lines.Length;
         }
     }
 

@@ -31,7 +31,7 @@ namespace FGEGraphics.UISystem;
 /// <param name="info">Information about the box.</param>
 /// <param name="fonts">The font to use.</param>
 /// <param name="pos">The position of the element.</param>
-public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos) : UIElement(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.FontDefault.Height) : pos)
+public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos) : UIElement(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.Height) : pos)
 {
     /// <summary>The current text in this input box.</summary>
     public string Text = text;
@@ -241,15 +241,15 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
         int w = LastAbsoluteSize.X;
         engine.Textures.White.Bind();
         Renderer2D.SetColor(Color);
-        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.FontDefault.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         GL.Enable(EnableCap.ScissorTest);
-        GL.Scissor(x, engine.Window.ClientSize.Y - (y + (int)Fonts.FontDefault.Height), w, (int)Fonts.FontDefault.Height);
+        GL.Scissor(x, engine.Window.ClientSize.Y - (y + Fonts.Height), w, Fonts.Height);
         if (Selected)
         {
             float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
             float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);
             Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.FontDefault.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
         }
         Renderer2D.SetColor(Color4.White);
         Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

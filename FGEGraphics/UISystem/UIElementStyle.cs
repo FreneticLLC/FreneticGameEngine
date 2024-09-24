@@ -72,7 +72,7 @@ public record UIElementStyle
     }
 
     /// <summary>Returns the font height, or <c>0</c> if <see cref="TextFont"/> is <c>null</c>.</summary>
-    public int FontHeight => TextFont?.FontDefault.Height ?? 0;
+    public int FontHeight => TextFont?.Height ?? 0;
 
     /// <summary>Returns whether this style can render text in general.</summary>
     public bool CanRenderText() => TextFont is not null;

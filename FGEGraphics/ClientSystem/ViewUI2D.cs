@@ -194,7 +194,7 @@ public class ViewUI2D
                 float x = Client.MouseX + text.Width < Client.WindowWidth
                     ? Client.MouseX + 10
                     : Client.MouseX - text.Width - 10;
-                float textHeight = text.Lines.Length * Client.FontSets.Standard.FontDefault.Height;
+                float textHeight = text.Lines.Length * Client.FontSets.Standard.Height;
                 float y = Client.MouseY + textHeight < Client.WindowHeight
                     ? Client.MouseY + 20
                     : Client.MouseY - textHeight - 20;
