@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.UtilitySystems;
+using FGECore.CoreSystems;
 
 namespace FGECore.MathHelpers;
 
@@ -239,7 +240,7 @@ public struct Location : IEquatable<Location>
     /// <returns>Same or shortened Location vector.</returns>
     public readonly Location WithMaxmimumLength(double len)
     {
-        Debug.Assert(len > 0, $"Length input to {nameof(WithMaxmimumLength)} should be greater than 0, but was {len}");
+        FGEDebug.Assert(len > 0, $"Length input to {nameof(WithMaxmimumLength)} should be greater than 0, but was {len}");
         double lsq = LengthSquared();
         if (lsq > len * len)
         {
@@ -259,7 +260,7 @@ public struct Location : IEquatable<Location>
     /// <returns>The new Location vector.</returns>
     public readonly Location WithMinimumLength(double len, Location defaultValue)
     {
-        Debug.Assert(len > 0, $"Length input to {nameof(WithMinimumLength)} should be greater than 0, but was {len}");
+        FGEDebug.Assert(len > 0, $"Length input to {nameof(WithMinimumLength)} should be greater than 0, but was {len}");
         double lenSquared = LengthSquared();
         if (lenSquared < len * len)
         {
