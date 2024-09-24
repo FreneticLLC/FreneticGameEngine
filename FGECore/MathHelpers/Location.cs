@@ -16,8 +16,8 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using FGECore.UtilitySystems;
 using FGECore.CoreSystems;
+using FGECore.UtilitySystems;
 
 namespace FGECore.MathHelpers;
 

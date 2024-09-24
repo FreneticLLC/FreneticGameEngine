@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.EntitySystem;
+using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
 using BepuPhysics;
 using BepuPhysics.Collidables;
@@ -21,7 +22,6 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Trees;
 using BepuUtilities;
 using BepuUtilities.Memory;
-using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.PhysicsSystem;
 

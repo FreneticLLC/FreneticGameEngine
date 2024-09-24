@@ -13,15 +13,15 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.EntitySystem;
 using FGECore.EntitySystem.PhysicsHelpers;
+using FGECore.MathHelpers;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuUtilities;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 
 namespace FGECore.PhysicsSystem;
 

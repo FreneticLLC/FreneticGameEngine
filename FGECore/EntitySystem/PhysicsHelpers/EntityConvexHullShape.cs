@@ -9,12 +9,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics.Collidables;
-using System.Numerics;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 

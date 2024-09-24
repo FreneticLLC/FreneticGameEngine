@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.ConsoleHelpers;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 

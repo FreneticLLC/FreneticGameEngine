@@ -14,13 +14,13 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using FGECore.CoreSystems;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuUtilities;
 using BepuUtilities.Collections;
 using BepuUtilities.Memory;
-using FGECore.CoreSystems;
 
 namespace FGECore.PhysicsSystem.BepuCharacters;
 

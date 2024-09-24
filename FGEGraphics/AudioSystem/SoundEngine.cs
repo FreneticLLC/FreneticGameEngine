@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore;
+using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
@@ -26,7 +27,6 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
 using NVorbis;
-using FGECore.ConsoleHelpers;
 
 namespace FGEGraphics.AudioSystem;
 

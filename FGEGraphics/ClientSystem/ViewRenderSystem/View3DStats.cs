@@ -6,13 +6,13 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGECore.UtilitySystems;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.UtilitySystems;
 
 namespace FGEGraphics.ClientSystem.ViewRenderSystem;
 
