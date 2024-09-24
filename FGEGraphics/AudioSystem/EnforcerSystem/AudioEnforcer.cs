@@ -234,6 +234,10 @@ public class AudioEnforcer
         public readonly void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
         {
             int outBufPosition = 0;
+            // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
+            // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
+            // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
+            // TODO: Note as well the current ear velocity should be additive with the sound velocity.
             AudioPositionalEarData leftEar = new(1, 0), rightEar = new(1, 0);
             if (toAdd.UsePosition)
             {
