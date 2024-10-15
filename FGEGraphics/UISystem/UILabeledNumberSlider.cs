@@ -41,9 +41,7 @@ public class UILabeledNumberSlider : UINumberSlider
     {
         labelFormat ??= Integer ? "0" : "0.0";
         AddStyle(labelInputStyle, true);
-        AddChild(Label = new UINumberInputLabel(Value, integer, labelFormat, labelInputStyle, labelHighlightStyle, pos.AtOrigin(), labelRenderBox, labelBoxPadding, labelBoxStyles));
-        // FIXME: Using labelLeft, when dimensions change, pos not updated until one frame later
-        // (This won't be an issue with the TextAlignment replacement in UIPositionHelper, presumably)
+        AddChild(Label = new UINumberInputLabel(integer, labelFormat, labelInputStyle, labelHighlightStyle, pos.AtOrigin(), Value, "", labelRenderBox, labelBoxPadding, labelBoxStyles));
         Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
         OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.OnTextSubmit += _ =>

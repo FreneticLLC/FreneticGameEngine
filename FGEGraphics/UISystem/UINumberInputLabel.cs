@@ -36,20 +36,39 @@ public class UINumberInputLabel : UIInputLabel
     /// <summary>The character matcher for this number label type.</summary>
     public AsciiMatcher CharacterMatcher => Integer ? IntegerMatcher : DecimalMatcher;
 
-    /// <summary>The decimal value of the label.</summary>
-    public double Value => double.Parse(TextContent);
+    /// <summary>Data internal to a <see cref="UINumberInputLabel"/> instance.</summary>
+    public new struct InternalData
+    {
+        /// <summary>The raw decimal value of the label.</summary>
+        public double Value;
+    }
+
+    /// <summary>Data internal to a <see cref="UINumberInputLabel"/> instance.</summary>
+    public InternalData NumberInternal = new();
+
+    /// <summary>Gets or sets the decimal value of the label.</summary>
+    public double Value
+    {
+        get => NumberInternal.Value;
+        set
+        {
+            NumberInternal.Value = value;
+            TextContent = value.ToString(Format);
+        }
+    }
 
     /// <remarks>Constructs a number input label.</remarks>
-    /// <param name="initial">The initial number value.</param>
     /// <param name="integer">Whether the label should be an integer.</param>
     /// <param name="format">The format string for the label.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
-    /// <param name="pos">The position of the element.</param>-
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="initial">The initial number value.</param>
+    /// <param name="placeholderInfo"></param>
     /// <param name="renderBox">Whether to render a box behind the label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
     /// <param name="boxStyles">The box styles for the label.</param>
-    public UINumberInputLabel(double initial, bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool renderBox = false, int boxPadding = 0, UIClickableElement.StyleGroup boxStyles = null) : base("", initial.ToString(format), boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, false, renderBox, boxPadding)
+    public UINumberInputLabel(bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, double initial = 0, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, StyleGroup boxStyles = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? initial.ToString(format) : "", boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, false, renderBox, boxPadding)
     {
         Integer = integer;
         Format = format;
@@ -70,6 +89,10 @@ public class UINumberInputLabel : UIInputLabel
             result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexRight..];
             Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
             return result;
+        }
+        if (result.Length == 0 && !PlaceholderInfo.Empty)
+        {
+            return "";
         }
         int expIndex = result.LastIndexOf('e');
         if (expIndex != -1 && (expIndex == result.Length - 1 || !result[..expIndex].Any(char.IsAsciiDigit)))
@@ -96,6 +119,20 @@ public class UINumberInputLabel : UIInputLabel
             _ => true
         });
         result = new string(filtered.ToArray());
-        return double.TryParse(result, out double value) ? value.ToString(Format) : "0";
+        if (double.TryParse(result, out double value))
+        {
+            NumberInternal.Value = value;
+            return value.ToString(Format);
+        }
+        NumberInternal.Value = 0;
+        return "0";
+    }
+
+    /// <inheritdoc/>
+    public override List<string> GetDebugInfo()
+    {
+        List<string> info = base.GetDebugInfo();
+        info.Add($"^7Value: ^3{Value}");
+        return info;
     }
 }
