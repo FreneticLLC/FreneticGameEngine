@@ -438,12 +438,12 @@ public class UIInputLabel : UIClickableElement
     // TODO: Account for formatting codes
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
-        if (Internal.CursorEnd == cursorPos && MousePreviouslyDown == shiftDown)
+        if (Internal.CursorEnd == cursorPos && View.MousePreviouslyDown == shiftDown)
         {
             return;
         }
         Internal.CursorEnd = Math.Max(cursorPos, 0);
-        if (!MousePreviouslyDown && !shiftDown)
+        if (!View.MousePreviouslyDown && !shiftDown)
         {
             Internal.CursorStart = Internal.CursorEnd;
         }
@@ -453,7 +453,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
     public void TickMouse()
     {
-        if (!MouseDown || Internal.TextChain.Count == 0)
+        if (!View.MouseDown || Internal.TextChain.Count == 0)
         {
             return;
         }

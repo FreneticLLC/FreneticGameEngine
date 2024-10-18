@@ -11,7 +11,6 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a container of elements that only renders children within its bounds.</summary>
 /// <param name="pos">The position of the element.</param>
-// TODO: disable elements outside of the scissor view
 public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
 {
     /// <inheritdoc/>
@@ -42,4 +41,7 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
         GL.Scissor(0, 0, Engine.Window.ClientSize.X, Engine.Window.ClientSize.Y); // TODO: Bump around a stack, for embedded scroll groups?
         GL.Disable(EnableCap.ScissorTest);
     }
+
+    /// <summary>Constrains child interactions to the scissor boundaries.</summary>
+    public override bool CanInteract(int x, int y) => SelfContains(x, y);
 }

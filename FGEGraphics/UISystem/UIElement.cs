@@ -314,8 +314,7 @@ public abstract class UIElement
     /// <param name="mouseY">The Y position of the mouse.</param>
     public virtual void TickInteraction(int mouseX, int mouseY)
     {
-        bool containsMouse = SelfContains(mouseX, mouseY);
-        if (containsMouse)
+        if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
             if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
             {
@@ -669,6 +668,11 @@ public abstract class UIElement
             }
         }
     }
+
+    /// <summary>Returns whether this element (and recursive children) can be interacted with at the specified position.</summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    public virtual bool CanInteract(int x, int y) => Parent.CanInteract(x, y);
 
     /// <summary>Preps the element.</summary>
     public virtual void Init()
