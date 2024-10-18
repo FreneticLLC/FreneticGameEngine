@@ -43,17 +43,17 @@ public class ViewUI2D
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
 
+    /// <summary>Whether the mouse left button is currently down.</summary>
+    public bool MouseDown;
+
+    /// <summary>Whether the mouse left button was previously down.</summary>
+    public bool MousePreviouslyDown;
+
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
     {
         /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen;
-
-        /// <summary>Whether the mouse left button is currently down.</summary>
-        public bool MouseDown;
-
-        /// <summary>Whether the mouse left button was previously down.</summary>
-        public bool MousePreviouslyDown;
 
         /// <summary>Debug info about hovered UI elements.</summary>
         public List<string> DebugInfo = [];
@@ -211,7 +211,7 @@ public class ViewUI2D
     {
         int mouseX = (int)Client.MouseX;
         int mouseY = (int)Client.MouseY;
-        Internal.MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
+        MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.FullTick(Client.Delta);
         Internal.RenderStack.Reverse();
         foreach (UIElement elem in Internal.RenderStack)
@@ -221,6 +221,6 @@ public class ViewUI2D
                 elem.TickInteraction(mouseX, mouseY);
             } 
         }
-        Internal.MousePreviouslyDown = Internal.MouseDown;
+        MousePreviouslyDown = MouseDown;
     }
 }

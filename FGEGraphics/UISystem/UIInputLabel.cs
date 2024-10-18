@@ -26,9 +26,8 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an editable text area.</summary>
 // TODO: Text alignment
-// TODO: Horizontal scrolling within bounds, with option
-// TODO: Vertical scrolling when bounds exceeded
 // TODO: Cap text length
+// TODO: HasEdited
 public class UIInputLabel : UIClickableElement
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
