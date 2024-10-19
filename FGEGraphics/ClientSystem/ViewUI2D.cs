@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticExtensions;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -19,7 +20,6 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
-using FreneticUtilities.FreneticExtensions;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -134,9 +134,13 @@ public class ViewUI2D
             // TODO: alternate Ortho setting from scaler/adder def!
             Client.Shaders.ColorMult2DShader.Bind();
             Renderer2D.SetColor(Color4F.White);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetColor");
             GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(UIContext.Scaler.X, UIContext.Scaler.Y, UIContext.AspectHelper));
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetScaler");
             ShaderLocations.Common2D.ADDER.Set(UIContext.Adder);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - SetAdder");
             GL.Disable(EnableCap.DepthTest);
+            GraphicsUtil.CheckError("ViewUI2D - Draw - DisableDepth");
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
@@ -190,7 +194,7 @@ public class ViewUI2D
                 float x = Client.MouseX + text.Width < Client.WindowWidth
                     ? Client.MouseX + 10
                     : Client.MouseX - text.Width - 10;
-                float textHeight = text.Lines.Length * Client.FontSets.Standard.FontDefault.Height;
+                float textHeight = text.Lines.Length * Client.FontSets.Standard.Height;
                 float y = Client.MouseY + textHeight < Client.WindowHeight
                     ? Client.MouseY + 20
                     : Client.MouseY - textHeight - 20;

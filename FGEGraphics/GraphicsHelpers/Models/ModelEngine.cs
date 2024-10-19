@@ -19,9 +19,9 @@ using FGECore.MathHelpers;
 using FGECore.ModelSystems;
 using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
 using OpenTK;
 using OpenTK.Mathematics;
-using FGEGraphics.ClientSystem.ViewRenderSystem;
 
 namespace FGEGraphics.GraphicsHelpers.Models;
 

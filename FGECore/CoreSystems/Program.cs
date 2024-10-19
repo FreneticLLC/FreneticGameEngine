@@ -6,7 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FreneticUtilities.FreneticToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.CoreSystems;
 

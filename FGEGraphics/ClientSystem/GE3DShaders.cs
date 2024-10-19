@@ -27,7 +27,12 @@ public class GE3DShaders
     /// <param name="forShad">Whether to enable forward-mode shadow effects.</param>
     public void LoadAll(ShaderEngine Shaders, bool AllowLL, bool forNorm, bool forLight, bool forShad)
     {
-        string def = Shaders.MCM_GOOD_GRAPHICS ? "#MCM_GOOD_GRAPHICS" : "#";
+        string def = Shaders.MCM_GOOD_GRAPHICS ? "#MCM_GOOD_GRAPHICS," : "#";
+        if (Shaders.ShutUpIntel)
+        {
+            def += "MCM_SHUT_UP_INTEL,";
+        }
+        def = def.TrimEnd(',');
         Deferred.ShadowPass_Basic = Shaders.GetShader("shadow" + def);
         Deferred.ShadowPass_NoBones = Shaders.GetShader("shadow" + def + ",MCM_NO_BONES");
         Deferred.GBufferSolid = Shaders.GetShader("fbo" + def);

@@ -6,13 +6,17 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuUtilities;
-using BepuPhysics;
-using System.Numerics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text;
+using BepuPhysics;
 using BepuPhysics.Constraints;
+using BepuUtilities;
 using BepuUtilities.Memory;
+
 using static BepuUtilities.GatherScatter;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

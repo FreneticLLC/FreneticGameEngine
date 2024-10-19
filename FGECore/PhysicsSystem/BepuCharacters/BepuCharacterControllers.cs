@@ -14,6 +14,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using FGECore.CoreSystems;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
@@ -89,7 +90,7 @@ public unsafe class CharacterControllers : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetCharacterIndexForBodyHandle(int bodyHandle)
     {
-        Debug.Assert(bodyHandle >= 0 && bodyHandle < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle] >= 0, "Can only look up indices for body handles associated with characters in this CharacterControllers instance.");
+        FGEDebug.Assert(bodyHandle >= 0 && bodyHandle < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle] >= 0, "Can only look up indices for body handles associated with characters in this CharacterControllers instance.");
         return bodyHandleToCharacterIndex[bodyHandle];
     }
 
@@ -112,7 +113,7 @@ public unsafe class CharacterControllers : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref CharacterController GetCharacterByBodyHandle(BodyHandle bodyHandle)
     {
-        Debug.Assert(bodyHandle.Value >= 0 && bodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle.Value] >= 0, "Can only look up indices for body handles associated with characters in this CharacterControllers instance.");
+        FGEDebug.Assert(bodyHandle.Value >= 0 && bodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle.Value] >= 0, "Can only look up indices for body handles associated with characters in this CharacterControllers instance.");
         return ref characters[bodyHandleToCharacterIndex[bodyHandle.Value]];
     }
 
@@ -123,7 +124,7 @@ public unsafe class CharacterControllers : IDisposable
     /// <returns>Reference to the allocated character.</returns>
     public ref CharacterController AllocateCharacter(BodyHandle bodyHandle)
     {
-        Debug.Assert(bodyHandle.Value >= 0 && (bodyHandle.Value >= bodyHandleToCharacterIndex.Length || bodyHandleToCharacterIndex[bodyHandle.Value] == -1),
+        FGEDebug.Assert(bodyHandle.Value >= 0 && (bodyHandle.Value >= bodyHandleToCharacterIndex.Length || bodyHandleToCharacterIndex[bodyHandle.Value] == -1),
             "Cannot allocate more than one character for the same body handle.");
         if (bodyHandle.Value >= bodyHandleToCharacterIndex.Length)
             ResizeBodyHandleCapacity(Math.Max(bodyHandle.Value + 1, bodyHandleToCharacterIndex.Length * 2));
@@ -141,9 +142,9 @@ public unsafe class CharacterControllers : IDisposable
     /// <param name="characterIndex">Index of the character to remove.</param>
     public void RemoveCharacterByIndex(int characterIndex)
     {
-        Debug.Assert(characterIndex >= 0 && characterIndex < characters.Count, "Character index must exist in the set of characters.");
+        FGEDebug.Assert(characterIndex >= 0 && characterIndex < characters.Count, "Character index must exist in the set of characters.");
         ref var character = ref characters[characterIndex];
-        Debug.Assert(character.BodyHandle.Value >= 0 && character.BodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[character.BodyHandle.Value] == characterIndex,
+        FGEDebug.Assert(character.BodyHandle.Value >= 0 && character.BodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[character.BodyHandle.Value] == characterIndex,
             "Character must exist in the set of characters.");
         bodyHandleToCharacterIndex[character.BodyHandle.Value] = -1;
         characters.FastRemoveAt(characterIndex);
@@ -160,7 +161,7 @@ public unsafe class CharacterControllers : IDisposable
     /// <param name="bodyHandle">Body handle associated with the character to remove.</param>
     public void RemoveCharacterByBodyHandle(BodyHandle bodyHandle)
     {
-        Debug.Assert(bodyHandle.Value >= 0 && bodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle.Value] >= 0,
+        FGEDebug.Assert(bodyHandle.Value >= 0 && bodyHandle.Value < bodyHandleToCharacterIndex.Length && bodyHandleToCharacterIndex[bodyHandle.Value] >= 0,
             "Removing a character by body handle requires that a character associated with the given body handle actually exists.");
         RemoveCharacterByIndex(bodyHandleToCharacterIndex[bodyHandle.Value]);
     }
@@ -340,7 +341,7 @@ public unsafe class CharacterControllers : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryReportContacts<TManifold>(in CollidablePair pair, ref TManifold manifold, int workerIndex, ref PairMaterialProperties materialProperties) where TManifold : struct, IContactManifold<TManifold>
     {
-        Debug.Assert(contactCollectionWorkerCaches.Allocated && workerIndex < contactCollectionWorkerCaches.Length && contactCollectionWorkerCaches[workerIndex].SupportCandidates.Allocated,
+        FGEDebug.Assert(contactCollectionWorkerCaches.Allocated && workerIndex < contactCollectionWorkerCaches.Length && contactCollectionWorkerCaches[workerIndex].SupportCandidates.Allocated,
             "Worker caches weren't properly allocated; did you forget to call PrepareForContacts before collision detection?");
         if (manifold.Count == 0)
             return false;
@@ -401,7 +402,7 @@ public unsafe class CharacterControllers : IDisposable
     /// </summary>
     void PrepareForContacts(float dt, IThreadDispatcher threadDispatcher = null)
     {
-        Debug.Assert(!contactCollectionWorkerCaches.Allocated, "Worker caches were already allocated; did you forget to call AnalyzeContacts after collision detection to flush the previous frame's results?");
+        FGEDebug.Assert(!contactCollectionWorkerCaches.Allocated, "Worker caches were already allocated; did you forget to call AnalyzeContacts after collision detection to flush the previous frame's results?");
         var threadCount = threadDispatcher == null ? 1 : threadDispatcher.ThreadCount;
         pool.Take(threadCount, out contactCollectionWorkerCaches);
         for (int i = 0; i < contactCollectionWorkerCaches.Length; ++i)
@@ -547,7 +548,7 @@ public unsafe class CharacterControllers : IDisposable
                     if (character.Support.Mobility != CollidableMobility.Static)
                     {
                         ref var supportingBodyLocation = ref Simulation.Bodies.HandleToLocation[character.Support.BodyHandle.Value];
-                        Debug.Assert(supportingBodyLocation.SetIndex == 0, "If the character is active, any support should be too.");
+                        FGEDebug.Assert(supportingBodyLocation.SetIndex == 0, "If the character is active, any support should be too.");
                         ref var supportVelocity = ref Simulation.Bodies.ActiveSet.DynamicsState[supportingBodyLocation.Index].Motion.Velocity;
                         var wxr = Vector3.Cross(supportVelocity.Angular, supportCandidate.OffsetFromSupport);
                         var supportContactVelocity = supportVelocity.Linear + wxr;
@@ -592,7 +593,7 @@ public unsafe class CharacterControllers : IDisposable
                     QuaternionEx.Transform(character.LocalUp, Simulation.Bodies.ActiveSet.DynamicsState[bodyLocation.Index].Motion.Pose.Orientation, out var up);
                     var rayDistance = Vector3.Dot(character.ViewDirection, surfaceBasis.Y);
                     var rayVelocity = Vector3.Dot(up, surfaceBasis.Y);
-                    Debug.Assert(rayVelocity > 0,
+                    FGEDebug.Assert(rayVelocity > 0,
                         "The calibrated support normal and the character's up direction should have a positive dot product if the maximum slope is working properly. Is the maximum slope >= pi/2?");
                     surfaceBasis.Z = up * (rayDistance / rayVelocity) - character.ViewDirection;
                     var zLengthSquared = surfaceBasis.Z.LengthSquared();
@@ -699,7 +700,7 @@ public unsafe class CharacterControllers : IDisposable
     void AnalyzeContacts(float dt, IThreadDispatcher threadDispatcher)
     {
         //var start = Stopwatch.GetTimestamp();
-        Debug.Assert(contactCollectionWorkerCaches.Allocated, "Worker caches weren't properly allocated; did you forget to call PrepareForContacts before collision detection?");
+        FGEDebug.Assert(contactCollectionWorkerCaches.Allocated, "Worker caches weren't properly allocated; did you forget to call PrepareForContacts before collision detection?");
 
         if (threadDispatcher == null)
         {
@@ -759,14 +760,14 @@ public unsafe class CharacterControllers : IDisposable
                 {
                     ref var pendingConstraint = ref workerCache.StaticConstraintsToAdd[i];
                     ref var character = ref characters[pendingConstraint.CharacterIndex];
-                    Debug.Assert(character.Support.Mobility == CollidableMobility.Static);
+                    FGEDebug.Assert(character.Support.Mobility == CollidableMobility.Static, "Character support mobility is unexpectedly nonstatic");
                     character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, pendingConstraint.Description);
                 }
                 for (int i = 0; i < workerCache.DynamicConstraintsToAdd.Count; ++i)
                 {
                     ref var pendingConstraint = ref workerCache.DynamicConstraintsToAdd[i];
                     ref var character = ref characters[pendingConstraint.CharacterIndex];
-                    Debug.Assert(character.Support.Mobility != CollidableMobility.Static);
+                    FGEDebug.Assert(character.Support.Mobility != CollidableMobility.Static, "Character support mobility is unexpectedly static");
                     character.MotionConstraintHandle = Simulation.Solver.Add(character.BodyHandle, character.Support.BodyHandle, pendingConstraint.Description);
                 }
                 ref var activeSet = ref Simulation.Bodies.ActiveSet;

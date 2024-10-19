@@ -69,6 +69,9 @@ public class ShaderEngine
     /// </summary>
     public bool MCM_GOOD_GRAPHICS = true;
 
+    /// <summary>If true, this GPU's shader compiler acts like an annoying Intel compiler and needs to be told to shut up and do its job.</summary>
+    public bool ShutUpIntel = false;
+
     /// <summary>Updates the shader engine to the new timestamp.</summary>
     /// <param name="time">The current timestamp.</param>
     public void Update(double time)

@@ -14,10 +14,10 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.FileSystems;
+using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
-using FGECore.MathHelpers;
 
 namespace FGECore.ModelSystems;
 

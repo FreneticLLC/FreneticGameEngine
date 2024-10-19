@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.ConsoleHelpers;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -59,6 +59,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
 
     /// <summary>Name of the font set.</summary>
     public string Name = _name.ToLowerFast();
+
+    /// <summary>Height, in pixels, of this fontset (based on <see cref="FontDefault"/>'s height) (ie how tall a standard symbol is, or how wide the line gap needs to be).</summary>
+    public int Height => FontDefault.Height;
 
     /// <summary>Loads the font set.</summary>
     /// <param name="fontname">The name of the font.</param>
@@ -464,7 +467,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     {
                         if (part.Highlight)
                         {
-                            DrawRectangle(X, lineY, part.Width, FontDefault.Height, TransModify(part.HighlightColor, transmod), ReusableTextVBO);
+                            DrawRectangle(X, lineY, part.Width, Height, TransModify(part.HighlightColor, transmod), ReusableTextVBO);
                         }
                         if (part.Underline)
                         {
@@ -515,7 +518,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                         GraphicsUtil.CheckError("FontSet - Render - Part - Strike", line);
                     }
                 }
-                lineY += FontDefault.Height;
+                lineY += Height;
             }
             GraphicsUtil.CheckError("FontSet - Render - PostParts");
             Engine.GLFonts.Shaders.TextCleanerShader.Bind();
@@ -636,7 +639,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         {
             width = Math.Max(width, MeasureFancyText(data[i], bcolor));
         }
-        return new Location(width, data.Length * FontDefault.Height, 0);
+        return new Location(width, data.Length * Height, 0);
     }
 
     /// <summary>Helper to split strings fancy-text complex-text strings, marked with [] around sections and | to separate values.</summary>

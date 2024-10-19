@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
@@ -18,9 +19,8 @@ using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using System.Numerics;
-using BepuPhysics.Trees;
 using BepuPhysics.CollisionDetection;
+using BepuPhysics.Trees;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
 

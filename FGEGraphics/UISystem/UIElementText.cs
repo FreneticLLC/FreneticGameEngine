@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -166,7 +167,7 @@ public class UIElementText
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.FontDefault.Height ?? 0;
+    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.Height ?? 0;
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIElementText text) => text.Renderable;
@@ -217,7 +218,7 @@ public class UIElementText
             List<int> skippedIndices = null;
             RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new(line);
             yield return new(font, splitText, y, skippedIndices ?? []);
-            y += font.FontDefault.Height * splitText.Lines.Length;
+            y += font.Height * splitText.Lines.Length;
         }
     }
 

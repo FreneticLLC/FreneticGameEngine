@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore;
+using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
@@ -66,7 +67,7 @@ public class SoundEngine : IDisposable
     /// Maximum number of sound effects playing simultaneously before the next one gets fed to the enforcer instead of directly into OpenAL.
     /// If set to 0, the enforcer is always used.
     /// </summary>
-    public int MaxBeforeEnforce = 50;
+    public int MaxBeforeEnforce = 0;//50;
 
     //public MicrophoneHandler Microphone = null;
 
@@ -79,6 +80,15 @@ public class SoundEngine : IDisposable
     /// <summary>Current global pitch.</summary>
     public float GlobalPitch = 1.0f;
 
+    /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
+    public const float SPEED_OF_SOUND = 343;
+
+    /// <summary>The speed of sound, in units per second, defaults to <see cref="SPEED_OF_SOUND"/>.</summary>
+    public float SpeedOfSound = SPEED_OF_SOUND;
+
+    /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
+    public float MaxSoundVolume = 2;
+
     /// <summary>Initialize the sound engine.</summary>
     /// <param name="tclient">The backing client.</param>
     public void Init(GameEngineBase tclient)
@@ -89,6 +99,7 @@ public class SoundEngine : IDisposable
             ALC.DestroyContext(Context);
         }
         Client = tclient;
+        string[] devices = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
         string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
         ALDevice device = ALC.OpenDevice(deviceName);
         Context = ALC.CreateContext(device, (int[])null);
@@ -104,7 +115,7 @@ public class SoundEngine : IDisposable
         }
         /*try
         {
-            if (Microphone != null)
+            if (Microphone is not null)
             {
                 Microphone.StopEcho();
             }
@@ -114,7 +125,7 @@ public class SoundEngine : IDisposable
         {
             SysConsole.Output("Loading microphone handling", ex);
         }*/
-        if (Effects != null)
+        if (Effects is not null)
         {
             foreach (SoundEffect sfx in Effects.Values)
             {
@@ -123,7 +134,8 @@ public class SoundEngine : IDisposable
         }
         Effects = [];
         PlayingNow = [];
-        //DeafLoop = GetSound("sfx/ringing/earring_loop");
+        string actualName = ALC.GetString(device, AlcGetString.DeviceSpecifier);
+        Logs.ClientInit($"Audio system initialized, using device '{actualName}', available='{devices.JoinString(",")}', Enforcer={Client.EnforceAudio}, MaxBeforeEnforce={MaxBeforeEnforce}");
     }
 
     /// <summary>Stop all sounds.</summary>
@@ -145,7 +157,7 @@ public class SoundEngine : IDisposable
             EnforcerInternal.Shutdown();
             EnforcerInternal = null;
         }
-        if (Context.Handle != IntPtr.Zero && (EnforcerInternal == null || !EnforcerInternal.Run))
+        if (Context.Handle != IntPtr.Zero && (EnforcerInternal is null || !EnforcerInternal.Run))
         {
             ALC.DestroyContext(Context);
         }
@@ -155,16 +167,12 @@ public class SoundEngine : IDisposable
     /// <summary>Whether the engine is 'selected' currently, and should play audio.</summary>
     public bool Selected = true;
 
-    //SoundEffect DeafLoop;
-
-    //public ActiveSound DeafNoise = null;
-
     /// <summary>Checks for audio errors.</summary>
     /// <param name="inp">The location.</param>
     [Conditional("AUDIO_ERROR_CHECK")]
     public void CheckError(string inp)
     {
-        if (EnforcerInternal == null || MaxBeforeEnforce != 0)
+        if (EnforcerInternal is null || MaxBeforeEnforce != 0)
         {
             ALError err = AL.GetError();
             if (err != ALError.NoError)
@@ -191,7 +199,7 @@ public class SoundEngine : IDisposable
     public void Update(Location position, Location forward, Location up, Location velocity, bool selected)
     {
         CPosition = position;
-        if (EnforcerInternal == null || MaxBeforeEnforce != 0)
+        if (EnforcerInternal is null || MaxBeforeEnforce != 0)
         {
             ALError err = AL.GetError();
             if (err != ALError.NoError)
@@ -203,89 +211,24 @@ public class SoundEngine : IDisposable
         }
         bool sel = !Client.QuietOnDeselect || selected;
         Selected = sel;
-        /*if (DeafenTime > 0.0)
-        {
-            TimeDeaf += Engine.Delta;
-            DeafenTime -= Engine.Delta;
-            if (DeafNoise == null)
-            {
-                DeafNoise = PlaySimpleInternal(DeafLoop, true);
-                if (DeafNoise == null)
-                {
-                    DeafenTime = 0;
-                    TimeDeaf = 0;
-                }
-            }
-            if (DeafenTime < 0)
-            {
-                TimeDeaf = 0;
-                DeafenTime = 0;
-                DeafNoise.Stop();
-                DeafNoise.Destroy();
-                DeafNoise = null;
-            }
-        }
-        if (TimeDeaf > 0.001 && DeafenTime > 0.001)
-        {
-            float weaken = (float)Math.Min(DeafenTime, TimeDeaf);
-            if (weaken < 1.0)
-            {
-                DeafNoise.Gain = (float)weaken * 0.5f;
-                DeafNoise.UpdateGain();
-            }
-            else
-            {
-                DeafNoise.Gain = 0.5f;
-                DeafNoise.UpdateGain();
-            }
-        }
-        DeafLoop.LastUse = Engine.GlobalTickTime;*/
         for (int i = 0; i < PlayingNow.Count; i++)
         {
             ActiveSound sound = PlayingNow[i];
-            if (!sound.Exists || (sound.AudioInternal == null && sound.Src < 0) || (sound.AudioInternal == null ? (ALSourceState)AL.GetSource(sound.Src, ALGetSourcei.SourceState) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
+            if (!sound.Exists || (sound.AudioInternal is null && sound.Src < 0) || (sound.AudioInternal is null ? (ALSourceState)AL.GetSource(sound.Src, ALGetSourcei.SourceState) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
             {
                 sound.Destroy();
-                if (sound.AudioInternal == null)
+                if (sound.AudioInternal is null)
                 {
-                    CheckError("Destroy:" + sound.Effect.Name);
+                    CheckError($"Destroy:{sound.Effect.Name}");
                 }
                 PlayingNow.RemoveAt(i);
                 i--;
                 continue;
             }
             sound.Effect.LastUse = Client.GlobalTickTime;
-            /*if ((TimeDeaf > 0.0) && sel && !sound.IsBackground)
+            if (sel && !sound.IsBackground)
             {
-                sound.IsDeafened = true;
-                float lesser = (float)Math.Min(DeafenTime, TimeDeaf);
-                if (lesser < 0.999)
-                {
-                    if (sound.AudioInternal == null)
-                    {
-                        AL.Source(sound.Src, ALSourcef.Gain, sound.Gain * (1.0f - lesser));
-                    }
-                    else
-                    {
-                        sound.AudioInternal.Gain = sound.Gain * (1.0f - lesser);
-                    }
-                }
-                else
-                {
-                    if (sound.AudioInternal == null)
-                    {
-                        AL.Source(sound.Src, ALSourcef.Gain, 0.0001f);
-                    }
-                    else
-                    {
-                        sound.AudioInternal.Gain = 0.0001f;
-                    }
-                }
-            }
-            else */
-            if (/*(TimeDeaf <= 0.0) && */sel && !sound.IsBackground)
-            {
-                if (sound.AudioInternal == null)
+                if (sound.AudioInternal is null)
                 {
                     AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
                 }
@@ -295,9 +238,9 @@ public class SoundEngine : IDisposable
                 }
                 sound.IsDeafened = false;
             }
-            if (/*(TimeDeaf <= 0.0) && */!sel && sound.IsBackground && !sound.Backgrounded)
+            if (!sel && sound.IsBackground && !sound.Backgrounded)
             {
-                if (sound.AudioInternal == null)
+                if (sound.AudioInternal is null)
                 {
                     AL.Source(sound.Src, ALSourcef.Gain, 0.0001f);
                 }
@@ -307,9 +250,9 @@ public class SoundEngine : IDisposable
                 }
                 sound.Backgrounded = true;
             }
-            else if (/*(TimeDeaf <= 0.0) && */sel && sound.Backgrounded)
+            else if (sel && sound.Backgrounded)
             {
-                if (sound.AudioInternal == null)
+                if (sound.AudioInternal is null)
                 {
                     AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
                 }
@@ -342,7 +285,7 @@ public class SoundEngine : IDisposable
             AL.Listener(ALListenerf.Gain, globvol);
             CheckError("Gain");
         }
-        if (EnforcerInternal != null)
+        if (EnforcerInternal is not null)
         {
             // TODO: vel
             //AudioInternal.Left = CVars.a_left.ValueB;
@@ -351,6 +294,7 @@ public class SoundEngine : IDisposable
             EnforcerInternal.ForwardDirection = forward;
             EnforcerInternal.UpDirection = up;
             EnforcerInternal.Volume = globvol;
+            EnforcerInternal.SpeedOfSound = SpeedOfSound;
         }
         TimeTowardsNextClean += Client.Delta;
         if (TimeTowardsNextClean > 10.0)
@@ -423,12 +367,12 @@ public class SoundEngine : IDisposable
     /// <param name="callback">The callback upon playing start.</param>
     public void Play(SoundEffect sfx, bool loop, Location pos, float pitch = 1, float volume = 1, float seek = 0, Action<ActiveSound> callback = null)
     {
-        if (sfx == null)
+        if (sfx is null)
         {
             //OutputType.DEBUG.Output("Audio / null");
             return;
         }
-        if (PlayingNow.Count > 200 && EnforcerInternal == null)
+        if (PlayingNow.Count > 200 && EnforcerInternal is null)
         {
             if (!CanClean())
             {
@@ -449,13 +393,14 @@ public class SoundEngine : IDisposable
         {
             return;
         }
-        if (volume <= 0 || volume > 1)
+        if (volume < 0)
         {
-            throw new ArgumentException("Must be between 0 and 1", nameof(volume));
+            throw new ArgumentException("volume cannot be less than zero", nameof(volume));
         }
+        volume = Math.Min(volume, MaxSoundVolume);
         void playSound()
         {
-            if (sfx.Clip == null && sfx.Internal < 0)
+            if (sfx.Clip is null && sfx.Internal < 0)
             {
                 //OutputType.DEBUG.Output("Audio / clip");
                 return;
@@ -469,24 +414,12 @@ public class SoundEngine : IDisposable
                 Loop = loop
             };
             actsfx.Create();
-            if (actsfx.AudioInternal == null && actsfx.Src < 0)
+            if (actsfx.AudioInternal is null && actsfx.Src < 0)
             {
                 //OutputType.DEBUG.Output("Audio / src");
                 return;
             }
             CheckError("Create:" + sfx.Name);
-            /*if (TimeDeaf > 0.0)
-            {
-                actsfx.IsDeafened = true;
-                if (AudioInternal == null)
-                {
-                    AL.Source(actsfx.Src, ALSourcef.Gain, 0.0001f);
-                }
-                else
-                {
-                    actsfx.AudioInternal.Gain = 0.0001f;
-                }
-            }*/
             if (seek != 0)
             {
                 actsfx.Seek(seek);
@@ -500,7 +433,7 @@ public class SoundEngine : IDisposable
         }
         lock (sfx)
         {
-            if (sfx.Clip == null && sfx.Internal == -1)
+            if (sfx.Clip is null && sfx.Internal == -1)
             {
                 //OutputType.DEBUG.Output("Audio / delay");
                 sfx.Loaded += (o, e) =>
@@ -554,11 +487,12 @@ public class SoundEngine : IDisposable
             return sfx;
         }
         sfx = LoadSound(namelow);
-        if (sfx != null)
+        if (sfx is not null)
         {
             Effects.Add(namelow, sfx);
             return sfx;
         }
+        Logs.Warning($"Unable to find sound named '{TextStyle.Standout}{namelow}{TextStyle.Base}'");
         sfx = new SoundEffect()
         {
             Name = namelow,
@@ -579,9 +513,13 @@ public class SoundEngine : IDisposable
         {
             return bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
         }
-        else // 2
+        else if (channels == 2)
         {
             return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
+        }
+        else
+        {
+            throw new NotSupportedException($"The specified sound format ({channels} channels) is not supported.");
         }
     }
 
@@ -645,21 +583,6 @@ public class SoundEngine : IDisposable
             return null;
         }
     }
-
-    /*
-    public void Deafen(double time)
-    {
-        if (DeafenTime == 0.0 && time < 2.0)
-        {
-            time = 2.0;
-        }
-        DeafenTime = time;
-    }
-
-    public double DeafenTime = 0.0;
-
-    public double TimeDeaf = 0.0;
-    */
 
     /// <summary>Loads a sound effect from a .OGG stream.</summary>
     /// <param name="stream">The data stream.</param>
@@ -815,7 +738,7 @@ public class SoundEngine : IDisposable
     /// <returns>The audio level.</returns>
     public float EstimateAudioLevel()
     {
-        if (EnforcerInternal != null)
+        if (EnforcerInternal is not null)
         {
             lock (EnforcerInternal.CLelLock)
             {
@@ -824,7 +747,7 @@ public class SoundEngine : IDisposable
         }
         else
         {
-            return 0.5f; // TODO???
+            return 0.5f; // TODO: ???
         }
     }
 }
