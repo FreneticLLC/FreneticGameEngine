@@ -541,8 +541,8 @@ public class UIInputLabel : UIClickableElement
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
         UIElementStyle style = ElementInternal.CurrentStyle;
-        int x = elem.X + TextPadding;
-        int y = elem.Y + TextPadding;
+        int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
+        int y = ScrollGroup.Y + TextPadding;
         bool renderInfo = TextContent.Length == 0 && style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
