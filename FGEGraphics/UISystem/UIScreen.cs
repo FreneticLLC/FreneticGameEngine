@@ -32,10 +32,10 @@ public class UIScreen : UIElement
     /// </summary>
     private readonly GameClientWindow InternalClient;
 
-    /// <summary>Gets the client game engine this screen is associated with.</summary>
+    /// <inheritdoc/>
     public override GameEngineBase Engine => InternalClient.CurrentEngine;
 
-    /// <summary>Gets the client game window this screen is associated with.</summary>
+    /// <inheritdoc/>
     public override GameClientWindow Window => InternalClient;
 
     /// <summary>
@@ -86,4 +86,7 @@ public class UIScreen : UIElement
     public virtual void SwitchFrom()
     {
     }
+
+    /// <inheritdoc/>
+    public override bool CanInteract(int x, int y) => true;
 }

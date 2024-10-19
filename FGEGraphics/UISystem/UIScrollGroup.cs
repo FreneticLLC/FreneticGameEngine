@@ -73,6 +73,28 @@ public class UIScrollGroup : UIScissorGroup
             ScrollBar = new(null, null, styles, pos);
         }
 
+        /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
+        public void Reset()
+        {
+            Value = 0;
+            MaxValue = 0;
+        }
+
+        /// <summary>Scrolls to encompass a min/max offset pair.</summary>
+        /// <param name="min">The min offset.</param>
+        /// <param name="max">The max offset.</param>
+        public void ScrollToPos(int min, int max)
+        {
+            if (min < Value)
+            {
+                Value = min;
+            }
+            else if (max > RangeLength)
+            {
+                Value += max - RangeLength;
+            }
+        }
+
         /// <summary>Ticks the mouse dragging the <see cref="ScrollBar"/>.</summary>
         /// <param name="mousePos">The relevant mouse position.</param>
         /// <param name="groupPos">The relevant scroll group position.</param>
@@ -130,24 +152,35 @@ public class UIScrollGroup : UIScissorGroup
             throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
         }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Position.Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Position.Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
-        if (barX)
-        {
-            base.AddChild(ScrollX.ScrollBar);
-        }
-        if (barY)
-        {
-            base.AddChild(ScrollY.ScrollBar);
-        }
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
     }
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child, bool priority = true)
+    public override void Init()
+    {
+        if (ScrollX.ScrollBar is null && ScrollY.ScrollBar is null)
+        {
+            return;
+        }
+        UIGroup group = new(new UIPositionHelper(Position));
+        if (ScrollX.ScrollBar is not null)
+        {
+            group.AddChild(ScrollX.ScrollBar);
+        }
+        if (ScrollY.ScrollBar is not null)
+        {
+            group.AddChild(ScrollY.ScrollBar);
+        }
+        Parent.AddChild(group);
+    }
+
+    /// <inheritdoc/>
+    public override void AddChild(UIElement child)
     {
         UIPositionHelper original = new(child.Position);
         child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
-        base.AddChild(child, priority);
+        base.AddChild(child);
     }
 
     /// <summary>Ticks the mouse dragging the scroll bar.</summary>
@@ -170,7 +203,7 @@ public class UIScrollGroup : UIScissorGroup
     {
         float deltaX = Window.CurrentMouse.ScrollDelta.X;
         float deltaY = Window.CurrentMouse.ScrollDelta.Y;
-        if (Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
             deltaX = deltaY;
             deltaY = 0;
