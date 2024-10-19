@@ -18,7 +18,6 @@ using FreneticUtilities.FreneticToolkit;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an editable number label.</summary>
-// TODO: Cache raw value internally & independent of format
 public class UINumberInputLabel : UIInputLabel
 {
     /// <summary>Character matcher for integer number labels.</summary>
@@ -39,6 +38,7 @@ public class UINumberInputLabel : UIInputLabel
     /// <summary>Data internal to a <see cref="UINumberInputLabel"/> instance.</summary>
     public new struct InternalData
     {
+        // FIXME: Cached value recalculated when selected/deselected w/o edit
         /// <summary>The raw decimal value of the label.</summary>
         public double Value;
     }
@@ -59,19 +59,23 @@ public class UINumberInputLabel : UIInputLabel
 
     /// <remarks>Constructs a number input label.</remarks>
     /// <param name="integer">Whether the label should be an integer.</param>
-    /// <param name="format">The format string for the label.</param>
+    /// <param name="baseStyles">The clickable styles for the box and info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="pos">The position of the element.</param>
     /// <param name="initial">The initial number value.</param>
-    /// <param name="placeholderInfo"></param>
+    /// <param name="format">The format string for the label.</param>
+    /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="renderBox">Whether to render a box behind the label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
-    /// <param name="boxStyles">The box styles for the label.</param>
-    public UINumberInputLabel(bool integer, string format, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, double initial = 0, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, StyleGroup boxStyles = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? initial.ToString(format) : "", boxStyles ?? StyleGroup.Empty, inputStyle, highlightStyle, pos, false, renderBox, boxPadding)
+    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
+    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
+    /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
+    /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
+    public UINumberInputLabel(bool integer, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, double initial = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? initial.ToString(format) : "", baseStyles, inputStyle, highlightStyle, pos, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
     {
         Integer = integer;
-        Format = format;
+        Format = format ?? (integer ? "0" : "0.0");
         Multiline = false;
     }
 
