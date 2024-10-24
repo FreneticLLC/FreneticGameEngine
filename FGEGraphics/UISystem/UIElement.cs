@@ -670,7 +670,10 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Returns whether this element (and recursive children) can be interacted with at the specified position.</summary>
+    /// <summary>
+    /// Returns whether this element can be interacted with at the specified position.
+    /// This constraint also affects this element's children.
+    /// </summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     public virtual bool CanInteract(int x, int y) => Parent.CanInteract(x, y);

@@ -36,7 +36,7 @@ public class UINumberInputLabel : UIInputLabel
     public AsciiMatcher CharacterMatcher => Integer ? IntegerMatcher : DecimalMatcher;
 
     /// <summary>Data internal to a <see cref="UINumberInputLabel"/> instance.</summary>
-    public new struct InternalData
+    public struct NumberLabelInternalData
     {
         // FIXME: Cached value recalculated when selected/deselected w/o edit
         /// <summary>The raw decimal value of the label.</summary>
@@ -44,15 +44,15 @@ public class UINumberInputLabel : UIInputLabel
     }
 
     /// <summary>Data internal to a <see cref="UINumberInputLabel"/> instance.</summary>
-    public InternalData NumberInternal = new();
+    public NumberLabelInternalData NumberLabelInternal = new();
 
     /// <summary>Gets or sets the decimal value of the label.</summary>
     public double Value
     {
-        get => NumberInternal.Value;
+        get => NumberLabelInternal.Value;
         set
         {
-            NumberInternal.Value = value;
+            NumberLabelInternal.Value = value;
             TextContent = value.ToString(Format);
         }
     }
@@ -125,10 +125,10 @@ public class UINumberInputLabel : UIInputLabel
         result = new string(filtered.ToArray());
         if (double.TryParse(result, out double value))
         {
-            NumberInternal.Value = value;
+            NumberLabelInternal.Value = value;
             return value.ToString(Format);
         }
-        NumberInternal.Value = 0;
+        NumberLabelInternal.Value = 0;
         return "0";
     }
 

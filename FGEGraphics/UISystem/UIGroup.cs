@@ -19,5 +19,8 @@ public class UIGroup : UIElement
 {
     /// <summary>Constructs a new group.</summary>
     /// <param name="pos">The position of the element.</param>
-    public UIGroup(UIPositionHelper pos) : base(pos) => Enabled = false;
+    public UIGroup(UIPositionHelper pos) : base(pos)
+    {
+        Enabled = false;
+    }
 }
