@@ -184,7 +184,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>Whether the position is within any of the boundaries.</returns>
-    public bool SelfContains(int x, int y) => x > X && x < X + Width && y > Y && y < Y + Height;
+    public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
@@ -676,7 +676,7 @@ public abstract class UIElement
     /// </summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
-    public virtual bool CanInteract(int x, int y) => Parent.CanInteract(x, y);
+    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
 
     /// <summary>Preps the element.</summary>
     public virtual void Init()
