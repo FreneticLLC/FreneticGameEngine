@@ -18,6 +18,7 @@ namespace FGEGraphics.UISystem;
 /// Represents an expandable list container of UI elements.
 /// List expansion is in the opposite direction of the supplied <see cref="UIAnchor"/>. 
 /// </summary>
+// TODO: Getter positions instead of constants
 public class UIListGroup : UIGroup
 {
     /// <summary>Whether the list should expand vertically.</summary>
@@ -41,9 +42,9 @@ public class UIListGroup : UIGroup
     }
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child, bool priority = true)
+    public override void AddChild(UIElement child)
     {
-        base.AddChild(child, priority);
+        base.AddChild(child);
         child.Position.Anchor(Position.MainAnchor);
         if (Vertical)
         {

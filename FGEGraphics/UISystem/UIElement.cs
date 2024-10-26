@@ -37,6 +37,9 @@ public abstract class UIElement
     /// <summary>Gets the client game engine used to render this element.</summary>
     public virtual GameEngineBase Engine => Parent.Engine;
 
+    /// <summary>The UI view this element is attached to.</summary>
+    public ViewUI2D View => Position.View;
+
     /// <summary>Last known absolute position.</summary>
     public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
 
@@ -54,12 +57,6 @@ public abstract class UIElement
 
     /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
     public int Height => LastAbsoluteSize.Y;
-
-    /// <summary>Whether the mouse left button is currently down.</summary>
-    public bool MouseDown => Position.View.Internal.MouseDown;
-
-    /// <summary>Whether the mouse left button was previously down.</summary>
-    public bool MousePreviouslyDown => Position.View.Internal.MousePreviouslyDown;
 
     /// <summary>Last known aboslute rotation.</summary>
     public float LastAbsoluteRotation;
@@ -100,6 +97,7 @@ public abstract class UIElement
     {
         Position = pos;
         Position.For = this;
+        // TODO: fix, this is inaccurate
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         LastAbsoluteRotation = Position.Rotation;
@@ -107,8 +105,7 @@ public abstract class UIElement
 
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
-    /// <param name="priority">Whether the child element has render priority over this element.</param>
-    public virtual void AddChild(UIElement child, bool priority = true)
+    public virtual void AddChild(UIElement child)
     {
         if (child.Parent is not null)
         {
@@ -127,7 +124,6 @@ public abstract class UIElement
         }
         child.Parent = this;
         child.IsValid = true;
-        child.ChildPriority = priority;
         child.Init();
     }
 
@@ -188,15 +184,7 @@ public abstract class UIElement
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>Whether the position is within any of the boundaries.</returns>
-    public bool SelfContains(int x, int y)
-    {
-        int lowX = LastAbsolutePosition.X;
-        int lowY = LastAbsolutePosition.Y;
-        int highX = lowX + LastAbsoluteSize.X;
-        int highY = lowY + LastAbsoluteSize.Y;
-        return x > lowX && x < highX
-            && y > lowY && y < highY;
-    }
+    public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
@@ -276,7 +264,7 @@ public abstract class UIElement
             throw new Exception("Style must support text rendering when 'requireText' is true");
         }
         ElementInternal.Styles.Add(style);
-        // TODO: Find a way to avoid doing this on each call
+        // TODO: avoid doing this on each call
         if (style.CanRenderText())
         {
             foreach (UIElementText text in ElementInternal.Texts)
@@ -327,8 +315,7 @@ public abstract class UIElement
     /// <param name="mouseY">The Y position of the mouse.</param>
     public virtual void TickInteraction(int mouseX, int mouseY)
     {
-        bool containsMouse = SelfContains(mouseX, mouseY);
-        if (containsMouse)
+        if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
             if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
             {
@@ -339,7 +326,7 @@ public abstract class UIElement
                 }
                 MouseEnter();
             }
-            if (MouseDown && !MousePreviouslyDown && Position.View.InteractingElement is null)
+            if (View.MouseDown && !View.MousePreviouslyDown && Position.View.InteractingElement is null)
             {
                 if (Enabled)
                 {
@@ -349,7 +336,7 @@ public abstract class UIElement
                 }
                 MouseLeftDown(mouseX, mouseY);
             }
-            else if (!MouseDown && MousePreviouslyDown && Position.View.InteractingElement == this)
+            else if (!View.MouseDown && View.MousePreviouslyDown && Position.View.InteractingElement == this)
             {
                 if (Enabled)
                 {
@@ -361,7 +348,7 @@ public abstract class UIElement
             }
             return;
         }
-        if (ElementInternal.HoverInternal && (!MouseDown || Position.View.InteractingElement != this))
+        if (ElementInternal.HoverInternal && (!View.MouseDown || Position.View.InteractingElement != this))
         {
             ElementInternal.HoverInternal = false;
             if (Enabled)
@@ -373,12 +360,12 @@ public abstract class UIElement
                     Position.View.InteractingElement = null;
                 }
             }
-            if (MousePreviouslyDown)
+            if (View.MousePreviouslyDown)
             {
                 MouseLeftUpOutside(mouseX, mouseY);
             }
         }
-        if (MouseDown && Position.View.InteractingElement != this)
+        if (View.MouseDown && Position.View.InteractingElement != this)
         {
             if (Selected)
             {
@@ -412,6 +399,7 @@ public abstract class UIElement
     }
 
     // TODO: Don't pass the stack directly
+    // TODO: Clean this logic up and call it on creation
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -489,13 +477,7 @@ public abstract class UIElement
     /// <summary>Performs a render on this element using the current style.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(ViewUI2D view, double delta)
-    {
-        if (IsValid)
-        {
-            Render(view, delta, ElementInternal.CurrentStyle);
-        }
-    }
+    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
     /// <summary>Updates this element's child positions.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
@@ -515,6 +497,7 @@ public abstract class UIElement
         }
     }
 
+    // TODO: 'filter' predicate parameter?
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
     public IEnumerable<UIElement> AllChildren(bool toAdd = false)
@@ -522,9 +505,12 @@ public abstract class UIElement
         yield return this;
         foreach (UIElement element in ElementInternal.Children)
         {
-            foreach (UIElement child in element.AllChildren(toAdd))
+            if (element.IsValid)
             {
-                yield return child;
+                foreach (UIElement child in element.AllChildren(toAdd))
+                {
+                    yield return child;
+                }
             }
         }
         if (toAdd)
@@ -593,6 +579,7 @@ public abstract class UIElement
     }
 
     /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
+    // TODO: Account for in interaction logic
     public virtual void MouseLeave()
     {
     }
@@ -682,6 +669,14 @@ public abstract class UIElement
             }
         }
     }
+
+    /// <summary>
+    /// Returns whether this element can be interacted with at the specified position.
+    /// This constraint also affects this element's children.
+    /// </summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
 
     /// <summary>Preps the element.</summary>
     public virtual void Init()
