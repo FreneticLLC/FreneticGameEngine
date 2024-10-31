@@ -27,6 +27,7 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
 using NVorbis;
+using System.Threading;
 
 namespace FGEGraphics.AudioSystem;
 
@@ -80,14 +81,20 @@ public class SoundEngine : IDisposable
     /// <summary>Current global pitch.</summary>
     public float GlobalPitch = 1.0f;
 
-    /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
-    public const float SPEED_OF_SOUND = 343;
-
-    /// <summary>The speed of sound, in units per second, defaults to <see cref="SPEED_OF_SOUND"/>.</summary>
-    public float SpeedOfSound = SPEED_OF_SOUND;
+    /// <summary>The speed of sound, in units per second, defaults to <see cref="AudioEnforcer.SPEED_OF_SOUND"/>.</summary>
+    public float SpeedOfSound = AudioEnforcer.SPEED_OF_SOUND;
 
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
     public float MaxSoundVolume = 2;
+
+    /// <summary>All available OpenAL extensions.</summary>
+    public HashSet<string> ALExtensions = [];
+
+    /// <summary>The relevant OpenAL Device.</summary>
+    public ALDevice Device;
+
+    /// <summary>The relevant OpenAL Device Name.</summary>
+    public string DeviceName;
 
     /// <summary>Initialize the sound engine.</summary>
     /// <param name="tclient">The backing client.</param>
@@ -101,17 +108,21 @@ public class SoundEngine : IDisposable
         Client = tclient;
         string[] devices = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
         string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
-        ALDevice device = ALC.OpenDevice(deviceName);
-        Context = ALC.CreateContext(device, (int[])null);
+        Device = ALC.OpenDevice(deviceName);
+        Context = ALC.CreateContext(Device, (int[])null);
+        ALC.MakeContextCurrent(Context);
+        DeviceName = ALC.GetString(Device, AlcGetString.DeviceSpecifier);
+        string[] devExtensions = (ALC.GetString(Device, AlcGetString.Extensions) ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string[] coreExtensions = (AL.Get(ALGetString.Extensions) ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        ALExtensions.UnionWith(coreExtensions);
+        ALExtensions.UnionWith(devExtensions);
+        string vendor = AL.Get(ALGetString.Vendor);
+        string renderer = AL.Get(ALGetString.Renderer);
+        string version = AL.Get(ALGetString.Version);
         if (Client.EnforceAudio)
         {
-            EnforcerInternal = new AudioEnforcer();
+            EnforcerInternal = new AudioEnforcer() { Engine = this };
             EnforcerInternal.Init(Context);
-            Context = new ALContext(IntPtr.Zero);
-        }
-        else
-        {
-            ALC.MakeContextCurrent(Context);
         }
         /*try
         {
@@ -134,8 +145,7 @@ public class SoundEngine : IDisposable
         }
         Effects = [];
         PlayingNow = [];
-        string actualName = ALC.GetString(device, AlcGetString.DeviceSpecifier);
-        Logs.ClientInit($"Audio system initialized, using device '{actualName}', available='{devices.JoinString(",")}', Enforcer={Client.EnforceAudio}, MaxBeforeEnforce={MaxBeforeEnforce}");
+        Logs.ClientInit($"Audio system initialized, OpenAL vendor='{vendor}', renderer='{renderer}', version='{version}', using device '{DeviceName}', available devices: '{devices.JoinString("','")}', Enforcer={Client.EnforceAudio}, MaxBeforeEnforce={MaxBeforeEnforce}, ALExtensions='{ALExtensions.JoinString("','")}'");
     }
 
     /// <summary>Stop all sounds.</summary>
@@ -287,12 +297,9 @@ public class SoundEngine : IDisposable
         }
         if (EnforcerInternal is not null)
         {
-            // TODO: vel
+            EnforcerInternal.FrameUpdate(position, forward, up, false, Client.Delta);
             //AudioInternal.Left = CVars.a_left.ValueB;
             //AudioInternal.Right = CVars.a_right.ValueB;
-            EnforcerInternal.Position = position;
-            EnforcerInternal.ForwardDirection = forward;
-            EnforcerInternal.UpDirection = up;
             EnforcerInternal.Volume = globvol;
             EnforcerInternal.SpeedOfSound = SpeedOfSound;
         }
@@ -740,10 +747,7 @@ public class SoundEngine : IDisposable
     {
         if (EnforcerInternal is not null)
         {
-            lock (EnforcerInternal.CLelLock)
-            {
-                return EnforcerInternal.CurrentLevel;
-            }
+            return Volatile.Read(ref EnforcerInternal.CurrentLevel);
         }
         else
         {

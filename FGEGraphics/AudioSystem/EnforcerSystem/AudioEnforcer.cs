@@ -14,10 +14,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticToolkit;
+using FreneticUtilities.FreneticExtensions;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using FGECore.PhysicsSystem;
 using OpenTK.Audio.OpenAL;
 
 namespace FGEGraphics.AudioSystem.EnforcerSystem;
@@ -25,6 +25,9 @@ namespace FGEGraphics.AudioSystem.EnforcerSystem;
 /// <summary>The internal engine to crunch audio data and push it to the speakers (when OpenAL's matching subsystem is not playing nice).</summary>
 public class AudioEnforcer
 {
+    /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
+    public const float SPEED_OF_SOUND = 343;
+
     /// <summary>How many instances of the enforcer have been created. This value starts at 1 and increments every time an enforcer is launched.</summary>
     public static long AudioID = 1;
 
@@ -46,23 +49,38 @@ public class AudioEnforcer
     /// <summary>3D Position of the audio "camera".</summary>
     public Location Position;
 
+    /// <summary>The previous frame's position of the audio "camera".</summary>
+    public Location PreviousPosition;
+
+    /// <summary>The current velocity vector of the audio "camera".</summary>
+    public Location CurrentVelocity;
+
+    /// <summary>The time between the previous update frame and now as a decimal number of seconds, ie the time that transpired between <see cref="PreviousPosition"/> and <see cref="Position"/>.</summary>
+    public double FrameTime;
+
+    /// <summary>If the audio "camera" moves faster than this many units per second, presume a teleportation occured instead of natural movement. Defaults to mach 10.</summary>
+    public double SpeedOfPresumeTeleport = SPEED_OF_SOUND * 10;
+
+    /// <summary>How many units of distance below which audio has basically no dropoff.</summary>
+    public float LinearAudioDistance = 10;
+
     /// <summary>Forward direction (vector) of the audio "camera".</summary>
     public Location ForwardDirection;
 
     /// <summary>Up direction (vector) of the audio "camera".</summary>
     public Location UpDirection;
 
-    /// <summary>Whether the left channel is enabled.</summary>
-    public bool Left = true;
-
-    /// <summary>Whether the right channel is enabled.</summary>
-    public bool Right = true;
+    /// <summary>All channels this enforcer plays into.</summary>
+    public List<AudioChannel> Channels = [];
 
     /// <summary>The speed of sound, in units per second (on Earth in air this is 343 m/s).</summary>
-    public float SpeedOfSound = 343;
+    public float SpeedOfSound = SPEED_OF_SOUND;
 
     /// <summary>How far apart the ears are.</summary>
     public float HeadWidth = 0.2f; // TODO: SoundEngine control of this var
+
+    /// <summary>The backing <see cref="SoundEngine"/> instance.</summary>
+    public SoundEngine Engine;
 
     /// <summary>Add an audio instance to the enforcer.</summary>
     /// <param name="inst">The instance to add.</param>
@@ -85,11 +103,16 @@ public class AudioEnforcer
     {
         Internal.Instance = this;
         Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
         {
             Internal.ReusableBuffers[i] = new byte[InternalData.BYTES_PER_BUFFER];
         }
         Internal.Context = acontext;
+        if (Channels.IsEmpty())
+        {
+            Channels.Add(new AudioChannel("Left", this, Quaternion.FromAxisAngle(Location.UnitZ, Math.PI * 0.5)));
+            Channels.Add(new AudioChannel("Right", this, Quaternion.FromAxisAngle(Location.UnitZ, -Math.PI * 0.5)));
+        }
         Run = true;
         AudioThread = new Thread(new ThreadStart(Internal.ForceAudioLoop))
         {
@@ -98,16 +121,48 @@ public class AudioEnforcer
         AudioThread.Start();
     }
 
+    /// <summary>Updates data for the current frame.</summary>
+    /// <param name="newPosition">The new position the audio "camera" listener is in.</param>
+    /// <param name="forward">The new forward direction.</param>
+    /// <param name="up">The new up direction.</param>
+    /// <param name="didTeleport">If true, the listener teleported. If false, they moved normally.</param>
+    /// <param name="timeElapsed">How much time has elapsed since the previous frame, in seconds.</param>
+    public void FrameUpdate(Location newPosition, Location forward, Location up, bool didTeleport, double timeElapsed)
+    {
+        lock (Locker)
+        {
+            ForwardDirection = forward;
+            UpDirection = up;
+            FrameTime = timeElapsed;
+            if (!didTeleport)
+            {
+                Location travelVector = newPosition - Position;
+                CurrentVelocity = travelVector / timeElapsed;
+                if (CurrentVelocity.LengthSquared() > SpeedOfPresumeTeleport * SpeedOfPresumeTeleport)
+                {
+                    didTeleport = true;
+                }
+            }
+            PreviousPosition = didTeleport ? newPosition : Position;
+            Position = newPosition;
+            if (didTeleport)
+            {
+                CurrentVelocity = Location.Zero;
+            }
+            foreach (AudioChannel channel in Channels)
+            {
+                channel.FrameUpdate();
+            }
+        }
+    }
+
     /// <summary>Shuts down the enforcer. May take a moment before the enforcer thread stops.</summary>
     public void Shutdown()
     {
         Run = false;
     }
 
-    /// <summary>Current level (of audio) locker.</summary>
-    public LockObject CLelLock = new();
-
-    /// <summary>Current audio levels. Use <see cref="CLelLock"/>.</summary>
+    /// <summary>Current audio levels. Use <see cref="Volatile"/>.</summary>
     public float CurrentLevel = 0.0f;
 
     /// <summary>Internal data used by the enforcer.</summary>
@@ -116,14 +171,8 @@ public class AudioEnforcer
         /// <summary>The relevant backing enforcer instance.</summary>
         public AudioEnforcer Instance;
 
-        /// <summary>One quarter of PI. A constant.</summary>
-        public const float QUARTER_PI = (float)Math.PI * 0.25f;
-
         /// <summary>The audio frequency, in Hz (samples per second).</summary>
         public const int FREQUENCY = 44100;
-
-        /// <summary>Audio channels to use.</summary>
-        public const int CHANNELS = 2;
 
         /// <summary>Audio byte-rate to use.</summary>
         public const int BYTERATE = 2;
@@ -131,20 +180,20 @@ public class AudioEnforcer
         /// <summary>Multiplying an audio sample by this lowers its volume by 3 dB.</summary>
         public const float MINUS_THREE_DB = 0.707106781f;
 
-        /// <summary>The maximum pause, in milliseconds, between audio crunching passes.</summary>
+        /// <summary>The maximum pause, in milliseconds, between audio crunching passes. In practice pauses may end up longer due to operating system timing limitations, so keep this shorter than <see cref="MS_LOAD"/>.</summary>
         public const int PAUSE = 10;
 
         /// <summary>How many milliseconds to load at once in any one buffer.</summary>
         public const int MS_LOAD = 33;
 
-        /// <summary>Nubmer of audio buffers to use at the same time.</summary>
+        /// <summary>Nubmer of audio buffers to use at the same time per channel.</summary>
         public const int BUFFERS_AT_ONCE = 2;
 
         /// <summary>How many buffers are in <see cref="ReusableBuffers"/>.</summary>
-        public const int REUSABLE_BUFFER_ARRAY_SIZE = 10;
+        public const int REUSABLE_BUFFER_ARRAY_SIZE = 32;
 
         /// <summary>Actual byte space to load at once.</summary>
-        public const int BYTES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0) * CHANNELS * BYTERATE;
+        public const int BYTES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0) * BYTERATE;
 
         /// <summary>Relevant OpenAL audio context.</summary>
         public ALContext Context;
@@ -154,9 +203,6 @@ public class AudioEnforcer
 
         /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
         public int ByteBufferID;
-
-        /// <summary>The OpenAL audio source ID.</summary>
-        public int ALAudioSource;
 
         /// <summary>Cached reusable list of dead audio instances.</summary>
         public List<LiveAudioInstance> DeadInstances;
@@ -176,156 +222,18 @@ public class AudioEnforcer
             return toReturn;
         }
 
-        /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
-        /// <param name="Volume">The volume to this ear.</param>
-        /// <param name="TimeOffset">The time offset to this ear, in samples. This is usually a negative number, to indicate the position in the clip should be earlier, ie the playback of real audio should come later.</param>
-        public record struct AudioPositionalEarData(float Volume, int TimeOffset)
-        {
-            /// <summary>Fills the data for this ear based on relevant audio data.</summary>
-            public void Fill(Location soundPosition, Location earPosition, float angleVolume, AudioEnforcer instance)
-            {
-                float distSq = (float)soundPosition.DistanceSquared(earPosition);
-                float dist = MathF.Sqrt(distSq);
-                float distanceGain = 1.0f / Math.Max(1.0f, distSq);
-                Volume = angleVolume * distanceGain;
-                float timeOffsetSeconds = -dist / instance.SpeedOfSound;
-                TimeOffset = (int)(timeOffsetSeconds * FREQUENCY);
-            }
-        }
-
-        /// <summary>Calculates the correct positional audio data for each ear for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
-        public readonly (AudioPositionalEarData, AudioPositionalEarData) GetPositionalData(Location position)
-        {
-            Location relativeDirectionVector = (position - Instance.Position).Normalize();
-            Quaternion direction = Quaternion.GetQuaternionBetween(relativeDirectionVector, Instance.ForwardDirection);
-            float angle = (float)direction.AxisAngleForRadians(Instance.UpDirection);
-            Location rightDirection = Instance.ForwardDirection.CrossProduct(Instance.UpDirection);
-            AudioPositionalEarData left = new(), right = new();
-            if (Instance.Left)
-            {
-                Location leftEarPos = Instance.Position - rightDirection * (Instance.HeadWidth * 0.5);
-                float angleVolume = Math.Max(0, (float)Math.Cos(angle + QUARTER_PI)) * 0.5f + 0.5f;
-                left.Fill(position, leftEarPos, angleVolume, Instance);
-            }
-            if (Instance.Right)
-            {
-                Location rightEarPos = Instance.Position + rightDirection * (Instance.HeadWidth * 0.5);
-                float angleVolume = Math.Max(0, (float)Math.Sin(angle + QUARTER_PI)) * 0.5f + 0.5f;
-                right.Fill(position, rightEarPos, angleVolume, Instance);
-            }
-            return (left, right);
-        }
-
         /// <summary>Completely closes and stops the audio enforcer system.</summary>
         public void CloseAndStop()
         {
-            if ((ALSourceState)AL.GetSource(ALAudioSource, ALGetSourcei.SourceState) == ALSourceState.Playing)
+            foreach (AudioChannel channel in Instance.Channels)
             {
-                AL.SourceStop(ALAudioSource);
+                channel.DisableSource();
             }
             if (Context.Handle != IntPtr.Zero)
             {
                 ALC.DestroyContext(Context);
             }
             Context = new ALContext(IntPtr.Zero);
-        }
-
-        /// <summary>Adds a single audio instance to a raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
-        public readonly void AddClipToBuffer(byte[] outBuffer, LiveAudioInstance toAdd)
-        {
-            int outBufPosition = 0;
-            // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
-            // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
-            // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
-            // TODO: Note as well the current ear velocity should be additive with the sound velocity.
-            AudioPositionalEarData leftEar = new(1, 0), rightEar = new(1, 0);
-            if (toAdd.UsePosition)
-            {
-                (leftEar, rightEar) = GetPositionalData(toAdd.Position);
-            }
-            float gain = toAdd.Gain * Instance.Volume;
-            gain *= gain;
-            int volumeModifierRight = (int)((rightEar.Volume * gain) * ushort.MaxValue);
-            int volumeModifierLeft = (int)((leftEar.Volume * gain) * ushort.MaxValue);
-            byte[] clipData = toAdd.Clip.Data;
-            int maxBytePositionLeft = BYTES_PER_BUFFER;
-            int maxBytePositionRight = BYTES_PER_BUFFER;
-            if (!toAdd.Loop)
-            {
-                maxBytePositionLeft = Math.Min(clipData.Length - (toAdd.CurrentSample + leftEar.TimeOffset * 2), BYTES_PER_BUFFER);
-                maxBytePositionRight = Math.Min(clipData.Length - (toAdd.CurrentSample + rightEar.TimeOffset * 2), BYTES_PER_BUFFER);
-            }
-            int maxBytePosition = Math.Max(maxBytePositionLeft, maxBytePositionRight);
-            while (outBufPosition < maxBytePosition && outBufPosition + 3 < BYTES_PER_BUFFER)
-            {
-                // TODO: pitch, velocity, etc.?
-                int rawSampleInLeft = 0;
-                if (outBufPosition < maxBytePositionLeft)
-                {
-                    int leftSample = toAdd.CurrentSample + leftEar.TimeOffset * 2;
-                    if (toAdd.Loop)
-                    {
-                        leftSample %= clipData.Length;
-                        if (leftSample < 0)
-                        {
-                            leftSample += clipData.Length;
-                        }
-                    }
-                    if (leftSample >= 0 && leftSample + 1 < clipData.Length)
-                    {
-                        rawSampleInLeft = (short)((clipData[leftSample + 1] << 8) | clipData[leftSample]);
-                        int outSampleLeft = (rawSampleInLeft * volumeModifierLeft) >> 16;
-                        int rawPreValueLeft = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
-                        outSampleLeft += rawPreValueLeft; // TODO: Better scaled adder?
-                        outSampleLeft = Math.Max(short.MinValue, Math.Min(short.MaxValue, outSampleLeft));
-                        outBuffer[outBufPosition] = (byte)outSampleLeft;
-                        outBuffer[outBufPosition + 1] = (byte)(outSampleLeft >> 8);
-                    }
-                }
-                outBufPosition += 2;
-                if (outBufPosition < maxBytePositionRight)
-                {
-                    int outSampleRight = 0;
-                    if (toAdd.Clip.Channels == 2)
-                    {
-                        toAdd.CurrentSample += 2;
-                        int rightSample = toAdd.CurrentSample + rightEar.TimeOffset * 2;
-                        if (toAdd.Loop)
-                        {
-                            rightSample %= clipData.Length;
-                            if (rightSample < 0)
-                            {
-                                rightSample += clipData.Length;
-                            }
-                        }
-                        if (rightSample >= 0 && rightSample + 1 < clipData.Length)
-                        {
-                            int rawSampleInRight = (short)((clipData[rightSample + 1] << 8) | clipData[rightSample]);
-                            outSampleRight = (rawSampleInRight * volumeModifierRight) >> 16;
-                        }
-                    }
-                    else
-                    {
-                        outSampleRight = (rawSampleInLeft * volumeModifierRight) >> 16;
-                    }
-                    int rawPreValueRight = (short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]);
-                    outSampleRight += rawPreValueRight; // TODO: Better scaled adder?
-                    outBuffer[outBufPosition] = (byte)outSampleRight;
-                    outBuffer[outBufPosition + 1] = (byte)(outSampleRight >> 8);
-                }
-                toAdd.CurrentSample += 2;
-                if (toAdd.Loop)
-                {
-                    toAdd.CurrentSample %= clipData.Length;
-                }
-                outBufPosition += 2;
-            }
-            if (!toAdd.Loop && toAdd.CurrentSample + Math.Max(leftEar.TimeOffset, rightEar.TimeOffset) * 2 >= clipData.Length)
-            {
-                toAdd.CurrentSample = 0;
-                toAdd.State = AudioState.DONE;
-                DeadInstances.Add(toAdd);
-            }
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
@@ -342,15 +250,56 @@ public class AudioEnforcer
             return level;
         }
 
-        /// <summary>Causes a single buffer of audio to be added to the live playing audio in OpenAL. Also ensures the enforcer is playing in OpenAL at all.</summary>
-        public readonly void PlayBuffer(byte[] buffer)
+        /// <summary>Preprocess all channels, ensuring they have a valid audio source, and clearing used up buffers. Returns true if any channels are still full, or false if all have room for new buffers.</summary>
+        public readonly bool PreprocessAllChannels()
         {
-            int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
-            AL.BufferData(bufferID, ALFormat.Stereo16, buffer, FREQUENCY);
-            AL.SourceQueueBuffer(ALAudioSource, bufferID);
-            if ((ALSourceState)AL.GetSource(ALAudioSource, ALGetSourcei.SourceState) != ALSourceState.Playing)
+            bool anyFilled = false;
+            foreach (AudioChannel channel in Instance.Channels)
             {
-                AL.SourcePlay(ALAudioSource);
+                if (channel.ALSource == -1)
+                {
+                    channel.BuildSource();
+                }
+                AL.GetSource(channel.ALSource, ALGetSourcei.BuffersProcessed, out int buffersDone);
+                while (buffersDone > 0)
+                {
+                    int bufferID = AL.SourceUnqueueBuffer(channel.ALSource);
+                    UsableBufferIDs.Enqueue(bufferID);
+                    buffersDone--;
+                }
+                AL.GetSource(channel.ALSource, ALGetSourcei.BuffersQueued, out int waiting);
+                if (waiting >= BUFFERS_AT_ONCE)
+                {
+                    anyFilled = true;
+                }
+            }
+            return anyFilled;
+        }
+
+        /// <summary>Adds a single playing audio instance to all channels.</summary>
+        public readonly void AddClipToAllChannels(LiveAudioInstance audio)
+        {
+            if (audio.State == AudioState.PLAYING)
+            {
+                int newSample = 0;
+                int maxTimeOffset = 0;
+                foreach (AudioChannel channel in Instance.Channels)
+                {
+                    AudioChannel.ClipAddingResult result = channel.AddClipToBuffer(audio);
+                    newSample = result.NewSample;
+                    maxTimeOffset = Math.Max(maxTimeOffset, result.TimeOffset);
+                }
+                audio.CurrentSample = newSample;
+                if (!audio.Loop && audio.CurrentSample + maxTimeOffset * 2 >= audio.Clip.Data.Length)
+                {
+                    audio.CurrentSample = 0;
+                    audio.State = AudioState.DONE;
+                    DeadInstances.Add(audio);
+                }
+            }
+            else if (audio.State == AudioState.STOP || audio.State == AudioState.DONE)
+            {
+                DeadInstances.Add(audio);
             }
         }
 
@@ -362,9 +311,6 @@ public class AudioEnforcer
                 Stopwatch stopwatch = new();
                 stopwatch.Start();
                 ALC.MakeContextCurrent(Context);
-                ALAudioSource = AL.GenSource();
-                AL.Source(ALAudioSource, ALSourceb.Looping, false);
-                AL.Source(ALAudioSource, ALSourceb.SourceRelative, true);
                 UsableBufferIDs = new Queue<int>();
                 DeadInstances = [];
                 while (true)
@@ -376,31 +322,19 @@ public class AudioEnforcer
                     }
                     stopwatch.Stop();
                     double elSec = stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    AL.GetSource(ALAudioSource, ALGetSourcei.BuffersProcessed, out int buffersDone);
-                    while (buffersDone > 0)
+                    stopwatch.Restart();
+                    bool anyFilled = PreprocessAllChannels();
+                    if (!anyFilled)
                     {
-                        int bufferID = AL.SourceUnqueueBuffer(ALAudioSource);
-                        UsableBufferIDs.Enqueue(bufferID);
-                        buffersDone--;
-                    }
-                    AL.GetSource(ALAudioSource, ALGetSourcei.BuffersQueued, out int waiting);
-                    if (waiting < BUFFERS_AT_ONCE)
-                    {
-                        byte[] buffer = GetNextBuffer();
+                        foreach (AudioChannel channel in Instance.Channels)
+                        {
+                            channel.InternalCurrentBuffer = GetNextBuffer();
+                        }
                         lock (Instance.Locker)
                         {
                             foreach (LiveAudioInstance audio in Instance.Playing)
                             {
-                                if (audio.State == AudioState.PLAYING)
-                                {
-                                    AddClipToBuffer(buffer, audio);
-                                }
-                                else if (audio.State == AudioState.STOP || audio.State == AudioState.DONE)
-                                {
-                                    DeadInstances.Add(audio);
-                                }
+                                AddClipToAllChannels(audio);
                             }
                             foreach (LiveAudioInstance inst in DeadInstances)
                             {
@@ -408,12 +342,14 @@ public class AudioEnforcer
                             }
                             DeadInstances.Clear();
                         }
-                        float newCurrentLevel = GetLevelFor(buffer);
-                        lock (Instance.CLelLock)
+                        float newCurrentLevel = 0;
+                        foreach (AudioChannel channel in Instance.Channels)
                         {
-                            Instance.CurrentLevel = newCurrentLevel;
+                            newCurrentLevel = Math.Max(newCurrentLevel, GetLevelFor(channel.InternalCurrentBuffer));
+                            int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
+                            channel.PlayBuffer(bufferID);
                         }
-                        PlayBuffer(buffer);
+                        Volatile.Write(ref Instance.CurrentLevel, newCurrentLevel);
                     }
                     int ms = PAUSE - (int)(elSec * 1000.0);
                     if (ms > 0)
