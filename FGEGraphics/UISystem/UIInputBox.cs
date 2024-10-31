@@ -42,9 +42,6 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
     /// <summary>The font to use.</summary>
     public FontSet Fonts = fonts;
 
-    /// <summary>Whether this input box is currently selected.</summary>
-    public bool Selected = false;
-
     /// <summary>Whether this input box is multi-line.</summary>
     public bool MultiLine = false;
 
