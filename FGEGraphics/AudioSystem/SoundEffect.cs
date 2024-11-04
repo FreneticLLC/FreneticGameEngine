@@ -22,9 +22,6 @@ public class SoundEffect
     /// <summary>The name of the effect.</summary>
     public string Name;
 
-    /// <summary>The internal OpenAL ID, if one is relevant.</summary>
-    public int Internal;
-
     /// <summary>A quick-and-dirty event for when the sound effect is loaded.</summary>
     public EventHandler<EventArgs> Loaded;
 

@@ -6,19 +6,8 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FGECore;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.AudioSystem.EnforcerSystem;
-using OpenTK;
-using OpenTK.Audio;
-using OpenTK.Audio.OpenAL;
-using OpenTK.Mathematics;
 
 namespace FGEGraphics.AudioSystem;
 
@@ -44,9 +33,6 @@ public class ActiveSound(SoundEffect sfx)
     /// <summary>The gain of the sound.</summary>
     public float Gain = 1f;
 
-    /// <summary>The OpenAL source value, if relevant.</summary>
-    public int Src = -1;
-
     /// <summary>The internal enforcer instance, if relevant.</summary>
     public LiveAudioInstance AudioInternal = null;
 
@@ -64,58 +50,17 @@ public class ActiveSound(SoundEffect sfx)
     {
         if (!Exists)
         {
-            if (Engine.EnforcerInternal != null && Engine.PlayingNow.Count >= Engine.MaxBeforeEnforce)
+            AudioInternal = new LiveAudioInstance()
             {
-                AudioInternal = new LiveAudioInstance()
-                {
-                    Clip = Effect.Clip,
-                    Gain = Gain,
-                    Loop = Loop,
-                    Pitch = Pitch,
-                    Position = Position,
-                    Velocity = Location.Zero, // TODO: Velocity!
-                    // TODO: Direction?
-                    UsePosition = !Position.IsNaN()
-                };
-            }
-            else
-            {
-                Engine.CheckError("PRECREATE:" + Effect.Name);
-                Src = AL.GenSource();
-                if (Src < 0 || AL.GetError() != ALError.NoError)
-                {
-                    Src = -1;
-                    return;
-                }
-                AL.Source(Src, ALSourcei.Buffer, Effect.Internal);
-                AL.Source(Src, ALSourceb.Looping, Loop);
-                Engine.CheckError("Preconfig:" + Effect.Name);
-                if (Pitch != 1f)
-                {
-                    UpdatePitch();
-                }
-                if (Gain != 1f)
-                {
-                    UpdateGain();
-                }
-                Engine.CheckError("GP:" + Effect.Name);
-                if (!Position.IsNaN())
-                {
-                    Vector3 zero = Vector3.Zero;
-                    Vector3 vec = Position.ToOpenTK();
-                    AL.Source(Src, ALSource3f.Direction, ref zero);
-                    AL.Source(Src, ALSource3f.Velocity, ref zero);
-                    AL.Source(Src, ALSource3f.Position, ref vec);
-                    AL.Source(Src, ALSourceb.SourceRelative, false);
-                    AL.Source(Src, ALSourcef.EfxAirAbsorptionFactor, 1f);
-                    Engine.CheckError("Positioning:" + Effect.Name);
-                }
-                else
-                {
-                    AL.Source(Src, ALSourceb.SourceRelative, true);
-                    Engine.CheckError("Relative:" + Effect.Name);
-                }
-            }
+                Clip = Effect.Clip,
+                Gain = Gain,
+                Loop = Loop,
+                Pitch = Pitch,
+                Position = Position,
+                Velocity = Location.Zero, // TODO: Velocity!
+                                          // TODO: Direction?
+                UsePosition = !Position.IsNaN()
+            };
             Exists = true;
         }
     }
@@ -123,14 +68,7 @@ public class ActiveSound(SoundEffect sfx)
     /// <summary>Updates the pitch to the backing engine.</summary>
     public void UpdatePitch()
     {
-        if (AudioInternal != null)
-        {
-            AudioInternal.Pitch = Pitch;
-        }
-        else
-        {
-            AL.Source(Src, ALSourcef.Pitch, Pitch);
-        }
+        AudioInternal.Pitch = Pitch;
     }
 
     /// <summary>Whether the audio has been deafened.</summary>
@@ -140,137 +78,54 @@ public class ActiveSound(SoundEffect sfx)
     public void UpdateGain()
     {
         bool sel = Engine.Selected;
-        if (AudioInternal != null)
+        if (sel)
         {
-            if (sel)
-            {
-                AudioInternal.Gain = Gain;
-                Backgrounded = false;
-            }
-            else
-            {
-                AudioInternal.Gain = 0.0001f;
-                Backgrounded = true;
-            }
+            AudioInternal.Gain = Gain;
+            Backgrounded = false;
         }
         else
         {
-            if (sel)
-            {
-                AL.Source(Src, ALSourcef.Gain, Gain);
-                Backgrounded = false;
-            }
-            else
-            {
-                AL.Source(Src, ALSourcef.Gain, 0.0001f);
-                Backgrounded = true;
-            }
+            AudioInternal.Gain = 0.0001f;
+            Backgrounded = true;
         }
     }
 
     /// <summary>Plays the audio.</summary>
     public void Play()
     {
-        if (AudioInternal != null)
-        {
-            Engine.EnforcerInternal.Add(this);
-        }
-        else
-        {
-            if (Src < 0)
-            {
-                return;
-            }
-            AL.SourcePlay(Src);
-        }
+        Engine.EnforcerInternal.Add(this);
     }
 
     /// <summary>Seeks to a location in the clip (From 0.0 to 1.0).</summary>
     /// <param name="f">The location.</param>
     public void Seek(float f)
     {
-        if (AudioInternal != null)
-        {
-            int samp = (int)(AudioInternal.Clip.Data.Length * f);
-            AudioInternal.CurrentSample = samp - samp % 4;
-            return;
-        }
-        // TODO: Enforcer!
-        if (Src < 0)
-        {
-            return;
-        }
-        AL.Source(Src, ALSourcef.SecOffset, f);
+        int samp = (int)(AudioInternal.Clip.Data.Length * f);
+        AudioInternal.CurrentSample = samp - samp % 4;
     }
 
     /// <summary>Pauses the audio.</summary>
     public void Pause()
     {
-        if (AudioInternal != null)
-        {
-            AudioInternal.State = AudioState.PAUSED;
-        }
-        else
-        {
-            if (Src < 0)
-            {
-                return;
-            }
-            AL.SourcePause(Src);
-        }
+        AudioInternal.State = AudioState.PAUSED;
     }
 
     /// <summary>Stops the audio from playing further.</summary>
     public void Stop()
     {
-        if (AudioInternal != null)
-        {
-            AudioInternal.State = AudioState.STOP;
-        }
-        else
-        {
-            if (Src < 0)
-            {
-                return;
-            }
-            AL.SourceStop(Src);
-        }
+        AudioInternal.State = AudioState.STOP;
     }
 
     /// <summary>Returns whether the audio is currently playing.</summary>
     /// <returns>Whether it is playing.</returns>
     public bool IsPlaying()
     {
-        if (AudioInternal != null)
-        {
-            return AudioInternal.State == AudioState.PLAYING;
-        }
-        else
-        {
-            if (Src < 0)
-            {
-                return false;
-            }
-            return ((ALSourceState)AL.GetSource(Src, ALGetSourcei.SourceState) == ALSourceState.Playing);
-        }
+        return AudioInternal.State == AudioState.PLAYING;
     }
 
     /// <summary>Destroys the audio instance.</summary>
     public void Destroy()
     {
-        if (AudioInternal != null)
-        {
-            AudioInternal.State = AudioState.STOP;
-            return;
-        }
-        if (Src < 0)
-        {
-            return;
-        }
-        if (Exists)
-        {
-            AL.DeleteSource(Src);
-            Exists = false;
-        }
+        AudioInternal.State = AudioState.STOP;
     }
 }

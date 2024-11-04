@@ -22,10 +22,7 @@ using FGECore.FileSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.AudioSystem.EnforcerSystem;
 using FGEGraphics.ClientSystem;
-using OpenTK;
-using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
-using OpenTK.Mathematics;
 using NVorbis;
 using System.Threading;
 
@@ -63,14 +60,6 @@ public class SoundEngine : IDisposable
 
     /// <summary>The internal audio enforcer, if used.</summary>
     public AudioEnforcer EnforcerInternal;
-
-    /// <summary>
-    /// Maximum number of sound effects playing simultaneously before the next one gets fed to the enforcer instead of directly into OpenAL.
-    /// If set to 0, the enforcer is always used.
-    /// </summary>
-    public int MaxBeforeEnforce = 0;//50;
-
-    //public MicrophoneHandler Microphone = null;
 
     /// <summary>The backing game client.</summary>
     public GameEngineBase Client;
@@ -119,33 +108,11 @@ public class SoundEngine : IDisposable
         string vendor = AL.Get(ALGetString.Vendor);
         string renderer = AL.Get(ALGetString.Renderer);
         string version = AL.Get(ALGetString.Version);
-        if (Client.EnforceAudio)
-        {
-            EnforcerInternal = new AudioEnforcer() { Engine = this };
-            EnforcerInternal.Init(Context);
-        }
-        /*try
-        {
-            if (Microphone is not null)
-            {
-                Microphone.StopEcho();
-            }
-            Microphone = new MicrophoneHandler(this);
-        }
-        catch (Exception ex)
-        {
-            SysConsole.Output("Loading microphone handling", ex);
-        }*/
-        if (Effects is not null)
-        {
-            foreach (SoundEffect sfx in Effects.Values)
-            {
-                sfx.Internal = -2;
-            }
-        }
+        EnforcerInternal = new AudioEnforcer() { Engine = this };
+        EnforcerInternal.Init(Context);
         Effects = [];
         PlayingNow = [];
-        Logs.ClientInit($"Audio system initialized, OpenAL vendor='{vendor}', renderer='{renderer}', version='{version}', using device '{DeviceName}', available devices: '{devices.JoinString("','")}', Enforcer={Client.EnforceAudio}, MaxBeforeEnforce={MaxBeforeEnforce}, ALExtensions='{ALExtensions.JoinString("','")}'");
+        Logs.ClientInit($"Audio system initialized, OpenAL vendor='{vendor}', renderer='{renderer}', version='{version}', using device '{DeviceName}', available devices: '{devices.JoinString("','")}', ALExtensions='{ALExtensions.JoinString("','")}'");
     }
 
     /// <summary>Stop all sounds.</summary>
@@ -177,23 +144,6 @@ public class SoundEngine : IDisposable
     /// <summary>Whether the engine is 'selected' currently, and should play audio.</summary>
     public bool Selected = true;
 
-    /// <summary>Checks for audio errors.</summary>
-    /// <param name="inp">The location.</param>
-    [Conditional("AUDIO_ERROR_CHECK")]
-    public void CheckError(string inp)
-    {
-        if (EnforcerInternal is null || MaxBeforeEnforce != 0)
-        {
-            ALError err = AL.GetError();
-            if (err != ALError.NoError)
-            {
-                Logs.Warning($"Found audio error {err} for {inp}");
-                //init(Client, CVars);
-                return;
-            }
-        }
-    }
-
     /// <summary>The current position.</summary>
     public Location CPosition = Location.Zero;
 
@@ -209,28 +159,14 @@ public class SoundEngine : IDisposable
     public void Update(Location position, Location forward, Location up, Location velocity, bool selected)
     {
         CPosition = position;
-        if (EnforcerInternal is null || MaxBeforeEnforce != 0)
-        {
-            ALError err = AL.GetError();
-            if (err != ALError.NoError)
-            {
-                Logs.Warning($"Found audio error {err}!");
-                //init(Client, CVars);
-                return;
-            }
-        }
         bool sel = !Client.QuietOnDeselect || selected;
         Selected = sel;
         for (int i = 0; i < PlayingNow.Count; i++)
         {
             ActiveSound sound = PlayingNow[i];
-            if (!sound.Exists || (sound.AudioInternal is null && sound.Src < 0) || (sound.AudioInternal is null ? (ALSourceState)AL.GetSource(sound.Src, ALGetSourcei.SourceState) == ALSourceState.Stopped : sound.AudioInternal.State == AudioState.DONE))
+            if (!sound.Exists || sound.AudioInternal.State == AudioState.DONE)
             {
                 sound.Destroy();
-                if (sound.AudioInternal is null)
-                {
-                    CheckError($"Destroy:{sound.Effect.Name}");
-                }
                 PlayingNow.RemoveAt(i);
                 i--;
                 continue;
@@ -238,71 +174,25 @@ public class SoundEngine : IDisposable
             sound.Effect.LastUse = Client.GlobalTickTime;
             if (sel && !sound.IsBackground)
             {
-                if (sound.AudioInternal is null)
-                {
-                    AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
-                }
-                else
-                {
-
-                }
                 sound.IsDeafened = false;
             }
             if (!sel && sound.IsBackground && !sound.Backgrounded)
             {
-                if (sound.AudioInternal is null)
-                {
-                    AL.Source(sound.Src, ALSourcef.Gain, 0.0001f);
-                }
-                else
-                {
-                    sound.AudioInternal.Gain = 0.0001f;
-                }
+                sound.AudioInternal.Gain = 0.0001f;
                 sound.Backgrounded = true;
             }
             else if (sel && sound.Backgrounded)
             {
-                if (sound.AudioInternal is null)
-                {
-                    AL.Source(sound.Src, ALSourcef.Gain, sound.Gain);
-                }
-                else
-                {
-                    sound.AudioInternal.Gain = sound.Gain;
-                }
+                sound.AudioInternal.Gain = sound.Gain;
                 sound.Backgrounded = false;
                 sound.IsDeafened = false;
             }
         }
-        CheckError("Setup");
-        /*if (Microphone != null)
-        {
-            Microphone.Tick();
-        }*/
-        CheckError("Microphone");
         float globvol = GlobalVolume;
         globvol = globvol <= 0 ? 0.001f : (globvol > 1 ? 1 : globvol);
-        if (EnforcerInternal == null || MaxBeforeEnforce != 0)
-        {
-            Vector3 pos = position.ToOpenTK();
-            Vector3 forw = forward.ToOpenTK();
-            Vector3 upvec = up.ToOpenTK();
-            Vector3 vel = velocity.ToOpenTK();
-            AL.Listener(ALListener3f.Position, ref pos);
-            AL.Listener(ALListenerfv.Orientation, ref forw, ref upvec);
-            AL.Listener(ALListener3f.Velocity, ref vel);
-            CheckError("Positioning");
-            AL.Listener(ALListenerf.Gain, globvol);
-            CheckError("Gain");
-        }
-        if (EnforcerInternal is not null)
-        {
-            EnforcerInternal.FrameUpdate(position, forward, up, false, Client.Delta);
-            //AudioInternal.Left = CVars.a_left.ValueB;
-            //AudioInternal.Right = CVars.a_right.ValueB;
-            EnforcerInternal.Volume = globvol;
-            EnforcerInternal.SpeedOfSound = SpeedOfSound;
-        }
+        EnforcerInternal.FrameUpdate(position, forward, up, false, Client.Delta);
+        EnforcerInternal.Volume = globvol;
+        EnforcerInternal.SpeedOfSound = SpeedOfSound;
         TimeTowardsNextClean += Client.Delta;
         if (TimeTowardsNextClean > 10.0)
         {
@@ -321,11 +211,6 @@ public class SoundEngine : IDisposable
         {
             if (effect.Value.LastUse + 30.0 < Client.GlobalTickTime)
             {
-                if (effect.Value.Internal > -1)
-                {
-                    AL.DeleteBuffer(effect.Value.Internal);
-                }
-                effect.Value.Internal = -2;
                 ToRemove.Add(effect.Key);
             }
         }
@@ -376,21 +261,14 @@ public class SoundEngine : IDisposable
     {
         if (sfx is null)
         {
-            //OutputType.DEBUG.Output("Audio / null");
             return;
         }
         if (PlayingNow.Count > 200 && EnforcerInternal is null)
         {
             if (!CanClean())
             {
-                //OutputType.DEBUG.Output("Audio / count");
                 return;
             }
-        }
-        if (sfx.Internal == -2)
-        {
-            Play(GetSound(sfx.Name), loop, pos, pitch, volume, seek, callback);
-            return;
         }
         if (pitch <= 0 || pitch > 2)
         {
@@ -407,9 +285,8 @@ public class SoundEngine : IDisposable
         volume = Math.Min(volume, MaxSoundVolume);
         void playSound()
         {
-            if (sfx.Clip is null && sfx.Internal < 0)
+            if (sfx.Clip is null)
             {
-                //OutputType.DEBUG.Output("Audio / clip");
                 return;
             }
             ActiveSound actsfx = new(sfx)
@@ -421,28 +298,22 @@ public class SoundEngine : IDisposable
                 Loop = loop
             };
             actsfx.Create();
-            if (actsfx.AudioInternal is null && actsfx.Src < 0)
+            if (actsfx.AudioInternal is null)
             {
-                //OutputType.DEBUG.Output("Audio / src");
                 return;
             }
-            CheckError("Create:" + sfx.Name);
             if (seek != 0)
             {
                 actsfx.Seek(seek);
             }
-            CheckError("Preconfig:" + sfx.Name);
             actsfx.Play();
-            CheckError("Play:" + sfx.Name);
-            //OutputType.DEBUG.Output("Audio / sucess");
             PlayingNow.Add(actsfx);
             callback?.Invoke(actsfx);
         }
         lock (sfx)
         {
-            if (sfx.Clip is null && sfx.Internal == -1)
+            if (sfx.Clip is null)
             {
-                //OutputType.DEBUG.Output("Audio / delay");
                 sfx.Loaded += (o, e) =>
                 {
                     playSound();
@@ -451,36 +322,6 @@ public class SoundEngine : IDisposable
             }
         }
         playSound();
-    }
-
-    /// <summary>Play a sound (simple internal option).</summary>
-    /// <param name="sfx">The effect.</param>
-    /// <param name="loop">Whether to loop.</param>
-    /// <returns>The sound played.</returns>
-    public ActiveSound PlaySimpleInternal(SoundEffect sfx, bool loop)
-    {
-        ActiveSound playSound()
-        {
-            ActiveSound actsfx = new(sfx)
-            {
-                Engine = this,
-                Position = Location.NaN,
-                Pitch = 1.0f,
-                Gain = 1.0f,
-                Loop = loop
-            };
-            actsfx.Create();
-            actsfx.Play();
-            return actsfx;
-        }
-        lock (sfx)
-        {
-            if (sfx.Internal == -1)
-            {
-                return null; // TODO: Enforce load-NOW?
-            }
-        }
-        return playSound();
     }
 
     /// <summary>Gets a sound by name.</summary>
@@ -503,31 +344,10 @@ public class SoundEngine : IDisposable
         sfx = new SoundEffect()
         {
             Name = namelow,
-            Internal = -1,
             LastUse = Client.GlobalTickTime
         };
         Effects.Add(namelow, sfx);
         return sfx;
-    }
-
-    /// <summary>Gets the OpenAL sound format for some data.</summary>
-    /// <param name="channels">Channel count.</param>
-    /// <param name="bits">Bit count.</param>
-    /// <returns>AL format.</returns>
-    static ALFormat GetSoundFormat(int channels, int bits)
-    {
-        if (channels == 1)
-        {
-            return bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
-        }
-        else if (channels == 2)
-        {
-            return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
-        }
-        else
-        {
-            throw new NotSupportedException($"The specified sound format ({channels} channels) is not supported.");
-        }
     }
 
     /// <summary>Lock object to guarantee no simultaneous file reads.</summary>
@@ -549,7 +369,6 @@ public class SoundEngine : IDisposable
             SoundEffect tsfx = new()
             {
                 Name = name,
-                Internal = -1,
                 LastUse = Client.GlobalTickTime
             };
             Client.Schedule.StartAsyncTask(() =>
@@ -564,11 +383,9 @@ public class SoundEngine : IDisposable
                     SoundEffect ts = LoadVorbisSound(new MemoryStream(rawData), name);
                     lock (tsfx)
                     {
-                        tsfx.Internal = ts.Internal;
                         tsfx.Clip = ts.Clip;
                     }
-                    //OutputType.DEBUG.Output("Audio / valid1: " + tsfx.Internal + ", " + tsfx.Clip);
-                    if (tsfx.Loaded != null)
+                    if (tsfx.Loaded is not null)
                     {
                         Client.Schedule.ScheduleSyncTask(() =>
                         {
@@ -581,7 +398,6 @@ public class SoundEngine : IDisposable
                     SysConsole.Output($"loading audio file '{name}'", ex);
                 }
             });
-            //OutputType.DEBUG.Output("Audio / valid: " + tsfx);
             return tsfx;
         }
         catch (Exception ex)
@@ -621,11 +437,6 @@ public class SoundEngine : IDisposable
             };
             sfx.Clip = clip;
         }
-        if (EnforcerInternal == null || MaxBeforeEnforce != 0)
-        {
-            sfx.Internal = AL.GenBuffer();
-            AL.BufferData(sfx.Internal, GetSoundFormat(oggReader.Channels, 16), data, oggReader.SampleRate);
-        }
         return sfx;
     }
 
@@ -640,7 +451,7 @@ public class SoundEngine : IDisposable
             Name = name,
             LastUse = Client.GlobalTickTime
         };
-        byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out int rate);
+        byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out _);
         if (EnforcerInternal != null)
         {
             LiveAudioClip clip = new()
@@ -668,12 +479,6 @@ public class SoundEngine : IDisposable
             sfx.Clip = clip;
             // OutputType.DEBUG.Output("Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
         }
-        if (EnforcerInternal == null || MaxBeforeEnforce != 0)
-        {
-            sfx.Internal = AL.GenBuffer();
-            AL.BufferData(sfx.Internal, GetSoundFormat(channels, bits), data, rate);
-        }
-        //OutputType.DEBUG.Output("Audio / prepped: " + AudioInternal);
         return sfx;
     }
 
@@ -745,13 +550,6 @@ public class SoundEngine : IDisposable
     /// <returns>The audio level.</returns>
     public float EstimateAudioLevel()
     {
-        if (EnforcerInternal is not null)
-        {
-            return Volatile.Read(ref EnforcerInternal.CurrentLevel);
-        }
-        else
-        {
-            return 0.5f; // TODO: ???
-        }
+        return Volatile.Read(ref EnforcerInternal.CurrentLevel);
     }
 }

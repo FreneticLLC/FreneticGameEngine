@@ -55,9 +55,6 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
     /// <summary>The backing game client.</summary>
     public GameClientWindow Client => OwningInstance as GameClientWindow;
 
-    /// <summary>Whether to use audio 'enforce' mode.</summary>
-    public bool EnforceAudio = true;
-
     /// <summary>Whether to shut up when the game is deselected.</summary>
     public bool QuietOnDeselect = true;
 
