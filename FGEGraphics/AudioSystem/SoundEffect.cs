@@ -23,7 +23,7 @@ public class SoundEffect
     public string Name;
 
     /// <summary>A quick-and-dirty event for when the sound effect is loaded.</summary>
-    public EventHandler<EventArgs> Loaded;
+    public Action Loaded;
 
     /// <summary>The time this sound effect was last used.</summary>
     public double LastUse = 0.0;

@@ -58,20 +58,28 @@ public class SoundEngine : IDisposable
     /// <summary>The audio context from OpenAL.</summary>
     public ALContext Context = new(IntPtr.Zero);
 
-    /// <summary>The internal audio enforcer, if used.</summary>
-    public AudioEnforcer EnforcerInternal;
+    /// <summary>The internal audio enforcer.</summary>
+    public AudioEnforcer EnforcerInternal = new();
 
     /// <summary>The backing game client.</summary>
     public GameEngineBase Client;
 
-    /// <summary>Current global volume.</summary>
-    public float GlobalVolume = 0.5f;
+    /// <summary>Current global game volume. Must be in range [0.0 .. 2.0]</summary>
+    public float GlobalVolume
+    {
+        get => EnforcerInternal.Volume;
+        set => EnforcerInternal.Volume = Math.Clamp(value, 0, 2);
+    }
 
-    /// <summary>Current global pitch.</summary>
+    /// <summary>Current global pitch modifier.</summary>
     public float GlobalPitch = 1.0f;
 
     /// <summary>The speed of sound, in units per second, defaults to <see cref="AudioEnforcer.SPEED_OF_SOUND"/>.</summary>
-    public float SpeedOfSound = AudioEnforcer.SPEED_OF_SOUND;
+    public float SpeedOfSound
+    {
+        get => EnforcerInternal.SpeedOfSound;
+        set => EnforcerInternal.SpeedOfSound = value;
+    }
 
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
     public float MaxSoundVolume = 2;
@@ -84,6 +92,9 @@ public class SoundEngine : IDisposable
 
     /// <summary>The relevant OpenAL Device Name.</summary>
     public string DeviceName;
+
+    /// <summary>How long (in delta seconds) after a sound effect has last played before it should be automatically cleared from memory.</summary>
+    public double TimeBeforeClearSoundData = 60 * 5;
 
     /// <summary>Initialize the sound engine.</summary>
     /// <param name="tclient">The backing client.</param>
@@ -108,7 +119,12 @@ public class SoundEngine : IDisposable
         string vendor = AL.Get(ALGetString.Vendor);
         string renderer = AL.Get(ALGetString.Renderer);
         string version = AL.Get(ALGetString.Version);
-        EnforcerInternal = new AudioEnforcer() { Engine = this };
+        EnforcerInternal = new AudioEnforcer()
+        {
+            Engine = this,
+            SpeedOfSound = SpeedOfSound,
+            Volume = GlobalVolume
+        };
         EnforcerInternal.Init(Context);
         Effects = [];
         PlayingNow = [];
@@ -188,11 +204,7 @@ public class SoundEngine : IDisposable
                 sound.IsDeafened = false;
             }
         }
-        float globvol = GlobalVolume;
-        globvol = globvol <= 0 ? 0.001f : (globvol > 1 ? 1 : globvol);
         EnforcerInternal.FrameUpdate(position, forward, up, false, Client.Delta);
-        EnforcerInternal.Volume = globvol;
-        EnforcerInternal.SpeedOfSound = SpeedOfSound;
         TimeTowardsNextClean += Client.Delta;
         if (TimeTowardsNextClean > 10.0)
         {
@@ -204,12 +216,12 @@ public class SoundEngine : IDisposable
     /// <summary>Effect names to remove.</summary>
     readonly List<string> ToRemove = [];
 
-    /// <summary>Runs a full clean-up pass.</summary>
+    /// <summary>Runs a full clean-up pass, removing old sound effect data from memory.</summary>
     public void CleanTick()
     {
         foreach (KeyValuePair<string, SoundEffect> effect in Effects)
         {
-            if (effect.Value.LastUse + 30.0 < Client.GlobalTickTime)
+            if (effect.Value.LastUse + TimeBeforeClearSoundData < Client.GlobalTickTime)
             {
                 ToRemove.Add(effect.Key);
             }
@@ -227,52 +239,26 @@ public class SoundEngine : IDisposable
     /// <summary>Currently playing audio.</summary>
     public List<ActiveSound> PlayingNow;
 
-    /// <summary>Try to clean things. Return whether anything was cleaned.</summary>
-    /// <returns>Whether successful.</returns>
-    public bool CanClean()
-    {
-        bool cleaned = false;
-        for (int i = 0; i < PlayingNow.Count; i++)
-        {
-            ActiveSound sound = PlayingNow[i];
-            if (sound.Gain < 0.05 || (sound.Position.DistanceSquared(CPosition) > 30 * 30))
-            {
-                sound.Destroy();
-                PlayingNow.RemoveAt(i);
-                i--;
-                cleaned = true;
-            }
-        }
-        return cleaned;
-    }
-
     /// <summary>
     /// Plays a sound effect.
-    /// NOTE: *NOT* guaranteed to play a sound effect immediately, regardless of input! Some sound effects will be delayed! If too many audible sounds are already playing, this will refuse to play.
+    /// NOTE: *NOT* guaranteed to play a sound effect immediately, regardless of input! Some sound effects will be delayed!
     /// </summary>
     /// <param name="sfx">The sound effect.</param>
     /// <param name="loop">Whether to loop.</param>
-    /// <param name="pos">The position.</param>
+    /// <param name="position">The location in the world the sound should come from. Use <see cref="Location.NaN"/> for global/locationless.</param>
     /// <param name="pitch">The pitch.</param>
-    /// <param name="volume">The volume.</param>
-    /// <param name="seek">The seek location.</param>
+    /// <param name="volume">The relative volume of this sound effect.</param>
+    /// <param name="seek">The seek location within the clip, from 0.0 to 1.0 as a fraction of the overall clip length.</param>
     /// <param name="callback">The callback upon playing start.</param>
-    public void Play(SoundEffect sfx, bool loop, Location pos, float pitch = 1, float volume = 1, float seek = 0, Action<ActiveSound> callback = null)
+    public void Play(SoundEffect sfx, bool loop, Location position, float pitch = 1, float volume = 1, float seek = 0, Action<ActiveSound> callback = null)
     {
         if (sfx is null)
         {
             return;
         }
-        if (PlayingNow.Count > 200 && EnforcerInternal is null)
+        if (pitch <= 0 || pitch > 10)
         {
-            if (!CanClean())
-            {
-                return;
-            }
-        }
-        if (pitch <= 0 || pitch > 2)
-        {
-            throw new ArgumentException("Must be between 0 and 2", nameof(pitch));
+            throw new ArgumentException("Pitch must be between 0 and 10", nameof(pitch));
         }
         if (volume == 0)
         {
@@ -292,16 +278,11 @@ public class SoundEngine : IDisposable
             ActiveSound actsfx = new(sfx)
             {
                 Engine = this,
-                Position = pos,
+                Position = position,
                 Pitch = pitch * GlobalPitch,
                 Gain = volume,
                 Loop = loop
             };
-            actsfx.Create();
-            if (actsfx.AudioInternal is null)
-            {
-                return;
-            }
             if (seek != 0)
             {
                 actsfx.Seek(seek);
@@ -314,7 +295,7 @@ public class SoundEngine : IDisposable
         {
             if (sfx.Clip is null)
             {
-                sfx.Loaded += (o, e) =>
+                sfx.Loaded += () =>
                 {
                     playSound();
                 };
@@ -389,7 +370,7 @@ public class SoundEngine : IDisposable
                     {
                         Client.Schedule.ScheduleSyncTask(() =>
                         {
-                            tsfx.Loaded?.Invoke(tsfx, null);
+                            tsfx.Loaded?.Invoke();
                         });
                     }
                 }

@@ -22,19 +22,46 @@ public class ActiveSound(SoundEffect sfx)
     public SoundEffect Effect = sfx;
 
     /// <summary>The 3D space position of the sound effect.</summary>
-    public Location Position;
+    public Location Position
+    {
+        get => AudioInternal.Position;
+        set
+        {
+            AudioInternal.Position = value;
+            AudioInternal.UsePosition = !value.IsNaN();
+        }
+    }
+
+    /// <summary>The 3D space position of the sound effect.</summary>
+    public Location Velocity
+    {
+        get => AudioInternal.Velocity;
+        set => AudioInternal.Velocity = value;
+    }
 
     /// <summary>Whether to loop the sound.</summary>
-    public bool Loop = false;
+    public bool Loop
+    {
+        get => AudioInternal.Loop;
+        set => AudioInternal.Loop = value;
+    }
 
     /// <summary>The pitch of the sound.</summary>
-    public float Pitch = 1f;
+    public float Pitch
+    {
+        get => AudioInternal.Pitch;
+        set => AudioInternal.Pitch = value;
+    }
 
     /// <summary>The gain of the sound.</summary>
-    public float Gain = 1f;
+    public float Gain
+    {
+        get => AudioInternal.Gain;
+        set => AudioInternal.Gain = value;
+    }
 
     /// <summary>The internal enforcer instance, if relevant.</summary>
-    public LiveAudioInstance AudioInternal = null;
+    public LiveAudioInstance AudioInternal = new() { Clip = sfx.Clip };
 
     /// <summary>Whether the effect exists already in the backing systems.</summary>
     public bool Exists = false;
@@ -45,50 +72,8 @@ public class ActiveSound(SoundEffect sfx)
     /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
     public bool Backgrounded = false;
 
-    /// <summary>Creates the sound into the backing engines.</summary>
-    public void Create()
-    {
-        if (!Exists)
-        {
-            AudioInternal = new LiveAudioInstance()
-            {
-                Clip = Effect.Clip,
-                Gain = Gain,
-                Loop = Loop,
-                Pitch = Pitch,
-                Position = Position,
-                Velocity = Location.Zero, // TODO: Velocity!
-                                          // TODO: Direction?
-                UsePosition = !Position.IsNaN()
-            };
-            Exists = true;
-        }
-    }
-
-    /// <summary>Updates the pitch to the backing engine.</summary>
-    public void UpdatePitch()
-    {
-        AudioInternal.Pitch = Pitch;
-    }
-
     /// <summary>Whether the audio has been deafened.</summary>
     public bool IsDeafened = false;
-
-    /// <summary>Updates the gain to the backing systems.</summary>
-    public void UpdateGain()
-    {
-        bool sel = Engine.Selected;
-        if (sel)
-        {
-            AudioInternal.Gain = Gain;
-            Backgrounded = false;
-        }
-        else
-        {
-            AudioInternal.Gain = 0.0001f;
-            Backgrounded = true;
-        }
-    }
 
     /// <summary>Plays the audio.</summary>
     public void Play()
