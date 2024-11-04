@@ -14,6 +14,7 @@ using FreneticUtilities.FreneticToolkit;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using System.Runtime.InteropServices;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -23,6 +24,9 @@ public class FGE3DAudioEngine
 {
     /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
     public const float SPEED_OF_SOUND = 343;
+
+    /// <summary>If true, the audio engine should use WASAPI. If false, use OpenAL.</summary>
+    public static readonly bool USE_WASAPI = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     /// <summary>How many instances of the audio engine have been created. This value starts at 1 and increments every time an audio engine is launched.</summary>
     public static long AudioID = 1;
@@ -78,6 +82,9 @@ public class FGE3DAudioEngine
     /// <summary>If the engine is currently backed by OpenAL, this instance handles that.</summary>
     public OpenALAudioProvider OpenALBacker;
 
+    /// <summary>If the engine is currently backed by WASAPI, this instance handles that.</summary>
+    public WasApiAudioProvider WasApiAudioBacker;
+
     /// <summary>Add an audio instance to the audio engine.</summary>
     /// <param name="inst">The instance to add.</param>
     public void Add(ActiveSound inst)
@@ -96,8 +103,16 @@ public class FGE3DAudioEngine
     /// <summary>Initialize and load the audio engine.</summary>
     public void Init()
     {
-        OpenALBacker = new();
-        OpenALBacker.Init();
+        if (USE_WASAPI)
+        {
+            WasApiAudioBacker = new();
+            WasApiAudioBacker.Initialize();
+        }
+        else
+        {
+            OpenALBacker = new();
+            OpenALBacker.Init();
+        }
         Internal.Instance = this;
         Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
@@ -188,8 +203,11 @@ public class FGE3DAudioEngine
         /// <summary>How many buffers are in <see cref="ReusableBuffers"/>.</summary>
         public const int REUSABLE_BUFFER_ARRAY_SIZE = 32;
 
+        /// <summary>Number of audio samples in a buffer.</summary>
+        public const int SAMPLES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0);
+
         /// <summary>Actual byte space to load at once.</summary>
-        public const int BYTES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0) * BYTERATE;
+        public const int BYTES_PER_BUFFER = SAMPLES_PER_BUFFER * BYTERATE;
 
         /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
         public byte[][] ReusableBuffers;
@@ -216,6 +234,7 @@ public class FGE3DAudioEngine
         public readonly void CloseAndStop()
         {
             Instance.OpenALBacker?.Shutdown();
+            Instance.WasApiAudioBacker?.Shutdown();
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
@@ -266,7 +285,7 @@ public class FGE3DAudioEngine
             {
                 Stopwatch stopwatch = new();
                 stopwatch.Start();
-                Instance.OpenALBacker.MakeCurrent();
+                Instance.OpenALBacker?.MakeCurrent();
                 DeadInstances = [];
                 while (true)
                 {
@@ -278,7 +297,7 @@ public class FGE3DAudioEngine
                     stopwatch.Stop();
                     double elSec = stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
                     stopwatch.Restart();
-                    bool needsFill = Instance.OpenALBacker.PreprocessStep();
+                    bool needsFill = USE_WASAPI ? Instance.WasApiAudioBacker.PreprocessStep() : Instance.OpenALBacker.PreprocessStep();
                     if (needsFill)
                     {
                         foreach (AudioChannel channel in Instance.Channels)
@@ -302,7 +321,14 @@ public class FGE3DAudioEngine
                         {
                             newCurrentLevel = Math.Max(newCurrentLevel, GetLevelFor(channel.InternalCurrentBuffer));
                         }
-                        Instance.OpenALBacker.SendNextBuffer(Instance);
+                        if (USE_WASAPI)
+                        {
+                            Instance.WasApiAudioBacker.SendNextBuffer(Instance);
+                        }
+                        else
+                        {
+                            Instance.OpenALBacker.SendNextBuffer(Instance);
+                        }
                         Instance.CurrentLevel = newCurrentLevel;
                     }
                     int ms = PAUSE - (int)(elSec * 1000.0);
