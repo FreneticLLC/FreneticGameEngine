@@ -7,7 +7,7 @@
 //
 
 using FGECore.MathHelpers;
-using FGEGraphics.AudioSystem.EnforcerSystem;
+using FGEGraphics.AudioSystem.AudioInternals;
 
 namespace FGEGraphics.AudioSystem;
 
@@ -60,11 +60,8 @@ public class ActiveSound(SoundEffect sfx)
         set => AudioInternal.Gain = value;
     }
 
-    /// <summary>The internal enforcer instance, if relevant.</summary>
+    /// <summary>The internal audio engine instance, if relevant.</summary>
     public LiveAudioInstance AudioInternal = new() { Clip = sfx.Clip };
-
-    /// <summary>Whether the effect exists already in the backing systems.</summary>
-    public bool Exists = false;
 
     /// <summary>Whether the sound effect is considered a background effect.</summary>
     public bool IsBackground = false;
@@ -78,7 +75,7 @@ public class ActiveSound(SoundEffect sfx)
     /// <summary>Plays the audio.</summary>
     public void Play()
     {
-        Engine.EnforcerInternal.Add(this);
+        Engine.Internal.AudioEngine.Add(this);
     }
 
     /// <summary>Seeks to a location in the clip (From 0.0 to 1.0).</summary>
@@ -106,11 +103,5 @@ public class ActiveSound(SoundEffect sfx)
     public bool IsPlaying()
     {
         return AudioInternal.State == AudioState.PLAYING;
-    }
-
-    /// <summary>Destroys the audio instance.</summary>
-    public void Destroy()
-    {
-        AudioInternal.State = AudioState.STOP;
     }
 }

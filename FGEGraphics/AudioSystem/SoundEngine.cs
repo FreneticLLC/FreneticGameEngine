@@ -8,90 +8,73 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using FGECore;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
-using FGEGraphics.AudioSystem.EnforcerSystem;
+using FGEGraphics.AudioSystem.AudioInternals;
 using FGEGraphics.ClientSystem;
-using OpenTK.Audio.OpenAL;
 using NVorbis;
-using System.Threading;
 
 namespace FGEGraphics.AudioSystem;
 
 /// <summary>An audio sound system and engine for playing audio.</summary>
-public class SoundEngine : IDisposable
+public class SoundEngine
 {
-    /// <summary>Dumb MS logic dispose method.</summary>
-    /// <param name="disposing">Whether to dispose managed resources.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            if (Context.Handle != IntPtr.Zero)
-            {
-                ALC.DestroyContext(Context);
-            }
-            Context = new ALContext(IntPtr.Zero);
-        }
-    }
-
-    /// <summary>Disposes the window client.</summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
     /// <summary>A "noise" sound effect.</summary>
     public SoundEffect Noise;
-
-    /// <summary>The audio context from OpenAL.</summary>
-    public ALContext Context = new(IntPtr.Zero);
-
-    /// <summary>The internal audio enforcer.</summary>
-    public AudioEnforcer EnforcerInternal = new();
 
     /// <summary>The backing game client.</summary>
     public GameEngineBase Client;
 
+    /// <summary>Whether the engine is 'selected' currently, and should play audio.</summary>
+    public bool Selected = true;
+
+    /// <summary>Current effects.</summary>
+    public Dictionary<string, SoundEffect> Effects = [];
+
+    /// <summary>Currently playing audio.</summary>
+    public List<ActiveSound> PlayingNow = [];
+
+    /// <summary>Fake clip with no audio data.</summary>
+    public LiveAudioClip EmptyClip = new() { Data = [], Channels = 1 };
+
+    /// <summary>Internal data for this sound engine instance.</summary>
+    public struct InternalData
+    {
+        /// <summary>The internal audio engine.</summary>
+        public FGE3DAudioEngine AudioEngine;
+
+        /// <summary>Time until the next clean up pass.</summary>
+        public double TimeTowardsNextClean;
+    }
+
+    /// <summary>Internal data for this sound engine instance.</summary>
+    public InternalData Internal = new() { AudioEngine = new() };
+
     /// <summary>Current global game volume. Must be in range [0.0 .. 2.0]</summary>
     public float GlobalVolume
     {
-        get => EnforcerInternal.Volume;
-        set => EnforcerInternal.Volume = Math.Clamp(value, 0, 2);
+        get => Internal.AudioEngine.Volume;
+        set => Internal.AudioEngine.Volume = Math.Clamp(value, 0, 2);
     }
 
     /// <summary>Current global pitch modifier.</summary>
     public float GlobalPitch = 1.0f;
 
-    /// <summary>The speed of sound, in units per second, defaults to <see cref="AudioEnforcer.SPEED_OF_SOUND"/>.</summary>
+    /// <summary>The speed of sound, in units per second, defaults to <see cref="FGE3DAudioEngine.SPEED_OF_SOUND"/>.</summary>
     public float SpeedOfSound
     {
-        get => EnforcerInternal.SpeedOfSound;
-        set => EnforcerInternal.SpeedOfSound = value;
+        get => Internal.AudioEngine.SpeedOfSound;
+        set => Internal.AudioEngine.SpeedOfSound = value;
     }
 
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
     public float MaxSoundVolume = 2;
-
-    /// <summary>All available OpenAL extensions.</summary>
-    public HashSet<string> ALExtensions = [];
-
-    /// <summary>The relevant OpenAL Device.</summary>
-    public ALDevice Device;
-
-    /// <summary>The relevant OpenAL Device Name.</summary>
-    public string DeviceName;
 
     /// <summary>How long (in delta seconds) after a sound effect has last played before it should be automatically cleared from memory.</summary>
     public double TimeBeforeClearSoundData = 60 * 5;
@@ -100,35 +83,15 @@ public class SoundEngine : IDisposable
     /// <param name="tclient">The backing client.</param>
     public void Init(GameEngineBase tclient)
     {
-        EnforcerInternal?.Shutdown();
-        if (Context.Handle != IntPtr.Zero)
-        {
-            ALC.DestroyContext(Context);
-        }
+        Shutdown();
         Client = tclient;
-        string[] devices = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
-        string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
-        Device = ALC.OpenDevice(deviceName);
-        Context = ALC.CreateContext(Device, (int[])null);
-        ALC.MakeContextCurrent(Context);
-        DeviceName = ALC.GetString(Device, AlcGetString.DeviceSpecifier);
-        string[] devExtensions = (ALC.GetString(Device, AlcGetString.Extensions) ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        string[] coreExtensions = (AL.Get(ALGetString.Extensions) ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        ALExtensions.UnionWith(coreExtensions);
-        ALExtensions.UnionWith(devExtensions);
-        string vendor = AL.Get(ALGetString.Vendor);
-        string renderer = AL.Get(ALGetString.Renderer);
-        string version = AL.Get(ALGetString.Version);
-        EnforcerInternal = new AudioEnforcer()
+        // Note: we always want a new instance even during re-init, but we want to copy key variables across
+        Internal.AudioEngine = new FGE3DAudioEngine()
         {
-            Engine = this,
             SpeedOfSound = SpeedOfSound,
             Volume = GlobalVolume
         };
-        EnforcerInternal.Init(Context);
-        Effects = [];
-        PlayingNow = [];
-        Logs.ClientInit($"Audio system initialized, OpenAL vendor='{vendor}', renderer='{renderer}', version='{version}', using device '{DeviceName}', available devices: '{devices.JoinString("','")}', ALExtensions='{ALExtensions.JoinString("','")}'");
+        Internal.AudioEngine.Init();
     }
 
     /// <summary>Stop all sounds.</summary>
@@ -145,26 +108,8 @@ public class SoundEngine : IDisposable
     public void Shutdown()
     {
         StopAll();
-        if (EnforcerInternal != null)
-        {
-            EnforcerInternal.Shutdown();
-            EnforcerInternal = null;
-        }
-        if (Context.Handle != IntPtr.Zero && (EnforcerInternal is null || !EnforcerInternal.Run))
-        {
-            ALC.DestroyContext(Context);
-        }
-        Context = new ALContext(IntPtr.Zero);
+        Internal.AudioEngine?.Shutdown();
     }
-
-    /// <summary>Whether the engine is 'selected' currently, and should play audio.</summary>
-    public bool Selected = true;
-
-    /// <summary>The current position.</summary>
-    public Location CPosition = Location.Zero;
-
-    /// <summary>Time until the next clean up pass.</summary>
-    public double TimeTowardsNextClean = 0.0;
 
     /// <summary>Updates the sound engine.</summary>
     /// <param name="position">Current position.</param>
@@ -174,15 +119,13 @@ public class SoundEngine : IDisposable
     /// <param name="selected">Whether the system is selected.</param>
     public void Update(Location position, Location forward, Location up, Location velocity, bool selected)
     {
-        CPosition = position;
         bool sel = !Client.QuietOnDeselect || selected;
         Selected = sel;
         for (int i = 0; i < PlayingNow.Count; i++)
         {
             ActiveSound sound = PlayingNow[i];
-            if (!sound.Exists || sound.AudioInternal.State == AudioState.DONE)
+            if (sound.AudioInternal.State == AudioState.DONE || sound.AudioInternal.State == AudioState.STOP)
             {
-                sound.Destroy();
                 PlayingNow.RemoveAt(i);
                 i--;
                 continue;
@@ -204,12 +147,12 @@ public class SoundEngine : IDisposable
                 sound.IsDeafened = false;
             }
         }
-        EnforcerInternal.FrameUpdate(position, forward, up, false, Client.Delta);
-        TimeTowardsNextClean += Client.Delta;
-        if (TimeTowardsNextClean > 10.0)
+        Internal.AudioEngine.FrameUpdate(position, forward, up, false, Client.Delta);
+        Internal.TimeTowardsNextClean += Client.Delta;
+        if (Internal.TimeTowardsNextClean > 10.0)
         {
             CleanTick();
-            TimeTowardsNextClean = 0.0;
+            Internal.TimeTowardsNextClean = 0.0;
         }
     }
 
@@ -232,12 +175,6 @@ public class SoundEngine : IDisposable
         }
         ToRemove.Clear();
     }
-
-    /// <summary>Current effects.</summary>
-    public Dictionary<string, SoundEffect> Effects;
-
-    /// <summary>Currently playing audio.</summary>
-    public List<ActiveSound> PlayingNow;
 
     /// <summary>
     /// Plays a sound effect.
@@ -295,10 +232,7 @@ public class SoundEngine : IDisposable
         {
             if (sfx.Clip is null)
             {
-                sfx.Loaded += () =>
-                {
-                    playSound();
-                };
+                sfx.Loaded += playSound;
                 return;
             }
         }
@@ -331,9 +265,6 @@ public class SoundEngine : IDisposable
         return sfx;
     }
 
-    /// <summary>Lock object to guarantee no simultaneous file reads.</summary>
-    public LockObject SoundFileLocker = new();
-
     /// <summary>Load a sound effect.</summary>
     /// <param name="name">The name of the effect.</param>
     /// <returns>The sound effect.</returns>
@@ -342,11 +273,6 @@ public class SoundEngine : IDisposable
         try
         {
             string newname = $"sounds/{name}.ogg";
-            if (!Client.Client.Files.FileExists(newname))
-            {
-                Logs.Warning($"Cannot load audio '{name}': file does not exist.");
-                return null;
-            }
             SoundEffect tsfx = new()
             {
                 Name = name,
@@ -356,15 +282,20 @@ public class SoundEngine : IDisposable
             {
                 try
                 {
-                    byte[] rawData;
-                    lock (SoundFileLocker)
+                    LiveAudioClip clip;
+                    if (Client.Client.Files.TryReadFileData(newname, out byte[] rawData))
                     {
-                        rawData = Client.Client.Files.ReadFileData(newname);
+                        clip = LoadVorbisSound(new MemoryStream(rawData), name).Clip;
+
                     }
-                    SoundEffect ts = LoadVorbisSound(new MemoryStream(rawData), name);
+                    else
+                    {
+                        Logs.Warning($"Cannot load audio '{name}': file does not exist.");
+                        clip = EmptyClip;
+                    }
                     lock (tsfx)
                     {
-                        tsfx.Clip = ts.Clip;
+                        tsfx.Clip = clip;
                     }
                     if (tsfx.Loaded is not null)
                     {
@@ -409,15 +340,12 @@ public class SoundEngine : IDisposable
         {
             PrimitiveConversionHelper.Short16ToBytes((short)(sampleBuffer[i] * short.MaxValue), data, i * 2);
         }
-        if (EnforcerInternal != null)
+        LiveAudioClip clip = new()
         {
-            LiveAudioClip clip = new()
-            {
-                Data = data,
-                Channels = (byte)oggReader.Channels
-            };
-            sfx.Clip = clip;
-        }
+            Data = data,
+            Channels = (byte)oggReader.Channels
+        };
+        sfx.Clip = clip;
         return sfx;
     }
 
@@ -433,33 +361,30 @@ public class SoundEngine : IDisposable
             LastUse = Client.GlobalTickTime
         };
         byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out _);
-        if (EnforcerInternal != null)
+        LiveAudioClip clip = new()
         {
-            LiveAudioClip clip = new()
+            Data = data
+        };
+        if (bits == 8)
+        {
+            clip.Data = new byte[data.Length * 2];
+            for (int i = 0; i < data.Length; i++)
             {
-                Data = data
-            };
-            if (bits == 8)
-            {
-                clip.Data = new byte[data.Length * 2];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    // TODO: Sanity?
-                    clip.Data[i] = data[i + 1];
-                    clip.Data[i + 1] = 0;
-                }
-                //data = clip.Data;
+                // TODO: Sanity?
+                clip.Data[i] = data[i + 1];
+                clip.Data[i + 1] = 0;
             }
-            /*long pblast = 0;
-            for (int i = 0; i < clip.Data.Length; i++)
-            {
-                pblast += clip.Data[i];
-            }*/
-            // TODO: clip.Rate = rate;
-            clip.Channels = (byte)channels;
-            sfx.Clip = clip;
-            // OutputType.DEBUG.Output("Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
+            //data = clip.Data;
         }
+        /*long pblast = 0;
+        for (int i = 0; i < clip.Data.Length; i++)
+        {
+            pblast += clip.Data[i];
+        }*/
+        // TODO: clip.Rate = rate;
+        clip.Channels = (byte)channels;
+        sfx.Clip = clip;
+        // OutputType.DEBUG.Output("Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
         return sfx;
     }
 
@@ -527,10 +452,10 @@ public class SoundEngine : IDisposable
         }
     }
 
-    /// <summary>Estimates current audio levels (If enforcer enabled).</summary>
+    /// <summary>Estimates current audio levels. Very frame-by-frame sensitive, unlikely to be useful unless aggregated.</summary>
     /// <returns>The audio level.</returns>
     public float EstimateAudioLevel()
     {
-        return Volatile.Read(ref EnforcerInternal.CurrentLevel);
+        return Internal.AudioEngine.CurrentLevel;
     }
 }

@@ -7,22 +7,19 @@
 //
 
 using FGECore.MathHelpers;
-using OpenTK.Audio.OpenAL;
-using OpenTK.Mathematics;
 using System;
-using Quaternion = FGECore.MathHelpers.Quaternion;
 
-namespace FGEGraphics.AudioSystem.EnforcerSystem;
+namespace FGEGraphics.AudioSystem.AudioInternals;
 
-/// <summary>Represents one channel of audio (eg left or right ear) within the audio enforcer engine.</summary>
+/// <summary>Represents one channel of audio (eg left or right ear) within the audio engine.</summary>
 /// <remarks>Construct the audio channel instance and prep it for OpenAL usage.</remarks>
-public class AudioChannel(string name, AudioEnforcer enforcer, Quaternion rotation)
+public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotation)
 {
     /// <summary>Human-readable name of this audio channel, for debugging.</summary>
     public string Name = name;
 
-    /// <summary>The backing enforcer instance.</summary>
-    public AudioEnforcer Enforcer = enforcer;
+    /// <summary>The backing audio engine instance.</summary>
+    public FGE3DAudioEngine Engine = engine;
 
     /// <summary>The rotation from the listener's forward direction to this channel's ear. Build a quaternion presuming Y-Forward Z-Up for simple results. For example, the right ear channel would be a 90 degree rotation to the right.</summary>
     public Quaternion RotationFromForward = rotation;
@@ -33,61 +30,20 @@ public class AudioChannel(string name, AudioEnforcer enforcer, Quaternion rotati
     /// <summary>When this channel is being processed for new audio to add, this is the current buffer it's targeting.</summary>
     public byte[] InternalCurrentBuffer;
 
-    /// <summary>The AL Audio Source for this channel.</summary>
-    public int ALSource = -1;
-
     /// <summary>Volume modifier for this channel.</summary>
     public float Volume = 1;
 
     /// <summary>The minimum volume applied from channel directionalism.</summary>
-    public float DirectionalMinimum = 0;//0.2f;
+    public float DirectionalMinimum = 0.2f;
 
     /// <summary>Performs a general frame update of current data on this channel.</summary>
     public void FrameUpdate()
     {
-        Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitZ, Enforcer.UpDirection);
+        Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitZ, Engine.UpDirection);
         Quaternion actualCurrentRot = RotationFromForward * adaptedUp;
-        Location earDirection = actualCurrentRot.Transform(Enforcer.ForwardDirection);
-        CurrentPosition = Enforcer.Position + earDirection * (Enforcer.HeadWidth * 0.5);
+        Location earDirection = actualCurrentRot.Transform(Engine.ForwardDirection);
+        CurrentPosition = Engine.Position + earDirection * (Engine.HeadWidth * 0.5);
         // TODO: Track and handle ear's velocity
-    }
-
-    /// <summary>Builds and configures the audio source for this channel.</summary>
-    public void BuildSource()
-    {
-        ALSource = AL.GenSource();
-        ConfigureSource();
-    }
-
-    /// <summary>Configures the OpenAL source to have current proper information for this channel.</summary>
-    public void ConfigureSource()
-    {
-        // TODO: Audio: This is a jank hack, OpenAL is really bad at selecting which channels play what apparently.
-        // Need to rewrite this. Maybe nuke OpenAL and use a more native library? Eck.
-        Vector3 zero = Vector3.Zero;
-        // OpenAL uses Y-Up with X-Sides and Z-Forward
-        Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitY, Enforcer.UpDirection);
-        Quaternion alRot = RotationFromForward * adaptedUp;
-        Vector3 pos = alRot.Transform(Location.UnitZ).ToOpenTK();
-        Vector3 dir = -pos;
-        AL.Source(ALSource, ALSourceb.Looping, false);
-        AL.Source(ALSource, ALSource3f.Direction, ref dir);
-        AL.Source(ALSource, ALSource3f.Velocity, ref zero);
-        AL.Source(ALSource, ALSource3f.Position, ref pos);
-        AL.Source(ALSource, ALSourceb.SourceRelative, false);
-        AL.Source(ALSource, ALSourcef.ConeInnerAngle, 20);
-        AL.Source(ALSource, ALSourcef.ConeOuterAngle, 40);
-    }
-
-    /// <summary>Stops and removes the audio source.</summary>
-    public void DisableSource()
-    {
-        if ((ALSourceState)AL.GetSource(ALSource, ALGetSourcei.SourceState) == ALSourceState.Playing)
-        {
-            AL.SourceStop(ALSource);
-        }
-        AL.DeleteSource(ALSource);
-        ALSource = -1;
     }
 
     /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
@@ -100,31 +56,19 @@ public class AudioChannel(string name, AudioEnforcer enforcer, Quaternion rotati
     /// <summary>Calculates the correct positional audio data for each ear for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
     public AudioPositionalData GetPositionalData(Location position)
     {
-        Location relativeDirectionVector = (Enforcer.Position - position).Normalize();
+        Location relativeDirectionVector = (Engine.Position - position).Normalize();
         relativeDirectionVector = RotationFromForward.Transform(relativeDirectionVector);
-        Quaternion directionDifference = Quaternion.GetQuaternionBetween(Enforcer.ForwardDirection, relativeDirectionVector);
+        Quaternion directionDifference = Quaternion.GetQuaternionBetween(Engine.ForwardDirection, relativeDirectionVector);
         float angle = (float)directionDifference.RepresentedAngle();
         float angleVolume = Math.Max(0, (float)Math.Cos(angle * 0.5)) * (1f - DirectionalMinimum) + DirectionalMinimum;
         AudioPositionalData data = new();
         float dist = (float)position.Distance(CurrentPosition);
-        float modifiedDist = dist / Enforcer.LinearAudioDistance;
+        float modifiedDist = dist / Engine.LinearAudioDistance;
         float distanceGain = 1.0f / Math.Max(1.0f, modifiedDist * modifiedDist);
         data.Volume = angleVolume * distanceGain;
-        float timeOffsetSeconds = -dist / Enforcer.SpeedOfSound;
-        data.TimeOffset = (int)(timeOffsetSeconds * AudioEnforcer.InternalData.FREQUENCY);
+        float timeOffsetSeconds = -dist / Engine.SpeedOfSound;
+        data.TimeOffset = (int)(timeOffsetSeconds * FGE3DAudioEngine.InternalData.FREQUENCY);
         return data;
-    }
-
-    /// <summary>Plays the current audio buffer into OpenAL.</summary>
-    public void PlayBuffer(int bufferId)
-    {
-        AL.BufferData(bufferId, ALFormat.Mono16, InternalCurrentBuffer, AudioEnforcer.InternalData.FREQUENCY);
-        AL.SourceQueueBuffer(ALSource, bufferId);
-        if ((ALSourceState)AL.GetSource(ALSource, ALGetSourcei.SourceState) != ALSourceState.Playing)
-        {
-            AL.SourcePlay(ALSource);
-        }
-        InternalCurrentBuffer = null;
     }
 
     /// <summary>Result data from <see cref="AddClipToBuffer(LiveAudioInstance)"/>.</summary>
@@ -149,17 +93,17 @@ public class AudioChannel(string name, AudioEnforcer enforcer, Quaternion rotati
             timeOffset = data.TimeOffset;
             volume = data.Volume;
         }
-        float gain = toAdd.Gain * Enforcer.Volume * Volume;
-        gain *= gain;
+        float gain = toAdd.Gain * Engine.Volume * Volume;
+        gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         byte[] clipData = toAdd.Clip.Data;
         byte[] outBuffer = InternalCurrentBuffer;
-        int maxBytePosition = AudioEnforcer.InternalData.BYTES_PER_BUFFER;
+        int maxBytePosition = FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER;
         if (!toAdd.Loop)
         {
-            maxBytePosition = Math.Min(clipData.Length - (currentSample + timeOffset * 2), AudioEnforcer.InternalData.BYTES_PER_BUFFER);
+            maxBytePosition = Math.Min(clipData.Length - (currentSample + timeOffset * 2), FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER);
         }
-        while (outBufPosition < maxBytePosition && outBufPosition + 3 < AudioEnforcer.InternalData.BYTES_PER_BUFFER)
+        while (outBufPosition < maxBytePosition && outBufPosition + 3 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
         {
             // TODO: pitch, velocity, etc.?
             int sample = currentSample + timeOffset * 2;

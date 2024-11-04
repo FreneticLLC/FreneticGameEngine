@@ -15,7 +15,7 @@ using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
-namespace FGEGraphics.AudioSystem.EnforcerSystem;
+namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents currently playing audio.</summary>
 public class LiveAudioInstance

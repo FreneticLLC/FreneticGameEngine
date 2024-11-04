@@ -109,7 +109,7 @@ public abstract class BasicEngine
     }
 
     /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
-    public void Shutdown()
+    public virtual void Shutdown()
     {
         PhysicsWorldGeneric.Shutdown();
     }

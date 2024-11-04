@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.AudioSystem.EnforcerSystem;
+namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents the various states an audio instance can be in.</summary>
 public enum AudioState : byte

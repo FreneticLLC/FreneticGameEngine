@@ -33,7 +33,6 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
     {
         if (disposing)
         {
-            Sounds.Dispose();
             Shutdown();
         }
     }
@@ -133,6 +132,13 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
         {
             StackNoteHelper.Pop();
         }
+    }
+
+    /// <summary>Shut down the <see cref="GameEngineBase"/>.</summary>
+    public override void Shutdown()
+    {
+        base.Shutdown();
+        Sounds?.Shutdown();
     }
 
     /// <summary>Any post-load actions.</summary>

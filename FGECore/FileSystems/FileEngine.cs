@@ -429,6 +429,8 @@ public class FileEngine
 
     private bool TryReadFileDataSingle(string filename, out byte[] data)
     {
+        // TODO: Validate this is 100% async stable. Everything *should* be if you don't read during a system reload.
+        // (Do we need protected handler for that case? Maybe a 1-writer-many-readers lock? Or just ConcurrentDictionary the Internal.Files list)
         filename = CleanFileName(filename);
         if (Internal.Files.TryGetValue(filename, out FFPFile packagedFile))
         {

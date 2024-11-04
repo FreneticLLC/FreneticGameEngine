@@ -9,41 +9,37 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using FreneticUtilities.FreneticToolkit;
 using FreneticUtilities.FreneticExtensions;
-using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using OpenTK.Audio.OpenAL;
 
-namespace FGEGraphics.AudioSystem.EnforcerSystem;
+namespace FGEGraphics.AudioSystem.AudioInternals;
 
-/// <summary>The internal engine to crunch audio data and push it to the speakers (when OpenAL's matching subsystem is not playing nice).</summary>
-public class AudioEnforcer
+/// <summary>The internal engine to crunch audio data and push it to the speakers.
+/// Do not use this directly, use <see cref="SoundEngine"/>.</summary>
+public class FGE3DAudioEngine
 {
     /// <summary>Constant value of the approximate speed of sound in air on Earth, 343 meters per second.</summary>
     public const float SPEED_OF_SOUND = 343;
 
-    /// <summary>How many instances of the enforcer have been created. This value starts at 1 and increments every time an enforcer is launched.</summary>
+    /// <summary>How many instances of the audio engine have been created. This value starts at 1 and increments every time an audio engine is launched.</summary>
     public static long AudioID = 1;
 
     /// <summary>The thread for the enforcer.</summary>
     public Thread AudioThread;
 
     /// <summary>Whether the system is running.</summary>
-    public bool Run = false;
+    public volatile bool Run = false;
 
-    /// <summary>The current general volume of the audio enforcer.</summary>
+    /// <summary>The current general volume of the audio engine.</summary>
     public float Volume = 0.5f;
 
     /// <summary>All currently playing audio.</summary>
     public List<LiveAudioInstance> Playing = [];
 
-    /// <summary>Locker for interaction with the enforcer.</summary>
+    /// <summary>Locker for interaction with the audio engine.</summary>
     public LockObject Locker = new();
 
     /// <summary>3D Position of the audio "camera".</summary>
@@ -70,7 +66,7 @@ public class AudioEnforcer
     /// <summary>Up direction (vector) of the audio "camera".</summary>
     public Location UpDirection;
 
-    /// <summary>All channels this enforcer plays into.</summary>
+    /// <summary>All channels this audio engine plays into.</summary>
     public List<AudioChannel> Channels = [];
 
     /// <summary>The speed of sound, in units per second (on Earth in air this is 343 m/s).</summary>
@@ -79,10 +75,10 @@ public class AudioEnforcer
     /// <summary>How far apart the ears are.</summary>
     public float HeadWidth = 0.2f; // TODO: SoundEngine control of this var
 
-    /// <summary>The backing <see cref="SoundEngine"/> instance.</summary>
-    public SoundEngine Engine;
+    /// <summary>If the engine is currently backed by OpenAL, this instance handles that.</summary>
+    public OpenALAudioProvider OpenALBacker;
 
-    /// <summary>Add an audio instance to the enforcer.</summary>
+    /// <summary>Add an audio instance to the audio engine.</summary>
     /// <param name="inst">The instance to add.</param>
     public void Add(ActiveSound inst)
     {
@@ -97,17 +93,17 @@ public class AudioEnforcer
         }
     }
 
-    /// <summary>Initialize and load the enforcer.</summary>
-    /// <param name="acontext">The backing OpenAL context.</param>
-    public void Init(ALContext acontext)
+    /// <summary>Initialize and load the audio engine.</summary>
+    public void Init()
     {
+        OpenALBacker = new();
+        OpenALBacker.Init();
         Internal.Instance = this;
         Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
         {
             Internal.ReusableBuffers[i] = new byte[InternalData.BYTES_PER_BUFFER];
         }
-        Internal.Context = acontext;
         if (Channels.IsEmpty())
         {
             Channels.Add(new AudioChannel("Left", this, Quaternion.FromAxisAngle(Location.UnitZ, Math.PI * 0.5)));
@@ -156,20 +152,20 @@ public class AudioEnforcer
         }
     }
 
-    /// <summary>Shuts down the enforcer. May take a moment before the enforcer thread stops.</summary>
+    /// <summary>Shuts down the audio engine. May take a moment before the engine thread stops.</summary>
     public void Shutdown()
     {
         Run = false;
     }
 
-    /// <summary>Current audio levels. Use <see cref="Volatile"/>.</summary>
-    public float CurrentLevel = 0.0f;
+    /// <summary>Current audio levels.</summary>
+    public volatile float CurrentLevel = 0.0f;
 
-    /// <summary>Internal data used by the enforcer.</summary>
+    /// <summary>Internal data used by the audio engine.</summary>
     public struct InternalData
     {
-        /// <summary>The relevant backing enforcer instance.</summary>
-        public AudioEnforcer Instance;
+        /// <summary>The relevant backing audio engine instance.</summary>
+        public FGE3DAudioEngine Instance;
 
         /// <summary>The audio frequency, in Hz (samples per second).</summary>
         public const int FREQUENCY = 44100;
@@ -195,10 +191,7 @@ public class AudioEnforcer
         /// <summary>Actual byte space to load at once.</summary>
         public const int BYTES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0) * BYTERATE;
 
-        /// <summary>Relevant OpenAL audio context.</summary>
-        public ALContext Context;
-
-        /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the enforcer to prevent GC thrash.</summary>
+        /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
         public byte[][] ReusableBuffers;
 
         /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
@@ -206,9 +199,6 @@ public class AudioEnforcer
 
         /// <summary>Cached reusable list of dead audio instances.</summary>
         public List<LiveAudioInstance> DeadInstances;
-
-        /// <summary>Queue of reusable buffer IDs.</summary>
-        public Queue<int> UsableBufferIDs;
 
         /// <summary>Gets and cleans the next byte buffer to use.</summary>
         public byte[] GetNextBuffer()
@@ -222,18 +212,10 @@ public class AudioEnforcer
             return toReturn;
         }
 
-        /// <summary>Completely closes and stops the audio enforcer system.</summary>
-        public void CloseAndStop()
+        /// <summary>Completely closes and stops the audio engine.</summary>
+        public readonly void CloseAndStop()
         {
-            foreach (AudioChannel channel in Instance.Channels)
-            {
-                channel.DisableSource();
-            }
-            if (Context.Handle != IntPtr.Zero)
-            {
-                ALC.DestroyContext(Context);
-            }
-            Context = new ALContext(IntPtr.Zero);
+            Instance.OpenALBacker?.Shutdown();
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
@@ -242,38 +224,12 @@ public class AudioEnforcer
             float level = 0.0f;
             for (int i = 0; i < buffer.Length; i += BYTERATE)
             {
-                int val = buffer[i] | (buffer[i + 1] << 8);
-                float tval = val / (float)ushort.MaxValue;
+                int rawSample = unchecked((short)((buffer[i + 1] << 8) | buffer[i]));
+                float tval = Math.Abs(rawSample) / (float)short.MaxValue;
                 level += tval;
             }
-            level /= (buffer.Length / 2) * Instance.Volume;
+            level /= (buffer.Length / BYTERATE) * Instance.Volume;
             return level;
-        }
-
-        /// <summary>Preprocess all channels, ensuring they have a valid audio source, and clearing used up buffers. Returns true if any channels are still full, or false if all have room for new buffers.</summary>
-        public readonly bool PreprocessAllChannels()
-        {
-            bool anyFilled = false;
-            foreach (AudioChannel channel in Instance.Channels)
-            {
-                if (channel.ALSource == -1)
-                {
-                    channel.BuildSource();
-                }
-                AL.GetSource(channel.ALSource, ALGetSourcei.BuffersProcessed, out int buffersDone);
-                while (buffersDone > 0)
-                {
-                    int bufferID = AL.SourceUnqueueBuffer(channel.ALSource);
-                    UsableBufferIDs.Enqueue(bufferID);
-                    buffersDone--;
-                }
-                AL.GetSource(channel.ALSource, ALGetSourcei.BuffersQueued, out int waiting);
-                if (waiting >= BUFFERS_AT_ONCE)
-                {
-                    anyFilled = true;
-                }
-            }
-            return anyFilled;
         }
 
         /// <summary>Adds a single playing audio instance to all channels.</summary>
@@ -303,15 +259,14 @@ public class AudioEnforcer
             }
         }
 
-        /// <summary>The internal audio enforcer loop.</summary>
+        /// <summary>The internal audio engine loop.</summary>
         public void ForceAudioLoop()
         {
             try
             {
                 Stopwatch stopwatch = new();
                 stopwatch.Start();
-                ALC.MakeContextCurrent(Context);
-                UsableBufferIDs = new Queue<int>();
+                Instance.OpenALBacker.MakeCurrent();
                 DeadInstances = [];
                 while (true)
                 {
@@ -323,8 +278,8 @@ public class AudioEnforcer
                     stopwatch.Stop();
                     double elSec = stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
                     stopwatch.Restart();
-                    bool anyFilled = PreprocessAllChannels();
-                    if (!anyFilled)
+                    bool needsFill = Instance.OpenALBacker.PreprocessStep();
+                    if (needsFill)
                     {
                         foreach (AudioChannel channel in Instance.Channels)
                         {
@@ -346,10 +301,9 @@ public class AudioEnforcer
                         foreach (AudioChannel channel in Instance.Channels)
                         {
                             newCurrentLevel = Math.Max(newCurrentLevel, GetLevelFor(channel.InternalCurrentBuffer));
-                            int bufferID = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
-                            channel.PlayBuffer(bufferID);
                         }
-                        Volatile.Write(ref Instance.CurrentLevel, newCurrentLevel);
+                        Instance.OpenALBacker.SendNextBuffer(Instance);
+                        Instance.CurrentLevel = newCurrentLevel;
                     }
                     int ms = PAUSE - (int)(elSec * 1000.0);
                     if (ms > 0)
@@ -360,11 +314,11 @@ public class AudioEnforcer
             }
             catch (Exception ex)
             {
-                SysConsole.Output("Handling audio enforcer", ex);
+                SysConsole.Output("Handling audio engine", ex);
             }
         }
     }
 
-    /// <summary>Internal data used by the enforcer.</summary>
+    /// <summary>Internal data used by the audio engine.</summary>
     public InternalData Internal;
 }
