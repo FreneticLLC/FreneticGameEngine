@@ -276,7 +276,7 @@ public abstract class UIElement
     }
 
     /// <summary>Returns the <b>current</b> element style.</summary>
-    public virtual UIElementStyle Style => UIElementStyle.Empty;
+    public virtual UIElementStyle Style { get; set; }
 
     /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
     public virtual void SwitchFromStyle(UIElementStyle style)

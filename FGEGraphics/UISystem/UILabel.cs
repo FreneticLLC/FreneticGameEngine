@@ -29,9 +29,6 @@ public class UILabel : UIElement
     /// <summary>The text to display on this label.</summary>
     public UIElementText Text;
 
-    /// <summary>The style of this label.</summary>
-    public override UIElementStyle Style { get; }
-
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
     /// <param name="style">The style of the label.</param>
