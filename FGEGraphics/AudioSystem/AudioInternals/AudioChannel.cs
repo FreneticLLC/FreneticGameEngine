@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using System;
 
@@ -50,6 +51,9 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
 
     /// <summary>The minimum volume applied from channel directionalism.</summary>
     public float DirectionalMinimum = 0.2f;
+    
+    /// <summary>Offset for stereo source reading (0 for left, 2 for right).</summary>
+    public int StereoIndex = 0;
 
     /// <summary>Performs a general frame update of current data on this channel.</summary>
     public void FrameUpdate()
@@ -80,7 +84,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     {
     }
 
-    /// <summary>Calculates the correct positional audio data for each ear for a position based on distance (using inverse-square-root) and direction (using trigonometry). Returns as (left, right).</summary>
+    /// <summary>Calculates the correct positional audio data for the ear for a position based on distance (using inverse-square-root) and direction (using trigonometry).</summary>
     public AudioPositionalData GetPositionalData(Location position)
     {
         Location relativeDirectionVector = (Engine.Position - position).Normalize();
@@ -120,29 +124,38 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             timeOffset = data.TimeOffset;
             volume = data.Volume;
         }
+        int bytesPerSample = 2 * toAdd.Clip.Channels;
         float gain = toAdd.Gain * Engine.Volume * Volume;
+        float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         byte[] clipData = toAdd.Clip.Data;
         byte[] outBuffer = InternalCurrentBuffer;
-        int maxBytePosition = FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER;
-        if (!toAdd.Loop)
+        int clipLen = clipData.Length;
+        int offset = timeOffset * bytesPerSample + StereoIndex;
+        double step = bytesPerSample / (double)clipLen;
+        double samplePos = currentSample / (double)clipLen;
+        while (outBufPosition + 3 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
         {
-            maxBytePosition = Math.Min(clipData.Length - (currentSample + timeOffset * 2), FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER);
-        }
-        while (outBufPosition < maxBytePosition && outBufPosition + 3 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
-        {
-            // TODO: pitch, velocity, etc.?
-            int sample = currentSample + timeOffset * 2;
-            if (toAdd.Loop)
+            currentSample = (int)Math.Round(samplePos * clipLen);
+            currentSample -= currentSample % bytesPerSample;
+            int sample = currentSample + offset;
+            if (sample >= clipLen)
             {
-                sample %= clipData.Length;
-                if (sample < 0)
+                if (toAdd.Loop)
                 {
-                    sample += clipData.Length;
+                    sample %= clipLen;
+                    if (sample < 0)
+                    {
+                        sample += clipLen;
+                    }
+                }
+                else
+                {
+                    break;
                 }
             }
-            if (sample >= 0 && sample + 1 < clipData.Length)
+            if (sample >= 0 && sample + 1 < clipLen)
             {
                 int rawSample = unchecked((short)((clipData[sample + 1] << 8) | clipData[sample]));
                 int outSample = (rawSample * volumeModifier) >> 16;
@@ -152,11 +165,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
                 outBuffer[outBufPosition] = (byte)outSample;
                 outBuffer[outBufPosition + 1] = unchecked((byte)(outSample >> 8));
             }
-            currentSample += toAdd.Clip.Channels * 2;
-            if (toAdd.Loop)
-            {
-                currentSample %= clipData.Length;
-            }
+            samplePos += step * pitch;
             outBufPosition += 2;
         }
         return new(currentSample, timeOffset);

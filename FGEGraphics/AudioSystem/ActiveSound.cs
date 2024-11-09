@@ -169,6 +169,5 @@ public class ActiveSound
     public bool IsPlaying()
     {
         return Internal.ForceState == AudioState.PLAYING;
-        Internal.Modified = true;
     }
 }

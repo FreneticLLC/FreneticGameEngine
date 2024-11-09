@@ -125,7 +125,7 @@ public class FGE3DAudioEngine
         if (Channels.IsEmpty())
         {
             Channels.Add(new AudioChannel("Left", this, Quaternion.FromAxisAngle(Location.UnitZ, Math.PI * 0.5)));
-            Channels.Add(new AudioChannel("Right", this, Quaternion.FromAxisAngle(Location.UnitZ, -Math.PI * 0.5)));
+            Channels.Add(new AudioChannel("Right", this, Quaternion.FromAxisAngle(Location.UnitZ, -Math.PI * 0.5)) { StereoIndex = 2 });
         }
         Run = true;
         AudioThread = new Thread(new ThreadStart(Internal.ForceAudioLoop))

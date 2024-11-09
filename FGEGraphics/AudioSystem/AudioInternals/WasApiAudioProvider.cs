@@ -298,7 +298,6 @@ public partial class WasApiAudioProvider
             {
                 throw new Exception($"WASAPI {operation} failed with error code: 0x{hr:X8}");
             }
-            Logs.Debug($"Operation {operation} returned hr {hr}");
         }
     }
 
