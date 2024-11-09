@@ -49,13 +49,16 @@ public class FGE3DAudioEngine
     /// <summary>3D Position of the audio "camera".</summary>
     public Location Position;
 
-    /// <summary>The previous frame's position of the audio "camera".</summary>
-    public Location PreviousPosition;
-
     /// <summary>The current velocity vector of the audio "camera".</summary>
     public Location CurrentVelocity;
 
-    /// <summary>The time between the previous update frame and now as a decimal number of seconds, ie the time that transpired between <see cref="PreviousPosition"/> and <see cref="Position"/>.</summary>
+    /// <summary>If true, a frame update is pending. If false, there has been no update.</summary>
+    public bool HadUpdateFrame = false;
+
+    /// <summary>If true, the audio "camera" teleported in this frame.</summary>
+    public bool DidTeleport = false;
+
+    /// <summary>The global time (total delta seconds) of the frame.</summary>
     public double FrameTime;
 
     /// <summary>If the audio "camera" moves faster than this many units per second, presume a teleportation occured instead of natural movement. Defaults to mach 10.</summary>
@@ -87,16 +90,16 @@ public class FGE3DAudioEngine
 
     /// <summary>Add an audio instance to the audio engine.</summary>
     /// <param name="inst">The instance to add.</param>
-    public void Add(ActiveSound inst)
+    public void Add(LiveAudioInstance inst)
     {
         lock (Locker)
         {
-            if (inst.AudioInternal.State == AudioState.PLAYING)
+            if (inst.State == AudioState.PLAYING)
             {
                 return;
             }
-            inst.AudioInternal.State = AudioState.PLAYING;
-            Playing.Add(inst.AudioInternal);
+            inst.State = AudioState.PLAYING;
+            Playing.Add(inst);
         }
     }
 
@@ -136,34 +139,31 @@ public class FGE3DAudioEngine
     /// <param name="newPosition">The new position the audio "camera" listener is in.</param>
     /// <param name="forward">The new forward direction.</param>
     /// <param name="up">The new up direction.</param>
-    /// <param name="didTeleport">If true, the listener teleported. If false, they moved normally.</param>
-    /// <param name="timeElapsed">How much time has elapsed since the previous frame, in seconds.</param>
-    public void FrameUpdate(Location newPosition, Location forward, Location up, bool didTeleport, double timeElapsed)
+    /// <param name="newDidTeleport">If true, the listener teleported. If false, they moved normally.</param>
+    /// <param name="time">The global time (total delta seconds) of the frame.</param>
+    public void FrameUpdate(Location newPosition, Location forward, Location up, bool newDidTeleport, double time)
     {
         lock (Locker)
         {
             ForwardDirection = forward;
             UpDirection = up;
-            FrameTime = timeElapsed;
-            if (!didTeleport)
+            FrameTime = time;
+            if (!newDidTeleport)
             {
                 Location travelVector = newPosition - Position;
-                CurrentVelocity = travelVector / timeElapsed;
+                CurrentVelocity = travelVector / time;
                 if (CurrentVelocity.LengthSquared() > SpeedOfPresumeTeleport * SpeedOfPresumeTeleport)
                 {
-                    didTeleport = true;
+                    newDidTeleport = true;
                 }
             }
-            PreviousPosition = didTeleport ? newPosition : Position;
             Position = newPosition;
-            if (didTeleport)
+            if (newDidTeleport)
             {
                 CurrentVelocity = Location.Zero;
             }
-            foreach (AudioChannel channel in Channels)
-            {
-                channel.FrameUpdate();
-            }
+            DidTeleport = newDidTeleport;
+            HadUpdateFrame = true;
         }
     }
 
@@ -306,6 +306,10 @@ public class FGE3DAudioEngine
                         }
                         lock (Instance.Locker)
                         {
+                            foreach (AudioChannel channel in Instance.Channels)
+                            {
+                                channel.FrameUpdate();
+                            }
                             foreach (LiveAudioInstance audio in Instance.Playing)
                             {
                                 AddClipToAllChannels(audio);

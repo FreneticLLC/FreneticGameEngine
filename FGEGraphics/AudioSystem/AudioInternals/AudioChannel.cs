@@ -27,6 +27,21 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     /// <summary>The current position of this channel's input, eg the location of an ear.</summary>
     public Location CurrentPosition = Location.Zero;
 
+    /// <summary>How far the <see cref="CurrentPosition"/> changed in this frame from the previous.</summary>
+    public Location PositionChange = Location.Zero;
+
+    /// <summary>The current frame's velocity for this ear.</summary>
+    public Location Velocity = Location.Zero;
+
+    /// <summary>The global time of the prior frame.</summary>
+    public double PriorFrameTime = 0;
+
+    /// <summary>The global time of this frame.</summary>
+    public double FrameTime = 0;
+
+    /// <summary>The delta time elapsed between the previous frame and this one.</summary>
+    public double FrameDelta = 0;
+
     /// <summary>When this channel is being processed for new audio to add, this is the current buffer it's targeting.</summary>
     public byte[] InternalCurrentBuffer;
 
@@ -39,11 +54,23 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     /// <summary>Performs a general frame update of current data on this channel.</summary>
     public void FrameUpdate()
     {
+        PriorFrameTime = FrameTime;
+        FrameTime = Engine.FrameTime;
+        FrameDelta = Math.Clamp(FrameTime - PriorFrameTime, 0.0001, 10);
         Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitZ, Engine.UpDirection);
         Quaternion actualCurrentRot = RotationFromForward * adaptedUp;
         Location earDirection = actualCurrentRot.Transform(Engine.ForwardDirection);
-        CurrentPosition = Engine.Position + earDirection * (Engine.HeadWidth * 0.5);
-        // TODO: Track and handle ear's velocity
+        Location newPosition = Engine.Position + earDirection * (Engine.HeadWidth * 0.5);
+        if (Engine.DidTeleport)
+        {
+            PositionChange = Location.Zero;
+        }
+        else
+        {
+            PositionChange = newPosition - CurrentPosition;
+        }
+        Velocity = PositionChange / FrameDelta;
+        CurrentPosition = newPosition;
     }
 
     /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>

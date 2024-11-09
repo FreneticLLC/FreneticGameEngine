@@ -121,33 +121,38 @@ public class SoundEngine
     {
         bool sel = !Client.QuietOnDeselect || selected;
         Selected = sel;
-        for (int i = 0; i < PlayingNow.Count; i++)
+        lock (Internal.AudioEngine.Locker)
         {
-            ActiveSound sound = PlayingNow[i];
-            if (sound.AudioInternal.State == AudioState.DONE || sound.AudioInternal.State == AudioState.STOP)
+            for (int i = 0; i < PlayingNow.Count; i++)
             {
-                PlayingNow.RemoveAt(i);
-                i--;
-                continue;
+                ActiveSound sound = PlayingNow[i];
+                sound.Internal.Sync();
+                sound.Internal.State = sound.Internal.AudioInternal.State;
+                if (sound.Internal.State == AudioState.DONE || sound.Internal.State == AudioState.STOP)
+                {
+                    PlayingNow.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                sound.Effect.LastUse = Client.GlobalTickTime;
+                if (sel && !sound.IsBackground)
+                {
+                    sound.IsDeafened = false;
+                }
+                if (!sel && sound.IsBackground && !sound.Backgrounded)
+                {
+                    sound.Internal.AudioInternal.Gain = 0.0001f;
+                    sound.Backgrounded = true;
+                }
+                else if (sel && sound.Backgrounded)
+                {
+                    sound.Internal.AudioInternal.Gain = sound.Gain;
+                    sound.Backgrounded = false;
+                    sound.IsDeafened = false;
+                }
             }
-            sound.Effect.LastUse = Client.GlobalTickTime;
-            if (sel && !sound.IsBackground)
-            {
-                sound.IsDeafened = false;
-            }
-            if (!sel && sound.IsBackground && !sound.Backgrounded)
-            {
-                sound.AudioInternal.Gain = 0.0001f;
-                sound.Backgrounded = true;
-            }
-            else if (sel && sound.Backgrounded)
-            {
-                sound.AudioInternal.Gain = sound.Gain;
-                sound.Backgrounded = false;
-                sound.IsDeafened = false;
-            }
+            Internal.AudioEngine.FrameUpdate(position, forward, up, false, Client.GlobalTickTime);
         }
-        Internal.AudioEngine.FrameUpdate(position, forward, up, false, Client.Delta);
         Internal.TimeTowardsNextClean += Client.Delta;
         if (Internal.TimeTowardsNextClean > 10.0)
         {
