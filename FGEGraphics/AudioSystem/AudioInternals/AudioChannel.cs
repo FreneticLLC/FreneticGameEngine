@@ -136,7 +136,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         int offset = timeOffset * bytesPerSample + StereoIndex;
         double step = bytesPerSample / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
-        while (outBufPosition + 3 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
+        while (outBufPosition + 1 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
         {
             double approxSample = samplePos * clipLen;
             currentSample = (int)Math.Round(approxSample);
@@ -152,20 +152,17 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             }
             float fraction = (float)(approxSample - priorSample) / bytesPerSample;
             int sample = currentSample + offset;
+            if (toAdd.Loop)
+            {
+                sample %= clipLen;
+                if (sample < 0)
+                {
+                    sample += clipLen;
+                }
+            }
             if (sample >= clipLen)
             {
-                if (toAdd.Loop)
-                {
-                    sample %= clipLen;
-                    if (sample < 0)
-                    {
-                        sample += clipLen;
-                    }
-                }
-                else
-                {
-                    break;
-                }
+                break;
             }
             if (sample >= 0 && sample + 1 < clipLen)
             {
