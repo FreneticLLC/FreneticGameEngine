@@ -127,6 +127,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         int bytesPerSample = 2 * toAdd.Clip.Channels;
         float gain = toAdd.Gain * Engine.Volume * Volume;
         float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
+        bool procPitch = pitch != 1;
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         byte[] clipData = toAdd.Clip.Data;
@@ -137,8 +138,19 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         double samplePos = currentSample / (double)clipLen;
         while (outBufPosition + 3 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
         {
-            currentSample = (int)Math.Round(samplePos * clipLen);
+            double approxSample = samplePos * clipLen;
+            currentSample = (int)Math.Round(approxSample);
             currentSample -= currentSample % bytesPerSample;
+            int priorSample = currentSample;
+            if (procPitch && approxSample > currentSample)
+            {
+                currentSample += bytesPerSample;
+            }
+            else
+            {
+                priorSample -= bytesPerSample;
+            }
+            float fraction = (float)(approxSample - priorSample) / bytesPerSample;
             int sample = currentSample + offset;
             if (sample >= clipLen)
             {
@@ -157,9 +169,15 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             }
             if (sample >= 0 && sample + 1 < clipLen)
             {
+                int rawPreValue = unchecked((short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]));
                 int rawSample = unchecked((short)((clipData[sample + 1] << 8) | clipData[sample]));
                 int outSample = (rawSample * volumeModifier) >> 16;
-                int rawPreValue = unchecked((short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]));
+                if (procPitch && priorSample >= 0 && priorSample + 1 < clipLen)
+                {
+                    int rawPriorSample = unchecked((short)((clipData[priorSample + 1] << 8) | clipData[priorSample]));
+                    int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
+                    outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                }
                 outSample += rawPreValue; // TODO: Better scaled adder?
                 outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
                 outBuffer[outBufPosition] = (byte)outSample;
