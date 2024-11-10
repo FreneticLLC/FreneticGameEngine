@@ -338,7 +338,8 @@ public partial class WasApiAudioProvider
         Internal.RenderClient = (Native.IAudioRenderClient)Marshal.GetTypedObjectForIUnknown(Internal.RefRenderClient, typeof(Native.IAudioRenderClient));
         Internal.AudioClient.Reset();
         Internal.AudioClient.Start();
-        Logs.ClientInit($"Audio system initialized using WASAPI... device='{deviceId}', bufferFrames='{Internal.BufferFrameCount}'");
+        Logs.ClientInit($"Audio system initialized using WASAPI... device='{deviceId}'");
+        Logs.Debug($"WASAPI MaxBufferFrames={Internal.BufferFrameCount}");
     }
 
     /// <summary>Shuts down all WASAPI backings.</summary>

@@ -59,13 +59,13 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     public void FrameUpdate()
     {
         PriorFrameTime = FrameTime;
-        FrameTime = Engine.FrameTime;
+        FrameTime = Engine.Internal.FrameTime;
         FrameDelta = Math.Clamp(FrameTime - PriorFrameTime, 0.0001, 10);
-        Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitZ, Engine.UpDirection);
+        Quaternion adaptedUp = Quaternion.GetQuaternionBetween(Location.UnitZ, Engine.Internal.UpDirection);
         Quaternion actualCurrentRot = RotationFromForward * adaptedUp;
-        Location earDirection = actualCurrentRot.Transform(Engine.ForwardDirection);
-        Location newPosition = Engine.Position + earDirection * (Engine.HeadWidth * 0.5);
-        if (Engine.DidTeleport)
+        Location earDirection = actualCurrentRot.Transform(Engine.Internal.ForwardDirection);
+        Location newPosition = Engine.Internal.Position + earDirection * (Engine.HeadWidth * 0.5);
+        if (Engine.Internal.DidTeleport)
         {
             PositionChange = Location.Zero;
         }
@@ -87,9 +87,9 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     /// <summary>Calculates the correct positional audio data for the ear for a position based on distance (using inverse-square-root) and direction (using trigonometry).</summary>
     public AudioPositionalData GetPositionalData(Location position)
     {
-        Location relativeDirectionVector = (Engine.Position - position).Normalize();
+        Location relativeDirectionVector = (Engine.Internal.Position - position).Normalize();
         relativeDirectionVector = RotationFromForward.Transform(relativeDirectionVector);
-        Quaternion directionDifference = Quaternion.GetQuaternionBetween(Engine.ForwardDirection, relativeDirectionVector);
+        Quaternion directionDifference = Quaternion.GetQuaternionBetween(Engine.Internal.ForwardDirection, relativeDirectionVector);
         float angle = (float)directionDifference.RepresentedAngle();
         float angleVolume = Math.Max(0, (float)Math.Cos(angle * 0.5)) * (1f - DirectionalMinimum) + DirectionalMinimum;
         AudioPositionalData data = new();
@@ -105,7 +105,8 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     /// <summary>Result data from <see cref="AddClipToBuffer(LiveAudioInstance)"/>.</summary>
     /// <param name="NewSample">The new sample index.</param>
     /// <param name="TimeOffset">The time offset for this clip in this channel.</param>
-    public record struct ClipAddingResult(int NewSample, int TimeOffset);
+    /// <param name="IsDead">The sound has passed its end.</param>
+    public record struct ClipAddingResult(int NewSample, int TimeOffset, bool IsDead);
 
     /// <summary>Adds a single audio instance to the raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
     public ClipAddingResult AddClipToBuffer(LiveAudioInstance toAdd)
@@ -136,6 +137,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         int offset = timeOffset * bytesPerSample + StereoIndex;
         double step = bytesPerSample / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
+        bool isDead = false;
         while (outBufPosition + 1 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
         {
             double approxSample = samplePos * clipLen;
@@ -162,6 +164,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             }
             if (sample >= clipLen)
             {
+                isDead = true;
                 break;
             }
             if (sample >= 0 && sample + 1 < clipLen)
@@ -183,6 +186,6 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             samplePos += step * pitch;
             outBufPosition += 2;
         }
-        return new(currentSample, timeOffset);
+        return new(currentSample, timeOffset, isDead);
     }
 }

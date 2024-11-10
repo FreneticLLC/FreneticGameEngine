@@ -12,10 +12,10 @@ using FGECore.MathHelpers;
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents currently playing audio.</summary>
-public class LiveAudioInstance
+public class LiveAudioInstance(FGE3DAudioEngine engine)
 {
     /// <summary>The clip for this instance.</summary>
-    public LiveAudioClip Clip = null;
+    public SoundEffect Clip = null;
 
     /// <summary>Which audio sample this instance is on, as an index in the clip.</summary>
     public int CurrentSample = 0;
@@ -42,4 +42,7 @@ public class LiveAudioInstance
 
     /// <summary>The current state of this audio.</summary>
     public AudioState State = AudioState.WAITING;
+
+    /// <summary>Backing audio engine.</summary>
+    public FGE3DAudioEngine Engine = engine;
 }

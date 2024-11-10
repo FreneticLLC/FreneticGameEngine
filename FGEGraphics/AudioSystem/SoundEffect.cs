@@ -7,12 +7,6 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FGECore.FileSystems;
-using FGEGraphics.AudioSystem.AudioInternals;
 
 namespace FGEGraphics.AudioSystem;
 
@@ -28,6 +22,9 @@ public class SoundEffect
     /// <summary>The time this sound effect was last used.</summary>
     public double LastUse = 0.0;
 
-    /// <summary>The internal audio engine clip, if one is relevant.</summary>
-    public LiveAudioClip Clip;
+    /// <summary>The internal data for this clip.</summary>
+    public byte[] Data;
+
+    /// <summary>The number of channels in this clip (if it has been loaded).</summary>
+    public byte Channels;
 }

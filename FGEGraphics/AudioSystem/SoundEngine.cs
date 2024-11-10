@@ -41,7 +41,7 @@ public class SoundEngine
     public List<ActiveSound> PlayingNow = [];
 
     /// <summary>Fake clip with no audio data.</summary>
-    public LiveAudioClip EmptyClip = new() { Data = [], Channels = 1 };
+    public SoundEffect EmptyClip = new() { Data = [], Channels = 1, Name = "Empty" };
 
     /// <summary>Internal data for this sound engine instance.</summary>
     public struct InternalData
@@ -121,38 +121,28 @@ public class SoundEngine
     {
         bool sel = !Client.QuietOnDeselect || selected;
         Selected = sel;
-        lock (Internal.AudioEngine.Locker)
+        for (int i = 0; i < PlayingNow.Count; i++)
         {
-            for (int i = 0; i < PlayingNow.Count; i++)
+            ActiveSound sound = PlayingNow[i];
+            sound.Internal.State = sound.Internal.AudioInternal.State;
+            if (sound.Internal.State == AudioState.DONE || sound.Internal.State == AudioState.STOP)
             {
-                ActiveSound sound = PlayingNow[i];
-                sound.Internal.Sync();
-                sound.Internal.State = sound.Internal.AudioInternal.State;
-                if (sound.Internal.State == AudioState.DONE || sound.Internal.State == AudioState.STOP)
-                {
-                    PlayingNow.RemoveAt(i);
-                    i--;
-                    continue;
-                }
-                sound.Effect.LastUse = Client.GlobalTickTime;
-                if (sel && !sound.IsBackground)
-                {
-                    sound.IsDeafened = false;
-                }
-                if (!sel && sound.IsBackground && !sound.Backgrounded)
-                {
-                    sound.Internal.AudioInternal.Gain = 0.0001f;
-                    sound.Backgrounded = true;
-                }
-                else if (sel && sound.Backgrounded)
-                {
-                    sound.Internal.AudioInternal.Gain = sound.Gain;
-                    sound.Backgrounded = false;
-                    sound.IsDeafened = false;
-                }
+                PlayingNow.RemoveAt(i);
+                i--;
+                continue;
             }
-            Internal.AudioEngine.FrameUpdate(position, forward, up, false, Client.GlobalTickTime);
+            sound.Effect.LastUse = Client.GlobalTickTime;
+            if (!sel && sound.IsBackground && !sound.Backgrounded)
+            {
+                sound.Backgrounded = true;
+            }
+            else if (sel && sound.Backgrounded)
+            {
+                sound.Backgrounded = false;
+            }
+            sound.Internal.Sync();
         }
+        Internal.AudioEngine.UpdatesToSync.Enqueue(new(null, position, Location.Zero, 1, 1, AudioState.PLAYING, 0, false, Client.GlobalTickTime, forward, up, false, false));
         Internal.TimeTowardsNextClean += Client.Delta;
         if (Internal.TimeTowardsNextClean > 10.0)
         {
@@ -213,13 +203,12 @@ public class SoundEngine
         volume = Math.Min(volume, MaxSoundVolume);
         void playSound()
         {
-            if (sfx.Clip is null)
+            if (sfx.Data is null)
             {
                 return;
             }
-            ActiveSound actsfx = new(sfx)
+            ActiveSound actsfx = new(sfx, this)
             {
-                Engine = this,
                 Position = position,
                 Pitch = pitch * GlobalPitch,
                 Gain = volume,
@@ -235,7 +224,7 @@ public class SoundEngine
         }
         lock (sfx)
         {
-            if (sfx.Clip is null)
+            if (sfx.Data is null)
             {
                 sfx.Loaded += playSound;
                 return;
@@ -287,21 +276,19 @@ public class SoundEngine
             {
                 try
                 {
-                    LiveAudioClip clip;
+                    SoundEffect loaded;
                     if (Client.Client.Files.TryReadFileData(newname, out byte[] rawData))
                     {
-                        clip = LoadVorbisSound(new MemoryStream(rawData), name).Clip;
+                        loaded = LoadVorbisSound(new MemoryStream(rawData), name);
 
                     }
                     else
                     {
                         Logs.Warning($"Cannot load audio '{name}': file does not exist.");
-                        clip = EmptyClip;
+                        loaded = EmptyClip;
                     }
-                    lock (tsfx)
-                    {
-                        tsfx.Clip = clip;
-                    }
+                    tsfx.Channels = loaded.Channels;
+                    tsfx.Data = loaded.Data;
                     if (tsfx.Loaded is not null)
                     {
                         Client.Schedule.ScheduleSyncTask(() =>
@@ -345,12 +332,8 @@ public class SoundEngine
         {
             PrimitiveConversionHelper.Short16ToBytes((short)(sampleBuffer[i] * short.MaxValue), data, i * 2);
         }
-        LiveAudioClip clip = new()
-        {
-            Data = data,
-            Channels = (byte)oggReader.Channels
-        };
-        sfx.Clip = clip;
+        sfx.Data = data;
+        sfx.Channels = (byte)oggReader.Channels;
         return sfx;
     }
 
@@ -366,18 +349,15 @@ public class SoundEngine
             LastUse = Client.GlobalTickTime
         };
         byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out _);
-        LiveAudioClip clip = new()
-        {
-            Data = data
-        };
+        sfx.Data = data;
         if (bits == 8)
         {
-            clip.Data = new byte[data.Length * 2];
+            sfx.Data = new byte[data.Length * 2];
             for (int i = 0; i < data.Length; i++)
             {
                 // TODO: Sanity?
-                clip.Data[i] = data[i + 1];
-                clip.Data[i + 1] = 0;
+                sfx.Data[i] = data[i + 1];
+                sfx.Data[i + 1] = 0;
             }
             //data = clip.Data;
         }
@@ -387,8 +367,7 @@ public class SoundEngine
             pblast += clip.Data[i];
         }*/
         // TODO: clip.Rate = rate;
-        clip.Channels = (byte)channels;
-        sfx.Clip = clip;
+        sfx.Channels = (byte)channels;
         // OutputType.DEBUG.Output("Clip: " + sfx.Clip.Data.Length + ", " + channels + ", " + bits + ", " + rate + ", " + pblast);
         return sfx;
     }
@@ -457,8 +436,13 @@ public class SoundEngine
         }
     }
 
+    /// <summary>Returns the number of sound effects currently playing.</summary>
+    public float SoundsPlaying()
+    {
+        return Internal.AudioEngine.SoundCount;
+    }
+
     /// <summary>Estimates current audio levels. Very frame-by-frame sensitive, unlikely to be useful unless aggregated.</summary>
-    /// <returns>The audio level.</returns>
     public float EstimateAudioLevel()
     {
         return Internal.AudioEngine.CurrentLevel;

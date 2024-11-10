@@ -41,6 +41,9 @@ public class ActiveSound
         /// <summary>The gain of the sound.</summary>
         public float Gain = 1;
 
+        /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
+        public bool Backgrounded = false;
+
         /// <summary>The internal audio engine instance, if relevant.</summary>
         public LiveAudioInstance AudioInternal;
 
@@ -61,26 +64,15 @@ public class ActiveSound
                 return;
             }
             Modified = false;
-            AudioInternal.Position = Position;
-            AudioInternal.Velocity = Velocity;
-            AudioInternal.Loop = Loop;
-            AudioInternal.Pitch = Pitch;
-            AudioInternal.Gain = Gain;
-            if (ForceState != (AudioState)255)
-            {
-                AudioInternal.State = ForceState;
-                ForceState = (AudioState)255;
-            }
-            if (Seek != -1)
-            {
-                AudioInternal.CurrentSample = Seek;
-                Seek = -1;
-            }
+            float gain = Backgrounded ? 0.0001f : Gain;
+            AudioInternal.Engine.UpdatesToSync.Enqueue(new(AudioInternal, Position, Velocity, gain, Pitch, ForceState, Seek, Loop, 0, Location.Zero, Location.Zero, false, false));
+            Seek = -1;
+            ForceState = (AudioState)255;
         }
     }
 
     /// <summary>Internal data for <see cref="ActiveSound"/>.</summary>
-    public InternalData Internal;
+    public InternalData Internal = new();
 
     /// <summary>The 3D space position of the sound effect.</summary>
     public Location Position
@@ -121,23 +113,27 @@ public class ActiveSound
     public bool IsBackground = false;
 
     /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
-    public bool Backgrounded = false;
-
-    /// <summary>Whether the audio has been deafened.</summary>
-    public bool IsDeafened = false;
-
-    /// <param name="sfx">The backing sound effect.</param>
-    public ActiveSound(SoundEffect sfx)
+    public bool Backgrounded
     {
+        get => Internal.Backgrounded;
+        set { Internal.Backgrounded = value; Internal.Modified = true; }
+    }
+
+    /// <summary>Constructs the sound instance.</summary>
+    /// <param name="sfx">The backing sound effect.</param>
+    /// <param name="engine">The backing sound engine.</param>
+    public ActiveSound(SoundEffect sfx, SoundEngine engine)
+    {
+        Engine = engine;
         Effect = sfx;
-        Internal.AudioInternal = new() { Clip = sfx.Clip };
+        Internal.AudioInternal = new(engine.Internal.AudioEngine) { Clip = sfx };
     }
 
     /// <summary>Plays the audio.</summary>
     public void Play()
     {
-        Internal.Sync();
         Internal.State = AudioState.PLAYING;
+        Internal.Sync();
         Engine.Internal.AudioEngine.Add(Internal.AudioInternal);
     }
 
