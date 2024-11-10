@@ -6,6 +6,10 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using FGECore.MathHelpers;
 using FGEGraphics.AudioSystem.AudioInternals;
 
