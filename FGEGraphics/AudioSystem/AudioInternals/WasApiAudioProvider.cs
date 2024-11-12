@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -7,10 +7,11 @@
 //
 
 using System;
-using FGECore.CoreSystems;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -298,7 +299,6 @@ public partial class WasApiAudioProvider
             {
                 throw new Exception($"WASAPI {operation} failed with error code: 0x{hr:X8}");
             }
-            Logs.Debug($"Operation {operation} returned hr {hr}");
         }
     }
 
@@ -339,7 +339,8 @@ public partial class WasApiAudioProvider
         Internal.RenderClient = (Native.IAudioRenderClient)Marshal.GetTypedObjectForIUnknown(Internal.RefRenderClient, typeof(Native.IAudioRenderClient));
         Internal.AudioClient.Reset();
         Internal.AudioClient.Start();
-        Logs.ClientInit($"Audio system initialized using WASAPI... device='{deviceId}', bufferFrames='{Internal.BufferFrameCount}'");
+        Logs.ClientInit($"Audio system initialized using WASAPI... device='{deviceId}'");
+        Logs.Debug($"WASAPI MaxBufferFrames={Internal.BufferFrameCount}");
     }
 
     /// <summary>Shuts down all WASAPI backings.</summary>

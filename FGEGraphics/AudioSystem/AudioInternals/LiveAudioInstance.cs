@@ -10,24 +10,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FGECore;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents currently playing audio.</summary>
-public class LiveAudioInstance
+public class LiveAudioInstance(FGE3DAudioEngine engine)
 {
     /// <summary>The clip for this instance.</summary>
-    public LiveAudioClip Clip = null;
+    public SoundEffect Clip = null;
 
     /// <summary>Which audio sample this instance is on, as an index in the clip.</summary>
     public int CurrentSample = 0;
 
     /// <summary>Whether this instance should loop.</summary>
     public bool Loop = false;
+
+    // TODO: Track motion of the instance over time
 
     /// <summary>The position of this instance in 3D space.</summary>
     public Location Position = Location.Zero;
@@ -46,4 +45,7 @@ public class LiveAudioInstance
 
     /// <summary>The current state of this audio.</summary>
     public AudioState State = AudioState.WAITING;
+
+    /// <summary>Backing audio engine.</summary>
+    public FGE3DAudioEngine Engine = engine;
 }

@@ -7,14 +7,17 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
-using FreneticUtilities.FreneticToolkit;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
-using System.Runtime.InteropServices;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -46,29 +49,11 @@ public class FGE3DAudioEngine
     /// <summary>Locker for interaction with the audio engine.</summary>
     public LockObject Locker = new();
 
-    /// <summary>3D Position of the audio "camera".</summary>
-    public Location Position;
-
-    /// <summary>The previous frame's position of the audio "camera".</summary>
-    public Location PreviousPosition;
-
-    /// <summary>The current velocity vector of the audio "camera".</summary>
-    public Location CurrentVelocity;
-
-    /// <summary>The time between the previous update frame and now as a decimal number of seconds, ie the time that transpired between <see cref="PreviousPosition"/> and <see cref="Position"/>.</summary>
-    public double FrameTime;
-
     /// <summary>If the audio "camera" moves faster than this many units per second, presume a teleportation occured instead of natural movement. Defaults to mach 10.</summary>
     public double SpeedOfPresumeTeleport = SPEED_OF_SOUND * 10;
 
     /// <summary>How many units of distance below which audio has basically no dropoff.</summary>
     public float LinearAudioDistance = 10;
-
-    /// <summary>Forward direction (vector) of the audio "camera".</summary>
-    public Location ForwardDirection;
-
-    /// <summary>Up direction (vector) of the audio "camera".</summary>
-    public Location UpDirection;
 
     /// <summary>All channels this audio engine plays into.</summary>
     public List<AudioChannel> Channels = [];
@@ -85,19 +70,22 @@ public class FGE3DAudioEngine
     /// <summary>If the engine is currently backed by WASAPI, this instance handles that.</summary>
     public WasApiAudioProvider WasApiAudioBacker;
 
+    /// <summary>Data for syncing updates to audio clips between the game engine thread and the audio engine thread.</summary>
+    public record class SyncUpdate(LiveAudioInstance Instance, Location Position, Location Velocity, float Gain, float Pitch, AudioState State, int Seek, bool Loop, double Time, Location Forward, Location Up, bool DidTeleport, bool IsNew);
+
+    /// <summary>Data for syncing updates to audio clips between the game engine thread and the audio engine thread.</summary>
+    public ConcurrentQueue<SyncUpdate> UpdatesToSync = new();
+
     /// <summary>Add an audio instance to the audio engine.</summary>
     /// <param name="inst">The instance to add.</param>
-    public void Add(ActiveSound inst)
+    public void Add(LiveAudioInstance inst)
     {
-        lock (Locker)
+        if (inst.State == AudioState.PLAYING)
         {
-            if (inst.AudioInternal.State == AudioState.PLAYING)
-            {
-                return;
-            }
-            inst.AudioInternal.State = AudioState.PLAYING;
-            Playing.Add(inst.AudioInternal);
+            return;
         }
+        inst.State = AudioState.PLAYING;
+        UpdatesToSync.Enqueue(new(inst, Location.Zero, Location.Zero, 1, 1, AudioState.PLAYING, 0, false, 0, Location.Zero, Location.Zero, false, true));
     }
 
     /// <summary>Initialize and load the audio engine.</summary>
@@ -122,7 +110,7 @@ public class FGE3DAudioEngine
         if (Channels.IsEmpty())
         {
             Channels.Add(new AudioChannel("Left", this, Quaternion.FromAxisAngle(Location.UnitZ, Math.PI * 0.5)));
-            Channels.Add(new AudioChannel("Right", this, Quaternion.FromAxisAngle(Location.UnitZ, -Math.PI * 0.5)));
+            Channels.Add(new AudioChannel("Right", this, Quaternion.FromAxisAngle(Location.UnitZ, -Math.PI * 0.5)) { StereoIndex = 2 });
         }
         Run = true;
         AudioThread = new Thread(new ThreadStart(Internal.ForceAudioLoop))
@@ -130,41 +118,6 @@ public class FGE3DAudioEngine
             Name = "Audio_" + Interlocked.Increment(ref AudioID)
         };
         AudioThread.Start();
-    }
-
-    /// <summary>Updates data for the current frame.</summary>
-    /// <param name="newPosition">The new position the audio "camera" listener is in.</param>
-    /// <param name="forward">The new forward direction.</param>
-    /// <param name="up">The new up direction.</param>
-    /// <param name="didTeleport">If true, the listener teleported. If false, they moved normally.</param>
-    /// <param name="timeElapsed">How much time has elapsed since the previous frame, in seconds.</param>
-    public void FrameUpdate(Location newPosition, Location forward, Location up, bool didTeleport, double timeElapsed)
-    {
-        lock (Locker)
-        {
-            ForwardDirection = forward;
-            UpDirection = up;
-            FrameTime = timeElapsed;
-            if (!didTeleport)
-            {
-                Location travelVector = newPosition - Position;
-                CurrentVelocity = travelVector / timeElapsed;
-                if (CurrentVelocity.LengthSquared() > SpeedOfPresumeTeleport * SpeedOfPresumeTeleport)
-                {
-                    didTeleport = true;
-                }
-            }
-            PreviousPosition = didTeleport ? newPosition : Position;
-            Position = newPosition;
-            if (didTeleport)
-            {
-                CurrentVelocity = Location.Zero;
-            }
-            foreach (AudioChannel channel in Channels)
-            {
-                channel.FrameUpdate();
-            }
-        }
     }
 
     /// <summary>Shuts down the audio engine. May take a moment before the engine thread stops.</summary>
@@ -176,8 +129,11 @@ public class FGE3DAudioEngine
     /// <summary>Current audio levels.</summary>
     public volatile float CurrentLevel = 0.0f;
 
+    /// <summary>Current number of playing sound effects.</summary>
+    public volatile int SoundCount = 0;
+
     /// <summary>Internal data used by the audio engine.</summary>
-    public struct InternalData
+    public struct InternalData()
     {
         /// <summary>The relevant backing audio engine instance.</summary>
         public FGE3DAudioEngine Instance;
@@ -208,6 +164,27 @@ public class FGE3DAudioEngine
 
         /// <summary>Actual byte space to load at once.</summary>
         public const int BYTES_PER_BUFFER = SAMPLES_PER_BUFFER * BYTERATE;
+
+        /// <summary>3D Position of the audio "camera".</summary>
+        public Location Position;
+
+        /// <summary>The current velocity vector of the audio "camera".</summary>
+        public Location CurrentVelocity;
+
+        /// <summary>If true, a frame update is pending. If false, there has been no update.</summary>
+        public bool HadUpdateFrame = false;
+
+        /// <summary>If true, the audio "camera" teleported in this frame.</summary>
+        public bool DidTeleport = false;
+
+        /// <summary>The global time (total delta seconds) of the frame.</summary>
+        public double FrameTime;
+
+        /// <summary>Forward direction (vector) of the audio "camera".</summary>
+        public Location ForwardDirection;
+
+        /// <summary>Up direction (vector) of the audio "camera".</summary>
+        public Location UpDirection;
 
         /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
         public byte[][] ReusableBuffers;
@@ -240,15 +217,13 @@ public class FGE3DAudioEngine
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
         public readonly float GetLevelFor(byte[] buffer)
         {
-            float level = 0.0f;
+            int maxSample = 0;
             for (int i = 0; i < buffer.Length; i += BYTERATE)
             {
                 int rawSample = unchecked((short)((buffer[i + 1] << 8) | buffer[i]));
-                float tval = Math.Abs(rawSample) / (float)short.MaxValue;
-                level += tval;
+                maxSample = Math.Max(maxSample, Math.Abs(rawSample));
             }
-            level /= (buffer.Length / BYTERATE) * Instance.Volume;
-            return level;
+            return maxSample / (float)short.MaxValue;
         }
 
         /// <summary>Adds a single playing audio instance to all channels.</summary>
@@ -258,14 +233,16 @@ public class FGE3DAudioEngine
             {
                 int newSample = 0;
                 int maxTimeOffset = 0;
+                bool isDead = false;
                 foreach (AudioChannel channel in Instance.Channels)
                 {
                     AudioChannel.ClipAddingResult result = channel.AddClipToBuffer(audio);
                     newSample = result.NewSample;
                     maxTimeOffset = Math.Max(maxTimeOffset, result.TimeOffset);
+                    isDead = result.IsDead;
                 }
                 audio.CurrentSample = newSample;
-                if (!audio.Loop && audio.CurrentSample + maxTimeOffset * 2 >= audio.Clip.Data.Length)
+                if (isDead)
                 {
                     audio.CurrentSample = 0;
                     audio.State = AudioState.DONE;
@@ -276,6 +253,35 @@ public class FGE3DAudioEngine
             {
                 DeadInstances.Add(audio);
             }
+        }
+
+        /// <summary>Updates data for the current frame.</summary>
+        /// <param name="newPosition">The new position the audio "camera" listener is in.</param>
+        /// <param name="forward">The new forward direction.</param>
+        /// <param name="up">The new up direction.</param>
+        /// <param name="newDidTeleport">If true, the listener teleported. If false, they moved normally.</param>
+        /// <param name="time">The global time (total delta seconds) of the frame.</param>
+        public void FrameUpdate(Location newPosition, Location forward, Location up, bool newDidTeleport, double time)
+        {
+            ForwardDirection = forward;
+            UpDirection = up;
+            FrameTime = time;
+            if (!newDidTeleport)
+            {
+                Location travelVector = newPosition - Position;
+                CurrentVelocity = travelVector / time;
+                if (CurrentVelocity.LengthSquared() > Instance.SpeedOfPresumeTeleport * Instance.SpeedOfPresumeTeleport)
+                {
+                    newDidTeleport = true;
+                }
+            }
+            Position = newPosition;
+            if (newDidTeleport)
+            {
+                CurrentVelocity = Location.Zero;
+            }
+            DidTeleport = newDidTeleport;
+            HadUpdateFrame = true;
         }
 
         /// <summary>The internal audio engine loop.</summary>
@@ -306,6 +312,37 @@ public class FGE3DAudioEngine
                         }
                         lock (Instance.Locker)
                         {
+                            while (Instance.UpdatesToSync.TryDequeue(out SyncUpdate update))
+                            {
+                                if (update.IsNew)
+                                {
+                                    Instance.Playing.Add(update.Instance);
+                                }
+                                else if (update.Instance is null)
+                                {
+                                    FrameUpdate(update.Position, update.Forward, update.Up, update.DidTeleport, update.Time);
+                                }
+                                else
+                                {
+                                    update.Instance.Position = update.Position;
+                                    update.Instance.Velocity = update.Velocity;
+                                    update.Instance.Gain = update.Gain;
+                                    update.Instance.Pitch = update.Pitch;
+                                    if (update.State != (AudioState)255)
+                                    {
+                                        update.Instance.State = update.State;
+                                    }
+                                    update.Instance.Loop = update.Loop;
+                                    if (update.Seek != -1)
+                                    {
+                                        update.Instance.CurrentSample = update.Seek;
+                                    }
+                                }
+                            }
+                            foreach (AudioChannel channel in Instance.Channels)
+                            {
+                                channel.FrameUpdate();
+                            }
                             foreach (LiveAudioInstance audio in Instance.Playing)
                             {
                                 AddClipToAllChannels(audio);
@@ -330,6 +367,7 @@ public class FGE3DAudioEngine
                             Instance.OpenALBacker.SendNextBuffer(Instance);
                         }
                         Instance.CurrentLevel = newCurrentLevel;
+                        Instance.SoundCount = Instance.Playing.Count;
                     }
                     int ms = PAUSE - (int)(elSec * 1000.0);
                     if (ms > 0)
@@ -346,5 +384,5 @@ public class FGE3DAudioEngine
     }
 
     /// <summary>Internal data used by the audio engine.</summary>
-    public InternalData Internal;
+    public InternalData Internal = new();
 }

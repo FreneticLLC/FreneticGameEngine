@@ -6,102 +6,168 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using FGECore.MathHelpers;
 using FGEGraphics.AudioSystem.AudioInternals;
 
 namespace FGEGraphics.AudioSystem;
 
 /// <summary>Represents a currently playing sound effect.</summary>
-/// <param name="sfx">The backing sound effect.</param>
-public class ActiveSound(SoundEffect sfx)
+public class ActiveSound
 {
     /// <summary>The backing sound engine.</summary>
     public SoundEngine Engine;
 
     /// <summary>The represented sound effect.</summary>
-    public SoundEffect Effect = sfx;
+    public SoundEffect Effect;
+
+    /// <summary>Internal data for <see cref="ActiveSound"/>.</summary>
+    public struct InternalData()
+    {
+        /// <summary>If true, this sound effect has unsynced modifications.</summary>
+        public bool Modified = false;
+
+        /// <summary>The 3D space position of the sound effect.</summary>
+        public Location Position = Location.Zero;
+
+        /// <summary>The 3D space position of the sound effect.</summary>
+        public Location Velocity = Location.Zero;
+
+        /// <summary>Whether to loop the sound.</summary>
+        public bool Loop = false;
+
+        /// <summary>The pitch of the sound.</summary>
+        public float Pitch = 1;
+
+        /// <summary>The gain of the sound.</summary>
+        public float Gain = 1;
+
+        /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
+        public bool Backgrounded = false;
+
+        /// <summary>The internal audio engine instance, if relevant.</summary>
+        public LiveAudioInstance AudioInternal;
+
+        /// <summary>The current state of the audio.</summary>
+        public AudioState State = AudioState.WAITING;
+
+        /// <summary>A wanted change to the audio state.</summary>
+        public AudioState ForceState = (AudioState)255;
+
+        /// <summary>A desired seek index.</summary>
+        public int Seek = -1;
+
+        /// <summary>Sync the data copy to the backing engine, if needed.</summary>
+        public void Sync()
+        {
+            if (!Modified)
+            {
+                return;
+            }
+            Modified = false;
+            float gain = Backgrounded ? 0.0001f : Gain;
+            AudioInternal.Engine.UpdatesToSync.Enqueue(new(AudioInternal, Position, Velocity, gain, Pitch, ForceState, Seek, Loop, 0, Location.Zero, Location.Zero, false, false));
+            Seek = -1;
+            ForceState = (AudioState)255;
+        }
+    }
+
+    /// <summary>Internal data for <see cref="ActiveSound"/>.</summary>
+    public InternalData Internal = new();
 
     /// <summary>The 3D space position of the sound effect.</summary>
     public Location Position
     {
-        get => AudioInternal.Position;
-        set
-        {
-            AudioInternal.Position = value;
-            AudioInternal.UsePosition = !value.IsNaN();
-        }
+        get => Internal.Position;
+        set => Internal.Position = value;
     }
 
     /// <summary>The 3D space position of the sound effect.</summary>
     public Location Velocity
     {
-        get => AudioInternal.Velocity;
-        set => AudioInternal.Velocity = value;
+        get => Internal.Velocity;
+        set { Internal.Velocity = value; Internal.Modified = true; }
     }
 
     /// <summary>Whether to loop the sound.</summary>
     public bool Loop
     {
-        get => AudioInternal.Loop;
-        set => AudioInternal.Loop = value;
+        get => Internal.Loop;
+        set { Internal.Loop = value; Internal.Modified = true; }
     }
 
     /// <summary>The pitch of the sound.</summary>
     public float Pitch
     {
-        get => AudioInternal.Pitch;
-        set => AudioInternal.Pitch = value;
+        get => Internal.Pitch;
+        set { Internal.Pitch = value; Internal.Modified = true; }
     }
 
     /// <summary>The gain of the sound.</summary>
     public float Gain
     {
-        get => AudioInternal.Gain;
-        set => AudioInternal.Gain = value;
+        get => Internal.Gain;
+        set { Internal.Gain = value; Internal.Modified = true; }
     }
-
-    /// <summary>The internal audio engine instance, if relevant.</summary>
-    public LiveAudioInstance AudioInternal = new() { Clip = sfx.Clip };
 
     /// <summary>Whether the sound effect is considered a background effect.</summary>
     public bool IsBackground = false;
 
     /// <summary>Whether the sound effect has been forced into the background and quieted due to user focus need.</summary>
-    public bool Backgrounded = false;
+    public bool Backgrounded
+    {
+        get => Internal.Backgrounded;
+        set { Internal.Backgrounded = value; Internal.Modified = true; }
+    }
 
-    /// <summary>Whether the audio has been deafened.</summary>
-    public bool IsDeafened = false;
+    /// <summary>Constructs the sound instance.</summary>
+    /// <param name="sfx">The backing sound effect.</param>
+    /// <param name="engine">The backing sound engine.</param>
+    public ActiveSound(SoundEffect sfx, SoundEngine engine)
+    {
+        Engine = engine;
+        Effect = sfx;
+        Internal.AudioInternal = new(engine.Internal.AudioEngine) { Clip = sfx };
+    }
 
     /// <summary>Plays the audio.</summary>
     public void Play()
     {
-        Engine.Internal.AudioEngine.Add(this);
+        Internal.State = AudioState.PLAYING;
+        Internal.Sync();
+        Engine.Internal.AudioEngine.Add(Internal.AudioInternal);
     }
 
     /// <summary>Seeks to a location in the clip (From 0.0 to 1.0).</summary>
     /// <param name="f">The location.</param>
     public void Seek(float f)
     {
-        int samp = (int)(AudioInternal.Clip.Data.Length * f);
-        AudioInternal.CurrentSample = samp - samp % 4;
+        int samp = (int)(Internal.AudioInternal.Clip.Data.Length * f);
+        Internal.Seek = samp - samp % 4;
+        Internal.Modified = true;
     }
 
     /// <summary>Pauses the audio.</summary>
     public void Pause()
     {
-        AudioInternal.State = AudioState.PAUSED;
+        Internal.ForceState = AudioState.PAUSED;
+        Internal.Modified = true;
     }
 
     /// <summary>Stops the audio from playing further.</summary>
     public void Stop()
     {
-        AudioInternal.State = AudioState.STOP;
+        Internal.ForceState = AudioState.STOP;
+        Internal.Modified = true;
     }
 
     /// <summary>Returns whether the audio is currently playing.</summary>
     /// <returns>Whether it is playing.</returns>
     public bool IsPlaying()
     {
-        return AudioInternal.State == AudioState.PLAYING;
+        return Internal.ForceState == AudioState.PLAYING;
     }
 }
