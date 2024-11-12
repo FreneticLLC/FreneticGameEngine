@@ -18,6 +18,7 @@ using FGEGraphics.UISystem;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a toggleable button on the screen.</summary>
+// TODO: orientation of label
 public class UICheckbox : UIElement
 {
     /// <summary>The button for this checkbox.</summary>
@@ -38,7 +39,8 @@ public class UICheckbox : UIElement
     {
         AddChild(Button = new UIButton(null, Toggle, styles, pos.AtOrigin()));
         AddChild(Label = new UILabel(text, label, pos.AtOrigin().ConstantWidth(-1)));
-        Label.Position.ConstantX(Position.Width * 3 / 2).GetterY(() => (Height - Label.Height) / 2);
+        Label.Position.GetterX(() => Button.Width * 3 / 2).GetterY(() => (Height - Label.Height) / 2);
+        Position.GetterWidth(() => Label.Position.X + Label.Width); // TODO generalize
     }
 
     /// <summary>Constructs a new checkbox using the normal button style as the label style.</summary>
