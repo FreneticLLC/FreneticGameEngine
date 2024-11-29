@@ -142,6 +142,21 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             currentSample += preRead * clipChannels;
             maxSample -= preRead;
         }
+        int reverbCount = toAdd.ReverbCount;
+        bool doReverb = reverbCount > 0;
+        float reverbDelay = 0, reverbGain = 0;
+        int reverbDelaySamples = 0;
+        if (doReverb)
+        {
+            reverbDelay = toAdd.ReverbDelay;
+            reverbDelaySamples = (int)(reverbDelay * FGE3DAudioEngine.InternalData.FREQUENCY) * clipChannels;
+            reverbDelaySamples -= reverbDelaySamples % clipChannels;
+            reverbGain = 1 - toAdd.ReverbDecay;
+            reverbGain *= reverbGain;
+            int requiredToBeSilent = (int)Math.Ceiling(Math.Log(0.001, reverbGain));
+            float secondsExtra = (requiredToBeSilent + reverbCount) * reverbDelay;
+            maxSample += reverbDelaySamples * (requiredToBeSilent + reverbCount);
+        }
         int timeOffset = 0, priorTimeOffset = 0;
         float volume = 1;
         if (toAdd.UsePosition)
@@ -200,6 +215,37 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
                     int rawPriorSample = clipData[priorSample];
                     int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
                     outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                }
+                if (doReverb)
+                {
+                    float localReverbGain = 1;
+                    for (int i = 0; i < reverbCount; i++)
+                    {
+                        localReverbGain *= reverbGain;
+                        int otherSample = sample - reverbDelaySamples * i;
+                        if (toAdd.Loop)
+                        {
+                            otherSample %= clipLen;
+                            if (otherSample < 0)
+                            {
+                                otherSample += clipLen;
+                            }
+                        }
+                        if (otherSample >= 0 && otherSample < clipLen)
+                        {
+                            int rawOtherSample = clipData[otherSample];
+                            int outOtherSample = (rawOtherSample * volumeModifier) >> 16;
+                            outSample += (int)(outOtherSample * localReverbGain);
+                        }
+                    }
+                    // if reverb alone makes this sound loud enough to clip the final buffer, quiet the audio. This is basically a safety/sanity check.
+                    if (Math.Abs(outSample) > short.MaxValue)
+                    {
+                        float reduceVolumeBy = short.MaxValue / Math.Abs(outSample);
+                        gain *= reduceVolumeBy;
+                        volumeModifier = (int)((volume * gain) * ushort.MaxValue);
+                        toAdd.Gain *= reduceVolumeBy;
+                    }
                 }
                 if (mustDoLowPass)
                 {

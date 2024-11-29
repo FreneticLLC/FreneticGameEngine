@@ -231,10 +231,10 @@ public class FGE3DAudioEngine
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
         public unsafe readonly float GetLevelFor(short* buffer)
         {
-            short maxSample = 0;
+            int maxSample = 0;
             for (int i = 0; i < SAMPLES_PER_BUFFER; i++)
             {
-                maxSample = Math.Max(maxSample, Math.Abs(buffer[i]));
+                maxSample = Math.Max(maxSample, Math.Abs((int)buffer[i]));
             }
             return maxSample / (float)short.MaxValue;
         }

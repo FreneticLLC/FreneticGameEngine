@@ -123,6 +123,47 @@ public class ActiveSound
         set { Internal.Backgrounded = value; Internal.Modified = true; }
     }
 
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency
+    {
+        get => Internal.AudioInternal.LowPassFrequency;
+        set => Internal.AudioInternal.LowPassFrequency = value;
+    }
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency
+    {
+        get => Internal.AudioInternal.HighPassFrequency;
+        set => Internal.AudioInternal.HighPassFrequency = value;
+    }
+
+    /// <summary>How long to delay between reverberations of this sound.</summary>
+    public float ReverbDelay
+    {
+        get => Internal.AudioInternal.ReverbDelay;
+        set => Internal.AudioInternal.ReverbDelay = value;
+    }
+
+    /// <summary>How many reverberations of this sound to play. Set to 0 to not play any reverb.</summary>
+    public int ReverbCount
+    {
+        get => Internal.AudioInternal.ReverbCount;
+        set => Internal.AudioInternal.ReverbCount = value;
+    }
+
+    /// <summary>How much each reverberation's volume should drop by the time it reaches the next one. 0.25 means drop volume by a quarter after <see cref="ReverbDelay"/>.</summary>
+    public float ReverbDecay
+    {
+        get => Internal.AudioInternal.ReverbDecay;
+        set => Internal.AudioInternal.ReverbDecay = value;
+    }
+
     /// <summary>The number of channels in the sound effect (if it has been loaded, otherwise 0).</summary>
     public byte Channels => Internal.AudioInternal.Clip.Channels;
 
