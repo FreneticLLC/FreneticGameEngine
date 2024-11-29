@@ -126,12 +126,17 @@ public class FGE3DAudioEngine
     {
         if (Internal.ReusableBuffers is not null)
         {
-            for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
+            foreach (short* ptr in Internal.ReusableBuffers)
             {
-                Marshal.FreeHGlobal((IntPtr)Internal.ReusableBuffers[i]);
+                Marshal.FreeHGlobal((IntPtr)ptr);
             }
             Internal.ReusableBuffers = null;
         }
+        Channels.Clear();
+        WasApiAudioBacker?.Shutdown();
+        WasApiAudioBacker = null;
+        OpenALBacker?.Shutdown();
+        OpenALBacker = null;
         Run = false;
     }
 
