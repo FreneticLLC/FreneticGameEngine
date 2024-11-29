@@ -123,6 +123,9 @@ public class ActiveSound
         set { Internal.Backgrounded = value; Internal.Modified = true; }
     }
 
+    /// <summary>The number of channels in the sound effect (if it has been loaded, otherwise 0).</summary>
+    public byte Channels => Internal.AudioInternal.Clip.Channels;
+
     /// <summary>Constructs the sound instance.</summary>
     /// <param name="sfx">The backing sound effect.</param>
     /// <param name="engine">The backing sound engine.</param>
@@ -141,12 +144,12 @@ public class ActiveSound
         Engine.Internal.AudioEngine.Add(Internal.AudioInternal);
     }
 
-    /// <summary>Seeks to a location in the clip (From 0.0 to 1.0).</summary>
+    /// <summary>Seeks to a location in the clip (From 0.0 to 1.0). Not valid if the clip hasn't been loaded yet.</summary>
     /// <param name="f">The location.</param>
     public void Seek(float f)
     {
         int samp = (int)(Internal.AudioInternal.Clip.Data.Length * f);
-        Internal.Seek = samp - samp % 4;
+        Internal.Seek = samp - samp % Channels;
         Internal.Modified = true;
     }
 

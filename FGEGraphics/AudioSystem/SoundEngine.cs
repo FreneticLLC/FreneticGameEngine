@@ -328,10 +328,10 @@ public class SoundEngine
         // TODO: re-usable buffer for opti reasons?
         float[] sampleBuffer = new float[sampleCount];
         oggReader.ReadSamples(sampleBuffer, 0, sampleCount);
-        byte[] data = new byte[sampleCount * 2];
+        short[] data = new short[sampleCount];
         for (int i = 0; i < sampleCount; i++)
         {
-            PrimitiveConversionHelper.Short16ToBytes((short)(sampleBuffer[i] * short.MaxValue), data, i * 2);
+            data[i] = (short)(sampleBuffer[i] * short.MaxValue);
         }
         sfx.Data = data;
         sfx.Channels = (byte)oggReader.Channels;
@@ -350,17 +350,25 @@ public class SoundEngine
             LastUse = Client.GlobalTickTime
         };
         byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out _);
-        sfx.Data = data;
         if (bits == 8)
         {
-            sfx.Data = new byte[data.Length * 2];
+            sfx.Data = new short[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
-                // TODO: Sanity?
-                sfx.Data[i] = data[i + 1];
-                sfx.Data[i + 1] = 0;
+                sfx.Data[i] = data[i];
             }
-            //data = clip.Data;
+        }
+        else if (bits == 16)
+        {
+            sfx.Data = new short[data.Length / 2];
+            for (int i = 0; i < sfx.Data.Length; i++)
+            {
+                sfx.Data[i] = unchecked((short)((data[i * 2 + 1] << 8) | data[i * 2]));
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException($"Bit depth {bits} is not supported.");
         }
         /*long pblast = 0;
         for (int i = 0; i < clip.Data.Length; i++)

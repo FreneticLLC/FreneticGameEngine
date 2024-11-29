@@ -127,34 +127,34 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             timeOffset = data.TimeOffset;
             volume = data.Volume;
         }
-        int bytesPerSample = 2 * toAdd.Clip.Channels;
+        int clipChannels = toAdd.Clip.Channels;
         float gain = toAdd.Gain * Engine.Volume * Volume;
         float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
         bool procPitch = pitch != 1;
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
-        byte[] clipData = toAdd.Clip.Data;
+        short[] clipData = toAdd.Clip.Data;
         short[] outBuffer = InternalCurrentBuffer;
         int clipLen = clipData.Length;
-        int offset = timeOffset * bytesPerSample + StereoIndex;
-        double step = bytesPerSample / (double)clipLen;
+        int offset = timeOffset * clipChannels + StereoIndex;
+        double step = clipChannels / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
         for (int outBufPosition = 0;  outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
             double approxSample = samplePos * clipLen;
             currentSample = (int)Math.Round(approxSample);
-            currentSample -= currentSample % bytesPerSample;
+            currentSample -= currentSample % clipChannels;
             int priorSample = currentSample;
             if (procPitch && approxSample > currentSample)
             {
-                currentSample += bytesPerSample;
+                currentSample += clipChannels;
             }
             else
             {
-                priorSample -= bytesPerSample;
+                priorSample -= clipChannels;
             }
-            float fraction = (float)(approxSample - priorSample) / bytesPerSample;
+            float fraction = (float)(approxSample - priorSample) / clipChannels;
             int sample = currentSample + offset;
             if (toAdd.Loop)
             {
@@ -172,11 +172,11 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             if (sample >= 0 && sample + 1 < clipLen)
             {
                 int rawPreValue = outBuffer[outBufPosition];
-                int rawSample = unchecked((short)((clipData[sample + 1] << 8) | clipData[sample]));
+                int rawSample = clipData[sample];
                 int outSample = (rawSample * volumeModifier) >> 16;
                 if (procPitch && priorSample >= 0 && priorSample + 1 < clipLen)
                 {
-                    int rawPriorSample = unchecked((short)((clipData[priorSample + 1] << 8) | clipData[priorSample]));
+                    int rawPriorSample = clipData[priorSample];
                     int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
                     outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
                 }
