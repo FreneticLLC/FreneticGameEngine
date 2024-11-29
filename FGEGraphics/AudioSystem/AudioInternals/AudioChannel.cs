@@ -47,7 +47,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     public double FrameDelta = 0;
 
     /// <summary>When this channel is being processed for new audio to add, this is the current buffer it's targeting.</summary>
-    public byte[] InternalCurrentBuffer;
+    public short[] InternalCurrentBuffer; // TODO: Pointer
 
     /// <summary>Volume modifier for this channel.</summary>
     public float Volume = 1;
@@ -115,7 +115,6 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     public ClipAddingResult AddClipToBuffer(LiveAudioInstance toAdd)
     {
         int currentSample = toAdd.CurrentSample;
-        int outBufPosition = 0;
         // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
         // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
         // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
@@ -135,13 +134,13 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         byte[] clipData = toAdd.Clip.Data;
-        byte[] outBuffer = InternalCurrentBuffer;
+        short[] outBuffer = InternalCurrentBuffer;
         int clipLen = clipData.Length;
         int offset = timeOffset * bytesPerSample + StereoIndex;
         double step = bytesPerSample / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
-        while (outBufPosition + 1 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
+        for (int outBufPosition = 0;  outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
             double approxSample = samplePos * clipLen;
             currentSample = (int)Math.Round(approxSample);
@@ -172,7 +171,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
             }
             if (sample >= 0 && sample + 1 < clipLen)
             {
-                int rawPreValue = unchecked((short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]));
+                int rawPreValue = outBuffer[outBufPosition];
                 int rawSample = unchecked((short)((clipData[sample + 1] << 8) | clipData[sample]));
                 int outSample = (rawSample * volumeModifier) >> 16;
                 if (procPitch && priorSample >= 0 && priorSample + 1 < clipLen)
@@ -183,11 +182,9 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
                 }
                 outSample += rawPreValue; // TODO: Better scaled adder?
                 outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
-                outBuffer[outBufPosition] = (byte)outSample;
-                outBuffer[outBufPosition + 1] = unchecked((byte)(outSample >> 8));
+                outBuffer[outBufPosition] = (short)outSample;
             }
             samplePos += step * pitch;
-            outBufPosition += 2;
         }
         return new(currentSample, timeOffset, isDead);
     }

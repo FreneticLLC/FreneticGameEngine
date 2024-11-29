@@ -102,10 +102,10 @@ public class FGE3DAudioEngine
             OpenALBacker.Init();
         }
         Internal.Instance = this;
-        Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
+        Internal.ReusableBuffers = new short[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
         {
-            Internal.ReusableBuffers[i] = new byte[InternalData.BYTES_PER_BUFFER];
+            Internal.ReusableBuffers[i] = new short[InternalData.SAMPLES_PER_BUFFER];
         }
         if (Channels.IsEmpty())
         {
@@ -141,9 +141,6 @@ public class FGE3DAudioEngine
         /// <summary>The audio frequency, in Hz (samples per second).</summary>
         public const int FREQUENCY = 44100;
 
-        /// <summary>Audio byte-rate to use.</summary>
-        public const int BYTERATE = 2;
-
         /// <summary>Multiplying an audio sample by this lowers its volume by 3 dB.</summary>
         public const float MINUS_THREE_DB = 0.707106781f;
 
@@ -161,9 +158,6 @@ public class FGE3DAudioEngine
 
         /// <summary>Number of audio samples in a buffer.</summary>
         public const int SAMPLES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0);
-
-        /// <summary>Actual byte space to load at once.</summary>
-        public const int BYTES_PER_BUFFER = SAMPLES_PER_BUFFER * BYTERATE;
 
         /// <summary>3D Position of the audio "camera".</summary>
         public Location Position;
@@ -187,7 +181,7 @@ public class FGE3DAudioEngine
         public Location UpDirection;
 
         /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
-        public byte[][] ReusableBuffers;
+        public short[][] ReusableBuffers;
 
         /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
         public int ByteBufferID;
@@ -196,9 +190,9 @@ public class FGE3DAudioEngine
         public List<LiveAudioInstance> DeadInstances;
 
         /// <summary>Gets and cleans the next byte buffer to use.</summary>
-        public byte[] GetNextBuffer()
+        public short[] GetNextBuffer()
         {
-            byte[] toReturn = ReusableBuffers[ByteBufferID++];
+            short[] toReturn = ReusableBuffers[ByteBufferID++];
             ByteBufferID %= REUSABLE_BUFFER_ARRAY_SIZE;
             for (int i = 0; i < toReturn.Length; i++)
             {
@@ -215,12 +209,12 @@ public class FGE3DAudioEngine
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
-        public readonly float GetLevelFor(byte[] buffer)
+        public readonly float GetLevelFor(short[] buffer)
         {
             int maxSample = 0;
-            for (int i = 0; i < buffer.Length; i += BYTERATE)
+            for (int i = 0; i < buffer.Length; i++)
             {
-                int rawSample = unchecked((short)((buffer[i + 1] << 8) | buffer[i]));
+                int rawSample = buffer[i];
                 maxSample = Math.Max(maxSample, Math.Abs(rawSample));
             }
             return maxSample / (float)short.MaxValue;
