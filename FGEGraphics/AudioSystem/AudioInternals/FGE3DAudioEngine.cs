@@ -124,19 +124,6 @@ public class FGE3DAudioEngine
     /// <summary>Shuts down the audio engine. May take a moment before the engine thread stops.</summary>
     public unsafe void Shutdown()
     {
-        if (Internal.ReusableBuffers is not null)
-        {
-            foreach (short* ptr in Internal.ReusableBuffers)
-            {
-                Marshal.FreeHGlobal((IntPtr)ptr);
-            }
-            Internal.ReusableBuffers = null;
-        }
-        Channels.Clear();
-        WasApiAudioBacker?.Shutdown();
-        WasApiAudioBacker = null;
-        OpenALBacker?.Shutdown();
-        OpenALBacker = null;
         Run = false;
     }
 
@@ -213,10 +200,21 @@ public class FGE3DAudioEngine
         }
 
         /// <summary>Completely closes and stops the audio engine.</summary>
-        public readonly void CloseAndStop()
+        public void CloseAndStop()
         {
-            Instance.OpenALBacker?.Shutdown();
+            if (ReusableBuffers is not null)
+            {
+                foreach (short* ptr in ReusableBuffers)
+                {
+                    Marshal.FreeHGlobal((IntPtr)ptr);
+                }
+                ReusableBuffers = null;
+            }
+            Instance.Channels.Clear();
             Instance.WasApiAudioBacker?.Shutdown();
+            Instance.WasApiAudioBacker = null;
+            Instance.OpenALBacker?.Shutdown();
+            Instance.OpenALBacker = null;
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
@@ -237,13 +235,13 @@ public class FGE3DAudioEngine
             {
                 int newSample = 0;
                 int maxTimeOffset = 0;
-                bool isDead = false;
+                bool isDead = true;
                 foreach (AudioChannel channel in Instance.Channels)
                 {
                     AudioChannel.ClipAddingResult result = channel.AddClipToBuffer(audio);
                     newSample = result.NewSample;
                     maxTimeOffset = Math.Max(maxTimeOffset, result.TimeOffset);
-                    isDead = result.IsDead;
+                    isDead = isDead && result.IsDead;
                 }
                 audio.CurrentSample = newSample;
                 if (isDead)

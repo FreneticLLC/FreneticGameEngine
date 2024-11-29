@@ -115,6 +115,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     public ClipAddingResult AddClipToBuffer(LiveAudioInstance toAdd)
     {
         int currentSample = toAdd.CurrentSample;
+        int clipChannels = toAdd.Clip.Channels;
         // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
         // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
         // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
@@ -127,7 +128,6 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             timeOffset = data.TimeOffset;
             volume = data.Volume;
         }
-        int clipChannels = toAdd.Clip.Channels;
         float gain = toAdd.Gain * Engine.Volume * Volume;
         float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
         bool procPitch = pitch != 1;
