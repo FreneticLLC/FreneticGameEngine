@@ -100,12 +100,13 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
     /// <param name="Volume">The volume to this ear.</param>
     /// <param name="TimeOffset">The time offset to this ear, in samples. This is usually a negative number, to indicate the position in the clip should be earlier, ie the playback of real audio should come later.</param>
-    public record struct AudioPositionalData(float Volume, int TimeOffset)
+    /// <param name="PriorTimeOffset">The previous frame's time offset to this ear, in samples.</param>
+    public record struct AudioPositionalData(float Volume, int TimeOffset, int PriorTimeOffset)
     {
     }
 
     /// <summary>Calculates the correct positional audio data for the ear for a position based on distance (using inverse-square-root) and direction (using trigonometry).</summary>
-    public AudioPositionalData GetPositionalData(Location position)
+    public AudioPositionalData GetPositionalData(Location position, Location priorPosition)
     {
         Location relativeDirectionVector = (Engine.Internal.Position - position).Normalize();
         relativeDirectionVector = RotationFromForward.Transform(relativeDirectionVector);
@@ -119,6 +120,9 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         data.Volume = angleVolume * distanceGain;
         float timeOffsetSeconds = -dist / Engine.SpeedOfSound;
         data.TimeOffset = (int)(timeOffsetSeconds * FGE3DAudioEngine.InternalData.FREQUENCY);
+        float priorDist = (float)priorPosition.Distance(PriorPosition);
+        float priorTimeOffsetSeconds = -priorDist / Engine.SpeedOfSound;
+        data.PriorTimeOffset = (int)(priorTimeOffsetSeconds * FGE3DAudioEngine.InternalData.FREQUENCY);
         return data;
     }
 
@@ -151,32 +155,33 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             currentSample += preRead * clipChannels;
             maxSample -= preRead;
         }
-        int timeOffset = 0;
+        int timeOffset = 0, priorTimeOffset = 0;
         float volume = 1;
         if (toAdd.UsePosition)
         {
-            AudioPositionalData data = GetPositionalData(toAdd.Position);
-            timeOffset = data.TimeOffset;
+            AudioPositionalData data = GetPositionalData(toAdd.Position, toAdd.PriorPosition);
             volume = data.Volume;
+            timeOffset = data.TimeOffset;
+            priorTimeOffset = data.PriorTimeOffset;
         }
         float gain = toAdd.Gain * Engine.Volume * Volume;
-        float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
-        bool procPitch = pitch != 1;
+        float pitch = toAdd.Pitch;
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         short* outBuffer = InternalCurrentBuffer;
-        int offset = timeOffset * clipChannels + StereoIndex;
         double step = clipChannels / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
         double stepPitched = step * pitch;
         for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
-            double approxSample = samplePos * clipLen;
+            float fractionThrough = outBufPosition < 0 ? 0 : outBufPosition / (float)FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
+            float timeOffsetLocal = (timeOffset * fractionThrough + priorTimeOffset * (1 - fractionThrough)) * clipChannels;
+            double approxSample = samplePos * clipLen + timeOffsetLocal;
             currentSample = (int)Math.Round(approxSample);
             currentSample -= currentSample % clipChannels;
-            int priorSample = currentSample;
-            if (procPitch && approxSample > currentSample)
+            int priorSample = currentSample + StereoIndex;
+            if (approxSample > currentSample)
             {
                 currentSample += clipChannels;
             }
@@ -185,7 +190,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
                 priorSample -= clipChannels;
             }
             float fraction = (float)(approxSample - priorSample) / clipChannels;
-            int sample = currentSample + offset;
+            int sample = currentSample + StereoIndex;
             if (toAdd.Loop)
             {
                 sample %= clipLen;
@@ -203,7 +208,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             {
                 int rawSample = sample < clipLen ? clipData[sample] : 0;
                 int outSample = (rawSample * volumeModifier) >> 16;
-                if (procPitch && priorSample >= 0 && priorSample < clipLen)
+                if (priorSample >= 0 && priorSample < clipLen)
                 {
                     int rawPriorSample = clipData[priorSample];
                     int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
