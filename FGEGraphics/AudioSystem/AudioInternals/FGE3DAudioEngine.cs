@@ -177,9 +177,6 @@ public class FGE3DAudioEngine
         /// <summary>3D Position of the audio "camera".</summary>
         public Location Position;
 
-        /// <summary>The current velocity vector of the audio "camera".</summary>
-        public Location CurrentVelocity;
-
         /// <summary>If true, a frame update is pending. If false, there has been no update.</summary>
         public bool HadUpdateFrame = false;
 
@@ -282,17 +279,13 @@ public class FGE3DAudioEngine
             if (!newDidTeleport)
             {
                 Location travelVector = newPosition - Position;
-                CurrentVelocity = travelVector / time;
-                if (CurrentVelocity.LengthSquared() > Instance.SpeedOfPresumeTeleport * Instance.SpeedOfPresumeTeleport)
+                Location currentVelocity = travelVector / time;
+                if (currentVelocity.LengthSquared() > Instance.SpeedOfPresumeTeleport * Instance.SpeedOfPresumeTeleport)
                 {
                     newDidTeleport = true;
                 }
             }
             Position = newPosition;
-            if (newDidTeleport)
-            {
-                CurrentVelocity = Location.Zero;
-            }
             DidTeleport = newDidTeleport;
             HadUpdateFrame = true;
         }

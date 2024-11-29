@@ -34,12 +34,6 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     /// <summary>The prior position of this channel's input in the previous audio frame.</summary>
     public Location PriorPosition = Location.Zero;
 
-    /// <summary>How far the <see cref="CurrentPosition"/> changed in this frame from the previous.</summary>
-    public Location PositionChange = Location.Zero;
-
-    /// <summary>The current frame's velocity for this ear.</summary>
-    public Location Velocity = Location.Zero;
-
     /// <summary>The global time of the prior frame.</summary>
     public double PriorFrameTime = 0;
 
@@ -85,15 +79,12 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         Location newPosition = Engine.Internal.Position + earDirection * (Engine.HeadWidth * 0.5);
         if (Engine.Internal.DidTeleport)
         {
-            PositionChange = Location.Zero;
             PriorPosition = newPosition;
         }
         else
         {
-            PositionChange = newPosition - CurrentPosition;
             PriorPosition = CurrentPosition;
         }
-        Velocity = PositionChange / FrameDelta;
         CurrentPosition = newPosition;
     }
 
@@ -137,10 +128,6 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         int clipChannels = toAdd.Clip.Channels;
         short[] clipData = toAdd.Clip.Data;
         int clipLen = clipData.Length;
-        // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
-        // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
-        // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
-        // TODO: Note as well the current ear velocity should be additive with the sound velocity.
         float lowPassFrequencyCap = Math.Min(Math.Min(toAdd.LowPassFrequency, LowPassFrequency), Engine.LowPassFrequency);
         float lowPassFactor = lowPassFrequencyCap / FGE3DAudioEngine.InternalData.FREQUENCY;
         float highPassFrequencyMin = Math.Max(Math.Max(toAdd.HighPassFrequency, HighPassFrequency), Engine.HighPassFrequency);
