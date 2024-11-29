@@ -58,6 +58,18 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     /// <summary>Offset for stereo source reading (0 for left, 2 for right).</summary>
     public int StereoIndex = 0;
 
+    /// <summary>Frequency, in Hz, as the maximum frequency to play (ie a low pass filter).
+    /// Set for example to 1000 to only play low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency = int.MaxValue;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency = 0;
+
     /// <summary>Performs a general frame update of current data on this channel.</summary>
     public void FrameUpdate()
     {
@@ -116,10 +128,26 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     {
         int currentSample = toAdd.CurrentSample;
         int clipChannels = toAdd.Clip.Channels;
+        short[] clipData = toAdd.Clip.Data;
+        int clipLen = clipData.Length;
         // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
         // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
         // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
         // TODO: Note as well the current ear velocity should be additive with the sound velocity.
+        float lowPassFrequencyCap = Math.Min(Math.Min(toAdd.LowPassFrequency, LowPassFrequency), Engine.LowPassFrequency);
+        float lowPassFactor = lowPassFrequencyCap / FGE3DAudioEngine.InternalData.FREQUENCY;
+        float highPassFrequencyMin = Math.Max(Math.Max(toAdd.HighPassFrequency, HighPassFrequency), Engine.HighPassFrequency);
+        float highPassFactor = highPassFrequencyMin / FGE3DAudioEngine.InternalData.FREQUENCY;
+        float lowPassPrior = 0, highPassPrior = 0;
+        bool mustDoLowPass = lowPassFrequencyCap < 999_999 || highPassFrequencyMin > 0;
+        int preRead = 0;
+        int maxSample = clipLen;
+        if (mustDoLowPass)
+        {
+            preRead = -(int)(2 / Math.Min(highPassFactor > 0 ? highPassFactor : 1, lowPassFactor));
+            currentSample += preRead * clipChannels;
+            maxSample -= preRead;
+        }
         int timeOffset = 0;
         float volume = 1;
         if (toAdd.UsePosition)
@@ -133,14 +161,13 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         bool procPitch = pitch != 1;
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
-        short[] clipData = toAdd.Clip.Data;
         short* outBuffer = InternalCurrentBuffer;
-        int clipLen = clipData.Length;
         int offset = timeOffset * clipChannels + StereoIndex;
         double step = clipChannels / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
-        for (int outBufPosition = 0;  outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
+        double stepPitched = step * pitch;
+        for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
             double approxSample = samplePos * clipLen;
             currentSample = (int)Math.Round(approxSample);
@@ -164,27 +191,43 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
                     sample += clipLen;
                 }
             }
-            if (sample >= clipLen)
+            if (sample >= maxSample)
             {
                 isDead = true;
                 break;
             }
-            if (sample >= 0 && sample + 1 < clipLen)
+            if (sample >= 0)
             {
-                int rawPreValue = outBuffer[outBufPosition];
-                int rawSample = clipData[sample];
+                int rawSample = sample < clipLen ? clipData[sample] : 0;
                 int outSample = (rawSample * volumeModifier) >> 16;
-                if (procPitch && priorSample >= 0 && priorSample + 1 < clipLen)
+                if (procPitch && priorSample >= 0 && priorSample < clipLen)
                 {
                     int rawPriorSample = clipData[priorSample];
                     int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
                     outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
                 }
-                outSample += rawPreValue; // TODO: Better scaled adder?
-                outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
-                outBuffer[outBufPosition] = (short)outSample;
+                if (mustDoLowPass)
+                {
+                    if (lowPassFrequencyCap < 999_999)
+                    {
+                        lowPassPrior += lowPassFactor * (outSample - lowPassPrior);
+                        outSample = (int)lowPassPrior;
+                    }
+                    if (highPassFrequencyMin > 0)
+                    {
+                        highPassPrior += highPassFactor * (outSample - highPassPrior);
+                        outSample -= (int)highPassPrior;
+                    }
+                }
+                if (outBufPosition >= 0)
+                {
+                    int rawPreValue = outBuffer[outBufPosition];
+                    outSample += rawPreValue; // TODO: Better scaled adder?
+                    outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
+                    outBuffer[outBufPosition] = (short)outSample;
+                }
             }
-            samplePos += step * pitch;
+            samplePos += stepPitched;
         }
         return new(currentSample, timeOffset, isDead);
     }

@@ -44,6 +44,18 @@ public class FGE3DAudioEngine
     /// <summary>The current general volume of the audio engine.</summary>
     public float Volume = 0.5f;
 
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency = int.MaxValue;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency = 0;
+
     /// <summary>All currently playing audio.</summary>
     public List<LiveAudioInstance> Playing = [];
 
