@@ -31,6 +31,9 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     /// <summary>The current position of this channel's input, eg the location of an ear.</summary>
     public Location CurrentPosition = Location.Zero;
 
+    /// <summary>The prior position of this channel's input in the previous audio frame.</summary>
+    public Location PriorPosition = Location.Zero;
+
     /// <summary>How far the <see cref="CurrentPosition"/> changed in this frame from the previous.</summary>
     public Location PositionChange = Location.Zero;
 
@@ -83,10 +86,12 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         if (Engine.Internal.DidTeleport)
         {
             PositionChange = Location.Zero;
+            PriorPosition = newPosition;
         }
         else
         {
             PositionChange = newPosition - CurrentPosition;
+            PriorPosition = CurrentPosition;
         }
         Velocity = PositionChange / FrameDelta;
         CurrentPosition = newPosition;
@@ -118,10 +123,8 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
     }
 
     /// <summary>Result data from <see cref="AddClipToBuffer(LiveAudioInstance)"/>.</summary>
-    /// <param name="NewSample">The new sample index.</param>
-    /// <param name="TimeOffset">The time offset for this clip in this channel.</param>
     /// <param name="IsDead">The sound has passed its end.</param>
-    public record struct ClipAddingResult(int NewSample, int TimeOffset, bool IsDead);
+    public record struct ClipAddingResult(bool IsDead);
 
     /// <summary>Adds a single audio instance to the raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
     public ClipAddingResult AddClipToBuffer(LiveAudioInstance toAdd)
@@ -229,6 +232,6 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             }
             samplePos += stepPitched;
         }
-        return new(currentSample, timeOffset, isDead);
+        return new(isDead);
     }
 }

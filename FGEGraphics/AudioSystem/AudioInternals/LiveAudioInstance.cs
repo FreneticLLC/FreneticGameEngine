@@ -26,7 +26,8 @@ public class LiveAudioInstance(FGE3DAudioEngine engine)
     /// <summary>Whether this instance should loop.</summary>
     public bool Loop = false;
 
-    // TODO: Track motion of the instance over time
+    /// <summary>The position of this instance in 3D space during the previous sound engine internal frame.</summary>
+    public Location PriorPosition = Location.Zero;
 
     /// <summary>The position of this instance in 3D space.</summary>
     public Location Position = Location.Zero;

@@ -98,6 +98,8 @@ public class FGE3DAudioEngine
             return;
         }
         inst.State = AudioState.PLAYING;
+        inst.PriorPosition = inst.Position;
+        inst.UsePosition = !inst.Position.IsNaN();
         UpdatesToSync.Enqueue(new(inst, Location.Zero, Location.Zero, 1, 1, AudioState.PLAYING, 0, false, 0, Location.Zero, Location.Zero, false, true));
     }
 
@@ -245,23 +247,20 @@ public class FGE3DAudioEngine
         {
             if (audio.State == AudioState.PLAYING)
             {
-                int newSample = 0;
-                int maxTimeOffset = 0;
                 bool isDead = true;
                 foreach (AudioChannel channel in Instance.Channels)
                 {
                     AudioChannel.ClipAddingResult result = channel.AddClipToBuffer(audio);
-                    newSample = result.NewSample;
-                    maxTimeOffset = Math.Max(maxTimeOffset, result.TimeOffset);
                     isDead = isDead && result.IsDead;
                 }
-                audio.CurrentSample = newSample;
+                audio.CurrentSample += (int)Math.Round(audio.Pitch * SAMPLES_PER_BUFFER * audio.Clip.Channels);
                 if (isDead)
                 {
                     audio.CurrentSample = 0;
                     audio.State = AudioState.DONE;
                     DeadInstances.Add(audio);
                 }
+                audio.PriorPosition = audio.Position;
             }
             else if (audio.State == AudioState.STOP || audio.State == AudioState.DONE)
             {
@@ -298,8 +297,15 @@ public class FGE3DAudioEngine
             HadUpdateFrame = true;
         }
 
+        /// <summary>Trigger the internal audio engine loop.</summary>
+        public readonly void ForceAudioLoop()
+        {
+            // This has to be re-called from the correct instance, the thread code loses the reference.
+            Instance.Internal.ForceAudioLoopInternal();
+        }
+
         /// <summary>The internal audio engine loop.</summary>
-        public void ForceAudioLoop()
+        public void ForceAudioLoopInternal()
         {
             try
             {
@@ -339,6 +345,11 @@ public class FGE3DAudioEngine
                                 else
                                 {
                                     update.Instance.Position = update.Position;
+                                    if (!update.Instance.UsePosition)
+                                    {
+                                        update.Instance.PriorPosition = update.Position;
+                                    }
+                                    update.Instance.UsePosition = !update.Position.IsNaN();
                                     update.Instance.Velocity = update.Velocity;
                                     update.Instance.Gain = update.Gain;
                                     update.Instance.Pitch = update.Pitch;
