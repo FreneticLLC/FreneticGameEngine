@@ -18,6 +18,7 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using System.Runtime.CompilerServices;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -89,7 +90,7 @@ public class FGE3DAudioEngine
     }
 
     /// <summary>Initialize and load the audio engine.</summary>
-    public void Init()
+    public unsafe void Init()
     {
         if (USE_WASAPI)
         {
@@ -102,10 +103,10 @@ public class FGE3DAudioEngine
             OpenALBacker.Init();
         }
         Internal.Instance = this;
-        Internal.ReusableBuffers = new short[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
+        Internal.ReusableBuffers = new short*[InternalData.REUSABLE_BUFFER_ARRAY_SIZE];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
         {
-            Internal.ReusableBuffers[i] = new short[InternalData.SAMPLES_PER_BUFFER];
+            Internal.ReusableBuffers[i] = (short*)Marshal.AllocHGlobal(sizeof(short) * InternalData.SAMPLES_PER_BUFFER);
         }
         if (Channels.IsEmpty())
         {
@@ -121,8 +122,16 @@ public class FGE3DAudioEngine
     }
 
     /// <summary>Shuts down the audio engine. May take a moment before the engine thread stops.</summary>
-    public void Shutdown()
+    public unsafe void Shutdown()
     {
+        if (Internal.ReusableBuffers is not null)
+        {
+            for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
+            {
+                Marshal.FreeHGlobal((IntPtr)Internal.ReusableBuffers[i]);
+            }
+            Internal.ReusableBuffers = null;
+        }
         Run = false;
     }
 
@@ -133,7 +142,7 @@ public class FGE3DAudioEngine
     public volatile int SoundCount = 0;
 
     /// <summary>Internal data used by the audio engine.</summary>
-    public struct InternalData()
+    public unsafe struct InternalData()
     {
         /// <summary>The relevant backing audio engine instance.</summary>
         public FGE3DAudioEngine Instance;
@@ -181,7 +190,7 @@ public class FGE3DAudioEngine
         public Location UpDirection;
 
         /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
-        public short[][] ReusableBuffers;
+        public short*[] ReusableBuffers;
 
         /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
         public int ByteBufferID;
@@ -190,14 +199,11 @@ public class FGE3DAudioEngine
         public List<LiveAudioInstance> DeadInstances;
 
         /// <summary>Gets and cleans the next byte buffer to use.</summary>
-        public short[] GetNextBuffer()
+        public unsafe short* GetNextBuffer()
         {
-            short[] toReturn = ReusableBuffers[ByteBufferID++];
+            short* toReturn = ReusableBuffers[ByteBufferID++];
             ByteBufferID %= REUSABLE_BUFFER_ARRAY_SIZE;
-            for (int i = 0; i < toReturn.Length; i++)
-            {
-                toReturn[i] = 0;
-            }
+            Unsafe.InitBlockUnaligned(toReturn, 0, SAMPLES_PER_BUFFER * sizeof(short));
             return toReturn;
         }
 
@@ -209,13 +215,12 @@ public class FGE3DAudioEngine
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
-        public readonly float GetLevelFor(short[] buffer)
+        public unsafe readonly float GetLevelFor(short* buffer)
         {
-            int maxSample = 0;
-            for (int i = 0; i < buffer.Length; i++)
+            short maxSample = 0;
+            for (int i = 0; i < SAMPLES_PER_BUFFER; i++)
             {
-                int rawSample = buffer[i];
-                maxSample = Math.Max(maxSample, Math.Abs(rawSample));
+                maxSample = Math.Max(maxSample, Math.Abs(buffer[i]));
             }
             return maxSample / (float)short.MaxValue;
         }

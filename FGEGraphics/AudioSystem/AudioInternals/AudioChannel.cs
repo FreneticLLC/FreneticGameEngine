@@ -17,7 +17,7 @@ namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents one channel of audio (eg left or right ear) within the audio engine.</summary>
 /// <remarks>Construct the audio channel instance and prep it for OpenAL usage.</remarks>
-public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotation)
+public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotation)
 {
     /// <summary>Human-readable name of this audio channel, for debugging.</summary>
     public string Name = name;
@@ -47,7 +47,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     public double FrameDelta = 0;
 
     /// <summary>When this channel is being processed for new audio to add, this is the current buffer it's targeting.</summary>
-    public short[] InternalCurrentBuffer; // TODO: Pointer
+    public short* InternalCurrentBuffer;
 
     /// <summary>Volume modifier for this channel.</summary>
     public float Volume = 1;
@@ -134,7 +134,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         short[] clipData = toAdd.Clip.Data;
-        short[] outBuffer = InternalCurrentBuffer;
+        short* outBuffer = InternalCurrentBuffer;
         int clipLen = clipData.Length;
         int offset = timeOffset * clipChannels + StereoIndex;
         double step = clipChannels / (double)clipLen;

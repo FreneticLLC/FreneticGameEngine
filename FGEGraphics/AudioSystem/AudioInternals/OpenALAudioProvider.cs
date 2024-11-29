@@ -107,8 +107,8 @@ public class OpenALAudioProvider
         byte[] rawBuffer = RawDataBuffers.Count > 0 ? RawDataBuffers.Dequeue() : new byte[FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER * 4];
         AudioChannel leftChannel = engine.Channels.FirstOrDefault(c => c.Name == "Left");
         AudioChannel rightChannel = engine.Channels.FirstOrDefault(c => c.Name == "Right");
-        short[] leftBuffer = leftChannel.InternalCurrentBuffer;
-        short[] rightBuffer = rightChannel.InternalCurrentBuffer;
+        short* leftBuffer = leftChannel.InternalCurrentBuffer;
+        short* rightBuffer = rightChannel.InternalCurrentBuffer;
         fixed (byte* rawBufferPtr = rawBuffer)
         {
             for (int i = 0; i < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; i++)
