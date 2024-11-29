@@ -454,6 +454,7 @@ public class SoundEngine
     /// <summary>Estimates current audio levels. Very frame-by-frame sensitive, unlikely to be useful unless aggregated.</summary>
     public float EstimateAudioLevel()
     {
-        return Internal.AudioEngine.CurrentLevel;
+        // Sqrt is to back-compensate for gain values being squared. Humans perceive sound logarithmically.
+        return (float)Math.Sqrt(Internal.AudioEngine.CurrentLevel);
     }
 }
