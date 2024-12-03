@@ -178,100 +178,102 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         bool isDead = false;
         double stepPitched = step * pitch;
         fixed (short* clipDataPtr = clipData)
-        for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
-            float fractionThrough = outBufPosition < 0 ? 0 : outBufPosition / (float)FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
-            float timeOffsetLocal = (timeOffset * fractionThrough + priorTimeOffset * (1 - fractionThrough)) * clipChannels;
-            double approxSample = samplePos * clipLen + timeOffsetLocal;
-            currentSample = (int)Math.Round(approxSample);
-            currentSample -= currentSample % clipChannels;
-            int priorSample = currentSample + StereoIndex;
-            if (approxSample > currentSample)
+            for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
             {
-                currentSample += clipChannels;
-            }
-            else
-            {
-                priorSample -= clipChannels;
-            }
-            float fraction = (float)(approxSample - priorSample) / clipChannels;
-            int sample = currentSample + StereoIndex;
-            if (toAdd.Loop)
-            {
-                sample %= clipLen;
-                if (sample < 0)
+                float fractionThrough = outBufPosition < 0 ? 0 : outBufPosition / (float)FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
+                float timeOffsetLocal = (timeOffset * fractionThrough + priorTimeOffset * (1 - fractionThrough)) * clipChannels;
+                double approxSample = samplePos * clipLen + timeOffsetLocal;
+                currentSample = (int)Math.Round(approxSample);
+                currentSample -= currentSample % clipChannels;
+                int priorSample = currentSample + StereoIndex;
+                if (approxSample > currentSample)
                 {
-                    sample += clipLen;
+                    currentSample += clipChannels;
                 }
-            }
-            if (sample >= maxSample)
-            {
-                isDead = true;
-                break;
-            }
-            if (sample >= 0)
-            {
-                int rawSample = sample < clipLen ? clipDataPtr[sample] : 0;
-                int outSample = (rawSample * volumeModifier) >> 16;
-                if (priorSample >= 0 && priorSample < clipLen)
+                else
                 {
-                    int rawPriorSample = clipDataPtr[priorSample];
-                    int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
-                    outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                    priorSample -= clipChannels;
                 }
-                if (doReverb)
+                float fraction = (float)(approxSample - priorSample) / clipChannels;
+                int sample = currentSample + StereoIndex;
+                if (toAdd.Loop)
                 {
-                    float localReverbGain = 1;
-                    for (int i = 0; i < reverbCount; i++)
+                    sample %= clipLen;
+                    if (sample < 0)
                     {
-                        localReverbGain *= reverbGain;
-                        int otherSample = sample - reverbDelaySamples * i;
-                        if (toAdd.Loop)
+                        sample += clipLen;
+                    }
+                }
+                if (sample >= maxSample)
+                {
+                    isDead = true;
+                    break;
+                }
+                if (sample >= 0)
+                {
+                    int rawSample = sample < clipLen ? clipDataPtr[sample] : 0;
+                    int outSample = (rawSample * volumeModifier) >> 16;
+                    if (priorSample >= 0 && priorSample < clipLen)
+                    {
+                        int rawPriorSample = clipDataPtr[priorSample];
+                        int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
+                        outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                    }
+                    if (doReverb)
+                    {
+                        float localReverbGain = 1;
+                        for (int i = 0; i < reverbCount; i++)
                         {
-                            otherSample %= clipLen;
-                            if (otherSample < 0)
+                            localReverbGain *= reverbGain;
+                            int otherSample = sample - reverbDelaySamples * i;
+                            if (toAdd.Loop)
                             {
-                                otherSample += clipLen;
+                                otherSample %= clipLen;
+                                if (otherSample < 0)
+                                {
+                                    otherSample += clipLen;
+                                }
+                            }
+                            if (otherSample >= 0 && otherSample < clipLen)
+                            {
+                                int rawOtherSample = clipDataPtr[otherSample];
+                                int outOtherSample = (rawOtherSample * volumeModifier) >> 16;
+                                outSample += (int)(outOtherSample * localReverbGain);
                             }
                         }
-                        if (otherSample >= 0 && otherSample < clipLen)
+                        // if reverb alone makes this sound loud enough to clip the final buffer, quiet the audio. This is basically a safety/sanity check.
+                        if (Math.Abs(outSample) > short.MaxValue)
                         {
-                            int rawOtherSample = clipDataPtr[otherSample];
-                            int outOtherSample = (rawOtherSample * volumeModifier) >> 16;
-                            outSample += (int)(outOtherSample * localReverbGain);
+                            float reduceVolumeBy = short.MaxValue / Math.Abs(outSample);
+                            gain *= reduceVolumeBy;
+                            volumeModifier = (int)((volume * gain) * ushort.MaxValue);
+                            toAdd.Gain *= reduceVolumeBy;
                         }
                     }
-                    // if reverb alone makes this sound loud enough to clip the final buffer, quiet the audio. This is basically a safety/sanity check.
-                    if (Math.Abs(outSample) > short.MaxValue)
+                    if (mustDoLowPass)
                     {
-                        float reduceVolumeBy = short.MaxValue / Math.Abs(outSample);
-                        gain *= reduceVolumeBy;
-                        volumeModifier = (int)((volume * gain) * ushort.MaxValue);
-                        toAdd.Gain *= reduceVolumeBy;
+                        if (lowPassFrequencyCap < 999_999)
+                        {
+                            lowPassPrior += lowPassFactor * (outSample - lowPassPrior);
+                            outSample = (int)lowPassPrior;
+                        }
+                        if (highPassFrequencyMin > 0)
+                        {
+                            highPassPrior += highPassFactor * (outSample - highPassPrior);
+                            outSample -= (int)highPassPrior;
+                        }
+                    }
+                    if (outBufPosition >= 0)
+                    {
+                        int rawPreValue = outBuffer[outBufPosition];
+                        outSample += rawPreValue; // TODO: Better scaled adder?
+                        outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
+                        outBuffer[outBufPosition] = (short)outSample;
                     }
                 }
-                if (mustDoLowPass)
-                {
-                    if (lowPassFrequencyCap < 999_999)
-                    {
-                        lowPassPrior += lowPassFactor * (outSample - lowPassPrior);
-                        outSample = (int)lowPassPrior;
-                    }
-                    if (highPassFrequencyMin > 0)
-                    {
-                        highPassPrior += highPassFactor * (outSample - highPassPrior);
-                        outSample -= (int)highPassPrior;
-                    }
-                }
-                if (outBufPosition >= 0)
-                {
-                    int rawPreValue = outBuffer[outBufPosition];
-                    outSample += rawPreValue; // TODO: Better scaled adder?
-                    outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
-                    outBuffer[outBufPosition] = (short)outSample;
-                }
+                samplePos += stepPitched;
             }
-            samplePos += stepPitched;
         }
         return new(isDead);
     }
