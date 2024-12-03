@@ -14,6 +14,7 @@ using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -109,6 +110,7 @@ public class OpenALAudioProvider
         AudioChannel rightChannel = engine.Channels.FirstOrDefault(c => c.Name == "Right");
         short* leftBuffer = leftChannel.InternalCurrentBuffer;
         short* rightBuffer = rightChannel.InternalCurrentBuffer;
+        GraphicsUtil.DebugAssert(leftBuffer != null && rightBuffer != null, "Left and right buffers must be non-null.");
         fixed (byte* rawBufferPtr = rawBuffer)
         {
             for (int i = 0; i < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; i++)

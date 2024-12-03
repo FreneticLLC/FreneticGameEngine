@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -171,6 +172,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
         short* outBuffer = InternalCurrentBuffer;
+        GraphicsUtil.DebugAssert(outBuffer != null, "outBuffer must not be null");
         double step = clipChannels / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;

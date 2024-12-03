@@ -19,6 +19,8 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using System.Runtime.CompilerServices;
+using System.Drawing;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -231,6 +233,7 @@ public class FGE3DAudioEngine
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
         public unsafe readonly float GetLevelFor(short* buffer)
         {
+            GraphicsUtil.DebugAssert(buffer is not null, "GetLevelFor called with null buffer.");
             int maxSample = 0;
             for (int i = 0; i < SAMPLES_PER_BUFFER; i++)
             {

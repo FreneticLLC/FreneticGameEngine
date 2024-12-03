@@ -50,6 +50,20 @@ public static class GraphicsUtil
         Logs.Error($"{errorMessage}");
     }
 
+    /// <summary>Only if DEBUG flag is set, assert that a value must be true, error if it is not.</summary>
+    /// <param name="mustBeTrue">The value that must be true.</param>
+    /// <param name="message">The message if it is not true.</param>
+    [Conditional("DEBUG")]
+    public static void DebugAssert(bool mustBeTrue, string message)
+    {
+        if (!mustBeTrue)
+        {
+            Logs.Error($"Assertion failed: {message}");
+            CheckError("GraphicsUtil DebugAssert");
+            throw new Exception($"Assertion failed: {message}");
+        }
+    }
+
 #if DEBUG
     /// <summary>Map of all current active/allocated buffers (VBOs) to their source strings.</summary>
     public static Dictionary<uint, string> ActiveBuffers = [];
