@@ -175,6 +175,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
         double stepPitched = step * pitch;
+        fixed (short* clipDataPtr = clipData)
         for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
         {
             float fractionThrough = outBufPosition < 0 ? 0 : outBufPosition / (float)FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
@@ -208,11 +209,11 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
             }
             if (sample >= 0)
             {
-                int rawSample = sample < clipLen ? clipData[sample] : 0;
+                int rawSample = sample < clipLen ? clipDataPtr[sample] : 0;
                 int outSample = (rawSample * volumeModifier) >> 16;
                 if (priorSample >= 0 && priorSample < clipLen)
                 {
-                    int rawPriorSample = clipData[priorSample];
+                    int rawPriorSample = clipDataPtr[priorSample];
                     int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
                     outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
                 }
@@ -233,7 +234,7 @@ public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternio
                         }
                         if (otherSample >= 0 && otherSample < clipLen)
                         {
-                            int rawOtherSample = clipData[otherSample];
+                            int rawOtherSample = clipDataPtr[otherSample];
                             int outOtherSample = (rawOtherSample * volumeModifier) >> 16;
                             outSample += (int)(outOtherSample * localReverbGain);
                         }
