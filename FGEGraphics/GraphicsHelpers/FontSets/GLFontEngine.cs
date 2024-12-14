@@ -91,15 +91,11 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
         {
             GL.DeleteTexture(TextureMain);
         }
-        TextureMain = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, TextureMain);
+        TextureMain = (int)GraphicsUtil.GenTexture("GLFontEngine_TextureMain", TextureTarget.Texture2D);
         BitmapData bmp_data = CurrentBMP.LockBits(new Rectangle(0, 0, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
         CurrentBMP.UnlockBits(bmp_data);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         GL.BindTexture(TextureTarget.Texture2D, 0);
     }

@@ -618,66 +618,55 @@ public class Renderable
         Internal.IndexCount = inds.Length;
         Internal.LastVRAM = 0;
         // Vertex buffer
-        Internal.VertexVBO = GraphicsUtil.GenBuffer("Renderable_VertexVBO");
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.VertexVBO);
+        Internal.VertexVBO = GraphicsUtil.GenBuffer("Renderable_VertexVBO", BufferTarget.ArrayBuffer);
         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vecs.Length * Vector3.SizeInBytes), vecs, Internal.BufferMode);
         Internal.LastVRAM += vecs.Length * Vector3.SizeInBytes;
         // Normal buffer
-        Internal.NormalVBO = GraphicsUtil.GenBuffer("Renderable_NormalVBO");
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.NormalVBO);
+        Internal.NormalVBO = GraphicsUtil.GenBuffer("Renderable_NormalVBO", BufferTarget.ArrayBuffer);
         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(norms.Length * Vector3.SizeInBytes), norms, Internal.BufferMode);
         Internal.LastVRAM += norms.Length * Vector3.SizeInBytes;
         // TexCoord buffer
-        Internal.TexCoordVBO = GraphicsUtil.GenBuffer("Renderable_TexCoordVBO");
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.TexCoordVBO);
+        Internal.TexCoordVBO = GraphicsUtil.GenBuffer("Renderable_TexCoordVBO", BufferTarget.ArrayBuffer);
         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(texs.Length * Vector3.SizeInBytes), texs, Internal.BufferMode);
         Internal.LastVRAM += texs.Length * Vector3.SizeInBytes;
-        Internal.TangentVBO = GraphicsUtil.GenBuffer("Renderable_TangentVBO");
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.TangentVBO);
+        Internal.TangentVBO = GraphicsUtil.GenBuffer("Renderable_TangentVBO", BufferTarget.ArrayBuffer);
         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(tangs.Length * Vector3.SizeInBytes), tangs, Internal.BufferMode);
         Internal.LastVRAM += tangs.Length * Vector3.SizeInBytes;
         // Color buffer
         if (cols != null)
         {
             Internal.HasColors = true;
-            Internal.ColorVBO = GraphicsUtil.GenBuffer("Renderable_ColorVBO");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.ColorVBO);
+            Internal.ColorVBO = GraphicsUtil.GenBuffer("Renderable_ColorVBO", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(cols.Length * Vector4.SizeInBytes), cols, Internal.BufferMode);
             Internal.LastVRAM += cols.Length * Vector4.SizeInBytes;
         }
         if (Internal.HasBones)
         {
             // Weight buffer
-            Internal.BoneWeightVBO = GraphicsUtil.GenBuffer("Renderable_BoneWeightVBO");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.BoneWeightVBO);
+            Internal.BoneWeightVBO = GraphicsUtil.GenBuffer("Renderable_BoneWeightVBO", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(weights.Length * Vector4.SizeInBytes), weights, Internal.BufferMode);
             Internal.LastVRAM += weights.Length * Vector4.SizeInBytes;
             // ID buffer
-            Internal.BoneIDVBO = GraphicsUtil.GenBuffer("Renderable_BoneIDVBO");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.BoneIDVBO);
+            Internal.BoneIDVBO = GraphicsUtil.GenBuffer("Renderable_BoneIDVBO", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ids.Length * Vector4.SizeInBytes), ids, Internal.BufferMode);
             Internal.LastVRAM += ids.Length * Vector4.SizeInBytes;
             // Weight2 buffer
-            Internal.BoneWeight2VBO = GraphicsUtil.GenBuffer("Renderable_BoneWeight2VBO");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.BoneWeight2VBO);
+            Internal.BoneWeight2VBO = GraphicsUtil.GenBuffer("Renderable_BoneWeight2VBO", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(weights2.Length * Vector4.SizeInBytes), weights2, Internal.BufferMode);
             Internal.LastVRAM += weights2.Length * Vector4.SizeInBytes;
             // ID2 buffer
-            Internal.BoneID2VBO = GraphicsUtil.GenBuffer("Renderable_BoneID2VBO");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.BoneID2VBO);
+            Internal.BoneID2VBO = GraphicsUtil.GenBuffer("Renderable_BoneID2VBO", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(ids2.Length * Vector4.SizeInBytes), ids2, Internal.BufferMode);
             Internal.LastVRAM += ids2.Length * Vector4.SizeInBytes;
         }
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         // Index buffer
-        Internal.IndexVBO = GraphicsUtil.GenBuffer("Renderable_IndexVBO");
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, Internal.IndexVBO);
+        Internal.IndexVBO = GraphicsUtil.GenBuffer("Renderable_IndexVBO", BufferTarget.ElementArrayBuffer);
         GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(inds.Length * sizeof(uint)), inds, Internal.BufferMode);
         Internal.LastVRAM += inds.Length * sizeof(uint);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
         // VAO
         Internal.VAO = GraphicsUtil.GenVertexArray("Renderable_VAO");
-        GL.BindVertexArray(Internal.VAO);
         GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.VertexVBO);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.BindBuffer(BufferTarget.ArrayBuffer, Internal.NormalVBO);

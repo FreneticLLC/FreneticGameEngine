@@ -338,7 +338,7 @@ public class VRControllerTextureEngine
     public int FBO;
 
     /// <summary>The texture.</summary>
-    public int Texture;
+    public uint Texture;
 
     /// <summary>The base texture.</summary>
     public Texture BaseTexture;
@@ -359,13 +359,9 @@ public class VRControllerTextureEngine
     public void GenerateFirst()
     {
         FBO = GL.GenFramebuffer();
-        Texture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Texture);
+        Texture = GraphicsUtil.GenTexture("VRController_FBO_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 512, 512, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture, 0);
