@@ -26,7 +26,7 @@ public class SoundEffect
     public double LastUse = 0.0;
 
     /// <summary>The internal data for this clip.</summary>
-    public byte[] Data;
+    public short[] Data;
 
     /// <summary>The number of channels in this clip (if it has been loaded).</summary>
     public byte Channels;

@@ -47,11 +47,10 @@ public class PointLight2D
         Strength = str;
         FBO = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-        FBO_Tex = GL.GenTexture();
         if (Engine.OneDLights)
         {
             Width = 8192;
-            GL.BindTexture(TextureTarget.Texture1D, FBO_Tex);
+            FBO_Tex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Tex", TextureTarget.Texture1D);
             GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.R32f, Width, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
@@ -59,8 +58,7 @@ public class PointLight2D
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
             GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture1D, FBO_Tex, 0);
             GraphicsUtil.CheckError("PointLight2D init - 1D Tex");
-            FBO_DTex = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture1D, FBO_DTex);
+            FBO_DTex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Depth", TextureTarget.Texture1D);
             GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.DepthComponent, Width, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
             GraphicsUtil.CheckError("PointLight2D init - 1D DTex - Tex");
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
@@ -73,15 +71,12 @@ public class PointLight2D
         }
         else
         {
-            GL.BindTexture(TextureTarget.Texture2D, FBO_Tex);
+            FBO_Tex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Tex", TextureTarget.Texture2D);
             // TODO: Utilities.NextPowerOfTwo? Should probably only be added if it's confirmed as need (POT-only hardware on OpenGL 4.3 is unlikely... NPOTs are common!)
             Width = (int)(Strength * 2f);
             // TODO: Alpha texture!?
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
+            GraphicsUtil.TexParamLinearClamp();
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
         }
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

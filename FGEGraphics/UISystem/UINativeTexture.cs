@@ -23,10 +23,10 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="pos">The position of the element.</param>
-public class UINativeTexture(Func<int> texture, UIPositionHelper pos) : UIElement(pos)
+public class UINativeTexture(Func<uint> texture, UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The texture to display.</summary>
-    public Func<int> Texture = texture;
+    public Func<uint> Texture = texture;
 
     /// <summary>Whether the texture is flipped vertically.</summary>
     // TODO: Put transforms on UIPositionHelper

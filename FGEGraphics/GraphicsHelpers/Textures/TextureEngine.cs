@@ -119,11 +119,11 @@ public class TextureEngine : IDisposable
     /// <param name="time">The current time stamp.</param>
     public void Update(double time)
     {
-        cTime = time;
+        CurrentTime = time;
     }
 
     /// <summary>The current game tick time.</summary>
-    public double cTime = 1.0;
+    public double CurrentTime = 1.0;
 
     /// <summary>
     /// Gets a texture that already exists by name.
@@ -409,7 +409,7 @@ public class TextureEngine : IDisposable
     {
         texture.Width = bmp.Width;
         texture.Height = bmp.Height;
-        GL.GenTextures(1, out texture.OriginalInternalID);
+        texture.OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_FromBitmap_{texture.Name}", TextureTarget.Texture2D);
         texture.InternalTexture = texture.OriginalInternalID;
         texture.Bind();
         LockBitmapToTexture(bmp, DefaultLinear);
@@ -444,11 +444,12 @@ public class TextureEngine : IDisposable
             Engine = this,
             Name = name,
             Width = 2,
-            Height = 2
+            Height = 2,
+            OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_ForColor_{name}", TextureTarget.Texture2D)
         };
-        GL.GenTextures(1, out texture.OriginalInternalID);
         texture.InternalTexture = texture.OriginalInternalID;
         texture.Bind();
+        // TODO: Could just feed in binary directly instead of this silly intermediate bitmap
         using (Bitmap bmp = new(2, 2))
         {
             bmp.SetPixel(0, 0, c);
