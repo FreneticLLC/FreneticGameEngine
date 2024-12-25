@@ -132,21 +132,21 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     /// <param name="c">The color.</param>
     public static void SetColor(Color4F c)
     {
-        ShaderLocations.Common2D.COLOR.SetColor(c);
+        ManagedShader2D.CurrentColor.SetColor(c);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="col">The color.</param>
     public static void SetColor(Vector4 col)
     {
-        ShaderLocations.Common2D.COLOR.Set(col);
+        ManagedShader2D.CurrentColor.Set(col);
     }
 
     /// <summary>Sets the color of the next rendered objects.</summary>
     /// <param name="c">The color.</param>
     public static void SetColor(Color4 c)
     {
-        ShaderLocations.Common2D.COLOR.Set(c.R, c.G, c.B, c.A);
+        ManagedShader2D.CurrentColor.Set(c.R, c.G, c.B, c.A);
     }
 
     /// <summary>Renders a 2D texture fitted to a given rectangle.</summary>
@@ -215,15 +215,13 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
     {
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Pre");
         Vector2 scaler = new(xmax - xmin, ymax - ymin);
-        //Vector2 invScaler = new Vector2(1.0f / scaler.X, 1.0f / scaler.Y);
         Vector2 adder = new(xmin, ymin);
         Vector2 tscaler = rc.Scaler * scaler;
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(tscaler.X, tscaler.Y, rc.AspectHelper));
-        Vector2 tadder = (rc.Adder + adder) * rc.Scaler;
-        ShaderLocations.Common2D.ADDER.Set(tadder);
-        if (rot is not null)
+        ManagedShader2D.CurrentScaler.Set(tscaler.X, tscaler.Y, rc.AspectHelper);
+        ManagedShader2D.CurrentAdder.Set((rc.Adder + adder) * rc.Scaler);
+        if (rot.HasValue)
         {
-            ShaderLocations.Common2D.ROTATION.Set(rot.Value);
+            ManagedShader2D.CurrentRotation.Set(rot.Value);
         }
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Setup");
         if (hollow || (rc.CalcShadows && rc.Engine.OneDLights))
@@ -238,7 +236,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
         }
         if (rot is not null)
         {
-            ShaderLocations.Common2D.ROTATION.Set(Vector3.Zero);
+            ManagedShader2D.CurrentRotation.Set(Vector3.Zero);
         }
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Post");
     }

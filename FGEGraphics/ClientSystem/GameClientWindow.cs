@@ -321,7 +321,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         GLFonts.Init(Files);
         FontSets = new FontSetEngine(GLFonts)
         {
-            FixToShader = Shaders.ColorMult2DShader
+            FixToShader = Shaders.ColorMult2D.UnderlyingShader
         };
         // TODO: FGE/Core->Languages engine!
         FontSets.Init((subdata) => null, () => Ortho, () => GlobalTickTime);

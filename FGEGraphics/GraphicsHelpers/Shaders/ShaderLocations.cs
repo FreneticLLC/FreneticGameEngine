@@ -15,7 +15,7 @@ using FGECore.MathHelpers;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.ClientSystem;
+namespace FGEGraphics.GraphicsHelpers.Shaders;
 
 // TODO: Replace all of this class's `const int` with `ShaderUniform(X)` instances.
 // TODO: Also, actually add all relevant shader locs into here.
@@ -43,7 +43,7 @@ public static class ShaderLocations
     public static class Common2D
     {
         /// <summary>The scaler value.</summary>
-        public const int SCALER = 1;
+        public static ShaderUniformVec3 SCALER = new(1);
 
         /// <summary>The adder value.</summary>
         public static ShaderUniformVec2 ADDER = new(2);

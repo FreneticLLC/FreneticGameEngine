@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Models;
+using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;

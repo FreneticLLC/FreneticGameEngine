@@ -531,7 +531,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             ReusableTextVBO.Render(Engine.GLFonts);
             if (Engine.FixToShader is null)
             {
-                Engine.GLFonts.Shaders.ColorMult2DShader.Bind();
+                Engine.GLFonts.Shaders.ColorMult2D.Bind();
             }
             else
             {

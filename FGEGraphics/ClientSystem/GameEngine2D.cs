@@ -250,16 +250,16 @@ public class GameEngine2D : GameEngineBase
             Shader_Combine.Bind();
         }
         GraphicsUtil.CheckError("RenderSingleFrame - 2");
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-        GL.Uniform2(2, ref Adder);
+        ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+        ManagedShader2D.CurrentAdder.Set(Adder);
         GL.Uniform1(7, aspect);
         GraphicsUtil.CheckError("RenderSingleFrame - 2.5");
         Shader_Lightmap1D.Bind();
-        Shaders.ColorMult2DShader.Bind();
+        Shaders.ColorMult2D.Bind();
         GraphicsUtil.CheckError("RenderSingleFrame - 3");
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-        GL.Uniform2(2, ref Adder);
-        Renderer2D.SetColor(Vector4.One);
+        ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+        ManagedShader2D.CurrentAdder.Set(Adder);
+        ManagedShader2D.CurrentColor.SetColor(Color4F.White);
         // Third step: Pass to the primary rendering system
         try
         {
@@ -331,12 +331,12 @@ public class GameEngine2D : GameEngineBase
             GL.Disable(EnableCap.DepthTest);
             GL.DepthMask(false);
             GL.Viewport(0, 0, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation);
-            Shaders.ColorMult2DShader.Bind();
+            Shaders.ColorMult2D.Bind();
             MainRenderContext.CalcShadows = false;
             Scaler = OriginalScaler;
             Adder = OriginalAdder;
-            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-            GL.Uniform2(2, ref Adder);
+            ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+            ManagedShader2D.CurrentAdder.Set(Adder);
             MainRenderContext.Scaler = Scaler;
             MainRenderContext.Adder = Adder;
             RenderAll(false, null);
@@ -366,9 +366,10 @@ public class GameEngine2D : GameEngineBase
         {
             Lights[i].PrepareLightmap();
             GraphicsUtil.CheckError("Render - Light Precalcer (Prep)");
+            Adder = Lights[i].GetAdder();
             Scaler = Lights[i].GetScaler();
-            GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-            GL.Uniform2(2, Adder = Lights[i].GetAdder());
+            ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+            ManagedShader2D.CurrentAdder.Set(Adder);
             if (OneDLights)
             {
                 GL.ClearBuffer(ClearBuffer.Depth, 0, [1f]);
@@ -388,13 +389,13 @@ public class GameEngine2D : GameEngineBase
         MainRenderContext.CalcShadows = false;
         GraphicsUtil.CheckError("Render - Lights precalced");
         GL.Viewport(0, 0, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation);
-        Shaders.ColorMult2DShader.Bind();
+        Shaders.ColorMult2D.Bind();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
         GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
         Scaler = OriginalScaler;
         Adder = OriginalAdder;
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-        GL.Uniform2(2, ref Adder);
+        ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+        ManagedShader2D.CurrentAdder.Set(Adder);
         MainRenderContext.Scaler = Scaler;
         MainRenderContext.Adder = Adder;
         GraphicsUtil.CheckError("Render - Lights prepped");
@@ -411,8 +412,8 @@ public class GameEngine2D : GameEngineBase
         GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0, 0, 0, 1 });
         Scaler = Vector2.One;
         Adder = Vector2.Zero;
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
-        GL.Uniform2(2, ref Adder);
+        ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
+        ManagedShader2D.CurrentAdder.Set(Adder);
         MainRenderContext.Scaler = Scaler;
         MainRenderContext.Adder = Adder;
         MainRenderContext.Engine = this;
@@ -447,7 +448,7 @@ public class GameEngine2D : GameEngineBase
         Shader_Addlighttoscene.Bind();
         Scaler = Vector2.One;
         Adder = Vector2.Zero;
-        GL.Uniform3(ShaderLocations.Common2D.SCALER, new Vector3(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper));
+        ManagedShader2D.CurrentScaler.Set(Scaler.X, Scaler.Y, MainRenderContext.AspectHelper);
         GL.Uniform2(2, ref Adder);
         MainRenderContext.Scaler = Scaler;
         MainRenderContext.Adder = Adder;
@@ -458,7 +459,7 @@ public class GameEngine2D : GameEngineBase
         GL.ActiveTexture(TextureUnit.Texture1);
         GL.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture0);
-        Shaders.ColorMult2DShader.Bind();
+        Shaders.ColorMult2D.Bind();
         GraphicsUtil.CheckError("Render - Complete");
     }
 }

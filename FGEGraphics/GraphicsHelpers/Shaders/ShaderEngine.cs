@@ -35,7 +35,7 @@ public class ShaderEngine
     public Shader ColorMultShader;
 
     /// <summary>A common shader that multiplies colors, explicitly for 2D usage.</summary>
-    public Shader ColorMult2DShader;
+    public ManagedShader2D ColorMult2D;
 
     /// <summary>A common shader that removes black color.</summary>
     public Shader TextCleanerShader;
@@ -44,7 +44,8 @@ public class ShaderEngine
     public FileEngine Files;
 
     /// <summary>What shader is currently bound.</summary>
-    public static Shader BoundNow = null;
+    [ThreadStatic]
+    public static Shader BoundNow;
 
     /// <summary>Starts or restarts the shader system.</summary>
     /// <param name="files">The backing file engine.</param>
@@ -58,7 +59,7 @@ public class ShaderEngine
         ColorMultShader = GetShader("color_mult");
         if (Files.FileExists("shaders/color_mult2d.vs"))
         {
-            ColorMult2DShader = GetShader("color_mult2d");
+            ColorMult2D = new(GetShader("color_mult2d"));
         }
         TextCleanerShader = GetShader("text_cleaner?text");
     }

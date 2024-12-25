@@ -52,6 +52,9 @@ public class Shader
     /// <summary>Whether the shader loaded properly.</summary>
     public bool LoadedProperly = false;
 
+    /// <summary>Often null, <see cref="ManagedShader"/> version of this shader, if available and known.</summary>
+    public ManagedShader ManagedForm = null;
+
     /// <summary>Destroys the OpenGL program that this shader wraps.</summary>
     public void Destroy()
     {
@@ -84,12 +87,16 @@ public class Shader
         if (Internal_Program == -1)
         {
             Shader temp = Engine.GetShader(Name);
+            if (ManagedForm is not null)
+            {
+                temp.ManagedForm = ManagedForm;
+            }
             Original_Program = temp.Original_Program;
             Internal_Program = Original_Program;
             RemappedTo = temp;
             NewVersion = temp;
         }
-        else if (RemappedTo != null)
+        else if (RemappedTo is not null)
         {
             RemappedTo.CheckValid();
             Internal_Program = RemappedTo.Original_Program;
