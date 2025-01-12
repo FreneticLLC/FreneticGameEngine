@@ -22,7 +22,7 @@ using System.Text;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Frenetic LLC")]
 [assembly: AssemblyProduct("FGEGraphics")]
-[assembly: AssemblyCopyright("Copyright © Frenetic LLC 2017-2024")]
+[assembly: AssemblyCopyright("Copyright © Frenetic LLC 2017-2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
