@@ -126,7 +126,7 @@ public class GameEngine2D : GameEngineBase
     {
         GraphicsUtil.CheckError("PostLoad - Pre");
         Logs.ClientInit("GameEngine loading render helpers...");
-        RenderHelper = new Renderer2D(Textures, Shaders);
+        RenderHelper = new Renderer2D(Textures, Shaders, Client);
         RenderHelper.Init();
         GraphicsUtil.CheckError("PostLoad - RenderHelper Done");
         Logs.ClientInit("GameEngine loading 2D light helpers...");

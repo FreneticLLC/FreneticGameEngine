@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers.Shaders;
@@ -23,7 +24,7 @@ namespace FGEGraphics.GraphicsHelpers;
 /// <summary>2D render helper.</summary>
 /// <param name="tengine">Texture engine.</param>
 /// <param name="shaderdet">Shader engine.</param>
-public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
+public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClientWindow client)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -41,6 +42,9 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
 
     /// <summary>Line mesh.</summary>
     public Renderable Line;
+
+    /// <summary>Stack of scissor bounds.</summary>
+    public Stack<(int, int, int, int)> ScissorStack = [];
 
     void GenerateSquareVBO()
     {
@@ -108,6 +112,8 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
 
     /// <summary>Shader system.</summary>
     public ShaderEngine Shaders = shaderdet;
+
+    public GameClientWindow Client = client;
 
     /// <summary>Render a line between two points.</summary>
     /// <param name="start">The initial point.</param>
@@ -241,5 +247,52 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet)
             ShaderLocations.Common2D.ROTATION.Set(Vector3.Zero);
         }
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Post");
+    }
+
+    public void Scissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
+    {
+        //Logs.Debug($"Scissoring {(xmin, ymin, xmax, ymax)} as {(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin)}");
+        //Logs.Debug($"Ortho matrix: {(0, Client.Window.ClientSize.X, Client.Window.ClientSize.Y, 0)}");
+        GL.Scissor(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin);
+    }
+
+    public void PushScissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
+    {
+        if (ScissorStack.Count == 0)
+        {
+            GL.Enable(EnableCap.ScissorTest);
+        }
+        if (ScissorStack.Count > 0)
+        {
+            (int prevXmin, int prevYmin, int prevXmax, int prevYmax) = ScissorStack.Peek();
+            xmin = Math.Max(xmin, prevXmin);
+            ymin = Math.Max(ymin, prevYmin);
+            xmax = Math.Min(xmax, prevXmax);
+            ymax = Math.Min(ymax, prevYmax);
+        }
+        if (ScissorStack.Count == 0)
+        {
+            Scissor(rc, xmin, ymin, xmax, ymax);
+        }
+        ScissorStack.Push((xmin, ymin, xmax, ymax));
+    }
+
+    public void PopScissor(RenderContext2D rc)
+    {
+        if (ScissorStack.Count == 0)
+        {
+            throw new Exception("Scissor stack empty");
+        }
+        ScissorStack.Pop();
+        if (ScissorStack.Count > 0)
+        {
+            (int xmin, int ymin, int xmax, int ymax) = ScissorStack.Peek();
+            Scissor(rc, xmin, ymin, xmax, ymax);
+        }
+        else
+        {
+            GL.Scissor(0, 0, rc.Width, rc.Height);
+            GL.Disable(EnableCap.ScissorTest);
+        }
     }
 }

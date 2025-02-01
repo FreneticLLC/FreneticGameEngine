@@ -34,11 +34,12 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
         }
     }
 
+    // TODO: This doesn't work well with UI debug information
     /// <inheritdoc/>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        GL.Enable(EnableCap.ScissorTest);
-        GL.Scissor(X, Engine.Window.ClientSize.Y - Y - Height, Width, Height);
+        view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
+        //view.Client.FontSets.Standard.DrawFancyText($"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", new(X, Y, 0));
         foreach (UIElement child in ElementInternal.Children)
         {
             foreach (UIElement element in child.AllChildren())
@@ -46,8 +47,7 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
                 element.Render(view, delta);
             }
         }
-        GL.Scissor(0, 0, Engine.Window.ClientSize.X, Engine.Window.ClientSize.Y); // TODO: Bump around a stack, for embedded scroll groups?
-        GL.Disable(EnableCap.ScissorTest);
+        view.Rendering.PopScissor(view.UIContext);
     }
 
     /// <summary>Constrains child interactions to the scissor boundaries.</summary>
