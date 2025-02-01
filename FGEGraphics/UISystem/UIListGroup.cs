@@ -41,10 +41,12 @@ public class UIListGroup : UIGroup
         Spacing = spacing;
     }
 
-    /// <inheritdoc/>
-    public override void AddChild(UIElement child)
+    public void AddListItem(UIElement child, bool addChild = true)
     {
-        base.AddChild(child);
+        if (addChild)
+        {
+            base.AddChild(child);
+        }
         child.Position.Anchor(Position.MainAnchor);
         if (Vertical)
         {
