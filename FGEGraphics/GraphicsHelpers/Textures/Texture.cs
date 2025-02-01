@@ -108,7 +108,7 @@ public class Texture : IEquatable<Texture>
     /// <summary>Binds this texture to OpenGL.</summary>
     public void Bind()
     {
-        LastBindTime = Engine.cTime;
+        LastBindTime = Engine.CurrentTime;
         CheckValid();
         GL.BindTexture(TextureTarget.Texture2D, InternalTexture);
     }

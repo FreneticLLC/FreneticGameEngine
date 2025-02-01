@@ -12,12 +12,13 @@ using System.Linq;
 using System.Text;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Represents one channel of audio (eg left or right ear) within the audio engine.</summary>
 /// <remarks>Construct the audio channel instance and prep it for OpenAL usage.</remarks>
-public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotation)
+public unsafe class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotation)
 {
     /// <summary>Human-readable name of this audio channel, for debugging.</summary>
     public string Name = name;
@@ -31,11 +32,8 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     /// <summary>The current position of this channel's input, eg the location of an ear.</summary>
     public Location CurrentPosition = Location.Zero;
 
-    /// <summary>How far the <see cref="CurrentPosition"/> changed in this frame from the previous.</summary>
-    public Location PositionChange = Location.Zero;
-
-    /// <summary>The current frame's velocity for this ear.</summary>
-    public Location Velocity = Location.Zero;
+    /// <summary>The prior position of this channel's input in the previous audio frame.</summary>
+    public Location PriorPosition = Location.Zero;
 
     /// <summary>The global time of the prior frame.</summary>
     public double PriorFrameTime = 0;
@@ -47,7 +45,7 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     public double FrameDelta = 0;
 
     /// <summary>When this channel is being processed for new audio to add, this is the current buffer it's targeting.</summary>
-    public byte[] InternalCurrentBuffer;
+    public short* InternalCurrentBuffer;
 
     /// <summary>Volume modifier for this channel.</summary>
     public float Volume = 1;
@@ -57,6 +55,18 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
     
     /// <summary>Offset for stereo source reading (0 for left, 2 for right).</summary>
     public int StereoIndex = 0;
+
+    /// <summary>Frequency, in Hz, as the maximum frequency to play (ie a low pass filter).
+    /// Set for example to 1000 to only play low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency = int.MaxValue;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency = 0;
 
     /// <summary>Performs a general frame update of current data on this channel.</summary>
     public void FrameUpdate()
@@ -70,25 +80,25 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         Location newPosition = Engine.Internal.Position + earDirection * (Engine.HeadWidth * 0.5);
         if (Engine.Internal.DidTeleport)
         {
-            PositionChange = Location.Zero;
+            PriorPosition = newPosition;
         }
         else
         {
-            PositionChange = newPosition - CurrentPosition;
+            PriorPosition = CurrentPosition;
         }
-        Velocity = PositionChange / FrameDelta;
         CurrentPosition = newPosition;
     }
 
     /// <summary>Contains data about how audio sounds relative to a specific ear.</summary>
     /// <param name="Volume">The volume to this ear.</param>
     /// <param name="TimeOffset">The time offset to this ear, in samples. This is usually a negative number, to indicate the position in the clip should be earlier, ie the playback of real audio should come later.</param>
-    public record struct AudioPositionalData(float Volume, int TimeOffset)
+    /// <param name="PriorTimeOffset">The previous frame's time offset to this ear, in samples.</param>
+    public record struct AudioPositionalData(float Volume, int TimeOffset, int PriorTimeOffset)
     {
     }
 
     /// <summary>Calculates the correct positional audio data for the ear for a position based on distance (using inverse-square-root) and direction (using trigonometry).</summary>
-    public AudioPositionalData GetPositionalData(Location position)
+    public AudioPositionalData GetPositionalData(Location position, Location priorPosition)
     {
         Location relativeDirectionVector = (Engine.Internal.Position - position).Normalize();
         relativeDirectionVector = RotationFromForward.Transform(relativeDirectionVector);
@@ -102,93 +112,169 @@ public class AudioChannel(string name, FGE3DAudioEngine engine, Quaternion rotat
         data.Volume = angleVolume * distanceGain;
         float timeOffsetSeconds = -dist / Engine.SpeedOfSound;
         data.TimeOffset = (int)(timeOffsetSeconds * FGE3DAudioEngine.InternalData.FREQUENCY);
+        float priorDist = (float)priorPosition.Distance(PriorPosition);
+        float priorTimeOffsetSeconds = -priorDist / Engine.SpeedOfSound;
+        data.PriorTimeOffset = (int)(priorTimeOffsetSeconds * FGE3DAudioEngine.InternalData.FREQUENCY);
         return data;
     }
 
     /// <summary>Result data from <see cref="AddClipToBuffer(LiveAudioInstance)"/>.</summary>
-    /// <param name="NewSample">The new sample index.</param>
-    /// <param name="TimeOffset">The time offset for this clip in this channel.</param>
     /// <param name="IsDead">The sound has passed its end.</param>
-    public record struct ClipAddingResult(int NewSample, int TimeOffset, bool IsDead);
+    public record struct ClipAddingResult(bool IsDead);
 
     /// <summary>Adds a single audio instance to the raw playback buffer, without losing pre-existing audio data in the buffer.</summary>
     public ClipAddingResult AddClipToBuffer(LiveAudioInstance toAdd)
     {
         int currentSample = toAdd.CurrentSample;
-        int outBufPosition = 0;
-        // TODO: Need to track the actual change in position for each ear between frames, divided by frametime, and apply a shift effect to match.
-        // TODO: So eg if a player whips their head 180 degrees in one frame, the audio should have a natural effect from that rather than glitch jumping.
-        // TODO: Note to make sure that accounts reasonably for teleports (ie don't go wild at the frame of teleportation).
-        // TODO: Note as well the current ear velocity should be additive with the sound velocity.
-        int timeOffset = 0;
+        int clipChannels = toAdd.Clip.Channels;
+        short[] clipData = toAdd.Clip.Data;
+        int clipLen = clipData.Length;
+        float lowPassFrequencyCap = Math.Min(Math.Min(toAdd.LowPassFrequency, LowPassFrequency), Engine.LowPassFrequency);
+        float lowPassFactor = lowPassFrequencyCap / FGE3DAudioEngine.InternalData.FREQUENCY;
+        float highPassFrequencyMin = Math.Max(Math.Max(toAdd.HighPassFrequency, HighPassFrequency), Engine.HighPassFrequency);
+        float highPassFactor = highPassFrequencyMin / FGE3DAudioEngine.InternalData.FREQUENCY;
+        float lowPassPrior = 0, highPassPrior = 0;
+        bool mustDoLowPass = lowPassFrequencyCap < 999_999 || highPassFrequencyMin > 0;
+        int preRead = 0;
+        int maxSample = clipLen;
+        if (mustDoLowPass)
+        {
+            preRead = -(int)(2 / Math.Min(highPassFactor > 0 ? highPassFactor : 1, lowPassFactor));
+            currentSample += preRead * clipChannels;
+            maxSample -= preRead;
+        }
+        int reverbCount = toAdd.ReverbCount;
+        bool doReverb = reverbCount > 0;
+        float reverbDelay = 0, reverbGain = 0;
+        int reverbDelaySamples = 0;
+        if (doReverb)
+        {
+            reverbDelay = toAdd.ReverbDelay;
+            reverbDelaySamples = (int)(reverbDelay * FGE3DAudioEngine.InternalData.FREQUENCY) * clipChannels;
+            reverbDelaySamples -= reverbDelaySamples % clipChannels;
+            reverbGain = 1 - toAdd.ReverbDecay;
+            reverbGain *= reverbGain;
+            int requiredToBeSilent = (int)Math.Ceiling(Math.Log(0.001, reverbGain));
+            float secondsExtra = (requiredToBeSilent + reverbCount) * reverbDelay;
+            maxSample += reverbDelaySamples * (requiredToBeSilent + reverbCount);
+        }
+        int timeOffset = 0, priorTimeOffset = 0;
         float volume = 1;
         if (toAdd.UsePosition)
         {
-            AudioPositionalData data = GetPositionalData(toAdd.Position);
-            timeOffset = data.TimeOffset;
+            AudioPositionalData data = GetPositionalData(toAdd.Position, toAdd.PriorPosition);
             volume = data.Volume;
+            timeOffset = data.TimeOffset;
+            priorTimeOffset = data.PriorTimeOffset;
         }
-        int bytesPerSample = 2 * toAdd.Clip.Channels;
         float gain = toAdd.Gain * Engine.Volume * Volume;
-        float pitch = toAdd.Pitch; // TODO: Determine pitch by relative velocity
-        bool procPitch = pitch != 1;
+        float pitch = toAdd.Pitch;
         gain *= gain; // Exponential volume is how humans perceive volume (see eg decibel system)
         int volumeModifier = (int)((volume * gain) * ushort.MaxValue);
-        byte[] clipData = toAdd.Clip.Data;
-        byte[] outBuffer = InternalCurrentBuffer;
-        int clipLen = clipData.Length;
-        int offset = timeOffset * bytesPerSample + StereoIndex;
-        double step = bytesPerSample / (double)clipLen;
+        short* outBuffer = InternalCurrentBuffer;
+        GraphicsUtil.DebugAssert(outBuffer != null, "outBuffer must not be null");
+        double step = clipChannels / (double)clipLen;
         double samplePos = currentSample / (double)clipLen;
         bool isDead = false;
-        while (outBufPosition + 1 < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER)
+        double stepPitched = step * pitch;
+        fixed (short* clipDataPtr = clipData)
         {
-            double approxSample = samplePos * clipLen;
-            currentSample = (int)Math.Round(approxSample);
-            currentSample -= currentSample % bytesPerSample;
-            int priorSample = currentSample;
-            if (procPitch && approxSample > currentSample)
+            for (int outBufPosition = preRead; outBufPosition < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; outBufPosition++)
             {
-                currentSample += bytesPerSample;
-            }
-            else
-            {
-                priorSample -= bytesPerSample;
-            }
-            float fraction = (float)(approxSample - priorSample) / bytesPerSample;
-            int sample = currentSample + offset;
-            if (toAdd.Loop)
-            {
-                sample %= clipLen;
-                if (sample < 0)
+                float fractionThrough = outBufPosition < 0 ? 0 : outBufPosition / (float)FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
+                float timeOffsetLocal = (timeOffset * fractionThrough + priorTimeOffset * (1 - fractionThrough)) * clipChannels;
+                double approxSample = samplePos * clipLen + timeOffsetLocal;
+                currentSample = (int)Math.Round(approxSample);
+                currentSample -= currentSample % clipChannels;
+                int priorSample = currentSample + StereoIndex;
+                if (approxSample > currentSample)
                 {
-                    sample += clipLen;
+                    currentSample += clipChannels;
                 }
-            }
-            if (sample >= clipLen)
-            {
-                isDead = true;
-                break;
-            }
-            if (sample >= 0 && sample + 1 < clipLen)
-            {
-                int rawPreValue = unchecked((short)((outBuffer[outBufPosition + 1] << 8) | outBuffer[outBufPosition]));
-                int rawSample = unchecked((short)((clipData[sample + 1] << 8) | clipData[sample]));
-                int outSample = (rawSample * volumeModifier) >> 16;
-                if (procPitch && priorSample >= 0 && priorSample + 1 < clipLen)
+                else
                 {
-                    int rawPriorSample = unchecked((short)((clipData[priorSample + 1] << 8) | clipData[priorSample]));
-                    int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
-                    outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                    priorSample -= clipChannels;
                 }
-                outSample += rawPreValue; // TODO: Better scaled adder?
-                outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
-                outBuffer[outBufPosition] = (byte)outSample;
-                outBuffer[outBufPosition + 1] = unchecked((byte)(outSample >> 8));
+                float fraction = (float)(approxSample - priorSample) / clipChannels;
+                int sample = currentSample + StereoIndex;
+                if (toAdd.Loop)
+                {
+                    sample %= clipLen;
+                    if (sample < 0)
+                    {
+                        sample += clipLen;
+                    }
+                }
+                if (sample >= maxSample)
+                {
+                    isDead = true;
+                    break;
+                }
+                if (sample >= 0)
+                {
+                    int rawSample = sample < clipLen ? clipDataPtr[sample] : 0;
+                    int outSample = (rawSample * volumeModifier) >> 16;
+                    if (priorSample >= 0 && priorSample < clipLen)
+                    {
+                        int rawPriorSample = clipDataPtr[priorSample];
+                        int outPriorSample = (rawPriorSample * volumeModifier) >> 16;
+                        outSample = (int)(outPriorSample + (outSample - outPriorSample) * fraction);
+                    }
+                    if (doReverb)
+                    {
+                        float localReverbGain = 1;
+                        for (int i = 0; i < reverbCount; i++)
+                        {
+                            localReverbGain *= reverbGain;
+                            int otherSample = sample - reverbDelaySamples * i;
+                            if (toAdd.Loop)
+                            {
+                                otherSample %= clipLen;
+                                if (otherSample < 0)
+                                {
+                                    otherSample += clipLen;
+                                }
+                            }
+                            if (otherSample >= 0 && otherSample < clipLen)
+                            {
+                                int rawOtherSample = clipDataPtr[otherSample];
+                                int outOtherSample = (rawOtherSample * volumeModifier) >> 16;
+                                outSample += (int)(outOtherSample * localReverbGain);
+                            }
+                        }
+                        // if reverb alone makes this sound loud enough to clip the final buffer, quiet the audio. This is basically a safety/sanity check.
+                        if (Math.Abs(outSample) > short.MaxValue)
+                        {
+                            float reduceVolumeBy = short.MaxValue / Math.Abs(outSample);
+                            gain *= reduceVolumeBy;
+                            volumeModifier = (int)((volume * gain) * ushort.MaxValue);
+                            toAdd.Gain *= reduceVolumeBy;
+                        }
+                    }
+                    if (mustDoLowPass)
+                    {
+                        if (lowPassFrequencyCap < 999_999)
+                        {
+                            lowPassPrior += lowPassFactor * (outSample - lowPassPrior);
+                            outSample = (int)lowPassPrior;
+                        }
+                        if (highPassFrequencyMin > 0)
+                        {
+                            highPassPrior += highPassFactor * (outSample - highPassPrior);
+                            outSample -= (int)highPassPrior;
+                        }
+                    }
+                    if (outBufPosition >= 0)
+                    {
+                        int rawPreValue = outBuffer[outBufPosition];
+                        outSample += rawPreValue; // TODO: Better scaled adder?
+                        outSample = Math.Clamp(outSample, short.MinValue, short.MaxValue);
+                        outBuffer[outBufPosition] = (short)outSample;
+                    }
+                }
+                samplePos += stepPitched;
             }
-            samplePos += step * pitch;
-            outBufPosition += 2;
         }
-        return new(currentSample, timeOffset, isDead);
+        return new(isDead);
     }
 }

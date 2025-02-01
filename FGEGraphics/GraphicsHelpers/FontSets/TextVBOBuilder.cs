@@ -80,11 +80,13 @@ public struct TextVBOBuilder
     /// <summary>Builds the buffers pre-emptively.</summary>
     public void BuildBuffers()
     {
-        VBO = GraphicsUtil.GenBuffer("TextVBO_VBO");
-        VBOTexCoords = GraphicsUtil.GenBuffer("TextVBO_VBOTexCoords");
-        VBOColors = GraphicsUtil.GenBuffer("TextVBO_VBOColors");
-        VBOIndices = GraphicsUtil.GenBuffer("TextVBO_VBOIndices");
-        GL.GenVertexArrays(1, out VAO);
+        VBO = GraphicsUtil.GenBuffer("TextVBO_VBO", BufferTarget.ArrayBuffer);
+        VBOTexCoords = GraphicsUtil.GenBuffer("TextVBO_VBOTexCoords", BufferTarget.ArrayBuffer);
+        VBOColors = GraphicsUtil.GenBuffer("TextVBO_VBOColors", BufferTarget.ArrayBuffer);
+        VBOIndices = GraphicsUtil.GenBuffer("TextVBO_VBOIndices", BufferTarget.ArrayBuffer);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0); // Unbind
+        VAO = GraphicsUtil.GenVertexArray("TextVBO_VAO");
+        GL.BindVertexArray(0); // Unbind
         hasBuffers = true;
     }
 

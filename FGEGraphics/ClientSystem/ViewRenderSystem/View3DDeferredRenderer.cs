@@ -357,7 +357,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         Statistics.Lights.Start();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Screen_Main);
         View.DrawBuffer(DrawBufferMode.ColorAttachment0);
-        GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.0f, 0.0f, 0.0f, Config.LightsRenderClearAlpha });
+        GL.ClearBuffer(ClearBuffer.Color, 0, [0.0f, 0.0f, 0.0f, Config.LightsRenderClearAlpha]);
         if (Engine.Deferred_Shadows)
         {
             if (Engine.Deferred_SSAO)

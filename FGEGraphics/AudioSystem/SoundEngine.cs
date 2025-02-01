@@ -71,7 +71,31 @@ public class SoundEngine
     public float SpeedOfSound
     {
         get => Internal.AudioEngine.SpeedOfSound;
-        set => Internal.AudioEngine.SpeedOfSound = value;
+        set
+        {
+            Internal.AudioEngine.SpeedOfSound = value;
+            Internal.AudioEngine.SpeedOfPresumeTeleport = value * 10;
+        }
+    }
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency
+    {
+        get => Internal.AudioEngine.LowPassFrequency;
+        set => Internal.AudioEngine.LowPassFrequency = value;
+    }
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency
+    {
+        get => Internal.AudioEngine.HighPassFrequency;
+        set => Internal.AudioEngine.HighPassFrequency = value;
     }
 
     /// <summary>The max volume/gain that can be applied to a sound effect.</summary>
@@ -328,10 +352,10 @@ public class SoundEngine
         // TODO: re-usable buffer for opti reasons?
         float[] sampleBuffer = new float[sampleCount];
         oggReader.ReadSamples(sampleBuffer, 0, sampleCount);
-        byte[] data = new byte[sampleCount * 2];
+        short[] data = new short[sampleCount];
         for (int i = 0; i < sampleCount; i++)
         {
-            PrimitiveConversionHelper.Short16ToBytes((short)(sampleBuffer[i] * short.MaxValue), data, i * 2);
+            data[i] = (short)(sampleBuffer[i] * short.MaxValue);
         }
         sfx.Data = data;
         sfx.Channels = (byte)oggReader.Channels;
@@ -350,17 +374,25 @@ public class SoundEngine
             LastUse = Client.GlobalTickTime
         };
         byte[] data = ProcessWAVEData(stream, out int channels, out int bits, out _);
-        sfx.Data = data;
         if (bits == 8)
         {
-            sfx.Data = new byte[data.Length * 2];
+            sfx.Data = new short[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
-                // TODO: Sanity?
-                sfx.Data[i] = data[i + 1];
-                sfx.Data[i + 1] = 0;
+                sfx.Data[i] = data[i];
             }
-            //data = clip.Data;
+        }
+        else if (bits == 16)
+        {
+            sfx.Data = new short[data.Length / 2];
+            for (int i = 0; i < sfx.Data.Length; i++)
+            {
+                sfx.Data[i] = unchecked((short)((data[i * 2 + 1] << 8) | data[i * 2]));
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException($"Bit depth {bits} is not supported.");
         }
         /*long pblast = 0;
         for (int i = 0; i < clip.Data.Length; i++)
@@ -446,6 +478,7 @@ public class SoundEngine
     /// <summary>Estimates current audio levels. Very frame-by-frame sensitive, unlikely to be useful unless aggregated.</summary>
     public float EstimateAudioLevel()
     {
-        return Internal.AudioEngine.CurrentLevel;
+        // Sqrt is to back-compensate for gain values being squared. Humans perceive sound logarithmically.
+        return (float)Math.Sqrt(Internal.AudioEngine.CurrentLevel);
     }
 }

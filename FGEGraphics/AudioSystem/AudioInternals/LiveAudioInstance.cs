@@ -26,7 +26,8 @@ public class LiveAudioInstance(FGE3DAudioEngine engine)
     /// <summary>Whether this instance should loop.</summary>
     public bool Loop = false;
 
-    // TODO: Track motion of the instance over time
+    /// <summary>The position of this instance in 3D space during the previous sound engine internal frame.</summary>
+    public Location PriorPosition = Location.Zero;
 
     /// <summary>The position of this instance in 3D space.</summary>
     public Location Position = Location.Zero;
@@ -39,6 +40,27 @@ public class LiveAudioInstance(FGE3DAudioEngine engine)
 
     /// <summary>The pitch of this audio instance (frequency).</summary>
     public float Pitch = 1f;
+
+    /// <summary>How long in seconds to delay between reverberations of this sound.</summary>
+    public volatile float ReverbDelay = 0.1f;
+
+    /// <summary>How many reverberations of this sound to play. Set to 0 to not play any reverb.</summary>
+    public volatile int ReverbCount = 0;
+
+    /// <summary>How much each reverberation's volume should drop by the time it reaches the next one. 0.25 means drop volume by a quarter after <see cref="ReverbDelay"/>.</summary>
+    public volatile float ReverbDecay = 0.5f;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public volatile int LowPassFrequency = int.MaxValue;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public volatile int HighPassFrequency = 0;
 
     /// <summary>Whether to use the position and velocity value.</summary>
     public bool UsePosition = false;

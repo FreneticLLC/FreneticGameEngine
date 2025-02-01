@@ -62,19 +62,19 @@ public class EnumerableExtensionTests : FGETest
     [Test]
     public static void ToDictNoDupTest()
     {
-        Dictionary<string, int> resultDict = new[] { "a", "b", "c" }.ToDictionaryWithNoDup(new[] { 1, 2, 3 });
+        Dictionary<string, int> resultDict = new[] { "a", "b", "c" }.ToDictionaryWithNoDup([1, 2, 3]);
         ClassicAssert.AreEqual(3, resultDict.Count, "ToDictNoDupTest resultDict Count wrong");
         ClassicAssert.AreEqual(1, resultDict["a"], "ToDictNoDupTest resultDict['a'] wrong");
         ClassicAssert.AreEqual(2, resultDict["b"], "ToDictNoDupTest resultDict['b'] wrong");
         ClassicAssert.AreEqual(3, resultDict["c"], "ToDictNoDupTest resultDict['c'] wrong");
-        Assert.Throws<ArgumentException>(() => new[] { "a", "b", "c", "b", "d" }.ToDictionaryWithNoDup(new[] { 1, 2, 3, 4, 5 }), "ToDictNoDupTest allowed a dup");
+        Assert.Throws<ArgumentException>(() => new[] { "a", "b", "c", "b", "d" }.ToDictionaryWithNoDup([1, 2, 3, 4, 5]), "ToDictNoDupTest allowed a dup");
     }
 
     /// <summary>Tests "ToDictionaryWith".</summary>
     [Test]
     public static void ToDictTest()
     {
-        Dictionary<string, int> resultDict = new[] { "a", "b", "c", "b" }.ToDictionaryWith(new[] { 1, 2, 3, 4 });
+        Dictionary<string, int> resultDict = new[] { "a", "b", "c", "b" }.ToDictionaryWith([1, 2, 3, 4]);
         ClassicAssert.AreEqual(3, resultDict.Count, "ToDictTest resultDict Count wrong");
         ClassicAssert.AreEqual(1, resultDict["a"], "ToDictTest resultDict['a'] wrong");
         ClassicAssert.AreEqual(4, resultDict["b"], "ToDictTest resultDict['b'] wrong");

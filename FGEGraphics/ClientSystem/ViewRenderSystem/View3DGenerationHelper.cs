@@ -45,13 +45,9 @@ public class View3DGenerationHelper : View3DCoreDataSet
             GL.DeleteFramebuffer(Internal.FBO_OutView_Main);
             GL.DeleteTexture(Internal.FBO_OutView_DepthTexture);
         }
-        Internal.FBO_OutView_DepthTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture);
+        Internal.FBO_OutView_DepthTexture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_OutView_Depth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Config.Width, Config.Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         Internal.FBO_OutView_Main = GL.GenFramebuffer();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_OutView_Main);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture, 0);
@@ -70,20 +66,12 @@ public class View3DGenerationHelper : View3DCoreDataSet
             GL.DeleteTexture(Internal.FBO_Transparents_DepthTexture);
         }
         // TODO: Helper class!
-        Internal.FBO_Transparents_Texture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Transparents_Texture);
+        Internal.FBO_Transparents_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Transp_Text", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Config.Width, Config.Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        Internal.FBO_Transparents_DepthTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Transparents_DepthTexture);
+        GraphicsUtil.TexParamLinearClamp();
+        Internal.FBO_Transparents_DepthTexture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Transp_Depth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Config.Width, Config.Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         Internal.FBO_Transparents_Main = GL.GenFramebuffer();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Transparents_Main);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Internal.FBO_Transparents_Texture, 0);
@@ -95,15 +83,20 @@ public class View3DGenerationHelper : View3DCoreDataSet
         if (Config.LLActive)
         {
             // TODO: If was active, delete old data
-            GenTexture();
+            GL.ActiveTexture(TextureUnit.Texture4);
+            uint temp = GraphicsUtil.GenTexture("View3DGenHelper_LL_TranspText0", TextureTarget.Texture2DArray);
+            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.R32f, Config.Width, Config.Height, 3, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.BindImageTexture(4, temp, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+            Internal.LL_TransparentTextures[0] = temp;
             GenBuffer(1, false);
             GenBuffer(2, true);
             GL.ActiveTexture(TextureUnit.Texture7);
-            uint cspb = GraphicsUtil.GenBuffer("View3DGenerationHelper_cspb");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, cspb);
+            // TODO: Coherent names
+            uint cspb = GraphicsUtil.GenBuffer("View3DGenerationHelper_cspb", BufferTarget.ArrayBuffer);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)sizeof(uint), IntPtr.Zero, BufferUsageHint.StaticDraw);
-            int csp = GL.GenTexture();
-            GL.BindTexture(TextureTarget.TextureBuffer, csp);
+            uint csp = GraphicsUtil.GenTexture("View3DGenHelper_LL_csp", TextureTarget.TextureBuffer);
             GL.TexBuffer(TextureBufferTarget.TextureBuffer, SizedInternalFormat.R32f, cspb);
             GL.BindImageTexture(5, csp, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             Internal.LL_TransparentTextures[3] = csp;
@@ -112,34 +105,16 @@ public class View3DGenerationHelper : View3DCoreDataSet
         }
     }
 
-    /// <summary>Internal call to generate a texture.</summary>
-    /// <returns>The texture.</returns>
-    public int GenTexture()
-    {
-        GL.ActiveTexture(TextureUnit.Texture4);
-        int temp = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2DArray, temp);
-        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-        GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.R32f, Config.Width, Config.Height, 3, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
-        GL.BindImageTexture(4, temp, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
-        Internal.LL_TransparentTextures[0] = temp;
-        //GL.BindTexture(TextureTarget.Texture2DArray, 0);
-        return temp;
-    }
-
     /// <summary>Internal call to generate a buffer, for the Linked-List Transparency trick.</summary>
     /// <param name="c">The texture target ID.</param>
     /// <param name="flip">Whether it needs to be flipped.</param>
     /// <returns>The buffer.</returns>
-    public uint GenBuffer(int c, bool flip)
+    public uint GenBuffer(uint c, bool flip)
     {
-        GL.ActiveTexture(TextureUnit.Texture4 + c);
-        uint temp = GraphicsUtil.GenBuffer("View3DGenerationHelper_GenBuffer");
-        GL.BindBuffer(BufferTarget.TextureBuffer, temp);
+        GL.ActiveTexture(TextureUnit.Texture4 + (int)c);
+        uint temp = GraphicsUtil.GenBuffer("View3DGenerationHelper_LL_GenBuffer", BufferTarget.TextureBuffer);
         GL.BufferData(BufferTarget.TextureBuffer, (IntPtr)(flip ? View3DInternalData.LL_AB_SIZE / View3DInternalData.LL_P_SIZE * sizeof(uint) : View3DInternalData.LL_AB_SIZE * sizeof(float) * 4), IntPtr.Zero, BufferUsageHint.StaticDraw);
-        int ttex = GL.GenTexture();
-        GL.BindTexture(TextureTarget.TextureBuffer, ttex);
+        uint ttex = GraphicsUtil.GenTexture("View3DGenHelper_LL_TTex", TextureTarget.TextureBuffer);
         GL.TexBuffer(TextureBufferTarget.TextureBuffer, flip ? SizedInternalFormat.R32f : SizedInternalFormat.Rgba32f, temp);
         GL.BindImageTexture(4 + c, ttex, 0, false, 0, TextureAccess.ReadWrite, flip ? SizedInternalFormat.R32ui : SizedInternalFormat.Rgba32f);
         Internal.LL_TransparentTextures[c] = ttex;
@@ -178,9 +153,8 @@ public class View3DGenerationHelper : View3DCoreDataSet
         GraphicsUtil.CheckError("Load - View3D - Light - Deletes");
         State.DeferredTarget = new DeferredRenderTarget(Config.Width, Config.Height, Engine.Rendering, View);
         // FBO
-        Internal.FBO_Screen_Texture = GL.GenTexture();
         Internal.FBO_Screen_Main = GL.GenFramebuffer();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Screen_Texture);
+        Internal.FBO_Screen_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Screen_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Config.Width, Config.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -191,16 +165,14 @@ public class View3DGenerationHelper : View3DCoreDataSet
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         GraphicsUtil.CheckError("Load - View3D - Light - FBO");
         // Godray FBO
-        Internal.FBO_GodRay_Texture = GL.GenTexture();
-        Internal.FBO_GodRay_Texture_2 = GL.GenTexture();
         Internal.FBO_GodRay_Main = GL.GenFramebuffer();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_GodRay_Texture);
+        Internal.FBO_GodRay_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_GodRay_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Config.Width, Config.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_GodRay_Texture_2);
+        Internal.FBO_GodRay_Texture_2 = GraphicsUtil.GenTexture("View3DGenHelper_FBO_GodRay_Texture2", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Config.Width, Config.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -213,9 +185,8 @@ public class View3DGenerationHelper : View3DCoreDataSet
         GL.BindTexture(TextureTarget.Texture2D, 0);
         GraphicsUtil.CheckError("Load - View3D - Light - Godray");
         // HDR FBO
-        Internal.FBO_DynamicExposure_Texture = GL.GenTexture();
         Internal.FBO_DynamicExposure = GL.GenFramebuffer();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_DynamicExposure_Texture);
+        Internal.FBO_DynamicExposure_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_DynamicExposure_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -227,16 +198,14 @@ public class View3DGenerationHelper : View3DCoreDataSet
         GraphicsUtil.CheckError("Load - View3D - Light - HDR");
         // Shadow FBO
         int sq = Config.ShadowTexSize();
-        Internal.FBO_Shadow_DepthTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+        Internal.FBO_Shadow_DepthTexture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Shadow_DepthArray", TextureTarget.Texture2DArray);
         GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.DepthComponent, sq, sq, View3DInternalData.SHADOW_BITS_MAX + 1, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
         GraphicsUtil.CheckError("Load - View3D - Light - Shadows");
-        Internal.FBO_Shadow_ColorTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Shadow_ColorTexture);
+        Internal.FBO_Shadow_ColorTexture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Shadow_Color", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, sq, sq, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -255,15 +224,13 @@ public class View3DGenerationHelper : View3DCoreDataSet
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         GraphicsUtil.CheckError("Load - View3D - Light - Final");
         Internal.FBO_Decal = GL.GenFramebuffer();
-        Internal.FBO_Decal_Texture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Decal_Texture);
+        Internal.FBO_Decal_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Decal_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, Config.Width, Config.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        Internal.FBO_Decal_Depth = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Decal_Depth);
+        Internal.FBO_Decal_Depth = GraphicsUtil.GenTexture("View3DGenHelper_FBO_Decal_Depth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Config.Width, Config.Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -289,20 +256,12 @@ public class View3DGenerationHelper : View3DCoreDataSet
         }
         GraphicsUtil.CheckError("Load - View3D - GenFBO - Deletes");
         GL.ActiveTexture(TextureUnit.Texture0);
-        Internal.CurrentFBOTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.CurrentFBOTexture);
+        Internal.CurrentFBOTexture = GraphicsUtil.GenTexture("View3DGenHelper_CurrentFBOTexture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Config.Width, Config.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        Internal.CurrentFBODepth = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.CurrentFBODepth);
+        GraphicsUtil.TexParamLinearClamp();
+        Internal.CurrentFBODepth = GraphicsUtil.GenTexture("View3DGenHelper_CurrentFBODepth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Config.Width, Config.Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         Internal.CurrentFBO = GL.GenFramebuffer();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.CurrentFBO);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Internal.CurrentFBOTexture, 0);
@@ -314,7 +273,7 @@ public class View3DGenerationHelper : View3DCoreDataSet
 
     /// <summary>Converts the next frame to a texture.</summary>
     /// <returns>The texture.</returns>
-    public int NextFrameToTexture()
+    public uint NextFrameToTexture()
     {
         if (Internal.FBO_NextFrame_Texture != 0)
         {
@@ -326,20 +285,12 @@ public class View3DGenerationHelper : View3DCoreDataSet
         }
         GraphicsUtil.CheckError("View3D - NFTex - Pre");
         GL.ActiveTexture(TextureUnit.Texture0);
-        Internal.FBO_NextFrame_Texture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_NextFrame_Texture);
+        Internal.FBO_NextFrame_Texture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_NextFrame_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Config.Width, Config.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        Internal.FBO_NextFrame_DepthTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_NextFrame_DepthTexture);
+        GraphicsUtil.TexParamLinearClamp();
+        Internal.FBO_NextFrame_DepthTexture = GraphicsUtil.GenTexture("View3DGenHelper_FBO_NextFrame_Depth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Config.Width, Config.Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GraphicsUtil.TexParamLinearClamp();
         Internal.FBO_NextFrame = GL.GenFramebuffer();
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_NextFrame);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Internal.FBO_NextFrame_Texture, 0);

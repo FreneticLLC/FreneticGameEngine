@@ -18,6 +18,9 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using System.Runtime.CompilerServices;
+using System.Drawing;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -42,6 +45,18 @@ public class FGE3DAudioEngine
 
     /// <summary>The current general volume of the audio engine.</summary>
     public float Volume = 0.5f;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to <see cref="int.MaxValue"/> to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int LowPassFrequency = int.MaxValue;
+
+    /// <summary>Frequency, in Hz, as the minimum frequency to play (ie a high pass filter).
+    /// Set for example to 2000 to exclude low pitched bass.
+    /// Set to 0 to disable.
+    /// You can combine both high and low pass to constrain to a range of frequencies.</summary>
+    public int HighPassFrequency = 0;
 
     /// <summary>All currently playing audio.</summary>
     public List<LiveAudioInstance> Playing = [];
@@ -85,11 +100,13 @@ public class FGE3DAudioEngine
             return;
         }
         inst.State = AudioState.PLAYING;
+        inst.PriorPosition = inst.Position;
+        inst.UsePosition = !inst.Position.IsNaN();
         UpdatesToSync.Enqueue(new(inst, Location.Zero, Location.Zero, 1, 1, AudioState.PLAYING, 0, false, 0, Location.Zero, Location.Zero, false, true));
     }
 
     /// <summary>Initialize and load the audio engine.</summary>
-    public void Init()
+    public unsafe void Init()
     {
         if (USE_WASAPI)
         {
@@ -102,10 +119,10 @@ public class FGE3DAudioEngine
             OpenALBacker.Init();
         }
         Internal.Instance = this;
-        Internal.ReusableBuffers = new byte[InternalData.REUSABLE_BUFFER_ARRAY_SIZE][];
+        Internal.ReusableBuffers = new short*[InternalData.REUSABLE_BUFFER_ARRAY_SIZE];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
         {
-            Internal.ReusableBuffers[i] = new byte[InternalData.BYTES_PER_BUFFER];
+            Internal.ReusableBuffers[i] = (short*)Marshal.AllocHGlobal(sizeof(short) * InternalData.SAMPLES_PER_BUFFER);
         }
         if (Channels.IsEmpty())
         {
@@ -121,7 +138,7 @@ public class FGE3DAudioEngine
     }
 
     /// <summary>Shuts down the audio engine. May take a moment before the engine thread stops.</summary>
-    public void Shutdown()
+    public unsafe void Shutdown()
     {
         Run = false;
     }
@@ -133,16 +150,13 @@ public class FGE3DAudioEngine
     public volatile int SoundCount = 0;
 
     /// <summary>Internal data used by the audio engine.</summary>
-    public struct InternalData()
+    public unsafe struct InternalData()
     {
         /// <summary>The relevant backing audio engine instance.</summary>
         public FGE3DAudioEngine Instance;
 
         /// <summary>The audio frequency, in Hz (samples per second).</summary>
         public const int FREQUENCY = 44100;
-
-        /// <summary>Audio byte-rate to use.</summary>
-        public const int BYTERATE = 2;
 
         /// <summary>Multiplying an audio sample by this lowers its volume by 3 dB.</summary>
         public const float MINUS_THREE_DB = 0.707106781f;
@@ -162,14 +176,8 @@ public class FGE3DAudioEngine
         /// <summary>Number of audio samples in a buffer.</summary>
         public const int SAMPLES_PER_BUFFER = (int)((FREQUENCY * MS_LOAD) / 1000.0);
 
-        /// <summary>Actual byte space to load at once.</summary>
-        public const int BYTES_PER_BUFFER = SAMPLES_PER_BUFFER * BYTERATE;
-
         /// <summary>3D Position of the audio "camera".</summary>
         public Location Position;
-
-        /// <summary>The current velocity vector of the audio "camera".</summary>
-        public Location CurrentVelocity;
 
         /// <summary>If true, a frame update is pending. If false, there has been no update.</summary>
         public bool HadUpdateFrame = false;
@@ -187,7 +195,7 @@ public class FGE3DAudioEngine
         public Location UpDirection;
 
         /// <summary>A queue of byte arrays to reuse as audio buffers. Buffers are generated once and kept for the lifetime of the audio engine to prevent GC thrash.</summary>
-        public byte[][] ReusableBuffers;
+        public short*[] ReusableBuffers;
 
         /// <summary>The index in <see cref="ReusableBuffers"/> to next use.</summary>
         public int ByteBufferID;
@@ -196,32 +204,40 @@ public class FGE3DAudioEngine
         public List<LiveAudioInstance> DeadInstances;
 
         /// <summary>Gets and cleans the next byte buffer to use.</summary>
-        public byte[] GetNextBuffer()
+        public unsafe short* GetNextBuffer()
         {
-            byte[] toReturn = ReusableBuffers[ByteBufferID++];
+            short* toReturn = ReusableBuffers[ByteBufferID++];
             ByteBufferID %= REUSABLE_BUFFER_ARRAY_SIZE;
-            for (int i = 0; i < toReturn.Length; i++)
-            {
-                toReturn[i] = 0;
-            }
+            Unsafe.InitBlockUnaligned(toReturn, 0, SAMPLES_PER_BUFFER * sizeof(short));
             return toReturn;
         }
 
         /// <summary>Completely closes and stops the audio engine.</summary>
-        public readonly void CloseAndStop()
+        public void CloseAndStop()
         {
-            Instance.OpenALBacker?.Shutdown();
+            if (ReusableBuffers is not null)
+            {
+                foreach (short* ptr in ReusableBuffers)
+                {
+                    Marshal.FreeHGlobal((IntPtr)ptr);
+                }
+                ReusableBuffers = null;
+            }
+            Instance.Channels.Clear();
             Instance.WasApiAudioBacker?.Shutdown();
+            Instance.WasApiAudioBacker = null;
+            Instance.OpenALBacker?.Shutdown();
+            Instance.OpenALBacker = null;
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
-        public readonly float GetLevelFor(byte[] buffer)
+        public unsafe readonly float GetLevelFor(short* buffer)
         {
+            GraphicsUtil.DebugAssert(buffer is not null, "GetLevelFor called with null buffer.");
             int maxSample = 0;
-            for (int i = 0; i < buffer.Length; i += BYTERATE)
+            for (int i = 0; i < SAMPLES_PER_BUFFER; i++)
             {
-                int rawSample = unchecked((short)((buffer[i + 1] << 8) | buffer[i]));
-                maxSample = Math.Max(maxSample, Math.Abs(rawSample));
+                maxSample = Math.Max(maxSample, Math.Abs((int)buffer[i]));
             }
             return maxSample / (float)short.MaxValue;
         }
@@ -231,23 +247,20 @@ public class FGE3DAudioEngine
         {
             if (audio.State == AudioState.PLAYING)
             {
-                int newSample = 0;
-                int maxTimeOffset = 0;
-                bool isDead = false;
+                bool isDead = true;
                 foreach (AudioChannel channel in Instance.Channels)
                 {
                     AudioChannel.ClipAddingResult result = channel.AddClipToBuffer(audio);
-                    newSample = result.NewSample;
-                    maxTimeOffset = Math.Max(maxTimeOffset, result.TimeOffset);
-                    isDead = result.IsDead;
+                    isDead = isDead && result.IsDead;
                 }
-                audio.CurrentSample = newSample;
+                audio.CurrentSample += (int)Math.Round(audio.Pitch * SAMPLES_PER_BUFFER * audio.Clip.Channels);
                 if (isDead)
                 {
                     audio.CurrentSample = 0;
                     audio.State = AudioState.DONE;
                     DeadInstances.Add(audio);
                 }
+                audio.PriorPosition = audio.Position;
             }
             else if (audio.State == AudioState.STOP || audio.State == AudioState.DONE)
             {
@@ -269,23 +282,26 @@ public class FGE3DAudioEngine
             if (!newDidTeleport)
             {
                 Location travelVector = newPosition - Position;
-                CurrentVelocity = travelVector / time;
-                if (CurrentVelocity.LengthSquared() > Instance.SpeedOfPresumeTeleport * Instance.SpeedOfPresumeTeleport)
+                Location currentVelocity = travelVector / time;
+                if (currentVelocity.LengthSquared() > Instance.SpeedOfPresumeTeleport * Instance.SpeedOfPresumeTeleport)
                 {
                     newDidTeleport = true;
                 }
             }
             Position = newPosition;
-            if (newDidTeleport)
-            {
-                CurrentVelocity = Location.Zero;
-            }
             DidTeleport = newDidTeleport;
             HadUpdateFrame = true;
         }
 
+        /// <summary>Trigger the internal audio engine loop.</summary>
+        public readonly void ForceAudioLoop()
+        {
+            // This has to be re-called from the correct instance, the thread code loses the reference.
+            Instance.Internal.ForceAudioLoopInternal();
+        }
+
         /// <summary>The internal audio engine loop.</summary>
-        public void ForceAudioLoop()
+        public void ForceAudioLoopInternal()
         {
             try
             {
@@ -325,6 +341,11 @@ public class FGE3DAudioEngine
                                 else
                                 {
                                     update.Instance.Position = update.Position;
+                                    if (!update.Instance.UsePosition)
+                                    {
+                                        update.Instance.PriorPosition = update.Position;
+                                    }
+                                    update.Instance.UsePosition = !update.Position.IsNaN();
                                     update.Instance.Velocity = update.Velocity;
                                     update.Instance.Gain = update.Gain;
                                     update.Instance.Pitch = update.Pitch;

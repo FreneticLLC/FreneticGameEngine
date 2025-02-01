@@ -14,6 +14,7 @@ using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
+using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -101,20 +102,26 @@ public class OpenALAudioProvider
     }
 
     /// <summary>Gather data from the internal audio engine and send it forward to OpenAL to play.</summary>
-    public void SendNextBuffer(FGE3DAudioEngine engine)
+    public unsafe void SendNextBuffer(FGE3DAudioEngine engine)
     {
-        byte[] rawBuffer = RawDataBuffers.Count > 0 ? RawDataBuffers.Dequeue() : new byte[FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER * 2];
+        // 4 = 2 bytes per sample, 2 channels
+        byte[] rawBuffer = RawDataBuffers.Count > 0 ? RawDataBuffers.Dequeue() : new byte[FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER * 4];
         AudioChannel leftChannel = engine.Channels.FirstOrDefault(c => c.Name == "Left");
         AudioChannel rightChannel = engine.Channels.FirstOrDefault(c => c.Name == "Right");
-        byte[] leftBuffer = leftChannel.InternalCurrentBuffer;
-        byte[] rightBuffer = rightChannel.InternalCurrentBuffer;
-        // TODO: Perf testing -- validate this loop is as raw as possible. This might invoke some nasty JIT range check spam in current state
-        for (int i = 0; i < FGE3DAudioEngine.InternalData.BYTES_PER_BUFFER; i += 2)
+        short* leftBuffer = leftChannel.InternalCurrentBuffer;
+        short* rightBuffer = rightChannel.InternalCurrentBuffer;
+        GraphicsUtil.DebugAssert(leftBuffer != null && rightBuffer != null, "Left and right buffers must be non-null.");
+        fixed (byte* rawBufferPtr = rawBuffer)
         {
-            rawBuffer[i * 2] = leftBuffer[i];
-            rawBuffer[i * 2 + 1] = leftBuffer[i + 1];
-            rawBuffer[i * 2 + 2] = rightBuffer[i];
-            rawBuffer[i * 2 + 3] = rightBuffer[i + 1];
+            for (int i = 0; i < FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER; i++)
+            {
+                short left = leftBuffer[i], right = rightBuffer[i];
+                byte* subPtr = rawBufferPtr + (i * 4);
+                subPtr[0] = unchecked((byte)(left & 0xff));
+                subPtr[1] = unchecked((byte)((left >> 8) & 0xff));
+                subPtr[2] = unchecked((byte)(right & 0xff));
+                subPtr[3] = unchecked((byte)((right >> 8) & 0xff));
+            }
         }
         int bufferId = UsableBufferIDs.Count > 0 ? UsableBufferIDs.Dequeue() : AL.GenBuffer();
         AL.BufferData(bufferId, ALFormat.Stereo16, rawBuffer, FGE3DAudioEngine.InternalData.FREQUENCY);

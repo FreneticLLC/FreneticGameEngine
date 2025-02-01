@@ -137,21 +137,21 @@ public class GameEngine2D : GameEngineBase
     /// <summary>All current lights.</summary>
     public List<PointLight2D> Lights = [];
 
+    // TODO: Name these coherently
     int c_FBO;
 
-    int c_FBO_Tex;
+    uint c_FBO_Tex;
 
     int l_FBO;
 
-    int l_FBO_Tex;
+    uint l_FBO_Tex;
 
     /// <summary>Calculates and loads some light helper information.</summary>
     public void LoadLightHelpers()
     {
         c_FBO = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
-        c_FBO_Tex = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, c_FBO_Tex);
+        c_FBO_Tex = GraphicsUtil.GenTexture("GameEngine2D_LightHelper_C_FBO_Tex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
@@ -160,8 +160,7 @@ public class GameEngine2D : GameEngineBase
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, c_FBO_Tex, 0);
         l_FBO = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
-        l_FBO_Tex = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, l_FBO_Tex);
+        l_FBO_Tex = GraphicsUtil.GenTexture("GameEngine2D_LightHelper_L_FBO_Tex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
