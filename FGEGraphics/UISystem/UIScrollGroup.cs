@@ -18,7 +18,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
 // TODO: handle navigational scroll
-public class UIScrollGroup : UIScissorGroup
+public class UIScrollGroup : UIGroup
 {
     /// <summary>Contains scroll state for a direction.</summary>
     /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
@@ -137,6 +137,10 @@ public class UIScrollGroup : UIScissorGroup
     /// <summary>The vertical scroll direction.</summary>
     public ScrollDirection ScrollY;
 
+    public UIScissorGroup ScissorGroup;
+
+    public UIGroup ScrollBars;
+
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="pos">The position of the element.</param>
     /// <param name="barStyles">The scroll bar styles.</param>
@@ -154,25 +158,19 @@ public class UIScrollGroup : UIScissorGroup
         // TODO: Fix scroll bar overlap
         ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
         ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
-    }
-
-    /// <inheritdoc/>
-    public override void Init()
-    {
-        if (ScrollX.ScrollBar is null && ScrollY.ScrollBar is null)
+        if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
         {
-            return;
+            base.AddChild(ScrollBars = new(new UIPositionHelper(pos.AtOrigin())));
+            if (ScrollX.ScrollBar is not null)
+            {
+                ScrollBars.AddChild(ScrollX.ScrollBar);
+            }
+            if (ScrollY.ScrollBar is not null)
+            {
+                ScrollBars.AddChild(ScrollY.ScrollBar);
+            }
         }
-        UIGroup group = new(new UIPositionHelper(Position));
-        if (ScrollX.ScrollBar is not null)
-        {
-            group.AddChild(ScrollX.ScrollBar);
-        }
-        if (ScrollY.ScrollBar is not null)
-        {
-            group.AddChild(ScrollY.ScrollBar);
-        }
-        Parent.AddChild(group);
+        base.AddChild(ScissorGroup = new(new UIPositionHelper(pos.AtOrigin())));
     }
 
     /// <inheritdoc/>
@@ -180,7 +178,7 @@ public class UIScrollGroup : UIScissorGroup
     {
         UIPositionHelper original = new(child.Position);
         child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
-        base.AddChild(child);
+        ScissorGroup.AddChild(child);
     }
 
     /// <summary>Ticks the mouse dragging the scroll bar.</summary>
@@ -198,6 +196,7 @@ public class UIScrollGroup : UIScissorGroup
         return pressed;
     }
 
+    // TODO: Handle in a virtual method + interaction
     /// <summary>Ticks the scroll wheel and modifies the scroll value.</summary>
     public void TickMouseScroll()
     {
