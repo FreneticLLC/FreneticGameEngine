@@ -479,6 +479,8 @@ public abstract class UIElement
     /// <param name="delta">The time since the last render.</param>
     public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
+    public virtual bool CanRenderChild(UIElement child) => true;
+
     /// <summary>Updates this element's child positions.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -521,6 +523,19 @@ public abstract class UIElement
                 {
                     yield return child;
                 }
+            }
+        }
+    }
+
+    // TODO: find way to fit this into AllChildren
+    public void RenderAllChildren(ViewUI2D view, double delta)
+    {
+        Render(view, delta);
+        foreach (UIElement element in ElementInternal.Children)
+        {
+            if (element.IsValid && CanRenderChild(element))
+            {
+                element.RenderAllChildren(view, delta);
             }
         }
     }

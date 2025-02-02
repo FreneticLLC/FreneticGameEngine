@@ -270,10 +270,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
             xmax = Math.Min(xmax, prevXmax);
             ymax = Math.Min(ymax, prevYmax);
         }
-        if (ScissorStack.Count == 0)
-        {
-            Scissor(rc, xmin, ymin, xmax, ymax);
-        }
+        Scissor(rc, xmin, ymin, xmax, ymax);
         ScissorStack.Push((xmin, ymin, xmax, ymax));
     }
 

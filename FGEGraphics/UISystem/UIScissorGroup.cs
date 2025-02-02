@@ -42,13 +42,12 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
         //view.Client.FontSets.Standard.DrawFancyText($"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", new(X, Y, 0));
         foreach (UIElement child in ElementInternal.Children)
         {
-            foreach (UIElement element in child.AllChildren())
-            {
-                element.Render(view, delta);
-            }
+            child.RenderAllChildren(view, delta);
         }
         view.Rendering.PopScissor(view.UIContext);
     }
+
+    public override bool CanRenderChild(UIElement child) => false;
 
     /// <summary>Constrains child interactions to the scissor boundaries.</summary>
     public override bool CanInteract(int x, int y) => SelfContains(x, y);
