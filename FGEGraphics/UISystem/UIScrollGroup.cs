@@ -98,13 +98,12 @@ public class UIScrollGroup : UIGroup
         /// <summary>Ticks the mouse dragging the <see cref="ScrollBar"/>.</summary>
         /// <param name="mousePos">The relevant mouse position.</param>
         /// <param name="groupPos">The relevant scroll group position.</param>
-        /// <returns></returns>
-        public bool TickMouseDrag(float mousePos, int groupPos)
+        public void TickMouseDrag(float mousePos, int groupPos)
         {
             if (!ScrollBar.Pressed)
             {
                 BarHeldOffset = -1;
-                return false;
+                return;
             }
             if (BarHeldOffset == -1)
             {
@@ -112,7 +111,6 @@ public class UIScrollGroup : UIGroup
             }
             Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
             Value = Math.Clamp(Value, 0, MaxValue);
-            return true;
         }
 
         /// <summary>Ticks the scroll value based on the <paramref name="scrollDelta"/>.</summary>
@@ -181,45 +179,34 @@ public class UIScrollGroup : UIGroup
         ScissorGroup.AddChild(child);
     }
 
-    /// <summary>Ticks the mouse dragging the scroll bar.</summary>
-    public bool TickMouseDrag()
-    {
-        bool pressed = false;
-        if (ScrollX.ScrollBar is not null)
-        {
-            pressed |= ScrollX.TickMouseDrag(Window.MouseX, X);
-        }
-        if (ScrollY.ScrollBar is not null)
-        {
-            pressed |= ScrollY.TickMouseDrag(Window.MouseY, Y);
-        }
-        return pressed;
-    }
-
-    // TODO: Handle in a virtual method + interaction
-    /// <summary>Ticks the scroll wheel and modifies the scroll value.</summary>
-    public void TickMouseScroll()
-    {
-        float deltaX = Window.CurrentMouse.ScrollDelta.X;
-        float deltaY = Window.CurrentMouse.ScrollDelta.Y;
-        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
-        {
-            deltaX = deltaY;
-            deltaY = 0;
-        }
-        ScrollX.TickMouseScroll(deltaX);
-        ScrollY.TickMouseScroll(deltaY);
-    }
-
     /// <inheritdoc/>
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        bool barPressed = TickMouseDrag();
-        if (ElementInternal.HoverInternal && !barPressed)
+        if (ScrollX.ScrollBar is not null)
         {
-            TickMouseScroll();
+            ScrollX.TickMouseDrag(Window.MouseX, X);
         }
+        if (ScrollY.ScrollBar is not null)
+        {
+            ScrollY.TickMouseDrag(Window.MouseY, Y);
+        }
+    }
+
+    public override bool ScrollChanged(float x, float y)
+    {
+        if (ScrollX.ScrollBar?.Pressed ?? ScrollY.ScrollBar?.Pressed ?? false)
+        {
+            return true; // TODO: or false, which better UX?
+        }
+        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        {
+            x = y;
+            y = 0;
+        }
+        ScrollX.TickMouseScroll(x);
+        ScrollY.TickMouseScroll(y);
+        return true;
     }
 
     /// <inheritdoc/>

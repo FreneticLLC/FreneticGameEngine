@@ -251,8 +251,6 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
 
     public void Scissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
     {
-        //Logs.Debug($"Scissoring {(xmin, ymin, xmax, ymax)} as {(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin)}");
-        //Logs.Debug($"Ortho matrix: {(0, Client.Window.ClientSize.X, Client.Window.ClientSize.Y, 0)}");
         GL.Scissor(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin);
     }
 

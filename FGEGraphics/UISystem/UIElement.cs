@@ -313,11 +313,20 @@ public abstract class UIElement
     /// </summary>
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
-    public virtual void TickInteraction(int mouseX, int mouseY)
+    public void TickInteraction(int mouseX, int mouseY)
     {
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
-            if (!ElementInternal.HoverInternal && Position.View.InteractingElement is null)
+            if (ElementInternal.HoverInternal && !View.Internal.Scrolled)
+            {
+                // TODO: better logic
+                Vector2 delta = Window.CurrentMouse.ScrollDelta;
+                if (delta.X != 0 || delta.Y != 0)
+                {
+                    View.Internal.Scrolled = ScrollChanged(delta.X, delta.Y);
+                }
+            }
+            if (!ElementInternal.HoverInternal && View.HeldElement is null)
             {
                 ElementInternal.HoverInternal = true;
                 if (Enabled)
@@ -326,38 +335,38 @@ public abstract class UIElement
                 }
                 MouseEnter();
             }
-            if (View.MouseDown && !View.MousePreviouslyDown && Position.View.InteractingElement is null)
+            if (View.MouseDown && !View.MousePreviouslyDown && View.HeldElement is null)
             {
                 if (Enabled)
                 {
                     Pressed = true;
-                    Position.View.InteractingElement = this;
+                    View.HeldElement = this;
                     Select();
                 }
                 MouseLeftDown(mouseX, mouseY);
             }
-            else if (!View.MouseDown && View.MousePreviouslyDown && Position.View.InteractingElement == this)
+            else if (!View.MouseDown && View.MousePreviouslyDown && View.HeldElement == this)
             {
                 if (Enabled)
                 {
                     Pressed = false;
                     OnClick?.Invoke();
-                    Position.View.InteractingElement = null;
+                    View.HeldElement = null;
                 }
                 MouseLeftUp(mouseX, mouseY);
             }
             return;
         }
-        if (ElementInternal.HoverInternal && (!View.MouseDown || Position.View.InteractingElement != this))
+        if (ElementInternal.HoverInternal && (!View.MouseDown || View.HeldElement != this))
         {
             ElementInternal.HoverInternal = false;
             if (Enabled)
             {
                 Hovered = false;
                 Pressed = false;
-                if (Position.View.InteractingElement == this)
+                if (View.HeldElement == this)
                 {
-                    Position.View.InteractingElement = null;
+                    View.HeldElement = null;
                 }
             }
             if (View.MousePreviouslyDown)
@@ -365,7 +374,7 @@ public abstract class UIElement
                 MouseLeftUpOutside(mouseX, mouseY);
             }
         }
-        if (View.MouseDown && Position.View.InteractingElement != this)
+        if (View.MouseDown && View.HeldElement != this)
         {
             if (Selected)
             {
@@ -502,14 +511,14 @@ public abstract class UIElement
     // TODO: 'filter' predicate parameter?
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
-    public IEnumerable<UIElement> AllChildren(bool toAdd = false)
+    public IEnumerable<UIElement> AllChildren(Func<UIElement, bool> filter = null, bool toAdd = false)
     {
         yield return this;
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid)
+            if (element.IsValid && (filter?.Invoke(element) ?? true))
             {
-                foreach (UIElement child in element.AllChildren(toAdd))
+                foreach (UIElement child in element.AllChildren(filter, toAdd))
                 {
                     yield return child;
                 }
@@ -519,9 +528,12 @@ public abstract class UIElement
         {
             foreach (UIElement element in ElementInternal.ToAdd)
             {
-                foreach (UIElement child in element.AllChildren(toAdd))
+                if (filter?.Invoke(element) ?? true)
                 {
-                    yield return child;
+                    foreach (UIElement child in element.AllChildren(filter, toAdd))
+                    {
+                        yield return child;
+                    }
                 }
             }
         }
@@ -619,6 +631,7 @@ public abstract class UIElement
     {
     }
 
+    // TODO: should these directional variants be combined into single virtual methods?
     /// <summary>Ran when the user navigates horizontally while the element is <see cref="Selected"/>.</summary>
     /// <param name="value">The horizontal shift (positive for right, negative for left).</param>
     public virtual void NavigateLeftRight(int value)
@@ -630,6 +643,8 @@ public abstract class UIElement
     public virtual void NavigateUpDown(int value)
     {
     }
+
+    public virtual bool ScrollChanged(float x, float y) => false;
 
     /// <summary>Selects the element and fires <see cref="OnSelect"/>.</summary>
     public void Select()
@@ -708,7 +723,7 @@ public abstract class UIElement
     {
         List<string> info = new(4)
         {
-            $"^t^0^h^{(this == Position.View.InteractingElement ? "2" : "5")}^u{GetType()}",
+            $"^t^0^h^{(this == Position.View.HeldElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
             $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
         };

@@ -43,6 +43,7 @@ public class ViewUI2D
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
 
+    // TODO: move these somewhere else?
     /// <summary>Whether the mouse left button is currently down.</summary>
     public bool MouseDown;
 
@@ -60,6 +61,8 @@ public class ViewUI2D
 
         /// <summary>The stack of elements that were rendered.</summary>
         public List<UIElement> RenderStack = [];
+
+        public bool Scrolled;
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -78,8 +81,8 @@ public class ViewUI2D
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
     public bool Debug;
 
-    /// <summary>The UI element currently being interacted with.</summary>
-    public UIElement InteractingElement;
+    /// <summary>The UI element currently being pressed and held.</summary>
+    public UIElement HeldElement;
 
     /// <summary>Gets or sets the current main screen.</summary>
     public UIScreen CurrentScreen
@@ -171,7 +174,7 @@ public class ViewUI2D
                     if (Debug)
                     {
                         Engine.Textures.White.Bind();
-                        Color4F outlineColor = elem == InteractingElement ? Color4F.Green : elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
+                        Color4F outlineColor = elem == HeldElement ? Color4F.Green : elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
                         Renderer2D.SetColor(outlineColor);
                         Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
                         Renderer2D.SetColor(Color4F.White);
@@ -226,5 +229,6 @@ public class ViewUI2D
             } 
         }
         MousePreviouslyDown = MouseDown;
+        Internal.Scrolled = false;
     }
 }
