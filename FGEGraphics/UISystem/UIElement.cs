@@ -101,10 +101,7 @@ public abstract class UIElement
         }
         if (!ElementInternal.Children.Contains(child))
         {
-            if (!ElementInternal.ToAdd.Contains(child))
-            {
-                ElementInternal.ToAdd.Add(child);
-            }
+            ElementInternal.ToAdd.Add(child);
         }
         else if (!ElementInternal.ToRemove.Remove(child))
         {
@@ -121,10 +118,7 @@ public abstract class UIElement
     {
         if (ElementInternal.Children.Contains(child))
         {
-            if (!ElementInternal.ToRemove.Contains(child))
-            {
-                ElementInternal.ToRemove.Add(child);
-            }
+            ElementInternal.ToRemove.Add(child);
         }
         else if (!ElementInternal.ToAdd.Remove(child))
         {
@@ -178,19 +172,19 @@ public abstract class UIElement
     public struct ElementInternalData()
     {
         /// <summary>Current child elements.</summary>
-        public List<UIElement> Children = [];
+        public HashSet<UIElement> Children = [];
 
         /// <summary>Elements queued to be added as children.</summary>
-        public List<UIElement> ToAdd = [];
+        public HashSet<UIElement> ToAdd = [];
 
         /// <summary>Elements queued to be removed as children.</summary>
-        public List<UIElement> ToRemove = [];
+        public HashSet<UIElement> ToRemove = [];
 
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
         /// <summary>Styles registered on this element.</summary>
-        public List<UIElementStyle> Styles = [];
+        public HashSet<UIElementStyle> Styles = [];
 
         /// <summary>Text objects registered on this element.</summary>
         public List<UIElementText> Texts = [];
@@ -207,11 +201,7 @@ public abstract class UIElement
     {
         foreach (UIElement element in ElementInternal.ToAdd)
         {
-            if (!ElementInternal.Children.Contains(element))
-            {
-                ElementInternal.Children.Add(element);
-            }
-            else
+            if (!ElementInternal.Children.Add(element))
             {
                 throw new Exception($"UIElement: Failed to add a child element {element}!");
             }
