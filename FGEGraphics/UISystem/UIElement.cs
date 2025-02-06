@@ -88,10 +88,7 @@ public abstract class UIElement
     {
         Position = pos;
         Position.For = this;
-        // TODO: fix, this is inaccurate
-        LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(Position.X, Position.Y);
-        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
-        LastAbsoluteRotation = Position.Rotation;
+        UpdatePosition(Window.Delta, Vector3.Zero);
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -392,57 +389,50 @@ public abstract class UIElement
     }
 
     /// <summary>Updates positions of this element and its children.</summary>
-    /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
-    /// <param name="xoff">The X offset of this element's parent.</param>
-    /// <param name="yoff">The Y offset of this element's parent.</param>
-    /// <param name="lastRot">The last rotation made in the render chain.</param>
-    public virtual void UpdatePosition(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+    /// <param name="rotation">The last rotation made in the render chain.</param>
+    public virtual void UpdatePosition(double delta, Vector3 rotation)
     {
-        if (Parent is not null && Parent.ElementInternal.ToRemove.Contains(this))
-        {
-            return;
-        }
         int x = Position.X;
         int y = Position.Y;
         if (Position.MainAnchor == UIAnchor.RELATIVE)
         {
             y += Position.View.RelativeYLast;
         }
-        if (Math.Abs(lastRot.Z) < 0.001f)
+        if (Math.Abs(rotation.Z) < 0.001f)
         {
-            x += xoff;
-            y += yoff;
-            lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
+            x += Parent.X;
+            y += Parent.Y;
+            rotation = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
         }
-        else
+        // TODO: Clean up!
+        /*else 
         {
             int cwx = Parent is null ? 0 : Position.MainAnchor.GetX(this);
             int chy = Parent is null ? 0 : Position.MainAnchor.GetY(this);
             float half_wid = Position.Width * 0.5f;
             float half_hei = Position.Height * 0.5f;
-            float tx = x + lastRot.X + cwx - half_wid;
-            float ty = y + lastRot.Y + chy - half_hei;
-            float cosRot = (float)Math.Cos(-lastRot.Z);
-            float sinRot = (float)Math.Sin(-lastRot.Z);
-            float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
-            float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
-            lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
+            float tx = x + rotation.X + cwx - half_wid;
+            float ty = y + rotation.Y + chy - half_hei;
+            float cosRot = (float)Math.Cos(-rotation.Z);
+            float sinRot = (float)Math.Sin(-rotation.Z);
+            float tx2 = tx * cosRot - ty * sinRot - rotation.X - cwx * 2 + half_wid;
+            float ty2 = ty * cosRot + tx * sinRot - rotation.Y - chy * 2 + half_hei;
+            rotation = new Vector3(-half_wid, -half_hei, rotation.Z + Position.Rotation);
             int bx = (int)tx2 + xoff;
             int by = (int)ty2 + yoff;
             x = bx;
             y = by;
-        }
+        }*/
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
-        LastAbsoluteRotation = lastRot.Z;
+        LastAbsoluteRotation = rotation.Z;
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
-        output.Add(this);
-        CheckChildren();
+        /*CheckChildren();
         foreach (UIElement child in ElementInternal.Children)
         {
             child.UpdatePosition(output, delta, x, y, lastRot);
-        }
+        }*/
     }
 
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>

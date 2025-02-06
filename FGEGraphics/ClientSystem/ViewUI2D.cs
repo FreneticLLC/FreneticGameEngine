@@ -146,7 +146,13 @@ public class ViewUI2D
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
             Internal.RenderStack.Clear();
             RelativeYLast = 0;
-            CurrentScreen.UpdatePosition(Internal.RenderStack, Client.Delta, 0, 0, Vector3.Zero);
+            foreach (UIElement element in CurrentScreen.AllChildren())
+            {
+                if (element.IsValid)
+                {
+                    element.UpdatePosition(Client.Delta, Vector3.Zero);
+                }
+            }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
             foreach (UIElement elem in Internal.RenderStack)
             {
