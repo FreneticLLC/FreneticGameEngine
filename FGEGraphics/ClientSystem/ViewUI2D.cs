@@ -59,9 +59,6 @@ public class ViewUI2D
         /// <summary>Debug info about hovered UI elements.</summary>
         public List<string> DebugInfo = [];
 
-        /// <summary>The stack of elements that were rendered.</summary>
-        public List<UIElement> RenderStack = [];
-
         public bool Scrolled;
     }
 
@@ -144,24 +141,18 @@ public class ViewUI2D
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-            Internal.RenderStack.Clear();
             RelativeYLast = 0;
             foreach (UIElement element in CurrentScreen.AllChildren())
             {
                 if (element.IsValid)
                 {
                     element.UpdatePosition(Client.Delta, Vector3.Zero);
+                    element.UpdateStyle();
                 }
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            foreach (UIElement elem in Internal.RenderStack)
-            {
-                if (elem.IsValid)
-                {
-                    elem.UpdateStyle();
-                }
-            }
-            foreach (UIElement elem in (IEnumerable<UIElement>)Internal.RenderStack)
+            CurrentScreen.Render(this, Client.Delta);
+            /*foreach (UIElement elem in (IEnumerable<UIElement>)Internal.RenderStack)
             {
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try
@@ -205,7 +196,7 @@ public class ViewUI2D
                     ? Client.MouseY + 20
                     : Client.MouseY - textHeight - 20;
                 Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
-            }
+            }*/
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
             Internal.DebugInfo.Clear();
@@ -224,14 +215,13 @@ public class ViewUI2D
         Vector2 scrollDelta = Client.CurrentMouse.ScrollDelta;
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.FullTick(Client.Delta);
-        Internal.RenderStack.Reverse();
-        foreach (UIElement elem in Internal.RenderStack)
+        /*foreach (UIElement elem in Internal.RenderStack)
         {
             if (elem.IsValid)
             {
                 elem.TickInteraction(mouseX, mouseY, scrollDelta);
             } 
-        }
+        }*/
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
     }

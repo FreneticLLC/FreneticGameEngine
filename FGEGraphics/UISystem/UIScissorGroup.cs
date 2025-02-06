@@ -39,10 +39,10 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
-        foreach (UIElement child in ElementInternal.Children)
+        /*foreach (UIElement child in ElementInternal.Children)
         {
             child.RenderAllChildren(view, delta);
-        }
+        }*/
         view.Rendering.PopScissor(view.UIContext);
     }
 

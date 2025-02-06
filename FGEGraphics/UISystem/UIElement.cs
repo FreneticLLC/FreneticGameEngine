@@ -119,7 +119,7 @@ public abstract class UIElement
     {
         Position = pos;
         Position.For = this;
-        UpdatePosition(Window.Delta, Vector3.Zero);
+        //UpdatePosition(Window.Delta, Vector3.Zero);
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -198,7 +198,7 @@ public abstract class UIElement
         ElementInternal.ToRemove.Clear();
     }
 
-        // TODO: 'filter' predicate parameter?
+    // TODO: 'filter' predicate parameter?
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
     public IEnumerable<UIElement> AllChildren(Func<UIElement, bool> filter = null, bool toAdd = false)
@@ -456,8 +456,11 @@ public abstract class UIElement
         }
         if (Math.Abs(rotation.Z) < 0.001f)
         {
-            x += Parent.X;
-            y += Parent.Y;
+            if (Parent is not null)
+            {
+                x += Parent.X;
+                y += Parent.Y;
+            }
             rotation = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
         }
         // TODO: Clean up!
@@ -501,22 +504,15 @@ public abstract class UIElement
     /// <summary>Performs a render on this element using the current style.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
-
-    public virtual bool CanRenderChild(UIElement child) => true;
-
-    // TODO: find way to fit this into AllChildren
-    public void RenderAllChildren(ViewUI2D view, double delta)
+    public void Render(ViewUI2D view, double delta)
     {
-        Render(view, delta);
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in AllChildren())
         {
-            if (element.IsValid && CanRenderChild(element))
-            {
-                element.RenderAllChildren(view, delta);
-            }
+            element.Render(view, delta, element.ElementInternal.CurrentStyle);
         }
     }
+
+    public virtual bool CanRenderChild(UIElement child) => true;
 
     /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>
     /// <param name="x">The X position of the mouse.</param>
