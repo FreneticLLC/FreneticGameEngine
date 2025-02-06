@@ -64,6 +64,9 @@ public abstract class UIElement
     /// <summary>The position and size of this element.</summary>
     public UIPositionHelper Position;
 
+    /// <summary>Returns the <b>current</b> element style.</summary>
+    public virtual UIElementStyle Style { get; set; }
+
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender = true;
 
@@ -81,6 +84,34 @@ public abstract class UIElement
 
     /// <summary>Ran when this element is clicked.</summary>
     public Action OnClick;
+
+    /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
+    public struct ElementInternalData()
+    {
+        /// <summary>Current child elements.</summary>
+        public HashSet<UIElement> Children = [];
+
+        /// <summary>Elements queued to be added as children.</summary>
+        public HashSet<UIElement> ToAdd = [];
+
+        /// <summary>Elements queued to be removed as children.</summary>
+        public HashSet<UIElement> ToRemove = [];
+
+        /// <summary>Internal use only.</summary>
+        public bool HoverInternal;
+
+        /// <summary>Styles registered on this element.</summary>
+        public HashSet<UIElementStyle> Styles = [];
+
+        /// <summary>Text objects registered on this element.</summary>
+        public List<UIElementText> Texts = [];
+
+        /// <summary>The current style of this element.</summary>
+        public UIElementStyle CurrentStyle = UIElementStyle.Empty;
+    }
+
+    /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
+    public ElementInternalData ElementInternal = new();
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
@@ -146,56 +177,6 @@ public abstract class UIElement
         return element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
     }
 
-    /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
-    /// <param name="x">The X position to check for.</param>
-    /// <param name="y">The Y position to check for.</param>
-    /// <returns>Whether the position is within any of the boundaries.</returns>
-    public bool Contains(int x, int y)
-    {
-        foreach (UIElement child in ElementInternal.Children)
-        {
-            if (child.IsValid && child.Contains(x, y))
-            {
-                return true;
-            }
-        }
-        return SelfContains(x, y);
-    }
-
-    /// <summary>Checks if this element's boundaries contain the position on the screen.</summary>
-    /// <param name="x">The X position to check for.</param>
-    /// <param name="y">The Y position to check for.</param>
-    /// <returns>Whether the position is within any of the boundaries.</returns>
-    public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
-
-    /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public struct ElementInternalData()
-    {
-        /// <summary>Current child elements.</summary>
-        public HashSet<UIElement> Children = [];
-
-        /// <summary>Elements queued to be added as children.</summary>
-        public HashSet<UIElement> ToAdd = [];
-
-        /// <summary>Elements queued to be removed as children.</summary>
-        public HashSet<UIElement> ToRemove = [];
-
-        /// <summary>Internal use only.</summary>
-        public bool HoverInternal;
-
-        /// <summary>Styles registered on this element.</summary>
-        public HashSet<UIElementStyle> Styles = [];
-
-        /// <summary>Text objects registered on this element.</summary>
-        public List<UIElementText> Texts = [];
-
-        /// <summary>The current style of this element.</summary>
-        public UIElementStyle CurrentStyle = UIElementStyle.Empty;
-    }
-
-    /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
-    public ElementInternalData ElementInternal = new();
-
     /// <summary>Adds and removes any queued children.</summary>
     public void CheckChildren()
     {
@@ -217,17 +198,88 @@ public abstract class UIElement
         ElementInternal.ToRemove.Clear();
     }
 
-    /// <summary>Performs a tick on this element and its children.</summary>
-    /// <param name="delta">The time since the last tick.</param>
-    public void FullTick(double delta)
+        // TODO: 'filter' predicate parameter?
+    /// <summary>Yields this element and all child elements recursively.</summary>
+    /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
+    public IEnumerable<UIElement> AllChildren(Func<UIElement, bool> filter = null, bool toAdd = false)
+    {
+        yield return this;
+        foreach (UIElement element in ElementInternal.Children)
+        {
+            if (element.IsValid && (filter?.Invoke(element) ?? true))
+            {
+                foreach (UIElement child in element.AllChildren(filter, toAdd))
+                {
+                    yield return child;
+                }
+            }
+        }
+        if (toAdd)
+        {
+            foreach (UIElement element in ElementInternal.ToAdd)
+            {
+                if (filter?.Invoke(element) ?? true)
+                {
+                    foreach (UIElement child in element.AllChildren(filter, toAdd))
+                    {
+                        yield return child;
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO: replace with AllChildren?
+    /// <summary>Gets all children that contain the position on the screen.</summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    /// <returns>A list of child elements containing the position.</returns>
+    public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
+    {
+        foreach (UIElement element in ElementInternal.Children)
+        {
+            if (element.IsValid && element.Contains(x, y))
+            {
+                yield return element;
+            }
+        }
+    }
+
+    /// <summary>Gets all children that do not contain the position on the screen.</summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    /// <returns>A list of child elements not containing the position.</returns>
+    public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
+    {
+        foreach (UIElement element in ElementInternal.Children)
+        {
+            if (element.IsValid && !element.Contains(x, y))
+            {
+                yield return element;
+            }
+        }
+    }
+
+    /// <summary>Checks if this element's boundaries contain the position on the screen.</summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    /// <returns>Whether the position is within any of the boundaries.</returns>
+    public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
+
+    /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    /// <returns>Whether the position is within any of the boundaries.</returns>
+    public bool Contains(int x, int y)
     {
         foreach (UIElement element in AllChildren())
         {
-            element.CheckChildren();
-            element.UpdateStyle();
-            element.TickInput();
-            element.Tick(delta);
+            if (element.SelfContains(x, y))
+            {
+                return true;
+            }
         }
+        return false;
     }
 
     /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
@@ -255,8 +307,19 @@ public abstract class UIElement
         return style;
     }
 
-    /// <summary>Returns the <b>current</b> element style.</summary>
-    public virtual UIElementStyle Style { get; set; }
+    /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
+    public void UpdateStyle()
+    {
+        UIElementStyle newStyle = Style ?? UIElementStyle.Empty;
+        if (newStyle != ElementInternal.CurrentStyle)
+        {
+            if (ElementInternal.CurrentStyle is not null)
+            {
+                SwitchFromStyle(ElementInternal.CurrentStyle);
+            }
+            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
+        }
+    }
 
     /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
     public virtual void SwitchFromStyle(UIElementStyle style)
@@ -265,12 +328,6 @@ public abstract class UIElement
 
     /// <summary>Ran when this element switches to the relevant <see cref="UIElementStyle"/>.</summary>
     public virtual void SwitchToStyle(UIElementStyle style)
-    {
-    }
-
-    /// <summary>Performs a tick on this element.</summary>
-    /// <param name="delta">The time since the last tick.</param>
-    public virtual void Tick(double delta)
     {
     }
 
@@ -367,6 +424,25 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>Performs a tick on this element.</summary>
+    /// <param name="delta">The time since the last tick.</param>
+    public virtual void Tick(double delta)
+    {
+    }
+
+    /// <summary>Performs a tick on this element and its children.</summary>
+    /// <param name="delta">The time since the last tick.</param>
+    public void FullTick(double delta)
+    {
+        foreach (UIElement element in AllChildren())
+        {
+            element.CheckChildren();
+            element.UpdateStyle();
+            element.TickInput();
+            element.Tick(delta);
+        }
+    }
+
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
@@ -414,20 +490,6 @@ public abstract class UIElement
         }*/
     }
 
-    /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
-    public void UpdateStyle()
-    {
-        UIElementStyle newStyle = Style ?? UIElementStyle.Empty;
-        if (newStyle != ElementInternal.CurrentStyle)
-        {
-            if (ElementInternal.CurrentStyle is not null)
-            {
-                SwitchFromStyle(ElementInternal.CurrentStyle);
-            }
-            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
-        }
-    }
-
     /// <summary>Performs a render on this element.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
@@ -442,37 +504,6 @@ public abstract class UIElement
     public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
     public virtual bool CanRenderChild(UIElement child) => true;
-
-    // TODO: 'filter' predicate parameter?
-    /// <summary>Yields this element and all child elements recursively.</summary>
-    /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
-    public IEnumerable<UIElement> AllChildren(Func<UIElement, bool> filter = null, bool toAdd = false)
-    {
-        yield return this;
-        foreach (UIElement element in ElementInternal.Children)
-        {
-            if (element.IsValid && (filter?.Invoke(element) ?? true))
-            {
-                foreach (UIElement child in element.AllChildren(filter, toAdd))
-                {
-                    yield return child;
-                }
-            }
-        }
-        if (toAdd)
-        {
-            foreach (UIElement element in ElementInternal.ToAdd)
-            {
-                if (filter?.Invoke(element) ?? true)
-                {
-                    foreach (UIElement child in element.AllChildren(filter, toAdd))
-                    {
-                        yield return child;
-                    }
-                }
-            }
-        }
-    }
 
     // TODO: find way to fit this into AllChildren
     public void RenderAllChildren(ViewUI2D view, double delta)
@@ -601,36 +632,6 @@ public abstract class UIElement
     /// <summary>Ran when the user has stopped interacting with the element.</summary>
     public virtual void OnDeselect()
     {
-    }
-
-    /// <summary>Gets all children that contain the position on the screen.</summary>
-    /// <param name="x">The X position to check for.</param>
-    /// <param name="y">The Y position to check for.</param>
-    /// <returns>A list of child elements containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
-    {
-        foreach (UIElement element in ElementInternal.Children)
-        {
-            if (element.IsValid && element.Contains(x, y))
-            {
-                yield return element;
-            }
-        }
-    }
-
-    /// <summary>Gets all children that do not contain the position on the screen.</summary>
-    /// <param name="x">The X position to check for.</param>
-    /// <param name="y">The Y position to check for.</param>
-    /// <returns>A list of child elements not containing the position.</returns>
-    public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
-    {
-        foreach (UIElement element in ElementInternal.Children)
-        {
-            if (element.IsValid && !element.Contains(x, y))
-            {
-                yield return element;
-            }
-        }
     }
 
     /// <summary>
