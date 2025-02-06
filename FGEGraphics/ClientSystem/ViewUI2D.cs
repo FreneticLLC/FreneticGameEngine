@@ -108,9 +108,6 @@ public class ViewUI2D
     /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
     public int RelativeYLast = 0;
 
-    /// <summary>Whether to sort the view by priority order (if not, will be parent/child logical order).</summary>
-    public bool SortToPriority = false;
-
     /// <summary>Draw the menu to the relevant back buffer.</summary>
     // TODO: Clean this up
     public void Draw()
@@ -149,7 +146,7 @@ public class ViewUI2D
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
             Internal.RenderStack.Clear();
             RelativeYLast = 0;
-            CurrentScreen.UpdatePositions(Internal.RenderStack, Client.Delta, 0, 0, Vector3.Zero);
+            CurrentScreen.UpdatePosition(Internal.RenderStack, Client.Delta, 0, 0, Vector3.Zero);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
             foreach (UIElement elem in Internal.RenderStack)
             {
@@ -158,7 +155,7 @@ public class ViewUI2D
                     elem.UpdateStyle();
                 }
             }
-            foreach (UIElement elem in (SortToPriority ? Internal.RenderStack.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)Internal.RenderStack))
+            foreach (UIElement elem in (IEnumerable<UIElement>)Internal.RenderStack)
             {
                 StackNoteHelper.Push("Draw UI Element", elem);
                 try

@@ -82,15 +82,6 @@ public abstract class UIElement
     /// <summary>Ran when this element is clicked.</summary>
     public Action OnClick;
 
-    /// <summary>
-    /// Priority for rendering logic.
-    /// <para>Only used if <see cref="ViewUI2D.SortToPriority"/> is enabled.</para>
-    /// </summary>
-    public double RenderPriority = 0;
-
-    /// <summary>Whether this element has rendering priority over its parent, if any.</summary>
-    public bool ChildPriority = true;
-
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
     public UIElement(UIPositionHelper pos)
@@ -400,15 +391,13 @@ public abstract class UIElement
         }
     }
 
-    // TODO: Don't pass the stack directly
-    // TODO: Clean this logic up and call it on creation
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="xoff">The X offset of this element's parent.</param>
     /// <param name="yoff">The Y offset of this element's parent.</param>
     /// <param name="lastRot">The last rotation made in the render chain.</param>
-    public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+    public virtual void UpdatePosition(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
     {
         if (Parent is not null && Parent.ElementInternal.ToRemove.Contains(this))
         {
@@ -448,10 +437,12 @@ public abstract class UIElement
         LastAbsoluteRotation = lastRot.Z;
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
         Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
-        CheckChildren();
-        UpdateChildPositions(output, delta, x, y, lastRot, false);
         output.Add(this);
-        UpdateChildPositions(output, delta, x, y, lastRot, true);
+        CheckChildren();
+        foreach (UIElement child in ElementInternal.Children)
+        {
+            child.UpdatePosition(output, delta, x, y, lastRot);
+        }
     }
 
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
@@ -482,24 +473,6 @@ public abstract class UIElement
     public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
     public virtual bool CanRenderChild(UIElement child) => true;
-
-    /// <summary>Updates this element's child positions.</summary>
-    /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="xoff">The X offset of this element's parent.</param>
-    /// <param name="yoff">The Y offset of this element's parent.</param>
-    /// <param name="lastRot">The last rotation made in the render chain.</param>
-    /// <param name="childPriority">The priority value to target.</param>
-    public virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot, bool childPriority)
-    {
-        foreach (UIElement element in ElementInternal.Children)
-        {
-            if (element.IsValid && element.ChildPriority == childPriority)
-            {
-                element.UpdatePositions(output, delta, xoff, yoff, lastRot);
-            }
-        }
-    }
 
     // TODO: 'filter' predicate parameter?
     /// <summary>Yields this element and all child elements recursively.</summary>
