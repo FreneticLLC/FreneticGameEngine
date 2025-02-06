@@ -39,7 +39,6 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
         view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
-        //view.Client.FontSets.Standard.DrawFancyText($"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", new(X, Y, 0));
         foreach (UIElement child in ElementInternal.Children)
         {
             child.RenderAllChildren(view, delta);

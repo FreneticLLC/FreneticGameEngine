@@ -18,12 +18,108 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
 // TODO: handle navigational scroll
-public class UIScrollGroup : UIGroup
+public class UIScrollGroup : UIElement
 {
+    /// <summary>The horizontal scroll axis.</summary>
+    public Axis ScrollX;
+
+    /// <summary>The vertical scroll axis.</summary>
+    public Axis ScrollY;
+
+    /// <summary>The scissor layer for child elements.</summary>
+    public UIScissorGroup ScissorLayer;
+
+    /// <summary>The scroll bar layer (above the scissor layer).</summary>
+    public UIGroup ScrollBarLayer;
+
+    /// <summary>Whether either of the scroll bars are pressed.</summary>
+    public bool ScrollBarPressed => ScrollX.ScrollBar?.Pressed ?? ScrollY.ScrollBar?.Pressed ?? false;
+
+    /// <summary>Constructs the UI scroll group.</summary>
+    /// <param name="pos">The position of the element.</param>
+    /// <param name="barStyles">The scroll bar styles.</param>
+    /// <param name="barWidth">The width of the scroll bars.</param>
+    /// <param name="barX">Whether to add a horizontal scroll bar.</param>
+    /// <param name="barY">Whether to add a vertical scroll bar.</param>
+    /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
+    /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
+    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(pos)
+    {
+        if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
+        {
+            throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
+        }
+        // TODO: Fix scroll bar overlap
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
+        {
+            base.AddChild(ScrollBarLayer = new(new UIPositionHelper(pos.AtOrigin())));
+            if (ScrollX.ScrollBar is not null)
+            {
+                ScrollBarLayer.AddChild(ScrollX.ScrollBar);
+            }
+            if (ScrollY.ScrollBar is not null)
+            {
+                ScrollBarLayer.AddChild(ScrollY.ScrollBar);
+            }
+        }
+        base.AddChild(ScissorLayer = new(new UIPositionHelper(pos.AtOrigin())));
+    }
+
+    /// <inheritdoc/>
+    public override void AddChild(UIElement child)
+    {
+        UIPositionHelper original = new(child.Position);
+        child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
+        ScissorLayer.AddChild(child);
+    }
+
+    /// <inheritdoc/>
+    public override void Tick(double delta)
+    {
+        base.Tick(delta);
+        if (ScrollX.ScrollBar is not null)
+        {
+            ScrollX.TickMouseDrag(Window.MouseX, X);
+        }
+        if (ScrollY.ScrollBar is not null)
+        {
+            ScrollY.TickMouseDrag(Window.MouseY, Y);
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void NavigateDirection(int horizontal, int vertical)
+    {
+        if (!ScrollBarPressed)
+        {
+            ScrollX.TickMouseScroll(horizontal);
+            ScrollY.TickMouseScroll(vertical);
+        }
+    }
+
+    /// <inheritdoc/>
+    public override bool ScrollDirection(float horizontal, float vertical)
+    {
+        if (ScrollBarPressed)
+        {
+            return true; // TODO: or false, which better UX?
+        }
+        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        {
+            horizontal = vertical;
+            vertical = 0;
+        }
+        ScrollX.TickMouseScroll(horizontal);
+        ScrollY.TickMouseScroll(vertical);
+        return true;
+    }
+
     /// <summary>Contains scroll state for a direction.</summary>
     /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
     /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
-    public class ScrollDirection(bool vertical, Func<int> rangeLength)
+    public class Axis(bool vertical, Func<int> rangeLength)
     {
         /// <summary>The current scroll position.</summary>
         public int Value = 0;
@@ -56,7 +152,7 @@ public class UIScrollGroup : UIGroup
         /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
         /// <param name="styles">The <see cref="ScrollBar"/> styles.</param>
         /// <param name="pos">The base position for the <see cref="ScrollBar"/>.</param>
-        public ScrollDirection(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(vertical, rangeLength)
+        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(vertical, rangeLength)
         {
             if (!hasBar)
             {
@@ -127,86 +223,6 @@ public class UIScrollGroup : UIGroup
                 Value = MaxValue;
             }
         }
-    }
-
-    /// <summary>The horizontal scroll direction.</summary>
-    public ScrollDirection ScrollX;
-
-    /// <summary>The vertical scroll direction.</summary>
-    public ScrollDirection ScrollY;
-
-    public UIScissorGroup ScissorGroup;
-
-    public UIGroup ScrollBars;
-
-    /// <summary>Constructs the UI scroll group.</summary>
-    /// <param name="pos">The position of the element.</param>
-    /// <param name="barStyles">The scroll bar styles.</param>
-    /// <param name="barWidth">The width of the scroll bars.</param>
-    /// <param name="barX">Whether to add a horizontal scroll bar.</param>
-    /// <param name="barY">Whether to add a vertical scroll bar.</param>
-    /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
-    /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(pos)
-    {
-        if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
-        {
-            throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
-        }
-        // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
-        if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
-        {
-            base.AddChild(ScrollBars = new(new UIPositionHelper(pos.AtOrigin())));
-            if (ScrollX.ScrollBar is not null)
-            {
-                ScrollBars.AddChild(ScrollX.ScrollBar);
-            }
-            if (ScrollY.ScrollBar is not null)
-            {
-                ScrollBars.AddChild(ScrollY.ScrollBar);
-            }
-        }
-        base.AddChild(ScissorGroup = new(new UIPositionHelper(pos.AtOrigin())));
-    }
-
-    /// <inheritdoc/>
-    public override void AddChild(UIElement child)
-    {
-        UIPositionHelper original = new(child.Position);
-        child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
-        ScissorGroup.AddChild(child);
-    }
-
-    /// <inheritdoc/>
-    public override void Tick(double delta)
-    {
-        base.Tick(delta);
-        if (ScrollX.ScrollBar is not null)
-        {
-            ScrollX.TickMouseDrag(Window.MouseX, X);
-        }
-        if (ScrollY.ScrollBar is not null)
-        {
-            ScrollY.TickMouseDrag(Window.MouseY, Y);
-        }
-    }
-
-    public override bool ScrollChanged(float x, float y)
-    {
-        if (ScrollX.ScrollBar?.Pressed ?? ScrollY.ScrollBar?.Pressed ?? false)
-        {
-            return true; // TODO: or false, which better UX?
-        }
-        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
-        {
-            x = y;
-            y = 0;
-        }
-        ScrollX.TickMouseScroll(x);
-        ScrollY.TickMouseScroll(y);
-        return true;
     }
 
     /// <inheritdoc/>

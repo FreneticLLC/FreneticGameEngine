@@ -313,17 +313,15 @@ public abstract class UIElement
     /// </summary>
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
-    public void TickInteraction(int mouseX, int mouseY)
+    public void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
     {
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
             if (ElementInternal.HoverInternal && !View.Internal.Scrolled)
             {
-                // TODO: better logic
-                Vector2 delta = Window.CurrentMouse.ScrollDelta;
-                if (delta.X != 0 || delta.Y != 0)
+                if (scrollDelta.X != 0 || scrollDelta.Y != 0)
                 {
-                    View.Internal.Scrolled = ScrollChanged(delta.X, delta.Y);
+                    View.Internal.Scrolled = ScrollDirection(scrollDelta.X, scrollDelta.Y);
                 }
             }
             if (!ElementInternal.HoverInternal && View.HeldElement is null)
@@ -355,9 +353,8 @@ public abstract class UIElement
                 }
                 MouseLeftUp(mouseX, mouseY);
             }
-            return;
         }
-        if (ElementInternal.HoverInternal && (!View.MouseDown || View.HeldElement != this))
+        else if (ElementInternal.HoverInternal && (!View.MouseDown || View.HeldElement != this))
         {
             ElementInternal.HoverInternal = false;
             if (Enabled)
@@ -397,13 +394,9 @@ public abstract class UIElement
         {
             Deselect();
         }
-        if (keys.LeftRights != 0)
+        if (keys.LeftRights != 0 || keys.Scrolls != 0)
         {
-            NavigateLeftRight(keys.LeftRights);
-        }
-        if (keys.Scrolls != 0)
-        {
-            NavigateUpDown(keys.Scrolls);
+            NavigateDirection(keys.LeftRights, keys.Scrolls);
         }
     }
 
@@ -631,20 +624,18 @@ public abstract class UIElement
     {
     }
 
-    // TODO: should these directional variants be combined into single virtual methods?
-    /// <summary>Ran when the user navigates horizontally while the element is <see cref="Selected"/>.</summary>
-    /// <param name="value">The horizontal shift (positive for right, negative for left).</param>
-    public virtual void NavigateLeftRight(int value)
+    /// <summary>Ran when the user navigates directionally while the element is <see cref="Selected"/>.</summary>
+    /// <param name="horizontal">The horizontal shift (positive for right, negative for left).</param>
+    /// <param name="vertical">The vertical shift (positive for up, negative for down).</param>
+    public virtual void NavigateDirection(int horizontal, int vertical)
     {
     }
 
-    /// <summary>Ran when the user navigates vertically while the element is <see cref="Selected"/>.</summary>
-    /// <param name="value">The vertical shift (positive for up, negative for down).</param>
-    public virtual void NavigateUpDown(int value)
-    {
-    }
-
-    public virtual bool ScrollChanged(float x, float y) => false;
+    /// <summary>Ran when the user scrolls the mouse while hovering the element.</summary>
+    /// <param name="horizontal">The horizontal scroll (positive for right, negative for left).</param>
+    /// <param name="vertical">The vertical scroll (positive for up, negative for down).</param>
+    /// <returns>Whether to consume mouse scroll for this interaction step (such that no other elements receive this event).</returns>
+    public virtual bool ScrollDirection(float horizontal, float vertical) => false;
 
     /// <summary>Selects the element and fires <see cref="OnSelect"/>.</summary>
     public void Select()

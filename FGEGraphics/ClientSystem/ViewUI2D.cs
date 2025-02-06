@@ -218,6 +218,7 @@ public class ViewUI2D
     {
         int mouseX = (int)Client.MouseX;
         int mouseY = (int)Client.MouseY;
+        Vector2 scrollDelta = Client.CurrentMouse.ScrollDelta;
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.FullTick(Client.Delta);
         Internal.RenderStack.Reverse();
@@ -225,7 +226,7 @@ public class ViewUI2D
         {
             if (elem.IsValid)
             {
-                elem.TickInteraction(mouseX, mouseY);
+                elem.TickInteraction(mouseX, mouseY, scrollDelta);
             } 
         }
         MousePreviouslyDown = MouseDown;
