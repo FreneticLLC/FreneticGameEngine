@@ -221,11 +221,13 @@ public abstract class UIElement
     /// <param name="delta">The time since the last tick.</param>
     public void FullTick(double delta)
     {
-        CheckChildren();
-        UpdateStyle();
-        TickInput();
-        Tick(delta);
-        TickChildren(delta);
+        foreach (UIElement element in AllChildren())
+        {
+            element.CheckChildren();
+            element.UpdateStyle();
+            element.TickInput();
+            element.Tick(delta);
+        }
     }
 
     /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
@@ -270,19 +272,6 @@ public abstract class UIElement
     /// <param name="delta">The time since the last tick.</param>
     public virtual void Tick(double delta)
     {
-    }
-
-    /// <summary>Recursively ticks this element's children.</summary>
-    /// <param name="delta">The time since the last tick.</param>
-    public virtual void TickChildren(double delta)
-    {
-        foreach (UIElement child in ElementInternal.Children)
-        {
-            if (child.IsValid)
-            {
-                child.FullTick(delta);
-            }   
-        }
     }
 
     /// <summary>
