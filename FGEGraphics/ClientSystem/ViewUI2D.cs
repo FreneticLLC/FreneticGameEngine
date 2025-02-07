@@ -35,7 +35,7 @@ public class ViewUI2D
     public GameClientWindow Client;
 
     /// <summary>The render context (2D) for the UI.</summary>
-    public RenderContext2D UIContext;
+    public RenderContext2D UIContext = new();
 
     /// <summary>Gets the primary engine.</summary>
     public GameEngineBase Engine => Client.CurrentEngine;
@@ -83,9 +83,6 @@ public class ViewUI2D
         /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen;
 
-        /// <summary>Debug info about hovered UI elements.</summary>
-        public List<string> DebugInfo = [];
-
         public bool Scrolled;
     }
 
@@ -93,13 +90,40 @@ public class ViewUI2D
     public InternalData Internal = new();
 
     /// <summary>Constructs the view.</summary>
-    /// <param name="gameClient">Backing client window.</param>
-    public ViewUI2D(GameClientWindow gameClient)
+    /// <param name="client">Backing client window.</param>
+    public ViewUI2D(GameClientWindow client)
     {
-        Client = gameClient;
-        UIContext = new RenderContext2D();
+        Client = client;
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
+    }
+
+    public void DrawDebug()
+    {
+        List<string> debugInfo = [];
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            Engine.Textures.White.Bind();
+            Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
+            Renderer2D.SetColor(outlineColor);
+            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.LastAbsoluteRotation), true);
+            Renderer2D.SetColor(Color4F.White);
+            if (element.ElementInternal.HoverInternal)
+            {
+                debugInfo.Add(element.GetDebugInfo().JoinString("\n"));
+            }
+        }
+        string content = debugInfo.JoinString("\n\n");
+        RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
+        // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
+        float x = Client.MouseX + text.Width < Client.WindowWidth
+            ? Client.MouseX + 10
+            : Client.MouseX - text.Width - 10;
+        float textHeight = text.Lines.Length * Client.FontSets.Standard.Height;
+        float y = Client.MouseY + textHeight < Client.WindowHeight
+            ? Client.MouseY + 20
+            : Client.MouseY - textHeight - 20;
+        Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
@@ -147,55 +171,13 @@ public class ViewUI2D
                 }
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-            CurrentScreen.Render(this, Client.Delta);
-            /*foreach (UIElement elem in (IEnumerable<UIElement>)Internal.RenderStack)
-            {
-                StackNoteHelper.Push("Draw UI Element", elem);
-                try
-                {
-                    if (!elem.IsValid)
-                    {
-                        continue;
-                    }
-                    if (elem.ShouldRender)
-                    {
-                        elem.Render(this, Client.Delta);
-                    }
-                    if (Debug)
-                    {
-                        Engine.Textures.White.Bind();
-                        Color4F outlineColor = elem == HeldElement ? Color4F.Green : elem.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
-                        Renderer2D.SetColor(outlineColor);
-                        Rendering.RenderRectangle(UIContext, elem.X, elem.Y, elem.X + elem.Width, elem.Y + elem.Height, new(-0.5f, -0.5f, elem.LastAbsoluteRotation), true);
-                        Renderer2D.SetColor(Color4F.White);
-                        if (elem.ElementInternal.HoverInternal)
-                        {
-                            Internal.DebugInfo.Add(elem.GetDebugInfo().JoinString("\n"));
-                        }
-                    }
-                }
-                finally
-                {
-                    StackNoteHelper.Pop();
-                }
-            }
+            CurrentScreen.RenderAll(this, Client.Delta);
             if (Debug)
             {
-                string content = Internal.DebugInfo.JoinString("\n\n");
-                RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
-                // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
-                float x = Client.MouseX + text.Width < Client.WindowWidth
-                    ? Client.MouseX + 10
-                    : Client.MouseX - text.Width - 10;
-                float textHeight = text.Lines.Length * Client.FontSets.Standard.Height;
-                float y = Client.MouseY + textHeight < Client.WindowHeight
-                    ? Client.MouseY + 20
-                    : Client.MouseY - textHeight - 20;
-                Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
-            }*/
+                DrawDebug();
+            }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
-            Internal.DebugInfo.Clear();
         }
         finally
         {
@@ -210,14 +192,13 @@ public class ViewUI2D
         int mouseY = (int)Client.MouseY;
         Vector2 scrollDelta = Client.CurrentMouse.ScrollDelta;
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
-        CurrentScreen.FullTick(Client.Delta);
-        /*foreach (UIElement elem in Internal.RenderStack)
+        CurrentScreen.TickAll(Client.Delta);
+        // TODO: crude and probably slow
+        ICollection<UIElement> elements = [.. CurrentScreen.AllChildren()];
+        foreach (UIElement element in elements.Reverse())
         {
-            if (elem.IsValid)
-            {
-                elem.TickInteraction(mouseX, mouseY, scrollDelta);
-            } 
-        }*/
+            element.TickInteraction(mouseX, mouseY, scrollDelta);
+        }
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
     }

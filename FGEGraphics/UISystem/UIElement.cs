@@ -432,7 +432,7 @@ public abstract class UIElement
 
     /// <summary>Performs a tick on this element and its children.</summary>
     /// <param name="delta">The time since the last tick.</param>
-    public void FullTick(double delta)
+    public void TickAll(double delta)
     {
         foreach (UIElement element in AllChildren())
         {
@@ -499,11 +499,13 @@ public abstract class UIElement
     /// <summary>Performs a render on this element using the current style.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(ViewUI2D view, double delta)
+    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
+
+    public void RenderAll(ViewUI2D view, double delta)
     {
         foreach (UIElement element in AllChildren())
         {
-            element.Render(view, delta, element.ElementInternal.CurrentStyle);
+            element.Render(view, delta);
         }
     }
 
