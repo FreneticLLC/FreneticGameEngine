@@ -34,6 +34,9 @@ public class ViewUI2D
     /// <summary>The backing client window.</summary>
     public GameClientWindow Client;
 
+    /// <summary>The render context (2D) for the UI.</summary>
+    public RenderContext2D UIContext;
+
     /// <summary>Gets the primary engine.</summary>
     public GameEngineBase Engine => Client.CurrentEngine;
 
@@ -43,12 +46,36 @@ public class ViewUI2D
     /// <summary>The default basic UI screen.</summary>
     public UIScreen DefaultScreen;
 
+    /// <summary>Gets or sets the current main screen.</summary>
+    public UIScreen CurrentScreen
+    {
+        get => Internal.CurrentScreen;
+        set
+        {
+            if (value != Internal.CurrentScreen)
+            {
+                Internal.CurrentScreen?.SwitchFrom();
+                Internal.CurrentScreen = value;
+                Internal.CurrentScreen?.SwitchTo();
+            }
+        }
+    }
+
+    /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
+    public bool DirectToScreen = true;
+
     // TODO: move these somewhere else?
     /// <summary>Whether the mouse left button is currently down.</summary>
     public bool MouseDown;
 
     /// <summary>Whether the mouse left button was previously down.</summary>
     public bool MousePreviouslyDown;
+
+    /// <summary>The UI element currently being pressed and held.</summary>
+    public UIElement HeldElement;
+
+    /// <summary>Whether this UI view is in 'debug' mode.</summary>
+    public bool Debug;
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
@@ -74,33 +101,6 @@ public class ViewUI2D
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
     }
-
-    /// <summary>Whether this UI view is in 'debug' mode.</summary>
-    public bool Debug;
-
-    /// <summary>The UI element currently being pressed and held.</summary>
-    public UIElement HeldElement;
-
-    /// <summary>Gets or sets the current main screen.</summary>
-    public UIScreen CurrentScreen
-    {
-        get => Internal.CurrentScreen;
-        set
-        {
-            if (value != Internal.CurrentScreen)
-            {
-                Internal.CurrentScreen?.SwitchFrom();
-                Internal.CurrentScreen = value;
-                Internal.CurrentScreen?.SwitchTo();
-            }
-        }
-    }
-
-    /// <summary>The render context (2D) for the UI.</summary>
-    public RenderContext2D UIContext;
-
-    /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
-    public bool DirectToScreen = true;
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
     // TODO: Clean this up
