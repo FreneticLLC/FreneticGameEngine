@@ -450,10 +450,6 @@ public abstract class UIElement
     {
         int x = Position.X;
         int y = Position.Y;
-        if (Position.MainAnchor == UIAnchor.RELATIVE)
-        {
-            y += Position.View.RelativeYLast;
-        }
         if (Math.Abs(rotation.Z) < 0.001f)
         {
             if (Parent is not null)
@@ -485,7 +481,6 @@ public abstract class UIElement
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
         LastAbsoluteRotation = rotation.Z;
         LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
-        Position.View.RelativeYLast = y + LastAbsoluteSize.Y;
         /*CheckChildren();
         foreach (UIElement child in ElementInternal.Children)
         {

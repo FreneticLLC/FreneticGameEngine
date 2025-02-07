@@ -102,9 +102,6 @@ public class ViewUI2D
     /// <summary>Whether this UI is displayed directly onto the screen (as opposed to a temporary GL buffer).</summary>
     public bool DirectToScreen = true;
 
-    /// <summary>Used for <see cref="UIAnchor.RELATIVE"/>.</summary>
-    public int RelativeYLast = 0;
-
     /// <summary>Draw the menu to the relevant back buffer.</summary>
     // TODO: Clean this up
     public void Draw()
@@ -141,7 +138,6 @@ public class ViewUI2D
             Shader s = Client.FontSets.FixToShader;
             Client.FontSets.FixToShader = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-            RelativeYLast = 0;
             foreach (UIElement element in CurrentScreen.AllChildren())
             {
                 if (element.IsValid)
