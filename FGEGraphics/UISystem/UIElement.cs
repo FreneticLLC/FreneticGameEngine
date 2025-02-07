@@ -31,6 +31,7 @@ public abstract class UIElement
     /// <summary>True when the element is valid and usable, false when not-yet-added or already removed.</summary>
     public bool IsValid;
 
+    // TODO: rename to 'Client'
     /// <summary>Gets the client game window used to render this element.</summary>
     public virtual GameClientWindow Window => Parent.Window;
 
@@ -119,7 +120,6 @@ public abstract class UIElement
     {
         Position = pos;
         Position.For = this;
-        //UpdatePosition(Window.Delta, Vector3.Zero);
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -338,6 +338,7 @@ public abstract class UIElement
     /// </summary>
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
+    /// <param name="scrollDelta">The scroll wheel change.</param>
     public void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
     {
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
@@ -489,7 +490,7 @@ public abstract class UIElement
         }*/
     }
 
-    /// <summary>Performs a render on this element.</summary>
+    /// <summary>Renders this element.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
@@ -497,11 +498,14 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Performs a render on this element using the current style.</summary>
+    /// <summary>Renders this element using the current style.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
+    /// <summary>Renders this element and all of its children recursively.</summary>
+    /// <param name="view">The UI view.</param>
+    /// <param name="delta">The time since the last render.</param>
     public virtual void RenderAll(ViewUI2D view, double delta)
     {
         Render(view, delta);
@@ -648,7 +652,7 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Returns debug text to add to <see cref="ViewUI2D.InternalData.DebugInfo"/>.</summary>
+    /// <summary>Returns debug text to display when <see cref="ViewUI2D.Debug"/> mode is enabled.</summary>
     public virtual List<string> GetDebugInfo()
     {
         List<string> info = new(4)
