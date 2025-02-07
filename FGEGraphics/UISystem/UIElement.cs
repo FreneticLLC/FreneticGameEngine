@@ -198,17 +198,21 @@ public abstract class UIElement
         ElementInternal.ToRemove.Clear();
     }
 
-    // TODO: 'filter' predicate parameter?
+    // TODO: 'filter' predicate parameter
     /// <summary>Yields this element and all child elements recursively.</summary>
+    /// <param name="includeSelf">Whether to include this element.</param>
     /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
-    public IEnumerable<UIElement> AllChildren(Func<UIElement, bool> filter = null, bool toAdd = false)
+    public IEnumerable<UIElement> AllChildren(bool includeSelf = true, bool toAdd = false)
     {
-        yield return this;
+        if (includeSelf)
+        {
+            yield return this;
+        }
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid && (filter?.Invoke(element) ?? true))
+            if (element.IsValid) // TODO: is this a good check?
             {
-                foreach (UIElement child in element.AllChildren(filter, toAdd))
+                foreach (UIElement child in element.AllChildren(true, toAdd))
                 {
                     yield return child;
                 }
@@ -218,12 +222,9 @@ public abstract class UIElement
         {
             foreach (UIElement element in ElementInternal.ToAdd)
             {
-                if (filter?.Invoke(element) ?? true)
+                foreach (UIElement child in element.AllChildren(true, toAdd))
                 {
-                    foreach (UIElement child in element.AllChildren(filter, toAdd))
-                    {
-                        yield return child;
-                    }
+                    yield return child;
                 }
             }
         }
@@ -501,15 +502,17 @@ public abstract class UIElement
     /// <param name="delta">The time since the last render.</param>
     public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
 
-    public void RenderAll(ViewUI2D view, double delta)
+    public virtual void RenderAll(ViewUI2D view, double delta)
     {
-        foreach (UIElement element in AllChildren())
+        Render(view, delta);
+        foreach (UIElement child in ElementInternal.Children)
         {
-            element.Render(view, delta);
+            if (child.IsValid && child.ShouldRender)
+            {
+                child.RenderAll(view, delta);
+            }
         }
     }
-
-    public virtual bool CanRenderChild(UIElement child) => true;
 
     /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>
     /// <param name="x">The X position of the mouse.</param>

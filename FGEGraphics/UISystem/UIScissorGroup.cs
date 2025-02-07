@@ -25,28 +25,12 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child)
-    {
-        base.AddChild(child);
-        foreach (UIElement element in child.AllChildren(toAdd: true))
-        {
-            element.ShouldRender = false;
-        }
-    }
-
-    // TODO: This doesn't work well with UI debug information
-    /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void RenderAll(ViewUI2D view, double delta)
     {
         view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
-        /*foreach (UIElement child in ElementInternal.Children)
-        {
-            child.RenderAllChildren(view, delta);
-        }*/
+        base.RenderAll(view, delta);
         view.Rendering.PopScissor(view.UIContext);
     }
-
-    public override bool CanRenderChild(UIElement child) => false;
 
     /// <summary>Constrains child interactions to the scissor boundaries.</summary>
     public override bool CanInteract(int x, int y) => SelfContains(x, y);

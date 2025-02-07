@@ -83,6 +83,7 @@ public class ViewUI2D
         /// <summary>The current main screen.</summary>
         public UIScreen CurrentScreen;
 
+        /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
     }
 
@@ -98,6 +99,7 @@ public class ViewUI2D
         CurrentScreen = DefaultScreen;
     }
 
+    /// <summary>Draws information specific to <see cref="Debug"/> mode.</summary>
     public void DrawDebug()
     {
         List<string> debugInfo = [];
@@ -127,7 +129,6 @@ public class ViewUI2D
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
-    // TODO: Clean this up
     public void Draw()
     {
         StackNoteHelper.Push("Draw ViewUI2D", this);
