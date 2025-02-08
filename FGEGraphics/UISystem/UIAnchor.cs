@@ -64,7 +64,4 @@ public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y, UIAlignmen
 
     /// <summary>Bottom right UI Anchor. See <see cref="UIAnchor"/>.</summary>
     public static readonly UIAnchor BOTTOM_RIGHT = new(RIGHT_X, BOTTOM_Y, UIAlignment.RIGHT, UIAlignment.BOTTOM);
-
-    /// <summary>Relative UI Anchor. See <see cref="UIAnchor"/>.</summary>
-    public static readonly UIAnchor RELATIVE = new((_) => 0, (_) => 0, UIAlignment.LEFT, UIAlignment.TOP);
 }

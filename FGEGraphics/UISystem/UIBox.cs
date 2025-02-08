@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 public class UIBox(UIElementStyle style, UIPositionHelper pos) : UIElement(pos)
 {
     /// <summary>The style of the box.</summary>
-    public override UIElementStyle Style { get; } = style;
+    public override UIElementStyle Style { get; set; } = style;
     
     // TODO: put this on UIPositionHelper or something
     /// <summary>Whether this box is vertically flipped.</summary>

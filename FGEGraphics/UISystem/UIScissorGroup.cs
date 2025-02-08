@@ -25,29 +25,11 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child)
+    public override void RenderAll(ViewUI2D view, double delta)
     {
-        base.AddChild(child);
-        foreach (UIElement element in child.AllChildren(toAdd: true))
-        {
-            element.ShouldRender = false;
-        }
-    }
-
-    /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
-    {
-        GL.Enable(EnableCap.ScissorTest);
-        GL.Scissor(X, Engine.Window.ClientSize.Y - Y - Height, Width, Height);
-        foreach (UIElement child in ElementInternal.Children)
-        {
-            foreach (UIElement element in child.AllChildren())
-            {
-                element.Render(view, delta);
-            }
-        }
-        GL.Scissor(0, 0, Engine.Window.ClientSize.X, Engine.Window.ClientSize.Y); // TODO: Bump around a stack, for embedded scroll groups?
-        GL.Disable(EnableCap.ScissorTest);
+        view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
+        base.RenderAll(view, delta);
+        view.Rendering.PopScissor(view.UIContext);
     }
 
     /// <summary>Constrains child interactions to the scissor boundaries.</summary>

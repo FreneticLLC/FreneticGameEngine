@@ -22,9 +22,9 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 /// <summary>
 /// Represents a container of elements supporting clickable <see cref="UIElement"/>s that lead to <see cref="UIScreen"/>s,
 /// automatically handling the <see cref="UIElement.Enabled"/> state.
+/// </summary>
 /// <param name="pos">The position of the element.</param>
 /// <param name="onSwitch">Ran when the tab is switched.</param>
-/// </summary>
 public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
 {
     /// <summary>Ran when the tab is switched.</summary>
@@ -44,6 +44,7 @@ public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch =
         if (SelectedButton is not null)
         {
             SelectedButton.Enabled = true;
+            SelectedButton.Hovered = false;
             SelectedButton.Pressed = false;
             SelectedTab.SwitchFrom();
         }

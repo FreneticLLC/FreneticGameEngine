@@ -19,7 +19,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>
 /// Represents a GL native texture on a screen.
-/// <para>To render <see cref="Texture"/> instances, use <see cref="UIImage"/>.</para>
+/// <para>To render <see cref="GraphicsHelpers.Textures.Texture"/> instances, use <see cref="UIImage"/>.</para>
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="pos">The position of the element.</param>

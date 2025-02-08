@@ -235,7 +235,7 @@ public class UIInputLabel : UIClickableElement
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
         UIPositionHelper scrollGroupPos = pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => pos.Width - Inset() * 2, () => pos.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor);
+        ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
@@ -413,16 +413,20 @@ public class UIInputLabel : UIClickableElement
 
     // TODO: Handle ctrl left/right, handle up/down arrows
     /// <inheritdoc/>
-    public override void NavigateLeftRight(int value)
+    public override void NavigateDirection(int horizontal, int vertical)
     {
+        if (horizontal == 0)
+        {
+            return;
+        }
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         if (Internal.HasSelection && !shiftDown)
         {
-            Internal.CursorEnd = value < 0 ? Internal.IndexLeft : Internal.IndexRight;
+            Internal.CursorEnd = horizontal < 0 ? Internal.IndexLeft : Internal.IndexRight;
         }
         else
         {
-            Internal.CursorEnd += value;
+            Internal.CursorEnd += horizontal;
         }
         if (!shiftDown)
         {

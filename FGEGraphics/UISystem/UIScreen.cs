@@ -23,9 +23,6 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement
 {
-    /// <summary>The default priority of a UI Screen.</summary>
-    public const double SCREEN_PRIORITY_DEFAULT = -10E10;
-
     /// <summary>
     /// A reference to the relevant client backing this screen.
     /// Get this using <see cref="Window"/>.
@@ -50,7 +47,6 @@ public class UIScreen : UIElement
     {
         Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
         Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
-        RenderPriority = SCREEN_PRIORITY_DEFAULT;
     }
 
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>

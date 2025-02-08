@@ -95,7 +95,7 @@ public class UIDropdown : UIElement
     /// <param name="element">The clickable choice element.</param>
     public void AddChoice(string choice, UIClickableElement element)
     {
-        ListGroup.AddChild(element);
+        ListGroup.AddListItem(element);
         Choices[element] = choice;
         element.OnClick += () => HandleSelect(element);
     }
