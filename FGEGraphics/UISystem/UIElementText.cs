@@ -14,6 +14,7 @@ using System.Text;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 
 namespace FGEGraphics.UISystem;
@@ -229,6 +230,7 @@ public class UIElementText
     /// <param name="y">The starting y position.</param>
     public static void RenderChain(IEnumerable<ChainPiece> chain, float x, float y)
     {
+        GraphicsUtil.CheckError("UIElementText - PreRenderChain");
         foreach (ChainPiece piece in chain)
         {
             piece.Font.DrawFancyText(piece.Text, new Location(x, y + piece.YOffset, 0));

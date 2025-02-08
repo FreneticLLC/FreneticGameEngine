@@ -544,6 +544,7 @@ public class UIInputLabel : UIClickableElement
     /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
+        GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
         UIElementStyle style = ElementInternal.CurrentStyle;
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
         int y = ScrollGroup.Y + TextPadding;
@@ -567,6 +568,7 @@ public class UIInputLabel : UIClickableElement
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.Height;
         view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
+        GraphicsUtil.CheckError("UIInputLabel - PostRenderLabel", this);
     }
 
     /// <inheritdoc/>

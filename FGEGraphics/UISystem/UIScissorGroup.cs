@@ -27,6 +27,11 @@ public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
     /// <inheritdoc/>
     public override void RenderAll(ViewUI2D view, double delta)
     {
+        // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
+        if (Width <= 0 || Height <= 0)
+        {
+            return;
+        }
         view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
         base.RenderAll(view, delta);
         view.Rendering.PopScissor(view.UIContext);

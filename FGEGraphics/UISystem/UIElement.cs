@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using FGECore.CoreSystems;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -508,7 +509,9 @@ public abstract class UIElement
     /// <param name="delta">The time since the last render.</param>
     public virtual void RenderAll(ViewUI2D view, double delta)
     {
+        GraphicsUtil.CheckError("UIElement - PreRender");
         Render(view, delta);
+        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
         foreach (UIElement child in ElementInternal.Children)
         {
             if (child.IsValid && child.ShouldRender)
@@ -516,6 +519,7 @@ public abstract class UIElement
                 child.RenderAll(view, delta);
             }
         }
+        GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
     }
 
     /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>

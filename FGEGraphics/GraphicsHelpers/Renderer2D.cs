@@ -249,11 +249,16 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
 
     public void Scissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
     {
+        if (xmax < xmin || ymax < ymin)
+        {
+            throw new InvalidOperationException($"Tried to scissor with invalid size, {xmax - xmin}, {ymax - ymin}");
+        }
         GL.Scissor(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin);
     }
 
     public void PushScissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
     {
+        GraphicsUtil.CheckError("Renderer2D - PushScissor - Pre");
         if (ScissorStack.Count == 0)
         {
             GL.Enable(EnableCap.ScissorTest);
@@ -265,13 +270,17 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
             ymin = Math.Max(ymin, prevYmin);
             xmax = Math.Min(xmax, prevXmax);
             ymax = Math.Min(ymax, prevYmax);
+            xmax = Math.Max(xmin, xmax);
+            ymax = Math.Max(ymin, ymax);
         }
         Scissor(rc, xmin, ymin, xmax, ymax);
         ScissorStack.Push((xmin, ymin, xmax, ymax));
+        GraphicsUtil.CheckError("Renderer2D - PushScissor - Post", ScissorStack.Peek());
     }
 
     public void PopScissor(RenderContext2D rc)
     {
+        GraphicsUtil.CheckError("Renderer2D - PopScissor - Pre");
         if (ScissorStack.Count == 0)
         {
             throw new Exception("Scissor stack empty");
@@ -287,5 +296,6 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
             GL.Scissor(0, 0, rc.Width, rc.Height);
             GL.Disable(EnableCap.ScissorTest);
         }
+        GraphicsUtil.CheckError("Renderer2D - PopScissor - Post");
     }
 }
