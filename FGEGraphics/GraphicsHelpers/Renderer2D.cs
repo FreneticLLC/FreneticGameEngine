@@ -22,9 +22,8 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.GraphicsHelpers;
 
 /// <summary>2D render helper.</summary>
-/// <param name="tengine">Texture engine.</param>
-/// <param name="shaderdet">Shader engine.</param>
-public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClientWindow client)
+/// <param name="client">Relevant game client window.</param>
+public class Renderer2D(GameClientWindow client)
 {
     /// <summary>Prepare the renderer.</summary>
     public void Init()
@@ -42,9 +41,6 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
 
     /// <summary>Line mesh.</summary>
     public Renderable Line;
-
-    /// <summary>Stack of scissor bounds.</summary>
-    public Stack<(int, int, int, int)> ScissorStack = [];
 
     void GenerateSquareVBO()
     {
@@ -107,12 +103,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
         Line = builder.Generate();
     }
 
-    /// <summary>Texture system.</summary>
-    public TextureEngine Engine = tengine;
-
-    /// <summary>Shader system.</summary>
-    public ShaderEngine Shaders = shaderdet;
-
+    /// <summary>Relevant game client.</summary>
     public GameClientWindow Client = client;
 
     /// <summary>Render a line between two points.</summary>
@@ -247,6 +238,7 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
         GraphicsUtil.CheckError($"Renderer2D - RenderRectangle - Post");
     }
 
+    /// <summary>Scissors the rendering view, ie adds a bounding box restriction to what's visible.</summary>
     public void Scissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
     {
         if (xmax < xmin || ymax < ymin)
@@ -256,16 +248,18 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
         GL.Scissor(xmin, rc.Height - ymax, xmax - xmin, ymax - ymin);
     }
 
+    /// <summary>Pushes a scissor onto the stack, ie a stackable version of <see cref="Scissor(RenderContext2D, int, int, int, int)"/>.
+    /// After rendering, call <see cref="PopScissor(RenderContext2D)"/>.</summary>
     public void PushScissor(RenderContext2D rc, int xmin, int ymin, int xmax, int ymax)
     {
         GraphicsUtil.CheckError("Renderer2D - PushScissor - Pre");
-        if (ScissorStack.Count == 0)
+        if (rc.ScissorStack.Count == 0)
         {
             GL.Enable(EnableCap.ScissorTest);
         }
-        if (ScissorStack.Count > 0)
+        if (rc.ScissorStack.Count > 0)
         {
-            (int prevXmin, int prevYmin, int prevXmax, int prevYmax) = ScissorStack.Peek();
+            (int prevXmin, int prevYmin, int prevXmax, int prevYmax) = rc.ScissorStack.Peek();
             xmin = Math.Max(xmin, prevXmin);
             ymin = Math.Max(ymin, prevYmin);
             xmax = Math.Min(xmax, prevXmax);
@@ -274,21 +268,23 @@ public class Renderer2D(TextureEngine tengine, ShaderEngine shaderdet, GameClien
             ymax = Math.Max(ymin, ymax);
         }
         Scissor(rc, xmin, ymin, xmax, ymax);
-        ScissorStack.Push((xmin, ymin, xmax, ymax));
-        GraphicsUtil.CheckError("Renderer2D - PushScissor - Post", ScissorStack.Peek());
+        rc.ScissorStack.Push((xmin, ymin, xmax, ymax));
+        GraphicsUtil.CheckError("Renderer2D - PushScissor - Post", rc.ScissorStack.Peek());
     }
 
+    /// <summary>Pops a scissor from the stack, ie a stackable version of <see cref="Scissor(RenderContext2D, int, int, int, int)"/>.
+    /// Prior to this, call <see cref="PushScissor(RenderContext2D, int, int, int, int)"/>.</summary>
     public void PopScissor(RenderContext2D rc)
     {
         GraphicsUtil.CheckError("Renderer2D - PopScissor - Pre");
-        if (ScissorStack.Count == 0)
+        if (rc.ScissorStack.Count == 0)
         {
             throw new Exception("Scissor stack empty");
         }
-        ScissorStack.Pop();
-        if (ScissorStack.Count > 0)
+        rc.ScissorStack.Pop();
+        if (rc.ScissorStack.Count > 0)
         {
-            (int xmin, int ymin, int xmax, int ymax) = ScissorStack.Peek();
+            (int xmin, int ymin, int xmax, int ymax) = rc.ScissorStack.Peek();
             Scissor(rc, xmin, ymin, xmax, ymax);
         }
         else

@@ -179,6 +179,11 @@ public class ViewUI2D
             }
             GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
             Client.FontSets.FixToShader = s;
+            if (UIContext.ScissorStack.Count > 0)
+            {
+                Logs.Warning($"Scissor stack not empty at end of UI draw: {UIContext.ScissorStack.Count} unpopped scissors");
+                UIContext.ScissorStack.Clear();
+            }
         }
         finally
         {

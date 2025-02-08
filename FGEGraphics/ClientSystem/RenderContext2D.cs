@@ -48,4 +48,7 @@ public class RenderContext2D
 
     /// <summary>The present Scaler value.</summary>
     public Vector2 Scaler;
+
+    /// <summary>Stack of scissor bounds.</summary>
+    public Stack<(int, int, int, int)> ScissorStack = [];
 }

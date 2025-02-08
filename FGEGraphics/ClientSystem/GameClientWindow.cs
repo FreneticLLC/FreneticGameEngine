@@ -336,7 +336,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         Logs.ClientInit("GameClient loading render helper...");
         Rendering3D = new Renderer(Textures, Shaders, Models);
         Rendering3D.Init();
-        Rendering2D = new Renderer2D(Textures, Shaders, this);
+        Rendering2D = new Renderer2D(this);
         Rendering2D.Init();
         Logs.ClientInit("GameClient calling engine load...");
         CurrentEngine.Load();

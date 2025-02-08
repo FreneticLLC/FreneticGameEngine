@@ -41,6 +41,9 @@ public class UIListGroup : UIGroup
         Spacing = spacing;
     }
 
+    /// <summary>Adds a new child element to the list.</summary>
+    /// <param name="child">The child to add.</param>
+    /// <param name="addChild">If true, adds as a literal element child. If false, does not add as an element child but still updates positioning according to the list.</param>
     public void AddListItem(UIElement child, bool addChild = true)
     {
         if (addChild)
@@ -56,7 +59,7 @@ public class UIListGroup : UIGroup
                 maxY = -maxY;
             }
             child.Position.ConstantXY(0, maxY);
-            Position.ConstantHeight(maxY + child.Position.Height);
+            Position.ConstantHeight(maxY + child.Position.Height); // TODO: Is this correct for Alignment.BOTTOM?
             if (child.Position.Width > Position.Width)
             {
                 Position.ConstantWidth(child.Position.Width);
