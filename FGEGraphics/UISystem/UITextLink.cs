@@ -53,18 +53,14 @@ public class UITextLink : UIClickableElement
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIElementStyle style)
     {
-        Location textLocation = new(X, Y, 0);
         if (Icon is null)
         {
-            style.TextFont.DrawFancyText(Text, textLocation);
+            style.TextFont.DrawFancyText(Text, new(X, Y, 0));
             return;
         }
-        int fontHeight = style.TextFont.Height;
-        textLocation += new Location(fontHeight, fontHeight, 0);
-        Icon.Bind();
+        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Icon, X, Y, X + Height, Y + Height, TextureFit.STRETCH);
         Renderer2D.SetColor(style.BaseColor);
-        view.Rendering.RenderRectangle(view.UIContext, X, Y, textLocation.XF, textLocation.YF, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-        style.TextFont.DrawFancyText(Text, textLocation);
+        style.TextFont.DrawFancyText(Text, new(X + Height, Y, 0));
         Renderer2D.SetColor(Color4F.White);
     }
 }
