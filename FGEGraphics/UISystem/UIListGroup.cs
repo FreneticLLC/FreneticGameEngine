@@ -27,13 +27,18 @@ public class UIListGroup : UIGroup
     /// <summary>The spacing between each child.</summary>
     public int Spacing;
 
+    /// <summary>The anchor that the list will expand from.</summary>
+    public UIAnchor Anchor;
+
     /// <summary>Constructs a new list group.</summary>
     /// <param name="spacing">The spacing between each child.</param>
     /// <param name="pos">The position of the element.</param>
     /// <param name="vertical">Whether the list should expand vertically.</param>
-    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true) : base(pos.ConstantWidthHeight(0, 0))
+    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="pos"/> anchor.</param>
+    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true, UIAnchor anchor = null) : base(pos.ConstantWidthHeight(0, 0))
     {
-        if ((vertical && Position.MainAnchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Position.MainAnchor.AlignmentX == UIAlignment.CENTER))
+        Anchor = anchor ?? Position.MainAnchor;
+        if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
         {
             throw new Exception("UIListGroup must have a non-central expansion direction");
         }
@@ -50,11 +55,11 @@ public class UIListGroup : UIGroup
         {
             base.AddChild(element);
         }
-        element.Position.Anchor(Position.MainAnchor);
+        element.Position.Anchor(Anchor);
         if (Vertical)
         {
             int elementY = Position.Height > 0 ? Position.Height + Spacing : 0;
-            element.Position.ConstantXY(0, Position.MainAnchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
+            element.Position.ConstantXY(0, Anchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
             Position.ConstantHeight(elementY + element.Position.Height);
             if (element.Position.Width > Position.Width)
             {
@@ -64,7 +69,7 @@ public class UIListGroup : UIGroup
         else
         {
             int elementX = Position.Width > 0 ? Position.Width + Spacing : 0;
-            element.Position.ConstantXY(Position.MainAnchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
+            element.Position.ConstantXY(Anchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
             Position.ConstantWidth(elementX + element.Position.Width);
             if (element.Position.Height > Position.Height)
             {
