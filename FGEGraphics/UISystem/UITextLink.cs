@@ -44,7 +44,7 @@ public class UITextLink : UIClickableElement
         Text = new(this, text, true);
         Icon = icon;
         UpdateStyle();
-        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
+        Position.GetterWidthHeight(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height);
     }
 
     /// <summary>Performs a render on this link.</summary>
