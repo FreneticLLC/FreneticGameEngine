@@ -19,6 +19,7 @@ using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -40,6 +41,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GenerateSquareVBO();
         GenerateLineVBO();
         GenerateBoxVBO();
+        GenerateCircleVBO();
     }
 
     /// <summary>A 2D square from (0,0,0) to (1,1,0) with normals all equal to (0,0,1).</summary>
@@ -50,6 +52,9 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
 
     /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
     public Renderable Box;
+
+    // <summary>A 2D circle from... uhhhh
+    public Renderable Circle;
 
     /// <summary>Texture engine.</summary>
     public TextureEngine Textures = _textures;
@@ -153,6 +158,40 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
         builder.Vertices[i] = new Vector3(lowValue, 1, 1);
         Box = builder.Generate();
+    }
+
+
+    void GenerateCircleVBO()
+    {
+        const int segments = 32;
+        const int vertexCount = segments + 2;
+        const int indexCount = segments + 2;
+
+        Renderable.ArrayBuilder builder = new();
+        builder.Prepare2D(vertexCount, indexCount);
+        builder.Tangents = new Vector3[vertexCount];
+        builder.Vertices[0] = new Vector3(0, 0, 0);
+        builder.TexCoords[0] = new Vector3(0.5f, 0.5f, 0);
+        builder.Normals[0] = new Vector3(0, 0, -1);
+        builder.Colors[0] = new Vector4(1, 1, 1, 1);
+        builder.Tangents[0] = new Vector3(1, 0, 0);
+        builder.Indices[0] = 0;
+        // Generate vertices around circle
+        for (int i = 0; i <= segments; i++)
+        {
+            float angle = (float)(i * 2.0 * Math.PI / segments);
+            float x = (float)Math.Cos(angle);
+            float y = (float)Math.Sin(angle);
+
+            int vertIndex = i + 1;
+            builder.Vertices[vertIndex] = new Vector3(x, y, 0);
+            builder.TexCoords[vertIndex] = new Vector3((x + 1) * 0.5f, (y + 1) * 0.5f, 0);
+            builder.Normals[vertIndex] = new Vector3(0, 0, -1);
+            builder.Colors[vertIndex] = new Vector4(1, 1, 1, 1);
+            builder.Tangents[vertIndex] = new Vector3(1, 0, 0);
+            builder.Indices[vertIndex] = (uint)vertIndex;
+        }
+        Circle = builder.Generate();
     }
 
     /// <summary>Renders a line box.</summary>
@@ -364,6 +403,81 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
         GL.BindVertexArray(0);
     }
+
+
+
+    /// <summary>
+    /// Renders a Circle based on Location (Vectors Normalized Down)
+    /// </summary>
+    /// <param name="center">The Location for the circle to be rendered</param>
+    /// <param name="radius">Radius of the circle</param>
+    /// <param name="view">View to render Circle in</param>
+    /// <param name="color">Color of the circle</param>
+    /// <param name="enableCullFace">Enabling Cull Face makes both sides of the Circle Render</param>
+    /// <param name="enableDepthTest">Enabling Depth Testing allows depth checking of the pixel depth already stored</param>
+    /// <param name="depthFunc">Specifies the condition for passing the depth test
+    /// <param name="depthMask">Controls whether the depth buffer is writable or not
+    /// <param name="enableBlending">When blending is enabled, OpenGL mixes the color of the incoming fragment (new pixel) with the color already on the screen (old pixel)</param>
+    /// <param name="srcBlend">Color of the new fragment</param>
+    /// <param name="dstBlend">Color already on the screen</param>
+    public void RenderGroundCircle(
+        Location center,
+        float radius,
+        View3D view,
+        Vector4 color = default,
+        bool enableCullFace = false, 
+        bool enableDepthTest = true,
+        bool depthMask = true,
+        DepthFunction depthFunc = DepthFunction.Lequal,
+        bool enableBlending = true,
+        BlendingFactor srcBlend = BlendingFactor.SrcAlpha,
+        BlendingFactor dstBlend = BlendingFactor.OneMinusSrcAlpha)
+    {
+        // Save current states prior to render
+        bool cullFaceEnabled = GL.IsEnabled(EnableCap.CullFace);
+        bool depthTestEnabled = GL.IsEnabled(EnableCap.DepthTest);
+        bool blendEnabled = GL.IsEnabled(EnableCap.Blend);
+        bool prevDepthMask = GL.GetBoolean(GetPName.DepthWritemask);
+
+        // User options
+        if (enableCullFace) GL.Enable(EnableCap.CullFace); else GL.Disable(EnableCap.CullFace);
+        if (enableDepthTest) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
+        if (enableBlending)
+        {
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(srcBlend, dstBlend);
+        }
+        else
+        {
+            GL.Disable(EnableCap.Blend);
+        }
+
+        GL.ActiveTexture(TextureUnit.Texture0);
+        Textures.White.Bind();
+
+        
+        SetColor(color == default ? new Vector4(1.0f, 0.0f, 0.0f, 1.0f) : color, view);
+        
+        Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0)
+            * Matrix4d.CreateTranslation(center.ToOpenTK3D());
+
+
+        GL.DepthMask(depthMask);
+        GL.DepthFunc(depthFunc);
+
+
+        view.SetMatrix(2, mat);
+        GL.BindVertexArray(Circle.Internal.VAO);
+        GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
+
+        // Restore previous states 
+        if (cullFaceEnabled) GL.Enable(EnableCap.CullFace); else GL.Disable(EnableCap.CullFace);
+        if (depthTestEnabled) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
+        GL.DepthMask(prevDepthMask);
+        if (blendEnabled) GL.Enable(EnableCap.Blend); else GL.Disable(EnableCap.Blend);
+
+    }
+
 
     /// <summary>Renders a 2D rectangle.</summary>
     /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
