@@ -53,7 +53,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
     public Renderable Box;
 
-    // <summary>A 2D circle from... uhhhh
+    /// <summary>A 2D circle <summary>
     public Renderable Circle;
 
     /// <summary>Texture engine.</summary>
@@ -412,26 +412,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <param name="center">The Location for the circle to be rendered</param>
     /// <param name="radius">Radius of the circle</param>
     /// <param name="view">View to render Circle in</param>
-    /// <param name="color">Color of the circle</param>
-    /// <param name="enableCullFace">Enabling Cull Face makes both sides of the Circle Render</param>
-    /// <param name="enableDepthTest">Enabling Depth Testing allows depth checking of the pixel depth already stored</param>
-    /// <param name="depthFunc">Specifies the condition for passing the depth test
-    /// <param name="depthMask">Controls whether the depth buffer is writable or not
-    /// <param name="enableBlending">When blending is enabled, OpenGL mixes the color of the incoming fragment (new pixel) with the color already on the screen (old pixel)</param>
-    /// <param name="srcBlend">Color of the new fragment</param>
-    /// <param name="dstBlend">Color already on the screen</param>
-    public void RenderGroundCircle(
-        Location center,
-        float radius,
-        View3D view,
-        Vector4 color = default,
-        bool enableCullFace = false, 
-        bool enableDepthTest = true,
-        bool depthMask = true,
-        DepthFunction depthFunc = DepthFunction.Lequal,
-        bool enableBlending = true,
-        BlendingFactor srcBlend = BlendingFactor.SrcAlpha,
-        BlendingFactor dstBlend = BlendingFactor.OneMinusSrcAlpha)
+    public void RenderGroundCircle(Location center, float radius, View3D view)
     {
         // Save current states prior to render
         bool cullFaceEnabled = GL.IsEnabled(EnableCap.CullFace);
@@ -439,31 +420,27 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         bool blendEnabled = GL.IsEnabled(EnableCap.Blend);
         bool prevDepthMask = GL.GetBoolean(GetPName.DepthWritemask);
 
-        // User options
-        if (enableCullFace) GL.Enable(EnableCap.CullFace); else GL.Disable(EnableCap.CullFace);
-        if (enableDepthTest) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
-        if (enableBlending)
-        {
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(srcBlend, dstBlend);
-        }
-        else
-        {
-            GL.Disable(EnableCap.Blend);
-        }
+        // Question should this be outside of this function and based on user call like color?
+        GL.Disable(EnableCap.CullFace);
+        GL.Enable(EnableCap.DepthTest); 
+        
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        
+        
 
         GL.ActiveTexture(TextureUnit.Texture0);
         Textures.White.Bind();
 
         
-        SetColor(color == default ? new Vector4(1.0f, 0.0f, 0.0f, 1.0f) : color, view);
+       
         
         Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0)
             * Matrix4d.CreateTranslation(center.ToOpenTK3D());
 
 
-        GL.DepthMask(depthMask);
-        GL.DepthFunc(depthFunc);
+        GL.DepthMask(true);
+        GL.DepthFunc(DepthFunction.Lequal);
 
 
         view.SetMatrix(2, mat);
