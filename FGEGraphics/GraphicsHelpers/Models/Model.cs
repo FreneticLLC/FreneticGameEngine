@@ -95,7 +95,7 @@ public class Model(string _name)
         for (int i = 0; i < Meshes.Count; i++)
         {
             // TODO: Is StartsWith needed here?
-            if (Meshes[i].Name.StartsWith(name))
+            if (Meshes[i].NameLower.StartsWith(name))
             {
                 return Meshes[i];
             }
@@ -351,7 +351,7 @@ public class Model(string _name)
             return;
         }
         Skinned = true;
-        if (Engine.Window.Files.TryReadFileText("models/" + Name + ".skin", out string fileText))
+        if (Engine.Window.Files.TryReadFileText($"models/{Name}.skin", out string fileText)) // TODO: `.fmi` files
         {
             string[] data = fileText.SplitFast('\n');
             int c = 0;
@@ -364,11 +364,11 @@ public class Model(string _name)
                     {
                         Texture tex = texs.GetTexture(datums[1]);
                         bool success = false;
-                        string datic = datums[0].BeforeAndAfter(":::", out string typer);
+                        string datic = datums[0].BeforeAndAfter(":::", out string typer).ToLowerFast();
                         typer = typer.ToLowerFast();
                         for (int i = 0; i < Meshes.Count; i++)
                         {
-                            if (Meshes[i].Name == datic)
+                            if (Meshes[i].NameLower == datic)
                             {
                                 if (typer == "specular")
                                 {

@@ -23,6 +23,9 @@ public class ModelMesh
     /// <summary>The name of this mesh.</summary>
     public string Name;
 
+    /// <summary>The name of this mesh, pre-lowercased.</summary>
+    public string NameLower;
+
     /// <summary>The bones relevant to this mesh.</summary>
     public List<ModelBone> Bones = [];
 
@@ -30,7 +33,8 @@ public class ModelMesh
     /// <param name="_name">The name of it.</param>
     public ModelMesh(string _name)
     {
-        Name = _name.ToLowerFast();
+        Name = _name;
+        NameLower = Name.ToLowerFast();
         if (Name.EndsWith(".001"))
         {
             Name = Name[..^".001".Length];
