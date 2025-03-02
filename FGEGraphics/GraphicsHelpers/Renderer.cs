@@ -407,52 +407,20 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
 
 
     /// <summary>
-    /// Renders a Circle based on Location (Vectors Normalized Down)
+    /// Renders a circle based on location (vectors normalized down).
     /// </summary>
-    /// <param name="center">The Location for the circle to be rendered</param>
-    /// <param name="radius">Radius of the circle</param>
-    /// <param name="view">View to render Circle in</param>
-    public void RenderGroundCircle(Location center, float radius, View3D view)
+    /// <param name="center">The Location for the circle to be rendered.</param>
+    /// <param name="radius">Radius of the circle.</param>
+    /// <param name="view">View to render circle in.</param>
+    public void RenderCircle(Location center, float radius, View3D view)
     {
-        // Save current states prior to render
-        bool cullFaceEnabled = GL.IsEnabled(EnableCap.CullFace);
-        bool depthTestEnabled = GL.IsEnabled(EnableCap.DepthTest);
-        bool blendEnabled = GL.IsEnabled(EnableCap.Blend);
-        bool prevDepthMask = GL.GetBoolean(GetPName.DepthWritemask);
-
-        // Question should this be outside of this function and based on user call like color?
-        GL.Disable(EnableCap.CullFace);
-        GL.Enable(EnableCap.DepthTest); 
-        
-        GL.Enable(EnableCap.Blend);
-        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-        
-        
-
         GL.ActiveTexture(TextureUnit.Texture0);
         Textures.White.Bind();
-
-        
-       
-        
         Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0)
             * Matrix4d.CreateTranslation(center.ToOpenTK3D());
-
-
-        GL.DepthMask(true);
-        GL.DepthFunc(DepthFunction.Lequal);
-
-
         view.SetMatrix(2, mat);
         GL.BindVertexArray(Circle.Internal.VAO);
         GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
-
-        // Restore previous states 
-        if (cullFaceEnabled) GL.Enable(EnableCap.CullFace); else GL.Disable(EnableCap.CullFace);
-        if (depthTestEnabled) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
-        GL.DepthMask(prevDepthMask);
-        if (blendEnabled) GL.Enable(EnableCap.Blend); else GL.Disable(EnableCap.Blend);
-
     }
 
 
