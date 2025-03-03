@@ -19,7 +19,6 @@ using FGEGraphics.GraphicsHelpers.Models;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
-using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -53,7 +52,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
     public Renderable Box;
 
-    /// <summary>A 2D circle <summary>
+    /// <summary>A 2D circle.</summary>
     public Renderable Circle;
 
     /// <summary>Texture engine.</summary>
@@ -160,13 +159,12 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Box = builder.Generate();
     }
 
-
+    /// <summary>Generates a circle.</summary>
     void GenerateCircleVBO()
     {
         const int segments = 32;
         const int vertexCount = segments + 2;
         const int indexCount = segments + 2;
-
         Renderable.ArrayBuilder builder = new();
         builder.Prepare2D(vertexCount, indexCount);
         builder.Tangents = new Vector3[vertexCount];
@@ -404,8 +402,6 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GL.BindVertexArray(0);
     }
 
-
-
     /// <summary>
     /// Renders a circle based on location (vectors normalized down).
     /// </summary>
@@ -414,15 +410,12 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <param name="view">View to render circle in.</param>
     public void RenderCircle(Location center, float radius, View3D view)
     {
-        GL.ActiveTexture(TextureUnit.Texture0);
-        Textures.White.Bind();
-        Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0)
-            * Matrix4d.CreateTranslation(center.ToOpenTK3D());
+        Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0) * Matrix4d.CreateTranslation(center.ToOpenTK3D());
         view.SetMatrix(2, mat);
         GL.BindVertexArray(Circle.Internal.VAO);
         GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
+        GL.BindVertexArray(0);
     }
-
 
     /// <summary>Renders a 2D rectangle.</summary>
     /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
