@@ -175,12 +175,12 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         builder.Tangents[0] = new Vector3(1, 0, 0);
         builder.Indices[0] = 0;
         // Generate vertices around circle
-        for (int i = 0; i < segments; i++)
+        for (int i = segments - 1; i >= 0; i--)
         {
             float angle = (float)(i * 2.0 * Math.PI / segments);
             float x = (float)Math.Cos(angle);
             float y = (float)Math.Sin(angle);
-            int vertIndex = i + 1;
+            int vertIndex = segments - i;
             builder.Vertices[vertIndex] = new Vector3(x, y, 0);
             builder.TexCoords[vertIndex] = new Vector3((x + 1) * 0.5f, (y + 1) * 0.5f, 0);
             builder.Normals[vertIndex] = new Vector3(0, 0, -1);
