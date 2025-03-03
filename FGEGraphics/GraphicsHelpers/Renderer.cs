@@ -40,6 +40,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GenerateSquareVBO();
         GenerateLineVBO();
         GenerateBoxVBO();
+        GenerateCircleVBO();
     }
 
     /// <summary>A 2D square from (0,0,0) to (1,1,0) with normals all equal to (0,0,1).</summary>
@@ -50,6 +51,9 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
 
     /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
     public Renderable Box;
+
+    /// <summary>A 2D circle.</summary>
+    public Renderable Circle;
 
     /// <summary>Texture engine.</summary>
     public TextureEngine Textures = _textures;
@@ -153,6 +157,39 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         builder.Vertices[i] = new Vector3(lowValue, 1, lowValue); i++;
         builder.Vertices[i] = new Vector3(lowValue, 1, 1);
         Box = builder.Generate();
+    }
+
+    /// <summary>Generates a circle.</summary>
+    void GenerateCircleVBO()
+    {
+        const int segments = 32;
+        const int vertexCount = segments + 1;
+        const int indexCount = segments + 2;
+        Renderable.ArrayBuilder builder = new();
+        builder.Prepare2D(vertexCount, indexCount);
+        builder.Tangents = new Vector3[vertexCount];
+        builder.Vertices[0] = new Vector3(0, 0, 0);
+        builder.TexCoords[0] = new Vector3(0.5f, 0.5f, 0);
+        builder.Normals[0] = new Vector3(0, 0, -1);
+        builder.Colors[0] = new Vector4(1, 1, 1, 1);
+        builder.Tangents[0] = new Vector3(1, 0, 0);
+        builder.Indices[0] = 0;
+        // Generate vertices around circle
+        for (int i = segments - 1; i >= 0; i--)
+        {
+            float angle = (float)(i * 2.0 * Math.PI / segments);
+            float x = (float)Math.Cos(angle);
+            float y = (float)Math.Sin(angle);
+            int vertIndex = segments - i;
+            builder.Vertices[vertIndex] = new Vector3(x, y, 0);
+            builder.TexCoords[vertIndex] = new Vector3((x + 1) * 0.5f, (y + 1) * 0.5f, 0);
+            builder.Normals[vertIndex] = new Vector3(0, 0, -1);
+            builder.Colors[vertIndex] = new Vector4(1, 1, 1, 1);
+            builder.Tangents[vertIndex] = new Vector3(1, 0, 0);
+            builder.Indices[vertIndex] = (uint)vertIndex;
+        }
+        builder.Indices[segments + 1] = 1;
+        Circle = builder.Generate();
     }
 
     /// <summary>Renders a line box.</summary>
@@ -362,6 +399,21 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GL.UniformMatrix4(2, false, ref mat);
         GL.BindVertexArray(Square.Internal.VAO);
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
+        GL.BindVertexArray(0);
+    }
+
+    /// <summary>
+    /// Renders a circle based on location (vectors normalized down).
+    /// </summary>
+    /// <param name="center">The Location for the circle to be rendered.</param>
+    /// <param name="radius">Radius of the circle.</param>
+    /// <param name="view">View to render circle in.</param>
+    public void RenderCircle(Location center, float radius, View3D view)
+    {
+        Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0) * Matrix4d.CreateTranslation(center.ToOpenTK3D());
+        view.SetMatrix(2, mat);
+        GL.BindVertexArray(Circle.Internal.VAO);
+        GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
         GL.BindVertexArray(0);
     }
 
