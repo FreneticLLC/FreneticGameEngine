@@ -163,7 +163,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     void GenerateCircleVBO()
     {
         const int segments = 32;
-        const int vertexCount = segments + 2;
+        const int vertexCount = segments + 1;
         const int indexCount = segments + 2;
         Renderable.ArrayBuilder builder = new();
         builder.Prepare2D(vertexCount, indexCount);
@@ -175,12 +175,11 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         builder.Tangents[0] = new Vector3(1, 0, 0);
         builder.Indices[0] = 0;
         // Generate vertices around circle
-        for (int i = 0; i <= segments; i++)
+        for (int i = 0; i < segments; i++)
         {
             float angle = (float)(i * 2.0 * Math.PI / segments);
             float x = (float)Math.Cos(angle);
             float y = (float)Math.Sin(angle);
-
             int vertIndex = i + 1;
             builder.Vertices[vertIndex] = new Vector3(x, y, 0);
             builder.TexCoords[vertIndex] = new Vector3((x + 1) * 0.5f, (y + 1) * 0.5f, 0);
@@ -189,6 +188,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
             builder.Tangents[vertIndex] = new Vector3(1, 0, 0);
             builder.Indices[vertIndex] = (uint)vertIndex;
         }
+        builder.Indices[segments + 1] = 1;
         Circle = builder.Generate();
     }
 
