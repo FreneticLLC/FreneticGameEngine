@@ -174,7 +174,6 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         builder.Colors[0] = new Vector4(1, 1, 1, 1);
         builder.Tangents[0] = new Vector3(1, 0, 0);
         builder.Indices[0] = 0;
-        // Generate vertices around circle
         for (int i = segments - 1; i >= 0; i--)
         {
             float angle = (float)(i * 2.0 * Math.PI / segments);
