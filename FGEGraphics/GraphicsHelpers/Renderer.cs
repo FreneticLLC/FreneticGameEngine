@@ -209,7 +209,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Textures.White.Bind();
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
-        Matrix4d mat = Matrix4d.Scale(halfsize.ToOpenTK3D())
+        Matrix4d mat = Matrix4d.CreateScale(halfsize.ToOpenTK3D())
             * (rot != null && rot.HasValue ? rot.Value : Matrix4d.Identity)
             * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());
         view.SetMatrix(2, mat); // TODO: Client reference!
@@ -229,7 +229,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180; // TODO: Why are we getting a backwards vector then flipping the yaw? Just get the vector `end - start`? (Is pitch inverted when you do that? If so, why?)
-        Matrix4d mat = Matrix4d.Scale(len, 1, 1)
+        Matrix4d mat = Matrix4d.CreateScale(len, 1, 1)
             * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
             * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
             * Matrix4d.CreateTranslation(start.ToOpenTK3D());
@@ -250,7 +250,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180;
         Matrix4d mat = Matrix4d.CreateRotationY(90 * MathUtilities.PI180)
-            * Matrix4d.Scale(len, width, width)
+            * Matrix4d.CreateScale(len, width, width)
             * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
             * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
              * Matrix4d.CreateTranslation(start.ToOpenTK3D());
@@ -409,7 +409,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
     /// <param name="view">View to render circle in.</param>
     public void RenderCircle(Location center, float radius, View3D view)
     {
-        Matrix4d mat = Matrix4d.Scale(radius, radius, 1.0) * Matrix4d.CreateTranslation(center.ToOpenTK3D());
+        Matrix4d mat = Matrix4d.CreateScale(radius, radius, 1.0) * Matrix4d.CreateTranslation(center.ToOpenTK3D());
         view.SetMatrix(2, mat);
         GL.BindVertexArray(Circle.Internal.VAO);
         GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
@@ -459,7 +459,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location lookdir = (facing - center).Normalize();
         Location right = lookdir.CrossProduct(Location.UnitZ); // TODO: Camera up vector!
         Location updir = right.CrossProduct(lookdir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)scale.X, (float)scale.Y, (float)scale.Z);
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.CreateScale((float)scale.X, (float)scale.Y, (float)scale.Z);
         Matrix4d m2 = new(right.X, updir.X, lookdir.X, center.X,
             right.Y, updir.Y, lookdir.Y, center.Y,
             right.Z, updir.Z, lookdir.Z, center.Z,
@@ -508,7 +508,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location lookDir = (center - facing) / viewLength;
         Location forwardDir = (end - start) / lineLength;
         Location right = forwardDir.CrossProduct(lookDir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.Scale(width, lineLength, 1);
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.CreateScale(width, lineLength, 1);
         Matrix4d m2 = new(
             right.X, forwardDir.X, lookDir.X, center.X,
             right.Y, forwardDir.Y, lookDir.Y, center.Y,

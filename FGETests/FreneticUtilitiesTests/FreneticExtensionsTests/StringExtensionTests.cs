@@ -35,10 +35,12 @@ public class StringExtensionTests : FGETest
     public static void CapitalizationTests()
     {
         ClassicAssert.AreEqual("wow", "WOW".ToLowerFast(), "ToLowerFast 'WOW' isn't right");
+        ClassicAssert.AreEqual("wow".GetHashCode(), "WOW".ToLowerFast().GetHashCode(), "ToLowerFast 'WOW' isn't right hash code");
         ClassicAssert.AreEqual("big long text!", "BIG long TEXT!".ToLowerFast(), "ToLowerFast 'BIG long TEXT!' isn't right");
         Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
         Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");
         ClassicAssert.AreEqual("WOW", "wow".ToUpperFast(), "ToUpperFast 'wow' isn't right");
+        ClassicAssert.AreEqual("WOW".GetHashCode(), "wow".ToUpperFast().GetHashCode(), "ToUpperFast 'wow' isn't right hash code");
         ClassicAssert.AreEqual("BIG LONG TEXT!", "big long text!".ToUpperFast(), "ToUpperFast 'big long text!' isn't right");
         Assert.That("lots of lower characters 123!".IsAllLowerFast(), "IsAllLowerFast isn't right");
         Assert.That(!"a few UPPER characters 123!".IsAllLowerFast(), "!IsAllLowerFast isn't right");

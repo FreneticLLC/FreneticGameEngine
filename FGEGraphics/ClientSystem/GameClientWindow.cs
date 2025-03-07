@@ -299,7 +299,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-        GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+        GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
         GL.Disable(EnableCap.CullFace);
         GraphicsUtil.CheckError("GEB - Initial");
         InstanceInit();
