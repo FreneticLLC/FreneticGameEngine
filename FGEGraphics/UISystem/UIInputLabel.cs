@@ -313,7 +313,7 @@ public class UIInputLabel : UIClickableElement
     public void UpdateText()
     {
         Internal.UpdateTextComponents();
-        Internal.TextChain = UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Position.Width : -1).ToList();
+        Internal.TextChain = [.. UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Position.Width : -1)];
         Internal.CursorOffset = Selected ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }

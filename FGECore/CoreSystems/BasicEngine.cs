@@ -144,9 +144,9 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     public List<T> EntityList = new(8192);
 
     /// <summary>Returns a duplicate of the entity list, for when you expect the master list to change.</summary>
-    public IReadOnlyList<T> EntityListDuplicate()
+    public List<T> EntityListDuplicate()
     {
-        return new List<T>(EntityList);
+        return [.. EntityList];
     }
 
     /// <summary>Adds an entity to the server, quick and deadly. Prefer <see cref="SpawnEntity(Property[])"/> over this.</summary>
