@@ -43,7 +43,7 @@ public class UIScreen : UIElement
 
     /// <summary>Constructs a screen that covers the entire game window.</summary>
     /// <param name="view">The client UI View.</param>
-    public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
+    public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view).Anchor(UIAnchor.TOP_LEFT))
     {
         Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
         Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
