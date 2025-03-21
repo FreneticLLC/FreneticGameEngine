@@ -36,10 +36,10 @@ public class Texture : IEquatable<Texture>
     public Texture RemappedTo;
 
     /// <summary>The internal OpenGL texture ID.</summary>
-    public int InternalTexture = 0;
+    public int InternalTexture = -1;
 
     /// <summary>The original OpenGL texture ID that formed this texture.</summary>
-    public int OriginalInternalID = 0;
+    public int OriginalInternalID = -1;
 
     /// <summary>Whether the texture loaded properly.</summary>
     public bool LoadedProperly = false;
@@ -57,6 +57,9 @@ public class Texture : IEquatable<Texture>
         {
             GL.DeleteTexture(OriginalInternalID);
         }
+        LoadedProperly = false;
+        InternalTexture = -1;
+        OriginalInternalID = -1;
     }
 
     /// <summary>Removes the texture from the system.</summary>
@@ -91,16 +94,22 @@ public class Texture : IEquatable<Texture>
     /// <summary>Checks if the texture is valid, and replaces it if needed.</summary>
     public void CheckValid()
     {
-        if (InternalTexture == -1)
+        if (OriginalInternalID == -1)
         {
-            Texture temp = Engine.GetTexture(Name);
-            OriginalInternalID = temp.OriginalInternalID;
-            InternalTexture = OriginalInternalID;
-            LoadedProperly = false;
-            if (RemappedTo != null)
+            if (RemappedTo is not null)
             {
                 RemappedTo.CheckValid();
                 InternalTexture = RemappedTo.OriginalInternalID;
+            }
+            else
+            {
+                LoadedProperly = false;
+                Texture temp = Engine.GetTexture(Name);
+                InternalTexture = temp.InternalTexture;
+                if (temp.LoadedProperly)
+                {
+                    OriginalInternalID = temp.OriginalInternalID;
+                }
             }
         }
     }

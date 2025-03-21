@@ -363,7 +363,7 @@ public partial class WasApiAudioProvider
         return availableFrames > FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER && padding < FGE3DAudioEngine.InternalData.BUFFERS_AT_ONCE * FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
     }
 
-    /// <summary>Gather data from the internal audio engine and send it forward to OpenAL to play.</summary>
+    /// <summary>Gather data from the internal audio engine and send it forward to WasApi to play.</summary>
     public unsafe void SendNextBuffer(FGE3DAudioEngine engine)
     {
         // 4 = 2 bytes per sample, 2 channels

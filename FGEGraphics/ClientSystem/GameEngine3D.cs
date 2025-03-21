@@ -167,7 +167,7 @@ public class GameEngine3D : GameEngineBase
         GraphicsUtil.CheckError("PostLoad - Pre");
         Logs.ClientInit("GameEngine configuring graphics...");
         GL.Enable(EnableCap.CullFace);
-        GL.CullFace(CullFaceMode.Front);
+        GL.CullFace(TriangleFace.Front);
         Logs.ClientInit("GameEngine loading main 3D view...");
         if (!IsSubEngine)
         {

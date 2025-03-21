@@ -139,7 +139,7 @@ public class PropertyHolder
     {
         if (PropertyInternals.HeldInterfaces.TryGetValue(typeof(T), out List<object> objs))
         {
-            return objs.Cast<T>().ToList();
+            return [.. objs.Cast<T>()];
         }
         return [];
     }
@@ -180,7 +180,7 @@ public class PropertyHolder
     /// <returns>The set of property types.</returns>
     public List<Type> GetAllPropertyTypes()
     {
-        return new List<Type>(PropertyInternals.HeldProperties.Keys);
+        return [.. PropertyInternals.HeldProperties.Keys];
     }
 
     /// <summary>
@@ -190,7 +190,7 @@ public class PropertyHolder
     /// <returns>The set of properties.</returns>
     public List<Property> GetAllProperties()
     {
-        return new List<Property>(PropertyInternals.HeldProperties.Values);
+        return [.. PropertyInternals.HeldProperties.Values];
     }
 
     /// <summary>Returns the number of properties held by this holder.</summary>

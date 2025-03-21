@@ -109,8 +109,6 @@ public class TextureEngine : IDisposable
         foreach (Texture texture in LoadedTextures.Values)
         {
             texture.Destroy();
-            texture.InternalTexture = -1;
-            texture.OriginalInternalID = -1;
         }
         LoadedTextures.Clear();
     }
@@ -155,7 +153,6 @@ public class TextureEngine : IDisposable
         }
         Texture loaded = DynamicLoadTexture(textureName);
         LoadedTextures.Add(textureName, loaded);
-        OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(loaded));
         return loaded;
     }
 
@@ -198,6 +195,7 @@ public class TextureEngine : IDisposable
                 {
                     TextureFromBitMap(texture, bmp);
                     texture.LoadedProperly = true;
+                    OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(texture));
                 }
                 catch (Exception ex)
                 {

@@ -40,6 +40,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GenerateSquareVBO();
         GenerateLineVBO();
         GenerateBoxVBO();
+        GenerateCircleVBO();
     }
 
     /// <summary>A 2D square from (0,0,0) to (1,1,0) with normals all equal to (0,0,1).</summary>
@@ -50,6 +51,9 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
 
     /// <summary>A 3D box from (-1,-1,-1) to (1,1,1), ie size is (2,2,2) but the box is centered at (0,0,0).</summary>
     public Renderable Box;
+
+    /// <summary>A 2D circle.</summary>
+    public Renderable Circle;
 
     /// <summary>Texture engine.</summary>
     public TextureEngine Textures = _textures;
@@ -155,6 +159,38 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Box = builder.Generate();
     }
 
+    /// <summary>Generates a circle.</summary>
+    void GenerateCircleVBO()
+    {
+        const int segments = 32;
+        const int vertexCount = segments + 1;
+        const int indexCount = segments + 2;
+        Renderable.ArrayBuilder builder = new();
+        builder.Prepare2D(vertexCount, indexCount);
+        builder.Tangents = new Vector3[vertexCount];
+        builder.Vertices[0] = new Vector3(0, 0, 0);
+        builder.TexCoords[0] = new Vector3(0.5f, 0.5f, 0);
+        builder.Normals[0] = new Vector3(0, 0, -1);
+        builder.Colors[0] = new Vector4(1, 1, 1, 1);
+        builder.Tangents[0] = new Vector3(1, 0, 0);
+        builder.Indices[0] = 0;
+        for (int i = segments - 1; i >= 0; i--)
+        {
+            float angle = (float)(i * 2.0 * Math.PI / segments);
+            float x = (float)Math.Cos(angle);
+            float y = (float)Math.Sin(angle);
+            int vertIndex = segments - i;
+            builder.Vertices[vertIndex] = new Vector3(x, y, 0);
+            builder.TexCoords[vertIndex] = new Vector3((x + 1) * 0.5f, (y + 1) * 0.5f, 0);
+            builder.Normals[vertIndex] = new Vector3(0, 0, -1);
+            builder.Colors[vertIndex] = new Vector4(1, 1, 1, 1);
+            builder.Tangents[vertIndex] = new Vector3(1, 0, 0);
+            builder.Indices[vertIndex] = (uint)vertIndex;
+        }
+        builder.Indices[segments + 1] = 1;
+        Circle = builder.Generate();
+    }
+
     /// <summary>Renders a line box.</summary>
     /// <param name="min">The minimum coordinate.</param>
     /// <param name="max">The maximmum coordinate.</param>
@@ -173,7 +209,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Textures.White.Bind();
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
-        Matrix4d mat = Matrix4d.Scale(halfsize.ToOpenTK3D())
+        Matrix4d mat = Matrix4d.CreateScale(halfsize.ToOpenTK3D())
             * (rot != null && rot.HasValue ? rot.Value : Matrix4d.Identity)
             * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());
         view.SetMatrix(2, mat); // TODO: Client reference!
@@ -193,7 +229,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         double len = start.Distance(end);
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180; // TODO: Why are we getting a backwards vector then flipping the yaw? Just get the vector `end - start`? (Is pitch inverted when you do that? If so, why?)
-        Matrix4d mat = Matrix4d.Scale(len, 1, 1)
+        Matrix4d mat = Matrix4d.CreateScale(len, 1, 1)
             * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
             * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
             * Matrix4d.CreateTranslation(start.ToOpenTK3D());
@@ -214,7 +250,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location vecang = MathUtilities.VectorToAngles(start - end);
         vecang.Yaw += 180;
         Matrix4d mat = Matrix4d.CreateRotationY(90 * MathUtilities.PI180)
-            * Matrix4d.Scale(len, width, width)
+            * Matrix4d.CreateScale(len, width, width)
             * Matrix4d.CreateRotationY(vecang.Pitch * MathUtilities.PI180)
             * Matrix4d.CreateRotationZ(vecang.Yaw * MathUtilities.PI180)
              * Matrix4d.CreateTranslation(start.ToOpenTK3D());
@@ -365,6 +401,21 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GL.BindVertexArray(0);
     }
 
+    /// <summary>
+    /// Renders a circle based on location (vectors normalized down).
+    /// </summary>
+    /// <param name="center">The Location for the circle to be rendered.</param>
+    /// <param name="radius">Radius of the circle.</param>
+    /// <param name="view">View to render circle in.</param>
+    public void RenderCircle(Location center, float radius, View3D view)
+    {
+        Matrix4d mat = Matrix4d.CreateScale(radius, radius, 1.0) * Matrix4d.CreateTranslation(center.ToOpenTK3D());
+        view.SetMatrix(2, mat);
+        GL.BindVertexArray(Circle.Internal.VAO);
+        GL.DrawElements(PrimitiveType.TriangleFan, 34, DrawElementsType.UnsignedInt, IntPtr.Zero);
+        GL.BindVertexArray(0);
+    }
+
     /// <summary>Renders a 2D rectangle.</summary>
     /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
     /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
@@ -408,7 +459,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location lookdir = (facing - center).Normalize();
         Location right = lookdir.CrossProduct(Location.UnitZ); // TODO: Camera up vector!
         Location updir = right.CrossProduct(lookdir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.Scale((float)scale.X, (float)scale.Y, (float)scale.Z);
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5f, -0.5f, 0f) * Matrix4d.CreateScale((float)scale.X, (float)scale.Y, (float)scale.Z);
         Matrix4d m2 = new(right.X, updir.X, lookdir.X, center.X,
             right.Y, updir.Y, lookdir.Y, center.Y,
             right.Z, updir.Z, lookdir.Z, center.Z,
@@ -457,7 +508,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         Location lookDir = (center - facing) / viewLength;
         Location forwardDir = (end - start) / lineLength;
         Location right = forwardDir.CrossProduct(lookDir);
-        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.Scale(width, lineLength, 1);
+        Matrix4d mat = Matrix4d.CreateTranslation(-0.5, -0.5, 0) * Matrix4d.CreateScale(width, lineLength, 1);
         Matrix4d m2 = new(
             right.X, forwardDir.X, lookDir.X, center.X,
             right.Y, forwardDir.Y, lookDir.Y, center.Y,

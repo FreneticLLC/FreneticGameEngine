@@ -382,21 +382,15 @@ public class SingleAnimationNode
     {
         Matrix4x4 pos = Matrix4x4.CreateTranslation(LerpPos(aTime).ToNumerics());
         Matrix4x4 rot = Matrix4x4.CreateFromQuaternion(LerpRotate(aTime).ToNumerics());
-        pos = Matrix4x4.Transpose(pos);
-        rot = Matrix4x4.Transpose(rot);
-        Matrix4x4 combined;
-        if (adjs != null && adjs.TryGetValue(Name, out Matrix4x4 t))
+        Matrix4x4 combined = rot * pos;
+        if (adjs is not null && adjs.TryGetValue(Name, out Matrix4x4 t))
         {
-            combined = pos * rot * t;
+            // TODO: Why is this transpose needed?
+            combined = Matrix4x4.Transpose(t) * combined;
         }
-        else
+        if (Parent is not null)
         {
-            combined = pos * rot;
-        }
-        if (Parent != null)
-        {
-            combined = Parent.GetBoneTotalMatrix(aTime, adjs) * combined;
-            //combined *= Parent.GetBoneTotalMatrix(aTime);
+            combined *= Parent.GetBoneTotalMatrix(aTime, adjs);
         }
         return combined;
     }

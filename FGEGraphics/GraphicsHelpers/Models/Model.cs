@@ -95,7 +95,7 @@ public class Model(string _name)
         for (int i = 0; i < Meshes.Count; i++)
         {
             // TODO: Is StartsWith needed here?
-            if (Meshes[i].Name.StartsWith(name))
+            if (Meshes[i].NameLower.StartsWith(name))
             {
                 return Meshes[i];
             }
@@ -131,7 +131,7 @@ public class Model(string _name)
     }
 
     /// <summary>Any custom animation adjustments on this model.</summary>
-    public Dictionary<string, Matrix4> CustomAnimationAdjustments = [];
+    public Dictionary<string, System.Numerics.Matrix4x4> CustomAnimationAdjustments = [];
 
     /// <summary>Force bones not to offset.</summary>
     public bool ForceBoneNoOffset = false;
@@ -144,30 +144,29 @@ public class Model(string _name)
         string nodename = pNode.Name;
         Matrix4 nodeTransf = Matrix4.Identity;
         SingleAnimationNode pNodeAnim = FindNodeAnim(nodename, pNode.Mode, out double time);
-        if (pNodeAnim != null)
+        if (pNodeAnim is not null)
         {
             Location vec = pNodeAnim.LerpPos(time);
             FGECore.MathHelpers.Quaternion quat = pNodeAnim.LerpRotate(time);
             OpenTK.Mathematics.Quaternion oquat = new((float)quat.X, (float)quat.Y, (float)quat.Z, (float)quat.W);
             Matrix4.CreateTranslation((float)vec.X, (float)vec.Y, (float)vec.Z, out Matrix4 trans);
-            trans.Transpose();
             Matrix4.CreateFromQuaternion(oquat, out Matrix4 rot);
-            if (CustomAnimationAdjustments.TryGetValue(nodename, out Matrix4 r2))
+            nodeTransf = rot * trans;
+            if (CustomAnimationAdjustments.TryGetValue(nodename, out System.Numerics.Matrix4x4 adjustment))
             {
-                rot *= r2;
+                nodeTransf *= adjustment.Convert();
             }
-            rot.Transpose();
-            nodeTransf = Matrix4.Mult(trans, rot);
         }
         else
         {
-            if (CustomAnimationAdjustments.TryGetValue(nodename, out Matrix4 temp))
+            if (CustomAnimationAdjustments.TryGetValue(nodename, out System.Numerics.Matrix4x4 adjustment))
             {
-                temp.Transpose();
-                nodeTransf = temp;
+                nodeTransf = adjustment.Convert();
             }
         }
-        Matrix4 global = Matrix4.Mult(transf, nodeTransf);
+        // TODO: This transpose is sus.
+        nodeTransf.Transpose();
+        Matrix4 global = transf * nodeTransf;
         for (int i = 0; i < pNode.Bones.Count; i++)
         {
             if (ForceBoneNoOffset)
@@ -176,7 +175,7 @@ public class Model(string _name)
             }
             else
             {
-                Matrix4.Mult(global, pNode.Bones[i].Offset, out pNode.Bones[i].Transform);
+                pNode.Bones[i].Transform = global * pNode.Bones[i].Offset;
             }
         }
         for (int i = 0; i < pNode.Children.Count; i++)
@@ -351,7 +350,7 @@ public class Model(string _name)
             return;
         }
         Skinned = true;
-        if (Engine.Window.Files.TryReadFileText("models/" + Name + ".skin", out string fileText))
+        if (Engine.Window.Files.TryReadFileText($"models/{Name}.skin", out string fileText)) // TODO: `.fmi` files
         {
             string[] data = fileText.SplitFast('\n');
             int c = 0;
@@ -364,11 +363,11 @@ public class Model(string _name)
                     {
                         Texture tex = texs.GetTexture(datums[1]);
                         bool success = false;
-                        string datic = datums[0].BeforeAndAfter(":::", out string typer);
+                        string datic = datums[0].BeforeAndAfter(":::", out string typer).ToLowerFast();
                         typer = typer.ToLowerFast();
                         for (int i = 0; i < Meshes.Count; i++)
                         {
-                            if (Meshes[i].Name == datic)
+                            if (Meshes[i].NameLower == datic)
                             {
                                 if (typer == "specular")
                                 {

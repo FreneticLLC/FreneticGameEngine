@@ -122,7 +122,7 @@ public class UINumberInputLabel : UIInputLabel
             '-' => index == signIndex || (expIndex != -1 && index == expIndex + 1),
             _ => true
         });
-        result = new string(filtered.ToArray());
+        result = new string([.. filtered]);
         if (double.TryParse(result, out double value))
         {
             NumberLabelInternal.Value = value;

@@ -297,7 +297,7 @@ public class ModelEngine
             }
             for (int i = 0; i < mesh.Indices.Length; i++)
             {
-                builder.Indices[i] = (uint)mesh.Indices[i];
+                builder.Indices[i] = mesh.Indices[i];
             }
             int bc = mesh.Bones.Length;
             if (bc > View3DInternalData.MAX_BONES)
