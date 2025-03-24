@@ -116,8 +116,8 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>Fired when the window is closed.</summary>
     public Action OnWindowClosed;
 
-    /// <summary>Whether the program should shut down when the window is closed.</summary>
-    public bool ExitOnClose = true;
+    /// <summary>Whether the program should forcibly shut down when the window is closed.</summary>
+    public bool ExitOnClose = false;
 
     /// <summary>The currently rendering UI for this engine.</summary>
     public ViewUI2D MainUI;
