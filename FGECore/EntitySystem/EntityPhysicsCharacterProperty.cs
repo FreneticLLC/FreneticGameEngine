@@ -18,6 +18,7 @@ using FGECore.MathHelpers;
 using FGECore.PhysicsSystem.BepuCharacters;
 using FGECore.PropertySystem;
 using BepuPhysics;
+using FGECore.PhysicsSystem;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
 
@@ -140,14 +141,8 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         {
             return;
         }
-        if (Physics == null && !Entity.TryGetProperty(out Physics))
-        {
-            Physics = new EntityPhysicsProperty()
-            {
-                Mass = 60,
-            };
-            Entity.AddProperty(Physics);
-        }
+        Physics ??= Entity.GetOrAddProperty<EntityPhysicsProperty>(() => new() { Mass = 60 });
+        Physics.CGroup = CollisionUtil.Character;
         Physics.Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric);
         Physics.RecoveryDamping = 0;
         Physics.OnSpawn();
