@@ -45,12 +45,9 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
     }
 
     /// <summary>Helper class for internal data related to the server instance.</summary>
-    public struct InternalData
+    public struct InternalData()
     {
-        /// <summary>Used to calculate the <see cref="GameInstance.Delta"/> value.</summary>
-        public Stopwatch DeltaCounter;
-
-        /// <summary>Used as part of accurate tick timing.</summary>
+        /// <summary>Used as part of accurate tick timing - how much delta has been built up before running the current tick.</summary>
         public double TotalDelta;
 
         /// <summary>
@@ -58,13 +55,16 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
         /// Inverse of this is present target FPS.
         /// </summary>
         public double TargetDelta;
+
+        /// <summary>The value of <see cref="Stopwatch.GetTimestamp"/> when the current tick started.</summary>
+        public long TickStartTimestamp = Stopwatch.GetTimestamp();
     }
 
     /// <summary>Internal data for this server instance.</summary>
-    public InternalData Internal;
+    public InternalData Internal = new();
 
     /// <summary>Target frames per second.</summary>
-    public double Target_FPS = 30;
+    public double TargetFPS = 30;
 
     /// <summary>The current tick rate of the server.</summary>
     public int TPS = 0;
@@ -81,41 +81,33 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
     /// <summary>
     /// Starts and runs the entire server game instance.
     /// Will take over present thread until completion.
+    /// Will shut down the instance fully at the end.
     /// </summary>
     public void StartAndRun()
     {
-        double TARGETFPS;
-        Stopwatch Counter = new();
-        Internal.DeltaCounter = new Stopwatch();
-        Internal.DeltaCounter.Start();
+        double targetFps, currentDelta;
+        long priorTickStart;
+        int targetTime;
         Internal.TotalDelta = 0;
-        double CurrentDelta;
-        Internal.TargetDelta = 0.0;
-        int targettime;
+        Internal.TargetDelta = 0;
         try
         {
             StackNoteHelper.Push("ServerGameInstance main loop - StartAndRun", this);
             while (true)
             {
-                // Update the tick time usage counter
-                Counter.Reset();
-                Counter.Start();
-                // Update the tick delta counter
-                Internal.DeltaCounter.Stop();
+                priorTickStart = Internal.TickStartTimestamp;
+                Internal.TickStartTimestamp = Stopwatch.GetTimestamp();
                 // Delta time = Elapsed ticks * (ticks/second)
-                CurrentDelta = ((double)Internal.DeltaCounter.ElapsedTicks) / ((double)Stopwatch.Frequency);
-                // Begin the delta counter to find out how much time is /really/ slept+ticked for
-                Internal.DeltaCounter.Reset();
-                Internal.DeltaCounter.Start();
+                currentDelta = (Internal.TickStartTimestamp - priorTickStart) / (double)Stopwatch.Frequency;
                 // How much time should pass between each tick ideally
-                TARGETFPS = Target_FPS;
-                if (TARGETFPS < 1 || TARGETFPS > 600)
+                targetFps = TargetFPS;
+                if (targetFps < 1 || targetFps > 600)
                 {
-                    TARGETFPS = 30;
+                    targetFps = 30;
                 }
-                Internal.TargetDelta = (1.0d / TARGETFPS);
+                Internal.TargetDelta = 1.0 / targetFps;
                 // How much delta has been built up
-                Internal.TotalDelta += CurrentDelta;
+                Internal.TotalDelta += currentDelta;
                 double tdelt = Internal.TargetDelta;
                 while (Internal.TotalDelta > tdelt * 3)
                 {
@@ -125,10 +117,8 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
                 // As long as there's more delta built up than delta wanted, tick
                 while (Internal.TotalDelta > tdelt)
                 {
-                    if (NeedShutdown.IsCancellationRequested)
+                    if (InstanceShutdownToken.IsCancellationRequested)
                     {
-                        Internal.DeltaCounter.Stop();
-                        Counter.Stop();
                         return;
                     }
                     lock (TickLock)
@@ -138,15 +128,17 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
                     }
                     Internal.TotalDelta -= tdelt;
                 }
-                // The tick is done, stop measuring it
-                Counter.Stop();
                 // Only sleep for target milliseconds/tick minus how long the tick took... this is imprecise but that's okay
-                targettime = (int)((1000d / TARGETFPS) - Counter.ElapsedMilliseconds);
+                double elapsedSeconds = (Stopwatch.GetTimestamp() - Internal.TickStartTimestamp) / (double)Stopwatch.Frequency;
+                targetTime = (int)Math.Floor((1000d / targetFps) - (elapsedSeconds * 1000));
                 // Only sleep at all if we're not lagging
-                if (targettime > 0)
+                if (targetTime > 0)
                 {
-                    // Try to sleep for the target time - very imprecise, thus we deal with precision inside the tick code
-                    Thread.Sleep(targettime);
+                    if (targetTime > 5 || !Thread.Yield())
+                    {
+                        // Try to sleep for the target time - very imprecise, thus we deal with precision inside the tick code
+                        Thread.Sleep(targetTime);
+                    }
                 }
             }
         }
@@ -156,7 +148,7 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
         }
         catch (Exception ex)
         {
-            SysConsole.Output($"{InstanceClassification} crash", ex);
+            SysConsole.Output($"{InstanceClassification} [{Name}] crash", ex);
         }
         finally
         {

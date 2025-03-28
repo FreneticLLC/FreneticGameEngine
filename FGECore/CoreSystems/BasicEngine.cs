@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using FGECore.EntitySystem;
 using FGECore.EntitySystem.JointSystems;
 using FGECore.PhysicsSystem;
@@ -54,6 +55,9 @@ public abstract class BasicEngine
 
     /// <summary>Any/all non-physics joints currently registered into this engine.</summary>
     public List<NonPhysicalJointBase> NonPhysicalJoints = new(64);
+
+    /// <summary>A cancel token source that can be used to indicate this engine instance is intended to shutdown. Many internal functions actively disable if this is set.</summary>
+    public CancellationTokenSource EngineShutdownToken = new();
 
     /// <summary>Add and activate a joint into this engine.</summary>
     public void AddJoint(GenericBaseJoint joint)
@@ -111,6 +115,8 @@ public abstract class BasicEngine
     /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
     public virtual void Shutdown()
     {
+        EngineShutdownToken.Cancel();
+        Logs.Debug($"[BasicEngine/Shutdown] [In {OwningInstanceGeneric.Name}] Closing physics simulation...");
         PhysicsWorldGeneric.Shutdown();
     }
 }
@@ -350,6 +356,10 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     /// <summary>The internal engine tick sequence.</summary>
     public void Tick()
     {
+        if (EngineShutdownToken.IsCancellationRequested)
+        {
+            return;
+        }
         try
         {
             StackNoteHelper.Push("BasicEngine - Update Physics", PhysicsWorld);
@@ -396,5 +406,12 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
         {
             StackNoteHelper.Pop();
         }
+    }
+
+    /// <inheritdoc/>
+    public override void Shutdown()
+    {
+        base.Shutdown();
+        OwningInstance.Engines.Remove(this as T2);
     }
 }

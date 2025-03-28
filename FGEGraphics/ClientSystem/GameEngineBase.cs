@@ -138,6 +138,7 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
     public override void Shutdown()
     {
         base.Shutdown();
+        Logs.Debug("[Shutdown] Closing sounds engine...");
         Sounds?.Shutdown();
     }
 

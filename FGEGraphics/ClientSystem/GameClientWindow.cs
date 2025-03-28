@@ -363,9 +363,16 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>Called when the window is closed.</summary>
     public void Window_Closed(CancelEventArgs args)
     {
+        if (!InstanceShutdownToken.IsCancellationRequested)
+        {
+            InstanceShutdown();
+            return;
+        }
         OnWindowClosed?.Invoke();
         if (ExitOnClose)
         {
+            Logs.ClientInfo("Window closed, full exiting now.");
+            SysConsole.ShutDown();
             Environment.Exit(0);
         }
     }
@@ -451,11 +458,33 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <returns>True if VR is enabled, false if not (there was an error, or there is no VR support on the client system).</returns>
     public bool ActivateVR()
     {
-        if (VR != null)
+        if (VR is not null)
         {
             return true;
         }
-        return VRSupport.TryInit(this) != null;
+        VR = VRSupport.TryInit(this);
+        return VR is not null;
+    }
+
+    /// <inheritdoc/>
+    public override void InstanceShutdown()
+    {
+        if (InstanceShutdownToken.IsCancellationRequested)
+        {
+            return;
+        }
+        base.InstanceShutdown();
+        if (VR is not null)
+        {
+            Logs.Debug("[Shutdown] Closing VR...");
+            VR.Stop();
+            VR = null;
+        }
+        try
+        {
+            Window.Close();
+        }
+        catch (Exception) { } // Ignore
     }
 
     /// <summary>Dumb MS logic dispose method.</summary>
