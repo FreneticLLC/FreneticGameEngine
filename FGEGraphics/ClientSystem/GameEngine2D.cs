@@ -291,34 +291,20 @@ public class GameEngine2D : GameEngineBase
     /// <param name="shouldShadow">The method to determine if an object should cast a shadow.</param>
     private void RenderAll(bool lights, Func<ClientEntity, bool> shouldShadow)
     {
-        try
+        using var _push1 = StackNoteHelper.UsePush("GameEngine2D - RenderAll", this);
+        Textures.White.Bind();
+        Renderer2D.SetColor(Vector4.One);
+        RenderAllObjectsPre?.Invoke(lights);
+        // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
+        foreach (ClientEntity ent in Entities.Values
+            .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
+            .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
         {
-            StackNoteHelper.Push("GameEngine2D - RenderAll", this);
-            Textures.White.Bind();
-            Renderer2D.SetColor(Vector4.One);
-            RenderAllObjectsPre?.Invoke(lights);
-            // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
-            foreach (ClientEntity ent in Entities.Values
-                .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
-                .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
-            {
-                try
-                {
-                    StackNoteHelper.Push("GameEngine2D - Render Specific Entity", ent);
-                    ent.Renderer.RenderStandard2D(MainRenderContext);
-                }
-                finally
-                {
-                    StackNoteHelper.Pop();
-                }
-            }
-            RenderAllObjectsPost?.Invoke(lights);
-            GraphicsUtil.CheckError("Render - all Entities rendered");
+            using var _push2 = StackNoteHelper.UsePush("GameEngine2D - Render Specific Entity", ent);
+            ent.Renderer.RenderStandard2D(MainRenderContext);
         }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+        RenderAllObjectsPost?.Invoke(lights);
+        GraphicsUtil.CheckError("Render - all Entities rendered");
     }
 
     /// <summary>Renders the entire GameEngine2D.</summary>

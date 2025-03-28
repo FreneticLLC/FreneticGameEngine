@@ -205,33 +205,19 @@ public class GameEngine3D : GameEngineBase
     /// <param name="view">The view object.</param>
     public void Render3D(View3D view)
     {
-        try
+        using var _push1 = StackNoteHelper.UsePush("GameEngine3D - Render All Entities", this);
+        // TODO: Out View Rendering!
+        GL.ActiveTexture(TextureUnit.Texture1);
+        Textures.NormalDef.Bind();
+        GL.ActiveTexture(TextureUnit.Texture0);
+        foreach (ClientEntity ce in EntityList)
         {
-            StackNoteHelper.Push("GameEngine3D - Render All Entities", this);
-            // TODO: Out View Rendering!
-            GL.ActiveTexture(TextureUnit.Texture1);
-            Textures.NormalDef.Bind();
-            GL.ActiveTexture(TextureUnit.Texture0);
-            foreach (ClientEntity ce in EntityList)
+            // TODO: layering logic of some form instead of this overly basic stuff.
+            if (ShouldRender(ce.Renderer, view.State.RenderingShadows))
             {
-                // TODO: layering logic of some form instead of this overly basic stuff.
-                if (ShouldRender(ce.Renderer, view.State.RenderingShadows))
-                {
-                    try
-                    {
-                        StackNoteHelper.Push("GameEngine3D - Render Specific Entity", ce);
-                        ce.Renderer?.RenderStandard(MainContext);
-                    }
-                    finally
-                    {
-                        StackNoteHelper.Pop();
-                    }
-                }
+                using var _push2 = StackNoteHelper.UsePush("GameEngine3D - Render Specific Entity", ce);
+                ce.Renderer?.RenderStandard(MainContext);
             }
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
         }
     }
 

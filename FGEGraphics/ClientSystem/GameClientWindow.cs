@@ -241,38 +241,31 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <param name="initialFlags">The initial window flag.</param>
     public void Start(WindowBorder initialFlags = WindowBorder.Fixed)
     {
-        try
+        using var _push = StackNoteHelper.UsePush("GameClientWindow - Start, run", this);
+        Logs.ClientInit("GameEngine loading...");
+        Window = new GameWindow(new GameWindowSettings() { UpdateFrequency = MaxFps }, new NativeWindowSettings()
         {
-            StackNoteHelper.Push("GameClientWindow - Start, run", this);
-            Logs.ClientInit("GameEngine loading...");
-            Window = new GameWindow(new GameWindowSettings() { UpdateFrequency = MaxFps }, new NativeWindowSettings()
-            {
-                ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
-                Title = StartingWindowTitle,
-                Flags = ContextFlags.ForwardCompatible,
-                WindowState = WindowState.Normal,
-                API = ContextAPI.OpenGL,
-                APIVersion = new Version(4, 3),
-                Profile = ContextProfile.Core,
-                StartFocused = true,
-                StartVisible = true,
-                WindowBorder = initialFlags
-            });
-            Window.Load += Window_Load;
-            Window.RenderFrame += Window_RenderFrame;
-            Window.MouseMove += Mouse_Move;
-            Window.Closing += Window_Closed;
-            Window.Resize += Window_Resize;
-            Window.FocusedChanged += Window_FocusedChanged;
-            Logs.ClientInit("GameEngine calling SetUp event...");
-            OnWindowSetUp?.Invoke();
-            Logs.ClientInit("GameEngine running...");
-            Window.Run();
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+            ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
+            Title = StartingWindowTitle,
+            Flags = ContextFlags.ForwardCompatible,
+            WindowState = WindowState.Normal,
+            API = ContextAPI.OpenGL,
+            APIVersion = new Version(4, 3),
+            Profile = ContextProfile.Core,
+            StartFocused = true,
+            StartVisible = true,
+            WindowBorder = initialFlags
+        });
+        Window.Load += Window_Load;
+        Window.RenderFrame += Window_RenderFrame;
+        Window.MouseMove += Mouse_Move;
+        Window.Closing += Window_Closed;
+        Window.Resize += Window_Resize;
+        Window.FocusedChanged += Window_FocusedChanged;
+        Logs.ClientInit("GameEngine calling SetUp event...");
+        OnWindowSetUp?.Invoke();
+        Logs.ClientInit("GameEngine running...");
+        Window.Run();
     }
 
     /// <summary>Fired when the window is resized.</summary>
@@ -380,78 +373,71 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>Renders a single frame of the game, and also ticks.</summary>
     public void Window_RenderFrame(FrameEventArgs e)
     {
-        try
+        using var _push = StackNoteHelper.UsePush("GameClientWindow - Render and tick frame", this);
+        // First step: check delta
+        if (e.Time <= 0.0)
         {
-            StackNoteHelper.Push("GameClientWindow - Render and tick frame", this);
-            // First step: check delta
-            if (e.Time <= 0.0)
-            {
-                return;
-            }
-            // Mouse handling
-            PreviousMouse = CurrentMouse;
-            CurrentMouse = Window.MouseState;
-            // Standard pre-tick
-            PreTick(e.Time);
-            ErrorCode ec = GL.GetError();
-            while (ec != ErrorCode.NoError)
-            {
-                Logs.Warning($"Uncaught GL Error: {ec}");
-                ec = GL.GetError();
-            }
-            // Second step: clear the screen
-            GL.ClearBuffer(ClearBuffer.Color, 0, Internal.ScreenClearColor);
-            GL.ClearBuffer(ClearBuffer.Depth, 0, Internal.DepthClear);
+            return;
+        }
+        // Mouse handling
+        PreviousMouse = CurrentMouse;
+        CurrentMouse = Window.MouseState;
+        // Standard pre-tick
+        PreTick(e.Time);
+        ErrorCode ec = GL.GetError();
+        while (ec != ErrorCode.NoError)
+        {
+            Logs.Warning($"Uncaught GL Error: {ec}");
+            ec = GL.GetError();
+        }
+        // Second step: clear the screen
+        GL.ClearBuffer(ClearBuffer.Color, 0, Internal.ScreenClearColor);
+        GL.ClearBuffer(ClearBuffer.Depth, 0, Internal.DepthClear);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        GL.DrawBuffer(DrawBufferMode.Back);
+        GraphicsUtil.CheckError("GameClient - Pre");
+        // Tick helpers
+        Models.Update(GlobalTickTime);
+        GraphicsUtil.CheckError("GameClient - PostModelUpdate");
+        // Third step: general game rendering
+        CurrentEngine.RenderSingleFrame();
+        GraphicsUtil.CheckError("GameClient - PostMainEngine");
+        if (VR != null) // VR Push-To-Screen
+        {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.DrawBuffer(DrawBufferMode.Back);
-            GraphicsUtil.CheckError("GameClient - Pre");
-            // Tick helpers
-            Models.Update(GlobalTickTime);
-            GraphicsUtil.CheckError("GameClient - PostModelUpdate");
-            // Third step: general game rendering
-            CurrentEngine.RenderSingleFrame();
-            GraphicsUtil.CheckError("GameClient - PostMainEngine");
-            if (VR != null) // VR Push-To-Screen
-            {
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-                GL.DrawBuffer(DrawBufferMode.Back);
-                Shaders.ColorMultShader.Bind();
-                Rendering3D.SetColor(Vector4.One, Engine3D.MainView);
-                GL.Disable(EnableCap.DepthTest);
-                GL.Disable(EnableCap.CullFace);
-                GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
-                GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
-                GL.BindTexture(TextureTarget.Texture2D, Engine3D.MainView.Internal.CurrentFBOTexture);
-                Rendering3D.RenderRectangle(-1, -1, 1, 1);
-                GL.Enable(EnableCap.DepthTest);
-                GL.Enable(EnableCap.CullFace);
-                GraphicsUtil.CheckError("GameClient - PostVRPush");
-            }
-            // Add the UI Layer too
-            MainUI.Draw();
-            GraphicsUtil.CheckError("GameClient - PostUI");
-            // Fourth step: clean up!
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.BindVertexArray(0);
-            GL.UseProgram(0);
-            ShaderEngine.BoundNow = null;
-            // Semi-final step: Tick logic!
-            GraphicsUtil.CheckError("GameClient - PreTick");
-            // Main instance tick.
-            Tick();
-            // Primary UI tick
-            MainUI.Tick();
-            Keyboard.ResetState();
-            GraphicsUtil.CheckError("GameClient - PostTick");
-            // Final non-VR step: Swap the render buffer onto the screen!
-            Window.SwapBuffers();
-            VR?.Submit(); // VR Push-To-HMD
-            GraphicsUtil.CheckError("GameClient - Post");
+            Shaders.ColorMultShader.Bind();
+            Rendering3D.SetColor(Vector4.One, Engine3D.MainView);
+            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.CullFace);
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
+            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+            GL.BindTexture(TextureTarget.Texture2D, Engine3D.MainView.Internal.CurrentFBOTexture);
+            Rendering3D.RenderRectangle(-1, -1, 1, 1);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.CullFace);
+            GraphicsUtil.CheckError("GameClient - PostVRPush");
         }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+        // Add the UI Layer too
+        MainUI.Draw();
+        GraphicsUtil.CheckError("GameClient - PostUI");
+        // Fourth step: clean up!
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GL.BindVertexArray(0);
+        GL.UseProgram(0);
+        ShaderEngine.BoundNow = null;
+        // Semi-final step: Tick logic!
+        GraphicsUtil.CheckError("GameClient - PreTick");
+        // Main instance tick.
+        Tick();
+        // Primary UI tick
+        MainUI.Tick();
+        Keyboard.ResetState();
+        GraphicsUtil.CheckError("GameClient - PostTick");
+        // Final non-VR step: Swap the render buffer onto the screen!
+        Window.SwapBuffers();
+        VR?.Submit(); // VR Push-To-HMD
+        GraphicsUtil.CheckError("GameClient - Post");
     }
 
     /// <summary>Converts the window into VR mode, if possible.</summary>

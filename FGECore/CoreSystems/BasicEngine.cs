@@ -274,44 +274,30 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
     /// <param name="props">Any properties to apply.</param>
     public T SpawnEntity(Action<T> configure, params Property[] props)
     {
-        try
+        using var _push = StackNoteHelper.UsePush("BasicEngine - Spawn Entity", this);
+        T ce = CreateEntity();
+        ce.EID = CurrentEntityID++;
+        using var _push2 = StackNoteHelper.UsePush("BasicEngine - Configure Entity", ce);
+        configure?.Invoke(ce);
+        for (int i = 0; i < props.Length; i++)
         {
-            StackNoteHelper.Push("BasicEngine - Spawn Entity", this);
-            T ce = CreateEntity();
+            ce.AddProperty(props[i]);
+        }
+        while (!AddEntity(ce))
+        {
+            Logs.Warning($"Entity with newly generated EID {ce.EID} failed to add - EID tracker may be corrupt, or save data may have been mixed. Re-attempting...");
             ce.EID = CurrentEntityID++;
-            try
-            {
-                StackNoteHelper.Push("BasicEngine - Configure Entity", ce);
-                configure?.Invoke(ce);
-                for (int i = 0; i < props.Length; i++)
-                {
-                    ce.AddProperty(props[i]);
-                }
-                while (!AddEntity(ce))
-                {
-                    Logs.Warning($"Entity with newly generated EID {ce.EID} failed to add - EID tracker may be corrupt, or save data may have been mixed. Re-attempting...");
-                    ce.EID = CurrentEntityID++;
-                }
-                ce.IsSpawned = true;
-                foreach (Property prop in ce.GetAllProperties())
-                {
-                    if (prop is BasicEntityProperty bep)
-                    {
-                        bep.OnSpawn();
-                    }
-                }
-                ce.OnSpawnEvent?.Fire(new EntitySpawnEventArgs());
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
-            return ce;
         }
-        finally
+        ce.IsSpawned = true;
+        foreach (Property prop in ce.GetAllProperties())
         {
-            StackNoteHelper.Pop();
+            if (prop is BasicEntityProperty bep)
+            {
+                bep.OnSpawn();
+            }
         }
+        ce.OnSpawnEvent?.Fire(new EntitySpawnEventArgs());
+        return ce;
     }
 
     /// <summary>Spawns an entity into the world.</summary>
@@ -329,28 +315,21 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
             Logs.Warning("Despawing non-spawned entity.");
             return;
         }
-        try
+        using var _push = StackNoteHelper.UsePush("BasicEngine - Despawn Entity", ent);
+        foreach (GenericBaseJoint joint in new List<GenericBaseJoint>(ent.Joints))
         {
-            StackNoteHelper.Push("BasicEngine - Despawn Entity", ent);
-            foreach (GenericBaseJoint joint in new List<GenericBaseJoint>(ent.Joints))
-            {
-                RemoveJoint(joint);
-            }
-            foreach (Property prop in ent.EnumerateAllProperties())
-            {
-                if (prop is BasicEntityProperty bep)
-                {
-                    bep.OnDespawn();
-                }
-            }
-            ent.OnDespawnEvent?.Fire(new EntityDespawnEventArgs());
-            RemoveEntity(ent);
-            ent.IsSpawned = false;
+            RemoveJoint(joint);
         }
-        finally
+        foreach (Property prop in ent.EnumerateAllProperties())
         {
-            StackNoteHelper.Pop();
+            if (prop is BasicEntityProperty bep)
+            {
+                bep.OnDespawn();
+            }
         }
+        ent.OnDespawnEvent?.Fire(new EntityDespawnEventArgs());
+        RemoveEntity(ent);
+        ent.IsSpawned = false;
     }
 
     /// <summary>The internal engine tick sequence.</summary>
@@ -390,15 +369,10 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
             {
                 if (ent.OnTick is not null)
                 {
-                    try // TODO: This try/finally is a bit heavy to be running on *every* entity, can extra outside the loop possibly?
-                    {
-                        StackNoteHelper.Push("BasicEngine - Tick specific entity", ent);
-                        ent.OnTick();
-                    }
-                    finally
-                    {
-                        StackNoteHelper.Pop();
-                    }
+                    // TODO: This using push is a bit heavy to be running on *every* entity, can extra outside the loop possibly?
+                    // (C# does slightly dirty things internally there - try/finally block)
+                    using var _push = StackNoteHelper.UsePush("BasicEngine - Tick specific entity", ent);
+                    ent.OnTick();
                 }
             }
         }

@@ -174,15 +174,8 @@ public abstract class GameInstance
     /// <summary>Ticks the instance's scheduler.</summary>
     public void TickScheduler()
     {
-        try
-        {
-            StackNoteHelper.Push("GameInstance - Tick Scheduler", Schedule);
-            Schedule.RunAllSyncTasks(Delta);
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+        using var _push = StackNoteHelper.UsePush("GameInstance - Tick Scheduler", Schedule);
+        Schedule.RunAllSyncTasks(Delta);
     }
 }
 
@@ -207,24 +200,17 @@ public abstract class GameInstance<T, T2> : GameInstance where T : BasicEntity<T
     /// </summary>
     public void Tick()
     {
-        try
+        if (InstanceShutdownToken.IsCancellationRequested)
         {
-            if (InstanceShutdownToken.IsCancellationRequested)
-            {
-                return;
-            }
-            StackNoteHelper.Push("GameInstance tick sequence - Tick", this);
-            Watchdog?.IsAlive();
-            foreach (T2 engine in Engines)
-            {
-                engine.Delta = Delta;
-                engine.Tick();
-            }
-            OnTick?.Invoke();
+            return;
         }
-        finally
+        using var _push = StackNoteHelper.UsePush("GameInstance tick sequence - Tick", this);
+        Watchdog?.IsAlive();
+        foreach (T2 engine in Engines)
         {
-            StackNoteHelper.Pop();
+            engine.Delta = Delta;
+            engine.Tick();
         }
+        OnTick?.Invoke();
     }
 }

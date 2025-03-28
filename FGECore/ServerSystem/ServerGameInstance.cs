@@ -28,19 +28,12 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
     {
         if (shouldDefaultEngine)
         {
-            try
+            using var _push = StackNoteHelper.UsePush("ServerGameInstance construction, preparation of default engine", this);
+            Engines.Add(new ServerEngine()
             {
-                StackNoteHelper.Push("ServerGameInstance construction, preparation of default engine", this);
-                Engines.Add(new ServerEngine()
-                {
-                    OwningInstance = this
-                });
-                DefaultEngine.LoadBasic();
-            }
-            finally
-            {
-                StackNoteHelper.Pop();
-            }
+                OwningInstance = this
+            });
+            DefaultEngine.LoadBasic();
         }
     }
 
@@ -90,9 +83,9 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
         int targetTime;
         Internal.TotalDelta = 0;
         Internal.TargetDelta = 0;
+        using var _push = StackNoteHelper.UsePush("ServerGameInstance main loop - StartAndRun", this);
         try
         {
-            StackNoteHelper.Push("ServerGameInstance main loop - StartAndRun", this);
             while (true)
             {
                 priorTickStart = Internal.TickStartTimestamp;
@@ -152,7 +145,6 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
         }
         finally
         {
-            StackNoteHelper.Pop();
             InstanceShutdown();
         }
     }

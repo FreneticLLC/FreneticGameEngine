@@ -39,7 +39,7 @@ public static class StackNoteHelper
     /// <summary>Pushes a new entry to the current note stack.</summary>
     /// <param name="note">The note.</param>
     /// <param name="relatedObj">A related object, if any.</param>
-    public static void Push(string note, object relatedObj)
+    public static void Push(string note, object relatedObj = null)
     {
         //OutputType.DEBUG.Output($"Thread {Thread.CurrentThread.Name ?? Environment.CurrentManagedThreadId.ToString()} pushing note {note} with related object {relatedObj}.");
         Notes.Push(note, relatedObj);
@@ -49,5 +49,29 @@ public static class StackNoteHelper
     public static void Pop()
     {
         Notes.Pop();
+    }
+
+    /// <summary>Pushes a new entry to the current note stack with a 'using' pattern.</summary>
+    /// <param name="note">The note.</param>
+    /// <param name="relatedObj">A related object, if any.</param>
+    public static NotePush UsePush(string note, object relatedObj = null)
+    {
+        return new NotePush(note, relatedObj);
+    }
+
+    /// <summary>Helper struct for pushing a note and automatically popping it when disposed.</summary>
+    public struct NotePush : IDisposable
+    {
+        /// <summary>Constructs a new note push.</summary>
+        public NotePush(string note, object relatedObj)
+        {
+            Push(note, relatedObj);
+        }
+
+        /// <summary>Disposes the note push.</summary>
+        public readonly void Dispose()
+        {
+            Pop();
+        }
     }
 }
