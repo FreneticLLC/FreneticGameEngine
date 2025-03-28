@@ -26,7 +26,6 @@
     <Reference Include="BepuUtilities">
       <HintPath>..\lib\BepuUtilities.dll</HintPath>
     </Reference>
-    <Reference Include="System.IO.Compression" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FGE_Icon.ico" />
