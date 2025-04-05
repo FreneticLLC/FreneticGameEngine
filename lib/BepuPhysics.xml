@@ -952,7 +952,7 @@
         </member>
         <member name="M:BepuPhysics.BodyReference.ApplyImpulse(System.Numerics.Vector3,System.Numerics.Vector3)">
             <summary>
-            Applies an impulse to a body at the given world space position. Does not modify activity states.
+            Applies an impulse to a body at the given world space offset. Does not modify activity states.
             </summary>
             <param name="impulse">Impulse to apply to the body.</param>
             <param name="impulseOffset">World space offset to apply the impulse at.</param>
@@ -965,9 +965,9 @@
         </member>
         <member name="M:BepuPhysics.BodyReference.GetVelocityForOffset(System.Numerics.Vector3,System.Numerics.Vector3@)">
             <summary>
-            Computes the velocity of an offset point attached to the body.
+            Computes the velocity of a world space offset point attached to the body.
             </summary>
-            <param name="offset">Offset from the body's center to </param>
+            <param name="offset">World space offset from the body's center to the point to measure.</param>
             <param name="velocity">Effective velocity of the point if it were attached to the body.</param>
         </member>
         <member name="M:BepuPhysics.BodyReference.ApplyAngularImpulse(System.Numerics.Vector3)">
@@ -1638,12 +1638,18 @@
             Index of the shape within whatever shape collection holds the compound's child shape data.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Collidables.CompoundChild.AsPose(BepuPhysics.Collidables.CompoundChild@)">
+        <member name="M:BepuPhysics.Collidables.CompoundChild.#ctor(BepuPhysics.RigidPose@,BepuPhysics.Collidables.TypedIndex)">
             <summary>
-            Reintreprets the 32 bytes of a compound child as a pose.
+            Creates a compound child.
             </summary>
-            <param name="child">Child to reinterpret.</param>
-            <returns>Reference to the child as a pose.</returns>
+            <param name="pose">Pose of the compound child in the local space of the parent shape.</param>
+            <param name="shapeIndex">Index of the shape used by the child.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundChild.AsPose">
+            <summary>
+            Returns a reference to the memory of the <see cref="T:BepuPhysics.Collidables.CompoundChild"/> as a <see cref="T:BepuPhysics.RigidPose"/>.
+            </summary>
+            <returns>Reference to this compound child as a pose.</returns>
         </member>
         <member name="T:BepuPhysics.Collidables.Compound">
             <summary>
@@ -1745,6 +1751,14 @@
             <param name="localPose">Pose of the shape in the compound's local space.</param>
             <param name="weight">Weight of the shape. If the compound is interpreted as a dynamic, this will be used as the mass. Otherwise, it is used for recentering.</param>
             <param name="localInverseInertia">Inverse inertia tensor of the shape being added in its local space. This is assumed to already be scaled as desired by the weight.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.CompoundBuilder.Add(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,BepuPhysics.BodyInertia@)">
+            <summary>
+            Adds a new shape to the accumulator.
+            </summary>
+            <param name="shape">Index of the shape to add.</param>
+            <param name="localPose">Pose of the shape in the compound's local space.</param>
+            <param name="childInertia">Inverse inertia tensor and inverse mass of the shape being added in the child's local space. The inverse mass is used as the inverse weight for building the compound.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.CompoundBuilder.AddForKinematic(BepuPhysics.Collidables.TypedIndex,BepuPhysics.RigidPose@,System.Single)">
             <summary>
@@ -2024,16 +2038,15 @@
             Helper methods to create and process convex hulls from point clouds.
             </summary>
         </member>
-        <member name="T:BepuPhysics.Collidables.ConvexHullHelper.EdgeFaceIndices">
+        <member name="M:BepuPhysics.Collidables.ConvexHullHelper.FindNextIndexForFaceHull(System.Numerics.Vector2,System.Numerics.Vector2,System.Single,BepuUtilities.Collections.QuickList{System.Numerics.Vector2}@)">
             <summary>
-            Tracks the faces associated with a detected surface edge. 
-            During hull calculation, surface edges that have only one face associated with them should have an outstanding entry in the edges to visit set.
-            Surface edges can never validly have more than two faces associated with them. Two means that an edge is 'complete', or should be.
-            Detecting a third edge implies an error condition. By tracking *which* faces were associated with an edge, we can attempt to fix the error.
-            This type of error tends to occur when there is a numerical disagreement about what vertices are coplanar with a face.
-            One iteration could find what it thinks is a complete face, and a later iteration ends up finding more vertices *including* the ones already contained in the previous face.
-            That's a recipe for excessive edge faces, but it's also a direct indicator that we should merge the involved faces for being close enough to coplanar that the error happened in the first place.
+            Finds the next index in the 2D hull of a face on the 3D hull using gift wrapping.
             </summary>
+            <param name="start">Start location of the next edge to identify.</param>
+            <param name="previousEdgeDirection">2D direction of the previously identified edge.</param>
+            <param name="planeEpsilon">Epsilon within which to consider points to be coplanar (or here, in the 2D case, collinear).</param>
+            <param name="facePoints">Points composing the hull face projected onto the face's 2D basis.</param>
+            <returns>Index of the point in facePoints which is the end point for the next edge segment as identified by gift wrapping.</returns>
         </member>
         <member name="M:BepuPhysics.Collidables.ConvexHullHelper.ComputeHull(System.Span{System.Numerics.Vector3},BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.HullData@)">
             <summary>
@@ -5764,6 +5777,15 @@
             <param name="dynamicBodyHandles">Set of body handles in the constraint referring to dynamic bodies.</param>
             <param name="encodedBodyIndices">Set of encoded body indices to use in the new constraint allocation.</param>
         </member>
+        <member name="M:BepuPhysics.Constraints.TypeProcessor`3.DecodeBodyIndices(System.Numerics.Vector{System.Int32},System.Numerics.Vector{System.Int32})">
+            <summary>
+            Takes body indices that could include metadata like kinematic flags in their upper bits and returns indices
+            with those flags stripped and with any lanes masked out by the integrationMask set to -1.
+            </summary>
+            <param name="encodedBodyIndices">Encoded body indices to decode.</param>
+            <param name="integrationMask">Mask to apply to the body indices.</param>
+            <returns>Body indices suitable for sending to to the IntegrateVelocity callback.</returns>
+        </member>
         <member name="T:BepuPhysics.Constraints.VolumeConstraint">
             <summary>
             Constrains the volume of a tetrahedron connecting the centers of four bodies to match a goal volume. 
@@ -6222,6 +6244,65 @@
             Orchestrates the bookkeeping and execution of a full dynamic simulation.
             </summary>
         </member>
+        <member name="P:BepuPhysics.Simulation.Awakener">
+            <summary>
+            Gets the system responsible for awakening bodies within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.Sleeper">
+            <summary>
+            Gets the system responsible for putting bodies to sleep within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.Bodies">
+            <summary>
+            Gets the collection of bodies in the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.Statics">
+            <summary>
+            Gets the collection of statics within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.Shapes">
+            <summary>
+            Gets or sets the collection of shapes used by the simulation.
+            </summary>
+            <remarks>
+            While <see cref="T:BepuPhysics.Collidables.Shapes"/> instances can be shared between multiple <see cref="T:BepuPhysics.Simulation"/> instances, there are no guarantees of thread safety.
+            Further, setting the <see cref="P:BepuPhysics.Simulation.Shapes"/> property to another collection while there are any outstanding references in the simulation to shapes within the old collection will result in fatal errors if the simulation continues to be used.
+            </remarks>
+        </member>
+        <member name="P:BepuPhysics.Simulation.SolverBatchCompressor">
+            <summary>
+            Gets the batch compressor used to compact constraints into fewer solver batches.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.Solver">
+            <summary>
+            Gets the solver used to solved constraints within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.PoseIntegrator">
+            <summary>
+            Gets the integrator used to update velocities and poses within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.BroadPhase">
+            <summary>
+            Gets the broad phase used by the simulation. Supports accelerated ray and volume queries.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.BroadPhaseOverlapFinder">
+            <summary>
+            Gets the system used to find overlapping pairs within the simulation.
+            </summary>
+        </member>
+        <member name="P:BepuPhysics.Simulation.NarrowPhase">
+            <summary>
+            Gets the system used to identify contacts in colliding pairs of shapes and to update contact constraint data.
+            </summary>
+        </member>
         <member name="P:BepuPhysics.Simulation.Profiler">
             <summary>
             Gets the simulation profiler. Note that the SimulationProfiler implementation only exists when the library is compiled with the PROFILE compilation symbol; if not defined, returned times are undefined.
@@ -6243,7 +6324,7 @@
             Note that this can only affect determinism locally- different processor architectures may implement instructions differently.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Simulation.Create``2(BepuUtilities.Memory.BufferPool,``0,``1,BepuPhysics.SolveDescription,BepuPhysics.ITimestepper,System.Nullable{BepuPhysics.SimulationAllocationSizes})">
+        <member name="M:BepuPhysics.Simulation.Create``2(BepuUtilities.Memory.BufferPool,``0,``1,BepuPhysics.SolveDescription,BepuPhysics.ITimestepper,System.Nullable{BepuPhysics.SimulationAllocationSizes},BepuPhysics.Collidables.Shapes)">
             <summary>
             Constructs a simulation supporting dynamic movement and constraints with the specified narrow phase callbacks.
             </summary>
@@ -6253,6 +6334,7 @@
             <param name="timestepper">Timestepper that defines how the simulation state should be updated. If null, <see cref="T:BepuPhysics.DefaultTimestepper"/> is used.</param>
             <param name="solveDescription">Describes how the solver should execute, including the number of substeps and the number of velocity iterations per substep.</param>
             <param name="initialAllocationSizes">Allocation sizes to initialize the simulation with. If left null, default values are chosen.</param>
+            <param name="shapes">Collection of shapes to use in the simulation, if any. If null, a new <see cref="T:BepuPhysics.Collidables.Shapes"/> collection will be created for this simulation.</param>
             <returns>New simulation.</returns>
         </member>
         <member name="M:BepuPhysics.Simulation.Sleep(BepuUtilities.IThreadDispatcher)">
@@ -6405,6 +6487,9 @@
             <summary>
             Minimum number of shapes to allocate space for in each shape type batch.
             </summary>
+            <remarks>
+            Unused if a <see cref="T:BepuPhysics.Collidables.Shapes"/> instance was directly provided to the <see cref="T:BepuPhysics.Simulation"/> constructor.
+            </remarks>
         </member>
         <member name="F:BepuPhysics.SimulationAllocationSizes.Constraints">
             <summary>
@@ -6432,7 +6517,7 @@
             <param name="bodies">The number of bodies to allocate space for.</param>
             <param name="statics">The number of statics to allocate space for.</param>
             <param name="islands">The number of inactive islands to allocate space for.</param>
-            <param name="shapesPerType">Minimum number of shapes to allocate space for in each shape type batch.</param>
+            <param name="shapesPerType">Minimum number of shapes to allocate space for in each shape type batch. Unused if a <see cref="T:BepuPhysics.Collidables.Shapes"/> instance was directly provided to the <see cref="T:BepuPhysics.Simulation"/> constructor.</param>
             <param name="constraints">The number of constraints to allocate bookkeeping space for. This does not affect actual type batch allocation sizes, only the solver-level constraint handle storage.</param>
             <param name="constraintsPerTypeBatch">The minimum number of constraints to allocate space for in each individual type batch.
             New type batches will be given enough memory for this number of constraints, and any compaction will not reduce the allocations below it.
@@ -8126,6 +8211,20 @@
             <param name="leafIndex">Index of the leaf to remove.</param>
             <returns>Former index of the leaf that was moved into the removed leaf's slot, if any.
             If leafIndex pointed at the last slot in the list, then this returns -1 since no leaf was moved.</returns>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetNodeChildForLeaf(BepuPhysics.Trees.Leaf)">
+            <summary>
+            Gets a reference to the node child representing the leaf within the tree.
+            </summary>
+            <param name="leaf">Leaf to look up in the tree.</param>
+            <returns>A reference to the node child within the tree.</returns>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetNodeChildForLeaf(System.Int32)">
+            <summary>
+            Gets a reference to the node child representing the leaf within the tree.
+            </summary>
+            <param name="leafIndex">Index of the leaf to look up in the tree.</param>
+            <returns>A reference to the node child within the tree.</returns>
         </member>
         <member name="M:BepuPhysics.Trees.Tree.GetSelfOverlaps2``1(``0@)">
             <summary>
