@@ -41,7 +41,7 @@ public class EntityCapsuleShape : EntityShapeHelper
     public override EntityCapsuleShape Register()
     {
         EntityCapsuleShape dup = MemberwiseClone() as EntityCapsuleShape;
-        dup.CapsuleIndex = Space.Internal.CoreSimulation.Shapes.Add((Capsule) BepuShape);
+        dup.CapsuleIndex = Space.Internal.CoreSimulation.Shapes.Add((Capsule)BepuShape);
         Space.Internal.Pool.Take(1, out dup.CompoundBuffer);
         dup.CompoundBuffer[0].LocalPosition = Vector3.Zero;
         dup.CompoundBuffer[0].LocalOrientation = Quaternion_Y2Z;

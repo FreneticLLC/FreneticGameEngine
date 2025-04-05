@@ -21,6 +21,7 @@ using BepuPhysics;
 using FGECore.PhysicsSystem;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
+using BepuPhysics.Collidables;
 
 namespace FGECore.EntitySystem;
 
@@ -160,6 +161,9 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         Entity.OnTick += Tick;
         IsSpawned = true;
     }
+
+    /// <summary>Gets the Bepu shape for this character (a compound shape of a single capsule), or null if not currently registered to a space.</summary>
+    public Compound? GetBepuShape => Physics?.Shape is null ? null : (Compound)Physics.Shape.BepuShape;
 
     /// <summary>Whether this character is currently spawned.</summary>
     public bool IsSpawned = false;
