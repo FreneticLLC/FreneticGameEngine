@@ -16,6 +16,7 @@ using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
+using BepuUtilities.Memory;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -63,4 +64,15 @@ public abstract class EntityShapeHelper(PhysicsSpace _space)
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>Call <see cref="Simulation.Sweep{TShape, TSweepHitHandler}(in TShape, in RigidPose, in BodyVelocity, float, BufferPool, ref TSweepHitHandler)"/> for this shape.</summary>
+    /// <typeparam name="TSweepHitHandler">Type of the callbacks executed when a sweep impacts an object in the scene.</typeparam>
+    /// <param name="simulation">The backing simulation.</param>
+    /// <param name="pos">Starting position of the sweep.</param>
+    /// <param name="velocity">Velocity of the swept shape.</param>
+    /// <param name="maximumT">Maximum length of the sweep in units of time used to integrate the velocity.</param>
+    /// <param name="pool">Pool to allocate any temporary resources in during execution.</param>
+    /// <param name="hitHandler">Callbacks executed when a sweep impacts an object in the scene.</param>
+    /// <remarks>Simulation objects are treated as stationary during the sweep.</remarks>
+    public abstract void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler) where TSweepHitHandler : ISweepHitHandler;
 }

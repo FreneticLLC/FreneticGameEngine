@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics.Collidables;
+using BepuPhysics;
+using BepuUtilities.Memory;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -46,5 +48,12 @@ public class EntityConvexHullShape : EntityShapeHelper
     {
         ConvexHull hull = (ConvexHull)BepuShape;
         return $"{nameof(EntityConvexHullShape)}({hull.Points.Length} points)";
+    }
+
+    /// <inheritdoc/>
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler)
+    {
+        RigidPose pose = new(pos, Quaternion.Identity);
+        simulation.Sweep((ConvexHull)BepuShape, pose, velocity, maximumT, pool, ref hitHandler);
     }
 }

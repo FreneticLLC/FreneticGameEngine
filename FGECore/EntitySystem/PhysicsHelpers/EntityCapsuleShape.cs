@@ -17,6 +17,7 @@ using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
+using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -72,5 +73,12 @@ public class EntityCapsuleShape : EntityShapeHelper
     {
         Capsule capsule = (Capsule)BepuShape;
         return $"{nameof(EntityCapsuleShape)}(radius={capsule.Radius}, length={capsule.Length})";
+    }
+
+    /// <inheritdoc/>
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler)
+    {
+        RigidPose pose = new(pos, Quaternion_Y2Z);
+        simulation.Sweep((Capsule)BepuShape, pose, velocity, maximumT, pool, ref hitHandler);
     }
 }

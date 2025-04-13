@@ -80,7 +80,7 @@ public class InstanceWatchdog
     {
         lock (Internal.Lock)
         {
-            if (WatchedThread != null)
+            if (WatchedThread is not null)
             {
                 throw new InvalidOperationException("Watchdog already started.");
             }

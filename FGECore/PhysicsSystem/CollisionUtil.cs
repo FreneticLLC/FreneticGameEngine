@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using FGECore.EntitySystem;
 using FGECore.MathHelpers;
 using BepuPhysics.Collidables;
+using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.PhysicsSystem;
 
@@ -159,7 +160,7 @@ public class CollisionUtil(PhysicsSpace world)
     /// <returns>Results.</returns>
     public CollisionResult CuboidLineTrace(in Location halfsize, in Location start, in Location end, Func<EntityPhysicsProperty, bool> filter = null)
     {
-        Box shape = new((float)halfsize.X * 2f, (float)halfsize.Y * 2f, (float)halfsize.Z * 2f);
+        EntityBoxShape shape = new(halfsize * 2, World);
         return CuboidLineTrace(shape, start, end, filter);
     }
 
@@ -169,7 +170,7 @@ public class CollisionUtil(PhysicsSpace world)
     /// <param name="end">The end of the line.</param>
     /// <param name="filter">The collision filter, input a BEPU BroadPhaseEntry and output whether collision should be allowed.</param>
     /// <returns>The collision details.</returns>
-    public CollisionResult CuboidLineTrace<TShape>(TShape shape, in Location start, in Location end, Func<EntityPhysicsProperty, bool> filter = null) where TShape : unmanaged, IConvexShape
+    public CollisionResult CuboidLineTrace(EntityShapeHelper shape, in Location start, in Location end, Func<EntityPhysicsProperty, bool> filter = null)
     {
         double len = (end - start).Length();
         return World.ConvexTraceSingle(shape, start, (end - start) / len, len, filter);

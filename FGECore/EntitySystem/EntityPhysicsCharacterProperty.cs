@@ -83,6 +83,9 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float AerialVelocityFraction = 0.6f;
 
+    /// <summary>A shrunk copy of the current physics shape - it is 90% the size of the original. This is used to allow "edge-friendly" traces.</summary>
+    public EntityCapsuleShape ShrunkShape;
+
     /// <summary>Possible built-in character stances.</summary>
     public enum Stance
     {
@@ -145,6 +148,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         Physics ??= Entity.GetOrAddProperty<EntityPhysicsProperty>(() => new() { Mass = 60 });
         Physics.CGroup = CollisionUtil.Character;
         Physics.Shape = new EntityCapsuleShape(BodyRadius, BodyHeight * 0.5f, Engine.PhysicsWorldGeneric);
+        ShrunkShape = new EntityCapsuleShape(BodyRadius * 0.9f, BodyHeight * 0.5f * 0.9f, Engine.PhysicsWorldGeneric);
         Physics.RecoveryDamping = 0;
         Physics.OnSpawn();
         Physics.SpawnedBody.LocalInertia = new BodyInertia { InverseMass = 1f / Physics.Mass };
