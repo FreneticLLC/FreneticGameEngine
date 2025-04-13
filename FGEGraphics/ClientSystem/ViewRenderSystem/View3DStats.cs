@@ -34,7 +34,7 @@ public class View3DStats
     /// <summary>Resets perf spike times when needed.</summary>
     public void Check(double delta)
     {
-        if (PerformanceTimer.DISABLE)
+        if (PerformanceTimer.DisableTimers)
         {
             return;
         }

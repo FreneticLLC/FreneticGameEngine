@@ -305,8 +305,7 @@ public class FGE3DAudioEngine
         {
             try
             {
-                Stopwatch stopwatch = new();
-                stopwatch.Start();
+                long lastTime = Stopwatch.GetTimestamp();
                 Instance.OpenALBacker?.MakeCurrent();
                 DeadInstances = [];
                 while (true)
@@ -316,9 +315,9 @@ public class FGE3DAudioEngine
                         CloseAndStop();
                         return;
                     }
-                    stopwatch.Stop();
-                    double elSec = stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
-                    stopwatch.Restart();
+                    long newTime = Stopwatch.GetTimestamp();
+                    double elSec = (newTime - lastTime) / (double)Stopwatch.Frequency;
+                    lastTime = newTime;
                     bool needsFill = USE_WASAPI ? Instance.WasApiAudioBacker.PreprocessStep() : Instance.OpenALBacker.PreprocessStep();
                     if (needsFill)
                     {
