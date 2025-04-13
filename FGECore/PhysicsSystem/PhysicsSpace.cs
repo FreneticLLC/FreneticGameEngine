@@ -248,10 +248,10 @@ public class PhysicsSpace
     public void Tick(double delta)
     {
         Internal.DeltaAccumulator += delta;
-        while (Internal.DeltaAccumulator > UpdateDelta)
+        while (Internal.DeltaAccumulator >= UpdateDelta)
         {
             double updateBy = UpdateDelta;
-            while (Internal.DeltaAccumulator > updateBy * 3)
+            while (Internal.DeltaAccumulator >= updateBy * 3)
             {
                 updateBy *= 3;
                 if (updateBy > UpdateDelta * MaxUpdateDeltaRatio)
