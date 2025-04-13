@@ -18,6 +18,7 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.UtilitySystems;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FGECore.MathHelpers;
 
@@ -561,6 +562,13 @@ public struct Location : IEquatable<Location>
     public override readonly string ToString() => $"({X}, {Y}, {Z})";
 
     /// <summary>
+    /// Returns the location as a string in the form: (X, Y, Z) with the given number format.
+    /// </summary>
+    /// <param name="format">The number format, inserted into <see cref="double.ToString(string?)"/></param>
+    /// <returns>The location string.</returns>
+    public readonly string ToString([StringSyntax("NumericFormat")] string format) => $"({X.ToString(format)}, {Y.ToString(format)}, {Z.ToString(format)})";
+
+    /// <summary>
     /// Returns the location as a string in the form (X, Y, Z) with short decimals (2 places).
     /// Inverts <see cref="FromString(string)"/>.
     /// </summary>
@@ -589,7 +597,7 @@ public struct Location : IEquatable<Location>
 
     /// <summary>
     /// Converts a string representation of a location to a Location object.
-    /// Inverts <see cref="ToString"/> and <see cref="ToSimpleString"/>.
+    /// Inverts <see cref="ToString()"/> and <see cref="ToSimpleString()"/>.
     /// Returns <see cref="NaN"/> when invalid.
     /// </summary>
     /// <param name="input">The location string.</param>
