@@ -17,6 +17,8 @@ using FGECore.EntitySystem;
 using FGECore.FileSystems;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
+using System.Runtime.InteropServices;
+using System.IO;
 
 namespace FGECore.CoreSystems;
 
@@ -29,13 +31,16 @@ public abstract class GameInstance
     /// <summary>If cancelled, the instance should shutdown at the next tick.</summary>
     public CancellationTokenSource ShutdownRequestedToken = new();
 
-    /// <summary>The name of the data folder. By default, "data".</summary>
+    /// <summary>Full system root path for <see cref="Folder_Mods"/> and <see cref="Folder_Saves"/> to be within. By default fills with an OS-specific save-game path.</summary>
+    public string SaveFolderPath;
+
+    /// <summary>The name of the data folder. By default, "data". This is relative to the executable path.</summary>
     public string Folder_Data = "data";
 
-    /// <summary>The name of the mods folder. By default, "mods".</summary>
+    /// <summary>The name of the mods folder. By default, "mods". This is relative to <see cref="SaveFolderPath"/>.</summary>
     public string Folder_Mods = "mods";
 
-    /// <summary>The name of the saves folder. By default, "saves".</summary>
+    /// <summary>The name of the saves folder. By default, "saves". This is relative to <see cref="SaveFolderPath"/>.</summary>
     public string Folder_Saves = "saves";
 
     /// <summary>Whether the instance is already initialized or not.</summary>
@@ -101,11 +106,47 @@ public abstract class GameInstance
     /// <summary>Gets all engines in the game instance.</summary>
     public abstract IEnumerable<BasicEngine> GenericEngines();
 
+    /// <summary>Simple ASCII matcher to autofill <see cref="SaveFolderPath"/> with only safe path text.</summary>
+    public static AsciiMatcher SimplifyGamePathMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
+
+    /// <summary>Generate and return a recommended save folder base path, eg "C:/Users/(Name)/Documents/My Games" on Windows.</summary>
+    public static string GetRecommendedSaveFolderPath()
+    {
+        string simplePathAppend = $"{SimplifyGamePathMatcher.TrimToMatches(Program.GameAuthor)}/{SimplifyGamePathMatcher.TrimToMatches(Program.GameName)}";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None);
+            return $"{documents}/My Games/{simplePathAppend}";
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            string library = $"{Path.GetFullPath("~")}/Library/Application Support"; // Seems to be the Mac standard folder for it?
+            return $"{library}/{simplePathAppend}";
+        }
+        string localShare = $"{Path.GetFullPath("~")}/.local/share"; // Gnome (eg Ubuntu) prefers this weird folder
+        if (Directory.Exists(localShare))
+        {
+            return $"{localShare}/{simplePathAppend}";
+        }
+        // Screw it, sane default: sub folder within the user dir
+        return $"{Path.GetFullPath("~")}/{simplePathAppend}";
+    }
+
+    /// <summary>Construct and prebuild the game instance.</summary>
+    public GameInstance()
+    {
+        SaveFolderPath = GetRecommendedSaveFolderPath();
+    }
+
     /// <summary>Inits the game instance.</summary>
     public void InstanceInit()
     {
         SysConsole.Output(InitOutputType, "GameInstance loading file helpers...");
-        Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
+        Directory.CreateDirectory(SaveFolderPath);
+        SaveFolderPath = Path.GetFullPath(SaveFolderPath).Replace('\\', '/');
+        string realMods = Path.GetFullPath($"{SaveFolderPath}/{Folder_Mods}").Replace('\\', '/');
+        string realSaves = Path.GetFullPath($"{SaveFolderPath}/{Folder_Saves}").Replace('\\', '/');
+        Files.Init(Folder_Data, realMods, realSaves);
         AssetStreaming = new AssetStreamingEngine(Files, Schedule);
         AssetStreaming.Init();
         IsInitialized = true;
