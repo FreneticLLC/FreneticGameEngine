@@ -12,7 +12,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.CoreSystems;
@@ -21,7 +20,8 @@ namespace FGECore.CoreSystems;
 /// <param name="_name">Game name.</param>
 /// <param name="_version">Game version.</param>
 /// <param name="_versdesc">Game version descriptor.</param>
-public abstract class Program(string _name, string _version, string _versdesc)
+/// <param name="_author">Game's author label, eg a company name.</param>
+public abstract class Program(string _name, string _version, string _versdesc, string _author)
 {
     /// <summary>The current program instance.</summary>
     public static Program Instance;
@@ -58,6 +58,9 @@ public abstract class Program(string _name, string _version, string _versdesc)
     /// <summary>The version description of this program.</summary>
     public readonly string VersionDescription = _versdesc;
 
+    /// <summary>The short label for the author of this program.</summary>
+    public readonly string Author = _author;
+
     /// <summary>The current program's game name.</summary>
     public static string GameName => Instance.Name;
 
@@ -69,4 +72,7 @@ public abstract class Program(string _name, string _version, string _versdesc)
     /// (EG "Release", "Beta", or "Alpha" usually).
     /// </summary>
     public static string GameVersionDescription => Instance.VersionDescription;
+
+    /// <summary>The current program's author label.</summary>
+    public static string GameAuthor => Instance.Author;
 }

@@ -38,8 +38,8 @@ public abstract class FGETest
 }
 
 /// <summary>Represents a test program.</summary>
-	public class FGETestProgram : Program
-	{
+public class FGETestProgram : Program
+{
     /// <summary>Name of the program.</summary>
     public const string NAME = "FGE Tests";
 
@@ -49,9 +49,12 @@ public abstract class FGETest
     /// <summary>Version-Description of the program.</summary>
     public const string VERSDESC = "Test-Only";
 
+    /// <summary>Author of the program.</summary>
+    public const string AUTHOR = "Frenetic LLC";
+
     /// <summary>Construct the tester.</summary>
     public FGETestProgram()
-        : base(NAME, VERSION, VERSDESC)
+        : base(NAME, VERSION, VERSDESC, AUTHOR)
     {
     }
-	}
+}
