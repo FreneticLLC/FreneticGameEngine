@@ -243,6 +243,10 @@ public class TextureEngine : IDisposable
     /// <returns>The bitmap.</returns>
     public static Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
     {
+        if (data.Length < 1)
+        {
+            throw new Exception("Failed to load texture: bitmap loading failed (no data)!");
+        }
         Bitmap bmp = new(new MemoryStream(data));
 #if DEBUG
         if (bmp.Width <= 0 || bmp.Height <= 0)

@@ -302,6 +302,7 @@ public class GameEngine2D : GameEngineBase
         {
             using var _push2 = StackNoteHelper.UsePush("GameEngine2D - Render Specific Entity", ent);
             ent.Renderer.RenderStandard2D(MainRenderContext);
+            ent.OnRendered2D?.Invoke(MainRenderContext);
         }
         RenderAllObjectsPost?.Invoke(lights);
         GraphicsUtil.CheckError("Render - all Entities rendered");

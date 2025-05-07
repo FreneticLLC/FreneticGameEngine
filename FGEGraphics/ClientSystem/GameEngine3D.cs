@@ -217,6 +217,7 @@ public class GameEngine3D : GameEngineBase
             {
                 using var _push2 = StackNoteHelper.UsePush("GameEngine3D - Render Specific Entity", ce);
                 ce.Renderer?.RenderStandard(MainContext);
+                ce.OnRendered?.Invoke(MainContext);
             }
         }
     }
