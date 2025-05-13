@@ -248,10 +248,10 @@ public class PhysicsSpace
     public void Tick(double delta)
     {
         Internal.DeltaAccumulator += delta;
-        while (Internal.DeltaAccumulator > UpdateDelta)
+        while (Internal.DeltaAccumulator >= UpdateDelta)
         {
             double updateBy = UpdateDelta;
-            while (Internal.DeltaAccumulator > updateBy * 3)
+            while (Internal.DeltaAccumulator >= updateBy * 3)
             {
                 updateBy *= 3;
                 if (updateBy > UpdateDelta * MaxUpdateDeltaRatio)
@@ -330,6 +330,26 @@ public class PhysicsSpace
     {
         InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
         Internal.CoreSimulation.Sweep(shape, new RigidPose((start - Offset).ToNumerics(), System.Numerics.Quaternion.Identity), new BodyVelocity(direction.ToNumerics(), Vector3.Zero), (float)distance, Internal.Pool, ref helper);
+        if (helper.Hit.Hit)
+        {
+            helper.Hit.Position += Offset;
+        }
+        return helper.Hit;
+    }
+
+    /// <summary>
+    /// Sends a world convex-shape trace, giving back the single found object, or null if none.
+    /// Uses a standard filter.
+    /// </summary>
+    /// <param name="shape">The shape to trace with.</param>
+    /// <param name="start">The start position.</param>
+    /// <param name="direction">The direction, should be normalized in advance.</param>
+    /// <param name="distance">The distance.</param>
+    /// <param name="filter">The filter, if any. A function that returns true to allow the trace to hit the given entity, or false to not allow it.</param>
+    public CollisionResult ConvexTraceSingle(EntityShapeHelper shape, Location start, Location direction, double distance, Func<EntityPhysicsProperty, bool> filter = null)
+    {
+        InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
+        shape.Sweep(Internal.CoreSimulation, (start - Offset).ToNumerics(), new BodyVelocity(direction.ToNumerics(), Vector3.Zero), (float)distance, Internal.Pool, ref helper);
         if (helper.Hit.Hit)
         {
             helper.Hit.Position += Offset;

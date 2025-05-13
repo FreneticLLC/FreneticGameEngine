@@ -114,30 +114,24 @@ public abstract class GameEngineBase : BasicEngine<ClientEntity, GameEngineBase>
     /// <summary>Loads the engine.</summary>
     public void Load()
     {
-        try
-        {
-            StackNoteHelper.Push("GameEngineBase - Loading", this);
-            Logs.ClientInit("GameEngine starting load sequence, start with basic...");
-            LoadBasic();
-            Logs.ClientInit("GameEngine loading shaders...");
-            GetShaders();
-            Logs.ClientInit("GameEngine core load complete, calling additional load...");
-            PostLoad();
-            Logs.ClientInit("GameEngine prepping audio systems...");
-            Sounds = new SoundEngine();
-            Sounds.Init(this);
-            Logs.ClientInit("GameEngine load sequence complete.");
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+        using var _push = StackNoteHelper.UsePush("GameEngineBase - Loading", this);
+        Logs.ClientInit("GameEngine starting load sequence, start with basic...");
+        LoadBasic();
+        Logs.ClientInit("GameEngine loading shaders...");
+        GetShaders();
+        Logs.ClientInit("GameEngine core load complete, calling additional load...");
+        PostLoad();
+        Logs.ClientInit("GameEngine prepping audio systems...");
+        Sounds = new SoundEngine();
+        Sounds.Init(this);
+        Logs.ClientInit("GameEngine load sequence complete.");
     }
 
     /// <summary>Shut down the <see cref="GameEngineBase"/>.</summary>
     public override void Shutdown()
     {
         base.Shutdown();
+        Logs.Debug("[Shutdown] Closing sounds engine...");
         Sounds?.Shutdown();
     }
 

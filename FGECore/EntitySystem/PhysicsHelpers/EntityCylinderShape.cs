@@ -76,4 +76,11 @@ public class EntityCylinderShape : EntityShapeHelper
         Cylinder cylinder = (Cylinder)BepuShape;
         return $"{nameof(EntityCylinderShape)}(radius={cylinder.Radius}, length={cylinder.Length})";
     }
+
+    /// <inheritdoc/>
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler)
+    {
+        RigidPose pose = new(pos, Quaternion_Y2Z);
+        simulation.Sweep((Cylinder)BepuShape, pose, velocity, maximumT, pool, ref hitHandler);
+    }
 }

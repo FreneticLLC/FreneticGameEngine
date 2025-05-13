@@ -8,10 +8,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using BepuPhysics;
 using BepuPhysics.Collidables;
+using BepuUtilities.Memory;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -26,5 +30,10 @@ public class TemporaryEntityShape : EntityShapeHelper
     }
 
     /// <summary>Not valid for this type.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public override EntityShapeHelper Register() => throw new NotImplementedException();
+
+    /// <summary>Not valid for this type.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler) => throw new NotImplementedException();
 }

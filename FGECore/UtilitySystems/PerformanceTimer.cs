@@ -19,13 +19,20 @@ namespace FGECore.UtilitySystems;
 public class PerformanceTimer(string _name)
 {
     /// <summary>Can be used to globally disable performance timing if preferred.</summary>
-    public static bool DISABLE = false;
+    public static bool DisableTimers = false;
 
     /// <summary>The name of this <see cref="PerformanceTimer"/>, if any.</summary>
     public string Name = _name;
 
-    /// <summary>The actual internal <see cref="Stopwatch"/> instance used for timing things.</summary>
-    public Stopwatch Internal = new();
+    /// <summary>Internal data for a <see cref="PerformanceTimer"/>.</summary>
+    public struct InternalData()
+    {
+        /// <summary>Value of <see cref="Stopwatch.GetTimestamp"/> when the timer started.</summary>
+        public long StopwatchStartTime = 0;
+    }
+
+    /// <summary>Internal data for this <see cref="PerformanceTimer"/>.</summary>
+    public InternalData Internal = new();
 
     /// <summary>Last frame's millisecond time.</summary>
     public long LastMS;
@@ -42,22 +49,28 @@ public class PerformanceTimer(string _name)
     /// <summary>Starts measuring a new frame.</summary>
     public void Start()
     {
-        if (DISABLE)
+        if (DisableTimers)
         {
             return;
         }
-        Internal.Restart();
+        Internal.StopwatchStartTime = Stopwatch.GetTimestamp();
     }
 
     /// <summary>Finishes measuring the current frame.</summary>
     public void Stop()
     {
-        if (DISABLE)
+        if (DisableTimers)
         {
             return;
         }
-        Internal.Stop();
-        LastMS = Internal.ElapsedMilliseconds;
+        if (Internal.StopwatchStartTime == 0)
+        {
+            return;
+        }
+        long ticks = Stopwatch.GetTimestamp() - Internal.StopwatchStartTime;
+        double secElapsed = ticks / (double)Stopwatch.Frequency;
+        Internal.StopwatchStartTime = 0;
+        LastMS = (long)(secElapsed * 1000);
         if (LastMS > SpikeMS)
         {
             SpikeMS = LastMS;
@@ -67,6 +80,6 @@ public class PerformanceTimer(string _name)
     /// <summary>Creates a simple string display of this timer.</summary>
     public override string ToString()
     {
-        return $"{Name}: {LastMS}ms normal, {SpikeMS}ms spike";
+        return $"{Name}: {LastMS:000}ms normal, {SpikeMS:000}ms spike";
     }
 }

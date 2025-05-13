@@ -15,6 +15,9 @@ using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
+using BepuUtilities.Memory;
+using System.ComponentModel;
+using System.Numerics;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -48,5 +51,12 @@ public class EntityMeshShape : EntityShapeHelper
     public override void ComputeInertia(float mass, out BodyInertia inertia)
     {
         inertia = ((Mesh) BepuShape).ComputeClosedInertia(mass);
+    }
+
+    /// <summary>Invalid.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler)
+    {
+        throw new InvalidOperationException("Mesh cannot be used for convex sweep.");
     }
 }

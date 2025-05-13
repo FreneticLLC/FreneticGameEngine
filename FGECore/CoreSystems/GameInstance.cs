@@ -17,26 +17,40 @@ using FGECore.EntitySystem;
 using FGECore.FileSystems;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
+using System.Runtime.InteropServices;
+using System.IO;
 
 namespace FGECore.CoreSystems;
 
 /// <summary>Represents one game instance - that is, one program, which contains an arbitrary number of engines within it.</summary>
 public abstract class GameInstance
 {
-    /// <summary>Whether the instance is marked for shutdown as soon as possible.</summary>
-    public readonly CancellationTokenSource NeedShutdown = new();
+    /// <summary>Whether the instance is in the process of shutting down. Many internal functions actively disable if this is set.</summary>
+    public CancellationTokenSource InstanceShutdownToken = new();
 
-    /// <summary>The name of the data folder. By default, "data".</summary>
+    /// <summary>If cancelled, the instance should shutdown at the next tick.</summary>
+    public CancellationTokenSource ShutdownRequestedToken = new();
+
+    /// <summary>Full system root path for <see cref="Folder_Mods"/> and <see cref="Folder_Saves"/> to be within. By default fills with an OS-specific save-game path.</summary>
+    public string SaveFolderPath;
+
+    /// <summary>The name of the data folder. By default, "data". This is relative to the executable path.</summary>
     public string Folder_Data = "data";
 
-    /// <summary>The name of the mods folder. By default, "mods".</summary>
+    /// <summary>The name of the mods folder. By default, "mods". This is relative to <see cref="SaveFolderPath"/>.</summary>
     public string Folder_Mods = "mods";
 
-    /// <summary>The name of the saves folder. By default, "saves".</summary>
+    /// <summary>The name of the saves folder. By default, "saves". This is relative to <see cref="SaveFolderPath"/>.</summary>
     public string Folder_Saves = "saves";
 
     /// <summary>Whether the instance is already initialized or not.</summary>
     public bool IsInitialized = false;
+
+    /// <summary>If true, this instance owns its assets (<see cref="AssetStreaming"/>, <see cref="FileEngine"/>, ...). If false, something else owns and manages the assets.</summary>
+    public bool OwnsAssets = true;
+
+    /// <summary>Name of this <see cref="GameInstance"/>.</summary>
+    public string Name = "UnnamedInstance";
 
     /// <summary>Fired before the instance has shut down.</summary>
     public Action PreShutdown;
@@ -69,7 +83,7 @@ public abstract class GameInstance
     public FileEngine Files = new();
 
     /// <summary>The source object for this instance. Set to any tag style constant reference you find most helpful to keep!</summary>
-    public Object Source;
+    public object Source;
 
     /// <summary>Helper for streaming assets.</summary>
     public AssetStreamingEngine AssetStreaming;
@@ -89,11 +103,50 @@ public abstract class GameInstance
     /// <summary>The <see cref="SysConsole"/> output type for "info" messages.</summary>
     public abstract OutputType InfoOutputType { get; }
 
+    /// <summary>Gets all engines in the game instance.</summary>
+    public abstract IEnumerable<BasicEngine> GenericEngines();
+
+    /// <summary>Simple ASCII matcher to autofill <see cref="SaveFolderPath"/> with only safe path text.</summary>
+    public static AsciiMatcher SimplifyGamePathMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
+
+    /// <summary>Generate and return a recommended save folder base path, eg "C:/Users/(Name)/Documents/My Games" on Windows.</summary>
+    public static string GetRecommendedSaveFolderPath()
+    {
+        string simplePathAppend = $"{SimplifyGamePathMatcher.TrimToMatches(Program.GameAuthor)}/{SimplifyGamePathMatcher.TrimToMatches(Program.GameName)}";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None);
+            return $"{documents}/My Games/{simplePathAppend}";
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            string library = $"{Path.GetFullPath("~")}/Library/Application Support"; // Seems to be the Mac standard folder for it?
+            return $"{library}/{simplePathAppend}";
+        }
+        string localShare = $"{Path.GetFullPath("~")}/.local/share"; // Gnome (eg Ubuntu) prefers this weird folder
+        if (Directory.Exists(localShare))
+        {
+            return $"{localShare}/{simplePathAppend}";
+        }
+        // Screw it, sane default: sub folder within the user dir
+        return $"{Path.GetFullPath("~")}/{simplePathAppend}";
+    }
+
+    /// <summary>Construct and prebuild the game instance.</summary>
+    public GameInstance()
+    {
+        SaveFolderPath = GetRecommendedSaveFolderPath();
+    }
+
     /// <summary>Inits the game instance.</summary>
     public void InstanceInit()
     {
         SysConsole.Output(InitOutputType, "GameInstance loading file helpers...");
-        Files.Init(Folder_Data, Folder_Mods, Folder_Saves);
+        Directory.CreateDirectory(SaveFolderPath);
+        SaveFolderPath = Path.GetFullPath(SaveFolderPath).Replace('\\', '/');
+        string realMods = Path.GetFullPath($"{SaveFolderPath}/{Folder_Mods}").Replace('\\', '/');
+        string realSaves = Path.GetFullPath($"{SaveFolderPath}/{Folder_Saves}").Replace('\\', '/');
+        Files.Init(Folder_Data, realMods, realSaves);
         AssetStreaming = new AssetStreamingEngine(Files, Schedule);
         AssetStreaming.Init();
         IsInitialized = true;
@@ -106,25 +159,53 @@ public abstract class GameInstance
     {
         if (!IsInitialized)
         {
+            Logs.Debug($"[GameInstance/Shutdown] [{Name}] Ignore un-initialized shutdown.");
             return;
         }
-        NeedShutdown.Cancel();
+        if (InstanceShutdownToken.IsCancellationRequested)
+        {
+            Logs.Debug($"[GameInstance/Shutdown] [{Name}] Ignore duplicate shutdown.");
+            return;
+        }
+        InstanceShutdownToken.Cancel();
+        Logs.Debug($"[GameInstance/Shutdown] [{Name}] Pre-shutdown...");
         PreShutdown?.Invoke();
         PreShutdown = null;
-        AssetStreaming.Shutdown();
-        AssetStreaming = null;
-        Files.Cleanup();
-        Files = null;
+        Logs.Debug($"[GameInstance/Shutdown] [{Name}] Shutdown engines...");
+        foreach (BasicEngine engine in GenericEngines().ToArray())
+        {
+            engine.Shutdown();
+        }
+        if (OwnsAssets)
+        {
+            Logs.Debug($"[GameInstance/Shutdown] [{Name}] Closing asset streamer...");
+            AssetStreaming.Shutdown();
+            AssetStreaming = null;
+            Logs.Debug($"[GameInstance/Shutdown] [{Name}] Closing files engine...");
+            Files.Cleanup();
+            Files = null;
+        }
         IsInitialized = false;
+        Logs.Debug($"[GameInstance/Shutdown] [{Name}] Stopping watchdog...");
         Watchdog.Stop();
         Watchdog = null;
         OnShutdown?.Invoke();
+        Logs.Debug($"[GameInstance/Shutdown] [{Name}] Core shutdown complete.");
     }
 
     /// <summary>Does some pre-tick processing. Call <see cref="GameInstance{T, T2}.Tick"/> after.</summary>
     /// <param name="delta">How much time has passed since the last tick.</param>
     public void PreTick(double delta)
     {
+        if (InstanceShutdownToken.IsCancellationRequested)
+        {
+            return;
+        }
+        if (ShutdownRequestedToken.IsCancellationRequested)
+        {
+            InstanceShutdown();
+            return;
+        }
         StackNoteHelper.Notes.Clean();
         Delta = delta;
         GlobalTickTime += delta;
@@ -134,15 +215,8 @@ public abstract class GameInstance
     /// <summary>Ticks the instance's scheduler.</summary>
     public void TickScheduler()
     {
-        try
-        {
-            StackNoteHelper.Push("GameInstance - Tick Scheduler", Schedule);
-            Schedule.RunAllSyncTasks(Delta);
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
+        using var _push = StackNoteHelper.UsePush("GameInstance - Tick Scheduler", Schedule);
+        Schedule.RunAllSyncTasks(Delta);
     }
 }
 
@@ -154,14 +228,11 @@ public abstract class GameInstance<T, T2> : GameInstance where T : BasicEntity<T
     /// <summary>Any and all engines running in this instance on the main level.</summary>
     public List<T2> Engines = [];
 
+    /// <inheritdoc/>
+    public override IEnumerable<BasicEngine> GenericEngines() => Engines;
+
     /// <summary>Gets the "default" engine: the first in the <see cref="Engines"/> list!</summary>
-    public T2 DefaultEngine
-    {
-        get
-        {
-            return Engines[0];
-        }
-    }
+    public T2 DefaultEngine => Engines[0];
 
     /// <summary>
     /// Ticks the instance and all engines.
@@ -170,20 +241,17 @@ public abstract class GameInstance<T, T2> : GameInstance where T : BasicEntity<T
     /// </summary>
     public void Tick()
     {
-        try
+        if (InstanceShutdownToken.IsCancellationRequested)
         {
-            StackNoteHelper.Push("GameInstance tick sequence - Tick", this);
-            Watchdog.IsAlive();
-            foreach (T2 engine in Engines)
-            {
-                engine.Delta = Delta;
-                engine.Tick();
-            }
-            OnTick?.Invoke();
+            return;
         }
-        finally
+        using var _push = StackNoteHelper.UsePush("GameInstance tick sequence - Tick", this);
+        Watchdog?.IsAlive();
+        foreach (T2 engine in Engines)
         {
-            StackNoteHelper.Pop();
+            engine.Delta = Delta;
+            engine.Tick();
         }
+        OnTick?.Invoke();
     }
 }

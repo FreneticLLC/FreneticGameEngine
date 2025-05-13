@@ -89,13 +89,7 @@ public class FileEngine
     /// Gets the saves folder.
     /// This handles both where files are saved and what folder has highest priority for loads.
     /// </summary>
-    public string SavesFolder
-    {
-        get
-        {
-            return Internal.SavesFolder;
-        }
-    }
+    public string SavesFolder => Internal.SavesFolder;
     #endregion
 
     #region Setup

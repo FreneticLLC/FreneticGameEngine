@@ -154,6 +154,26 @@ public struct Vector3i : IEquatable<Vector3i>
         return new Vector3i(one.X * two, one.Y * two, one.Z * two);
     }
 
+    /// <summary>Mathematical operation.</summary>
+    /// <param name="one">First vec.</param>
+    /// <param name="two">Int scalar.</param>
+    /// <returns>Result.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3i operator /(Vector3i one, int two)
+    {
+        return new Vector3i(one.X / two, one.Y / two, one.Z / two);
+    }
+
+    /// <summary>Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(int, int)"/> to each coordinate.</summary>
+    /// <param name="two">The second Vector3i.</param>
+    /// <returns>The bigger valued coordinates.</returns>
+    public readonly Vector3i Max(in Vector3i two) => new(Math.Max(X, two.X), Math.Max(Y, two.Y), Math.Max(Z, two.Z));
+
+    /// <summary>Returns the smaller valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Min(int, int)"/> to each coordinate.</summary>
+    /// <param name="two">The second Vector3i.</param>
+    /// <returns>The smaller valued coordinates.</returns>
+    public readonly Vector3i Min(in Vector3i two) => new(Math.Min(X, two.X), Math.Min(Y, two.Y), Math.Min(Z, two.Z));
+
     /// <summary>Gets or set the XY 2D component of this <see cref="Vector3i"/>.</summary>
     public Vector2i XY
     {

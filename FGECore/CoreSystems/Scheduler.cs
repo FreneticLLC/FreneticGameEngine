@@ -98,6 +98,7 @@ public class Scheduler
         return item;
     }
 
+    /// <summary>Trick to easily prevent over-dequeueing any new tasks queued while the tasks were running.</summary>
     private static readonly SyncScheduleItem END_ITEM = new();
 
     /// <summary>Ran every frame to cause all sync tasks to be processed.</summary>
@@ -241,7 +242,7 @@ public class ASyncScheduleItem : ScheduleItem
     {
         lock (Locker)
         {
-            if (FollowUp != null)
+            if (FollowUp is not null)
             {
                 return FollowUp.ReplaceOrFollowWith(item);
             }

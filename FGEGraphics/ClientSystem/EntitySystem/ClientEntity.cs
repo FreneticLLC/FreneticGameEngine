@@ -26,6 +26,12 @@ public class ClientEntity(GameEngineBase _engine) : BasicEntity<ClientEntity, Ga
     /// </summary>
     public EntityRenderableProperty Renderer = null;
 
+    /// <summary>Dynamic action for any custom 2D rendering behavior, triggered after the main <see cref="Renderer"/> has rendered.</summary>
+    public Action<RenderContext2D> OnRendered2D;
+
+    /// <summary>Dynamic action for any custom 3D rendering behavior, triggered after the main <see cref="Renderer"/> has rendered.</summary>
+    public Action<RenderContext> OnRendered;
+
     /// <summary>Gets the client window associated with this entity.</summary>
     public GameClientWindow Window => Engine.Client;
 
@@ -33,7 +39,7 @@ public class ClientEntity(GameEngineBase _engine) : BasicEntity<ClientEntity, Ga
     public override void OnAdded(Property prop)
     {
         base.OnAdded(prop);
-        if (Renderer == null && prop is EntityRenderableProperty rnd)
+        if (Renderer is null && prop is EntityRenderableProperty rnd)
         {
             Renderer = rnd;
         }

@@ -22,20 +22,8 @@ namespace FGEGraphics.ClientSystem.EntitySystem;
 public class ClientEntityProperty : BasicEntityProperty<ClientEntity, GameEngineBase>
 {
     /// <summary>Gets the associated client game engine, as a <see cref="GameEngine2D"/> (only works when the engine is 3D, of course)</summary>
-    public GameEngine2D Engine2D
-    {
-        get
-        {
-            return Entity.Engine as GameEngine2D;
-        }
-    }
+    public GameEngine2D Engine2D => Entity.Engine as GameEngine2D;
 
     /// <summary>Gets the associated client game engine, as a <see cref="GameEngine3D"/> (only works when the engine is 3D, of course).</summary>
-    public GameEngine3D Engine3D
-    {
-        get
-        {
-            return Entity.Engine as GameEngine3D;
-        }
-    }
+    public GameEngine3D Engine3D => Entity.Engine as GameEngine3D;
 }

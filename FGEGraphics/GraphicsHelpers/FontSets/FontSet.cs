@@ -187,7 +187,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         {
             return output;
         }
-        StackNoteHelper.Push("FontSet - Parse fancy text", originalText);
+        using var _push = StackNoteHelper.UsePush("FontSet - Parse fancy text", originalText);
         try
         {
             ParseDepth++;
@@ -404,7 +404,6 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         finally
         {
             ParseDepth--;
-            StackNoteHelper.Pop();
         }
     }
 
@@ -443,106 +442,99 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         {
             return;
         }
-        StackNoteHelper.Push("FontSet - Draw fancy text", text);
+        using var _push = StackNoteHelper.UsePush("FontSet - Draw fancy text", text);
         GraphicsUtil.CheckError("FontSet - Render - PreParts");
-        try
+        float lineY = (float)position.Y;
+        for (int i = 0; i < text.Lines.Length; i++)
         {
-            float lineY = (float)position.Y;
-            for (int i = 0; i < text.Lines.Length; i++)
+            RenderableTextLine line = text.Lines[i];
+            float X = (float)position.X;
+            foreach (RenderableTextPart part in line.Parts)
             {
-                RenderableTextLine line = text.Lines[i];
-                float X = (float)position.X;
-                foreach (RenderableTextPart part in line.Parts)
+                float Y = lineY;
+                if (part.SuperScript)
                 {
-                    float Y = lineY;
-                    if (part.SuperScript)
-                    {
-                        Y += part.Font.Height * 0.25f;
-                    }
-                    else if (part.SubScript)
-                    {
-                        Y += part.Font.Height;
-                    }
-                    if (Y >= -part.Font.Height && Y - part.Font.Height <= maxY)
-                    {
-                        if (part.Highlight)
-                        {
-                            DrawRectangle(X, lineY, part.Width, Height, TransModify(part.HighlightColor, transmod), ReusableTextVBO);
-                        }
-                        if (part.Underline)
-                        {
-                            DrawRectangle(X, Y + (part.Font.Height * 4f / 5f), part.Width, 2, TransModify(part.UnderlineColor, transmod), ReusableTextVBO);
-                        }
-                        if (part.Overline)
-                        {
-                            DrawRectangle(X, Y + 2f, part.Width, 2, TransModify(part.OverlineColor, transmod), ReusableTextVBO);
-                        }
-                        GraphicsUtil.CheckError("FontSet - Render - Part - Boxes", line);
-                        if (extraShadow)
-                        {
-                            foreach (Point point in ShadowPoints)
-                            {
-                                part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
-                            }
-                        }
-                        if (part.Shadow)
-                        {
-                            foreach (Point point in ShadowPoints)
-                            {
-                                part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
-                            }
-                            foreach (Point point in BetterShadowPoints)
-                            {
-                                part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f * transmod), ReusableTextVBO, part.Flip);
-                            }
-                        }
-                        if (part.Emphasis)
-                        {
-                            foreach (Point point in EmphasisPoints)
-                            {
-                                part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
-                            }
-                            foreach (Point point in BetterEmphasisPoints)
-                            {
-                                part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
-                            }
-                        }
-                        GraphicsUtil.CheckError("FontSet - Render - Part - Wrap Strings", line);
-                        RenderBaseText(ReusableTextVBO, X, Y, part, transmod);
-                        GraphicsUtil.CheckError("FontSet - Render - Part - Text", line);
-                        if (part.Strike)
-                        {
-                            DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, TransModify(part.StrikeColor, transmod), ReusableTextVBO);
-                        }
-                        X += part.Width;
-                        GraphicsUtil.CheckError("FontSet - Render - Part - Strike", line);
-                    }
+                    Y += part.Font.Height * 0.25f;
                 }
-                lineY += Height;
+                else if (part.SubScript)
+                {
+                    Y += part.Font.Height;
+                }
+                if (Y >= -part.Font.Height && Y - part.Font.Height <= maxY)
+                {
+                    if (part.Highlight)
+                    {
+                        DrawRectangle(X, lineY, part.Width, Height, TransModify(part.HighlightColor, transmod), ReusableTextVBO);
+                    }
+                    if (part.Underline)
+                    {
+                        DrawRectangle(X, Y + (part.Font.Height * 4f / 5f), part.Width, 2, TransModify(part.UnderlineColor, transmod), ReusableTextVBO);
+                    }
+                    if (part.Overline)
+                    {
+                        DrawRectangle(X, Y + 2f, part.Width, 2, TransModify(part.OverlineColor, transmod), ReusableTextVBO);
+                    }
+                    GraphicsUtil.CheckError("FontSet - Render - Part - Boxes", line);
+                    if (extraShadow)
+                    {
+                        foreach (Point point in ShadowPoints)
+                        {
+                            part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
+                        }
+                    }
+                    if (part.Shadow)
+                    {
+                        foreach (Point point in ShadowPoints)
+                        {
+                            part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
+                        }
+                        foreach (Point point in BetterShadowPoints)
+                        {
+                            part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f * transmod), ReusableTextVBO, part.Flip);
+                        }
+                    }
+                    if (part.Emphasis)
+                    {
+                        foreach (Point point in EmphasisPoints)
+                        {
+                            part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
+                        }
+                        foreach (Point point in BetterEmphasisPoints)
+                        {
+                            part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
+                        }
+                    }
+                    GraphicsUtil.CheckError("FontSet - Render - Part - Wrap Strings", line);
+                    RenderBaseText(ReusableTextVBO, X, Y, part, transmod);
+                    GraphicsUtil.CheckError("FontSet - Render - Part - Text", line);
+                    if (part.Strike)
+                    {
+                        DrawRectangle(X, Y + (part.Font.Height / 2), part.Width, 2, TransModify(part.StrikeColor, transmod), ReusableTextVBO);
+                    }
+                    X += part.Width;
+                    GraphicsUtil.CheckError("FontSet - Render - Part - Strike", line);
+                }
             }
-            GraphicsUtil.CheckError("FontSet - Render - PostParts");
-            Engine.GLFonts.Shaders.TextCleanerShader.Bind();
-            Matrix4 ortho = Engine.GetOrtho();
-            GL.UniformMatrix4(1, false, ref ortho);
-            GL.Uniform3(3, Vector3.One);
-            GraphicsUtil.CheckError("FontSet - Render - PreBuild");
-            ReusableTextVBO.Build();
-            GraphicsUtil.CheckError("FontSet - Render - PostBuild");
-            ReusableTextVBO.Render(Engine.GLFonts);
-            if (Engine.FixToShader is null)
-            {
-                Engine.GLFonts.Shaders.ColorMult2D.Bind();
-            }
-            else
-            {
-                Engine.FixToShader.Bind();
-            }
-            GraphicsUtil.CheckError("FontSet - Render - Post");
+            lineY += Height;
         }
-        finally
+        GraphicsUtil.CheckError("FontSet - Render - PostParts");
+        Engine.GLFonts.Shaders.TextCleanerShader.Bind();
+        Matrix4 ortho = Engine.GetOrtho();
+        GL.UniformMatrix4(1, false, ref ortho);
+        GL.Uniform3(3, Vector3.One);
+        GraphicsUtil.CheckError("FontSet - Render - PreBuild");
+        ReusableTextVBO.Build();
+        GraphicsUtil.CheckError("FontSet - Render - PostBuild");
+        ReusableTextVBO.Render(Engine.GLFonts);
+        if (Engine.FixToShader is null)
         {
-            StackNoteHelper.Pop();
+            Engine.GLFonts.Shaders.ColorMult2D.Bind();
         }
+        else
+        {
+            Engine.FixToShader.Bind();
+        }
+        GraphicsUtil.CheckError("FontSet - Render - Post");
     }
 
     /// <summary>The <see cref="TextVBOBuilder"/> that's reused for text rendering.</summary>

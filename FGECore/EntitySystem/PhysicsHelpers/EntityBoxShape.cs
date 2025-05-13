@@ -15,6 +15,9 @@ using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
 using BepuPhysics.Collidables;
+using BepuPhysics;
+using BepuUtilities.Memory;
+using System.Numerics;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
@@ -41,5 +44,12 @@ public class EntityBoxShape : EntityShapeHelper
     {
         Box box = (Box)BepuShape;
         return $"{nameof(EntityBoxShape)}({box.Width}, {box.Height}, {box.Length})";
+    }
+
+    /// <inheritdoc/>
+    public override void Sweep<TSweepHitHandler>(in Simulation simulation, in Vector3 pos, in BodyVelocity velocity, float maximumT, BufferPool pool, ref TSweepHitHandler hitHandler)
+    {
+        RigidPose pose = new(pos, System.Numerics.Quaternion.Identity);
+        simulation.Sweep((Box)BepuShape, pose, velocity, maximumT, pool, ref hitHandler);
     }
 }

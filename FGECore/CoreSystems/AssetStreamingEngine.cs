@@ -175,6 +175,10 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
             }
             void CallProcData()
             {
+                if (FileThreadCancelToken.IsCancellationRequested)
+                {
+                    return;
+                }
                 goal.ProcessData(data);
             }
             if (goal.ShouldSyncToMainThread)
