@@ -119,8 +119,11 @@ public abstract class UIElement
     /// <param name="pos">The position of the element.</param>
     public UIElement(UIPositionHelper pos)
     {
-        Position = pos;
-        Position.For = this;
+        if (pos is not null)
+        {
+            Position = pos;
+            pos.For = this;
+        }
     }
 
     /// <summary>Adds a child to this element.</summary>

@@ -24,10 +24,10 @@ namespace FGEGraphics.UISystem;
 public class UIScreen : UIElement
 {
     /// <summary>
-    /// A reference to the relevant client backing this screen.
-    /// Get this using <see cref="Window"/>.
+    /// A reference to the relevant client window backing this screen, needed as this may be the root element.
+    /// Normally get this using <see cref="Window"/>.
     /// </summary>
-    private readonly GameClientWindow InternalClient;
+    public GameClientWindow InternalClient;
 
     /// <inheritdoc/>
     public override GameEngineBase Engine => InternalClient.CurrentEngine;
@@ -45,8 +45,7 @@ public class UIScreen : UIElement
     /// <param name="view">The client UI View.</param>
     public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view).Anchor(UIAnchor.TOP_LEFT))
     {
-        Position.GetterWidth(() => Parent == null ? Engine.Window.ClientSize.X : Parent.Position.Width);
-        Position.GetterHeight(() => Parent == null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
+        InternalConfigurePosition();
     }
 
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
@@ -57,6 +56,14 @@ public class UIScreen : UIElement
         Enabled = false;
         InternalClient = client;
         IsValid = true;
+    }
+
+    /// <summary>Internal method to configure the position of the screen as fully covering the actual screen space. Called by the standard constructor.</summary>
+    public void InternalConfigurePosition()
+    {
+        Position.ConstantXY(0, 0);
+        Position.GetterWidth(() => Parent is null ? Engine.Window.ClientSize.X : Parent.Position.Width);
+        Position.GetterHeight(() => Parent is null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
     }
 
     /// <summary>Performs a render on this element.</summary>
