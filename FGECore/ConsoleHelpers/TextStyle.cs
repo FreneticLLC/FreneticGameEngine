@@ -67,7 +67,7 @@ public static class TextStyle
     /// <returns>The fixed string.</returns>
     public static string ApplyBaseColor(this string text, string color)
     {
-        if (color != "^r^7")
+        if (color.Length < 4 || !color.StartsWith("^r^") || color[3] < '0' || color[3] > '9')
         {
             color = "^r^7" + color;
         }
