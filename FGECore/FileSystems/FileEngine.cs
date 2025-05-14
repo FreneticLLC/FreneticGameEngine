@@ -480,6 +480,37 @@ public class FileEngine
         data = null;
         return false;
     }
+
+    /// <summary>
+    /// Reads a file from disk with the given filename, using journalling mode.
+    /// This is a special helper for reading data output by <see cref="WriteFileDataJournallingDetached(string, byte[])"/> without requiring file engine lock
+    /// (but limited to only dynamic data).
+    /// This is detached and safe to run async.
+    /// </summary>
+    /// <param name="exactFileName">The exact full final path to the file.</param>
+    /// <param name="data">The data in the file, if found.</param>
+    public static bool TryReadFileDataJournallingDetached(string exactFileName, out byte[] data)
+    {
+        string directoryName = Path.GetDirectoryName(exactFileName);
+        if (!Directory.Exists(directoryName))
+        {
+            data = null;
+            return false;
+        }
+        if (File.Exists(exactFileName))
+        {
+            data = File.ReadAllBytes(exactFileName);
+            return true;
+        }
+        if (File.Exists(exactFileName + "~2"))
+        {
+            data = File.ReadAllBytes(exactFileName + "~2");
+            return true;
+        }
+        // Note: ~1 are likely corrupted, so ignore them.
+        data = null;
+        return false;
+    }
     #endregion
 
     #region File listing
