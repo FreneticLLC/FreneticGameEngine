@@ -98,6 +98,6 @@ public static class TextStyle
             }
             result.Append(text[i]);
         }
-        return result.ToString();
+        return color + result.ToString();
     }
 }

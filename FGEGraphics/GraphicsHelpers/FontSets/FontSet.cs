@@ -416,7 +416,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <param name="maxY">Optional: The maximum Y value to keep drawing at (to prevent text from going past the end of a text-area).</param>
     /// <param name="transmod">Optional: Transparency modifier, from 0 to 1 (1 is opaque, lower is more transparent).</param>
     /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
-    /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used (note: it's often good to apply the baseColor to the start of the text, as it will not be applied automatically).</param>
+    /// <param name="baseColor">Optional: The 'base color', to be used when '^B' is used.</param>
     public void DrawFancyText(string text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false, string baseColor = "^r^7")
     {
         DrawFancyText(ParseFancyText(text, baseColor), position, maxY, transmod, extraShadow);
