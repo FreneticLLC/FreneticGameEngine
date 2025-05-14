@@ -27,13 +27,18 @@ public class UIListGroup : UIGroup
     /// <summary>The spacing between each child.</summary>
     public int Spacing;
 
+    /// <summary>The anchor that the list will expand from.</summary>
+    public UIAnchor Anchor;
+
     /// <summary>Constructs a new list group.</summary>
     /// <param name="spacing">The spacing between each child.</param>
     /// <param name="pos">The position of the element.</param>
     /// <param name="vertical">Whether the list should expand vertically.</param>
-    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true) : base(pos.ConstantWidthHeight(0, 0))
+    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="pos"/> anchor.</param>
+    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true, UIAnchor anchor = null) : base(pos.ConstantWidthHeight(0, 0))
     {
-        if ((vertical && Position.MainAnchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Position.MainAnchor.AlignmentX == UIAlignment.CENTER))
+        Anchor = anchor ?? Position.MainAnchor;
+        if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
         {
             throw new Exception("UIListGroup must have a non-central expansion direction");
         }
@@ -41,42 +46,34 @@ public class UIListGroup : UIGroup
         Spacing = spacing;
     }
 
-    /// <summary>Adds a new child element to the list.</summary>
-    /// <param name="child">The child to add.</param>
-    /// <param name="addChild">If true, adds as a literal element child. If false, does not add as an element child but still updates positioning according to the list.</param>
-    public void AddListItem(UIElement child, bool addChild = true)
+    /// <summary>Adds and positions an element within the list.</summary>
+    /// <param name="element">The element to add.</param>
+    /// <param name="addChild">Whether to add <paramref name="element"/> as a child.</param>
+    public void AddListItem(UIElement element, bool addChild = true)
     {
         if (addChild)
         {
-            base.AddChild(child);
+            base.AddChild(element);
         }
-        child.Position.Anchor(Position.MainAnchor);
+        element.Position.Anchor(Anchor);
         if (Vertical)
         {
-            int maxY = Position.Height > 0 ? Position.Height + Spacing : 0;
-            if (Position.MainAnchor.AlignmentY == UIAlignment.BOTTOM)
+            int elementY = Position.Height > 0 ? Position.Height + Spacing : 0;
+            element.Position.ConstantXY(0, Anchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
+            Position.ConstantHeight(elementY + element.Position.Height);
+            if (element.Position.Width > Position.Width)
             {
-                maxY = -maxY;
-            }
-            child.Position.ConstantXY(0, maxY);
-            Position.ConstantHeight(maxY + child.Position.Height); // TODO: Is this correct for Alignment.BOTTOM?
-            if (child.Position.Width > Position.Width)
-            {
-                Position.ConstantWidth(child.Position.Width);
+                Position.ConstantWidth(element.Position.Width);
             }
         }
         else
         {
-            int maxX = Position.Width > 0 ? Position.Width + Spacing : 0;
-            if (Position.MainAnchor.AlignmentX == UIAlignment.RIGHT)
+            int elementX = Position.Width > 0 ? Position.Width + Spacing : 0;
+            element.Position.ConstantXY(Anchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
+            Position.ConstantWidth(elementX + element.Position.Width);
+            if (element.Position.Height > Position.Height)
             {
-                maxX = -maxX;
-            }
-            child.Position.ConstantXY(maxX, 0);
-            Position.ConstantWidth(maxX + child.Position.Width);
-            if (child.Position.Height > Position.Height)
-            {
-                Position.ConstantHeight(child.Position.Height);
+                Position.ConstantHeight(element.Position.Height);
             }
         }
     }
