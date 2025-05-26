@@ -44,6 +44,9 @@ public class Texture : IEquatable<Texture>
     /// <summary>Whether the texture loaded properly.</summary>
     public bool LoadedProperly = false;
 
+    /// <summary>If true, this <see cref="Texture"/> owns the value of <see cref="OriginalInternalID"/> attached to it.</summary>
+    public bool OwnsItsTextureId = false;
+
     /// <summary>The width of the texture.</summary>
     public int Width;
 
@@ -53,11 +56,12 @@ public class Texture : IEquatable<Texture>
     /// <summary>Removes the texture from OpenGL.</summary>
     public void Destroy()
     {
-        if (LoadedProperly && OriginalInternalID > -1 && GL.IsTexture(OriginalInternalID))
+        if (OwnsItsTextureId && OriginalInternalID > -1 && GL.IsTexture(OriginalInternalID))
         {
             GL.DeleteTexture(OriginalInternalID);
         }
         LoadedProperly = false;
+        OwnsItsTextureId = false;
         InternalTexture = -1;
         OriginalInternalID = -1;
     }
@@ -104,6 +108,7 @@ public class Texture : IEquatable<Texture>
             else
             {
                 LoadedProperly = false;
+                OwnsItsTextureId = false;
                 Texture temp = Engine.GetTexture(Name);
                 InternalTexture = temp.InternalTexture;
                 if (temp.LoadedProperly)

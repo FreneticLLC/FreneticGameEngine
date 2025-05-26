@@ -169,13 +169,17 @@ public class TextureEngine : IDisposable
             OriginalInternalID = White.OriginalInternalID,
             InternalTexture = White.InternalTexture,
             LoadedProperly = false,
+            OwnsItsTextureId = false,
             Width = White.Width,
             Height = White.Height
         };
         void handleError(string message)
         {
             Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
-            texture.LoadedProperly = false;
+            Schedule.ScheduleSyncTask(() =>
+            {
+                texture.Destroy();
+            });
         }
         void processLoad(byte[] data)
         {
@@ -419,8 +423,12 @@ public class TextureEngine : IDisposable
     {
         texture.Width = bmp.Width;
         texture.Height = bmp.Height;
-        texture.OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_FromBitmap_{texture.Name}", TextureTarget.Texture2D);
-        texture.InternalTexture = texture.OriginalInternalID;
+        if (!texture.OwnsItsTextureId)
+        {
+            texture.OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_FromBitmap_{texture.Name}", TextureTarget.Texture2D);
+            texture.InternalTexture = texture.OriginalInternalID;
+            texture.OwnsItsTextureId = true;
+        }
         texture.Bind();
         LockBitmapToTexture(bmp, DefaultLinear);
     }
@@ -433,8 +441,11 @@ public class TextureEngine : IDisposable
     {
         try
         {
-            Bitmap bmp = LoadBitmapForTexture(filename, twidth);
-            LockBitmapToTexture(bmp, depth);
+            Bitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true);
+            if (bmp is not null)
+            {
+                LockBitmapToTexture(bmp, depth);
+            }
         }
         catch (Exception ex)
         {
@@ -458,6 +469,7 @@ public class TextureEngine : IDisposable
             OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_ForColor_{name}", TextureTarget.Texture2D)
         };
         texture.InternalTexture = texture.OriginalInternalID;
+        texture.OwnsItsTextureId = true;
         texture.Bind();
         // TODO: Could just feed in binary directly instead of this silly intermediate bitmap
         using (Bitmap bmp = new(2, 2))
@@ -499,6 +511,7 @@ public class TextureEngine : IDisposable
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
+        GraphicsUtil.CheckError("LockBitmapToTexture");
     }
 
     /// <summary>Locks a bitmap file's data to a GL texture array.</summary>
@@ -513,5 +526,6 @@ public class TextureEngine : IDisposable
         }
 #endif
         GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, BitmapBytes(bmp));
+        GraphicsUtil.CheckError("LockBitmapToTexture 3D");
     }
 }
