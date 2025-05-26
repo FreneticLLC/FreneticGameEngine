@@ -36,7 +36,22 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
     /// All currently waiting asset streaming goals.
     /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
     /// </summary>
-    public ConcurrentQueue<StreamGoal> Goals = new();
+    public ConcurrentQueue<StreamGoal>[] Goals = [new(), new(), new(), new(), new()];
+
+    /// <summary>Enumeration of priority levels for asset streaming goals.</summary>
+    public enum GoalPriority : int
+    {
+        /// <summary>Need this data immediately! Supercede all others!</summary>
+        FASTEST = 0,
+        /// <summary>This data should be grabbed quickly. Ideal for thumbnails, proxies, etc. to keep user experience clean.</summary>
+        FAST = 1,
+        /// <summary>Standard data read, when priority choices don't apply.</summary>
+        NORMAL = 2,
+        /// <summary>Slower than normal - ideal for a large asset that can be separately proxied with a FAST read.</summary>
+        SLOW = 3,
+        /// <summary>I do not care! Read it tomorrow!</summary>
+        SLOWEST = 4
+    }
 
     /// <summary>
     /// Reset event for when the files thread has more goals to process.
@@ -81,6 +96,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
 
         /// <summary>Called to process the file data once loaded. MUST be set.</summary>
         public Action<byte[]> ProcessData;
+
+        /// <summary>The priority level of this goal.</summary>
+        public GoalPriority Priority;
 
         /// <summary>
         /// Whether to sync the process result call to the main thread (if not, runs async).
@@ -140,9 +158,18 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
             {
                 return;
             }
-            while (Goals.TryDequeue(out StreamGoal goal))
+        backToZero:
+            for (int i = 0; i < Goals.Length; i++)
             {
-                ProcessGoal(goal);
+                if (Goals[i].TryDequeue(out StreamGoal goal))
+                {
+                    if (FileThreadCancelToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    ProcessGoal(goal);
+                    goto backToZero;
+                }
             }
         }
     }
@@ -203,8 +230,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
     /// <param name="onFileMissing">(Optional) called to handle a file-missing situation.</param>
     /// <param name="onError">(Optional) called to handle an error message. If unset, errors go to the <see cref="SysConsole"/>.</param>
     /// <param name="altExtensions">Alternate file extensions that are also acceptable.</param>
+    /// <param name="priority">The priority level for this goal.</param>
     /// <returns>The created <see cref="StreamGoal"/>.</returns>
-    public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null, string[] altExtensions = null)
+    public StreamGoal AddGoal(string fileName, bool processOnMainThread, Action<byte[]> processAction, Action onFileMissing = null, Action<string> onError = null, string[] altExtensions = null, GoalPriority priority = GoalPriority.NORMAL)
     {
         StreamGoal goal = new()
         {
@@ -215,7 +243,7 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
             OnError = onError,
             AltExtensions = altExtensions
         };
-        Goals.Enqueue(goal);
+        Goals[(int)priority].Enqueue(goal);
         GoalWaitingReset.Set();
         return goal;
     }
