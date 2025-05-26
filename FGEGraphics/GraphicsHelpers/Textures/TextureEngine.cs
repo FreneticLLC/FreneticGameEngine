@@ -156,7 +156,7 @@ public class TextureEngine : IDisposable
         return loaded;
     }
 
-    /// <summary>Dynamically loads a texture (returns a temporary copy of 'White', then fills it in when possible).</summary>
+    /// <summary>Dynamically loads a texture (returns a temporary copy of 'White', then fills it to a lowres thumbnail soon, then fills it in when possible).</summary>
     /// <param name="textureName">The texture name to load.</param>
     /// <returns>The texture object.</returns>
     public Texture DynamicLoadTexture(string textureName)
@@ -181,6 +181,39 @@ public class TextureEngine : IDisposable
                 texture.Destroy();
             });
         }
+        void processThumb(byte[] data)
+        {
+            if (texture.LoadedProperly)
+            {
+                return;
+            }
+            Bitmap bmp;
+            try
+            {
+                bmp = BitmapForBytes(data);
+            }
+            catch (Exception ex)
+            {
+                handleError(ex.ToString());
+                return;
+            }
+            Schedule.ScheduleSyncTask(() =>
+            {
+                try
+                {
+                    if (texture.LoadedProperly)
+                    {
+                        return;
+                    }
+                    InternalTextureFromBitMap(texture, bmp);
+                }
+                catch (Exception ex)
+                {
+                    handleError(ex.ToString());
+                }
+                bmp.Dispose();
+            });
+        }
         void processLoad(byte[] data)
         {
             Bitmap bmp;
@@ -197,7 +230,7 @@ public class TextureEngine : IDisposable
             {
                 try
                 {
-                    TextureFromBitMap(texture, bmp);
+                    InternalTextureFromBitMap(texture, bmp);
                     texture.LoadedProperly = true;
                     OnTextureLoaded?.Invoke(this, new TextureLoadedEventArgs(texture));
                 }
@@ -208,12 +241,17 @@ public class TextureEngine : IDisposable
                 bmp.Dispose();
             });
         }
+        void irrelevantMissing() { }
         void fileMissing()
         {
             Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
-            texture.LoadedProperly = false;
+            Schedule.ScheduleSyncTask(() =>
+            {
+                texture.Destroy();
+            });
         }
-        AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions);
+        AssetStreaming.AddGoal($"textures/{textureName}.thumb.jpg", false, processThumb, irrelevantMissing, handleError, priority: AssetStreamingEngine.GoalPriority.FAST);
+        AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.SLOW);
         return texture;
     }
 
@@ -342,10 +380,15 @@ public class TextureEngine : IDisposable
     /// <param name="filename">The name of the file to use.</param>
     /// <param name="twidth">The texture width, if any.</param>
     /// <param name="docache">If true, use caching. If false, always create a fresh copy.</param>
+    /// <param name="extension">Specific file extension (eg '.png'), if required. Null for automatic search.</param>
     /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
-    public Bitmap LoadBitmapForTexture(string filename, int twidth, bool docache = false)
+    public Bitmap LoadBitmapForTexture(string filename, int twidth, bool docache = false, string extension = null)
     {
         filename = FileEngine.CleanFileName(filename);
+        if (extension is not null)
+        {
+            filename += extension;
+        }
         if (docache && TempBitmapCache.TryGetValue((filename, twidth), out Bitmap cachedBitmap))
         {
             return cachedBitmap;
@@ -358,21 +401,24 @@ public class TextureEngine : IDisposable
                 {
                     return textureFile;
                 }
-                if (Files.TryReadFileData($"textures/{filename}.png", out textureFile))
+                if (Files.TryReadFileData(extension is null ? $"textures/{filename}.png" : $"textures/{filename}", out textureFile))
                 {
                     TempBitmapBytesCache[filename] = textureFile;
                     ScheduleClearCache();
                     return textureFile;
                 }
-                foreach (string ext in AlternateImageFileExtensions)
+                if (extension is null)
                 {
-                    if (Files.TryReadFileData($"textures/{filename}.{ext}", out textureFile))
+                    foreach (string ext in AlternateImageFileExtensions)
                     {
-                        TempBitmapBytesCache[filename] = textureFile;
-                        return textureFile;
+                        if (Files.TryReadFileData($"textures/{filename}.{ext}", out textureFile))
+                        {
+                            TempBitmapBytesCache[filename] = textureFile;
+                            return textureFile;
+                        }
                     }
+                    Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                 }
-                Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{filename}.png{TextStyle.Base}' does not exist.");
                 return null;
             }
             byte[] textureFile = getBytes(filename);
@@ -414,12 +460,13 @@ public class TextureEngine : IDisposable
         {
             return null;
         }
-        TextureFromBitMap(texture, bmp);
+        InternalTextureFromBitMap(texture, bmp);
         texture.LoadedProperly = true;
         return texture;
     }
 
-    private void TextureFromBitMap(Texture texture, Bitmap bmp)
+    /// <summary>Internal helper to make a GL texture from a bitmap.</summary>
+    public void InternalTextureFromBitMap(Texture texture, Bitmap bmp)
     {
         texture.Width = bmp.Width;
         texture.Height = bmp.Height;
@@ -431,6 +478,27 @@ public class TextureEngine : IDisposable
         }
         texture.Bind();
         LockBitmapToTexture(bmp, DefaultLinear);
+    }
+
+    /// <summary>loads a thumbnail texture by name and puts it into a texture array.</summary>
+    /// <param name="filename">The texture array.</param>
+    /// <param name="depth">The depth in the array.</param>
+    /// <param name="twidth">The texture width.</param>
+    public void LoadThumbIntoArray(string filename, int depth, int twidth)
+    {
+        try
+        {
+            Bitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true, extension: ".thumb.jpg");
+            if (bmp is not null)
+            {
+                LockBitmapToTexture(bmp, depth);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logs.Error($"Failed to load texture thumbnail from filename '{TextStyle.Standout}textures/{filename}.thumb.jpg{TextStyle.Base}': {ex}");
+            return;
+        }
     }
 
     /// <summary>loads a texture by name and puts it into a texture array.</summary>
