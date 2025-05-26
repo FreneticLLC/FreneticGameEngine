@@ -53,19 +53,19 @@ public partial class SysConsole
 
     /// <summary>
     /// Generates a standard log file name.
-    /// Uses a format of "/logs/(year)/(month)/(day)_(hour)_(min)_(procid).log"
+    /// Uses a format of "(baseLogsDir)/(year)/(month)/(day)_(hour)_(min)_(procid).log"
     /// </summary>
     /// <returns>The generated log file name.</returns>
     public static string GenerateLogFileName(string basePath)
     {
         DateTime DT = DateTime.Now;
-        string logfolder = basePath + "/logs/" + DT.Year.ToString().PadLeft(4, '0') + "/" + DT.Month.ToString().PadLeft(2, '0') + "/";
-        return logfolder + DT.Day.ToString().PadLeft(2, '0') + "_" + DT.Hour.ToString().PadLeft(2, '0') + "_" + DT.Minute.ToString().PadLeft(2, '0') + "_" + Environment.ProcessId + ".log";
+        string logfolder = $"{basePath}/{DT.Year.ToString().PadLeft(4, '0')}/{DT.Month.ToString().PadLeft(2, '0')}";
+        return $"{logfolder}/{DT.Day.ToString().PadLeft(2, '0')}_{DT.Hour.ToString().PadLeft(2, '0')}_{DT.Minute.ToString().PadLeft(2, '0')}_{Environment.ProcessId}.log";
     }
 
     /// <summary>The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.</summary>
     // TODO: Configuration option to change the log file name (with a disable option that routes to a null). With options to put a value like logs/%year%/%month%/%day%.log
-    public static string LogFileName = GenerateLogFileName(Environment.CurrentDirectory);
+    public static string LogFileName = GenerateLogFileName($"{Environment.CurrentDirectory}/logs");
 
     /// <summary>A message to test console colors.</summary>
     public const string TestColorsMessage = "Test colors: ^r^7Text Colors: ^0^h^1^^n1 ^!^^n! ^2^^n2 ^@^^n@ ^3^^n3 ^#^^n# ^4^^n4 ^$^^n$ ^5^^n5 ^%^^n% ^6^^n6 ^-^^n- ^7^^n7 ^&^^n& ^8^^n8 ^*^^** ^9^^n9 ^(^^n( ^&^h^0^^n0^h ^)^^n) ^a^^na ^A^^nA\n" +
