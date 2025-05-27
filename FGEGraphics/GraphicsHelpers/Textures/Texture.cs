@@ -32,8 +32,11 @@ public class Texture : IEquatable<Texture>
     /// <summary>The full name of the texture.</summary>
     public string Name;
 
-    /// <summary>The texture that this texture was remapped to, if any.</summary>
+    /// <summary>The texture that this texture was remapped to, if any (for manual direct texture remapping, normal reserved for modding use cases).</summary>
     public Texture RemappedTo;
+
+    /// <summary>Internal remap, if the original texture instance is deleted, old copies need to forward to newer copies.</summary>
+    public Texture Replacement;
 
     /// <summary>The internal OpenGL texture ID.</summary>
     public int InternalTexture = -1;
@@ -109,13 +112,19 @@ public class Texture : IEquatable<Texture>
             {
                 LoadedProperly = false;
                 OwnsItsTextureId = false;
-                Texture temp = Engine.GetTexture(Name);
-                InternalTexture = temp.InternalTexture;
-                if (temp.LoadedProperly)
-                {
-                    OriginalInternalID = temp.OriginalInternalID;
-                }
+                Replacement = Engine.GetTexture(Name);
             }
+        }
+        if (Replacement is not null)
+        {
+            Replacement.CheckValid();
+            if (Replacement.Replacement is not null)
+            {
+                Replacement = Replacement.Replacement;
+            }
+            LoadedProperly = Replacement.LoadedProperly;
+            InternalTexture = Replacement.InternalTexture;
+            OriginalInternalID = Replacement.OriginalInternalID;
         }
     }
 
