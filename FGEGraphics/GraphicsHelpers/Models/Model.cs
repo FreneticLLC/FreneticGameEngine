@@ -309,6 +309,7 @@ public class Model(string _name)
     /// <param name="torsoanim">Torso animation.</param>
     public void Draw(RenderContext context, double aTimeHead = 0, SingleAnimation headanim = null, double aTimeTorso = 0, SingleAnimation torsoanim = null, double aTimeLegs = 0, SingleAnimation legsanim = null, bool forceBones = false)
     {
+        GraphicsUtil.CheckError("Model - Draw - Pre", this);
         LastDrawTime = Engine.CurrentTime;
         hAnim = headanim;
         tAnim = torsoanim;
@@ -336,6 +337,7 @@ public class Model(string _name)
             }
             Meshes[i].Draw(context);
         }
+        GraphicsUtil.CheckError("Model - Draw - Post", this);
     }
 
     /// <summary>Whether this model has a skin already.</summary>

@@ -26,20 +26,28 @@ public class ModelMesh
     /// <summary>The name of this mesh, pre-lowercased.</summary>
     public string NameLower;
 
+    /// <summary>The model that owns this mesh (if any).</summary>
+    public Model Parent;
+
     /// <summary>The bones relevant to this mesh.</summary>
     public List<ModelBone> Bones = [];
 
     /// <summary>Constructs the model mesh.</summary>
     /// <param name="_name">The name of it.</param>
-    public ModelMesh(string _name)
+    /// <param name="_parent">Parent model, if available.</param>
+    public ModelMesh(string _name, Model _parent)
     {
         Name = _name;
+        Parent = _parent;
         NameLower = Name.ToLowerFast();
         if (Name.EndsWith(".001"))
         {
             Name = Name[..^".001".Length];
         }
-        BaseRenderable = new Renderable();
+        BaseRenderable = new Renderable()
+        {
+            Name = $"Model={_parent?.Name},Mesh={Name} Renderable",
+        };
     }
 
     /// <summary>The VBO for this mesh.</summary>
@@ -57,5 +65,12 @@ public class ModelMesh
     {
         context.ModelsRendered++;
         BaseRenderable.Render(context, true);
+        GraphicsUtil.CheckError("ModelMesh - Draw", this);
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"ModelMesh(Name={Name}, Parent={(Parent is null ? "null" : Parent.Name)})";
     }
 }

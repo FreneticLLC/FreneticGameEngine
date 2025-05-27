@@ -124,6 +124,12 @@ public class Texture : IEquatable<Texture>
     {
         LastBindTime = Engine.CurrentTime;
         CheckValid();
+#if DEBUG
+        if (InternalTexture == -1)
+        {
+            Logs.Warning($"Trying to bind internally invalid texture: {Name}");
+        }
+#endif
         GL.BindTexture(TextureTarget.Texture2D, InternalTexture);
     }
 
@@ -131,7 +137,7 @@ public class Texture : IEquatable<Texture>
     /// <returns>The name.</returns>
     public override string ToString()
     {
-        return Name;
+        return $"Texture(Name={Name}, ID={InternalTexture}, OriginalID={OriginalInternalID}, Loaded={LoadedProperly}, OwnsId={OwnsItsTextureId})";
     }
 
     /// <summary>Returns a hash code for this <see cref="Texture"/>.</summary>

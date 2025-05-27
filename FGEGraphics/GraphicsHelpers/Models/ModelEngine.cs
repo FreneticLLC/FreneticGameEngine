@@ -85,7 +85,7 @@ public class ModelEngine
             ModelMin = new Location(-0.5),
             ModelMax = new Location(0.5)
         };
-        ModelMesh mm = new("cube");
+        ModelMesh mm = new("cube", m);
         Renderable.ListBuilder builder = new();
         builder.Prepare();
         TextureCoordinates tc = new();
@@ -261,7 +261,7 @@ public class ModelEngine
             {
                 continue;
             }
-            ModelMesh modmesh = new(mesh.Name);
+            ModelMesh modmesh = new(mesh.Name, model);
             bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
             bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
             if (!hasn)

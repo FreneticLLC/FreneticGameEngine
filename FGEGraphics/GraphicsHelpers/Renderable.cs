@@ -95,6 +95,15 @@ public class Renderable
     /// <summary>The normal texture.</summary>
     public Texture NormalTexture;
 
+    /// <summary>Name for this renderable, if any. Useful for debugging mainly.</summary>
+    public string Name;
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"Renderable(Name={Name}, ColorTexture={ColorTexture}, SpecularTexture={SpecularTexture}, ReflectivityTexture={ReflectivityTexture}, NormalTexture={NormalTexture})";
+    }
+
     /// <summary>Represents a <see cref="Renderable"/> builder type object.</summary>
     public abstract class Builder
     {
@@ -721,7 +730,7 @@ public class Renderable
         {
             return;
         }
-        if (context != null)
+        if (context is not null)
         {
             context.ObjectsRendered++;
             context.VerticesRendered += Internal.IndexCount;
@@ -729,6 +738,7 @@ public class Renderable
         GL.BindVertexArray(Internal.VAO);
         GL.DrawElements(PrimitiveType.Triangles, Internal.IndexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
         GL.BindVertexArray(0);
+        GraphicsUtil.CheckError("Renderable - Render - VAO", this);
     }
 
     /// <summary>Render the VBO fully.</summary>
@@ -736,10 +746,11 @@ public class Renderable
     /// <param name="fixafter">Whether to fix textures after rendering (if textures are enabled).</param>
     public void Render(RenderContext context, bool fixafter)
     {
-        if (ColorTexture != null)
+        GraphicsUtil.CheckError("Renderable - Render - Pre", this);
+        if (ColorTexture is not null)
         {
             GL.ActiveTexture(TextureUnit.Texture3);
-            if (ReflectivityTexture != null)
+            if (ReflectivityTexture is not null)
             {
                 ReflectivityTexture.Bind();
             }
@@ -748,7 +759,7 @@ public class Renderable
                 ColorTexture.Engine.Black.Bind();
             }
             GL.ActiveTexture(TextureUnit.Texture2);
-            if (SpecularTexture != null)
+            if (SpecularTexture is not null)
             {
                 SpecularTexture.Bind();
             }
@@ -757,7 +768,7 @@ public class Renderable
                 ColorTexture.Engine.Black.Bind();
             }
             GL.ActiveTexture(TextureUnit.Texture1);
-            if (NormalTexture != null)
+            if (NormalTexture is not null)
             {
                 NormalTexture.Bind();
             }
@@ -767,9 +778,10 @@ public class Renderable
             }
             GL.ActiveTexture(TextureUnit.Texture0);
             ColorTexture.Bind();
+            GraphicsUtil.CheckError("Renderable - Render - Textures", this);
         }
         RenderWithoutTextures(context);
-        if (fixafter && ColorTexture != null)
+        if (fixafter && ColorTexture is not null)
         {
             GL.ActiveTexture(TextureUnit.Texture3);
             ColorTexture.Engine.Black.Bind();
@@ -780,6 +792,7 @@ public class Renderable
             GL.ActiveTexture(TextureUnit.Texture0);
             ColorTexture.Engine.White.Bind();
         }
+        GraphicsUtil.CheckError("Renderable - Render - Post", this);
     }
 }
 

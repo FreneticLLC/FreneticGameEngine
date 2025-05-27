@@ -60,7 +60,7 @@ public partial class SysConsole
     {
         DateTime DT = DateTime.Now;
         string logfolder = $"{basePath}/{DT.Year.ToString().PadLeft(4, '0')}/{DT.Month.ToString().PadLeft(2, '0')}";
-        return $"{logfolder}/{DT.Day.ToString().PadLeft(2, '0')}_{DT.Hour.ToString().PadLeft(2, '0')}_{DT.Minute.ToString().PadLeft(2, '0')}_{Environment.ProcessId}.log";
+        return $"{logfolder}/{DT.Day.ToString().PadLeft(2, '0')}_{DT.Hour.ToString().PadLeft(2, '0')}_{DT.Minute.ToString().PadLeft(2, '0')}_{Environment.ProcessId.ToString().PadLeft(5, '0')}.log";
     }
 
     /// <summary>The name for the log file to use. Set this BEFORE calling <see cref="Init"/>.</summary>
