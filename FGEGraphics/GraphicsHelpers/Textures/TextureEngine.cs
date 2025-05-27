@@ -125,7 +125,7 @@ public class TextureEngine : IDisposable
 
     /// <summary>
     /// Gets a texture that already exists by name.
-    /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture(string)"/>.</para>
+    /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture"/>.</para>
     /// </summary>
     /// <param name="texturename">The name of the texture.</param>
     /// <returns>The texture, if it exists.</returns>
@@ -452,7 +452,7 @@ public class TextureEngine : IDisposable
 
     /// <summary>
     /// Loads a texture from file.
-    /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture(string)"/>.</para>
+    /// <para>Note: Most users should not use this method. Instead, use <see cref="GetTexture"/>.</para>
     /// </summary>
     /// <param name="filename">The name of the file to use.</param>
     /// <param name="twidth">The texture width, if any.</param>

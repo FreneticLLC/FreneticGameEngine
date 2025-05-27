@@ -47,6 +47,11 @@ public partial class WasApiAudioProvider
         [LibraryImport("ole32.dll")]
         public static partial void CoTaskMemFree(nint pv);
 
+        /// <summary>The PropVariantClear function frees all elements that can be freed in a given PROPVARIANT structure. For complex elements with known element pointers, the underlying elements are freed prior to freeing the containing element.</summary>
+        /// <param name="pvar">A pointer to an initialized PROPVARIANT structure for which any deallocatable elements are to be freed. On return, all zeroes are written to the PROPVARIANT structure.</param>
+        [LibraryImport("ole32.dll")]
+        public static partial int PropVariantClear(nint pvar);
+
         /// <summary>Enum constant: Class Context: All.</summary>
         public const uint CLSCTX_ALL = 1;
 
@@ -80,6 +85,142 @@ public partial class WasApiAudioProvider
             /// <summary>When used with AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM, a sample rate converter with better quality than the default conversion but with a higher performance cost is used. This should be used if the audio is ultimately intended to be heard by humans as opposed to other scenarios such as pumping silence or populating a meter.</summary>
             SRC_DEFAULT_QUALITY = 0x08000000
         }
+
+        /// <summary>Storage Access constants.</summary>
+        public enum STGMConstants : int
+        {
+            /// <summary>Read-only access.</summary>
+            READ = 0,
+            /// <summary>Write-only access.</summary>
+            WRITE = 1,
+            /// <summary>Read+Write access.</summary>
+            READWRITE = 2
+        }
+
+        /// <summary>Specifies the FMTID/PID identifier that programmatically identifies a property. Replaces SHCOLUMNID.</summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        public struct PropertyKey(Guid fmtid, uint pid)
+        {
+            /// <summary>A unique GUID for the property.</summary>
+            public Guid fmtid = fmtid;
+
+            /// <summary>A property identifier (PID). This parameter is not used as in SHCOLUMNID. It is recommended that you set this value to PID_FIRST_USABLE. Any value greater than or equal to 2 is acceptable.</summary>
+            public uint pid = pid;
+        }
+
+        /// <summary>This interface exposes methods used to enumerate and manipulate property values.</summary>
+        [Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IPropertyStore
+        {
+            /// <summary>This method returns a count of the number of properties that are attached to the file.</summary>
+            /// <param name="cProps">A pointer to a value that indicates the property count.</param>
+            public int GetCount(out uint cProps);
+
+            /// <summary>Gets a property key from the property array of an item.</summary>
+            /// <param name="iProp">The index of the property key in the array of PROPERTYKEY structures. This is a zero-based index.</param>
+            /// <param name="pkey">TBD (wtf actual microsoft docs here is 'TBD'??)</param>
+            public int GetAt([In] uint iProp, out PropertyKey pkey);
+
+            /// <summary>This method retrieves the data for a specific property.</summary>
+            /// <param name="key">TBD</param>
+            /// <param name="pv">After the IPropertyStore::GetValue method returns successfully, this parameter points to a PROPVARIANT structure that contains data about the property.</param>
+            public int GetValue([In] ref PropertyKey key, [In] nint pv);
+
+            /// <summary>This method sets a property value or replaces or removes an existing value.</summary>
+            /// <param name="key">TBD</param>
+            /// <param name="pv">REFPROPVARIANT - TBD</param>
+            public int SetValue([In] ref PropertyKey key, [In] nint pv);
+
+            /// <summary>After a change has been made, this method saves the changes.</summary>
+            public int Commit();
+        }
+
+        /// <summary>Contains static DevPKey values.</summary>
+        public static class PKeys
+        {
+            // ============= Core Properties that matter =============
+            /// <summary>The PKEY_Device_FriendlyName property contains the friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").</summary>
+            public static PropertyKey PKEY_Device_FriendlyName = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 14); // STRING
+            /// <summary>The device description of the endpoint device (for example, "Speakers").</summary>
+            public static PropertyKey PKEY_Device_DeviceDesc = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 2); // STRING
+            /// <summary>Stores the audio endpoint device instance identifier. The value can also be aquired via IMMDevice::GetId method. For more information about this property, see Endpoint ID Strings and DEVPKEY_Device_InstanceId.</summary>
+            public static PropertyKey PKEY_Device_InstanceId = new(new Guid(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57), 256); // STRING
+            /// <summary>The PKEY_AudioEndpoint_FormFactor property specifies the form factor of the audio endpoint device. The form factor indicates the physical attributes of the audio endpoint device that the user manipulates.</summary>
+            public static PropertyKey PKEY_AudioEndpoint_FormFactor = new(new Guid(0x1da5d803, 0xd492, 0x4edd, 0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e), 0); // UI4
+            /// <summary>The PKEY_AudioEndpoint_PhysicalSpeakers property specifies the channel-configuration mask for the audio endpoint device. The mask indicates the physical configuration of a set of speakers and specifies the assignment of channels to speakers. For more information about channel-configuration masks, see KSPROPERTY_AUDIO_CHANNEL_CONFIG.</summary>
+            public static PropertyKey PKEY_AudioEndpoint_PhysicalSpeakers = new(new Guid(0x1da5d803, 0xd492, 0x4edd, 0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e), 3); // UI4
+            /// <summary>A GUID associated with this audio endpoint, unique across all audio endpoints. This GUID can be used as the device identifier in the DirectSound APIs.</summary>
+            public static PropertyKey PKEY_AudioEndpoint_GUID = new(new Guid(0x1da5d803, 0xd492, 0x4edd, 0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e), 4); // LPWSTR (stringized GUID)
+            /// <summary>The device format (can be PCM integer).</summary>
+            public static PropertyKey PKEY_AudioEngine_DeviceFormat = new(new Guid(0xf19f064d, 0x82c, 0x4e27, 0xbc, 0x73, 0x68, 0x82, 0xa1, 0xbb, 0x8e, 0x4c), 0); // VT_BLOB
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+            // ============= others =============
+            public static PropertyKey PKEY_NAME = new(new Guid(0xb725f130, 0x47ef, 0x101a, 0xa5, 0xf1, 0x02, 0x60, 0x8c, 0x9e, 0xeb, 0xac), 10); // STRING
+            public static PropertyKey PKEY_Device_HardwareIds = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 3); // STRING_LIST
+            public static PropertyKey PKEY_Device_CompatibleIds = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 4); // STRING_LIST
+            public static PropertyKey PKEY_Device_Service = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 6); // STRING
+            public static PropertyKey PKEY_Device_Class = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 9); // STRING
+            public static PropertyKey PKEY_Device_ClassGuid = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 10); // GUID
+            public static PropertyKey PKEY_Device_Driver = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 11); // STRING
+            public static PropertyKey PKEY_Device_ConfigFlags = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 12); // UINT32
+            public static PropertyKey PKEY_Device_Manufacturer = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 13); // STRING
+            public static PropertyKey PKEY_Device_LocationInfo = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 15); // STRING
+            public static PropertyKey PKEY_Device_PDOName = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 16); // STRING
+            public static PropertyKey PKEY_Device_Capabilities = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 17); // UINT32
+            public static PropertyKey PKEY_Device_UINumber = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 18); // UINT32
+            public static PropertyKey PKEY_Device_UpperFilters = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 19); // STRING_LIST
+            public static PropertyKey PKEY_Device_LowerFilters = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 20); // STRING_LIST
+            public static PropertyKey PKEY_Device_BusTypeGuid = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 21); // GUID
+            public static PropertyKey PKEY_Device_LegacyBusType = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 22); // UINT32
+            public static PropertyKey PKEY_Device_BusNumber = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 23); // UINT32
+            public static PropertyKey PKEY_Device_EnumeratorName = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 24); // STRING
+            public static PropertyKey PKEY_Device_Security = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 25); // SECURITY_DESCRIPTOR
+            public static PropertyKey PKEY_Device_SecuritySDS = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 26); // SECURITY_DESCRIPTOR_STRING
+            public static PropertyKey PKEY_Device_DevType = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 27); // UINT32
+            public static PropertyKey PKEY_Device_Exclusive = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 28); // BOOLEAN
+            public static PropertyKey PKEY_Device_Characteristics = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 29); // UINT32
+            public static PropertyKey PKEY_Device_Address = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 30); // UINT32
+            public static PropertyKey PKEY_Device_UINumberDescFormat = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 31); // STRING
+            public static PropertyKey PKEY_Device_PowerData = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 32); // BINARY
+            public static PropertyKey PKEY_Device_RemovalPolicy = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 33); // UINT32
+            public static PropertyKey PKEY_Device_RemovalPolicyDefault = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 34); // UINT32
+            public static PropertyKey PKEY_Device_RemovalPolicyOverride = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 35); // UINT32
+            public static PropertyKey PKEY_Device_InstallState = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 36); // UINT32
+            public static PropertyKey PKEY_Device_LocationPaths = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 37); // STRING_LIST
+            public static PropertyKey PKEY_Device_BaseContainerId = new(new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 38); // GUID
+            public static PropertyKey PKEY_Device_Model = new(new Guid(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57), 39); // STRING
+        }
+
+        /// <summary>For <see cref="PKeys.PKEY_AudioEndpoint_FormFactor"/>.</summary>
+        public enum EndpointFormFactor : int
+        {
+            RemoteNetworkDevice, // = 0
+            Speakers,
+            LineLevel,
+            Headphones,
+            Microphone,
+            Headset,
+            Handset,
+            UnknownDigitalPassthrough,
+            SPDIF,
+            DigitalAudioDisplayDevice,
+            UnknownFormFactor,
+            EndpointFormFactor_enum_count
+        }
+
+        /// <summary>Enum of VARTYPE for a PropertyVariant.</summary>
+        public enum VarType
+        {
+            VT_EMPTY = 0, VT_NULL = 1, VT_I2 = 2, VT_I4 = 3, VT_R4 = 4, VT_R8 = 5, VT_CY = 6, VT_DATE = 7, VT_BSTR = 8,
+            VT_DISPATCH = 9, VT_ERROR = 10, VT_BOOL = 11, VT_VARIANT = 12, VT_UNKNOWN = 13, VT_DECIMAL = 14, VT_I1 = 16,
+            VT_UI1 = 17, VT_UI2 = 18, VT_UI4 = 19, VT_I8 = 20, VT_UI8 = 21, VT_INT = 22, VT_UINT = 23, VT_VOID = 24,
+            VT_HRESULT = 25, VT_PTR = 26, VT_SAFEARRAY = 27, VT_CARRAY = 28, VT_USERDEFINED = 29, VT_LPSTR = 30, VT_LPWSTR = 31,
+            VT_RECORD = 36, VT_INT_PTR = 37, VT_UINT_PTR = 38, VT_FILETIME = 64, VT_BLOB = 65, VT_STREAM = 66, VT_STORAGE = 67,
+            VT_STREAMED_OBJECT = 68, VT_STORED_OBJECT = 69, VT_BLOB_OBJECT = 70, VT_CF = 71, VT_CLSID = 72, VT_VERSIONED_STREAM = 73,
+            VT_BSTR_BLOB = 0xfff, VT_VECTOR = 0x1000, VT_ARRAY = 0x2000, VT_BYREF = 0x4000, VT_RESERVED = 0x8000, VT_ILLEGAL = 0xffff
+        }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>The IMMDeviceEnumerator interface provides methods for enumerating multimedia device resources. In the current implementation of the MMDevice API, the only device resources that this interface can enumerate are audio endpoint devices. A client obtains a reference to an IMMDeviceEnumerator interface by calling the CoCreateInstance function, as described previously (see MMDevice API).</summary>
         [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")]
@@ -301,6 +442,38 @@ public partial class WasApiAudioProvider
                 throw new Exception($"WASAPI {operation} failed with error code: 0x{hr:X8}");
             }
         }
+
+        /// <summary>Equivalent to <see cref="Marshal.GetObjectForNativeVariant"/> but actually works for strings and stuff.</summary>
+        public static object GetObjectFromPropVariant(nint pv)
+        {
+            Native.VarType varType = (Native.VarType)Marshal.ReadInt16(pv);
+            Logs.Debug($"Found object of type {varType}");
+            return varType switch
+            {
+                Native.VarType.VT_EMPTY or Native.VarType.VT_NULL or Native.VarType.VT_VOID => null,
+                Native.VarType.VT_LPSTR => Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(pv + 8)),
+                Native.VarType.VT_BSTR => Marshal.PtrToStringBSTR(Marshal.ReadIntPtr(pv + 8)),
+                Native.VarType.VT_LPWSTR => Marshal.PtrToStringUni(Marshal.ReadIntPtr(pv + 8)),
+                Native.VarType.VT_FILETIME => DateTime.FromFileTimeUtc(Marshal.ReadInt64(pv + 8)),
+                Native.VarType.VT_CLSID => Marshal.PtrToStructure<Guid>(Marshal.ReadIntPtr(pv + 8)),
+                Native.VarType.VT_I1 or Native.VarType.VT_UI1 or Native.VarType.VT_I2 or Native.VarType.VT_I4 or Native.VarType.VT_I8
+                or Native.VarType.VT_UI2 or Native.VarType.VT_UI4 or Native.VarType.VT_UI8 or Native.VarType.VT_R4 or Native.VarType.VT_R8
+                or Native.VarType.VT_BOOL or Native.VarType.VT_DECIMAL or Native.VarType.VT_INT or Native.VarType.VT_UINT
+                or Native.VarType.VT_ERROR or Native.VarType.VT_HRESULT => Marshal.GetObjectForNativeVariant(pv),
+                _ => throw new NotSupportedException($"Unsupported PropVariant type: {varType}"),
+            };
+        }
+
+        /// <summary>Gets a value from a property store, and converts it to a C# type.</summary>
+        public static object GetPropertyValueFixed(Native.IPropertyStore propStore, Native.PropertyKey key)
+        {
+            nint pv = Marshal.AllocCoTaskMem(32);
+            CheckHResult(propStore.GetValue(ref key, pv), "propertyStore.GetValue");
+            object obj = GetObjectFromPropVariant(pv);
+            CheckHResult(Native.PropVariantClear(pv), "PropVariantClear");
+            Marshal.FreeCoTaskMem(pv);
+            return obj;
+        }
     }
 
     /// <summary>Raw internal data for the WASAPI handler.</summary>
@@ -316,17 +489,22 @@ public partial class WasApiAudioProvider
         {
             throw new Exception("Failed to create IMMDeviceEnumerator");
         }
-        var enumerator = (Native.IMMDeviceEnumerator)Marshal.GetTypedObjectForIUnknown(Internal.RefEnumerator, typeof(Native.IMMDeviceEnumerator));
+        Native.IMMDeviceEnumerator enumerator = (Native.IMMDeviceEnumerator)Marshal.GetTypedObjectForIUnknown(Internal.RefEnumerator, typeof(Native.IMMDeviceEnumerator));
         // TODO: Properly track the available list and allow user to change at will
         InternalData.CheckHResult(enumerator.GetDefaultAudioEndpoint(0 /* eRender */, 0 /* eConsole */, out Internal.RefDevice), "GetDefaultAudioEndpoint");
         if (Internal.RefDevice == nint.Zero)
         {
             throw new Exception("Failed to get default IMMDevice");
         }
-        var device = (Native.IMMDevice)Marshal.GetTypedObjectForIUnknown(Internal.RefDevice, typeof(Native.IMMDevice));
+        Native.IMMDevice device = (Native.IMMDevice)Marshal.GetTypedObjectForIUnknown(Internal.RefDevice, typeof(Native.IMMDevice));
         InternalData.CheckHResult(device.GetId(out string deviceId), "device.GetId");
         InternalData.CheckHResult(device.Activate(ref InternalData.IID_IAudioClient, Native.CLSCTX_ALL, IntPtr.Zero, out Internal.RefAudioClient), "device.Activate");
         Internal.AudioClient = (Native.IAudioClient)Marshal.GetTypedObjectForIUnknown(Internal.RefAudioClient, typeof(Native.IAudioClient));
+        InternalData.CheckHResult(device.OpenPropertyStore((int)Native.STGMConstants.READ, out nint ppProperties), "device.OpenPropertyStore");
+        Native.IPropertyStore propertyStore = (Native.IPropertyStore)Marshal.GetTypedObjectForIUnknown(ppProperties, typeof(Native.IPropertyStore));
+        string friendlyName = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_FriendlyName)}";
+        string description = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_DeviceDesc)}";
+        uint formFact = (uint)InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_AudioEndpoint_FormFactor);
         // TODO: Dynamic format based on device config / user settings
         Internal.Format = Native.WaveFormatEx.Create(FGE3DAudioEngine.InternalData.FREQUENCY, 2);
         uint streamFlags = (uint)(Native.AUDCLNT_STREAMFLAGS.AUTOCONVERTPCM | Native.AUDCLNT_STREAMFLAGS.SRC_DEFAULT_QUALITY);
@@ -340,7 +518,7 @@ public partial class WasApiAudioProvider
         Internal.RenderClient = (Native.IAudioRenderClient)Marshal.GetTypedObjectForIUnknown(Internal.RefRenderClient, typeof(Native.IAudioRenderClient));
         Internal.AudioClient.Reset();
         Internal.AudioClient.Start();
-        Logs.ClientInit($"Audio system initialized using WASAPI... device='{deviceId}'");
+        Logs.ClientInit($"Audio system initialized using WASAPI... device is (id={deviceId}, friendlyName='{friendlyName}', description='{description}', form={(Native.EndpointFormFactor)formFact})");
         Logs.Debug($"WASAPI MaxBufferFrames={Internal.BufferFrameCount}");
     }
 
