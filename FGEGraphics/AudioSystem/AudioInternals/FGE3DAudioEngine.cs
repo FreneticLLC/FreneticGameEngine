@@ -79,11 +79,8 @@ public class FGE3DAudioEngine
     /// <summary>How far apart the ears are.</summary>
     public float HeadWidth = 0.2f; // TODO: SoundEngine control of this var
 
-    /// <summary>If the engine is currently backed by OpenAL, this instance handles that.</summary>
-    public OpenALAudioProvider OpenALBacker;
-
-    /// <summary>If the engine is currently backed by WASAPI, this instance handles that.</summary>
-    public WasApiAudioProvider WasApiAudioBacker;
+    /// <summary>The internal backend for hardware interaction.</summary>
+    public GenericAudioBacker AudioBacker;
 
     /// <summary>Data for syncing updates to audio clips between the game engine thread and the audio engine thread.</summary>
     public record class SyncUpdate(LiveAudioInstance Instance, Location Position, Location Velocity, float Gain, float Pitch, AudioState State, int Seek, bool Loop, double Time, Location Forward, Location Up, bool DidTeleport, bool IsNew);
@@ -108,16 +105,29 @@ public class FGE3DAudioEngine
     /// <summary>Initialize and load the audio engine.</summary>
     public unsafe void Init()
     {
-        if (USE_WASAPI)
+        if (AudioBacker is null)
         {
-            WasApiAudioBacker = new();
-            WasApiAudioBacker.Initialize();
+            if (USE_WASAPI)
+            {
+                AudioBacker = new WasApiAudioProvider();
+            }
+            else
+            {
+                AudioBacker = new OpenALAudioProvider();
+            }
         }
         else
         {
-            OpenALBacker = new();
-            OpenALBacker.Init();
+            AudioBacker.Shutdown();
         }
+        AudioBacker.PreInit();
+        /*List<AudioDevice> devices = ListAvailableOutputDevices();
+        Logs.Debug($"Found {devices.Count} audio devices:");
+        foreach (AudioDevice device in devices)
+        {
+            Logs.Debug(device.FullDescriptionText);
+        }*/
+        AudioBacker.SelectDeviceAndInit(null); // TODO: Device select
         Internal.Instance = this;
         Internal.ReusableBuffers = new short*[InternalData.REUSABLE_BUFFER_ARRAY_SIZE];
         for (int i = 0; i < InternalData.REUSABLE_BUFFER_ARRAY_SIZE; i++)
@@ -141,6 +151,12 @@ public class FGE3DAudioEngine
     public unsafe void Shutdown()
     {
         Run = false;
+    }
+
+    /// <summary>Returns a list of all available audio output devices.</summary>
+    public List<AudioDevice> ListAvailableOutputDevices()
+    {
+        return AudioBacker.ListAllAudioDevices();
     }
 
     /// <summary>Current audio levels.</summary>
@@ -224,10 +240,8 @@ public class FGE3DAudioEngine
                 ReusableBuffers = null;
             }
             Instance.Channels.Clear();
-            Instance.WasApiAudioBacker?.Shutdown();
-            Instance.WasApiAudioBacker = null;
-            Instance.OpenALBacker?.Shutdown();
-            Instance.OpenALBacker = null;
+            Instance.AudioBacker.Shutdown();
+            Instance.AudioBacker = null;
         }
 
         /// <summary>Calculates the audio level of a raw audio buffer.</summary>
@@ -306,7 +320,7 @@ public class FGE3DAudioEngine
             try
             {
                 long lastTime = Stopwatch.GetTimestamp();
-                Instance.OpenALBacker?.MakeCurrent();
+                Instance.AudioBacker.MakeCurrent();
                 DeadInstances = [];
                 while (true)
                 {
@@ -318,7 +332,7 @@ public class FGE3DAudioEngine
                     long newTime = Stopwatch.GetTimestamp();
                     double elSec = (newTime - lastTime) / (double)Stopwatch.Frequency;
                     lastTime = newTime;
-                    bool needsFill = USE_WASAPI ? Instance.WasApiAudioBacker.PreprocessStep() : Instance.OpenALBacker.PreprocessStep();
+                    bool needsFill = Instance.AudioBacker.PreprocessStep();
                     if (needsFill)
                     {
                         foreach (AudioChannel channel in Instance.Channels)
@@ -378,14 +392,7 @@ public class FGE3DAudioEngine
                         {
                             newCurrentLevel = Math.Max(newCurrentLevel, GetLevelFor(channel.InternalCurrentBuffer));
                         }
-                        if (USE_WASAPI)
-                        {
-                            Instance.WasApiAudioBacker.SendNextBuffer(Instance);
-                        }
-                        else
-                        {
-                            Instance.OpenALBacker.SendNextBuffer(Instance);
-                        }
+                        Instance.AudioBacker.SendNextBuffer(Instance);
                         Instance.CurrentLevel = newCurrentLevel;
                         Instance.SoundCount = Instance.Playing.Count;
                     }

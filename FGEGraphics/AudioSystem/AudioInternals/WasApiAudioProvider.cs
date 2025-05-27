@@ -17,7 +17,7 @@ using FGEGraphics.GraphicsHelpers;
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Helper for audio playback using WASAPI (Windows Audio Session API). As the name implies, this is Windows-only, however it is a very direct proper native lib, just one thin OS level above the hardware driver.</summary>
-public partial class WasApiAudioProvider
+public partial class WasApiAudioProvider : GenericAudioBacker
 {
     /// <summary>Extremely Windows-only native WASAPI calls.
     /// Do not touch these unless you super duper extra especially know what you're doing.
@@ -205,8 +205,7 @@ public partial class WasApiAudioProvider
             UnknownDigitalPassthrough,
             SPDIF,
             DigitalAudioDisplayDevice,
-            UnknownFormFactor,
-            EndpointFormFactor_enum_count
+            UnknownFormFactor
         }
 
         /// <summary>Enum of VARTYPE for a PropertyVariant.</summary>
@@ -247,6 +246,21 @@ public partial class WasApiAudioProvider
             /// <summary>The RegisterEndpointNotificationCallback method registers a client's notification callback interface.</summary>
             /// <param name="pClient">Pointer to the IMMNotificationClient interface that the client is registering for notification callbacks.</param>
             public int RegisterEndpointNotificationCallback(nint pClient);
+        }
+
+        /// <summary>The IMMDeviceCollection interface represents a collection of multimedia device resources. In the current implementation, the only device resources that the MMDevice API can create collections of are audio endpoint devices.</summary>
+        [Guid("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IMMDeviceCollection
+        {
+            /// <summary>The GetCount method retrieves a count of the devices in the device collection.</summary>
+            /// <param name="pcDevices">A UINT variable into which the method writes the number of devices in the device collection.</param>
+            public int GetCount(out uint pcDevices);
+
+            /// <summary>The Item method retrieves a pointer to the specified item in the device collection.</summary>
+            /// <param name="nDevice">The device number. If the collection contains n devices, the devices are numbered 0 to n– 1.</param>
+            /// <param name="ppDevice">Pointer to a pointer variable into which the method writes the address of the IMMDevice interface of the specified item in the device collection. Through this method, the caller obtains a counted reference to the interface. The caller is responsible for releasing the interface, when it is no longer needed, by calling the interface's Release method. If the Item call fails, *ppDevice is NULL.</param>
+            public int Item(uint nDevice, out nint ppDevice);
         }
 
         /// <summary>The IMMDevice interface encapsulates the generic features of a multimedia device resource. In the current implementation of the MMDevice API, the only type of device resource that an IMMDevice interface can represent is an audio endpoint device.</summary>
@@ -402,13 +416,16 @@ public partial class WasApiAudioProvider
     public struct InternalData
     {
         /// <summary>Internal raw references.</summary>
-        public nint RefAudioClient, RefDevice, RefEnumerator, RefRenderClient;
+        public nint RefAudioClient, RefEnumerator, RefRenderClient;
 
         /// <summary>The WASAPI audio client.</summary>
         public Native.IAudioClient AudioClient;
 
         /// <summary>The WASAPI render client.</summary>
         public Native.IAudioRenderClient RenderClient;
+
+        /// <summary>The WASAPI device enumerator.</summary>
+        public Native.IMMDeviceEnumerator Enumerator;
 
         /// <summary>Raw wave format data for WASAPI init.</summary>
         public Native.WaveFormatEx Format;
@@ -447,7 +464,6 @@ public partial class WasApiAudioProvider
         public static object GetObjectFromPropVariant(nint pv)
         {
             Native.VarType varType = (Native.VarType)Marshal.ReadInt16(pv);
-            Logs.Debug($"Found object of type {varType}");
             return varType switch
             {
                 Native.VarType.VT_EMPTY or Native.VarType.VT_NULL or Native.VarType.VT_VOID => null,
@@ -479,8 +495,42 @@ public partial class WasApiAudioProvider
     /// <summary>Raw internal data for the WASAPI handler.</summary>
     public InternalData Internal = new() { RawDataBuffers = [] };
 
-    /// <summary>Initialize the WASAPI handler.</summary>
-    public void Initialize()
+    /// <inheritdoc/>
+    public override List<AudioDevice> ListAllAudioDevices()
+    {
+        List<AudioDevice> result = [];
+        InternalData.CheckHResult(Internal.Enumerator.EnumAudioEndpoints(0 /* eRender */, 1 /* DEVICE_STATE_ACTIVE */, out nint ppDevices), "GetDefaultAudioEndpoint");
+        Native.IMMDeviceCollection collection = (Native.IMMDeviceCollection)Marshal.GetTypedObjectForIUnknown(ppDevices, typeof(Native.IMMDeviceCollection));
+        InternalData.CheckHResult(collection.GetCount(out uint deviceCount), "collection.GetCount");
+        for (uint i = 0; i < deviceCount; i++)
+        {
+            InternalData.CheckHResult(collection.Item(i, out nint ppDevice), "collection.Item");
+            Native.IMMDevice device = (Native.IMMDevice)Marshal.GetTypedObjectForIUnknown(ppDevice, typeof(Native.IMMDevice));
+            InternalData.CheckHResult(device.GetId(out string deviceId), "device.GetId");
+            InternalData.CheckHResult(device.OpenPropertyStore((int)Native.STGMConstants.READ, out nint ppProperties), "device.OpenPropertyStore");
+            Native.IPropertyStore propertyStore = (Native.IPropertyStore)Marshal.GetTypedObjectForIUnknown(ppProperties, typeof(Native.IPropertyStore));
+            string friendlyName = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_FriendlyName)}";
+            string description = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_DeviceDesc)}";
+            string guid = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_AudioEndpoint_GUID)}";
+            uint formFactorIndex = (uint)InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_AudioEndpoint_FormFactor);
+            Native.EndpointFormFactor formFactor = (Native.EndpointFormFactor)formFactorIndex;
+            AudioDevice deviceOut = new()
+            {
+                Name = friendlyName,
+                UID = guid,
+                InternalID = deviceId,
+                FullDescriptionText = $"{friendlyName}:\n  Description: {description}\n  Form Factor: {formFactor}\n  GUID: {guid}\n  WASAPI ID: {deviceId}\n  Index: {i}",
+                IDs = [guid, deviceId, friendlyName, description, $"{formFactor}", $"{i}"]
+            };
+            Marshal.ReleaseComObject(device);
+            result.Add(deviceOut);
+        }
+        Marshal.ReleaseComObject(collection);
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public override void PreInit()
     {
         // TODO: Is COM initialize redundant in C# context? Doesn't hurt to have though.
         InternalData.CheckHResult(Native.CoInitializeEx(IntPtr.Zero, (uint)Native.COINIT.MULTITHREADED), "CoInitializeEx");
@@ -489,22 +539,33 @@ public partial class WasApiAudioProvider
         {
             throw new Exception("Failed to create IMMDeviceEnumerator");
         }
-        Native.IMMDeviceEnumerator enumerator = (Native.IMMDeviceEnumerator)Marshal.GetTypedObjectForIUnknown(Internal.RefEnumerator, typeof(Native.IMMDeviceEnumerator));
-        // TODO: Properly track the available list and allow user to change at will
-        InternalData.CheckHResult(enumerator.GetDefaultAudioEndpoint(0 /* eRender */, 0 /* eConsole */, out Internal.RefDevice), "GetDefaultAudioEndpoint");
-        if (Internal.RefDevice == nint.Zero)
+        Internal.Enumerator = (Native.IMMDeviceEnumerator)Marshal.GetTypedObjectForIUnknown(Internal.RefEnumerator, typeof(Native.IMMDeviceEnumerator));
+    }
+
+    /// <inheritdoc/>
+    public override void SelectDeviceAndInit(AudioDevice device)
+    {
+        if (Internal.AudioClient is not null)
         {
-            throw new Exception("Failed to get default IMMDevice");
+            Shutdown();
+            PreInit();
         }
-        Native.IMMDevice device = (Native.IMMDevice)Marshal.GetTypedObjectForIUnknown(Internal.RefDevice, typeof(Native.IMMDevice));
-        InternalData.CheckHResult(device.GetId(out string deviceId), "device.GetId");
-        InternalData.CheckHResult(device.Activate(ref InternalData.IID_IAudioClient, Native.CLSCTX_ALL, IntPtr.Zero, out Internal.RefAudioClient), "device.Activate");
+        nint refDevice = 0;
+        if (device is not null)
+        {
+            InternalData.CheckHResult(Internal.Enumerator.GetDevice(device.InternalID, out refDevice), "GetDefaultAudioEndpoint");
+        }
+        if (refDevice == nint.Zero)
+        {
+            InternalData.CheckHResult(Internal.Enumerator.GetDefaultAudioEndpoint(0 /* eRender */, 0 /* eConsole */, out refDevice), "GetDefaultAudioEndpoint");
+            if (refDevice == nint.Zero)
+            {
+                throw new Exception("Failed to get default IMMDevice");
+            }
+        }
+        Native.IMMDevice mmDevice = (Native.IMMDevice)Marshal.GetTypedObjectForIUnknown(refDevice, typeof(Native.IMMDevice));
+        InternalData.CheckHResult(mmDevice.Activate(ref InternalData.IID_IAudioClient, Native.CLSCTX_ALL, IntPtr.Zero, out Internal.RefAudioClient), "device.Activate");
         Internal.AudioClient = (Native.IAudioClient)Marshal.GetTypedObjectForIUnknown(Internal.RefAudioClient, typeof(Native.IAudioClient));
-        InternalData.CheckHResult(device.OpenPropertyStore((int)Native.STGMConstants.READ, out nint ppProperties), "device.OpenPropertyStore");
-        Native.IPropertyStore propertyStore = (Native.IPropertyStore)Marshal.GetTypedObjectForIUnknown(ppProperties, typeof(Native.IPropertyStore));
-        string friendlyName = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_FriendlyName)}";
-        string description = $"{InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_Device_DeviceDesc)}";
-        uint formFact = (uint)InternalData.GetPropertyValueFixed(propertyStore, Native.PKeys.PKEY_AudioEndpoint_FormFactor);
         // TODO: Dynamic format based on device config / user settings
         Internal.Format = Native.WaveFormatEx.Create(FGE3DAudioEngine.InternalData.FREQUENCY, 2);
         uint streamFlags = (uint)(Native.AUDCLNT_STREAMFLAGS.AUTOCONVERTPCM | Native.AUDCLNT_STREAMFLAGS.SRC_DEFAULT_QUALITY);
@@ -518,22 +579,27 @@ public partial class WasApiAudioProvider
         Internal.RenderClient = (Native.IAudioRenderClient)Marshal.GetTypedObjectForIUnknown(Internal.RefRenderClient, typeof(Native.IAudioRenderClient));
         Internal.AudioClient.Reset();
         Internal.AudioClient.Start();
-        Logs.ClientInit($"Audio system initialized using WASAPI... device is (id={deviceId}, friendlyName='{friendlyName}', description='{description}', form={(Native.EndpointFormFactor)formFact})");
-        Logs.Debug($"WASAPI MaxBufferFrames={Internal.BufferFrameCount}");
+        Marshal.ReleaseComObject(mmDevice);
+        Logs.ClientInit($"Audio system initialized using WASAPI... device selection: {device?.Name ?? "default"}");
     }
 
-    /// <summary>Shuts down all WASAPI backings.</summary>
-    public void Shutdown()
+    /// <inheritdoc/>
+    public override void Shutdown()
     {
         Internal.AudioClient.Stop();
-        Native.CoTaskMemFree(Internal.RefAudioClient);
-        Native.CoTaskMemFree(Internal.RefDevice);
-        Native.CoTaskMemFree(Internal.RefEnumerator);
-        Native.CoTaskMemFree(Internal.RefRenderClient);
+        Marshal.ReleaseComObject(Internal.AudioClient);
+        Marshal.ReleaseComObject(Internal.Enumerator);
+        Marshal.ReleaseComObject(Internal.RenderClient);
+        Internal.AudioClient = null;
+        Internal.RenderClient = null;
+        Internal.Enumerator = null;
+        Internal.RefAudioClient = nint.Zero;
+        Internal.RefEnumerator = nint.Zero;
+        Internal.RefRenderClient = nint.Zero;
     }
 
-    /// <summary>Preprocesses the WASAPI backer for a single framestep. Returns true if there's room to add anything, or false if the instance is already full on buffers.</summary>
-    public bool PreprocessStep()
+    /// <inheritdoc/>
+    public override bool PreprocessStep()
     {
         // padding is the number of frames queued but not yet played
         Internal.AudioClient.GetCurrentPadding(out uint padding);
@@ -541,8 +607,8 @@ public partial class WasApiAudioProvider
         return availableFrames > FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER && padding < FGE3DAudioEngine.InternalData.BUFFERS_AT_ONCE * FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER;
     }
 
-    /// <summary>Gather data from the internal audio engine and send it forward to WasApi to play.</summary>
-    public unsafe void SendNextBuffer(FGE3DAudioEngine engine)
+    /// <inheritdoc/>
+    public override unsafe void SendNextBuffer(FGE3DAudioEngine engine)
     {
         // 4 = 2 bytes per sample, 2 channels
         byte[] rawBuffer = Internal.RawDataBuffers.Count > 0 ? Internal.RawDataBuffers.Dequeue() : new byte[FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER * 4];
@@ -571,5 +637,11 @@ public partial class WasApiAudioProvider
         int bytesToWrite = (int)(frames * bytesPerFrame);
         Marshal.Copy(rawBuffer, 0, pData, bytesToWrite);
         Internal.RenderClient.ReleaseBuffer(frames, 0);
+    }
+
+    /// <inheritdoc/>
+    public override void MakeCurrent()
+    {
+        // Not needed
     }
 }

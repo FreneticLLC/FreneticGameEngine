@@ -19,7 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
 /// <summary>Helper for audio playback using OpenTK's OpenAL library. Cross-platform and simple. Used when native libraries are unavailable.</summary>
-public class OpenALAudioProvider
+public class OpenALAudioProvider : GenericAudioBacker
 {
     /// <summary>All available OpenAL extensions.</summary>
     public HashSet<string> ALExtensions = [];
@@ -42,12 +42,18 @@ public class OpenALAudioProvider
     /// <summary>Reusable internal raw binary buffers.</summary>
     public Queue<byte[]> RawDataBuffers = [];
 
-    /// <summary>Initialize the OpenAL system.</summary>
-    public void Init()
+    /// <inheritdoc/>
+    public override void PreInit()
+    {
+        // Nothing needed.
+    }
+
+    /// <inheritdoc/>
+    public override void SelectDeviceAndInit(AudioDevice device)
     {
         // Gather some metadata, mostly just for debugging usage
         string[] devices = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
-        string deviceName = ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
+        string deviceName = device is not null ? device.InternalID : ALC.GetString(ALDevice.Null, AlcGetString.DefaultDeviceSpecifier);
         Device = ALC.OpenDevice(deviceName);
         Context = ALC.CreateContext(Device, (int[])null);
         ALC.MakeContextCurrent(Context);
@@ -71,8 +77,29 @@ public class OpenALAudioProvider
         Logs.Debug($"OpenAL available devices: '{devices.JoinString("','")}', ALExtensions='{ALExtensions.JoinString("','")}'");
     }
 
-    /// <summary>Shut down and disable the audio system.</summary>
-    public void Shutdown()
+    /// <summary>(Attempts to) return a list of all available audio devices.</summary>
+    public override List<AudioDevice> ListAllAudioDevices()
+    {
+        List<AudioDevice> devices = [];
+        string[] deviceNames = [.. ALC.GetStringList(GetEnumerationStringList.DeviceSpecifier)];
+        foreach (string deviceName in deviceNames)
+        {
+            // TODO: Can we even read any metadata here? Like... the *name* of a device even? Argh.
+            AudioDevice device = new()
+            {
+                Name = deviceName,
+                UID = deviceName,
+                InternalID = deviceName,
+                FullDescriptionText = $"OpenAL Device: {deviceName}",
+                IDs = [deviceName],
+            };
+            devices.Add(device);
+        }
+        return devices;
+    }
+
+    /// <inheritdoc/>
+    public override void Shutdown()
     {
         if (Context.Handle != IntPtr.Zero)
         {
@@ -81,14 +108,14 @@ public class OpenALAudioProvider
         Context = new ALContext(IntPtr.Zero);
     }
 
-    /// <summary>Attaches this OpenAL context to the current thread.</summary>
-    public void MakeCurrent()
+    /// <inheritdoc/>
+    public override void MakeCurrent()
     {
         ALC.MakeContextCurrent(Context);
     }
 
-    /// <summary>Preprocesses the OpenAL backer for a single framestep. Returns true if there's room to add anything, or false if the instance is already full on buffers.</summary>
-    public bool PreprocessStep()
+    /// <inheritdoc/>
+    public override bool PreprocessStep()
     {
         AL.GetSource(ALSource, ALGetSourcei.BuffersProcessed, out int buffersDone);
         while (buffersDone > 0)
@@ -101,8 +128,8 @@ public class OpenALAudioProvider
         return waiting < FGE3DAudioEngine.InternalData.BUFFERS_AT_ONCE;
     }
 
-    /// <summary>Gather data from the internal audio engine and send it forward to OpenAL to play.</summary>
-    public unsafe void SendNextBuffer(FGE3DAudioEngine engine)
+    /// <inheritdoc/>
+    public override unsafe void SendNextBuffer(FGE3DAudioEngine engine)
     {
         // 4 = 2 bytes per sample, 2 channels
         byte[] rawBuffer = RawDataBuffers.Count > 0 ? RawDataBuffers.Dequeue() : new byte[FGE3DAudioEngine.InternalData.SAMPLES_PER_BUFFER * 4];
