@@ -33,8 +33,8 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
     public Scheduler Schedule = _schedule;
 
     /// <summary>
-    /// All currently waiting asset streaming goals.
-    /// Controlled mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
+    /// All currently waiting asset streaming goals, mapped by priority level.
+    /// Controlled mainly by <see cref="AddGoal"/>.
     /// </summary>
     public ConcurrentQueue<StreamGoal>[] Goals = [new(), new(), new(), new(), new()];
 
@@ -55,7 +55,7 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
 
     /// <summary>
     /// Reset event for when the files thread has more goals to process.
-    /// Set mainly by <see cref="AddGoal(string, bool, Action{byte[]}, Action, Action{string}, string[])"/>.
+    /// Set mainly by <see cref="AddGoal"/>.
     /// </summary>
     public AutoResetEvent GoalWaitingReset = new(false);
 
@@ -148,7 +148,7 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         }
     }
 
-    /// <summary>Entry point of the Files thread.</summary>
+    /// <summary>Entry point of the Files thread, internal usage.</summary>
     public void FilesMainLoop()
     {
         while (true)
@@ -174,7 +174,7 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
         }
     }
 
-    /// <summary>Process a single asset streaming goal.</summary>
+    /// <summary>Process a single asset streaming goal, internal usage.</summary>
     public void ProcessGoal(StreamGoal goal)
     {
         try

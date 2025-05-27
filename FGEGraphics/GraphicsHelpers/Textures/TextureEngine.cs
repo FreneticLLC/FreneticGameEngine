@@ -573,7 +573,17 @@ public class TextureEngine : IDisposable
             throw new InvalidOperationException($"Bitmap contains invalid dimensions: {bmp.Width}x{bmp.Height}");
         }
 #endif
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp.Width, bmp.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, BitmapBytes(bmp));
+        LockBitmapToTexture(bmp.Width, bmp.Height, BitmapBytes(bmp), linear);
+    }
+
+    /// <summary>Locks a bitmap file's data to a GL texture.</summary>
+    /// <param name="width">The width of the bitmap image.</param>
+    /// <param name="height">The height of the bitmap image.</param>
+    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(Bitmap)"/>.</param>
+    /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
+    public static void LockBitmapToTexture(int width, int height, byte[] rawBitmap, bool linear)
+    {
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, rawBitmap);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, linear ? (int)TextureMinFilter.Linear : (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, linear ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -593,7 +603,17 @@ public class TextureEngine : IDisposable
             throw new InvalidOperationException($"Bitmap contains invalid dimensions: {bmp.Width}x{bmp.Height}");
         }
 #endif
-        GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, BitmapBytes(bmp));
+        LockBitmapToTexture(bmp.Width, bmp.Height, BitmapBytes(bmp), depth);
+    }
+
+    /// <summary>Locks a bitmap file's data to a GL texture array.</summary>
+    /// <param name="width">The width of the bitmap image.</param>
+    /// <param name="height">The height of the bitmap image.</param>
+    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(Bitmap)"/>.</param>
+    /// <param name="depth">The depth in a 3D texture.</param>
+    public static void LockBitmapToTexture(int width, int height, byte[] rawBitmap, int depth)
+    {
+        GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, width, height, 1, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, rawBitmap);
         GraphicsUtil.CheckError("LockBitmapToTexture 3D");
     }
 }
