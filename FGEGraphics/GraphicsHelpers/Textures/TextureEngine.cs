@@ -143,23 +143,25 @@ public class TextureEngine : IDisposable
     /// If the relevant texture exists but is not yet loaded, will load it from file.
     /// </summary>
     /// <param name="textureName">The name of the texture.</param>
+    /// <param name="highPriority">If true, load this texture with a high priority. If false, stream it slowly with a thumbnail first.</param>
     /// <returns>A valid texture object.</returns>
-    public Texture GetTexture(string textureName)
+    public Texture GetTexture(string textureName, bool highPriority = false)
     {
         textureName = FileEngine.CleanFileName(textureName);
         if (LoadedTextures.TryGetValue(textureName, out Texture foundTexture))
         {
             return foundTexture;
         }
-        Texture loaded = DynamicLoadTexture(textureName);
+        Texture loaded = DynamicLoadTexture(textureName, highPriority);
         LoadedTextures.Add(textureName, loaded);
         return loaded;
     }
 
     /// <summary>Dynamically loads a texture (returns a temporary copy of 'White', then fills it to a lowres thumbnail soon, then fills it in when possible).</summary>
     /// <param name="textureName">The texture name to load.</param>
+    /// <param name="highPriority">If true, load this texture with a high priority. If false, stream it slowly with a thumbnail first.</param>
     /// <returns>The texture object.</returns>
-    public Texture DynamicLoadTexture(string textureName)
+    public Texture DynamicLoadTexture(string textureName, bool highPriority = false)
     {
         textureName = FileEngine.CleanFileName(textureName);
         Texture texture = new()
@@ -250,8 +252,15 @@ public class TextureEngine : IDisposable
                 texture.Destroy();
             });
         }
-        AssetStreaming.AddGoal($"textures/{textureName}.thumb.jpg", false, processThumb, irrelevantMissing, handleError, priority: AssetStreamingEngine.GoalPriority.FAST);
-        AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.SLOW);
+        if (highPriority)
+        {
+            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.FASTEST);
+        }
+        else
+        {
+            AssetStreaming.AddGoal($"textures/{textureName}.thumb.jpg", false, processThumb, irrelevantMissing, handleError, priority: AssetStreamingEngine.GoalPriority.FAST);
+            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.SLOW);
+        }
         return texture;
     }
 
