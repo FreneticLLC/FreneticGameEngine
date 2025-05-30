@@ -45,7 +45,7 @@ public class UIDropdown : UIElement
     public string SelectedValue;
 
     /// <summary>Fired when a choice is selected.</summary>
-    public Action<string> ChoiceSelected;
+    public Action<string> OnChoiceSelect;
 
     /// <summary>Constructs a new UI dropdown.</summary>
     /// <param name="text">The text to display when no choice is selected.</param>
@@ -79,7 +79,7 @@ public class UIDropdown : UIElement
         RemoveChild(Box);
         AddChild(Button);
         Button.Text.Content = SelectedValue;
-        ChoiceSelected?.Invoke(SelectedValue);
+        OnChoiceSelect?.Invoke(SelectedValue);
     }
 
     /// <summary>Reverts the dropdown to its pre-chosen state.</summary>

@@ -30,6 +30,9 @@ public class UICheckbox : UIElement
     /// <summary>Whether this checkbox is toggled.</summary>
     public bool Toggled = false;
 
+    /// <summary>Fired when the checkbox is toggled.</summary>
+    public Action<bool> OnToggle;
+
     /// <summary>Constructs a new button-based checkbox.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="label">The text label style.</param>
@@ -53,8 +56,6 @@ public class UICheckbox : UIElement
     {
         Toggled = !Toggled;
         Button.Text.Content = Toggled ? "X" : null;
+        OnToggle(Toggled);
     }
-
-    /// <summary>Returns <see cref="Button"/>.</summary>
-    public static implicit operator UIClickableElement(UICheckbox box) => box.Button;
 }
