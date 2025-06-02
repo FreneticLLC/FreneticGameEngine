@@ -31,16 +31,15 @@ public class UI3DSubEngine : UIElement
     public GameEngine3D SubEngine;
 
     /// <summary>Constructs a new 3D sub-engine.</summary>
-    /// <param name="pos">The position of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="alphaBack">Whether to have an alpha background.</param>
-    public UI3DSubEngine(UILayout pos, bool alphaBack)
-        : base(pos)
+    public UI3DSubEngine(UILayout layout, bool alphaBack) : base(layout)
     {
         SubEngine = new GameEngine3D
         {
             IsSubEngine = true,
             SubSize = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height),
-            OwningInstance = pos.View.Client
+            OwningInstance = layout.View.Client
         };
         if (alphaBack)
         {

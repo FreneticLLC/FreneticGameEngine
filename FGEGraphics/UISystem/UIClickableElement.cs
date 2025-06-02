@@ -46,10 +46,10 @@ public abstract class UIClickableElement : UIElement
 
     /// <summary>Constructs the styled clickable element.</summary>
     /// <param name="styles">The clickable styles.</param>
-    /// <param name="pos">The position of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="requireText">Whether the styles must support text rendering.</param>
     /// <param name="onClick">Ran when the element is clicked.</param>
-    public UIClickableElement(StyleGroup styles, UILayout pos, bool requireText = false, Action onClick = null) : base(pos)
+    public UIClickableElement(StyleGroup styles, UILayout layout, bool requireText = false, Action onClick = null) : base(layout)
     {
         OnClick += onClick;
         Styles = AddStyles(styles);

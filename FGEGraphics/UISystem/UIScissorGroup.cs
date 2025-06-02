@@ -18,8 +18,8 @@ using OpenTK.Graphics.OpenGL4;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a container of elements that only renders children within its bounds.</summary>
-/// <param name="pos">The position of the element.</param>
-public class UIScissorGroup(UILayout pos) : UIGroup(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UIScissorGroup(UILayout layout) : UIGroup(layout)
 {
     /// <inheritdoc/>
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];

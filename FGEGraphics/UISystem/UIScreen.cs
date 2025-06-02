@@ -50,8 +50,8 @@ public class UIScreen : UIElement
 
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
     /// <param name="client">The client game window.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIScreen(GameClientWindow client, UILayout pos) : base(pos)
+    /// <param name="layout">The layout of the element.</param>
+    public UIScreen(GameClientWindow client, UILayout layout) : base(layout)
     {
         Enabled = false;
         InternalClient = client;

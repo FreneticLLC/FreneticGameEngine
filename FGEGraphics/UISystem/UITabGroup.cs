@@ -23,9 +23,9 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 /// Represents a container of elements supporting clickable <see cref="UIElement"/>s that lead to <see cref="UIScreen"/>s,
 /// automatically handling the <see cref="UIElement.Enabled"/> state.
 /// </summary>
-/// <param name="pos">The position of the element.</param>
+/// <param name="layout">The layout of the element.</param>
 /// <param name="onSwitch">Ran when the tab is switched.</param>
-public class UITabGroup(UILayout pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
+public class UITabGroup(UILayout layout, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(layout)
 {
     /// <summary>Ran when the tab is switched.</summary>
     public Action<TabSwitchedArgs> OnTabSwitch = onSwitch;

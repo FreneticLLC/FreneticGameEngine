@@ -33,7 +33,7 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="labelPadding">The horizontal spacing between the label and the slider.</param>
     /// <param name="labelInputStyle">The normal label style.</param>
     /// <param name="labelHighlightStyle">The highlighted label style.</param>
-    /// <param name="pos">The position of the slider.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="labelFormat">A format string for the label value.</param>
     /// <param name="updateOnEdit">Whether to update the slider value while the user edits the label.</param>
     /// <param name="labelRenderBox">Whether to render a box behind the number label.</param>
@@ -42,11 +42,11 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="labelScrollBarWidth">The width of the label scroll bar.</param>
     /// <param name="labelScrollBarX">Whether to add a horizontal label scroll bar.</param>
     /// <param name="labelScrollBarXAnchor">The anchor of the horizontal label scroll bar.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup baseStyles, bool labelLeft, int labelPadding, UIElementStyle labelInputStyle, UIElementStyle labelHighlightStyle, UILayout pos, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, pos)
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup baseStyles, bool labelLeft, int labelPadding, UIElementStyle labelInputStyle, UIElementStyle labelHighlightStyle, UILayout layout, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, layout)
     {
         AddStyle(labelInputStyle, true);
-        AddChild(Label = new UINumberInputLabel(integer, baseStyles, labelInputStyle, labelHighlightStyle, pos.AtOrigin(), Value, labelFormat, "", labelRenderBox, labelBoxPadding, labelScrollBarStyles, labelScrollBarWidth, labelScrollBarX, labelScrollBarXAnchor));
-        Label.Layout.SetPosition(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
+        AddChild(Label = new UINumberInputLabel(integer, baseStyles, labelInputStyle, labelHighlightStyle, layout.AtOrigin(), Value, labelFormat, "", labelRenderBox, labelBoxPadding, labelScrollBarStyles, labelScrollBarWidth, labelScrollBarX, labelScrollBarXAnchor));
+        Label.Layout.SetPosition(() => labelLeft ? -labelPadding - Label.Width : layout.Width + labelPadding, () => (layout.Height - Label.Height) / 2);
         OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.OnTextSubmit += _ =>
         {
@@ -57,5 +57,6 @@ public class UILabeledNumberSlider : UINumberSlider
         {
             Label.OnTextEdit += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
         }
+        Value.ToString
     }
 }

@@ -31,6 +31,7 @@ namespace FGEGraphics.UISystem;
 /// <param name="info">Information about the box.</param>
 /// <param name="fonts">The font to use.</param>
 /// <param name="pos">The position of the element.</param>
+// TODO: Remove
 public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) : UIElement(pos.Height <= 0 ? pos.SetHeight((int)fonts.Height) : pos)
 {
     /// <summary>The current text in this input box.</summary>

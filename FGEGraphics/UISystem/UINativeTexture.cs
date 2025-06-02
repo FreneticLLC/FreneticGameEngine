@@ -22,14 +22,14 @@ namespace FGEGraphics.UISystem;
 /// <para>To render <see cref="GraphicsHelpers.Textures.Texture"/> instances, use <see cref="UIImage"/>.</para>
 /// </summary>
 /// <param name="texture">The texture to display.</param>
-/// <param name="pos">The position of the element.</param>
-public class UINativeTexture(Func<uint> texture, UILayout pos) : UIElement(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(layout)
 {
     /// <summary>The texture to display.</summary>
     public Func<uint> Texture = texture;
 
     /// <summary>Whether the texture is flipped vertically.</summary>
-    // TODO: Put transforms on UIPositionHelper
+    // TODO: Put transforms on UILayout
     public bool Flip;
 
     /// <summary>Renders the texture on a screen.</summary>

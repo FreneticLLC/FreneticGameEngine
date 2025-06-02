@@ -20,7 +20,7 @@ namespace FGEGraphics.UISystem;
 public class UILayout
 {
     /// <summary>The view backing this layout's</summary>
-    public ViewUI2D View;
+    public ViewUI2D View; // TODO: Remove
 
     /// <summary>The element this layout is applied to.</summary>
     public UIElement Element;

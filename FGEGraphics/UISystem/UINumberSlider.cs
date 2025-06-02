@@ -61,8 +61,8 @@ public class UINumberSlider : UIClickableElement
     /// <param name="interval">The grid-snapping interval, if any.</param>
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styles">The clickable styles.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UINumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup styles, UILayout pos) : base(styles, pos, false, null)
+    /// <param name="layout">The layout of the element.</param>
+    public UINumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup styles, UILayout layout) : base(styles, layout, false, null)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
@@ -74,7 +74,7 @@ public class UINumberSlider : UIClickableElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
-        AddChild(Button = new(UIElementStyle.Empty, pos.AtOrigin().SetWidth(pos.Height / 2)) { ShouldRender = false, Enabled = false });
+        AddChild(Button = new(UIElementStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { ShouldRender = false, Enabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 

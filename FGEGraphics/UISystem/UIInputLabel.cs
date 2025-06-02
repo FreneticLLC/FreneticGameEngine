@@ -215,7 +215,7 @@ public class UIInputLabel : UIClickableElement
     /// <param name="baseStyles">The clickable styles for the box and info text.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
-    /// <param name="pos">The position of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
@@ -225,18 +225,18 @@ public class UIInputLabel : UIClickableElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UILayout pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, pos, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, layout, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
-            pos.SetSize(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2); // TODO: GetterWidthHeight
-            AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
+            layout.SetSize(layout.Width + boxPadding * 2, layout.Height + boxPadding * 2); // TODO: dynamic size
+            AddChild(Box = new(UIElementStyle.Empty, layout.AtOrigin()) { Enabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
-        UILayout scrollGroupPos = pos.AtOrigin().SetPosition(Inset, Inset).SetSize(() => pos.Width - Inset() * 2, () => pos.Height - Inset() * 2);
+        UILayout scrollGroupPos = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
-        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
+        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(layout.View, RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
         HighlightStyle = highlightStyle ?? baseStyles.Click;

@@ -38,12 +38,12 @@ public class UICheckbox : UIElement
     /// <param name="text">The text to display.</param>
     /// <param name="labelStyle">The text label style.</param>
     /// <param name="boxStyles">The clickable styles.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UILayout pos, bool toggled = false, UIElementStyle labelStyle = null) : base(pos)
+    /// <param name="layout">The layout of the element.</param>
+    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UILayout layout, bool toggled = false, UIElementStyle labelStyle = null) : base(layout)
     {
         Toggled = toggled;
-        AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, pos.AtOrigin()));
-        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, pos.AtOrigin().SetWidth(-1)));
+        AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, layout.AtOrigin()));
+        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetWidth(-1)));
         Label.Layout.SetX(() => Button.Width * 3 / 2).SetY(() => (Height - Label.Height) / 2);
         Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize
     }

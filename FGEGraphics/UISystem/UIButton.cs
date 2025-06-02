@@ -37,10 +37,10 @@ public class UIButton : UIClickableElement
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIButton(string text, Action clicked, StyleGroup styles, UILayout pos) : base(styles, pos, false, clicked)
+    /// <param name="layout">The layout of the element.</param>
+    public UIButton(string text, Action clicked, StyleGroup styles, UILayout layout) : base(styles, layout, false, clicked)
     {
-        AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin()) { ShouldRender = false, Enabled = false });
+        AddChild(Box = new UIBox(UIElementStyle.Empty, layout.AtOrigin()) { ShouldRender = false, Enabled = false });
         Text = new(this, text);
     }
 
@@ -50,15 +50,15 @@ public class UIButton : UIClickableElement
     /// <param name="textureSet">The name of the texture set to use.</param>
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="pos">The position of the element.</param>
-    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UILayout pos)
+    /// <param name="layout">The layout of the element.</param>
+    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UILayout layout)
     {
         // TODO: Move this to a method on UIClickableElement.StyleGroup
         UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
         UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
         UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
         UIElementStyle disabled = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
-        return new UIButton(text, clicked, new(normal, hover, click, disabled), pos);
+        return new UIButton(text, clicked, new(normal, hover, click, disabled), layout);
     }
 
     /// <summary>Renders this button on the screen.</summary>

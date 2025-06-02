@@ -54,13 +54,13 @@ public class UIDropdown : UIElement
     /// <param name="listSpacing">The spacing betwene <see cref="ListGroup"/> entries.</param>
     /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
     /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UILayout pos) : base(pos)
+    /// <param name="layout">The layout of the element.</param>
+    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UILayout layout) : base(layout)
     {
         PlaceholderInfo = text;
-        AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
-        Box = new UIBox(boxStyle, pos.AtOrigin());
-        Box.AddChild(ListGroup = new(listSpacing, new UILayout(pos.View).SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, layout.AtOrigin()));
+        Box = new UIBox(boxStyle, layout.AtOrigin());
+        Box.AddChild(ListGroup = new(listSpacing, new UILayout(layout.View).SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => ListGroup.Layout.Height + boxPadding * 2);
     }
 

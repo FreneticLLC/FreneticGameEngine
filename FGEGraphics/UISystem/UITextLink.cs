@@ -38,9 +38,9 @@ public class UITextLink : UIClickableElement
     /// <param name="icon">The icon to display alongside the text.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
-    /// <param name="pos">The position of the element.</param>;
+    /// <param name="layout">The layout of the element.</param>;
     // TODO: default values
-    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UILayout pos) : base(styles, pos, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UILayout layout) : base(styles, layout, true, clicked)
     {
         Text = new(this, text, true);
         Icon = icon;

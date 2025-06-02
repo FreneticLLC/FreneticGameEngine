@@ -116,13 +116,13 @@ public abstract class UIElement
     public ElementInternalData ElementInternal = new();
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
-    /// <param name="pos">The position of the element.</param>
-    public UIElement(UILayout pos)
+    /// <param name="layout">The layout of the element.</param>
+    public UIElement(UILayout layout)
     {
-        if (pos is not null)
+        if (layout is not null)
         {
-            Layout = pos;
-            pos.Element = this;
+            Layout = layout;
+            layout.Element = this;
         }
     }
 

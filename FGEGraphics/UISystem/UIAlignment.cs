@@ -30,6 +30,7 @@ public enum UIAlignment
 }
 
 /// <summary>Helper methods for <see cref="UIAlignment"/>.</summary>
+// TODO: Remove
 public static class UIAlignmentExtensions
 {
     /// <summary>Returns the fraction of width or height to multiply in to get the proper offset for this alignment. Returns 0, 0.5, or 1.</summary>

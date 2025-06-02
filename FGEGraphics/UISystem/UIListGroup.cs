@@ -32,10 +32,10 @@ public class UIListGroup : UIGroup
 
     /// <summary>Constructs a new list group.</summary>
     /// <param name="spacing">The spacing between each child.</param>
-    /// <param name="pos">The position of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="vertical">Whether the list should expand vertically.</param>
-    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="pos"/> anchor.</param>
-    public UIListGroup(int spacing, UILayout pos, bool vertical = true, UIAnchor anchor = null) : base(pos.SetSize(0, 0))
+    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="layout"/> anchor.</param>
+    public UIListGroup(int spacing, UILayout layout, bool vertical = true, UIAnchor anchor = null) : base(layout.SetSize(0, 0))
     {
         Anchor = anchor ?? Layout.Anchor;
         if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))

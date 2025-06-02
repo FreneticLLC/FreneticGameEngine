@@ -18,8 +18,8 @@ namespace FGEGraphics.UISystem;
 public class UIGroup : UIElement
 {
     /// <summary>Constructs a new group.</summary>
-    /// <param name="pos">The position of the element.</param>
-    public UIGroup(UILayout pos) : base(pos)
+    /// <param name="layout">The layout of the element.</param>
+    public UIGroup(UILayout layout) : base(layout)
     {
         Enabled = false;
     }

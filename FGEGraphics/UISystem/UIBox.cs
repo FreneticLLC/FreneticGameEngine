@@ -24,13 +24,13 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple box on the screen.</summary>
 /// <remarks>Constructs a simple colored box.</remarks>
 /// <param name="style">The style of the element.</param>
-/// <param name="pos">The position of the element.</param>
-public class UIBox(UIElementStyle style, UILayout pos) : UIElement(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UIBox(UIElementStyle style, UILayout layout) : UIElement(layout)
 {
     /// <summary>The style of the box.</summary>
     public override UIElementStyle Style { get; set; } = style;
     
-    // TODO: put this on UIPositionHelper or something
+    // TODO: put this on UILayout or something
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
 

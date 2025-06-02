@@ -22,8 +22,8 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple image on a screen.</summary>
 /// <remarks>Constructs an image.</remarks>
 /// <param name="image">The image to display.</param>
-/// <param name="pos">The position of the element.</param>
-public class UIImage(Texture image, UILayout pos) : UIElement(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UIImage(Texture image, UILayout layout) : UIElement(layout)
 {
     /// <summary>The image to display.</summary>
     public Texture Image = image;
