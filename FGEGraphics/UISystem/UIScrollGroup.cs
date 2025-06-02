@@ -50,11 +50,11 @@ public class UIScrollGroup : UIElement
             throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
         }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UILayout(layout.View).SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UILayout(layout.View).SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UILayout().SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UILayout().SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
         if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
         {
-            base.AddChild(ScrollBarLayer = new(new UILayout(layout.AtOrigin())));
+            base.AddChild(ScrollBarLayer = new(layout.AtOrigin()));
             if (ScrollX.ScrollBar is not null)
             {
                 ScrollBarLayer.AddChild(ScrollX.ScrollBar);
@@ -64,7 +64,7 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScissorLayer = new(new UILayout(layout.AtOrigin())));
+        base.AddChild(ScissorLayer = new(layout.AtOrigin()));
     }
 
     /// <inheritdoc/>

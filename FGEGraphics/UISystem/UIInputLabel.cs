@@ -234,9 +234,9 @@ public class UIInputLabel : UIClickableElement
             AddChild(Box = new(UIElementStyle.Empty, layout.AtOrigin()) { Enabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
-        UILayout scrollGroupPos = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
-        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(layout.View, RenderLabel));
+        UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
+        ScrollGroup = new(scrollGroupLayout, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
+        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
         HighlightStyle = highlightStyle ?? baseStyles.Click;

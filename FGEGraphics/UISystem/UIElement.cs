@@ -32,15 +32,15 @@ public abstract class UIElement
     /// <summary>True when the element is valid and usable, false when not-yet-added or already removed.</summary>
     public bool IsValid;
 
+    /// <summary>Gets the UI view this element is attached to.</summary>
+    public virtual ViewUI2D View => Parent.View;
+
     // TODO: rename to 'Client'
     /// <summary>Gets the client game window used to render this element.</summary>
-    public virtual GameClientWindow Window => Parent.Window;
+    public GameClientWindow Window => View.Client;
 
     /// <summary>Gets the client game engine used to render this element.</summary>
-    public virtual GameEngineBase Engine => Parent.Engine;
-
-    /// <summary>The UI view this element is attached to.</summary>
-    public ViewUI2D View => Layout.View;
+    public GameEngineBase Engine => Window.CurrentEngine;
 
     /// <summary>Last known absolute position.</summary>
     public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
@@ -664,7 +664,7 @@ public abstract class UIElement
     {
         List<string> info = new(4)
         {
-            $"^t^0^h^{(this == Layout.View.HeldElement ? "2" : "5")}^u{GetType()}",
+            $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
             $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
         };

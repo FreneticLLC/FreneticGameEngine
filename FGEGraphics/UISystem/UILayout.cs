@@ -19,9 +19,6 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents the positioning, sizing, and rotation logic for a <see cref="UIElement"/>.</summary>
 public class UILayout
 {
-    /// <summary>The view backing this layout's</summary>
-    public ViewUI2D View; // TODO: Remove
-
     /// <summary>The element this layout is applied to.</summary>
     public UIElement Element;
 
@@ -54,21 +51,18 @@ public class UILayout
     /// <summary>Internal data that should usually not be accessed directly.</summary>
     public InternalData Internal;
 
-    /// <summary>Constructs an empty layout for a given view.</summary>
-    /// <param name="view">The backing view.</param>
-    public UILayout(ViewUI2D view)
+    /// <summary>Constructs an empty layout.</summary>
+    public UILayout()
     {
-        View = view;
         SetPosition(0, 0);
         SetSize(0, 0);
         SetRotation(0f);
     }
 
-    /// <summary>Constructs a new layout as a copy of another layout.</summary>
+    /// <summary>Constructs a new layout as a copy of another layout without the attached <see cref="Element"/>.</summary>
     /// <param name="layout">The layout to copy.</param>
     public UILayout(UILayout layout)
     {
-        View = layout.View;
         Anchor = layout.Anchor;
         Internal = layout.Internal;
     }

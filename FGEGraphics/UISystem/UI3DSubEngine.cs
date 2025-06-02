@@ -39,7 +39,7 @@ public class UI3DSubEngine : UIElement
         {
             IsSubEngine = true,
             SubSize = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height),
-            OwningInstance = layout.View.Client
+            OwningInstance = Window
         };
         if (alphaBack)
         {

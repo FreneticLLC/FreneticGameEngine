@@ -60,7 +60,7 @@ public class UIDropdown : UIElement
         PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, layout.AtOrigin()));
         Box = new UIBox(boxStyle, layout.AtOrigin());
-        Box.AddChild(ListGroup = new(listSpacing, new UILayout(layout.View).SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        Box.AddChild(ListGroup = new(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => ListGroup.Layout.Height + boxPadding * 2);
     }
 
@@ -107,7 +107,7 @@ public class UIDropdown : UIElement
     /// <returns>The added text link.</returns>
     public UITextLink AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
     {
-        UITextLink link = new(choice, null, null, linkStyles, new UILayout(Layout.View));
+        UITextLink link = new(choice, null, null, linkStyles, new UILayout());
         AddChoice(choice, link);
         return link;
     }

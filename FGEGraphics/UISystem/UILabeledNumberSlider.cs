@@ -57,6 +57,5 @@ public class UILabeledNumberSlider : UINumberSlider
         {
             Label.OnTextEdit += _ => Value = double.TryParse(Label.TextContent, out double value) ? Math.Clamp(value, Min, Max) : initial;
         }
-        Value.ToString
     }
 }
