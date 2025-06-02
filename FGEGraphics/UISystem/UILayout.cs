@@ -100,6 +100,10 @@ public class UILayout
         return this;
     }
 
+    /// <summary>Sets a constant position.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetPosition(Location location) => SetPosition((int)location.X, (int)location.Y);
+
     /// <summary>Sets a constant width.</summary>
     /// <returns>This object.</returns>
     public UILayout SetWidth(int width)
@@ -157,6 +161,10 @@ public class UILayout
         Internal.Y = new() { Dynamic = y };
         return this;
     }
+
+    /// <summary>Sets a dynamic position.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetPosition(Func<Location> location) => SetPosition(() => (int)location().X, () => (int)location().Y);
 
     /// <summary>Sets a dynamic width.</summary>
     /// <returns>This object.</returns>
