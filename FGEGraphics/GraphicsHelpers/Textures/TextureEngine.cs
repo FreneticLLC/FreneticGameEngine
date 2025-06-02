@@ -181,6 +181,7 @@ public class TextureEngine : IDisposable
             Schedule.ScheduleSyncTask(() =>
             {
                 texture.Destroy();
+                texture.InternalTexture = White.InternalTexture;
             });
         }
         void processThumb(byte[] data)
@@ -250,6 +251,7 @@ public class TextureEngine : IDisposable
             Schedule.ScheduleSyncTask(() =>
             {
                 texture.Destroy();
+                texture.InternalTexture = White.InternalTexture;
             });
         }
         if (highPriority)

@@ -117,14 +117,21 @@ public class Texture : IEquatable<Texture>
         }
         if (Replacement is not null)
         {
-            Replacement.CheckValid();
-            if (Replacement.Replacement is not null)
+            if (Replacement == this)
             {
-                Replacement = Replacement.Replacement;
+                Replacement = null;
             }
-            LoadedProperly = Replacement.LoadedProperly;
-            InternalTexture = Replacement.InternalTexture;
-            OriginalInternalID = Replacement.OriginalInternalID;
+            else
+            {
+                Replacement.CheckValid();
+                if (Replacement.Replacement is not null)
+                {
+                    Replacement = Replacement.Replacement;
+                }
+                LoadedProperly = Replacement.LoadedProperly;
+                InternalTexture = Replacement.InternalTexture;
+                OriginalInternalID = Replacement.OriginalInternalID;
+            }
         }
     }
 

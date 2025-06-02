@@ -353,7 +353,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         RigidPose pose = new((Internal.Position - PhysicsWorld.Offset).ToNumerics(), Internal.Orientation.ToNumerics());
         BodyVelocity velocity = new(Internal.LinearVelocity.ToNumerics(), Internal.AngularVelocity.ToNumerics());
         Shape = Shape.Register();
-        CollidableDescription collidable = new(Shape.ShapeIndex, 0.1f, ContinuousDetection.Continuous(1e-4f, 1e-4f)) { MinimumSpeculativeMargin = 0.01f };
+        CollidableDescription collidable = new(Shape.ShapeIndex, 99999, ContinuousDetection.Continuous(1e-4f, 1e-4f)) { MinimumSpeculativeMargin = 0 };
         BodyDescription description;
         if (Mass == 0)
         {
