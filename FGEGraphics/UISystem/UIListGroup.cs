@@ -35,9 +35,9 @@ public class UIListGroup : UIGroup
     /// <param name="pos">The position of the element.</param>
     /// <param name="vertical">Whether the list should expand vertically.</param>
     /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="pos"/> anchor.</param>
-    public UIListGroup(int spacing, UIPositionHelper pos, bool vertical = true, UIAnchor anchor = null) : base(pos.ConstantWidthHeight(0, 0))
+    public UIListGroup(int spacing, UILayout pos, bool vertical = true, UIAnchor anchor = null) : base(pos.SetSize(0, 0))
     {
-        Anchor = anchor ?? Position.MainAnchor;
+        Anchor = anchor ?? Layout.Anchor;
         if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
         {
             throw new Exception("UIListGroup must have a non-central expansion direction");
@@ -55,25 +55,25 @@ public class UIListGroup : UIGroup
         {
             base.AddChild(element);
         }
-        element.Position.Anchor(Anchor);
+        element.Layout.SetAnchor(Anchor);
         if (Vertical)
         {
-            int elementY = Position.Height > 0 ? Position.Height + Spacing : 0;
-            element.Position.ConstantXY(0, Anchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
-            Position.ConstantHeight(elementY + element.Position.Height);
-            if (element.Position.Width > Position.Width)
+            int elementY = Layout.Height > 0 ? Layout.Height + Spacing : 0;
+            element.Layout.SetPosition(0, Anchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
+            Layout.SetHeight(elementY + element.Layout.Height);
+            if (element.Layout.Width > Layout.Width)
             {
-                Position.ConstantWidth(element.Position.Width);
+                Layout.SetWidth(element.Layout.Width);
             }
         }
         else
         {
-            int elementX = Position.Width > 0 ? Position.Width + Spacing : 0;
-            element.Position.ConstantXY(Anchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
-            Position.ConstantWidth(elementX + element.Position.Width);
-            if (element.Position.Height > Position.Height)
+            int elementX = Layout.Width > 0 ? Layout.Width + Spacing : 0;
+            element.Layout.SetPosition(Anchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
+            Layout.SetWidth(elementX + element.Layout.Width);
+            if (element.Layout.Height > Layout.Height)
             {
-                Position.ConstantHeight(element.Position.Height);
+                Layout.SetHeight(element.Layout.Height);
             }
         }
     }

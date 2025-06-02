@@ -49,7 +49,7 @@ public abstract class UIClickableElement : UIElement
     /// <param name="pos">The position of the element.</param>
     /// <param name="requireText">Whether the styles must support text rendering.</param>
     /// <param name="onClick">Ran when the element is clicked.</param>
-    public UIClickableElement(StyleGroup styles, UIPositionHelper pos, bool requireText = false, Action onClick = null) : base(pos)
+    public UIClickableElement(StyleGroup styles, UILayout pos, bool requireText = false, Action onClick = null) : base(pos)
     {
         OnClick += onClick;
         Styles = AddStyles(styles);

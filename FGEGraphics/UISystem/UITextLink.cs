@@ -40,12 +40,12 @@ public class UITextLink : UIClickableElement
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>;
     // TODO: default values
-    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UILayout pos) : base(styles, pos, true, clicked)
     {
         Text = new(this, text, true);
         Icon = icon;
         UpdateStyle();
-        Position.GetterWidthHeight(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height);
+        Layout.SetSize(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height);
     }
 
     /// <summary>Performs a render on this link.</summary>

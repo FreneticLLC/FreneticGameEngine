@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 /// <remarks>Constructs an image.</remarks>
 /// <param name="image">The image to display.</param>
 /// <param name="pos">The position of the element.</param>
-public class UIImage(Texture image, UIPositionHelper pos) : UIElement(pos)
+public class UIImage(Texture image, UILayout pos) : UIElement(pos)
 {
     /// <summary>The image to display.</summary>
     public Texture Image = image;

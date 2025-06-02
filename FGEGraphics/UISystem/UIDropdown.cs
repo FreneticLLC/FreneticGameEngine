@@ -55,13 +55,13 @@ public class UIDropdown : UIElement
     /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
     /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos) : base(pos)
+    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UILayout pos) : base(pos)
     {
         PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
         Box = new UIBox(boxStyle, pos.AtOrigin());
-        Box.AddChild(ListGroup = new(listSpacing, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, boxPadding)));
-        Box.Position.GetterHeight(() => ListGroup.Position.Height + boxPadding * 2);
+        Box.AddChild(ListGroup = new(listSpacing, new UILayout(pos.View).SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        Box.Layout.SetHeight(() => ListGroup.Layout.Height + boxPadding * 2);
     }
 
     /// <summary>Opens the dropdown list.</summary>
@@ -107,7 +107,7 @@ public class UIDropdown : UIElement
     /// <returns>The added text link.</returns>
     public UITextLink AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
     {
-        UITextLink link = new(choice, null, null, linkStyles, new UIPositionHelper(Position.View));
+        UITextLink link = new(choice, null, null, linkStyles, new UILayout(Layout.View));
         AddChoice(choice, link);
         return link;
     }

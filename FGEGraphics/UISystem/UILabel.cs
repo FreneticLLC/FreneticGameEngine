@@ -33,12 +33,12 @@ public class UILabel : UIElement
     /// <param name="text">The text to display on the label.</param>
     /// <param name="style">The style of the label.</param>
     /// <param name="pos">The position of the element.</param>
-    public UILabel(string text, UIElementStyle style, UIPositionHelper pos) : base(pos)
+    public UILabel(string text, UIElementStyle style, UILayout pos) : base(pos)
     {
         Style = AddStyle(style, true);
-        Text = new(this, text, true, Position.Width);
+        Text = new(this, text, true, Layout.Width);
         UpdateStyle();
-        Position.GetterWidthHeight(() => Text.Width, () => Text.Height); // TODO: padding
+        Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
 
     /// <summary>Renders this label on the screen.</summary>

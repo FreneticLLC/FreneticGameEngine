@@ -42,11 +42,11 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="labelScrollBarWidth">The width of the label scroll bar.</param>
     /// <param name="labelScrollBarX">Whether to add a horizontal label scroll bar.</param>
     /// <param name="labelScrollBarXAnchor">The anchor of the horizontal label scroll bar.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup baseStyles, bool labelLeft, int labelPadding, UIElementStyle labelInputStyle, UIElementStyle labelHighlightStyle, UIPositionHelper pos, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, pos)
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup baseStyles, bool labelLeft, int labelPadding, UIElementStyle labelInputStyle, UIElementStyle labelHighlightStyle, UILayout pos, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, pos)
     {
         AddStyle(labelInputStyle, true);
         AddChild(Label = new UINumberInputLabel(integer, baseStyles, labelInputStyle, labelHighlightStyle, pos.AtOrigin(), Value, labelFormat, "", labelRenderBox, labelBoxPadding, labelScrollBarStyles, labelScrollBarWidth, labelScrollBarX, labelScrollBarXAnchor));
-        Label.Position.GetterXY(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
+        Label.Layout.SetPosition(() => labelLeft ? -labelPadding - Label.Width : pos.Width + labelPadding, () => (pos.Height - Label.Height) / 2);
         OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
         Label.OnTextSubmit += _ =>
         {

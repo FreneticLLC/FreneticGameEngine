@@ -19,7 +19,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a container of elements that only renders children within its bounds.</summary>
 /// <param name="pos">The position of the element.</param>
-public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
+public class UIScissorGroup(UILayout pos) : UIGroup(pos)
 {
     /// <inheritdoc/>
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];

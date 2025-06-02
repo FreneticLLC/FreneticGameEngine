@@ -38,7 +38,7 @@ public class UIButton : UIClickableElement
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIButton(string text, Action clicked, StyleGroup styles, UIPositionHelper pos) : base(styles, pos, false, clicked)
+    public UIButton(string text, Action clicked, StyleGroup styles, UILayout pos) : base(styles, pos, false, clicked)
     {
         AddChild(Box = new UIBox(UIElementStyle.Empty, pos.AtOrigin()) { ShouldRender = false, Enabled = false });
         Text = new(this, text);
@@ -51,7 +51,7 @@ public class UIButton : UIClickableElement
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="pos">The position of the element.</param>
-    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UIPositionHelper pos)
+    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UILayout pos)
     {
         // TODO: Move this to a method on UIClickableElement.StyleGroup
         UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };

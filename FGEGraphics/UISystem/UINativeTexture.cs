@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="pos">The position of the element.</param>
-public class UINativeTexture(Func<uint> texture, UIPositionHelper pos) : UIElement(pos)
+public class UINativeTexture(Func<uint> texture, UILayout pos) : UIElement(pos)
 {
     /// <summary>The texture to display.</summary>
     public Func<uint> Texture = texture;

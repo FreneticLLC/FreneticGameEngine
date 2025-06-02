@@ -25,7 +25,7 @@ public record TabSwitchedArgs(UIScreen From, UIScreen To);
 /// </summary>
 /// <param name="pos">The position of the element.</param>
 /// <param name="onSwitch">Ran when the tab is switched.</param>
-public class UITabGroup(UIPositionHelper pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
+public class UITabGroup(UILayout pos, Action<TabSwitchedArgs> onSwitch = null) : UIGroup(pos)
 {
     /// <summary>Ran when the tab is switched.</summary>
     public Action<TabSwitchedArgs> OnTabSwitch = onSwitch;

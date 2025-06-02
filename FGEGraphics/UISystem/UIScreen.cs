@@ -43,7 +43,7 @@ public class UIScreen : UIElement
 
     /// <summary>Constructs a screen that covers the entire game window.</summary>
     /// <param name="view">The client UI View.</param>
-    public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view).Anchor(UIAnchor.TOP_LEFT))
+    public UIScreen(ViewUI2D view) : this(view.Client, new UILayout(view).SetAnchor(UIAnchor.TOP_LEFT))
     {
         InternalConfigurePosition();
     }
@@ -51,7 +51,7 @@ public class UIScreen : UIElement
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
     /// <param name="client">The client game window.</param>
     /// <param name="pos">The position of the element.</param>
-    public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
+    public UIScreen(GameClientWindow client, UILayout pos) : base(pos)
     {
         Enabled = false;
         InternalClient = client;
@@ -61,9 +61,9 @@ public class UIScreen : UIElement
     /// <summary>Internal method to configure the position of the screen as fully covering the actual screen space. Called by the standard constructor.</summary>
     public void InternalConfigurePosition()
     {
-        Position.ConstantXY(0, 0);
-        Position.GetterWidth(() => Parent is null ? Engine.Window.ClientSize.X : Parent.Position.Width);
-        Position.GetterHeight(() => Parent is null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
+        Layout.SetPosition(0, 0);
+        Layout.SetWidth(() => Parent is null ? Engine.Window.ClientSize.X : Parent.Layout.Width);
+        Layout.SetHeight(() => Parent is null ? Engine.Window.ClientSize.Y : Parent.Layout.Height);
     }
 
     /// <summary>Performs a render on this element.</summary>

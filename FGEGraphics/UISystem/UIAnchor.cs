@@ -32,11 +32,11 @@ public class UIAnchor(Func<UIElement, int> x, Func<UIElement, int> y, UIAlignmen
 
     /// <summary>Helper function objects for the public static values.</summary>
     private static readonly Func<UIElement, int> LEFT_X = element => 0,
-        CENTER_X = element => element.Parent.Position.Width / 2 - element.Position.Width / 2,
-        RIGHT_X = element => element.Parent.Position.Width - element.Position.Width,
+        CENTER_X = element => element.Parent.Layout.Width / 2 - element.Layout.Width / 2,
+        RIGHT_X = element => element.Parent.Layout.Width - element.Layout.Width,
         TOP_Y = element => 0,
-        CENTER_Y = element => element.Parent.Position.Height / 2 - element.Position.Height / 2,
-        BOTTOM_Y = element => element.Parent.Position.Height - element.Position.Height;
+        CENTER_Y = element => element.Parent.Layout.Height / 2 - element.Layout.Height / 2,
+        BOTTOM_Y = element => element.Parent.Layout.Height - element.Layout.Height;
 
     /// <summary>Top left UI Anchor. See <see cref="UIAnchor"/>.</summary>
     public static readonly UIAnchor TOP_LEFT = new(LEFT_X, TOP_Y, UIAlignment.LEFT, UIAlignment.TOP);

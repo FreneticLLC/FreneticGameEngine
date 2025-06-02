@@ -43,18 +43,18 @@ public class UIScrollGroup : UIElement
     /// <param name="barY">Whether to add a vertical scroll bar.</param>
     /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIScrollGroup(UIPositionHelper pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(pos)
+    public UIScrollGroup(UILayout pos, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(pos)
     {
         if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
         {
             throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
         }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UIPositionHelper(pos.View).Anchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UILayout(pos.View).SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UILayout(pos.View).SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
         if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
         {
-            base.AddChild(ScrollBarLayer = new(new UIPositionHelper(pos.AtOrigin())));
+            base.AddChild(ScrollBarLayer = new(new UILayout(pos.AtOrigin())));
             if (ScrollX.ScrollBar is not null)
             {
                 ScrollBarLayer.AddChild(ScrollX.ScrollBar);
@@ -64,14 +64,14 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScissorLayer = new(new UIPositionHelper(pos.AtOrigin())));
+        base.AddChild(ScissorLayer = new(new UILayout(pos.AtOrigin())));
     }
 
     /// <inheritdoc/>
     public override void AddChild(UIElement child)
     {
-        UIPositionHelper original = new(child.Position);
-        child.Position.GetterXY(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
+        UILayout original = new(child.Layout);
+        child.Layout.SetPosition(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
         ScissorLayer.AddChild(child);
     }
 
@@ -152,7 +152,7 @@ public class UIScrollGroup : UIElement
         /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
         /// <param name="styles">The <see cref="ScrollBar"/> styles.</param>
         /// <param name="pos">The base position for the <see cref="ScrollBar"/>.</param>
-        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(vertical, rangeLength)
+        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UILayout pos) : this(vertical, rangeLength)
         {
             if (!hasBar)
             {
@@ -160,11 +160,11 @@ public class UIScrollGroup : UIElement
             }
             if (vertical)
             {
-                pos.GetterY(() => BarPosition).GetterHeight(() => BarLength).ConstantWidth(width);
+                pos.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(width);
             }
             else
             {
-                pos.GetterX(() => BarPosition).GetterWidth(() => BarLength).ConstantHeight(width);
+                pos.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(width);
             }
             ScrollBar = new(null, null, styles, pos);
         }

@@ -40,7 +40,7 @@ public abstract class UIElement
     public virtual GameEngineBase Engine => Parent.Engine;
 
     /// <summary>The UI view this element is attached to.</summary>
-    public ViewUI2D View => Position.View;
+    public ViewUI2D View => Layout.View;
 
     /// <summary>Last known absolute position.</summary>
     public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
@@ -64,7 +64,7 @@ public abstract class UIElement
     public float LastAbsoluteRotation;
 
     /// <summary>The position and size of this element.</summary>
-    public UIPositionHelper Position;
+    public UILayout Layout;
 
     /// <summary>Returns the <b>current</b> element style.</summary>
     public virtual UIElementStyle Style { get; set; }
@@ -117,12 +117,12 @@ public abstract class UIElement
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="pos">The position of the element.</param>
-    public UIElement(UIPositionHelper pos)
+    public UIElement(UILayout pos)
     {
         if (pos is not null)
         {
-            Position = pos;
-            pos.For = this;
+            Layout = pos;
+            pos.Element = this;
         }
     }
 
@@ -454,8 +454,8 @@ public abstract class UIElement
     /// <param name="rotation">The last rotation made in the render chain.</param>
     public virtual void UpdatePosition(double delta, Vector3 rotation)
     {
-        int x = Position.X;
-        int y = Position.Y;
+        int x = Layout.X;
+        int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
         {
             if (Parent is not null)
@@ -463,7 +463,7 @@ public abstract class UIElement
                 x += Parent.X;
                 y += Parent.Y;
             }
-            rotation = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
+            rotation = new Vector3(Layout.Width * -0.5f, Layout.Height * -0.5f, Layout.Rotation);
         }
         // TODO: Clean up!
         /*else 
@@ -486,7 +486,7 @@ public abstract class UIElement
         }*/
         LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
         LastAbsoluteRotation = rotation.Z;
-        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height);
+        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height);
         /*CheckChildren();
         foreach (UIElement child in ElementInternal.Children)
         {
@@ -664,7 +664,7 @@ public abstract class UIElement
     {
         List<string> info = new(4)
         {
-            $"^t^0^h^{(this == Position.View.HeldElement ? "2" : "5")}^u{GetType()}",
+            $"^t^0^h^{(this == Layout.View.HeldElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
             $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
         };

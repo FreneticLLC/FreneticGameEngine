@@ -225,16 +225,16 @@ public class UIInputLabel : UIClickableElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UIPositionHelper pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, pos, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UILayout pos, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, pos, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
-            pos.ConstantWidthHeight(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2); // TODO: GetterWidthHeight
+            pos.SetSize(pos.Width + boxPadding * 2, pos.Height + boxPadding * 2); // TODO: GetterWidthHeight
             AddChild(Box = new(UIElementStyle.Empty, pos.AtOrigin()) { Enabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
-        UIPositionHelper scrollGroupPos = pos.AtOrigin().GetterXY(Inset, Inset).GetterWidthHeight(() => pos.Width - Inset() * 2, () => pos.Height - Inset() * 2);
+        UILayout scrollGroupPos = pos.AtOrigin().SetPosition(Inset, Inset).SetSize(() => pos.Width - Inset() * 2, () => pos.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupPos, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(pos.View, RenderLabel));
         AddChild(ScrollGroup);
@@ -313,7 +313,7 @@ public class UIInputLabel : UIClickableElement
     public void UpdateText()
     {
         Internal.UpdateTextComponents();
-        Internal.TextChain = [.. UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Position.Width : -1)];
+        Internal.TextChain = [.. UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Layout.Width : -1)];
         Internal.CursorOffset = Selected ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }

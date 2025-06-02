@@ -39,13 +39,13 @@ public class UICheckbox : UIElement
     /// <param name="labelStyle">The text label style.</param>
     /// <param name="boxStyles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UIPositionHelper pos, bool toggled = false, UIElementStyle labelStyle = null) : base(pos)
+    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UILayout pos, bool toggled = false, UIElementStyle labelStyle = null) : base(pos)
     {
         Toggled = toggled;
         AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, pos.AtOrigin()));
-        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, pos.AtOrigin().ConstantWidth(-1)));
-        Label.Position.GetterX(() => Button.Width * 3 / 2).GetterY(() => (Height - Label.Height) / 2);
-        Position.GetterWidth(() => Label.Position.X + Label.Width); // TODO generalize
+        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, pos.AtOrigin().SetWidth(-1)));
+        Label.Layout.SetX(() => Button.Width * 3 / 2).SetY(() => (Height - Label.Height) / 2);
+        Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize
     }
 
     /// <summary>Toggles this checkbox.</summary>
