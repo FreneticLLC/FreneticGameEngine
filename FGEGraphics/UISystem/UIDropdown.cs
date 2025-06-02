@@ -21,6 +21,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Arrow key + ENTER navigation
 // TODO: Scroll if exceed max width
 // TODO: Dropdown icon next to placeholder info?
+// TODO: Different style for placeholder info
 public class UIDropdown : UIElement
 {
     /// <summary>A mapping of <see cref="ListGroup"/> clickables to their string values.</summary>

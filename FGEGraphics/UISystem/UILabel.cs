@@ -38,7 +38,7 @@ public class UILabel : UIElement
         Style = AddStyle(style, true);
         Text = new(this, text, true, Position.Width);
         UpdateStyle();
-        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
+        Position.GetterWidthHeight(() => Text.Width, () => Text.Height); // TODO: padding
     }
 
     /// <summary>Renders this label on the screen.</summary>

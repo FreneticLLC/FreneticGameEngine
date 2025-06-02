@@ -19,6 +19,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a toggleable button on the screen.</summary>
 // TODO: orientation of label
+// TODO: generalize beyond an 'X' when toggled
 public class UICheckbox : UIElement
 {
     /// <summary>The button for this checkbox.</summary>
@@ -35,20 +36,16 @@ public class UICheckbox : UIElement
 
     /// <summary>Constructs a new button-based checkbox.</summary>
     /// <param name="text">The text to display.</param>
-    /// <param name="label">The text label style.</param>
-    /// <param name="styles">The clickable styles.</param>
+    /// <param name="labelStyle">The text label style.</param>
+    /// <param name="boxStyles">The clickable styles.</param>
     /// <param name="pos">The position of the element.</param>
-    public UICheckbox(string text, UIElementStyle label, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : base(pos)
+    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UIPositionHelper pos, bool toggled = false, UIElementStyle labelStyle = null) : base(pos)
     {
-        AddChild(Button = new UIButton(null, Toggle, styles, pos.AtOrigin()));
-        AddChild(Label = new UILabel(text, label, pos.AtOrigin().ConstantWidth(-1)));
+        Toggled = toggled;
+        AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, pos.AtOrigin()));
+        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, pos.AtOrigin().ConstantWidth(-1)));
         Label.Position.GetterX(() => Button.Width * 3 / 2).GetterY(() => (Height - Label.Height) / 2);
         Position.GetterWidth(() => Label.Position.X + Label.Width); // TODO generalize
-    }
-
-    /// <summary>Constructs a new checkbox using the normal button style as the label style.</summary>
-    public UICheckbox(string text, UIClickableElement.StyleGroup styles, UIPositionHelper pos) : this(text, new(styles.Normal) { BaseColor = Color4F.Transparent }, styles, pos)
-    {
     }
 
     /// <summary>Toggles this checkbox.</summary>
@@ -56,6 +53,6 @@ public class UICheckbox : UIElement
     {
         Toggled = !Toggled;
         Button.Text.Content = Toggled ? "X" : null;
-        OnToggle(Toggled);
+        OnToggle?.Invoke(Toggled);
     }
 }
