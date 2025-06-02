@@ -27,13 +27,13 @@ namespace FGEGraphics.UISystem;
 public class UILabel : UIElement
 {
     /// <summary>The text to display on this label.</summary>
-    public UIElementText Text;
+    public UIText Text;
 
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
     /// <param name="style">The style of the label.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UILabel(string text, UIElementStyle style, UILayout layout) : base(layout)
+    public UILabel(string text, UIStyle style, UILayout layout) : base(layout)
     {
         Style = AddStyle(style, true);
         Text = new(this, text, true, Layout.Width);
@@ -45,7 +45,7 @@ public class UILabel : UIElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         if (style.BaseColor.A > 0)
         {

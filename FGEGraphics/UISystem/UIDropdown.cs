@@ -55,7 +55,7 @@ public class UIDropdown : UIElement
     /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
     /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UILayout layout) : base(layout)
+    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIStyle boxStyle, UILayout layout) : base(layout)
     {
         PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, layout.AtOrigin()));

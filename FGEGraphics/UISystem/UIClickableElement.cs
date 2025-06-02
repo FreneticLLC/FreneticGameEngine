@@ -23,22 +23,22 @@ public abstract class UIClickableElement : UIElement
     /// <param name="hover">The style to use on hover.</param>
     /// <param name="click">The style to use on click.</param>
     /// <param name="disabled">The style to use when disabled.</param>
-    public class StyleGroup(UIElementStyle normal, UIElementStyle hover, UIElementStyle click, UIElementStyle disabled)
+    public class StyleGroup(UIStyle normal, UIStyle hover, UIStyle click, UIStyle disabled)
     {
         /// <summary>An empty style group.</summary>
-        public static readonly StyleGroup Empty = new(UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty, UIElementStyle.Empty);
+        public static readonly StyleGroup Empty = new(UIStyle.Empty, UIStyle.Empty, UIStyle.Empty, UIStyle.Empty);
 
         /// <summary>The render style to use when the element is not being interacted with.</summary>
-        public UIElementStyle Normal = normal;
+        public UIStyle Normal = normal;
 
         /// <summary>The render style to use when the user is hovering their mouse cursor over this element.</summary>
-        public UIElementStyle Hover = hover;
+        public UIStyle Hover = hover;
 
         /// <summary>The render style to use when the user is clicking on this element.</summary>
-        public UIElementStyle Click = click;
+        public UIStyle Click = click;
 
         /// <summary>The style to use when the element is disabled.</summary>
-        public UIElementStyle Disabled = disabled;
+        public UIStyle Disabled = disabled;
     }
 
     /// <summary>The clickable style group.</summary>
@@ -56,12 +56,12 @@ public abstract class UIClickableElement : UIElement
     }
 
     /// <summary>Returns the normal, hover, or click style based on the current element state.</summary>
-    public override UIElementStyle Style => Pressed ? Styles.Click
+    public override UIStyle Style => Pressed ? Styles.Click
         : Hovered ? Styles.Hover
         : !Enabled ? Styles.Disabled
         : Styles.Normal;
 
-    /// <summary>Calls <see cref="UIElement.AddStyle(UIElementStyle, bool)"/> on each member of the style group.</summary>
+    /// <summary>Calls <see cref="UIElement.AddStyle(UIStyle, bool)"/> on each member of the style group.</summary>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="requireText">Whether each style must support text rendering.</param>
     public StyleGroup AddStyles(StyleGroup styles, bool requireText = false)

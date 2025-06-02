@@ -25,10 +25,10 @@ namespace FGEGraphics.UISystem;
 /// <remarks>Constructs a simple colored box.</remarks>
 /// <param name="style">The style of the element.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UIBox(UIElementStyle style, UILayout layout) : UIElement(layout)
+public class UIBox(UIStyle style, UILayout layout) : UIElement(layout)
 {
     /// <summary>The style of the box.</summary>
-    public override UIElementStyle Style { get; set; } = style;
+    public override UIStyle Style { get; set; } = style;
     
     // TODO: put this on UILayout or something
     /// <summary>Whether this box is vertically flipped.</summary>
@@ -38,7 +38,7 @@ public class UIBox(UIElementStyle style, UILayout layout) : UIElement(layout)
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
         bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;

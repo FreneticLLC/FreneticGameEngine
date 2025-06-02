@@ -67,7 +67,7 @@ public abstract class UIElement
     public UILayout Layout;
 
     /// <summary>Returns the <b>current</b> element style.</summary>
-    public virtual UIElementStyle Style { get; set; }
+    public virtual UIStyle Style { get; set; }
 
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender = true;
@@ -103,13 +103,13 @@ public abstract class UIElement
         public bool HoverInternal;
 
         /// <summary>Styles registered on this element.</summary>
-        public HashSet<UIElementStyle> Styles = [];
+        public HashSet<UIStyle> Styles = [];
 
         /// <summary>Text objects registered on this element.</summary>
-        public List<UIElementText> Texts = [];
+        public List<UIText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
-        public UIElementStyle CurrentStyle = UIElementStyle.Empty;
+        public UIStyle CurrentStyle = UIStyle.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -287,10 +287,10 @@ public abstract class UIElement
         return false;
     }
 
-    /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIElementText"/>.</summary>
+    /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIText"/>.</summary>
     /// <param name="style">The style to register.</param>
     /// <param name="requireText">Whether the style must support text rendering.</param>
-    public UIElementStyle AddStyle(UIElementStyle style, bool requireText = false)
+    public UIStyle AddStyle(UIStyle style, bool requireText = false)
     {
         if (ElementInternal.Styles.Contains(style))
         {
@@ -304,7 +304,7 @@ public abstract class UIElement
         // TODO: avoid doing this on each call
         if (style.CanRenderText())
         {
-            foreach (UIElementText text in ElementInternal.Texts)
+            foreach (UIText text in ElementInternal.Texts)
             {
                 text.RefreshRenderables();
             }
@@ -315,7 +315,7 @@ public abstract class UIElement
     /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
     public void UpdateStyle()
     {
-        UIElementStyle newStyle = Style ?? UIElementStyle.Empty;
+        UIStyle newStyle = Style ?? UIStyle.Empty;
         if (newStyle != ElementInternal.CurrentStyle)
         {
             if (ElementInternal.CurrentStyle is not null)
@@ -326,13 +326,13 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Ran when this element switches from the relevant <see cref="UIElementStyle"/>.</summary>
-    public virtual void SwitchFromStyle(UIElementStyle style)
+    /// <summary>Ran when this element switches from the relevant <see cref="UIStyle"/>.</summary>
+    public virtual void SwitchFromStyle(UIStyle style)
     {
     }
 
-    /// <summary>Ran when this element switches to the relevant <see cref="UIElementStyle"/>.</summary>
-    public virtual void SwitchToStyle(UIElementStyle style)
+    /// <summary>Ran when this element switches to the relevant <see cref="UIStyle"/>.</summary>
+    public virtual void SwitchToStyle(UIStyle style)
     {
     }
 
@@ -498,7 +498,7 @@ public abstract class UIElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public virtual void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public virtual void Render(ViewUI2D view, double delta, UIStyle style)
     {
     }
 

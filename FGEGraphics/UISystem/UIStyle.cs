@@ -19,10 +19,10 @@ using FGEGraphics.GraphicsHelpers.Textures;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
-public record UIElementStyle
+public record UIStyle
 {
     /// <summary>An empty element style.</summary>
-    public static readonly UIElementStyle Empty = new() { Name = "Empty" };
+    public static readonly UIStyle Empty = new() { Name = "Empty" };
 
     /// <summary>What base color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
     public Color4F BaseColor = Color4F.Transparent;
@@ -53,13 +53,13 @@ public record UIElementStyle
     public string Name;
 
     /// <summary>Constructs a default element style.</summary>
-    public UIElementStyle()
+    public UIStyle()
     {
     }
 
     /// <summary>Constructs a new style as a copy of another style.</summary>
     /// <param name="style">The style to copy.</param>
-    public UIElementStyle(UIElementStyle style)
+    public UIStyle(UIStyle style)
     {
         BaseColor = style.BaseColor;
         BaseTexture = style.BaseTexture;
@@ -79,5 +79,5 @@ public record UIElementStyle
 
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
-    public bool CanRenderText(UIElementText text) => !text.Empty && CanRenderText() && (text.Internal.InternalStyle == this || (text.Internal.RenderableContent?.ContainsKey(this) ?? false));
+    public bool CanRenderText(UIText text) => !text.Empty && CanRenderText() && (text.Internal.InternalStyle == this || (text.Internal.RenderableContent?.ContainsKey(this) ?? false));
 }

@@ -35,7 +35,7 @@ public class UIImage(Texture image, UILayout layout) : UIElement(layout)
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
     }

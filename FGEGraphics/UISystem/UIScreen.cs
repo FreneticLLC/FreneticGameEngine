@@ -64,7 +64,7 @@ public class UIScreen : UIElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         if (ResetOnRender)
         {

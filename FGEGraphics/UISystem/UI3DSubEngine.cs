@@ -74,7 +74,7 @@ public class UI3DSubEngine : UIElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">Delta time.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         int x = LastAbsolutePosition.X;
         int y = LastAbsolutePosition.Y;

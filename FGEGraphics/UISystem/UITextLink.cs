@@ -27,7 +27,7 @@ namespace FGEGraphics.UISystem;
 public class UITextLink : UIClickableElement
 {
     /// <summary>The text to display for this link.</summary>
-    public UIElementText Text;
+    public UIText Text;
 
     /// <summary>The icon to display alongside this link.</summary>
     // TODO: UIImage
@@ -52,7 +52,7 @@ public class UITextLink : UIClickableElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         if (Icon is null)
         {

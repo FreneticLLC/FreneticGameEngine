@@ -20,5 +20,5 @@ namespace FGEGraphics.UISystem;
 public class UIRenderable(Action<UIElement, ViewUI2D, double> renderer) : UIElement(new UILayout())
 {
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style) => renderer(this, view, delta);
+    public override void Render(ViewUI2D view, double delta, UIStyle style) => renderer(this, view, delta);
 }

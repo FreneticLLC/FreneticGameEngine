@@ -74,7 +74,7 @@ public class UINumberSlider : UIClickableElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
-        AddChild(Button = new(UIElementStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { ShouldRender = false, Enabled = false });
+        AddChild(Button = new(UIStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { ShouldRender = false, Enabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 
@@ -114,7 +114,7 @@ public class UINumberSlider : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(Styles.Normal.BorderColor);

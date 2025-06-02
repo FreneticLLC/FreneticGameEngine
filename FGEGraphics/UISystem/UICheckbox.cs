@@ -39,7 +39,7 @@ public class UICheckbox : UIElement
     /// <param name="labelStyle">The text label style.</param>
     /// <param name="boxStyles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UILayout layout, bool toggled = false, UIElementStyle labelStyle = null) : base(layout)
+    public UICheckbox(string text, UIClickableElement.StyleGroup boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
     {
         Toggled = toggled;
         AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, layout.AtOrigin()));

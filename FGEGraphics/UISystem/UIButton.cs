@@ -31,7 +31,7 @@ public class UIButton : UIClickableElement
     public UIBox Box;
 
     /// <summary>The text to render on this button.</summary>
-    public UIElementText Text;
+    public UIText Text;
 
     /// <summary>Constructs a new style-based button.</summary>
     /// <param name="text">The text to display.</param>
@@ -40,7 +40,7 @@ public class UIButton : UIClickableElement
     /// <param name="layout">The layout of the element.</param>
     public UIButton(string text, Action clicked, StyleGroup styles, UILayout layout) : base(styles, layout, false, clicked)
     {
-        AddChild(Box = new UIBox(UIElementStyle.Empty, layout.AtOrigin()) { ShouldRender = false, Enabled = false });
+        AddChild(Box = new UIBox(UIStyle.Empty, layout.AtOrigin()) { ShouldRender = false, Enabled = false });
         Text = new(this, text);
     }
 
@@ -51,13 +51,13 @@ public class UIButton : UIClickableElement
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="layout">The layout of the element.</param>
-    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIElementStyle style, UILayout layout)
+    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIStyle style, UILayout layout)
     {
         // TODO: Move this to a method on UIClickableElement.StyleGroup
-        UIElementStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
-        UIElementStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
-        UIElementStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
-        UIElementStyle disabled = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
+        UIStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
+        UIStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
+        UIStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
+        UIStyle disabled = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
         return new UIButton(text, clicked, new(normal, hover, click, disabled), layout);
     }
 
@@ -65,7 +65,7 @@ public class UIButton : UIClickableElement
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         Box.Render(view, delta, style);
         if (style.CanRenderText(Text))

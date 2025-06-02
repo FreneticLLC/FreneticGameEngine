@@ -36,7 +36,7 @@ public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(la
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         GL.BindTexture(TextureTarget.Texture2D, Texture());
         float ymin = Flip ? Y + Height : Y;

@@ -54,13 +54,13 @@ public class UIInputLabel : UIClickableElement
     public UIRenderable LabelRenderable;
 
     /// <summary>The text to display when the input is empty.</summary>
-    public UIElementText PlaceholderInfo;
+    public UIText PlaceholderInfo;
 
     /// <summary>The UI style of normal input content.</summary>
-    public UIElementStyle InputStyle;
+    public UIStyle InputStyle;
 
     /// <summary>The UI style of highlighted input content.</summary>
-    public UIElementStyle HighlightStyle;
+    public UIStyle HighlightStyle;
 
     /// <summary>Whether the input label supports multiple lines.</summary>
     public bool Multiline = true;
@@ -95,7 +95,7 @@ public class UIInputLabel : UIClickableElement
     public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
 
     /// <inheritdoc/>
-    public override UIElementStyle Style => Selected ? Styles.Click : base.Style;
+    public override UIStyle Style => Selected ? Styles.Click : base.Style;
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
@@ -128,16 +128,16 @@ public class UIInputLabel : UIClickableElement
         public readonly bool HasSelection => CursorStart != CursorEnd;
 
         /// <summary>The text preceding <see cref="IndexLeft"/>.</summary>
-        public UIElementText TextLeft;
+        public UIText TextLeft;
 
         /// <summary>The text between <see cref="IndexLeft"/> and <see cref="IndexRight"/>.</summary>
-        public UIElementText TextBetween;
+        public UIText TextBetween;
 
         /// <summary>The text following <see cref="IndexRight"/>.</summary>
-        public UIElementText TextRight;
+        public UIText TextRight;
 
         /// <summary>A text chain generated from <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
-        public List<UIElementText.ChainPiece> TextChain;
+        public List<UIText.ChainPiece> TextChain;
         
         /// <summary>Sets both cursor positions at a single index.</summary>
         /// <param name="cursorPos">The cursor positions.</param>
@@ -180,7 +180,7 @@ public class UIInputLabel : UIClickableElement
             cursorIndex -= TextChain.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
             for (int i = 0; i < TextChain.Count; i++)
             {
-                UIElementText.ChainPiece piece = TextChain[i];
+                UIText.ChainPiece piece = TextChain[i];
                 for (int j = 0; j < piece.Text.Lines.Length; j++)
                 {
                     RenderableTextPart[] parts = piece.Text.Lines[j].Parts;
@@ -225,13 +225,13 @@ public class UIInputLabel : UIClickableElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIElementStyle inputStyle, UIElementStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, layout, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, layout, requireText: placeholderInfo.Length > 0)
     {
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
             layout.SetSize(layout.Width + boxPadding * 2, layout.Height + boxPadding * 2); // TODO: dynamic size
-            AddChild(Box = new(UIElementStyle.Empty, layout.AtOrigin()) { Enabled = false });
+            AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { Enabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
         UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
@@ -278,7 +278,7 @@ public class UIInputLabel : UIClickableElement
             return;
         }
         int maxWidth = 0;
-        foreach (UIElementText.ChainPiece piece in Internal.TextChain)
+        foreach (UIText.ChainPiece piece in Internal.TextChain)
         {
             if (piece.Text.Width > maxWidth)
             {
@@ -313,7 +313,7 @@ public class UIInputLabel : UIClickableElement
     public void UpdateText()
     {
         Internal.UpdateTextComponents();
-        Internal.TextChain = [.. UIElementText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Layout.Width : -1)];
+        Internal.TextChain = [.. UIText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Layout.Width : -1)];
         Internal.CursorOffset = Selected ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }
@@ -469,14 +469,14 @@ public class UIInputLabel : UIClickableElement
         bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = Window.MouseX - (LabelRenderable.X + TextPadding);
         float relMouseY = Window.MouseY - (LabelRenderable.Y + TextPadding);
-        UIElementText.ChainPiece lastPiece = Internal.TextChain[^1];
+        UIText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
             TickMousePosition(TextContent.Length, shiftDown);
             return;
         }
         int indexOffset = 0;
-        foreach (UIElementText.ChainPiece piece in Internal.TextChain)
+        foreach (UIText.ChainPiece piece in Internal.TextChain)
         {
             for (int i = 0; i < piece.Text.Lines.Length; i++)
             {
@@ -545,7 +545,7 @@ public class UIInputLabel : UIClickableElement
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
         GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
-        UIElementStyle style = ElementInternal.CurrentStyle;
+        UIStyle style = ElementInternal.CurrentStyle;
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
         int y = ScrollGroup.Y + TextPadding;
         bool renderInfo = TextContent.Length == 0 && style.CanRenderText(PlaceholderInfo);
@@ -555,7 +555,7 @@ public class UIInputLabel : UIClickableElement
         }
         else
         {
-            UIElementText.RenderChain(Internal.TextChain, x, y);
+            UIText.RenderChain(Internal.TextChain, x, y);
         }
         if (Internal.CursorOffset.IsNaN())
         {
@@ -572,7 +572,7 @@ public class UIInputLabel : UIClickableElement
     }
 
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style) => Box?.Render(view, delta, style);
+    public override void Render(ViewUI2D view, double delta, UIStyle style) => Box?.Render(view, delta, style);
 
     /// <inheritdoc/>
     public override List<string> GetDebugInfo()
