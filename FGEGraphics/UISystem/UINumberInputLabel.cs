@@ -72,7 +72,7 @@ public class UINumberInputLabel : UIInputLabel
     /// <param name="scrollBarWidth">The width of the scroll bar.</param>
     /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
-    public UINumberInputLabel(bool integer, StyleGroup baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double initial = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? initial.ToString(format) : "", baseStyles, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
+    public UINumberInputLabel(bool integer, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double initial = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? initial.ToString(format) : "", baseStyles, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
     {
         Integer = integer;
         Format = format ?? (integer ? "0" : "0.0");

@@ -25,7 +25,7 @@ namespace FGEGraphics.UISystem;
 public class UIDropdown : UIElement
 {
     /// <summary>A mapping of <see cref="ListGroup"/> clickables to their string values.</summary>
-    public Dictionary<UIClickableElement, string> Choices = [];
+    public Dictionary<UIElement, string> Choices = [];
 
     /// <summary>The text to display when no choice is selected.</summary>
     public string PlaceholderInfo;
@@ -40,7 +40,7 @@ public class UIDropdown : UIElement
     public UIBox Box;
 
     /// <summary>The currently selected entry in the <see cref="ListGroup"/>.</summary>
-    public UIClickableElement SelectedElement;
+    public UIElement SelectedElement;
 
     /// <summary>The currently selected dropdown value.</summary>
     public string SelectedValue;
@@ -55,7 +55,7 @@ public class UIDropdown : UIElement
     /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
     /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIStyle boxStyle, UILayout layout) : base(layout)
+    public UIDropdown(string text, int boxPadding, int listSpacing, UIInteractionStyles buttonStyles, UIStyle boxStyle, UILayout layout) : base(layout)
     {
         PlaceholderInfo = text;
         AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, layout.AtOrigin()));
@@ -73,7 +73,7 @@ public class UIDropdown : UIElement
 
     /// <summary>Selects one of the choices and closes the dropdown list.</summary>
     /// <param name="element">The selected choice.</param>
-    public void HandleSelect(UIClickableElement element)
+    public void HandleSelect(UIElement element)
     {
         SelectedElement = element;
         SelectedValue = Choices[element];
@@ -94,7 +94,7 @@ public class UIDropdown : UIElement
     /// <summary>Adds a choice to the dropdown.</summary>
     /// <param name="choice">The choice text.</param>
     /// <param name="element">The clickable choice element.</param>
-    public void AddChoice(string choice, UIClickableElement element)
+    public void AddChoice(string choice, UIElement element)
     {
         ListGroup.AddListItem(element);
         Choices[element] = choice;
@@ -105,7 +105,7 @@ public class UIDropdown : UIElement
     /// <param name="choice">The choice text.</param>
     /// <param name="linkStyles">The link styles.</param>
     /// <returns>The added text link.</returns>
-    public UITextLink AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
+    public UITextLink AddTextLinkChoice(string choice, UIInteractionStyles linkStyles)
     {
         UITextLink link = new(choice, null, null, linkStyles, new UILayout());
         AddChoice(choice, link);

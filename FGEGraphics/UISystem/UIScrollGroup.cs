@@ -43,7 +43,7 @@ public class UIScrollGroup : UIElement
     /// <param name="barY">Whether to add a vertical scroll bar.</param>
     /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIScrollGroup(UILayout layout, UIClickableElement.StyleGroup barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(layout)
+    public UIScrollGroup(UILayout layout, UIInteractionStyles barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(layout)
     {
         if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
         {
@@ -152,7 +152,7 @@ public class UIScrollGroup : UIElement
         /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
         /// <param name="styles">The <see cref="ScrollBar"/> styles.</param>
         /// <param name="layout">The base layout of the <see cref="ScrollBar"/>.</param>
-        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIClickableElement.StyleGroup styles, UILayout layout) : this(vertical, rangeLength)
+        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIInteractionStyles styles, UILayout layout) : this(vertical, rangeLength)
         {
             if (!hasBar)
             {

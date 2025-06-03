@@ -23,16 +23,18 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple box on the screen.</summary>
 /// <remarks>Constructs a simple colored box.</remarks>
-/// <param name="style">The style of the element.</param>
-/// <param name="layout">The layout of the element.</param>
-public class UIBox(UIStyle style, UILayout layout) : UIElement(layout)
+public class UIBox : UIElement
 {
-    /// <summary>The style of the box.</summary>
-    public override UIStyle Style { get; set; } = style;
-    
     // TODO: put this on UILayout or something
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
+
+    /// <param name="style">The style of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
+    public UIBox(UIStyle style, UILayout layout) : base(layout)
+    {
+        SetStyle(style);
+    }
 
     /// <summary>Renders this box on the screen.</summary>
     /// <param name="view">The UI view.</param>

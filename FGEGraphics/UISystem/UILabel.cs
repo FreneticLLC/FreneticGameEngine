@@ -35,9 +35,8 @@ public class UILabel : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UILabel(string text, UIStyle style, UILayout layout) : base(layout)
     {
-        Style = AddStyle(style, true);
+        SetStyle(style);
         Text = new(this, text, true, Layout.Width);
-        UpdateStyle();
         Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
 

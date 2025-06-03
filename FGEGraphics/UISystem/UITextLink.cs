@@ -24,7 +24,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable text link on a screen.</summary>
-public class UITextLink : UIClickableElement
+public class UITextLink : UIElement
 {
     /// <summary>The text to display for this link.</summary>
     public UIText Text;
@@ -40,12 +40,13 @@ public class UITextLink : UIClickableElement
     /// <param name="styles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>;
     // TODO: default values
-    public UITextLink(string text, Texture icon, Action clicked, StyleGroup styles, UILayout layout) : base(styles, layout, true, clicked)
+    public UITextLink(string text, Texture icon, Action clicked, UIInteractionStyles styles, UILayout layout) : base(layout)
     {
+        Styler = styles.Styler;
         Text = new(this, text, true);
         Icon = icon;
-        UpdateStyle();
         Layout.SetSize(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height);
+        OnClick += clicked;
     }
 
     /// <summary>Performs a render on this link.</summary>

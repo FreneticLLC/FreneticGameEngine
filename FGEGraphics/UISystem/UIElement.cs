@@ -66,8 +66,10 @@ public abstract class UIElement
     /// <summary>The position and size of this element.</summary>
     public UILayout Layout;
 
-    /// <summary>Returns the <b>current</b> element style.</summary>
-    public virtual UIStyle Style { get; set; }
+    /// <summary>Gets the current element style.</summary>
+    public UIStyle Style => ElementInternal.Style;
+
+    public Func<UIElement, UIStyle> Styler;
 
     /// <summary>Whether this element should render automatically.</summary>
     public bool ShouldRender = true;
@@ -109,7 +111,7 @@ public abstract class UIElement
         public List<UIText> Texts = [];
 
         /// <summary>The current style of this element.</summary>
-        public UIStyle CurrentStyle = UIStyle.Empty;
+        public UIStyle Style = UIStyle.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -144,6 +146,8 @@ public abstract class UIElement
         }
         child.Parent = this;
         child.IsValid = true;
+        child.UpdateStyle();
+        child.UpdatePosition(0, Vector3.Zero);
         child.Init();
     }
 
@@ -287,42 +291,43 @@ public abstract class UIElement
         return false;
     }
 
-    /// <summary>Registers a style to this element instance. Necessary when this element contains <see cref="UIText"/>.</summary>
-    /// <param name="style">The style to register.</param>
-    /// <param name="requireText">Whether the style must support text rendering.</param>
-    public UIStyle AddStyle(UIStyle style, bool requireText = false)
+    /// <summary>
+    /// Sets the style of this element.
+    /// <para>Additionally, updates any <see cref="UIText"/> objects attached to this element.</para>
+    /// <para>Fires <see cref="SwitchFromStyle(UIStyle)"/> and <see cref="SwitchToStyle(UIStyle)"/> accordingly.</para>
+    /// </summary>
+    /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
+    public void SetStyle(UIStyle style)
     {
-        if (ElementInternal.Styles.Contains(style))
+        UIStyle previousStyle = ElementInternal.Style;
+        if (previousStyle == style)
         {
-            return style;
+            return;
         }
-        if (requireText && !style.CanRenderText())
+        SwitchFromStyle(previousStyle);
+        if (!ElementInternal.Styles.Contains(style))
         {
-            throw new Exception("Style must support text rendering when 'requireText' is true");
-        }
-        ElementInternal.Styles.Add(style);
-        // TODO: avoid doing this on each call
-        if (style.CanRenderText())
-        {
-            foreach (UIText text in ElementInternal.Texts)
+            ElementInternal.Styles.Add(style);
+            if (style.CanRenderText())
             {
-                text.RefreshRenderables();
+                foreach (UIText text in ElementInternal.Texts)
+                {
+                    if (!text.Empty && text.Internal.Style is null)
+                    {
+                        text.Internal.Renderables[style] = text.CreateRenderable(style);
+                    }
+                }
             }
         }
-        return style;
+        SwitchToStyle(ElementInternal.Style = style ?? UIStyle.Empty);
     }
 
-    /// <summary>Updates the current style and fires relevant events if it has changed.</summary>
+    /// <summary>If a <see cref="Styler"/> is present, attempts to update the current style.</summary>
     public void UpdateStyle()
     {
-        UIStyle newStyle = Style ?? UIStyle.Empty;
-        if (newStyle != ElementInternal.CurrentStyle)
+        if (Styler is not null)
         {
-            if (ElementInternal.CurrentStyle is not null)
-            {
-                SwitchFromStyle(ElementInternal.CurrentStyle);
-            }
-            SwitchToStyle(ElementInternal.CurrentStyle = newStyle);
+            SetStyle(Styler(this));
         }
     }
 
@@ -443,7 +448,6 @@ public abstract class UIElement
         foreach (UIElement element in AllChildren())
         {
             element.CheckChildren();
-            element.UpdateStyle();
             element.TickInput();
             element.Tick(delta);
         }
@@ -505,7 +509,7 @@ public abstract class UIElement
     /// <summary>Renders this element using the current style.</summary>
     /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.CurrentStyle);
+    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.Style);
 
     /// <summary>Renders this element and all of its children recursively.</summary>
     /// <param name="view">The UI view.</param>
@@ -670,7 +674,7 @@ public abstract class UIElement
         };
         if (ElementInternal.Styles.Count > 0)
         {
-            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.CurrentStyle ? "3" : "7")}{style.Name}" : "^1unnamed")];
+            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
             info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
         }
         return info;

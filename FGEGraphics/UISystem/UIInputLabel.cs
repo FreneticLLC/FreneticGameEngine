@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Text alignment
 // TODO: Cap text length
 // TODO: HasEdited
-public class UIInputLabel : UIClickableElement
+public class UIInputLabel : UIElement
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
@@ -92,10 +92,7 @@ public class UIInputLabel : UIClickableElement
     public int Lines => Internal.TextChain.Sum(piece => piece.Text.Lines.Length);
 
     /// <summary>The padding offset for the rendered text, if any.</summary>
-    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.CurrentStyle.BorderThickness) : 0;
-
-    /// <inheritdoc/>
-    public override UIStyle Style => Selected ? Styles.Click : base.Style;
+    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) : 0;
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
@@ -225,21 +222,22 @@ public class UIInputLabel : UIClickableElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, StyleGroup baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, StyleGroup scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(baseStyles, layout, requireText: placeholderInfo.Length > 0)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(layout)
     {
+        Styler = element => element.Selected ? baseStyles.Press : baseStyles.Styler(element);
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
             layout.SetSize(layout.Width + boxPadding * 2, layout.Height + boxPadding * 2); // TODO: dynamic size
             AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { Enabled = false });
         }
-        int Inset() => Box is not null ? ElementInternal.CurrentStyle.BorderThickness : 0;
+        int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
         UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
-        HighlightStyle = highlightStyle ?? baseStyles.Click;
+        HighlightStyle = highlightStyle ?? baseStyles.Press;
         PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.MaxWidth = maxWidth;
         Internal.TextLeft = new(this, null, false, style: InputStyle);
@@ -297,7 +295,7 @@ public class UIInputLabel : UIClickableElement
             ScrollGroup.ScrollY.Reset();
             return;
         }
-        int lastLineHeight = Internal.TextLeft.CurrentStyle.FontHeight + TextPadding * 2;
+        int lastLineHeight = Internal.TextLeft.Style.FontHeight + TextPadding * 2;
         ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
         ScrollGroup.ScrollY.ScrollToPos((int)Internal.CursorOffset.Y, (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
     }
@@ -545,7 +543,7 @@ public class UIInputLabel : UIClickableElement
     public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
     {
         GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
-        UIStyle style = ElementInternal.CurrentStyle;
+        UIStyle style = ElementInternal.Style;
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
         int y = ScrollGroup.Y + TextPadding;
         bool renderInfo = TextContent.Length == 0 && style.CanRenderText(PlaceholderInfo);
@@ -565,7 +563,7 @@ public class UIInputLabel : UIClickableElement
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
-        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).CurrentStyle.TextFont.Height;
+        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).Style.TextFont.Height;
         view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
         GraphicsUtil.CheckError("UIInputLabel - PostRenderLabel", this);

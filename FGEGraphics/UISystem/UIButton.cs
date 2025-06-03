@@ -25,7 +25,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable button on a screen.</summary>
-public class UIButton : UIClickableElement
+public class UIButton : UIElement
 {
     /// <summary>The pressable area of this button.</summary>
     public UIBox Box;
@@ -38,8 +38,10 @@ public class UIButton : UIClickableElement
     /// <param name="clicked">The action to run when clicked.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIButton(string text, Action clicked, StyleGroup styles, UILayout layout) : base(styles, layout, false, clicked)
+    public UIButton(string text, Action clicked, UIInteractionStyles styles, UILayout layout) : base(layout)
     {
+        Styler = styles.Styler;
+        OnClick += clicked;
         AddChild(Box = new UIBox(UIStyle.Empty, layout.AtOrigin()) { ShouldRender = false, Enabled = false });
         Text = new(this, text);
     }
@@ -53,7 +55,7 @@ public class UIButton : UIClickableElement
     /// <param name="layout">The layout of the element.</param>
     public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIStyle style, UILayout layout)
     {
-        // TODO: Move this to a method on UIClickableElement.StyleGroup
+        // TODO: Move this to a method on UIInteractionStyles
         UIStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
         UIStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
         UIStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };

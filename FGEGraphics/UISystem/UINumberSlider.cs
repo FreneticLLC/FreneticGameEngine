@@ -22,7 +22,7 @@ namespace FGEGraphics.UISystem;
 /// Represents a slider element that can choose between a range of real number values.
 /// For a labeled number slider, use <see cref="UILabeledNumberSlider"/>.
 /// </summary>
-public class UINumberSlider : UIClickableElement
+public class UINumberSlider : UIElement
 {
     /// <summary>The minimum slider value.</summary>
     public double Min;
@@ -62,8 +62,9 @@ public class UINumberSlider : UIClickableElement
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup styles, UILayout layout) : base(styles, layout, false, null)
+    public UINumberSlider(double min, double max, double initial, double interval, bool integer, UIInteractionStyles styles, UILayout layout) : base(layout)
     {
+        Styler = styles.Styler;
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
         Min = Integer ? (int)min : min;
@@ -117,7 +118,7 @@ public class UINumberSlider : UIClickableElement
     public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
         Engine.Textures.White.Bind();
-        Renderer2D.SetColor(Styles.Normal.BorderColor);
+        Renderer2D.SetColor(style.BorderColor);
         int lineWidth = style.BorderThickness / 2;
         int centerY = Y + Height / 2;
         view.Rendering.RenderRectangle(view.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);

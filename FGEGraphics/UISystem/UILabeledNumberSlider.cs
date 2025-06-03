@@ -42,9 +42,8 @@ public class UILabeledNumberSlider : UINumberSlider
     /// <param name="labelScrollBarWidth">The width of the label scroll bar.</param>
     /// <param name="labelScrollBarX">Whether to add a horizontal label scroll bar.</param>
     /// <param name="labelScrollBarXAnchor">The anchor of the horizontal label scroll bar.</param>
-    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, StyleGroup baseStyles, bool labelLeft, int labelPadding, UIStyle labelInputStyle, UIStyle labelHighlightStyle, UILayout layout, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, StyleGroup labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, layout)
+    public UILabeledNumberSlider(double min, double max, double initial, double interval, bool integer, UIInteractionStyles baseStyles, bool labelLeft, int labelPadding, UIStyle labelInputStyle, UIStyle labelHighlightStyle, UILayout layout, string labelFormat = null, bool updateOnEdit = true, bool labelRenderBox = false, int labelBoxPadding = 0, UIInteractionStyles labelScrollBarStyles = null, int labelScrollBarWidth = 0, bool labelScrollBarX = false, UIAnchor labelScrollBarXAnchor = null) : base(min, max, initial, interval, integer, baseStyles, layout)
     {
-        AddStyle(labelInputStyle, true);
         AddChild(Label = new UINumberInputLabel(integer, baseStyles, labelInputStyle, labelHighlightStyle, layout.AtOrigin(), Value, labelFormat, "", labelRenderBox, labelBoxPadding, labelScrollBarStyles, labelScrollBarWidth, labelScrollBarX, labelScrollBarXAnchor));
         Label.Layout.SetPosition(() => labelLeft ? -labelPadding - Label.Width : layout.Width + labelPadding, () => (layout.Height - Label.Height) / 2);
         OnValueEdit += _ => Label.TextContent = Value.ToString(Label.Format);
