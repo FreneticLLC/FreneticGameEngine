@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
@@ -42,33 +43,42 @@ public abstract class UIElement
     /// <summary>Gets the client game engine used to render this element.</summary>
     public GameEngineBase Engine => Window.CurrentEngine;
 
-    /// <summary>Last known absolute position.</summary>
-    public FGECore.MathHelpers.Vector2i LastAbsolutePosition;
-
-    /// <summary>Last known absolute size (Width and Height).</summary>
-    public FGECore.MathHelpers.Vector2i LastAbsoluteSize;
-
-    /// <summary>Last known absolute X position (from <see cref="LastAbsolutePosition"/>).</summary>
-    public int X => LastAbsolutePosition.X;
-
-    /// <summary>Last known absolute Y position (from <see cref="LastAbsolutePosition"/>).</summary>
-    public int Y => LastAbsolutePosition.Y;
-
-    /// <summary>Last known absolute width (from <see cref="LastAbsoluteSize"/>).</summary>
-    public int Width => LastAbsoluteSize.X;
-
-    /// <summary>Last known absolute height (from <see cref="LastAbsoluteSize"/>).</summary>
-    public int Height => LastAbsoluteSize.Y;
-
-    /// <summary>Last known aboslute rotation.</summary>
-    public float LastAbsoluteRotation;
-
-    /// <summary>The position and size of this element.</summary>
+    /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
     public UILayout Layout;
+
+    /// <summary>This absolute position.</summary>
+    /// <seealso cref="X"/>
+    /// <seealso cref="Y"/>
+    public FGECore.MathHelpers.Vector2i Position;
+
+    /// <summary>The absolute size.</summary>
+    /// <seealso cref="Width"/>
+    /// <seealso cref="Height"/>
+    public FGECore.MathHelpers.Vector2i Size;
+
+    /// <summary>The absolute rotation.</summary>
+    public float Rotation;
+
+    /// <summary>Gets the absolute X coordinate.</summary>
+    /// <seealso cref="Position"/>
+    public int X => Position.X;
+
+    /// <summary>Gets the absolute Y coordinate.</summary>
+    /// <seealso cref="Position"/>
+    public int Y => Position.Y;
+
+    /// <summary>Gets the absolute width value.</summary>
+    /// <seealso cref="Size"/>
+    public int Width => Size.X;
+
+    /// <summary>Gets the absolute height value.</summary>
+    /// <seealso cref="Size"/>
+    public int Height => Size.Y;
 
     /// <summary>Gets the current element style.</summary>
     public UIStyle Style => ElementInternal.Style;
 
+    /// <summary>Styling logic for this element. If non-null, updates the <see cref="Style"/> every frame.</summary>
     public Func<UIElement, UIStyle> Styler;
 
     /// <summary>Whether this element should render automatically.</summary>
@@ -186,7 +196,7 @@ public abstract class UIElement
     }
 
     /// <summary>Adds and removes any queued children.</summary>
-    public void CheckChildren()
+    public void UpdateChildren()
     {
         foreach (UIElement element in ElementInternal.ToAdd)
         {
@@ -305,9 +315,8 @@ public abstract class UIElement
             return;
         }
         SwitchFromStyle(previousStyle);
-        if (!ElementInternal.Styles.Contains(style))
+        if (ElementInternal.Styles.Add(style))
         {
-            ElementInternal.Styles.Add(style);
             if (style.CanRenderText())
             {
                 foreach (UIText text in ElementInternal.Texts)
@@ -447,7 +456,7 @@ public abstract class UIElement
     {
         foreach (UIElement element in AllChildren())
         {
-            element.CheckChildren();
+            element.UpdateChildren();
             element.TickInput();
             element.Tick(delta);
         }
@@ -488,9 +497,9 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        LastAbsolutePosition = new FGECore.MathHelpers.Vector2i(x, y);
-        LastAbsoluteRotation = rotation.Z;
-        LastAbsoluteSize = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height);
+        Position = new FGECore.MathHelpers.Vector2i(x, y);
+        Rotation = rotation.Z;
+        Size = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height);
         /*CheckChildren();
         foreach (UIElement child in ElementInternal.Children)
         {
@@ -669,7 +678,7 @@ public abstract class UIElement
         List<string> info = new(4)
         {
             $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
-            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{LastAbsoluteRotation}",
+            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation}",
             $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
         };
         if (ElementInternal.Styles.Count > 0)

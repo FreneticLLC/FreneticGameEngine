@@ -41,6 +41,6 @@ public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(la
         GL.BindTexture(TextureTarget.Texture2D, Texture());
         float ymin = Flip ? Y + Height : Y;
         float ymax = Flip ? Y : Y + Height;
-        view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, Rotation));
     }
 }

@@ -42,7 +42,7 @@ public class UIBox : UIElement
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
-        Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
+        Vector3 rotation = new(-0.5f, -0.5f, Rotation);
         bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
         if (any)
         {

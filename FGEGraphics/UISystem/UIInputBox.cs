@@ -84,7 +84,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         Selected = true;
         // TODO: implement
         // /* KeyHandlerState khs = */KeyHandler.GetKBState();
-        int xs = LastAbsolutePosition.X;
+        int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
             if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
@@ -125,7 +125,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
     /// <summary>Adjusts the cursor position based on the mouse X coordinate.</summary>
     public void AdjustMax()
     {
-        int xs = LastAbsolutePosition.X;
+        int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
             if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
@@ -234,12 +234,12 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
             }
             typed = typed.Replace("^", "^^n");
         }
-        int x = LastAbsolutePosition.X;
-        int y = LastAbsolutePosition.Y;
-        int w = LastAbsoluteSize.X;
+        int x = Position.X;
+        int y = Position.Y;
+        int w = Size.X;
         engine.Textures.White.Bind();
         Renderer2D.SetColor(Color);
-        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, Rotation));
         GL.Enable(EnableCap.ScissorTest);
         GL.Scissor(x, engine.Window.ClientSize.Y - (y + Fonts.Height), w, Fonts.Height);
         if (Selected)
@@ -247,7 +247,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
             float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
             float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);
             Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, Rotation));
         }
         Renderer2D.SetColor(Color4.White);
         Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

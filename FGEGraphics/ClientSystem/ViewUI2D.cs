@@ -108,7 +108,7 @@ public class ViewUI2D
             Engine.Textures.White.Bind();
             Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
             Renderer2D.SetColor(outlineColor);
-            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.LastAbsoluteRotation), true);
+            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
             Renderer2D.SetColor(Color4F.White);
             if (element.ElementInternal.HoverInternal)
             {

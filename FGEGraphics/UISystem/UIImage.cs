@@ -37,6 +37,6 @@ public class UIImage(Texture image, UILayout layout) : UIElement(layout)
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
-        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }

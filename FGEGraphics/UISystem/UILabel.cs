@@ -49,7 +49,7 @@ public class UILabel : UIElement
         if (style.BaseColor.A > 0)
         {
             Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, Rotation));
             Renderer2D.SetColor(Color4F.White);
         }
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));

@@ -76,11 +76,7 @@ public class UI3DSubEngine : UIElement
     /// <param name="style">The current element style.</param>
     public override void Render(ViewUI2D view, double delta, UIStyle style)
     {
-        int x = LastAbsolutePosition.X;
-        int y = LastAbsolutePosition.Y;
-        int w = LastAbsoluteSize.X;
-        int h = LastAbsoluteSize.Y;
         GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
-        view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        view.Rendering.RenderRectangle(view.UIContext, X, Y + Height, X + Width, Y, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }
