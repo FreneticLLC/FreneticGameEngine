@@ -46,23 +46,6 @@ public class UIButton : UIElement
         Text = new(this, text);
     }
 
-    /// <summary>Constructs a new button based on a standard texture set.</summary>
-    /// <param name="style">The base button style.</param>
-    /// <param name="textures">The texture engine to get textures from.</param>
-    /// <param name="textureSet">The name of the texture set to use.</param>
-    /// <param name="text">The text to display.</param>
-    /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="layout">The layout of the element.</param>
-    public static UIButton Textured(string text, TextureEngine textures, string textureSet, Action clicked, UIStyle style, UILayout layout)
-    {
-        // TODO: Move this to a method on UIInteractionStyles
-        UIStyle normal = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_none") };
-        UIStyle hover = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_hover") };
-        UIStyle click = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_click") };
-        UIStyle disabled = new(style) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
-        return new UIButton(text, clicked, new(normal, hover, click, disabled), layout);
-    }
-
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {

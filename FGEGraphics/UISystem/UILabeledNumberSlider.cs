@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a <see cref="UINumberSlider"/> element with an editable number label alongside the interactable area.</summary>
+// TODO: Remove
 public class UILabeledNumberSlider : UINumberSlider
 {
     // TODO: Vertically center text
     /// <summary>The slider's value label.</summary>
     public UINumberInputLabel Label;
 
-    // TODO: accept a number label instead of having an enormous constructor?
     /// <summary>Constructs a labeled number slider.</summary>
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>

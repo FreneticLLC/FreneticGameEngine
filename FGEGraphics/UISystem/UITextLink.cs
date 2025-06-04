@@ -45,7 +45,7 @@ public class UITextLink : UIElement
         Styler = styles.Styler;
         Text = new(this, text, true);
         Icon = icon;
-        Layout.SetSize(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height);
+        Layout.SetSize(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height); // TODO: padding
         OnClick += clicked;
     }
 

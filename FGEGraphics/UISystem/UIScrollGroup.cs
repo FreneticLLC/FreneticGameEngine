@@ -17,7 +17,8 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
-// TODO: handle navigational scroll
+// TODO: option to automatically calculate max scroll based on added elements
+// TODO: add utility list + scrollgroup class
 public class UIScrollGroup : UIElement
 {
     /// <summary>The horizontal scroll axis.</summary>

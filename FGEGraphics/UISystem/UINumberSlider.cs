@@ -45,14 +45,13 @@ public class UINumberSlider : UIElement
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
     public double Progress => (Value - Min) / (Max - Min);
 
+    /// <summary>The box placed at the current slider progress.</summary>
+    public UIBox Button;
+
+    // TODO: number label
+
     /// <summary>Fired when the user edits the slider value.</summary>
     public Action<double> OnValueEdit;
-
-    /// <summary>
-    /// The box placed at the current slider progress.
-    /// Not actually a <see cref="UIButton"/> for better UX.
-    /// </summary>
-    public UIBox Button;
 
     /// <summary>Constructs a number slider.</summary>
     /// <param name="min">The minimum slider value.</param>

@@ -43,12 +43,6 @@ public class UILabel : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        if (style.BaseColor.A > 0)
-        {
-            Renderer2D.SetColor(style.BaseColor);
-            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, Rotation));
-            Renderer2D.SetColor(Color4F.White);
-        }
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
     }
 }
