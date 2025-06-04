@@ -540,16 +540,15 @@ public class UIInputLabel : UIElement
     }
 
     /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
-    public void RenderLabel(UIElement elem, ViewUI2D view, double delta)
+    public void RenderLabel(UIElement elem, double delta, UIStyle style)
     {
         GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
-        UIStyle style = ElementInternal.Style;
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
         int y = ScrollGroup.Y + TextPadding;
-        bool renderInfo = TextContent.Length == 0 && style.CanRenderText(PlaceholderInfo);
+        bool renderInfo = TextContent.Length == 0 && Style.CanRenderText(PlaceholderInfo);
         if (renderInfo)
         {
-            style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
+            Style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
         }
         else
         {
@@ -564,13 +563,13 @@ public class UIInputLabel : UIElement
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).Style.TextFont.Height;
-        view.Rendering.RenderRectangle(view.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
+        View.Rendering.RenderRectangle(View.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
         GraphicsUtil.CheckError("UIInputLabel - PostRenderLabel", this);
     }
 
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIStyle style) => Box?.Render(view, delta, style);
+    public override void Render(double delta, UIStyle style) => Box?.Render(delta, style);
 
     /// <inheritdoc/>
     public override List<string> GetDebugInfo()

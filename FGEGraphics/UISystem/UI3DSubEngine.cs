@@ -47,21 +47,20 @@ public class UI3DSubEngine : UIElement
         }
     }
 
-    /// <summary>Initializes the subengine.</summary>
+    /// <inheritdoc/>
     public override void Init()
     {
         SubEngine.OwningInstance = Window;
         SubEngine.Load();
     }
 
-    /// <summary>Destroys the subengine.</summary>
+    /// <inheritdoc/>
     public override void Destroy()
     {
         SubEngine.MainView.GenerationHelper.Destroy();
     }
 
-    /// <summary>Ticks the element.</summary>
-    /// <param name="delta">Delta.</param>
+    /// <inheritdoc/>
     public override void Tick(double delta)
     {
         SubEngine.Delta = delta;
@@ -70,13 +69,10 @@ public class UI3DSubEngine : UIElement
         SubEngine.Tick();
     }
 
-    /// <summary>Renders the view on-screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">Delta time.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
-        view.Rendering.RenderRectangle(view.UIContext, X, Y + Height, X + Width, Y, new Vector3(-0.5f, -0.5f, Rotation));
+        View.Rendering.RenderRectangle(View.UIContext, X, Y + Height, X + Width, Y, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }

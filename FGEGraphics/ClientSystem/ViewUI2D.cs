@@ -170,7 +170,7 @@ public class ViewUI2D
             }
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-        CurrentScreen.RenderAll(this, Client.Delta);
+        CurrentScreen.RenderAll(Client.Delta);
         if (Debug)
         {
             DrawDebug();

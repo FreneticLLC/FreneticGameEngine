@@ -63,13 +63,10 @@ public class UIButton : UIElement
         return new UIButton(text, clicked, new(normal, hover, click, disabled), layout);
     }
 
-    /// <summary>Renders this button on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
-        Box.Render(view, delta, style);
+        Box.Render(delta, style);
         if (style.CanRenderText(Text))
         {
             style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));

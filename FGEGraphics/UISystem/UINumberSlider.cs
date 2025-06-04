@@ -115,13 +115,13 @@ public class UINumberSlider : UIElement
     }
 
     /// <inheritdoc/>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    public override void Render(double delta, UIStyle style)
     {
         Engine.Textures.White.Bind();
         Renderer2D.SetColor(style.BorderColor);
         int lineWidth = style.BorderThickness / 2;
         int centerY = Y + Height / 2;
-        view.Rendering.RenderRectangle(view.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);
+        View.Rendering.RenderRectangle(View.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);
         if (Interval > 0.0)
         {
             double values = (Max - Min) / Interval;
@@ -130,10 +130,10 @@ public class UINumberSlider : UIElement
             {
                 int x = (int)(X + i * spacing);
                 int height = Height / 6; // TODO: Make this value customizable
-                view.Rendering.RenderRectangle(view.UIContext, x - lineWidth, centerY - height, x + lineWidth, centerY + height);
+                View.Rendering.RenderRectangle(View.UIContext, x - lineWidth, centerY - height, x + lineWidth, centerY + height);
             }
         }
         Renderer2D.SetColor(Color4F.White);
-        Button.Render(view, delta, style);
+        Button.Render(delta, style);
     }
 }

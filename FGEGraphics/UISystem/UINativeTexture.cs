@@ -32,15 +32,12 @@ public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(la
     // TODO: Put transforms on UILayout
     public bool Flip;
 
-    /// <summary>Renders the texture on a screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         GL.BindTexture(TextureTarget.Texture2D, Texture());
         float ymin = Flip ? Y + Height : Y;
         float ymax = Flip ? Y : Y + Height;
-        view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, Rotation));
+        View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, Rotation));
     }
 }

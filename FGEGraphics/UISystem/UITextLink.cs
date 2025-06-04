@@ -49,18 +49,15 @@ public class UITextLink : UIElement
         OnClick += clicked;
     }
 
-    /// <summary>Performs a render on this link.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         if (Icon is null)
         {
             style.TextFont.DrawFancyText(Text, new(X, Y, 0));
             return;
         }
-        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Icon, X, Y, X + Height, Y + Height, TextureFit.STRETCH);
+        View.Rendering.RenderFittedTextureRectangle(View.UIContext, Icon, X, Y, X + Height, Y + Height, TextureFit.STRETCH);
         Renderer2D.SetColor(style.BaseColor);
         style.TextFont.DrawFancyText(Text, new(X + Height, Y, 0));
         Renderer2D.SetColor(Color4F.White);

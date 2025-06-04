@@ -40,16 +40,13 @@ public class UILabel : UIElement
         Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
 
-    /// <summary>Renders this label on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         if (style.BaseColor.A > 0)
         {
             Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, Rotation));
+            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, Rotation));
             Renderer2D.SetColor(Color4F.White);
         }
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));

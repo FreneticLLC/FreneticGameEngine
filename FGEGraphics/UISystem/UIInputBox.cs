@@ -206,11 +206,8 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         }
     }
 
-    /// <summary>Renders this input box on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         string typed = Text;
         int c = 0;
@@ -239,7 +236,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         int w = Size.X;
         engine.Textures.White.Bind();
         Renderer2D.SetColor(Color);
-        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, Rotation));
+        View.Rendering.RenderRectangle(View.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, Rotation));
         GL.Enable(EnableCap.ScissorTest);
         GL.Scissor(x, engine.Window.ClientSize.Y - (y + Fonts.Height), w, Fonts.Height);
         if (Selected)
@@ -247,7 +244,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
             float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
             float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);
             Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, Rotation));
+            View.Rendering.RenderRectangle(View.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, Rotation));
         }
         Renderer2D.SetColor(Color4.White);
         Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

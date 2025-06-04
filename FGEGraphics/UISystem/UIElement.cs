@@ -508,31 +508,28 @@ public abstract class UIElement
     }
 
     /// <summary>Renders this element.</summary>
-    /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public virtual void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <param name="style">The rendering style.</param>
+    public virtual void Render(double delta, UIStyle style)
     {
     }
 
-    /// <summary>Renders this element using the current style.</summary>
-    /// <param name="view">The UI view.</param>
+    /// <summary>Renders this element with the current <see cref="Style"/>.</summary>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(ViewUI2D view, double delta) => Render(view, delta, ElementInternal.Style);
+    public void Render(double delta) => Render(delta, Style);
 
     /// <summary>Renders this element and all of its children recursively.</summary>
-    /// <param name="view">The UI view.</param>
     /// <param name="delta">The time since the last render.</param>
-    public virtual void RenderAll(ViewUI2D view, double delta)
+    public virtual void RenderAll(double delta)
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
-        Render(view, delta);
+        Render(delta);
         GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
         foreach (UIElement child in ElementInternal.Children)
         {
             if (child.IsValid && child.ShouldRender)
             {
-                child.RenderAll(view, delta);
+                child.RenderAll(delta);
             }
         }
         GraphicsUtil.CheckError("UIElement - PostRenderAll", this);

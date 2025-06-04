@@ -31,12 +31,9 @@ public class UIImage(Texture image, UILayout layout) : UIElement(layout)
     /// <summary>How to fit the image within this element's bounding box.</summary>
     public TextureFit Fit = TextureFit.STRETCH;
 
-    /// <summary>Renders the image on a screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
-        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
+        View.Rendering.RenderFittedTextureRectangle(View.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }
