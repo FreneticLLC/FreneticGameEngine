@@ -410,6 +410,7 @@ public abstract class UIElement
                     View.HeldElement = null;
                 }
             }
+            MouseLeave();
             if (View.MousePreviouslyDown)
             {
                 MouseLeftUpOutside(mouseX, mouseY);
@@ -641,12 +642,12 @@ public abstract class UIElement
         OnDeselect();
     }
 
-    /// <summary>Ran when the user has begun interacting with the element.</summary>
+    /// <summary>Ran when the user begins interacting with the element.</summary>
     public virtual void OnSelect()
     {
     }
 
-    /// <summary>Ran when the user has stopped interacting with the element.</summary>
+    /// <summary>Ran when the user stops interacting with the element.</summary>
     public virtual void OnDeselect()
     {
     }
