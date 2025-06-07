@@ -18,6 +18,8 @@ using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+using Vector2i = FGECore.MathHelpers.Vector2i;
+
 namespace FGEGraphics.UISystem;
 
 /// <summary>
@@ -49,12 +51,12 @@ public abstract class UIElement
     /// <summary>This absolute position.</summary>
     /// <seealso cref="X"/>
     /// <seealso cref="Y"/>
-    public FGECore.MathHelpers.Vector2i Position;
+    public Vector2i Position;
 
     /// <summary>The absolute size.</summary>
     /// <seealso cref="Width"/>
     /// <seealso cref="Height"/>
-    public FGECore.MathHelpers.Vector2i Size;
+    public Vector2i Size;
 
     /// <summary>The absolute rotation.</summary>
     public float Rotation;
@@ -98,6 +100,8 @@ public abstract class UIElement
 
     /// <summary>Ran when this element is clicked.</summary>
     public Action OnClick;
+
+    public Action<Vector2i, Vector2i> OnSizeChange;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
@@ -498,9 +502,14 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        Position = new FGECore.MathHelpers.Vector2i(x, y);
+        Position = new Vector2i(x, y);
+        if (Size.X != Layout.Width || Size.Y != Layout.Height)
+        {
+            Vector2i newSize = new(Layout.Width, Layout.Height);
+            OnSizeChange?.Invoke(Size, newSize);
+            Size = newSize;
+        }
         Rotation = rotation.Z;
-        Size = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height);
         /*CheckChildren();
         foreach (UIElement child in ElementInternal.Children)
         {

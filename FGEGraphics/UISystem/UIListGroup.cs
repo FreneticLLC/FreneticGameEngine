@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.MathHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,14 @@ public class UIListGroup : UIGroup
     /// <summary>The anchor that the list will expand from.</summary>
     public UIAnchor Anchor;
 
+    public struct InternalData()
+    {
+        public List<UIElement> Items = [];
+        public Dictionary<UIElement, int> Offsets = [];
+    }
+
+    public InternalData Internal = new();
+
     /// <summary>Constructs a new list group.</summary>
     /// <param name="spacing">The spacing between each child.</param>
     /// <param name="layout">The layout of the element.</param>
@@ -44,6 +53,16 @@ public class UIListGroup : UIGroup
         }
         Vertical = vertical;
         Spacing = spacing;
+        if (Vertical)
+        {
+            Layout.SetHeight(() => Internal.Items.Count > 0 ? Internal.Offsets[Internal.Items[^1]] + Internal.Items[^1].Height : 0);
+            Layout.SetWidth(() => Internal.Items.Count > 0 ? Internal.Items.Max(item => item.Width) : 0);
+        }
+        else
+        {
+            Layout.SetWidth(() => Internal.Items.Count > 0 ? Internal.Offsets[Internal.Items[^1]] + Internal.Items[^1].Width : 0);
+            Layout.SetHeight(() => Internal.Items.Count > 0 ? Internal.Items.Max(item => item.Height) : 0);
+        }
     }
 
     /// <summary>Adds and positions an element within the list.</summary>
@@ -56,25 +75,28 @@ public class UIListGroup : UIGroup
             base.AddChild(element);
         }
         element.Layout.SetAnchor(Anchor);
+        Internal.Offsets[element] = Internal.Items.Count > 0 ? Internal.Offsets[Internal.Items[^1]] + (Vertical ? Internal.Items[^1].Height : Internal.Items[^1].Width) + Spacing : 0;
+        Internal.Items.Add(element);
         if (Vertical)
         {
-            int elementY = Layout.Height > 0 ? Layout.Height + Spacing : 0;
-            element.Layout.SetPosition(0, Anchor.AlignmentY == UIAlignment.TOP ? elementY : -elementY);
-            Layout.SetHeight(elementY + element.Layout.Height);
-            if (element.Layout.Width > Layout.Width)
-            {
-                Layout.SetWidth(element.Layout.Width);
-            }
+            element.Layout.SetY(() => Anchor.AlignmentY == UIAlignment.TOP ? Internal.Offsets[element] : -Internal.Offsets[element]).SetX(0);
         }
         else
         {
-            int elementX = Layout.Width > 0 ? Layout.Width + Spacing : 0;
-            element.Layout.SetPosition(Anchor.AlignmentX == UIAlignment.LEFT ? elementX : -elementX, 0);
-            Layout.SetWidth(elementX + element.Layout.Width);
-            if (element.Layout.Height > Layout.Height)
-            {
-                Layout.SetHeight(element.Layout.Height);
-            }
+            element.Layout.SetX(() => Anchor.AlignmentX == UIAlignment.LEFT ? Internal.Offsets[element] : -Internal.Offsets[element]).SetY(0);
         }
+        element.OnSizeChange += (oldSize, newSize) =>
+        {
+            int index = Internal.Items.IndexOf(element);
+            if (index <= 0)
+            {
+                return;
+            }
+            for (int i = index + 1; i < Internal.Items.Count; i++)
+            {
+                Vector2i difference = newSize - oldSize;
+                Internal.Offsets[Internal.Items[i]] += Vertical ? difference.Y : difference.X;
+            }
+        };
     }
 }
