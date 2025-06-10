@@ -42,7 +42,7 @@ public class UIButton : UIElement
     {
         Styler = styles.Styler;
         OnClick += clicked;
-        AddChild(Box = new UIBox(UIStyle.Empty, layout.AtOrigin()) { ShouldRender = false, Enabled = false });
+        AddChild(Box = new UIBox(UIStyle.Empty, layout.AtOrigin()) { RenderSelf = false, Enabled = false });
         Text = new(this, text);
     }
 

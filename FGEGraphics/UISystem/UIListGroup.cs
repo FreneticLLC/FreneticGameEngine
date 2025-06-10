@@ -66,37 +66,56 @@ public class UIListGroup : UIGroup
     }
 
     /// <summary>Adds and positions an element within the list.</summary>
-    /// <param name="element">The element to add.</param>
-    /// <param name="addChild">Whether to add <paramref name="element"/> as a child.</param>
-    public void AddListItem(UIElement element, bool addChild = true)
+    /// <param name="item">The element to add.</param>
+    /// <param name="addChild">Whether to add <paramref name="item"/> as a child.</param>
+    public void AddListItem(UIElement item, bool addChild = true)
     {
         if (addChild)
         {
-            base.AddChild(element);
+            base.AddChild(item);
         }
-        element.Layout.SetAnchor(Anchor);
-        Internal.Offsets[element] = Internal.Items.Count > 0 ? Internal.Offsets[Internal.Items[^1]] + (Vertical ? Internal.Items[^1].Height : Internal.Items[^1].Width) + Spacing : 0;
-        Internal.Items.Add(element);
+        item.Layout.SetAnchor(Anchor);
+        Internal.Offsets[item] = Internal.Items.Count > 0 ? Internal.Offsets[Internal.Items[^1]] + (Vertical ? Internal.Items[^1].Height : Internal.Items[^1].Width) + Spacing : 0;
+        Internal.Items.Add(item);
         if (Vertical)
         {
-            element.Layout.SetY(() => Anchor.AlignmentY == UIAlignment.TOP ? Internal.Offsets[element] : -Internal.Offsets[element]).SetX(0);
+            item.Layout.SetY(() => Anchor.AlignmentY == UIAlignment.TOP ? Internal.Offsets[item] : -Internal.Offsets[item]).SetX(0);
         }
         else
         {
-            element.Layout.SetX(() => Anchor.AlignmentX == UIAlignment.LEFT ? Internal.Offsets[element] : -Internal.Offsets[element]).SetY(0);
+            item.Layout.SetX(() => Anchor.AlignmentX == UIAlignment.LEFT ? Internal.Offsets[item] : -Internal.Offsets[item]).SetY(0);
         }
-        element.OnSizeChange += (oldSize, newSize) =>
+        item.OnSizeChange += (oldSize, newSize) =>
         {
-            int index = Internal.Items.IndexOf(element);
-            if (index <= 0)
+            int listIndex = Internal.Items.IndexOf(item);
+            if (listIndex < 0)
             {
                 return;
             }
-            for (int i = index + 1; i < Internal.Items.Count; i++)
+            for (int i = listIndex + 1; i < Internal.Items.Count; i++)
             {
                 Vector2i difference = newSize - oldSize;
                 Internal.Offsets[Internal.Items[i]] += Vertical ? difference.Y : difference.X;
             }
         };
+    }
+
+    public void RemoveListItem(UIElement item)
+    {
+        if (!Internal.Items.Contains(item))
+        {
+            throw new Exception("Tried to remove an item that does not belong to this list!");
+        }
+        Internal.Items.Remove(item);
+        Internal.Offsets.Remove(item);
+    }
+
+    public override void RemoveChild(UIElement child)
+    {
+        if (Internal.Items.Contains(child))
+        {
+            RemoveListItem(child);
+        }
+        base.RemoveChild(child);
     }
 }

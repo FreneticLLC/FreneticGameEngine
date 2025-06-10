@@ -35,6 +35,18 @@ public abstract class UIElement
     /// <summary>True when the element is valid and usable, false when not-yet-added or already removed.</summary>
     public bool IsValid;
 
+    /// <summary>Whether this element can be interacted with.</summary>
+    public bool Enabled = true;
+
+    /// <summary>Whether the mouse is hovering over this element.</summary>
+    public bool Hovered = false;
+
+    /// <summary>Whether this element is being clicked.</summary>
+    public bool Pressed = false;
+
+    /// <summary>Whether the element is the last being interacted with.</summary>
+    public bool Selected = false;
+
     /// <summary>Gets the UI view this element is attached to.</summary>
     public virtual ViewUI2D View => Parent.View;
 
@@ -83,25 +95,19 @@ public abstract class UIElement
     /// <summary>Styling logic for this element. If non-null, updates the <see cref="Style"/> every frame.</summary>
     public Func<UIElement, UIStyle> Styler;
 
-    /// <summary>Whether this element should render automatically.</summary>
-    public bool ShouldRender = true;
-
-    /// <summary>Whether this element can be interacted with.</summary>
-    public bool Enabled = true;
-
-    /// <summary>Whether the mouse is hovering over this element.</summary>
-    public bool Hovered = false;
-
-    /// <summary>Whether this element is being clicked.</summary>
-    public bool Pressed = false;
-
-    /// <summary>Whether the element is the last being interacted with.</summary>
-    public bool Selected = false;
+    /// <summary>Whether this element should render itself.</summary>
+    public bool RenderSelf = true;
 
     /// <summary>Ran when this element is clicked.</summary>
     public Action OnClick;
 
+    public Action<UIStyle> OnStyleSwitch;
+
+    public Action<Vector2i, Vector2i> OnPositionChange;
+
     public Action<Vector2i, Vector2i> OnSizeChange;
+
+    public Action<float, float> OnRotationChange;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
@@ -118,14 +124,20 @@ public abstract class UIElement
         /// <summary>Internal use only.</summary>
         public bool HoverInternal;
 
+        public Vector2i LastPosition;
+
+        public Vector2i LastSize;
+
+        public float LastRotation;
+
+        /// <summary>The current style of this element.</summary>
+        public UIStyle Style = UIStyle.Empty;
+
         /// <summary>Styles registered on this element.</summary>
         public HashSet<UIStyle> Styles = [];
 
         /// <summary>Text objects registered on this element.</summary>
         public List<UIText> Texts = [];
-
-        /// <summary>The current style of this element.</summary>
-        public UIStyle Style = UIStyle.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -161,13 +173,13 @@ public abstract class UIElement
         child.Parent = this;
         child.IsValid = true;
         child.UpdateStyle();
-        child.UpdatePosition(0, Vector3.Zero);
+        child.UpdateTransforms(0, Vector3.Zero);
         child.Init();
     }
 
     /// <summary>Removes a child from this element.</summary>
     /// <param name="child">The element to be unparented.</param>
-    public void RemoveChild(UIElement child)
+    public virtual void RemoveChild(UIElement child)
     {
         if (ElementInternal.Children.Contains(child))
         {
@@ -470,7 +482,8 @@ public abstract class UIElement
     /// <summary>Updates positions of this element and its children.</summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
-    public virtual void UpdatePosition(double delta, Vector3 rotation)
+    // TODO: should this be virtual?
+    public virtual void UpdateTransforms(double delta, Vector3 rotation)
     {
         int x = Layout.X;
         int y = Layout.Y;
@@ -502,19 +515,28 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        Position = new Vector2i(x, y);
-        if (Size.X != Layout.Width || Size.Y != Layout.Height)
-        {
-            Vector2i newSize = new(Layout.Width, Layout.Height);
-            OnSizeChange?.Invoke(Size, newSize);
-            Size = newSize;
-        }
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastSize = Size;
+        ElementInternal.LastRotation = Rotation;
+        Position = new(x, y);
+        Size = new(Layout.Width, Layout.Height);
         Rotation = rotation.Z;
-        /*CheckChildren();
-        foreach (UIElement child in ElementInternal.Children)
+    }
+
+    public void HandleTransforms()
+    {
+        if (ElementInternal.LastPosition != Position)
         {
-            child.UpdatePosition(output, delta, x, y, lastRot);
-        }*/
+            OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+        }
+        if (ElementInternal.LastSize != Size)
+        {
+            OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+        }
+        if (ElementInternal.LastRotation != Rotation)
+        {
+            OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+        }
     }
 
     /// <summary>Renders this element.</summary>
@@ -537,7 +559,7 @@ public abstract class UIElement
         GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
         foreach (UIElement child in ElementInternal.Children)
         {
-            if (child.IsValid && child.ShouldRender)
+            if (child.IsValid && child.RenderSelf)
             {
                 child.RenderAll(delta);
             }

@@ -26,6 +26,8 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+using Vector2i = FGECore.MathHelpers.Vector2i;
+
 namespace FGEGraphics.ClientSystem;
 
 /// <summary>A 2D UI view.</summary>
@@ -163,11 +165,12 @@ public class ViewUI2D
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
-            if (element.IsValid)
-            {
-                element.UpdatePosition(Client.Delta, Vector3.Zero);
-                element.UpdateStyle();
-            }
+            element.UpdateTransforms(Client.Delta, Vector3.Zero);
+        }
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            element.HandleTransforms();
+            element.UpdateStyle();
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
