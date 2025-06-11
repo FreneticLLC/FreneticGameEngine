@@ -165,12 +165,12 @@ public class ViewUI2D
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
+            element.UpdateStyle();
             element.UpdateTransforms(Client.Delta, Vector3.Zero);
         }
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
             element.HandleTransforms();
-            element.UpdateStyle();
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);

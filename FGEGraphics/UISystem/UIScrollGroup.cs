@@ -55,7 +55,7 @@ public class UIScrollGroup : UIElement
         ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UILayout().SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
         if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
         {
-            base.AddChild(ScrollBarLayer = new(layout.AtOrigin()));
+            base.AddChild(ScrollBarLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
             if (ScrollX.ScrollBar is not null)
             {
                 ScrollBarLayer.AddChild(ScrollX.ScrollBar);
@@ -65,7 +65,7 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScissorLayer = new(layout.AtOrigin()));
+        base.AddChild(ScissorLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
     }
 
     /// <inheritdoc/>

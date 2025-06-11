@@ -28,10 +28,10 @@ public class UICheckbox : UIElement
     /// <summary>The label to render alongside this checkbox.</summary>
     public UILabel Label;
 
-    /// <summary>Whether this checkbox is toggled.</summary>
+    /// <summary>Whether this checkbox is toggled on.</summary>
     public bool Toggled = false;
 
-    /// <summary>Fired when the checkbox is toggled.</summary>
+    /// <summary>Fired when the checkbox changes state.</summary>
     public Action<bool> OnToggle;
 
     /// <summary>Constructs a new button-based checkbox.</summary>
@@ -41,18 +41,23 @@ public class UICheckbox : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UICheckbox(string text, UIInteractionStyles boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
     {
-        Toggled = toggled;
-        AddChild(Button = new UIButton(Toggled ? "X" : null, Toggle, boxStyles, layout.AtOrigin()));
+        AddChild(Button = new UIButton(null, Toggle, boxStyles, layout.AtOrigin()));
         AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetWidth(-1)));
         Label.Layout.SetX(() => Button.Width * 3 / 2).SetY(() => (Height - Label.Height) / 2);
         Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize
+        SetToggled(toggled);
+    }
+
+    public void SetToggled(bool toggled)
+    {
+        Toggled = toggled;
+        Button.Text.Content = Toggled ? "X" : null;
     }
 
     /// <summary>Toggles this checkbox.</summary>
     public void Toggle()
     {
-        Toggled = !Toggled;
-        Button.Text.Content = Toggled ? "X" : null;
+        SetToggled(!Toggled);
         OnToggle?.Invoke(Toggled);
     }
 }
