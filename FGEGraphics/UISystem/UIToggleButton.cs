@@ -20,7 +20,7 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a toggleable button on the screen.</summary>
 // TODO: orientation of label
 // TODO: generalize beyond an 'X' when toggled
-public class UICheckbox : UIElement
+public class UIToggleButton : UIElement
 {
     /// <summary>The button for this checkbox.</summary>
     public UIButton Button;
@@ -34,12 +34,12 @@ public class UICheckbox : UIElement
     /// <summary>Fired when the checkbox changes state.</summary>
     public Action<bool> OnToggle;
 
-    /// <summary>Constructs a new button-based checkbox.</summary>
+    /// <summary>Constructs a new toggle button.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="labelStyle">The text label style.</param>
     /// <param name="boxStyles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UICheckbox(string text, UIInteractionStyles boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
+    public UIToggleButton(string text, UIInteractionStyles boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
     {
         AddChild(Button = new UIButton(null, Toggle, boxStyles, layout.AtOrigin()));
         AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetWidth(-1)));
