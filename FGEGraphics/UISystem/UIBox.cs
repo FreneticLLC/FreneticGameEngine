@@ -22,13 +22,13 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple box on the screen.</summary>
-/// <remarks>Constructs a simple colored box.</remarks>
 public class UIBox : UIElement
 {
     // TODO: put this on UILayout or something
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
 
+    /// <summary>Constructs a UI box.</summary>
     /// <param name="style">The style of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     public UIBox(UIStyle style, UILayout layout) : base(layout)

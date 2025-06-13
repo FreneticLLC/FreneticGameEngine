@@ -30,7 +30,7 @@ public class UIButton : UIElement
     /// <summary>The pressable area of this button.</summary>
     public UIBox Box;
 
-    /// <summary>The text to render on this button.</summary>
+    /// <summary>The text to render with this button.</summary>
     public UIText Text;
 
     /// <summary>Constructs a new style-based button.</summary>

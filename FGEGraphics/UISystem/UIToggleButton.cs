@@ -25,7 +25,7 @@ public class UIToggleButton : UIElement
     /// <summary>The button for this checkbox.</summary>
     public UIButton Button;
 
-    /// <summary>The label to render alongside this checkbox.</summary>
+    /// <summary>The text to render alongside this button.</summary>
     public UILabel Label;
 
     /// <summary>Whether this checkbox is toggled on.</summary>
@@ -42,9 +42,9 @@ public class UIToggleButton : UIElement
     public UIToggleButton(string text, UIInteractionStyles boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
     {
         AddChild(Button = new UIButton(null, Toggle, boxStyles, layout.AtOrigin()));
-        AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetWidth(-1)));
-        Label.Layout.SetX(() => Button.Width * 3 / 2).SetY(() => (Height - Label.Height) / 2);
-        Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize
+        //AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetAnchor(UIAnchor.CENTER_LEFT).SetWidth(-1)));
+        //Label.Layout.SetX(() => Button.Width * 3 / 2);
+        //Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize
         SetToggled(toggled);
     }
 
