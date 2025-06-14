@@ -77,7 +77,7 @@ public class ViewUI2D
     public UIElement HeldElement;
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
-    public bool Debug;
+    public bool IsDebug;
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
@@ -101,7 +101,7 @@ public class ViewUI2D
         CurrentScreen = DefaultScreen;
     }
 
-    /// <summary>Draws information specific to <see cref="Debug"/> mode.</summary>
+    /// <summary>Draws information specific to <see cref="IsDebug"/> mode.</summary>
     public void DrawDebug()
     {
         List<string> debugInfo = [];
@@ -174,7 +174,7 @@ public class ViewUI2D
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
-        if (Debug)
+        if (IsDebug)
         {
             DrawDebug();
         }

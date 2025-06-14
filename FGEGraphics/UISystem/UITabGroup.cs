@@ -16,7 +16,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>
 /// Represents a container of elements supporting clickable <see cref="UIElement"/>s that lead to <see cref="UIScreen"/>s,
-/// automatically handling the <see cref="UIElement.Enabled"/> state.
+/// automatically handling the <see cref="UIElement.IsEnabled"/> state.
 /// </summary>
 /// <param name="layout">The layout of the element.</param>
 /// <param name="onSwitch">Ran when the tab is switched.</param>
@@ -38,15 +38,15 @@ public class UITabGroup(UILayout layout, Action<UIScreen, UIScreen> onSwitch = n
     {
         if (SelectedButton is not null)
         {
-            SelectedButton.Enabled = true;
-            SelectedButton.Hovered = false;
-            SelectedButton.Pressed = false;
+            SelectedButton.IsEnabled = true;
+            SelectedButton.IsHovered = false;
+            SelectedButton.IsPressed = false;
             SelectedTab.SwitchFrom();
         }
         if (button is not null)
         {
-            button.Enabled = false;
-            button.Pressed = true;
+            button.IsEnabled = false;
+            button.IsPressed = true;
         }
         tab.SwitchTo();
         OnTabSwitch(SelectedTab, tab);
@@ -63,8 +63,8 @@ public class UITabGroup(UILayout layout, Action<UIScreen, UIScreen> onSwitch = n
     {
         if (main)
         {
-            button.Enabled = false;
-            button.Pressed = true;
+            button.IsEnabled = false;
+            button.IsPressed = true;
             SelectedButton = button;
             SelectedTab = tab;
         }

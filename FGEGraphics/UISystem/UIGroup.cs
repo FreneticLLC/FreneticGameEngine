@@ -21,6 +21,6 @@ public class UIGroup : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UIGroup(UILayout layout) : base(layout)
     {
-        Enabled = false;
+        IsEnabled = false;
     }
 }

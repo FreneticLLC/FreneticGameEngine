@@ -33,9 +33,9 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
     public UIStyle Disabled = disabled;
 
     /// <summary>The styling logic for a <see cref="UIElement.Styler"/>.</summary>
-    public UIStyle Styler(UIElement element) => element.Pressed ? Press
-        : element.Hovered ? Hover
-        : !element.Enabled ? Disabled
+    public UIStyle Styler(UIElement element) => element.IsPressed ? Press
+        : element.IsHovered ? Hover
+        : !element.IsEnabled ? Disabled
         : Normal;
 
     /// <summary>Creates interaction styles based on a standard texture set.</summary>

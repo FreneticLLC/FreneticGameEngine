@@ -224,16 +224,16 @@ public class UIInputLabel : UIElement
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
     public UIInputLabel(string placeholderInfo, string defaultText, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(layout)
     {
-        Styler = element => element.Selected ? baseStyles.Press : baseStyles.Styler(element);
+        Styler = element => element.IsSelected ? baseStyles.Press : baseStyles.Styler(element);
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
             layout.SetSize(layout.Width + boxPadding * 2, layout.Height + boxPadding * 2); // TODO: dynamic size
-            AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { Enabled = false });
+            AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { IsEnabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
         UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupLayout, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { Enabled = false };
+        ScrollGroup = new(scrollGroupLayout, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
@@ -247,18 +247,18 @@ public class UIInputLabel : UIElement
     }
 
     /// <inheritdoc/>
-    public override void OnSelect()
+    public override void Selected()
     {
         TickMouse();
         UpdateScrollGroup();
     }
 
     /// <inheritdoc/>
-    public override void OnDeselect()
+    public override void Deselected()
     {
-        if ((ScrollGroup.ScrollX.ScrollBar?.Pressed | ScrollGroup.ScrollY.ScrollBar?.Pressed) ?? false)
+        if ((ScrollGroup.ScrollX.ScrollBar?.IsPressed | ScrollGroup.ScrollY.ScrollBar?.IsPressed) ?? false)
         {
-            Selected = true;
+            IsSelected = true;
             return;
         }
         SubmitText();
@@ -312,7 +312,7 @@ public class UIInputLabel : UIElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = [.. UIText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Layout.Width : -1)];
-        Internal.CursorOffset = Selected ? Internal.GetCursorOffset() : Location.NaN;
+        Internal.CursorOffset = IsSelected ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }
 
@@ -411,7 +411,7 @@ public class UIInputLabel : UIElement
 
     // TODO: Handle ctrl left/right, handle up/down arrows
     /// <inheritdoc/>
-    public override void NavigateDirection(int horizontal, int vertical)
+    public override void Navigated(int horizontal, int vertical)
     {
         if (horizontal == 0)
         {
@@ -459,7 +459,7 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        bool BarPressed(UIButton bar) => (bar?.Pressed | bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY)) ?? false;
+        bool BarPressed(UIButton bar) => (bar?.IsPressed | bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
         {
             return;
@@ -526,7 +526,7 @@ public class UIInputLabel : UIElement
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        if (!Selected)
+        if (!IsSelected)
         {
             return;
         }

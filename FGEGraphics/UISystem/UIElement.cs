@@ -36,16 +36,16 @@ public abstract class UIElement
     public bool IsValid;
 
     /// <summary>Whether this element can be interacted with.</summary>
-    public bool Enabled = true;
+    public bool IsEnabled = true;
 
     /// <summary>Whether the mouse is hovering over this element.</summary>
-    public bool Hovered = false;
+    public bool IsHovered = false;
 
     /// <summary>Whether this element is being clicked.</summary>
-    public bool Pressed = false;
+    public bool IsPressed = false;
 
     /// <summary>Whether the element is the last being interacted with.</summary>
-    public bool Selected = false;
+    public bool IsSelected = false;
 
     /// <summary>Gets the UI view this element is attached to.</summary>
     public virtual ViewUI2D View => Parent.View;
@@ -101,7 +101,7 @@ public abstract class UIElement
     /// <summary>Ran when this element is clicked.</summary>
     public Action OnClick;
 
-    public Action<UIStyle> OnStyleSwitch;
+    public Action<UIStyle, UIStyle> OnStyleSwitch;
 
     public Action<Vector2i, Vector2i> OnPositionChange;
 
@@ -206,10 +206,7 @@ public abstract class UIElement
 
     /// <summary>Checks if this element has the specified child.</summary>
     /// <param name="element">The possible child.</param>
-    public bool HasChild(UIElement element)
-    {
-        return element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
-    }
+    public bool HasChild(UIElement element) => element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
 
     /// <summary>Adds and removes any queued children.</summary>
     public void UpdateChildren()
@@ -325,6 +322,7 @@ public abstract class UIElement
     /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
     public void SetStyle(UIStyle style)
     {
+        style ??= UIStyle.Empty;
         UIStyle previousStyle = ElementInternal.Style;
         if (previousStyle == style)
         {
@@ -344,7 +342,8 @@ public abstract class UIElement
                 }
             }
         }
-        SwitchToStyle(ElementInternal.Style = style ?? UIStyle.Empty);
+        SwitchToStyle(ElementInternal.Style = style);
+        OnStyleSwitch?.Invoke(previousStyle, style);
     }
 
     /// <summary>If a <see cref="Styler"/> is present, attempts to update the current style.</summary>
@@ -367,8 +366,16 @@ public abstract class UIElement
     }
 
     /// <summary>
+    /// Returns whether this element can be interacted with at the specified position.
+    /// This constraint also affects this element's children.
+    /// </summary>
+    /// <param name="x">The X position to check for.</param>
+    /// <param name="y">The Y position to check for.</param>
+    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
+
+    /// <summary>
     /// Ticks this element's interaction state. Should be called in the reverse of the rendering order.
-    /// Elements with <see cref="Enabled"/> set to <c>false</c> are ignored by the interaction system.
+    /// Elements with <see cref="IsEnabled"/> set to <c>false</c> are ignored by the interaction system.
     /// </summary>
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
@@ -381,64 +388,64 @@ public abstract class UIElement
             {
                 if (scrollDelta.X != 0 || scrollDelta.Y != 0)
                 {
-                    View.Internal.Scrolled = ScrollDirection(scrollDelta.X, scrollDelta.Y);
+                    View.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
                 }
             }
             if (!ElementInternal.HoverInternal && View.HeldElement is null)
             {
                 ElementInternal.HoverInternal = true;
-                if (Enabled)
+                if (IsEnabled)
                 {
-                    Hovered = true;
+                    IsHovered = true;
                 }
-                MouseEnter();
+                MouseEntered();
             }
             if (View.MouseDown && !View.MousePreviouslyDown && View.HeldElement is null)
             {
-                if (Enabled)
+                if (IsEnabled)
                 {
-                    Pressed = true;
+                    IsPressed = true;
                     View.HeldElement = this;
                     Select();
                 }
-                MouseLeftDown(mouseX, mouseY);
+                MousePressed();
             }
             else if (!View.MouseDown && View.MousePreviouslyDown && View.HeldElement == this)
             {
-                if (Enabled)
+                if (IsEnabled)
                 {
-                    Pressed = false;
+                    IsPressed = false;
                     OnClick?.Invoke();
                     View.HeldElement = null;
                 }
-                MouseLeftUp(mouseX, mouseY);
+                MouseReleased();
             }
         }
         else if (ElementInternal.HoverInternal && (!View.MouseDown || View.HeldElement != this))
         {
             ElementInternal.HoverInternal = false;
-            if (Enabled)
+            if (IsEnabled)
             {
-                Hovered = false;
-                Pressed = false;
+                IsHovered = false;
+                IsPressed = false;
                 if (View.HeldElement == this)
                 {
                     View.HeldElement = null;
                 }
             }
-            MouseLeave();
+            MouseExited();
             if (View.MousePreviouslyDown)
             {
-                MouseLeftUpOutside(mouseX, mouseY);
+                MouseReleasedOutside();
             }
         }
         if (View.MouseDown && View.HeldElement != this)
         {
-            if (Selected)
+            if (IsSelected)
             {
                 Deselect();
             }
-            MouseLeftDownOutside(mouseX, mouseY);
+            MousePressedOutside();
         }
     }
 
@@ -446,7 +453,7 @@ public abstract class UIElement
     /// <summary>Ticks the <see cref="KeyHandler.BuildingState"/> on this element.</summary>
     public void TickInput()
     {
-        if (!Selected)
+        if (!IsSelected)
         {
             return;
         }
@@ -457,7 +464,7 @@ public abstract class UIElement
         }
         if (keys.LeftRights != 0 || keys.Scrolls != 0)
         {
-            NavigateDirection(keys.LeftRights, keys.Scrolls);
+            Navigated(keys.LeftRights, keys.Scrolls);
         }
     }
 
@@ -567,89 +574,33 @@ public abstract class UIElement
         GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
     }
 
-    /// <summary>Fires <see cref="MouseLeftDown()"/> for all children included in the position.</summary>
-    /// <param name="x">The X position of the mouse.</param>
-    /// <param name="y">The Y position of the mouse.</param>
-    public void MouseLeftDown(int x, int y)
-    {
-        MouseLeftDown();
-        foreach (UIElement child in GetChildrenAt(x, y))
-        {
-            child.MouseLeftDown(x, y);
-        }
-    }
-
-    /// <summary>Fires <see cref="MouseLeftDownOutside()"/> for all children included in the position.</summary>
-    /// <param name="x">The X position of the mouse.</param>
-    /// <param name="y">The Y position of the mouse.</param>
-    public void MouseLeftDownOutside(int x, int y)
-    {
-        MouseLeftDownOutside();
-        foreach (UIElement child in GetChildrenNotAt(x, y))
-        {
-            child.MouseLeftDownOutside(x, y);
-        }
-    }
-
-    /// <summary>Fires <see cref="MouseLeftUp()"/> for all children included in the position.</summary>
-    /// <param name="x">The X position of the mouse.</param>
-    /// <param name="y">The Y position of the mouse.</param>
-    public void MouseLeftUp(int x, int y)
-    {
-        MouseLeftUp();
-        foreach (UIElement child in GetChildrenAt(x, y))
-        {
-            child.MouseLeftUp(x, y);
-        }
-    }
-
-    /// <summary>Fires <see cref="MouseLeftUpOutside()"/> for all children included in the position.</summary>
-    /// <param name="x">The X position of the mouse.</param>
-    /// <param name="y">The Y position of the mouse.</param>
-    public void MouseLeftUpOutside(int x, int y)
-    {
-        MouseLeftUpOutside();
-        foreach (UIElement child in GetChildrenNotAt(x, y))
-        {
-            child.MouseLeftUpOutside(x, y);
-        }
-    }
-
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
-    public virtual void MouseEnter()
+    public virtual void MouseEntered()
     {
     }
 
     /// <summary>Ran when the mouse exits the boundaries of this element.</summary>
-    // TODO: Account for in interaction logic
-    public virtual void MouseLeave()
+    public virtual void MouseExited()
     {
     }
 
     /// <summary>Ran when the left mouse button is pressed down within the boundaries of this element or its children.</summary>
-    public virtual void MouseLeftDown()
+    public virtual void MousePressed()
     {
     }
 
     /// <summary>Ran when the left mouse button is pressed down outside of the boundaries of this element or its children.</summary>
-    public virtual void MouseLeftDownOutside()
+    public virtual void MousePressedOutside()
     {
     }
 
     /// <summary>Ran when the left mouse button is released within the boundaries of this element or its children.</summary>
-    public virtual void MouseLeftUp()
+    public virtual void MouseReleased()
     {
     }
 
     /// <summary>Ran when the left mouse button is released outside of the boundaries of this element or its children.</summary>
-    public virtual void MouseLeftUpOutside()
-    {
-    }
-
-    /// <summary>Ran when the user navigates directionally while the element is <see cref="Selected"/>.</summary>
-    /// <param name="horizontal">The horizontal shift (positive for right, negative for left).</param>
-    /// <param name="vertical">The vertical shift (positive for up, negative for down).</param>
-    public virtual void NavigateDirection(int horizontal, int vertical)
+    public virtual void MouseReleasedOutside()
     {
     }
 
@@ -657,39 +608,38 @@ public abstract class UIElement
     /// <param name="horizontal">The horizontal scroll (positive for right, negative for left).</param>
     /// <param name="vertical">The vertical scroll (positive for up, negative for down).</param>
     /// <returns>Whether to consume mouse scroll for this interaction step (such that no other elements receive this event).</returns>
-    public virtual bool ScrollDirection(float horizontal, float vertical) => false;
+    public virtual bool MouseScrolled(float horizontal, float vertical) => false;
 
-    /// <summary>Selects the element and fires <see cref="OnSelect"/>.</summary>
-    public void Select()
+    /// <summary>Ran when the user navigates directionally while the element is <see cref="IsSelected"/>.</summary>
+    /// <param name="horizontal">The horizontal shift (positive for right, negative for left).</param>
+    /// <param name="vertical">The vertical shift (positive for up, negative for down).</param>
+    public virtual void Navigated(int horizontal, int vertical)
     {
-        Selected = true;
-        OnSelect();
     }
 
-    /// <summary>Deselects the element and fires <see cref="OnDeselect"/>.</summary>
+    /// <summary>Selects the element and fires <see cref="Selected"/>.</summary>
+    public void Select()
+    {
+        IsSelected = true;
+        Selected();
+    }
+
+    /// <summary>Deselects the element and fires <see cref="Deselected"/>.</summary>
     public void Deselect()
     {
-        Selected = false;
-        OnDeselect();
+        IsSelected = false;
+        Deselected();
     }
 
     /// <summary>Ran when the user begins interacting with the element.</summary>
-    public virtual void OnSelect()
+    public virtual void Selected()
     {
     }
 
     /// <summary>Ran when the user stops interacting with the element.</summary>
-    public virtual void OnDeselect()
+    public virtual void Deselected()
     {
     }
-
-    /// <summary>
-    /// Returns whether this element can be interacted with at the specified position.
-    /// This constraint also affects this element's children.
-    /// </summary>
-    /// <param name="x">The X position to check for.</param>
-    /// <param name="y">The Y position to check for.</param>
-    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
 
     /// <summary>Preps the element.</summary>
     public virtual void Init()
@@ -701,14 +651,14 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Returns debug text to display when <see cref="ViewUI2D.Debug"/> mode is enabled.</summary>
+    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
     public virtual List<string> GetDebugInfo()
     {
         List<string> info = new(4)
         {
             $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation}",
-            $"^7Enabled: ^{(Enabled ? "2" : "1")}{Enabled} ^&| ^7Hovered: ^{(Hovered ? "2" : "1")}{Hovered} ^&| ^7Pressed: ^{(Pressed ? "2" : "1")}{Pressed} ^&| ^7Selected: ^{(Selected ? "2" : "1")}{Selected}"
+            $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsSelected ? "2" : "1")}{IsSelected}"
         };
         if (ElementInternal.Styles.Count > 0)
         {

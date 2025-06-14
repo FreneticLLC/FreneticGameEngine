@@ -78,10 +78,10 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
     public InternalData Internal;
 
     /// <summary>Selects this input box.</summary>
-    public override void MouseLeftDown()
+    public override void MousePressed()
     {
         Internal.MDown = true;
-        Selected = true;
+        IsSelected = true;
         // TODO: implement
         // /* KeyHandlerState khs = */KeyHandler.GetKBState();
         int xs = Position.X;
@@ -110,13 +110,13 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
     }
 
     /// <summary>Deselects this input box.</summary>
-    public override void MouseLeftDownOutside()
+    public override void MousePressedOutside()
     {
-        Selected = false;
+        IsSelected = false;
     }
 
     /// <summary>Sets the new cursor position.</summary>
-    public override void MouseLeftUp()
+    public override void MouseReleased()
     {
         AdjustMax();
         Internal.MDown = false;
@@ -146,7 +146,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         {
             AdjustMax();
         }
-        if (Selected)
+        if (IsSelected)
         {
             if (MinCursor > MaxCursor)
             {
@@ -239,7 +239,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         View.Rendering.RenderRectangle(View.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, Rotation));
         GL.Enable(EnableCap.ScissorTest);
         GL.Scissor(x, engine.Window.ClientSize.Y - (y + Fonts.Height), w, Fonts.Height);
-        if (Selected)
+        if (IsSelected)
         {
             float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
             float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);

@@ -41,7 +41,7 @@ public class UIScreen : UIElement
     public UIScreen(ViewUI2D view, UILayout layout) : base(layout)
     {
         InternalView = view;
-        Enabled = false;
+        IsEnabled = false;
         IsValid = true;
     }
 

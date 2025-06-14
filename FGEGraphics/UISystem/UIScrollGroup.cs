@@ -34,7 +34,7 @@ public class UIScrollGroup : UIElement
     public UIGroup ScrollBarLayer;
 
     /// <summary>Whether either of the scroll bars are pressed.</summary>
-    public bool ScrollBarPressed => ScrollX.ScrollBar?.Pressed ?? ScrollY.ScrollBar?.Pressed ?? false;
+    public bool ScrollBarPressed => ScrollX.ScrollBar?.IsPressed ?? ScrollY.ScrollBar?.IsPressed ?? false;
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="layout">The layout of the element.</param>
@@ -91,7 +91,7 @@ public class UIScrollGroup : UIElement
     }
 
     /// <inheritdoc/>
-    public override void NavigateDirection(int horizontal, int vertical)
+    public override void Navigated(int horizontal, int vertical)
     {
         if (!ScrollBarPressed)
         {
@@ -101,11 +101,11 @@ public class UIScrollGroup : UIElement
     }
 
     /// <inheritdoc/>
-    public override bool ScrollDirection(float horizontal, float vertical)
+    public override bool MouseScrolled(float horizontal, float vertical)
     {
         if (ScrollBarPressed)
         {
-            return true; // TODO: or false, which better UX?
+            return true;
         }
         if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
@@ -197,7 +197,7 @@ public class UIScrollGroup : UIElement
         /// <param name="groupPos">The relevant scroll group position.</param>
         public void TickMouseDrag(float mousePos, int groupPos)
         {
-            if (!ScrollBar.Pressed)
+            if (!ScrollBar.IsPressed)
             {
                 BarHeldOffset = -1;
                 return;

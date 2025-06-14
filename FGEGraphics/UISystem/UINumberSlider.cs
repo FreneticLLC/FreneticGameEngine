@@ -74,7 +74,7 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
-        AddChild(Button = new(UIStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { RenderSelf = false, Enabled = false });
+        AddChild(Button = new(UIStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { RenderSelf = false, IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 
@@ -99,7 +99,7 @@ public class UINumberSlider : UIElement
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        if (!Pressed)
+        if (!IsPressed)
         {
             return;
         }
