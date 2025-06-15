@@ -18,6 +18,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
@@ -43,5 +44,14 @@ public class UILabel : UIElement
     public override void Render(double delta, UIStyle style)
     {
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+    }
+
+    public static (UILabel Label, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    {
+        UIListGroup list = new(spacing, layout, false, listAnchor ?? UIAnchor.TOP_LEFT);
+        UILabel label = new(text, styling, layout.AtOrigin());
+        list.AddChild(label);
+        list.AddChild(new UIImage(icon, new UILayout().SetSize(() => label.Height, () => label.Height)));
+        return (label, list);
     }
 }

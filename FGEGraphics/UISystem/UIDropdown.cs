@@ -101,14 +101,14 @@ public class UIDropdown : UIElement
         element.OnClick += () => HandleSelect(element);
     }
 
-    /// <summary>Adds a <see cref="UITextLink"/> as a choice to the dropdown.</summary>
+    /// <summary>Adds a <see cref="UILabel"/> as a choice to the dropdown.</summary>
     /// <param name="choice">The choice text.</param>
-    /// <param name="linkStyles">The link styles.</param>
+    /// <param name="styling">The label styles.</param>
     /// <returns>The added text link.</returns>
-    public UITextLink AddTextLinkChoice(string choice, UIInteractionStyles linkStyles)
+    public UILabel AddLabelChoice(string choice, UIStyling styling)
     {
-        UITextLink link = new(choice, null, null, linkStyles, new UILayout());
-        AddChoice(choice, link);
-        return link;
+        UILabel label = new(choice, styling, new UILayout());
+        AddChoice(choice, label);
+        return label;
     }
 }

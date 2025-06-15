@@ -65,7 +65,7 @@ public class UIText
     /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
     /// <param name="style">An internal style to use instead of the parent element's.</param>
-    public UIText(UIElement element, string content, bool required = false, int maxWidth = -1, UIStyle style = null)
+    public UIText(UIElement element, string content, bool required = false, int maxWidth = -1, UIStyle style = null /* TODO: UIStyling? */)
     {
         content ??= (required ? Null : null);
         if (style is not null && !style.CanRenderText())
