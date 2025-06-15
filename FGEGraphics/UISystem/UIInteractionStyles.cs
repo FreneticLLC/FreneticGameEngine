@@ -18,7 +18,7 @@ namespace FGEGraphics.UISystem;
 public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, UIStyle disabled)
 {
     /// <summary>Empty interaction styles.</summary>
-    public static readonly UIInteractionStyles Empty = new(UIStyle.Empty, UIStyle.Empty, UIStyle.Empty, UIStyle.Empty);
+    public static readonly UIInteractionStyles Empty = new(null, null, null, null);
 
     /// <summary>The style of an element not being interacted with.</summary>
     public UIStyle Normal = normal;
@@ -32,8 +32,8 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
     /// <summary>The style of a disabled element.</summary>
     public UIStyle Disabled = disabled;
 
-    /// <summary>The styling logic for a <see cref="UIElement.Styler"/>.</summary>
-    public UIStyle Styler(UIElement element) => element.IsPressed ? Press
+    /// <summary>The styling logic for an interactable element.</summary>
+    public UIStyle Styling(UIElement element) => element.IsPressed ? Press
         : element.IsHovered ? Hover
         : !element.IsEnabled ? Disabled
         : Normal;
@@ -50,4 +50,6 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
         UIStyle disabled = new(baseStyle) { BaseTexture = textures.GetTexture($"{textureSet}_disabled") };
         return new(normal, hover, press, disabled);
     }
+
+    public static implicit operator UIStyling(UIInteractionStyles styles) => new(styles.Styling);
 }

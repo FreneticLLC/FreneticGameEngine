@@ -37,11 +37,11 @@ public class UIToggleButton : UIElement
     /// <summary>Constructs a new toggle button.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="labelStyle">The text label style.</param>
-    /// <param name="boxStyles">The clickable styles.</param>
+    /// <param name="boxStyling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIToggleButton(string text, UIInteractionStyles boxStyles, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(layout)
+    public UIToggleButton(string text, UIStyling boxStyling, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(boxStyling, layout)
     {
-        AddChild(Button = new UIButton(null, Toggle, boxStyles, layout.AtOrigin()));
+        AddChild(Button = new UIButton(null, Toggle, boxStyling, layout.AtOrigin()));
         //AddChild(Label = new UILabel(text, labelStyle ?? boxStyles.Normal, layout.AtOrigin().SetAnchor(UIAnchor.CENTER_LEFT).SetWidth(-1)));
         //Label.Layout.SetX(() => Button.Width * 3 / 2);
         //Layout.SetWidth(() => Label.Layout.X + Label.Width); // TODO generalize

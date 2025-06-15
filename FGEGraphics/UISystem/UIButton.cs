@@ -36,11 +36,9 @@ public class UIButton : UIElement
     /// <summary>Constructs a new style-based button.</summary>
     /// <param name="text">The text to display.</param>
     /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="styles">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIButton(string text, Action clicked, UIInteractionStyles styles, UILayout layout) : base(layout)
+    public UIButton(string text, Action clicked, UIStyling styling, UILayout layout) : base(styling,layout)
     {
-        Styler = styles.Styler;
         OnClick += clicked;
         AddChild(Box = new UIBox(UIStyle.Empty, layout.AtOrigin()) { RenderSelf = false, IsEnabled = false });
         Text = new(this, text);

@@ -24,6 +24,7 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an interactable text link on a screen.</summary>
+// TODO: this is almost identical to UILabel, merge
 public class UITextLink : UIElement
 {
     /// <summary>The text to display for this link.</summary>
@@ -37,12 +38,11 @@ public class UITextLink : UIElement
     /// <param name="text">The text to display.</param>
     /// <param name="icon">The icon to display alongside the text.</param>
     /// <param name="clicked">The action to run when clicked.</param>
-    /// <param name="styles">The clickable styles.</param>
+    /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>;
     // TODO: default values
-    public UITextLink(string text, Texture icon, Action clicked, UIInteractionStyles styles, UILayout layout) : base(layout)
+    public UITextLink(string text, Texture icon, Action clicked, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Styler = styles.Styler;
         Text = new(this, text, true);
         Icon = icon;
         Layout.SetSize(() => Text.Width + (Icon is not null ? Height : 0), () => Text.Height); // TODO: padding

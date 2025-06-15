@@ -59,11 +59,10 @@ public class UINumberSlider : UIElement
     /// <param name="initial">The initial slider value.</param>
     /// <param name="interval">The grid-snapping interval, if any.</param>
     /// <param name="integer">Whether to use integers instead of decimals.</param>
-    /// <param name="styles">The clickable styles.</param>
+    /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double initial, double interval, bool integer, UIInteractionStyles styles, UILayout layout) : base(layout)
+    public UINumberSlider(double min, double max, double initial, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling,layout)
     {
-        Styler = styles.Styler;
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
         Min = Integer ? (int)min : min;

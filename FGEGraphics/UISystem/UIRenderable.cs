@@ -17,7 +17,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple renderer that can be attached to any element.</summary>
 /// <param name="renderer">The renderer method. See <see cref="UIElement.Render(double, UIStyle)"/>.</param>
-public class UIRenderable(Action<UIElement, double, UIStyle> renderer) : UIElement(new UILayout())
+public class UIRenderable(Action<UIElement, double, UIStyle> renderer) : UIElement(UIStyling.Empty, new UILayout())
 {
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style) => renderer(this, delta, style);

@@ -80,4 +80,6 @@ public record UIStyle
     /// <summary>Returns whether this style can render the specified text.</summary>
     /// <param name="text">The UI text object to check.</param>
     public bool CanRenderText(UIText text) => !text.Empty && CanRenderText() && (text.Internal.Style == this || (text.Internal.Renderables?.ContainsKey(this) ?? false));
+
+    public static implicit operator Func<UIElement, UIStyle>(UIStyle style) => element => style;
 }

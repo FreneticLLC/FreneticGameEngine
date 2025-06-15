@@ -31,12 +31,11 @@ public class UILabel : UIElement
 
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
-    /// <param name="style">The style of the label.</param>
+    /// <param name="styling">The style of the label.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UILabel(string text, UIStyle style, UILayout layout) : base(layout)
+    public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        SetStyle(style);
-        Text = new(this, text, true, Layout.Width);
+        Text = new UIText(this, text, true, Layout.Width);
         Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
 

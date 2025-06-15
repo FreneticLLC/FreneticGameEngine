@@ -32,6 +32,12 @@ public abstract class UIElement
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
+    /// <summary>Styling logic for this element.</summary>
+    public UIStyling Styling;
+
+    /// <summary>Gets the current element style.</summary>
+    public UIStyle Style => ElementInternal.Style;
+
     /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
     public UILayout Layout;
 
@@ -81,12 +87,6 @@ public abstract class UIElement
     /// <summary>Gets the absolute height value.</summary>
     /// <seealso cref="Size"/>
     public int Height => Size.Y;
-
-    /// <summary>Gets the current element style.</summary>
-    public UIStyle Style => ElementInternal.Style;
-
-    /// <summary>Styling logic for this element. If present, updates the <see cref="Style"/> every frame.</summary>
-    public Func<UIElement, UIStyle> Styler;
 
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
@@ -145,12 +145,13 @@ public abstract class UIElement
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="layout">The layout of the element.</param>
-    public UIElement(UILayout layout)
+    public UIElement(UIStyling styling, UILayout layout)
     {
+        Styling = styling;
         if (layout is not null)
         {
             Layout = layout;
-            layout.Element = this;
+            Layout.Element = this;
         }
     }
 
@@ -177,7 +178,7 @@ public abstract class UIElement
     }
 
     /// <summary>Removes a child from this element.</summary>
-    /// <param name="child">The element to be unparented.</param>
+    /// <param name="child">The child to be removed.</param>
     public virtual void RemoveChild(UIElement child)
     {
         if (ElementInternal.Children.Contains(child))
@@ -339,13 +340,10 @@ public abstract class UIElement
         OnStyleChange?.Invoke(previousStyle, style);
     }
 
-    /// <summary>If a <see cref="Styler"/> is present, attempts to update the current style.</summary>
+    /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
     public void UpdateStyle()
     {
-        if (Styler is not null)
-        {
-            SetStyle(Styler(this));
-        }
+        SetStyle(Styling.Get(this));
     }
 
     /// <summary>Ran when <see cref="Style"/> changes value.</summary>

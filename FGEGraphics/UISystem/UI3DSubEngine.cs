@@ -33,7 +33,7 @@ public class UI3DSubEngine : UIElement
     /// <summary>Constructs a new 3D sub-engine.</summary>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="alphaBack">Whether to have an alpha background.</param>
-    public UI3DSubEngine(UILayout layout, bool alphaBack) : base(layout)
+    public UI3DSubEngine(UILayout layout, bool alphaBack) : base(UIStyling.Empty, layout)
     {
         SubEngine = new GameEngine3D
         {

@@ -38,21 +38,21 @@ public class UIScrollGroup : UIElement
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="barStyles">The scroll bar styles.</param>
+    /// <param name="barStyling">The scroll bar styles.</param>
     /// <param name="barWidth">The width of the scroll bars.</param>
     /// <param name="barX">Whether to add a horizontal scroll bar.</param>
     /// <param name="barY">Whether to add a vertical scroll bar.</param>
     /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIScrollGroup(UILayout layout, UIInteractionStyles barStyles = null, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(layout)
+    public UIScrollGroup(UILayout layout, UIStyling barStyling = default, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(UIStyling.Empty, layout)
     {
         if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
         {
             throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
         }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyles, new UILayout().SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyles, new UILayout().SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
+        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyling, new UILayout().SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
+        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyling, new UILayout().SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
         if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
         {
             base.AddChild(ScrollBarLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
@@ -151,9 +151,9 @@ public class UIScrollGroup : UIElement
         /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
         /// <param name="hasBar">Whether to create the <see cref="ScrollBar"/>.</param>
         /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
-        /// <param name="styles">The <see cref="ScrollBar"/> styles.</param>
+        /// <param name="styling">The <see cref="ScrollBar"/> styles.</param>
         /// <param name="layout">The base layout of the <see cref="ScrollBar"/>.</param>
-        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIInteractionStyles styles, UILayout layout) : this(vertical, rangeLength)
+        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIStyling styling, UILayout layout) : this(vertical, rangeLength)
         {
             if (!hasBar)
             {
@@ -167,7 +167,7 @@ public class UIScrollGroup : UIElement
             {
                 layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(width);
             }
-            ScrollBar = new(null, null, styles, layout);
+            ScrollBar = new(null, null, styling, layout);
         }
 
         /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>

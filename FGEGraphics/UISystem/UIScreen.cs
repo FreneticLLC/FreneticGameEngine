@@ -38,7 +38,7 @@ public class UIScreen : UIElement
     /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
     /// <param name="view">The client UI view.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIScreen(ViewUI2D view, UILayout layout) : base(layout)
+    public UIScreen(ViewUI2D view, UILayout layout) : base(UIStyling.Empty, layout)
     {
         InternalView = view;
         IsEnabled = false;

@@ -222,9 +222,9 @@ public class UIInputLabel : UIElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(UIStyling.Empty, layout)
     {
-        Styler = element => element.IsSelected ? baseStyles.Press : baseStyles.Styler(element);
+        Styling = new(element => element.IsSelected ? baseStyles.Press : baseStyles.Styling(element));
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
@@ -233,7 +233,7 @@ public class UIInputLabel : UIElement
         }
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
         UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupLayout, scrollBarStyles, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
+        ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle ?? baseStyles.Normal;
