@@ -87,7 +87,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
-            if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
+            if (xs + Fonts.MeasureFancyText(Text[..i]) > View.Client.MouseX)
             {
                 MinCursor = i;
                 MaxCursor = i;
@@ -128,7 +128,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
-            if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
+            if (xs + Fonts.MeasureFancyText(Text[..i]) > View.Client.MouseX)
             {
                 MinCursor = Math.Min(i, Internal.MStart);
                 MaxCursor = Math.Max(i, Internal.MStart);
@@ -153,7 +153,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
                 (MaxCursor, MinCursor) = (MinCursor, MaxCursor);
             }
             bool modified = false;
-            KeyHandlerState khs = Window.Keyboard.BuildingState;
+            KeyHandlerState khs = View.Client.Keyboard.BuildingState;
             if (khs.Escaped)
             {
                 TriedToEscape = true;
@@ -212,7 +212,7 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         string typed = Text;
         int c = 0;
         int cmax = 0;
-        GameEngineBase engine = Engine;
+        GameEngineBase engine = View.Engine;
         if (!/*engine.CVars.u_colortyping.ValueB*/false) // TODO: Color Typing option!
         {
             for (int i = 0; i < typed.Length && i < MinCursor; i++)

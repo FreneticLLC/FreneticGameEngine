@@ -56,8 +56,8 @@ public class UIScreen : UIElement
     public void InternalConfigurePosition()
     {
         Layout.SetPosition(0, 0);
-        Layout.SetWidth(() => Parent is null ? Engine.Window.ClientSize.X : Parent.Layout.Width);
-        Layout.SetHeight(() => Parent is null ? Engine.Window.ClientSize.Y : Parent.Layout.Height);
+        Layout.SetWidth(() => Parent is null ? View.Engine.Window.ClientSize.X : Parent.Layout.Width);
+        Layout.SetHeight(() => Parent is null ? View.Engine.Window.ClientSize.Y : Parent.Layout.Height);
     }
 
     /// <inheritdoc/>

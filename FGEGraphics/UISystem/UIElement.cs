@@ -29,36 +29,29 @@ namespace FGEGraphics.UISystem;
 // TODO: Hover text
 public abstract class UIElement
 {
-    /// <summary>The parent of this element.</summary>
+    /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
-    /// <summary>True when the element is valid and usable, false when not-yet-added or already removed.</summary>
+    /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
+    public UILayout Layout;
+
+    /// <summary>Gets the UI view this element is attached to.</summary>
+    public virtual ViewUI2D View => Parent.View;
+
+    /// <summary>Whether this element has been added to a parent element, <c>false</c> if not yet added or already removed.</summary>
     public bool IsValid;
 
     /// <summary>Whether this element can be interacted with.</summary>
     public bool IsEnabled = true;
 
-    /// <summary>Whether the mouse is hovering over this element.</summary>
+    /// <summary>Whether the user is hovering over this element.</summary>
     public bool IsHovered = false;
 
-    /// <summary>Whether this element is being clicked.</summary>
+    /// <summary>Whether the user is pressing this element.</summary>
     public bool IsPressed = false;
 
-    /// <summary>Whether the element is the last being interacted with.</summary>
+    /// <summary>Whether this is the last element the user has interacted with.</summary>
     public bool IsSelected = false;
-
-    /// <summary>Gets the UI view this element is attached to.</summary>
-    public virtual ViewUI2D View => Parent.View;
-
-    // TODO: rename to 'Client'
-    /// <summary>Gets the client game window used to render this element.</summary>
-    public GameClientWindow Window => View.Client;
-
-    /// <summary>Gets the client game engine used to render this element.</summary>
-    public GameEngineBase Engine => Window.CurrentEngine;
-
-    /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
-    public UILayout Layout;
 
     /// <summary>This absolute position.</summary>
     /// <seealso cref="X"/>
@@ -92,42 +85,49 @@ public abstract class UIElement
     /// <summary>Gets the current element style.</summary>
     public UIStyle Style => ElementInternal.Style;
 
-    /// <summary>Styling logic for this element. If non-null, updates the <see cref="Style"/> every frame.</summary>
+    /// <summary>Styling logic for this element. If present, updates the <see cref="Style"/> every frame.</summary>
     public Func<UIElement, UIStyle> Styler;
 
-    /// <summary>Whether this element should render itself.</summary>
+    /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
-    /// <summary>Ran when this element is clicked.</summary>
+    /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
-    public Action<UIStyle, UIStyle> OnStyleSwitch;
+    /// <summary>Fired when <see cref="Style"/> changes value.</summary>
+    public Action<UIStyle, UIStyle> OnStyleChange;
 
+    /// <summary>Fired when <see cref="Position"/> changes value.</summary>
     public Action<Vector2i, Vector2i> OnPositionChange;
 
+    /// <summary>Fired when <see cref="Size"/> changes value.</summary>
     public Action<Vector2i, Vector2i> OnSizeChange;
 
+    /// <summary>Fired when <see cref="Rotation"/> changes value.</summary>
     public Action<float, float> OnRotationChange;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
     {
-        /// <summary>Current child elements.</summary>
-        public HashSet<UIElement> Children = [];
+        /// <summary>This element's children.</summary>
+        public List<UIElement> Children = [];
 
         /// <summary>Elements queued to be added as children.</summary>
-        public HashSet<UIElement> ToAdd = [];
+        public List<UIElement> ToAdd = [];
 
-        /// <summary>Elements queued to be removed as children.</summary>
-        public HashSet<UIElement> ToRemove = [];
+        /// <summary>Child elements queued to be removed.</summary>
+        public List<UIElement> ToRemove = [];
 
-        /// <summary>Internal use only.</summary>
-        public bool HoverInternal;
+        /// <summary>Whether the mouse is hovering over this element.</summary>
+        public bool IsMouseHovered;
 
+        /// <summary>The last absolute position.</summary>
         public Vector2i LastPosition;
 
+        /// <summary>The last absolute size.</summary>
         public Vector2i LastSize;
 
+        /// <summary>The last absolute rotation.</summary>
         public float LastRotation;
 
         /// <summary>The current style of this element.</summary>
@@ -173,7 +173,6 @@ public abstract class UIElement
         child.Parent = this;
         child.IsValid = true;
         child.UpdateStyle();
-        child.UpdateTransforms(0, Vector3.Zero);
         child.Init();
     }
 
@@ -204,8 +203,8 @@ public abstract class UIElement
         ElementInternal.ToAdd.Clear();
     }
 
-    /// <summary>Checks if this element has the specified child.</summary>
-    /// <param name="element">The possible child.</param>
+    /// <summary>Returns whether this element is the parent of another element.</summary>
+    /// <param name="element">The possible child element.</param>
     public bool HasChild(UIElement element) => element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
 
     /// <summary>Adds and removes any queued children.</summary>
@@ -213,10 +212,7 @@ public abstract class UIElement
     {
         foreach (UIElement element in ElementInternal.ToAdd)
         {
-            if (!ElementInternal.Children.Add(element))
-            {
-                throw new Exception($"UIElement: Failed to add a child element {element}!");
-            }
+            ElementInternal.Children.Add(element);
         }
         foreach (UIElement element in ElementInternal.ToRemove)
         {
@@ -261,7 +257,7 @@ public abstract class UIElement
         }
     }
 
-    // TODO: replace with AllChildren?
+    // TODO: remove these?
     /// <summary>Gets all children that contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
@@ -292,16 +288,14 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Checks if this element's boundaries contain the position on the screen.</summary>
+    /// <summary>Returns whether this element's boundaries contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
-    /// <returns>Whether the position is within any of the boundaries.</returns>
     public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
 
-    /// <summary>Checks if this element's boundaries (or any of its children's boundaries) contain the position on the screen.</summary>
+    /// <summary>Returns whether this element's boundaries, or any of its childrens' boundaries, contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
-    /// <returns>Whether the position is within any of the boundaries.</returns>
     public bool Contains(int x, int y)
     {
         foreach (UIElement element in AllChildren())
@@ -317,7 +311,7 @@ public abstract class UIElement
     /// <summary>
     /// Sets the style of this element.
     /// <para>Additionally, updates any <see cref="UIText"/> objects attached to this element.</para>
-    /// <para>Fires <see cref="SwitchFromStyle(UIStyle)"/> and <see cref="SwitchToStyle(UIStyle)"/> accordingly.</para>
+    /// <para>Fires <see cref="OnStyleChange"/> and <see cref="StyleChanged(UIStyle, UIStyle)"/>.</para>
     /// </summary>
     /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
     public void SetStyle(UIStyle style)
@@ -328,7 +322,6 @@ public abstract class UIElement
         {
             return;
         }
-        SwitchFromStyle(previousStyle);
         if (ElementInternal.Styles.Add(style))
         {
             if (style.CanRenderText())
@@ -342,8 +335,8 @@ public abstract class UIElement
                 }
             }
         }
-        SwitchToStyle(ElementInternal.Style = style);
-        OnStyleSwitch?.Invoke(previousStyle, style);
+        StyleChanged(previousStyle, ElementInternal.Style = style);
+        OnStyleChange?.Invoke(previousStyle, style);
     }
 
     /// <summary>If a <see cref="Styler"/> is present, attempts to update the current style.</summary>
@@ -355,13 +348,10 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Ran when this element switches from the relevant <see cref="UIStyle"/>.</summary>
-    public virtual void SwitchFromStyle(UIStyle style)
-    {
-    }
-
-    /// <summary>Ran when this element switches to the relevant <see cref="UIStyle"/>.</summary>
-    public virtual void SwitchToStyle(UIStyle style)
+    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
+    /// <param name="from">The previous style.</param>
+    /// <param name="to">The new style.</param>
+    public virtual void StyleChanged(UIStyle from, UIStyle to)
     {
     }
 
@@ -384,16 +374,16 @@ public abstract class UIElement
     {
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
-            if (ElementInternal.HoverInternal && !View.Internal.Scrolled)
+            if (ElementInternal.IsMouseHovered && !View.Internal.Scrolled)
             {
                 if (scrollDelta.X != 0 || scrollDelta.Y != 0)
                 {
                     View.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
                 }
             }
-            if (!ElementInternal.HoverInternal && View.HeldElement is null)
+            if (!ElementInternal.IsMouseHovered && View.HeldElement is null)
             {
-                ElementInternal.HoverInternal = true;
+                ElementInternal.IsMouseHovered = true;
                 if (IsEnabled)
                 {
                     IsHovered = true;
@@ -421,9 +411,9 @@ public abstract class UIElement
                 MouseReleased();
             }
         }
-        else if (ElementInternal.HoverInternal && (!View.MouseDown || View.HeldElement != this))
+        else if (ElementInternal.IsMouseHovered && (!View.MouseDown || View.HeldElement != this))
         {
-            ElementInternal.HoverInternal = false;
+            ElementInternal.IsMouseHovered = false;
             if (IsEnabled)
             {
                 IsHovered = false;
@@ -457,7 +447,7 @@ public abstract class UIElement
         {
             return;
         }
-        KeyHandlerState keys = Window.Keyboard.BuildingState;
+        KeyHandlerState keys = View.Client.Keyboard.BuildingState;
         if (keys.Escaped)
         {
             Deselect();
@@ -530,6 +520,7 @@ public abstract class UIElement
         Rotation = rotation.Z;
     }
 
+    /// <summary>Fires relevant events if this element's transforms have changed.</summary>
     public void HandleTransforms()
     {
         if (ElementInternal.LastPosition != Position)

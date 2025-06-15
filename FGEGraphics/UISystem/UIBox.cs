@@ -43,7 +43,7 @@ public class UIBox : UIElement
         bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
         if (any)
         {
-            Engine.Textures.White.Bind();
+            View.Engine.Textures.White.Bind();
             if (style.DropShadowLength > 0)
             {
                 Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));

@@ -417,7 +417,7 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
+        bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         if (Internal.HasSelection && !shiftDown)
         {
             Internal.CursorEnd = horizontal < 0 ? Internal.IndexLeft : Internal.IndexRight;
@@ -459,14 +459,14 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        bool BarPressed(UIButton bar) => (bar?.IsPressed | bar?.SelfContains((int)Window.MouseX, (int)Window.MouseY)) ?? false;
+        bool BarPressed(UIButton bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
         {
             return;
         }
-        bool shiftDown = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        float relMouseX = Window.MouseX - (LabelRenderable.X + TextPadding);
-        float relMouseY = Window.MouseY - (LabelRenderable.Y + TextPadding);
+        bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
+        float relMouseX = View.Client.MouseX - (LabelRenderable.X + TextPadding);
+        float relMouseY = View.Client.MouseY - (LabelRenderable.Y + TextPadding);
         UIText.ChainPiece lastPiece = Internal.TextChain[^1];
         if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -530,7 +530,7 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        KeyHandlerState keys = Window.Keyboard.BuildingState;
+        KeyHandlerState keys = View.Client.Keyboard.BuildingState;
         TickBackspaces(keys);
         TickContent(keys);
         TickMouse();
@@ -559,7 +559,7 @@ public class UIInputLabel : UIElement
             return;
         }
         // TODO: Cursor blink modes
-        Engine.Textures.White.Bind();
+        View.Engine.Textures.White.Bind();
         Renderer2D.SetColor(InputStyle.BorderColor);
         int lineWidth = InputStyle.BorderThickness / 2;
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).Style.TextFont.Height;

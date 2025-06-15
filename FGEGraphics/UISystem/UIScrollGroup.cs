@@ -82,11 +82,11 @@ public class UIScrollGroup : UIElement
         base.Tick(delta);
         if (ScrollX.ScrollBar is not null)
         {
-            ScrollX.TickMouseDrag(Window.MouseX, X);
+            ScrollX.TickMouseDrag(View.Client.MouseX, X);
         }
         if (ScrollY.ScrollBar is not null)
         {
-            ScrollY.TickMouseDrag(Window.MouseY, Y);
+            ScrollY.TickMouseDrag(View.Client.MouseY, Y);
         }
     }
 
@@ -107,7 +107,7 @@ public class UIScrollGroup : UIElement
         {
             return true;
         }
-        if (ScrollY.MaxValue == 0 || Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        if (ScrollY.MaxValue == 0 || View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
             horizontal = vertical;
             vertical = 0;

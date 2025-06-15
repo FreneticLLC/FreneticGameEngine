@@ -104,8 +104,8 @@ public class UINumberSlider : UIElement
             return;
         }
         double previousValue = Value;
-        double mouseValue = Math.Clamp((Window.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
-        double interval = Window.Window.KeyboardState.IsKeyDown(Keys.LeftShift) ? (Integer ? 1.0 : 0.0) : Interval;
+        double mouseValue = Math.Clamp((View.Client.MouseX - X) / Width, 0.0, 1.0) * (Max - Min) + Min;
+        double interval = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift) ? (Integer ? 1.0 : 0.0) : Interval;
         Value = GetCorrectedValue(mouseValue, interval);
         if (Value != previousValue)
         {
@@ -116,7 +116,7 @@ public class UINumberSlider : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        Engine.Textures.White.Bind();
+        View.Engine.Textures.White.Bind();
         Renderer2D.SetColor(style.BorderColor);
         int lineWidth = style.BorderThickness / 2;
         int centerY = Y + Height / 2;
