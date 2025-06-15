@@ -19,7 +19,7 @@ public class UIGroup : UIElement
 {
     /// <summary>Constructs a new group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    public UIGroup(UILayout layout) : base(layout)
+    public UIGroup(UILayout layout) : base(UIStyling.Empty, layout)
     {
         IsEnabled = false;
     }
