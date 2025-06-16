@@ -14,37 +14,57 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
+/// <summary>Represents the styling logic for a <see cref="UIElement"/>.</summary>
 public struct UIStyling
 {
-    public static readonly UIStyling Empty = new(null);
+    /// <summary>Empty styling logic. Resolves to <see cref="UIStyle.Empty"/>.</summary>
+    public static readonly UIStyling Empty = new((UIStyle)null);
 
+    /// <summary>A constant style.</summary>
     public UIStyle Constant;
 
+    /// <summary>A dynamic style. If present, updates the relevant <see cref="UIElement.Style"/> every frame.</summary>
     public Func<UIElement, UIStyle> Dynamic;
 
+    /// <summary>Constructs styling logic using a constant style.</summary>
+    /// <param name="style">The constant style.</param>
     public UIStyling(UIStyle style)
     {
         Constant = style;
     }
 
+    /// <summary>Constructs styling logic using a dynamic style.</summary>
+    /// <param name="styling">The dynamic style.</param>
     public UIStyling(Func<UIElement, UIStyle> styling)
     {
         Dynamic = styling;
     }
 
-    public UIStyle Get(UIElement element) => Constant ?? Dynamic?.Invoke(element) ?? UIStyle.Empty;
+    /// <summary>
+    /// Returns the style for the specified <paramref name="element"/> based on this styling logic.
+    /// <para>Tries to evaluate <see cref="Constant"/> then <see cref="Dynamic"/>. If neither are present, resolves to <see cref="UIStyle.Empty"/>.</para>
+    /// </summary>
+    /// <param name="element">The element to be styled.</param>
+    public readonly UIStyle Get(UIElement element) => Constant ?? Dynamic?.Invoke(element) ?? UIStyle.Empty;
 
-    public UIStyling For(UIElement element)
+    /// <summary>
+    /// If <see cref="Dynamic"/> is present, returns a new <see cref="UIStyling"/> instance with the specified <paramref name="element"/> bound to the dynamic logic.
+    /// Otherwise, returns this instance unaltered.
+    /// </summary>
+    /// <param name="element">The element to bind.</param>
+    public readonly UIStyling Bind(UIElement element)
     {
-        if (Constant is not null)
+        if (Dynamic is not null)
         {
-            return this;
+            Func<UIElement, UIStyle> dynamic = Dynamic;
+            return new(element => dynamic(element));
         }
-        Func<UIElement, UIStyle> dynamic = Dynamic;
-        return new(element => dynamic?.Invoke(element));
+        return this;
     }
 
+    /// <summary>Calls <see cref="UIStyling(UIStyle)"/>.</summary>
     public static implicit operator UIStyling(UIStyle style) => new(style);
 
+    /// <summary>Calls <see cref="UIStyling(Func{UIElement, UIStyle})"/>.</summary>
     public static implicit operator UIStyling(Func<UIElement, UIStyle> styling) => new(styling);
 }
