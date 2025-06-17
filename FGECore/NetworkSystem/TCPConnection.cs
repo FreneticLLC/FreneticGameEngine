@@ -21,19 +21,25 @@ using FGECore.UtilitySystems;
 namespace FGECore.NetworkSystem;
 
 /// <summary>Represents a present TCP Connection.</summary>
-public class TCPConnection : IDisposable
+public class TCPConnection(Socket socket, TCPGameNetwork network) : IDisposable
 {
     /// <summary>The backing socket.</summary>
-    public Socket RelevantSocket = null;
+    public Socket RelevantSocket = socket;
+
+    /// <summary>Backing socket data send-merger.</summary>
+    public SocketDataAutomerger Merger = new(socket);
 
     /// <summary>The owning network system.</summary>
-    public TCPGameNetwork Network;
+    public TCPGameNetwork Network = network;
 
     /// <summary>Whether the connection is fully ready to send and receive standard data.</summary>
     public bool IsReady = false;
 
     /// <summary>A temporary buffer for data handling.</summary>
     public DataStream ReadData = new();
+
+    /// <summary>Standard output log type, defaults to ServerInfo.</summary>
+    public OutputType LogType = OutputType.SERVERINFO;
 
     private readonly byte[] OneByteHolder = new byte[1];
 
@@ -51,6 +57,19 @@ public class TCPConnection : IDisposable
     /// <summary>Any tag applied to this Object by the game.</summary>
     public object Tag;
 
+    /// <summary>Internal data for this <see cref="TCPConnection"/>.</summary>
+    public struct InternalData(DataStream stream)
+    {
+        /// <summary>For <see cref="SendPacket(long, byte[])"/>.</summary>
+        public DataStream ReusableSendStream = stream;
+
+        /// <summary>For <see cref="SendPacket(long, byte[])"/>.</summary>
+        public DataWriter ReusableSendWriter = new(stream);
+    }
+
+    /// <summary>Internal data for this <see cref="TCPConnection"/>.</summary>
+    public InternalData Internal = new(new(1024));
+
     /// <summary>Processes a received packet.</summary>
     /// <param name="pid">The packet ID.</param>
     /// <param name="reader">The data reader.</param>
@@ -59,42 +78,37 @@ public class TCPConnection : IDisposable
         // TODO
     }
 
-    /// <summary>The number of bytes waiting to send.</summary>
-    public int SentWaiting = 0;
-
     /// <summary>Sends a packet through the socket.</summary>
     /// <param name="packID">The packet ID.</param>
     /// <param name="data">The data.</param>
     public void SendPacket(long packID, byte[] data)
     {
-        if (RelevantSocket == null)
+        if (RelevantSocket is null)
         {
             return;
         }
-        DataStream outp = new();
-        DataWriter dw = new(outp);
-        dw.WriteInt(data.Length);
-        dw.WriteVarInt(packID);
-        dw.WriteBytes(data);
-        SentWaiting += data.Length;
+        // TODO: Thread protection? Async send queue?
+        Internal.ReusableSendStream.SetLength(0);
+        Internal.ReusableSendWriter.WriteInt(data.Length);
+        Internal.ReusableSendWriter.WriteVarInt(packID);
+        Internal.ReusableSendWriter.WriteBytes(data);
         try
         {
-            RelevantSocket.BeginSend(data, 0, data.Length, SocketFlags.None, SendComplete, data.Length);
+            Merger.Send(Internal.ReusableSendStream.ToArray());
         }
         catch (Exception ex)
         {
             CommonUtilities.CheckException(ex);
             RelevantSocket.Close();
             RelevantSocket = null;
-            Logs.ServerInfo($"[Connections:Error] {ex}");
+            LogType.Output($"[Connections:Error] {ex}");
         }
     }
 
-    /// <summary>Called when a send operation completes.</summary>
-    /// <param name="res"></param>
-    public void SendComplete(IAsyncResult res)
+    /// <summary>Run after every frame to ensure data is sent down the pipe.</summary>
+    public void PostTick()
     {
-        SentWaiting -= (int)res.AsyncState;
+        Merger.Autopush();
     }
 
     /// <summary>Run every frame to tick any network updates.</summary>
@@ -102,6 +116,7 @@ public class TCPConnection : IDisposable
     {
         try
         {
+            Merger.Autopush();
             int avail = RelevantSocket.Available;
             if (!IsReady)
             {
@@ -204,7 +219,7 @@ public class TCPConnection : IDisposable
             CommonUtilities.CheckException(ex);
             RelevantSocket.Close();
             RelevantSocket = null;
-            Logs.ServerInfo($"[Connections:Error] {ex.Message}");
+            LogType.Output($"[Connections:Error] {ex.Message}");
         }
     }
 

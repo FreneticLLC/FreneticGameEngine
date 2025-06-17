@@ -42,8 +42,10 @@ public class TCPGameNetwork : GameNetwork
         {
             try
             {
+                // TODO: is TcpListener a good idea? Or should we just use a Socket directly?
                 Listening = new TcpListener(IPAddress.IPv6Any, Port);
                 Listening.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                Listening.Server.NoDelay = true;
             }
             catch (Exception ex)
             {
@@ -58,13 +60,13 @@ public class TCPGameNetwork : GameNetwork
         Listening.Start(100);
     }
 
-    /// <summary>Tick the network engine.</summary>
+    /// <inheritdoc/>
     public override void Tick()
     {
         while (Listening.Pending())
         {
-            Socket s = Listening.AcceptSocket();
-            Connections.Add(new TCPConnection() { RelevantSocket = s, Network = this });
+            Socket socket = Listening.AcceptSocket();
+            Connections.Add(new TCPConnection(socket, this));
         }
         for (int i = Connections.Count - 1; i >= 0; i--)
         {
@@ -73,6 +75,15 @@ public class TCPGameNetwork : GameNetwork
             {
                 Connections.RemoveAt(i);
             }
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void PostTick()
+    {
+        foreach (TCPConnection connection in Connections)
+        {
+            connection.PostTick();
         }
     }
 

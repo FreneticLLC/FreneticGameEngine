@@ -17,8 +17,11 @@ namespace FGECore.NetworkSystem;
 /// <summary>Represents a game networking solution (Server).</summary>
 public abstract class GameNetwork
 {
-    /// <summary>Tick the network engine.</summary>
+    /// <summary>Tick the network engine, for basic connection processing.</summary>
     public abstract void Tick();
+
+    /// <summary>Post-tick the network engine, eg to ensure all data is sent down pipe.</summary>
+    public abstract void PostTick();
 
     /// <summary>Start the network engine.</summary>
     public abstract void Start();
