@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
@@ -18,10 +19,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>
-/// Represents a slider element that can choose between a range of real number values.
-/// For a labeled number slider, use <see cref="UILabeledNumberSlider"/>.
-/// </summary>
+/// <summary>Represents a slider element that can choose between a range of real number values.</summary>
 public class UINumberSlider : UIElement
 {
     /// <summary>The minimum slider value.</summary>
@@ -30,10 +28,10 @@ public class UINumberSlider : UIElement
     /// <summary>The maximum slider value.</summary>
     public double Max;
 
-    /// <summary>
-    /// The grid-snapping interval. 
-    /// Set to <c>0.0</c> or less for a gridless slider.
-    /// </summary>
+    /// <summary>The default slider value.</summary>
+    public double Default;
+
+    /// <summary>The grid-snapping interval. Set to <c>0.0</c> or less for a gridless slider.</summary>
     public double Interval;
 
     /// <summary>Whether the slider should use integers instead of decimals.</summary>
@@ -48,31 +46,30 @@ public class UINumberSlider : UIElement
     /// <summary>The box placed at the current slider progress.</summary>
     public UIBox Button;
 
-    // TODO: number label
-
     /// <summary>Fired when the user edits the slider value.</summary>
     public Action<double> OnValueEdit;
 
     /// <summary>Constructs a number slider.</summary>
     /// <param name="min">The minimum slider value.</param>
     /// <param name="max">The maximum slider value.</param>
-    /// <param name="initial">The initial slider value.</param>
+    /// <param name="defaultValue">The default slider value.</param>
     /// <param name="interval">The grid-snapping interval, if any.</param>
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double initial, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling,layout)
+    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling,layout)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
         Min = Integer ? (int)min : min;
         Max = Integer ? (int)max : max;
+        Default = defaultValue;
         if (Interval > 0.0)
         {
             int maxStep = (int)((Max - Min) / Interval);
             Max = Min + Interval * maxStep;
         }
-        Value = Math.Clamp(Integer ? (int)initial : initial, Min, Max);
+        Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
         AddChild(Button = new(UIStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { RenderSelf = false, IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
@@ -133,5 +130,25 @@ public class UINumberSlider : UIElement
         }
         Renderer2D.SetColor(Color4F.White);
         Button.Render(delta, style);
+    }
+
+    public static UIListGroup WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
+    {
+        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        slider.OnValueEdit += _ => label.TextContent = slider.Value.ToString(label.Format);
+        label.OnTextSubmit += _ =>
+        {
+            double newValue = slider.GetCorrectedValue(label.Value, slider.Integer ? 1.0 : 0.0);
+            slider.OnValueEdit?.Invoke(slider.Value = newValue);
+        };
+        if (trackLabelEdits)
+        {
+            label.OnTextEdit += _ => slider.Value = double.TryParse(label.TextContent, out double value) ? Math.Clamp(value, slider.Min, slider.Max) : slider.Default;
+        }
+        label.PlaceholderInfo.Content = null;
+        label.TextContent = slider.Default.ToString(label.Format);
+        list.AddListItem(slider);
+        list.AddListItem(label);
+        return list;
     }
 }

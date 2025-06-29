@@ -46,12 +46,13 @@ public class UILabel : UIElement
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
     }
 
-    public static (UILabel Label, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
-        UIListGroup list = new(spacing, layout, false, listAnchor ?? UIAnchor.TOP_LEFT);
+        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
         UILabel label = new(text, styling, layout.AtOrigin());
+        UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
         list.AddChild(label);
-        list.AddChild(new UIImage(icon, new UILayout().SetSize(() => label.Height, () => label.Height)));
-        return (label, list);
+        list.AddChild(image);
+        return (label, image, list);
     }
 }
