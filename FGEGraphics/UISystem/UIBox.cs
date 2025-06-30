@@ -22,13 +22,23 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple box on the screen.</summary>
-/// <remarks>Constructs a UI box.</remarks>
-/// <param name="layout">The layout of the element.</param>
-public class UIBox(UIStyling styling, UILayout layout) : UIElement(styling, layout)
+public class UIBox : UIElement
 {
     // TODO: move to UILayout
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
+
+    /// <summary>The text to display inside this box.</summary>
+    public UIText Text;
+
+    /// <summary>Constructs a <see cref="UIBox"/>.</summary>
+    /// <param name="styling">The styling of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="text">Text to display inside the box.</param>
+    public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
+    {
+        Text = new(this, text);
+    }
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
@@ -61,6 +71,10 @@ public class UIBox(UIStyling styling, UILayout layout) : UIElement(styling, layo
             float ymin = Flip ? Y + Height : Y;
             float ymax = Flip ? Y : Y + Height;
             View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
+        }
+        if (style.CanRenderText(Text))
+        {
+            style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));
         }
     }
 }

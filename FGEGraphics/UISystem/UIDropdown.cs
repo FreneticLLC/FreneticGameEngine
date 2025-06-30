@@ -31,7 +31,7 @@ public class UIDropdown : UIElement
     public string PlaceholderInfo;
 
     /// <summary>The button to open the dropdown.</summary>
-    public UIButton Button;
+    public UIBox Button;
 
     /// <summary>The dropdown list of choices.</summary>
     public UIListGroup ListGroup;
@@ -52,13 +52,13 @@ public class UIDropdown : UIElement
     /// <param name="text">The text to display when no choice is selected.</param>
     /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="ListGroup"/> entries.</param>
     /// <param name="listSpacing">The spacing betwene <see cref="ListGroup"/> entries.</param>
-    /// <param name="buttonStyling">The <see cref="Button"/> element styles.</param>
-    /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
+    /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
+    /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
     /// <param name="layout">The layout of the element.</param>
     public UIDropdown(string text, int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout) : base(buttonStyling, layout)
     {
         PlaceholderInfo = text;
-        AddChild(Button = new UIButton(text, HandleOpen, buttonStyling, layout.AtOrigin()));
+        AddChild(Button = new UIBox(buttonStyling, layout.AtOrigin(), text) { OnClick = HandleOpen });
         Box = new UIBox(boxStyling, layout.AtOrigin());
         Box.AddChild(ListGroup = new(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => ListGroup.Layout.Height + boxPadding * 2);

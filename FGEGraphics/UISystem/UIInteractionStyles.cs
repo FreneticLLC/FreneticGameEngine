@@ -33,7 +33,7 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
     public UIStyle Disabled = disabled;
 
     /// <summary>The styling logic for an interactable element.</summary>
-    public UIStyle Styling(UIElement element) => element.IsPressed ? Press
+    public virtual UIStyle Styling(UIElement element) => element.IsPressed ? Press
         : element.IsHovered ? Hover
         : !element.IsEnabled ? Disabled
         : Normal;
@@ -51,5 +51,6 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
         return new(normal, hover, press, disabled);
     }
 
+    /// <summary>Calls <see cref="UIStyling(System.Func{UIElement, UIStyle})"/>.</summary>
     public static implicit operator UIStyling(UIInteractionStyles styles) => new(styles.Styling);
 }

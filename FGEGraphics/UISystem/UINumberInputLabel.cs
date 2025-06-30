@@ -59,7 +59,7 @@ public class UINumberInputLabel : UIInputLabel
 
     /// <remarks>Constructs a number input label.</remarks>
     /// <param name="integer">Whether the label should be an integer.</param>
-    /// <param name="baseStyles">The clickable styles for the box and info text.</param>
+    /// <param name="styling">The styling logic of the element.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
@@ -72,7 +72,7 @@ public class UINumberInputLabel : UIInputLabel
     /// <param name="scrollBarWidth">The width of the scroll bar.</param>
     /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
-    public UINumberInputLabel(bool integer, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", baseStyles, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
+    public UINumberInputLabel(bool integer, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", styling, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
     {
         Integer = integer;
         Format = format ?? (integer ? "0" : "0.0");

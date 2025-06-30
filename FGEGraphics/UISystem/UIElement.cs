@@ -144,6 +144,7 @@ public abstract class UIElement
     public ElementInternalData ElementInternal = new();
 
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
+    /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     public UIElement(UIStyling styling, UILayout layout)
     {
@@ -404,7 +405,8 @@ public abstract class UIElement
                 {
                     IsPressed = false;
                     OnClick?.Invoke();
-                    View.HeldElement = null;
+                    Clicked();
+                    View.HeldElement = null; // FIXME
                 }
                 MouseReleased();
             }
@@ -604,6 +606,10 @@ public abstract class UIElement
     /// <param name="vertical">The vertical shift (positive for up, negative for down).</param>
     public virtual void Navigated(int horizontal, int vertical)
     {
+    }
+
+    public virtual void Clicked()
+    { 
     }
 
     /// <summary>Selects the element and fires <see cref="Selected"/>.</summary>

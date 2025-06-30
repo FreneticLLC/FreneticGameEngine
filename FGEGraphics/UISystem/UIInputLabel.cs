@@ -44,6 +44,14 @@ public class UIInputLabel : UIElement
         SUBMIT
     }
 
+    // TODO: something better?  
+    public struct Styles(UIInteractionStyles styles)
+    {
+        public UIStyle Styling(UIElement element) => element.IsSelected ? styles.Press : styles.Styling(element);
+
+        public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
+    }
+
     /// <summary>The box behind the input label.</summary>
     public UIBox Box = null;
 
@@ -209,7 +217,7 @@ public class UIInputLabel : UIElement
     /// <summary>Constructs an input label.</summary>
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
-    /// <param name="baseStyles">The clickable styles for the box and info text.</param>
+    /// <param name="styling">The styling logic of the element.</param>
     /// <param name="inputStyle">The style of normal input content.</param>
     /// <param name="highlightStyle">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
@@ -222,13 +230,14 @@ public class UIInputLabel : UIElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIInteractionStyles baseStyles, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(UIStyling.Empty, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styling, layout)
     {
-        Styling = new(element => element.IsSelected ? baseStyles.Press : baseStyles.Styling(element));
+        // TODO: WithBox method instead?
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
-            layout.SetSize(layout.Width + boxPadding * 2, layout.Height + boxPadding * 2); // TODO: dynamic size
+            UILayout baseLayout = new(layout);
+            layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
             AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { IsEnabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
@@ -236,8 +245,8 @@ public class UIInputLabel : UIElement
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
-        InputStyle = inputStyle ?? baseStyles.Normal;
-        HighlightStyle = highlightStyle ?? baseStyles.Press;
+        InputStyle = inputStyle;
+        HighlightStyle = highlightStyle;
         PlaceholderInfo = new(this, placeholderInfo, true);
         Internal.MaxWidth = maxWidth;
         Internal.TextLeft = new(this, null, false, style: InputStyle);
@@ -459,7 +468,7 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        bool BarPressed(UIButton bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
+        bool BarPressed(UIBox bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
         {
             return;

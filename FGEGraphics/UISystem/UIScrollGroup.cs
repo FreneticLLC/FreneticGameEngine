@@ -132,7 +132,7 @@ public class UIScrollGroup : UIElement
         public int ScrollSpeed = 10;
 
         /// <summary>The scroll bar button, if any.</summary>
-        public UIButton ScrollBar = null;
+        public UIBox ScrollBar = null;
 
         /// <summary>The held position offset of the scroll bar.</summary>
         public int BarHeldOffset = -1;
@@ -167,7 +167,7 @@ public class UIScrollGroup : UIElement
             {
                 layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(width);
             }
-            ScrollBar = new(null, null, styling, layout);
+            ScrollBar = new(styling, layout);
         }
 
         /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
