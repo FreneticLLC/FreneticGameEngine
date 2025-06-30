@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,11 +29,10 @@ public class UIToggleBox : UIBox
     public Action<bool> OnToggle;
 
     /// <summary>Constructs a new <see cref="UIToggleBox"/>.</summary>
-    /// <param name="labelStyle">The text label style.</param>
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="toggled">The initial toggle state.</param>
-    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false, UIStyle labelStyle = null) : base(styling, layout)
+    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false) : base(styling, layout)
     {
         SetToggled(toggled);
     }
@@ -54,9 +54,13 @@ public class UIToggleBox : UIBox
     /// <inheritdoc/>
     public override void Clicked() => Toggle();
 
-    // TODO
-    /*public static UIGroup WithLabel()
+    public static (UIToggleBox Box, UILabel Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = default, UIAnchor listAnchor = null)
     {
-
-    }*/
+        UIToggleBox box = new(styling, layout.AtOrigin(), toggled);
+        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UILabel label = new(text, labelStyling.IsEmpty ? styling.Bind(box) : labelStyling, new UILayout());
+        list.AddListItem(box);
+        list.AddListItem(label);
+        return (box, label, list);
+    }
 }

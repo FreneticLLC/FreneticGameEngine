@@ -51,8 +51,8 @@ public class UILabel : UIElement
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
         UILabel label = new(text, styling, layout.AtOrigin());
         UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
-        list.AddChild(label);
-        list.AddChild(image);
+        list.AddListItem(label);
+        list.AddListItem(image);
         return (label, image, list);
     }
 }

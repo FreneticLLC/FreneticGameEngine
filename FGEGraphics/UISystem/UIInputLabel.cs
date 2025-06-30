@@ -232,16 +232,16 @@ public class UIInputLabel : UIElement
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
     public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styling, layout)
     {
-        // TODO: WithBox method instead?
         if (renderBox)
         {
             Internal.BoxPadding = boxPadding;
-            UILayout baseLayout = new(layout);
-            layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
-            AddChild(Box = new(UIStyle.Empty, layout.AtOrigin()) { IsEnabled = false });
+            // TODO: properly handle padding
+            //UILayout baseLayout = new(layout);
+            //layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
+            AddChild(Box = new(UIStyle.Empty, new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
-        UILayout scrollGroupLayout = layout.AtOrigin().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
+        UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
         ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
