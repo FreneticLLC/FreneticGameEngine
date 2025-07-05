@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 
 public class UISelectionGroup(UILayout layout) : UIGroup(layout)
 {
+    public int MinSelections = -1;
+
     public int MaxSelections = -1;
 
     public bool IsCyclic = false;
@@ -72,7 +74,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         IsLocked = locked;
     }
 
-    public void UpdateLock()
+    public void UpdateLocks()
     {
         if (IsCyclic || MaxSelections <= 0)
         {
@@ -92,7 +94,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     {
         MaxSelections = maxSelections;
         FlushSelections();
-        UpdateLock();
+        UpdateLocks();
     }
 
     public void SetSelected(UIElement element, bool selected)
@@ -113,7 +115,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         element.IsPressed = true;
         element.IsStateLocked = true;
         SelectedElements.Add(element);
-        UpdateLock();
+        UpdateLocks();
         OnSelect?.Invoke(last, element);
     }
 
@@ -123,7 +125,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         element.IsHovered = false;
         element.IsPressed = false;
         element.IsStateLocked = false;
-        UpdateLock();
+        UpdateLocks();
     }
 
     public void AddElement(UIElement element, bool selected = false, bool addChild = true)
@@ -136,7 +138,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         {
             if (SelectedElements.Contains(element))
             {
-                DeselectElement(element);
+                if (SelectedElements.Count > MinSelections)
+                {
+                    DeselectElement(element);
+                }
             }
             else
             {
@@ -158,7 +163,11 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     {
         element.OnClick -= Internal.Updaters[element];
         Elements.Remove(element);
-        UpdateLock();
+        if (SelectedElements.Contains(element))
+        {
+            DeselectElement(element);
+        }
+        UpdateLocks();
         if (removeChild)
         {
             RemoveChild(element);
