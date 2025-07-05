@@ -28,7 +28,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
 
     public List<UIElement> SelectedElements = [];
 
-    public Action<UIElement, UIElement> OnSelect;
+    public Action<UIElement, UIElement> OnSelectElement;
 
     public struct InternalData()
     {
@@ -116,7 +116,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         element.IsStateLocked = true;
         SelectedElements.Add(element);
         UpdateLocks();
-        OnSelect?.Invoke(last, element);
+        OnSelectElement?.Invoke(last, element);
     }
 
     public void DeselectElement(UIElement element)
