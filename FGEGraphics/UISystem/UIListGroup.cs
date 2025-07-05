@@ -72,6 +72,7 @@ public class UIListGroup : UIGroup
         }
     }
 
+    // TODO: rename to AddItem
     /// <summary>Adds and positions an element within the list.</summary>
     /// <param name="item">The element to add.</param>
     /// <param name="index">The element's position in the list, <c>-1</c> for the end.</param>

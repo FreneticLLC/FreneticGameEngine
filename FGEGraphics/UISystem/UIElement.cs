@@ -50,6 +50,9 @@ public abstract class UIElement
     /// <summary>Whether this element can be interacted with.</summary>
     public bool IsEnabled = true;
 
+    // TODO: invert, IsUnlocked or something?
+    public bool IsStateLocked = false;
+
     /// <summary>Whether the user is hovering over this element.</summary>
     public bool IsHovered = false;
 
@@ -383,7 +386,7 @@ public abstract class UIElement
             if (!ElementInternal.IsMouseHovered && View.HeldElement is null)
             {
                 ElementInternal.IsMouseHovered = true;
-                if (IsEnabled)
+                if (IsEnabled && !IsStateLocked)
                 {
                     IsHovered = true;
                 }
@@ -393,7 +396,10 @@ public abstract class UIElement
             {
                 if (IsEnabled)
                 {
-                    IsPressed = true;
+                    if (!IsStateLocked)
+                    {
+                        IsPressed = true;
+                    }
                     View.HeldElement = this;
                     Select();
                 }
@@ -403,7 +409,10 @@ public abstract class UIElement
             {
                 if (IsEnabled)
                 {
-                    IsPressed = false;
+                    if (!IsStateLocked)
+                    {
+                        IsPressed = false;
+                    }
                     OnClick?.Invoke();
                     Clicked();
                     View.HeldElement = null; // FIXME
@@ -416,8 +425,11 @@ public abstract class UIElement
             ElementInternal.IsMouseHovered = false;
             if (IsEnabled)
             {
-                IsHovered = false;
-                IsPressed = false;
+                if (!IsStateLocked)
+                {
+                    IsHovered = false;
+                    IsPressed = false;
+                }
                 if (View.HeldElement == this)
                 {
                     View.HeldElement = null;
