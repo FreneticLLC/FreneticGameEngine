@@ -12,9 +12,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.EntitySystem;
+using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
 using BepuPhysics.Collidables;
-using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.PhysicsSystem;
 

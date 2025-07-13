@@ -12,9 +12,9 @@ using System.Linq;
 using System.Text;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
+using FGEGraphics.GraphicsHelpers;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
-using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 

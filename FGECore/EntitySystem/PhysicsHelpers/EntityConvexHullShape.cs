@@ -14,8 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.PhysicsSystem;
 using FGECore.PropertySystem;
-using BepuPhysics.Collidables;
 using BepuPhysics;
+using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;

@@ -258,7 +258,7 @@ public partial class WasApiAudioProvider : GenericAudioBacker
             public int GetCount(out uint pcDevices);
 
             /// <summary>The Item method retrieves a pointer to the specified item in the device collection.</summary>
-            /// <param name="nDevice">The device number. If the collection contains n devices, the devices are numbered 0 to n– 1.</param>
+            /// <param name="nDevice">The device number. If the collection contains n devices, the devices are numbered 0 to nï¿½ 1.</param>
             /// <param name="ppDevice">Pointer to a pointer variable into which the method writes the address of the IMMDevice interface of the specified item in the device collection. Through this method, the caller obtains a counted reference to the interface. The caller is responsible for releasing the interface, when it is no longer needed, by calling the interface's Release method. If the Item call fails, *ppDevice is NULL.</param>
             public int Item(uint nDevice, out nint ppDevice);
         }

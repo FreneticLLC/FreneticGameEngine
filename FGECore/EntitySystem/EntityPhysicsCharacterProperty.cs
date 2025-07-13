@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
+using FGECore.PhysicsSystem;
 using FGECore.PhysicsSystem.BepuCharacters;
 using FGECore.PropertySystem;
 using BepuPhysics;
-using FGECore.PhysicsSystem;
+using BepuPhysics.Collidables;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
-using BepuPhysics.Collidables;
 
 namespace FGECore.EntitySystem;
 

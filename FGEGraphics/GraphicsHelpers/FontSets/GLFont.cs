@@ -135,7 +135,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
 
     /// <summary>Adds all the symbols to the GLFont mega texture.</summary>
     /// <param name="input">The list of symbols.</param>
-    /// <returns>The list of symbols not able to added without expaninding, if any.</returns>
+    /// <returns>The list of symbols not able to added without expanding, if any.</returns>
     private IEnumerable<string> AddAll(IEnumerable<string> input)
     {
         using Graphics gfx = Graphics.FromImage(Engine.CurrentBMP);

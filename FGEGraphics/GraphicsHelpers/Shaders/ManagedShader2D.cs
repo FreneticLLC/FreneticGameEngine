@@ -1,4 +1,6 @@
-﻿// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
+//
+// This file is part of the Frenetic Game Engine, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
 // If neither of these are available, assume that neither you nor anyone other than the copyright holder
 // hold any right or permission to use this software until such time as the official license is identified.
@@ -13,6 +15,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+
 using static FGEGraphics.GraphicsHelpers.Shaders.ShaderLocations;
 
 namespace FGEGraphics.GraphicsHelpers.Shaders;
