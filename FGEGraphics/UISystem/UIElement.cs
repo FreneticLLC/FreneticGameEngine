@@ -50,7 +50,7 @@ public abstract class UIElement
     /// <summary>Whether this element can be interacted with.</summary>
     public bool IsEnabled = true;
 
-    // TODO: invert, IsUnlocked or something?
+    /// <summary>Whether the visual state of this element should be locked from interacted changes.</summary>
     public bool IsStateLocked = false;
 
     /// <summary>Whether the user is hovering over this element.</summary>
@@ -90,6 +90,9 @@ public abstract class UIElement
     /// <summary>Gets the absolute height value.</summary>
     /// <seealso cref="Size"/>
     public int Height => Size.Y;
+
+    /// <summary>An arbitrary value attached to this element.</summary>
+    public object Tag = null;
 
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
@@ -620,6 +623,7 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Ran when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public virtual void Clicked()
     { 
     }
