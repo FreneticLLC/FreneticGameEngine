@@ -60,7 +60,7 @@ public abstract class UIElement
     public bool IsPressed = false;
 
     /// <summary>Whether this is the last element the user has interacted with.</summary>
-    public bool IsSelected = false;
+    public bool IsFocused = false;
 
     /// <summary>This absolute position.</summary>
     /// <seealso cref="X"/>
@@ -99,6 +99,10 @@ public abstract class UIElement
 
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
+
+    public Action OnFocus;
+
+    public Action OnUnfocus;
 
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>
     public Action<UIStyle, UIStyle> OnStyleChange;
@@ -404,7 +408,7 @@ public abstract class UIElement
                         IsPressed = true;
                     }
                     View.HeldElement = this;
-                    Select();
+                    Focus();
                 }
                 MousePressed();
             }
@@ -418,7 +422,7 @@ public abstract class UIElement
                     }
                     OnClick?.Invoke();
                     Clicked();
-                    View.HeldElement = null; // FIXME
+                    View.HeldElement = null;
                 }
                 MouseReleased();
             }
@@ -446,9 +450,9 @@ public abstract class UIElement
         }
         if (View.MouseDown && View.HeldElement != this)
         {
-            if (IsSelected)
+            if (IsFocused)
             {
-                Deselect();
+                Unfocus();
             }
             MousePressedOutside();
         }
@@ -458,14 +462,14 @@ public abstract class UIElement
     /// <summary>Ticks the <see cref="KeyHandler.BuildingState"/> on this element.</summary>
     public void TickInput()
     {
-        if (!IsSelected)
+        if (!IsFocused)
         {
             return;
         }
         KeyHandlerState keys = View.Client.Keyboard.BuildingState;
         if (keys.Escaped)
         {
-            Deselect();
+            Unfocus();
         }
         if (keys.LeftRights != 0 || keys.Scrolls != 0)
         {
@@ -616,7 +620,7 @@ public abstract class UIElement
     /// <returns>Whether to consume mouse scroll for this interaction step (such that no other elements receive this event).</returns>
     public virtual bool MouseScrolled(float horizontal, float vertical) => false;
 
-    /// <summary>Ran when the user navigates directionally while the element is <see cref="IsSelected"/>.</summary>
+    /// <summary>Ran when the user navigates directionally while the element is <see cref="IsFocused"/>.</summary>
     /// <param name="horizontal">The horizontal shift (positive for right, negative for left).</param>
     /// <param name="vertical">The vertical shift (positive for up, negative for down).</param>
     public virtual void Navigated(int horizontal, int vertical)
@@ -628,27 +632,29 @@ public abstract class UIElement
     { 
     }
 
-    /// <summary>Selects the element and fires <see cref="Selected"/>.</summary>
-    public void Select()
+    /// <summary>Focuses on the element and fires <see cref="Focused"/>.</summary>
+    public void Focus()
     {
-        IsSelected = true;
-        Selected();
+        IsFocused = true;
+        OnFocus?.Invoke();
+        Focused();
     }
 
-    /// <summary>Deselects the element and fires <see cref="Deselected"/>.</summary>
-    public void Deselect()
+    /// <summary>Unfocuses the element and fires <see cref="Unfocused"/>.</summary>
+    public void Unfocus()
     {
-        IsSelected = false;
-        Deselected();
+        IsFocused = false;
+        OnUnfocus?.Invoke();
+        Unfocused();
     }
 
     /// <summary>Ran when the user begins interacting with the element.</summary>
-    public virtual void Selected()
+    public virtual void Focused()
     {
     }
 
     /// <summary>Ran when the user stops interacting with the element.</summary>
-    public virtual void Deselected()
+    public virtual void Unfocused()
     {
     }
 
@@ -669,7 +675,7 @@ public abstract class UIElement
         {
             $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
             $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation}",
-            $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsSelected ? "2" : "1")}{IsSelected}"
+            $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
         };
         if (ElementInternal.Styles.Count > 0)
         {

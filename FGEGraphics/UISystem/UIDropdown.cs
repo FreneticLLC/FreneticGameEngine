@@ -82,6 +82,8 @@ public class UIDropdown : UIElement
         {
             Box.Layout.SetPosition(() => X, () => Y);
         }
+        // TODO
+        //Box.OnUnfocus += Close;
     }
 
     /// <summary>Opens the dropdown list.</summary>
@@ -90,10 +92,17 @@ public class UIDropdown : UIElement
         Internal.Phase = InternalData.DropdownPhase.OPENING;
     }
 
+    /// <summary>Closes the dropdown list.</summary>
+    public void Close()
+    {
+        Internal.Phase = InternalData.DropdownPhase.CLOSING;
+    }
+
     /// <summary>Selects a dropdown choice, closing the container if necessary.</summary>
     /// <param name="choice">The choice to select.</param>
     public void SelectChoice(UIElement choice)
     {
+        Console.WriteLine("selecting " + choice);
         SelectedChoice = choice;
         Internal.Phase = (Internal.Layer ?? this).HasChild(Box) ? InternalData.DropdownPhase.CLOSING : InternalData.DropdownPhase.IDLE;
         Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
@@ -116,13 +125,14 @@ public class UIDropdown : UIElement
         if (Internal.Phase == InternalData.DropdownPhase.OPENING)
         {
             RemoveChild(Button);
-            Console.WriteLine("adding to " + (Internal.Layer ?? this));
             (Internal.Layer ?? this).AddChild(Box);
+            Box.Focus();
         }
         else if (Internal.Phase == InternalData.DropdownPhase.CLOSING)
         {
             (Internal.Layer ?? this).RemoveChild(Box);
             AddChild(Button);
+            Button.Focus();
         }
         if (Internal.Phase != InternalData.DropdownPhase.IDLE)
         {

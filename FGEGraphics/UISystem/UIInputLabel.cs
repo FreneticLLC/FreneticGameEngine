@@ -47,7 +47,7 @@ public class UIInputLabel : UIElement
     // TODO: something better?  
     public struct Styles(UIInteractionStyles styles)
     {
-        public UIStyle Styling(UIElement element) => element.IsSelected ? styles.Press : styles.Styling(element);
+        public UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
 
         public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
     }
@@ -256,18 +256,18 @@ public class UIInputLabel : UIElement
     }
 
     /// <inheritdoc/>
-    public override void Selected()
+    public override void Focused()
     {
         TickMouse();
         UpdateScrollGroup();
     }
 
     /// <inheritdoc/>
-    public override void Deselected()
+    public override void Unfocused()
     {
         if ((ScrollGroup.ScrollX.ScrollBar?.IsPressed | ScrollGroup.ScrollY.ScrollBar?.IsPressed) ?? false)
         {
-            IsSelected = true;
+            IsFocused = true;
             return;
         }
         SubmitText();
@@ -321,7 +321,7 @@ public class UIInputLabel : UIElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain = [.. UIText.IterateChain([Internal.TextLeft, Internal.TextBetween, Internal.TextRight], Internal.MaxWidth ? Layout.Width : -1)];
-        Internal.CursorOffset = IsSelected ? Internal.GetCursorOffset() : Location.NaN;
+        Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
     }
 
@@ -535,7 +535,7 @@ public class UIInputLabel : UIElement
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        if (!IsSelected)
+        if (!IsFocused)
         {
             return;
         }
