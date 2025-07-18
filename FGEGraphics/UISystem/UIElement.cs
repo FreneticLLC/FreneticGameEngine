@@ -375,7 +375,7 @@ public abstract class UIElement
     /// <param name="mouseX">The X position of the mouse.</param>
     /// <param name="mouseY">The Y position of the mouse.</param>
     /// <param name="scrollDelta">The scroll wheel change.</param>
-    public void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
+    public virtual void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
     {
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {

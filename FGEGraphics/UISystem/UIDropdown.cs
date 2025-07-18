@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,93 +23,132 @@ namespace FGEGraphics.UISystem;
 // TODO: Scroll if exceed max width
 // TODO: Dropdown icon next to placeholder info?
 // TODO: Different style for placeholder info
+// TODO: Add choice at index, remove choice
+
 public class UIDropdown : UIElement
 {
-    /// <summary>A mapping of <see cref="ListGroup"/> clickables to their string values.</summary>
-    public Dictionary<UIElement, string> Choices = [];
-
     /// <summary>The text to display when no choice is selected.</summary>
     public string PlaceholderInfo;
 
     /// <summary>The button to open the dropdown.</summary>
     public UIBox Button;
 
-    /// <summary>The dropdown list of choices.</summary>
-    public UIListGroup ListGroup;
-
-    /// <summary>The box container surrounding the <see cref="ListGroup"/>.</summary>
+    /// <summary>The box container surrounding the <see cref="Choices"/>.</summary>
     public UIBox Box;
 
-    /// <summary>The currently selected entry in the <see cref="ListGroup"/>.</summary>
-    public UIElement SelectedElement;
+    /// <summary>The dropdown list of choices.</summary>
+    public UIListGroup Choices;
 
-    /// <summary>The currently selected dropdown value.</summary>
-    public string SelectedValue;
+    /// <summary>The currently selected entry in the <see cref="Choices"/>.</summary>
+    public UIElement SelectedChoice; // TODO: selection group
 
     /// <summary>Fired when a choice is selected.</summary>
-    public Action<string> OnChoiceSelect;
+    public Action<UIElement> OnChoiceSelect;
+
+    public struct InternalData()
+    {
+        public enum DropdownPhase
+        {
+            IDLE,
+            OPENING,
+            CLOSING
+        }
+
+        public DropdownPhase Phase;
+
+        public UIElement Layer;
+
+        public Dictionary<UIElement, Func<string>> ToStrings = [];
+    }
+
+    public InternalData Internal = new();
 
     /// <summary>Constructs a new UI dropdown.</summary>
     /// <param name="text">The text to display when no choice is selected.</param>
-    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="ListGroup"/> entries.</param>
-    /// <param name="listSpacing">The spacing betwene <see cref="ListGroup"/> entries.</param>
+    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="Choices"/> entries.</param>
+    /// <param name="listSpacing">The spacing betwene <see cref="Choices"/> entries.</param>
     /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
     /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout) : base(buttonStyling, layout)
+    public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
-        PlaceholderInfo = text;
-        AddChild(Button = new UIBox(buttonStyling, layout.AtOrigin(), text) { OnClick = HandleOpen });
+        PlaceholderInfo = text ?? "null";
+        AddChild(Button = new UIBox(buttonStyling, layout.AtOrigin(), text) { OnClick = Open });
         Box = new UIBox(boxStyling, layout.AtOrigin());
-        Box.AddChild(ListGroup = new(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
-        Box.Layout.SetHeight(() => ListGroup.Layout.Height + boxPadding * 2);
+        Box.AddChild(Choices = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        Box.Layout.SetHeight(() => Choices.Layout.Height + boxPadding * 2);
+        Internal.Layer = layer;
+        if (layer is not null)
+        {
+            Box.Layout.SetPosition(() => X, () => Y);
+        }
     }
 
     /// <summary>Opens the dropdown list.</summary>
-    public void HandleOpen()
+    public void Open()
     {
-        RemoveChild(Button);
-        AddChild(Box);
+        Internal.Phase = InternalData.DropdownPhase.OPENING;
     }
 
-    /// <summary>Selects one of the choices and closes the dropdown list.</summary>
-    /// <param name="element">The selected choice.</param>
-    public void HandleSelect(UIElement element)
+    /// <summary>Selects a dropdown choice, closing the container if necessary.</summary>
+    /// <param name="choice">The choice to select.</param>
+    public void SelectChoice(UIElement choice)
     {
-        SelectedElement = element;
-        SelectedValue = Choices[element];
-        RemoveChild(Box);
-        AddChild(Button);
-        Button.Text.Content = SelectedValue;
-        OnChoiceSelect?.Invoke(SelectedValue);
+        SelectedChoice = choice;
+        Internal.Phase = (Internal.Layer ?? this).HasChild(Box) ? InternalData.DropdownPhase.CLOSING : InternalData.DropdownPhase.IDLE;
+        Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
+        if (choice is not null)
+        {
+            OnChoiceSelect?.Invoke(choice);
+        }
     }
 
     /// <summary>Reverts the dropdown to its pre-chosen state.</summary>
     public void DeselectChoice()
     {
-        Button.Text.Content = PlaceholderInfo;
-        SelectedElement = null;
-        SelectedValue = null;
+        SelectChoice(null);
+    }
+
+    /// <inheritdoc/>
+    public override void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
+    {
+        base.TickInteraction(mouseX, mouseY, scrollDelta);
+        if (Internal.Phase == InternalData.DropdownPhase.OPENING)
+        {
+            RemoveChild(Button);
+            Console.WriteLine("adding to " + (Internal.Layer ?? this));
+            (Internal.Layer ?? this).AddChild(Box);
+        }
+        else if (Internal.Phase == InternalData.DropdownPhase.CLOSING)
+        {
+            (Internal.Layer ?? this).RemoveChild(Box);
+            AddChild(Button);
+        }
+        if (Internal.Phase != InternalData.DropdownPhase.IDLE)
+        {
+            Internal.Phase = InternalData.DropdownPhase.IDLE;
+        }
     }
 
     /// <summary>Adds a choice to the dropdown.</summary>
-    /// <param name="choice">The choice text.</param>
-    /// <param name="element">The clickable choice element.</param>
-    public void AddChoice(string choice, UIElement element)
+    /// <param name="choice">The choice element.</param>
+    /// <param name="label">The string representation of the choice.</param>
+    public void AddChoice(UIElement choice, Func<string> label)
     {
-        ListGroup.AddListItem(element);
-        Choices[element] = choice;
-        element.OnClick += () => HandleSelect(element);
+        Choices.AddListItem(choice);
+        Internal.ToStrings[choice] = label;
+        choice.OnClick += () => SelectChoice(choice);
     }
 
     /// <summary>Adds a <see cref="UILabel"/> as a choice to the dropdown.</summary>
     /// <param name="choice">The choice text.</param>
     /// <param name="styling">The label styles.</param>
-    /// <returns>The added text link.</returns>
-    public UILabel AddLabelChoice(string choice, UIStyling styling)
+    /// <param name="tag">An optional value attached to the resulting label.</param>
+    /// <returns>The created label.</returns>
+    public UILabel AddLabelChoice(string choice, UIStyling styling, object tag = null)
     {
-        UILabel label = new(choice, styling, new UILayout());
-        AddChoice(choice, label);
+        UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
+        AddChoice(label, () => label.Text.Content);
         return label;
     }
 }
