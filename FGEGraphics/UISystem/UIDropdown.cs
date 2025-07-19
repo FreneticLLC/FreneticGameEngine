@@ -80,7 +80,7 @@ public class UIDropdown : UIElement
         Internal.Layer = layer;
         if (layer is not null)
         {
-            Box.Layout.SetPosition(() => X, () => Y);
+            Box.Layout.SetPosition(() => X - Internal.Layer.X, () => Y - Internal.Layer.Y);
         }
         // TODO
         //Box.OnUnfocus += Close;
