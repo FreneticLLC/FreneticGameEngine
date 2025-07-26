@@ -22,8 +22,8 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple image on a screen.</summary>
 /// <remarks>Constructs an image.</remarks>
 /// <param name="image">The image to display.</param>
-/// <param name="pos">The position of the element.</param>
-public class UIImage(Texture image, UIPositionHelper pos) : UIElement(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UIImage(Texture image, UILayout layout) : UIElement(UIStyling.Empty, layout)
 {
     /// <summary>The image to display.</summary>
     public Texture Image = image;
@@ -31,12 +31,9 @@ public class UIImage(Texture image, UIPositionHelper pos) : UIElement(pos)
     /// <summary>How to fit the image within this element's bounding box.</summary>
     public TextureFit Fit = TextureFit.STRETCH;
 
-    /// <summary>Renders the image on a screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
-        view.Rendering.RenderFittedTextureRectangle(view.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        View.Rendering.RenderFittedTextureRectangle(View.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }

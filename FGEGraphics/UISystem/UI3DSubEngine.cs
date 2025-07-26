@@ -31,16 +31,15 @@ public class UI3DSubEngine : UIElement
     public GameEngine3D SubEngine;
 
     /// <summary>Constructs a new 3D sub-engine.</summary>
-    /// <param name="pos">The position of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="alphaBack">Whether to have an alpha background.</param>
-    public UI3DSubEngine(UIPositionHelper pos, bool alphaBack)
-        : base(pos)
+    public UI3DSubEngine(UILayout layout, bool alphaBack) : base(UIStyling.Empty, layout)
     {
         SubEngine = new GameEngine3D
         {
             IsSubEngine = true,
-            SubSize = new FGECore.MathHelpers.Vector2i(Position.Width, Position.Height),
-            OwningInstance = pos.View.Client
+            SubSize = new FGECore.MathHelpers.Vector2i(Layout.Width, Layout.Height),
+            OwningInstance = View.Client
         };
         if (alphaBack)
         {
@@ -48,21 +47,20 @@ public class UI3DSubEngine : UIElement
         }
     }
 
-    /// <summary>Initializes the subengine.</summary>
+    /// <inheritdoc/>
     public override void Init()
     {
-        SubEngine.OwningInstance = Window;
+        SubEngine.OwningInstance = View.Client;
         SubEngine.Load();
     }
 
-    /// <summary>Destroys the subengine.</summary>
+    /// <inheritdoc/>
     public override void Destroy()
     {
         SubEngine.MainView.GenerationHelper.Destroy();
     }
 
-    /// <summary>Ticks the element.</summary>
-    /// <param name="delta">Delta.</param>
+    /// <inheritdoc/>
     public override void Tick(double delta)
     {
         SubEngine.Delta = delta;
@@ -71,17 +69,10 @@ public class UI3DSubEngine : UIElement
         SubEngine.Tick();
     }
 
-    /// <summary>Renders the view on-screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">Delta time.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
-        int x = LastAbsolutePosition.X;
-        int y = LastAbsolutePosition.Y;
-        int w = LastAbsoluteSize.X;
-        int h = LastAbsoluteSize.Y;
         GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
-        view.Rendering.RenderRectangle(view.UIContext, x, y + h, x + w, y, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        View.Rendering.RenderRectangle(View.UIContext, X, Y + Height, X + Width, Y, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }

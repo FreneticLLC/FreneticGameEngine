@@ -18,6 +18,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
@@ -27,32 +28,39 @@ namespace FGEGraphics.UISystem;
 public class UILabel : UIElement
 {
     /// <summary>The text to display on this label.</summary>
-    public UIElementText Text;
+    public UIText Text;
 
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
-    /// <param name="style">The style of the label.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UILabel(string text, UIElementStyle style, UIPositionHelper pos) : base(pos)
+    /// <param name="styling">The style of the label.</param>
+    /// <param name="layout">The layout of the element.</param>
+    public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Style = AddStyle(style, true);
-        Text = new(this, text, true, Position.Width);
-        UpdateStyle();
-        Position.GetterWidthHeight(() => Text.Width, () => Text.Height);
+        Text = new UIText(this, text, true, Layout.Width);
+        Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
 
-    /// <summary>Renders this label on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
-        if (style.BaseColor.A > 0)
-        {
-            Renderer2D.SetColor(style.BaseColor);
-            view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
-            Renderer2D.SetColor(Color4F.White);
-        }
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+    }
+
+    /// <summary>Constructs a label with an icon attached at the side.</summary>
+    /// <param name="text">The text to display on the label.</param>
+    /// <param name="icon">The texture of the icon.</param>
+    /// <param name="spacing">The space between the label and icon.</param>
+    /// <param name="styling">The styling of the label.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="listAnchor">The anchor to use when positioning the label and the icon in a list.</param>
+    /// <returns>A tuple of the label, icon, and their list container.</returns>
+    public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    {
+        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UILabel label = new(text, styling, layout.AtOrigin());
+        UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
+        list.AddListItem(label);
+        list.AddListItem(image);
+        return (label, image, list);
     }
 }

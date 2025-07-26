@@ -26,6 +26,8 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+using Vector2i = FGECore.MathHelpers.Vector2i;
+
 namespace FGEGraphics.ClientSystem;
 
 /// <summary>A 2D UI view.</summary>
@@ -75,7 +77,7 @@ public class ViewUI2D
     public UIElement HeldElement;
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
-    public bool Debug;
+    public bool IsDebug;
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
@@ -99,18 +101,18 @@ public class ViewUI2D
         CurrentScreen = DefaultScreen;
     }
 
-    /// <summary>Draws information specific to <see cref="Debug"/> mode.</summary>
+    /// <summary>Draws information specific to <see cref="IsDebug"/> mode.</summary>
     public void DrawDebug()
     {
         List<string> debugInfo = [];
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
             Engine.Textures.White.Bind();
-            Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.HoverInternal ? Color4F.Yellow : Color4F.Red;
+            Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
             Renderer2D.SetColor(outlineColor);
-            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.LastAbsoluteRotation), true);
+            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
             Renderer2D.SetColor(Color4F.White);
-            if (element.ElementInternal.HoverInternal)
+            if (element.ElementInternal.IsMouseHovered)
             {
                 debugInfo.Add(element.GetDebugInfo().JoinString("\n"));
             }
@@ -163,15 +165,16 @@ public class ViewUI2D
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
-            if (element.IsValid)
-            {
-                element.UpdatePosition(Client.Delta, Vector3.Zero);
-                element.UpdateStyle();
-            }
+            element.UpdateStyle();
+            element.HandleTransforms();
+        }
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            element.UpdateTransforms(Client.Delta, Vector3.Zero);
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
-        CurrentScreen.RenderAll(this, Client.Delta);
-        if (Debug)
+        CurrentScreen.RenderAll(Client.Delta);
+        if (IsDebug)
         {
             DrawDebug();
         }

@@ -22,25 +22,22 @@ namespace FGEGraphics.UISystem;
 /// <para>To render <see cref="GraphicsHelpers.Textures.Texture"/> instances, use <see cref="UIImage"/>.</para>
 /// </summary>
 /// <param name="texture">The texture to display.</param>
-/// <param name="pos">The position of the element.</param>
-public class UINativeTexture(Func<uint> texture, UIPositionHelper pos) : UIElement(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(UIStyling.Empty, layout)
 {
     /// <summary>The texture to display.</summary>
     public Func<uint> Texture = texture;
 
     /// <summary>Whether the texture is flipped vertically.</summary>
-    // TODO: Put transforms on UIPositionHelper
+    // TODO: Put transforms on UILayout
     public bool Flip;
 
-    /// <summary>Renders the texture on a screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         GL.BindTexture(TextureTarget.Texture2D, Texture());
         float ymin = Flip ? Y + Height : Y;
         float ymax = Flip ? Y : Y + Height;
-        view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, Rotation));
     }
 }
