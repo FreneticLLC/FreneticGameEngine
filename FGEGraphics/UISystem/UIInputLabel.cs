@@ -44,11 +44,14 @@ public class UIInputLabel : UIElement
         SUBMIT
     }
 
-    // TODO: something better?  
+    /// <summary>Wraps a <see cref="UIInteractionStyles"/> instance with logic specific to input labels.</summary>
+    /// <param name="styles">The base interaction styles.</param>
     public struct Styles(UIInteractionStyles styles)
     {
-        public UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
+        /// <summary>The styling logic for an input label.</summary>
+        public readonly UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
 
+        /// <summary>Calls <see cref="UIStyling(System.Func{UIElement, UIStyle})"/>.</summary>
         public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
     }
 

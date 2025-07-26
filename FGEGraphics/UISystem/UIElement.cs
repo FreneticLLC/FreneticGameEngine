@@ -100,8 +100,10 @@ public abstract class UIElement
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
+    /// <summary>Fired when the user focuses this element.</summary>
     public Action OnFocus;
 
+    /// <summary>Fired when the user unfocuses this element.</summary>
     public Action OnUnfocus;
 
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>

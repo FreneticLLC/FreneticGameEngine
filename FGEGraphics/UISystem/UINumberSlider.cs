@@ -132,6 +132,14 @@ public class UINumberSlider : UIElement
         Button.Render(delta, style);
     }
 
+    /// <summary>Joins a number slider and a number input label into a single unit.</summary>
+    /// <param name="slider">The number slider.</param>
+    /// <param name="label">The number input label.</param>
+    /// <param name="spacing">The space between the slider and the label.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="listAnchor">The anchor to use when positioning the slider and the label in a list.</param>
+    /// <param name="trackLabelEdits">Whether to update the number slider when the label is momentarily edited.</param>
+    /// <returns>A list group containing both elements.</returns>
     public static UIListGroup WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
     {
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);

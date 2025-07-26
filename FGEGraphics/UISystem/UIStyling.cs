@@ -26,7 +26,7 @@ public struct UIStyling
     /// <summary>A dynamic style. If present, updates the relevant <see cref="UIElement.Style"/> every frame.</summary>
     public Func<UIElement, UIStyle> Dynamic;
 
-    // TODO: renames
+    /// <summary>Whether this style is equivalent to <see cref="Empty"/></summary>
     public readonly bool IsEmpty => Constant is null && Dynamic is null;
 
     /// <summary>Constructs styling logic using a constant style.</summary>

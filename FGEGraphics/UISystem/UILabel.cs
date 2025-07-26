@@ -46,6 +46,14 @@ public class UILabel : UIElement
         style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
     }
 
+    /// <summary>Constructs a label with an icon attached at the side.</summary>
+    /// <param name="text">The text to display on the label.</param>
+    /// <param name="icon">The texture of the icon.</param>
+    /// <param name="spacing">The space between the label and icon.</param>
+    /// <param name="styling">The styling of the label.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="listAnchor">The anchor to use when positioning the label and the icon in a list.</param>
+    /// <returns>A tuple of the label, icon, and their list container.</returns>
     public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);

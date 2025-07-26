@@ -74,15 +74,17 @@ public class UIDropdown : UIElement
         public Dictionary<UIElement, Func<string>> ToStrings = [];
     }
 
+    /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
     public InternalData Internal = new();
 
     /// <summary>Constructs a new UI dropdown.</summary>
-    /// <param name="text">The text to display when no choice is selected.</param>
     /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="Entries"/> entries.</param>
     /// <param name="listSpacing">The spacing betwene <see cref="Entries"/> entries.</param>
     /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
     /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
     /// <param name="layout">The layout of the element.</param>
+    /// <param name="text">The text to display when no choice is selected.</param>
+    /// <param name="layer">An optional layer to place the dropdown on. If <c>null</c>, uses this element's layer.</param>
     public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
         PlaceholderInfo = text ?? "null";

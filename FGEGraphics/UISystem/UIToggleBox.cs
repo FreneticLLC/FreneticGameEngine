@@ -54,6 +54,15 @@ public class UIToggleBox : UIBox
     /// <inheritdoc/>
     public override void Clicked() => Toggle();
 
+    /// <summary>Constructs a toggle box with a label attached at its side.</summary>
+    /// <param name="text">The text to display on the label.</param>
+    /// <param name="spacing">The space between the box and the icon.</param>
+    /// <param name="styling">The styling of the box.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="toggled">Whether the box is toggled on.</param>
+    /// <param name="labelStyling">The styling of the label.</param>
+    /// <param name="listAnchor">The anchor to use when positioning the box and the icon in a list.</param>
+    /// <returns>A tuple of the toggle box, label, and their list container.</returns>
     public static (UIToggleBox Box, UILabel Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = default, UIAnchor listAnchor = null)
     {
         UIToggleBox box = new(styling, layout.AtOrigin(), toggled);
