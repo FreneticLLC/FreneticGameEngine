@@ -55,6 +55,7 @@ public class UIScreen : UIElement
     /// <summary>Internal method to configure the position of the screen as fully covering the actual screen space. Called by the standard constructor.</summary>
     public void InternalConfigurePosition()
     {
+        Layout.SetAnchor(UIAnchor.TOP_LEFT);
         Layout.SetPosition(0, 0);
         Layout.SetWidth(() => Parent is null ? View.Engine.Window.ClientSize.X : Parent.Layout.Width);
         Layout.SetHeight(() => Parent is null ? View.Engine.Window.ClientSize.Y : Parent.Layout.Height);
