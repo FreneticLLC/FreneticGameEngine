@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.MathHelpers;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -145,7 +146,12 @@ public class UIDropdown : UIElement
     /// <param name="label">The string representation of the choice.</param>
     public void AddChoice(UIElement choice, Func<string> label)
     {
-        Choices.AddListItem(choice);
+        // TODO: configurable appearance
+        UIStyle containerStyle = Choices.Items.Count % 2 == 0 ? UIStyle.Empty : new UIStyle { BaseColor = new(0, 0, 0, 0.25f) };
+        UIBox container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
+        choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
+        container.AddChild(choice);
+        Choices.AddListItem(container);
         Internal.ToStrings[choice] = label;
         choice.OnClick += () => SelectChoice(choice);
     }
