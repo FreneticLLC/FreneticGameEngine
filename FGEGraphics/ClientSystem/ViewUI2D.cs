@@ -26,8 +26,6 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-using Vector2i = FGECore.MathHelpers.Vector2i;
-
 namespace FGEGraphics.ClientSystem;
 
 /// <summary>A 2D UI view.</summary>
