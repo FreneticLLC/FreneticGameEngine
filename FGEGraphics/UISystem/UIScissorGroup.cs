@@ -18,23 +18,23 @@ using OpenTK.Graphics.OpenGL4;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a container of elements that only renders children within its bounds.</summary>
-/// <param name="pos">The position of the element.</param>
-public class UIScissorGroup(UIPositionHelper pos) : UIGroup(pos)
+/// <param name="layout">The layout of the element.</param>
+public class UIScissorGroup(UILayout layout) : UIGroup(layout)
 {
     /// <inheritdoc/>
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];
 
     /// <inheritdoc/>
-    public override void RenderAll(ViewUI2D view, double delta)
+    public override void RenderAll(double delta)
     {
         // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
         if (Width <= 0 || Height <= 0)
         {
             return;
         }
-        view.Rendering.PushScissor(view.UIContext, X, Y, X + Width, Y + Height);
-        base.RenderAll(view, delta);
-        view.Rendering.PopScissor(view.UIContext);
+        View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
+        base.RenderAll(delta);
+        View.Rendering.PopScissor(View.UIContext);
     }
 
     /// <summary>Constrains child interactions to the scissor boundaries.</summary>

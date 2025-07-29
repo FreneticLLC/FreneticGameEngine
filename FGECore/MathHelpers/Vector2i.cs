@@ -84,11 +84,27 @@ public struct Vector2i(int x, int y) : IEquatable<Vector2i>
         return one.Equals(two);
     }
 
+    /// <summary>Identity operator.</summary>
+    /// <param name="vec">The vector.</param>
+    /// <returns>Result.</returns>
+    public static Vector2i operator +(Vector2i vec) => vec;
+
+    /// <summary>Negation operator.</summary>
+    /// <param name="vec">The vector.</param>
+    /// <returns>Result.</returns>
+    public static Vector2i operator -(Vector2i vec) => new(-vec.X, -vec.Y);
+
     /// <summary>Mathematical comparison.</summary>
     /// <param name="one">First vec.</param>
     /// <param name="two">Second vec.</param>
     /// <returns>Result.</returns>
     public static Vector2i operator +(Vector2i one, Vector2i two) => new(one.X + two.X, one.Y + two.Y);
+
+    /// <summary>Mathematical comparison.</summary>
+    /// <param name="one">First vec.</param>
+    /// <param name="two">Second vec.</param>
+    /// <returns>Result.</returns>
+    public static Vector2i operator -(Vector2i one, Vector2i two) => new(one.X - two.X, one.Y - two.Y);
 
     /// <summary>Mathematical comparison.</summary>
     /// <param name="one">First vec.</param>

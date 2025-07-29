@@ -31,7 +31,8 @@ namespace FGEGraphics.UISystem;
 /// <param name="info">Information about the box.</param>
 /// <param name="fonts">The font to use.</param>
 /// <param name="pos">The position of the element.</param>
-public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelper pos) : UIElement(pos.Height <= 0 ? pos.ConstantHeight((int)fonts.Height) : pos)
+// TODO: Remove
+public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) : UIElement(UIStyling.Empty, pos.Height <= 0 ? pos.SetHeight(fonts.Height) : pos)
 {
     /// <summary>The current text in this input box.</summary>
     public string Text = text;
@@ -77,16 +78,16 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
     public InternalData Internal;
 
     /// <summary>Selects this input box.</summary>
-    public override void MouseLeftDown()
+    public override void MousePressed()
     {
         Internal.MDown = true;
-        Selected = true;
+        IsFocused = true;
         // TODO: implement
         // /* KeyHandlerState khs = */KeyHandler.GetKBState();
-        int xs = LastAbsolutePosition.X;
+        int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
-            if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
+            if (xs + Fonts.MeasureFancyText(Text[..i]) > View.Client.MouseX)
             {
                 MinCursor = i;
                 MaxCursor = i;
@@ -109,13 +110,13 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
     }
 
     /// <summary>Deselects this input box.</summary>
-    public override void MouseLeftDownOutside()
+    public override void MousePressedOutside()
     {
-        Selected = false;
+        IsFocused = false;
     }
 
     /// <summary>Sets the new cursor position.</summary>
-    public override void MouseLeftUp()
+    public override void MouseReleased()
     {
         AdjustMax();
         Internal.MDown = false;
@@ -124,10 +125,10 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
     /// <summary>Adjusts the cursor position based on the mouse X coordinate.</summary>
     public void AdjustMax()
     {
-        int xs = LastAbsolutePosition.X;
+        int xs = Position.X;
         for (int i = 0; i < Text.Length; i++)
         {
-            if (xs + Fonts.MeasureFancyText(Text[..i]) > Window.MouseX)
+            if (xs + Fonts.MeasureFancyText(Text[..i]) > View.Client.MouseX)
             {
                 MinCursor = Math.Min(i, Internal.MStart);
                 MaxCursor = Math.Max(i, Internal.MStart);
@@ -145,14 +146,14 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
         {
             AdjustMax();
         }
-        if (Selected)
+        if (IsFocused)
         {
             if (MinCursor > MaxCursor)
             {
                 (MaxCursor, MinCursor) = (MinCursor, MaxCursor);
             }
             bool modified = false;
-            KeyHandlerState khs = Window.Keyboard.BuildingState;
+            KeyHandlerState khs = View.Client.Keyboard.BuildingState;
             if (khs.Escaped)
             {
                 TriedToEscape = true;
@@ -205,16 +206,13 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
         }
     }
 
-    /// <summary>Renders this input box on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         string typed = Text;
         int c = 0;
         int cmax = 0;
-        GameEngineBase engine = Engine;
+        GameEngineBase engine = View.Engine;
         if (!/*engine.CVars.u_colortyping.ValueB*/false) // TODO: Color Typing option!
         {
             for (int i = 0; i < typed.Length && i < MinCursor; i++)
@@ -233,20 +231,20 @@ public class UIInputBox(string text, string info, FontSet fonts, UIPositionHelpe
             }
             typed = typed.Replace("^", "^^n");
         }
-        int x = LastAbsolutePosition.X;
-        int y = LastAbsolutePosition.Y;
-        int w = LastAbsoluteSize.X;
+        int x = Position.X;
+        int y = Position.Y;
+        int w = Size.X;
         engine.Textures.White.Bind();
         Renderer2D.SetColor(Color);
-        view.Rendering.RenderRectangle(view.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+        View.Rendering.RenderRectangle(View.UIContext, x - 1, y - 1, x + w + 1, y + Fonts.Height + 1, new Vector3(-0.5f, -0.5f, Rotation));
         GL.Enable(EnableCap.ScissorTest);
         GL.Scissor(x, engine.Window.ClientSize.Y - (y + Fonts.Height), w, Fonts.Height);
-        if (Selected)
+        if (IsFocused)
         {
             float textw = Fonts.MeasureFancyText(typed[..(MinCursor + c)]);
             float textw2 = Fonts.MeasureFancyText(typed[..(MaxCursor + cmax)]);
             Renderer2D.SetColor(new Color4(0f, 0.2f, 1f, 0.5f));
-            view.Rendering.RenderRectangle(view.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, LastAbsoluteRotation));
+            View.Rendering.RenderRectangle(View.UIContext, x + textw, y, x + textw2 + 1, y + Fonts.Height, new Vector3(-0.5f, -0.5f, Rotation));
         }
         Renderer2D.SetColor(Color4.White);
         Fonts.DrawFancyText((typed.Length == 0 ? ("^)^i" + Info) : ("^0" + typed)), new Location(x, y, 0));

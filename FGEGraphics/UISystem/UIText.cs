@@ -19,17 +19,26 @@ using FGEGraphics.GraphicsHelpers.FontSets;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>A text object that automatically updates its renderable content based on a <see cref="UIElement"/>'s <see cref="UIElementStyle"/>s.</summary>
-public class UIElementText
+/// <summary>A text object that automatically updates its renderable content based on a <see cref="UIElement"/>'s <see cref="UIStyle"/>s.</summary>
+public class UIText
 {
     /// <summary>The state to display when a required text value is empty.</summary>
     public const string Null = "null";
 
-    /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
+    /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
+    public bool Empty => (Internal.Content?.Length ?? 0) == 0;
+
+    /// <summary>The UI style to use for rendering this text.</summary>
+    public UIStyle Style => Internal.Style ?? Internal.Element.Style;
+
+    /// <summary>Whether the text is required to display some content.</summary>
+    public bool Required;
+
+    /// <summary>Data internal to a <see cref="UIText"/> instance.</summary>
     public struct InternalData
     {
         /// <summary>The parent UI element.</summary>
-        public UIElement ParentElement;
+        public UIElement Element;
 
         /// <summary>The raw string content of this text.</summary>
         public string Content;
@@ -37,64 +46,51 @@ public class UIElementText
         /// <summary>The maximum total width of this text, if any.</summary>
         public int MaxWidth;
 
-        /// <summary>A renderable text object internal to this text.</summary>
-        public RenderableText InternalRenderable;
-
         /// <summary>An element style internal to this text.</summary>
-        public UIElementStyle InternalStyle;
+        public UIStyle Style;
+
+        /// <summary>A renderable text object internal to this text.</summary>
+        public RenderableText Renderable;
 
         /// <summary>A cache mapping a UI element's text styles to renderable text.</summary>
-        public Dictionary<UIElementStyle, RenderableText> RenderableContent;
+        public Dictionary<UIStyle, RenderableText> Renderables;
     }
 
-    /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
-    public bool Empty => (Internal.Content?.Length ?? 0) == 0;
-
-    /// <summary>The UI style to use for rendering this text.</summary>
-    public UIElementStyle CurrentStyle => Internal.InternalStyle ?? Internal.ParentElement.ElementInternal.CurrentStyle;
-
-    /// <summary>Whether the text is required to display some content.</summary>
-    public bool Required;
-
-    /// <summary>Data internal to a <see cref="UIElementText"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UIText"/> instance.</summary>
     public InternalData Internal;
 
-    /// <summary>Constructs a <see cref="UIElementText"/> instance.</summary>
-    /// <param name="parent">The parent UI element.</param>
+    /// <summary>Constructs a <see cref="UIText"/> instance.</summary>
+    /// <param name="element">The parent UI element.</param>
     /// <param name="content">The initial text content.</param>
     /// <param name="required">Whether the text is required to display, even if empty.</param>
     /// <param name="maxWidth">The maximum total width, if any.</param>
     /// <param name="style">An internal style to use instead of the parent element's.</param>
-    /// <returns>The UI text instance.</returns>
-    public UIElementText(UIElement parent, string content, bool required = false, int maxWidth = -1, UIElementStyle style = null)
+    public UIText(UIElement element, string content, bool required = false, int maxWidth = -1, UIStyle style = null /* TODO: UIStyling? */)
     {
         content ??= (required ? Null : null);
         if (style is not null && !style.CanRenderText())
         {
             throw new Exception("Internal text style must support text rendering");
         }
+        Required = required;
         Internal = new InternalData()
         {
-            ParentElement = parent,
+            Element = element,
             Content = content,
             MaxWidth = maxWidth,
-            InternalStyle = style,
-            InternalRenderable = null
+            Style = style,
+            Renderable = null
         };
-        Required = required;
-        if (!Empty)
-        {
-            RefreshRenderables();
-        }
-        parent.ElementInternal.Texts.Add(this);
+        UpdateRenderables();
+        element.ElementInternal.Texts.Add(this);
     }
 
     /// <summary>Creates a <see cref="RenderableText"/> of the text <see cref="Content"/> given a style.</summary>
     /// <param name="style">The UI style to use.</param>
     /// <returns>The resulting renderable object.</returns>
-    public RenderableText CreateRenderable(UIElementStyle style)
+    public RenderableText CreateRenderable(UIStyle style)
     {
-        string styled = style.TextStyling(Content);
+        string styled = style.TextStyling(Content); // FIXME: this doesn't play well with translatable text.
         RenderableText renderable = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
         if (Internal.MaxWidth > 0)
         {
@@ -104,23 +100,25 @@ public class UIElementText
     }
 
     /// <summary>Updates the renderable cache based on the registered styles.</summary>
-    public void RefreshRenderables()
+    public void UpdateRenderables()
     {
         if (Empty)
         {
+            Internal.Renderable = null;
+            Internal.Renderables = null;
             return;
         }
-        if (Internal.InternalStyle is UIElementStyle internalStyle)
+        if (Internal.Style is UIStyle internalStyle)
         {
-            Internal.InternalRenderable = CreateRenderable(internalStyle);
+            Internal.Renderable = CreateRenderable(internalStyle);
             return;
         }
-        Internal.RenderableContent = [];
-        foreach (UIElementStyle style in Internal.ParentElement.ElementInternal.Styles)
+        Internal.Renderables ??= [];
+        foreach (UIStyle style in Internal.Element.ElementInternal.Styles)
         {
             if (style.CanRenderText())
             {
-                Internal.RenderableContent[style] = CreateRenderable(style);
+                Internal.Renderables[style] = CreateRenderable(style);
             }
         }
     }
@@ -132,15 +130,7 @@ public class UIElementText
         set
         {
             Internal.Content = value ?? (Required ? Null : null);
-            if (Empty)
-            {
-                Internal.InternalRenderable = null;
-                Internal.RenderableContent = null;
-            }
-            else
-            {
-                RefreshRenderables();
-            }
+            UpdateRenderables();
         }
     }
 
@@ -151,27 +141,26 @@ public class UIElementText
         set
         {
             Internal.MaxWidth = value;
-            RefreshRenderables();
+            UpdateRenderables();
         }
     }
 
-    // TODO: make these not NPE when empty
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the current style.
-    /// If <see cref="UIElementStyle.CanRenderText(UIElementText)"/> returns false, this returns <see cref="RenderableText.Empty"/>.
+    /// If <see cref="UIStyle.CanRenderText(UIText)"/> returns <c>false</c>, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
     public RenderableText Renderable => !Empty 
-        ? Internal.InternalRenderable ?? Internal.RenderableContent?.GetValueOrDefault(Internal.ParentElement.ElementInternal.CurrentStyle, RenderableText.Empty) 
+        ? Internal.Renderable ?? Internal.Renderables?.GetValueOrDefault(Internal.Element.Style, RenderableText.Empty) 
         : RenderableText.Empty;
 
     /// <summary>The total width of the text.</summary>
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines?.Length * CurrentStyle.TextFont?.Height ?? 0;
+    public int Height => Renderable?.Lines?.Length * Style.TextFont?.Height ?? 0;
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
-    public static implicit operator RenderableText(UIElementText text) => text.Renderable;
+    public static implicit operator RenderableText(UIText text) => text.Renderable;
 
     /// <summary>An individual UI text chain piece.</summary>
     /// <param name="Font">The font to render the chain piece with.</param>
@@ -188,12 +177,12 @@ public class UIElementText
     /// <param name="maxWidth">The wrapping width of the chain.</param>
     /// <returns>The text chain.</returns>
     // TODO: Fix blank lines not being counted
-    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIElementText> chain, float maxWidth = -1)
+    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UIText> chain, float maxWidth = -1)
     {
         List<(FontSet Font, RenderableTextLine Line)> lines = [];
-        foreach (UIElementText text in chain)
+        foreach (UIText text in chain)
         {
-            if (!text.CurrentStyle.CanRenderText(text))
+            if (!text.Style.CanRenderText(text))
             {
                 continue;
             }
@@ -210,7 +199,7 @@ public class UIElementText
             }
             foreach (RenderableTextLine line in textLines)
             {
-                lines.Add((text.CurrentStyle.TextFont, line));
+                lines.Add((text.Style.TextFont, line));
             }
         }
         float y = 0;
@@ -224,7 +213,7 @@ public class UIElementText
     }
 
     /// <summary>Renders a text chain.</summary>
-    /// <seealso cref="IterateChain(IEnumerable{UIElementText}, float)"/>
+    /// <seealso cref="IterateChain(IEnumerable{UIText}, float)"/>
     /// <param name="chain">The UI text objects.</param>
     /// <param name="x">The starting x position.</param>
     /// <param name="y">The starting y position.</param>

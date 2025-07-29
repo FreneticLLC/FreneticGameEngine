@@ -23,17 +23,11 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement
 {
-    /// <summary>
-    /// A reference to the relevant client window backing this screen, needed as this may be the root element.
-    /// Normally get this using <see cref="Window"/>.
-    /// </summary>
-    public GameClientWindow InternalClient;
+    /// <summary>The UI view backing this screen. See <see cref="View"/>.</summary>
+    public ViewUI2D InternalView;
 
     /// <inheritdoc/>
-    public override GameEngineBase Engine => InternalClient.CurrentEngine;
-
-    /// <inheritdoc/>
-    public override GameClientWindow Window => InternalClient;
+    public override ViewUI2D View => InternalView;
 
     /// <summary>
     /// Whether to erase the screen at the beginning of each render call.
@@ -41,36 +35,34 @@ public class UIScreen : UIElement
     /// </summary>
     protected bool ResetOnRender = false;
 
-    /// <summary>Constructs a screen that covers the entire game window.</summary>
-    /// <param name="view">The client UI View.</param>
-    public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view).Anchor(UIAnchor.TOP_LEFT))
+    /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
+    /// <param name="view">The client UI view.</param>
+    /// <param name="layout">The layout of the element.</param>
+    public UIScreen(ViewUI2D view, UILayout layout) : base(UIStyling.Empty, layout)
     {
-        InternalConfigurePosition();
+        InternalView = view;
+        IsEnabled = false;
+        IsValid = true;
     }
 
-    /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
-    /// <param name="client">The client game window.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIScreen(GameClientWindow client, UIPositionHelper pos) : base(pos)
+    /// <summary>Constructs a screen that covers the entire game window.</summary>
+    /// <param name="view">The client UI view.</param>
+    public UIScreen(ViewUI2D view) : this(view, new UILayout())
     {
-        Enabled = false;
-        InternalClient = client;
-        IsValid = true;
+        InternalConfigurePosition();
     }
 
     /// <summary>Internal method to configure the position of the screen as fully covering the actual screen space. Called by the standard constructor.</summary>
     public void InternalConfigurePosition()
     {
-        Position.ConstantXY(0, 0);
-        Position.GetterWidth(() => Parent is null ? Engine.Window.ClientSize.X : Parent.Position.Width);
-        Position.GetterHeight(() => Parent is null ? Engine.Window.ClientSize.Y : Parent.Position.Height);
+        Layout.SetAnchor(UIAnchor.TOP_LEFT);
+        Layout.SetPosition(0, 0);
+        Layout.SetWidth(() => Parent is null ? View.Engine.Window.ClientSize.X : Parent.Layout.Width);
+        Layout.SetHeight(() => Parent is null ? View.Engine.Window.ClientSize.Y : Parent.Layout.Height);
     }
 
-    /// <summary>Performs a render on this element.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
     {
         if (ResetOnRender)
         {

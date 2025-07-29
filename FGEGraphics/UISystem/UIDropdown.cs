@@ -6,6 +6,8 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.MathHelpers;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,93 +23,162 @@ namespace FGEGraphics.UISystem;
 // TODO: Arrow key + ENTER navigation
 // TODO: Scroll if exceed max width
 // TODO: Dropdown icon next to placeholder info?
+// TODO: Different style for placeholder info
+// TODO: Add choice at index, remove choice
 public class UIDropdown : UIElement
 {
-    /// <summary>A mapping of <see cref="ListGroup"/> clickables to their string values.</summary>
-    public Dictionary<UIClickableElement, string> Choices = [];
-
     /// <summary>The text to display when no choice is selected.</summary>
     public string PlaceholderInfo;
 
     /// <summary>The button to open the dropdown.</summary>
-    public UIButton Button;
+    public UIBox Button;
 
-    /// <summary>The dropdown list of choices.</summary>
-    public UIListGroup ListGroup;
-
-    /// <summary>The box container surrounding the <see cref="ListGroup"/>.</summary>
+    /// <summary>The box container surrounding the <see cref="Entries"/>.</summary>
     public UIBox Box;
 
-    /// <summary>The currently selected entry in the <see cref="ListGroup"/>.</summary>
-    public UIClickableElement SelectedElement;
+    /// <summary>The dropdown list of choice entries.</summary>
+    public UIListGroup Entries;
 
-    /// <summary>The currently selected dropdown value.</summary>
-    public string SelectedValue;
+    /// <summary>The list of selectable choices in the dropdown.</summary>
+    public List<UIElement> Choices = [];
+
+    /// <summary>The currently selected entry in the <see cref="Entries"/>.</summary>
+    public UIElement SelectedChoice; // TODO: selection group
 
     /// <summary>Fired when a choice is selected.</summary>
-    public Action<string> ChoiceSelected;
+    public Action<UIElement> OnChoiceSelect;
+
+    /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
+    public struct InternalData()
+    {
+        /// <summary>Represents dropdown logic to perform next tick.</summary>
+        public enum DropdownPhase
+        {
+            /// <summary>Doing nothing.</summary>
+            IDLE,
+
+            /// <summary>Opening the dropdown list.</summary>
+            OPENING,
+
+            /// <summary>Closing the dropdown list.</summary>
+            CLOSING
+        }
+
+        /// <summary>The logic to perform next tick.</summary>
+        public DropdownPhase Phase;
+
+        /// <summary>The layer to place the list container on, if any.</summary>
+        public UIElement Layer;
+
+        /// <summary>Maps choices to their string representations.</summary>
+        public Dictionary<UIElement, Func<string>> ToStrings = [];
+    }
+
+    /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
+    public InternalData Internal = new();
 
     /// <summary>Constructs a new UI dropdown.</summary>
+    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="Entries"/> entries.</param>
+    /// <param name="listSpacing">The spacing betwene <see cref="Entries"/> entries.</param>
+    /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
+    /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
+    /// <param name="layout">The layout of the element.</param>
     /// <param name="text">The text to display when no choice is selected.</param>
-    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="ListGroup"/> entries.</param>
-    /// <param name="listSpacing">The spacing betwene <see cref="ListGroup"/> entries.</param>
-    /// <param name="buttonStyles">The <see cref="Button"/> element styles.</param>
-    /// <param name="boxStyle">The <see cref="Box"/> element styles.</param>
-    /// <param name="pos">The position of the element.</param>
-    public UIDropdown(string text, int boxPadding, int listSpacing, UIClickableElement.StyleGroup buttonStyles, UIElementStyle boxStyle, UIPositionHelper pos) : base(pos)
+    /// <param name="layer">An optional layer to place the dropdown on. If <c>null</c>, uses this element's layer.</param>
+    public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
-        PlaceholderInfo = text;
-        AddChild(Button = new UIButton(text, HandleOpen, buttonStyles, pos.AtOrigin()));
-        Box = new UIBox(boxStyle, pos.AtOrigin());
-        Box.AddChild(ListGroup = new(listSpacing, new UIPositionHelper(pos.View).Anchor(UIAnchor.TOP_CENTER).ConstantXY(0, boxPadding)));
-        Box.Position.GetterHeight(() => ListGroup.Position.Height + boxPadding * 2);
+        PlaceholderInfo = text ?? "null";
+        AddChild(Button = new UIBox(buttonStyling, layout.AtOrigin(), text) { OnClick = Open });
+        Box = new UIBox(boxStyling, layout.AtOrigin());
+        Box.AddChild(Entries = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
+        Internal.Layer = layer;
+        if (layer is not null)
+        {
+            Box.Layout.SetPosition(() => X - Internal.Layer.X, () => Y - Internal.Layer.Y);
+        }
+        // TODO
+        //Box.OnUnfocus += Close;
     }
 
     /// <summary>Opens the dropdown list.</summary>
-    public void HandleOpen()
+    public void Open()
     {
-        RemoveChild(Button);
-        AddChild(Box);
+        Internal.Phase = InternalData.DropdownPhase.OPENING;
     }
 
-    /// <summary>Selects one of the choices and closes the dropdown list.</summary>
-    /// <param name="element">The selected choice.</param>
-    public void HandleSelect(UIClickableElement element)
+    /// <summary>Closes the dropdown list.</summary>
+    public void Close()
     {
-        SelectedElement = element;
-        SelectedValue = Choices[element];
-        RemoveChild(Box);
-        AddChild(Button);
-        Button.Text.Content = SelectedValue;
-        ChoiceSelected?.Invoke(SelectedValue);
+        Internal.Phase = InternalData.DropdownPhase.CLOSING;
+    }
+
+    /// <summary>Selects a dropdown choice, closing the container if necessary.</summary>
+    /// <param name="choice">The choice to select.</param>
+    public void SelectChoice(UIElement choice)
+    {
+        SelectedChoice = choice;
+        Internal.Phase = (Internal.Layer ?? this).HasChild(Box) ? InternalData.DropdownPhase.CLOSING : InternalData.DropdownPhase.IDLE;
+        Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
+        if (choice is not null)
+        {
+            OnChoiceSelect?.Invoke(choice);
+        }
     }
 
     /// <summary>Reverts the dropdown to its pre-chosen state.</summary>
     public void DeselectChoice()
     {
-        Button.Text.Content = PlaceholderInfo;
-        SelectedElement = null;
-        SelectedValue = null;
+        SelectChoice(null);
+    }
+
+    /// <inheritdoc/>
+    public override void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
+    {
+        base.TickInteraction(mouseX, mouseY, scrollDelta);
+        if (Internal.Phase == InternalData.DropdownPhase.OPENING)
+        {
+            RemoveChild(Button);
+            (Internal.Layer ?? this).AddChild(Box);
+            Box.Focus();
+        }
+        else if (Internal.Phase == InternalData.DropdownPhase.CLOSING)
+        {
+            (Internal.Layer ?? this).RemoveChild(Box);
+            AddChild(Button);
+            Button.Focus();
+        }
+        if (Internal.Phase != InternalData.DropdownPhase.IDLE)
+        {
+            Internal.Phase = InternalData.DropdownPhase.IDLE;
+        }
     }
 
     /// <summary>Adds a choice to the dropdown.</summary>
-    /// <param name="choice">The choice text.</param>
-    /// <param name="element">The clickable choice element.</param>
-    public void AddChoice(string choice, UIClickableElement element)
+    /// <param name="choice">The choice element.</param>
+    /// <param name="label">The string representation of the choice.</param>
+    public void AddChoice(UIElement choice, Func<string> label)
     {
-        ListGroup.AddListItem(element);
-        Choices[element] = choice;
-        element.OnClick += () => HandleSelect(element);
+        // TODO: configurable appearance
+        UIStyle containerStyle = Entries.Items.Count % 2 == 0 ? UIStyle.Empty : new UIStyle { BaseColor = new(0, 0, 0, 0.25f) };
+        UIBox container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
+        choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
+        container.AddChild(choice);
+        Entries.AddListItem(container);
+        Choices.Add(choice);
+        Internal.ToStrings[choice] = label;
+        choice.OnClick += () => SelectChoice(choice);
     }
 
-    /// <summary>Adds a <see cref="UITextLink"/> as a choice to the dropdown.</summary>
+    /// <summary>Adds a <see cref="UILabel"/> as a choice to the dropdown.</summary>
     /// <param name="choice">The choice text.</param>
-    /// <param name="linkStyles">The link styles.</param>
-    /// <returns>The added text link.</returns>
-    public UITextLink AddTextLinkChoice(string choice, UIClickableElement.StyleGroup linkStyles)
+    /// <param name="styling">The label styles.</param>
+    /// <param name="tag">An optional value attached to the resulting label.</param>
+    /// <returns>The created label.</returns>
+    public UILabel AddLabelChoice(string choice, UIStyling styling, object tag = null)
     {
-        UITextLink link = new(choice, null, null, linkStyles, new UIPositionHelper(Position.View));
-        AddChoice(choice, link);
-        return link;
+        UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
+        AddChoice(label, () => label.Text.Content);
+        return label;
     }
 }

@@ -22,43 +22,46 @@ using OpenTK.Mathematics;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple box on the screen.</summary>
-/// <remarks>Constructs a simple colored box.</remarks>
-/// <param name="style">The style of the element.</param>
-/// <param name="pos">The position of the element.</param>
-public class UIBox(UIElementStyle style, UIPositionHelper pos) : UIElement(pos)
+public class UIBox : UIElement
 {
-    /// <summary>The style of the box.</summary>
-    public override UIElementStyle Style { get; set; } = style;
-    
-    // TODO: put this on UIPositionHelper or something
+    // TODO: move to UILayout
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
 
-    /// <summary>Renders this box on the screen.</summary>
-    /// <param name="view">The UI view.</param>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="style">The current element style.</param>
-    public override void Render(ViewUI2D view, double delta, UIElementStyle style)
+    /// <summary>The text to display inside this box.</summary>
+    public UIText Text;
+
+    /// <summary>Constructs a <see cref="UIBox"/>.</summary>
+    /// <param name="styling">The styling of the element.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="text">Text to display inside the box.</param>
+    public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
     {
-        Vector3 rotation = new(-0.5f, -0.5f, LastAbsoluteRotation);
+        Text = new(this, text);
+    }
+
+    /// <inheritdoc/>
+    public override void Render(double delta, UIStyle style)
+    {
+        Vector3 rotation = new(-0.5f, -0.5f, Rotation);
         bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
         if (any)
         {
-            Engine.Textures.White.Bind();
+            View.Engine.Textures.White.Bind();
             if (style.DropShadowLength > 0)
             {
                 Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
-                view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
             }
             if (style.BorderColor.A > 0 && style.BorderThickness > 0)
             {
                 Renderer2D.SetColor(style.BorderColor);
-                view.Rendering.RenderRectangle(view.UIContext, X, Y, X + Width, Y + Height, rotation);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, rotation);
             }
             if (style.BaseColor.A > 0)
             {
                 Renderer2D.SetColor(style.BaseColor);
-                view.Rendering.RenderRectangle(view.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
+                View.Rendering.RenderRectangle(View.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
             }
             Renderer2D.SetColor(Color4F.White);
         }
@@ -67,7 +70,11 @@ public class UIBox(UIElementStyle style, UIPositionHelper pos) : UIElement(pos)
             style.BaseTexture.Bind();
             float ymin = Flip ? Y + Height : Y;
             float ymax = Flip ? Y : Y + Height;
-            view.Rendering.RenderRectangle(view.UIContext, X, ymin, X + Width, ymax, rotation);
+            View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
+        }
+        if (style.CanRenderText(Text))
+        {
+            style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));
         }
     }
 }
