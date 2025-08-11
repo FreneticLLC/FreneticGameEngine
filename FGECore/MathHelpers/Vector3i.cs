@@ -235,4 +235,10 @@ public struct Vector3i : IEquatable<Vector3i>
     {
         return new System.Numerics.Vector3(X, Y, Z);
     }
+
+    /// <summary>Implicit cast from <see cref="Vector3i"/> to <see cref="Location"/>.</summary>
+    public static implicit operator Location(Vector3i vec)
+    {
+        return new Location(vec.X, vec.Y, vec.Z);
+    }
 }
