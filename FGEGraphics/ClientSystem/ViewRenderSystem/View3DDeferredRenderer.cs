@@ -49,8 +49,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             {
                 if (light is SkyLight || State.CameraFrustum is null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
-                    if (light is SkyLight || light.EyePos.DistanceSquared(campos) <
-                        Config.LightsMaxDistance * Config.LightsMaxDistance + light.MaxDistance * light.MaxDistance * 6)
+                    if (light is SkyLight || light.EyePos.DistanceSquared(campos) < Config.LightsMaxDistance * Config.LightsMaxDistance + light.MaxDistance * light.MaxDistance * 6)
                     {
                         State.LightCount++;
                         if (light is PointLight pl && !pl.CastShadows)
@@ -115,7 +114,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 State.TranspShadows = subLight.TransparentShadows;
                                 subLight.SetProj(View);
                                 Shaders.Deferred.ShadowPass_Basic = Shaders.Deferred.ShadowPass_Basic.Bind();
-                                View.SetMatrix(2, Matrix4d.Identity);
+                                View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
                                 GraphicsUtil.CheckError("Pre-Prerender3 - Shadows");
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
@@ -129,16 +128,16 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                     if (redraw || subLight.NeedsUpdate)
                                     {
                                         subLight.NeedsUpdate = false;
-                                        View.BindFramebuffer(FramebufferTarget.Framebuffer, sky.FBO);
+                                        View.BindFramebuffer(FramebufferTarget.DrawFramebuffer, sky.FBO);
                                         View.DrawBuffer(DrawBufferMode.ColorAttachment0);
                                         GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                         GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                         State.FBOid = FBOID.STATIC_SHADOWS;
                                         GraphicsUtil.CheckError("Prerender - Shadows");
                                         Config.Render3D(View);
-                                        View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                                        View.BindFramebuffer(FramebufferTarget.DrawFramebuffer, 0);
                                     }
-                                    View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Shadow[lTID]);
+                                    View.BindFramebuffer(FramebufferTarget.DrawFramebuffer, Internal.FBO_Shadow[lTID]);
                                     GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, sky.FBO);
                                     GL.BlitFramebuffer(0, 0, sky.TexWidth, sky.TexWidth, ltX, ltY, widX, widY, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
                                     GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
@@ -151,13 +150,13 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 }
                                 else if (!subLight.CastShadows)
                                 {
-                                    View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Shadow[lTID]);
+                                    View.BindFramebuffer(FramebufferTarget.DrawFramebuffer, Internal.FBO_Shadow[lTID]);
                                     GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                     GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                 }
                                 else
                                 {
-                                    View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Shadow[lTID]);
+                                    View.BindFramebuffer(FramebufferTarget.DrawFramebuffer, Internal.FBO_Shadow[lTID]);
                                     GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                     GL.ClearBuffer(ClearBuffer.Color, 0, View3DInternalData.ARR_FLOAT_1F_1);
                                     State.FBOid = FBOID.SHADOWS;
