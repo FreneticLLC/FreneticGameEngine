@@ -47,7 +47,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             int ssp = sp / 2;
             foreach (LightObject light in Config.Lights)
             {
-                if (light is SkyLight || State.CameraFrustum == null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
+                if (light is SkyLight || State.CameraFrustum is null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
                     if (light is SkyLight || light.EyePos.DistanceSquared(campos) <
                         Config.LightsMaxDistance * Config.LightsMaxDistance + light.MaxDistance * light.MaxDistance * 6)
@@ -82,7 +82,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 int widY = sp;
                                 int ltX = 0;
                                 int ltY = 0;
-                                if (n >= 10)
+                                if (n >= 10) // TODO: This looks like a never-finished rewrite from ancient times? idek. Some form of shadowtex chunking system.
                                 {
                                     lTID = (n - 10) / 4;
                                     int ltCO = (n - 10) % 4;
@@ -102,7 +102,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 Config.CameraPos = subLight.EyePosition.ToLocation() - campos;
                                 Patches.ShadowLightPatch?.Invoke(light, subLight);
                                 Shaders.Deferred.ShadowPass_Particles = Shaders.Deferred.ShadowPass_Particles.Bind();
-                                View.SetMatrix(2, Matrix4d.Identity);
+                                View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
                                 ShaderLocations.Common.CAMERA_POSITION.Set(State.CameraRelativePosition);

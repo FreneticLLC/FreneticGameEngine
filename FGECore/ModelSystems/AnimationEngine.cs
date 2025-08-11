@@ -28,6 +28,7 @@ public class AnimationEngine
     public AnimationEngine()
     {
         Animations = [];
+        // TODO: These should not be defined here.
         string[] HBones = [ "neck02", "neck03", "head", "jaw", "levator02.l", "levator02.r", "special01", "special03", "special06.l", "special06.r",
                                          "temporalis01.l", "temporalis01.r", "temporalis02.l", "temporalis02.r", "special04", "oris02", "oris01", "oris06.l",
                                          "oris07.l", "oris06.r", "oris07.r", "tongue00", "tongue01", "tongue02", "tongue03", "tongue04", "tongue07.l", "tongue07.r",
