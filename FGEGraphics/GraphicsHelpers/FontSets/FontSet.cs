@@ -870,78 +870,22 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
 
     /// <summary>Splits some text at a maximum render width.</summary>
     /// <param name="text">The original (un-split) text.</param>
-    /// <param name="maxX">The maximum width.</param>
+    /// <param name="maxWidth">The maximum width.</param>
     /// <returns>The split text.</returns>
-    public static RenderableText SplitAppropriately(RenderableText text, int maxX)
+    public static RenderableText SplitAppropriately(RenderableText text, int maxWidth)
     {
-        if (text.Width < maxX)
+        List<RenderableTextLine> lines = [];
+        int totalWidth = 0;
+        foreach (RenderableTextLine line in text.Lines)
         {
-            return text;
-        }
-        List<RenderableTextLine> outLines = new(text.Lines.Length * 2);
-        foreach (RenderableTextLine fullLine in text.Lines)
-        {
-            RenderableTextLine line = fullLine;
-            while (true)
+            RenderableText splitLine = SplitLineAppropriately(line, maxWidth, out _);
+            lines.AddRange(splitLine.Lines);
+            if (splitLine.Width > totalWidth)
             {
-                if (line.Width <= maxX)
-                {
-                    outLines.Add(line);
-                    break;
-                }
-                float x = 0;
-                for (int i = 0; i < line.Parts.Length; i++)
-                {
-                    float priorX = x;
-                    x += line.Parts[i].Width;
-                    if (x >= maxX)
-                    {
-                        RenderableTextPart part = line.Parts[i];
-                        int target = 0;
-                        for (int j = part.Text.Length - 1; j >= 0; j--)
-                        {
-                            if (part.Font.MeasureString(part.Text[..j]) + priorX <= maxX)
-                            {
-                                target = j;
-                                break;
-                            }
-                        }
-                        int lastSpace = part.Text.LastIndexOf(' ', target);
-                        if (lastSpace == -1)
-                        {
-                            if (i > 0)
-                            {
-                                lastSpace = 0;
-                            }
-                            else
-                            {
-                                lastSpace = target;
-                            }
-                        }
-                        RenderableTextPart[] newFirstParts = line.Parts[..i];
-                        string firstLine = part.Text[..lastSpace];
-                        if (firstLine.Length > 0)
-                        {
-                            RenderableTextPart newFirstPart = part.Clone();
-                            newFirstPart.Text = firstLine;
-                            newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
-                            newFirstParts = [.. newFirstParts, newFirstPart];
-                        }
-                        RenderableTextLine newFirstLine = new() { Parts = newFirstParts, Width = newFirstParts.Length == 0 ? 0 : (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
-                        outLines.Add(newFirstLine);
-                        string nextLine = part.Text[lastSpace..];
-                        RenderableTextPart newNextPart = part.Clone();
-                        newNextPart.Text = nextLine;
-                        newNextPart.Width = newNextPart.Font.MeasureString(newNextPart.Text);
-                        RenderableTextPart[] newNextParts = new RenderableTextPart[line.Parts.Length - i];
-                        newNextParts[0] = newNextPart;
-                        Array.Copy(line.Parts, i + 1, newNextParts, 1, newNextParts.Length - 1);
-                        line = new RenderableTextLine() { Parts = newNextParts, Width = (int)Math.Ceiling(newNextParts.Max(p => p.Width)) };
-                    }
-                }
+                totalWidth = splitLine.Width;
             }
         }
-        return new RenderableText() { Lines = [.. outLines], Width = outLines.Max(l => l.Width) };
+        return new RenderableText() { Lines = lines.ToArray(), Width = totalWidth };
     }
 
     /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>
