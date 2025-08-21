@@ -927,7 +927,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                             newFirstPart.Width = newFirstPart.Font.MeasureString(newFirstPart.Text);
                             newFirstParts = [.. newFirstParts, newFirstPart];
                         }
-                        RenderableTextLine newFirstLine = new() { Parts = newFirstParts, Width = (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
+                        RenderableTextLine newFirstLine = new() { Parts = newFirstParts, Width = newFirstParts.Length == 0 ? 0 : (int)Math.Ceiling(newFirstParts.Max(p => p.Width)) };
                         outLines.Add(newFirstLine);
                         string nextLine = part.Text[lastSpace..];
                         RenderableTextPart newNextPart = part.Clone();
