@@ -133,6 +133,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="element">The element to select.</param>
     public void SelectElement(UIElement element)
     {
+        if (SelectedElements.Contains(element))
+        {
+            return;
+        }
         element.IsPressed = true;
         element.IsStateLocked = true;
         SelectedElements.Add(element);
@@ -148,6 +152,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="element">The element to deselect.</param>
     public void DeselectElement(UIElement element)
     {
+        if (!SelectedElements.Contains(element))
+        {
+            return;
+        }
         SelectedElements.Remove(element);
         element.IsHovered = false;
         element.IsPressed = false;
@@ -164,6 +172,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="addChild">Whether to add the element as a child.</param>
     public void AddElement(UIElement element, bool selected = false, bool addChild = true)
     {
+        if (Elements.Contains(element))
+        {
+            return;
+        }
         if (selected)
         {
             SelectElement(element);
