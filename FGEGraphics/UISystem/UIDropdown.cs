@@ -117,6 +117,10 @@ public class UIDropdown : UIElement
     /// <param name="choice">The choice to select.</param>
     public void SelectChoice(UIElement choice)
     {
+        if (SelectedChoice == choice)
+        {
+            return;
+        }
         SelectedChoice = choice;
         Internal.Phase = (Internal.Layer ?? this).HasChild(Box) ? InternalData.DropdownPhase.CLOSING : InternalData.DropdownPhase.IDLE;
         Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
