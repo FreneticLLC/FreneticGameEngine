@@ -541,20 +541,25 @@ public abstract class UIElement
     }
 
     /// <summary>Fires relevant events if this element's transforms have changed.</summary>
-    public void HandleTransforms()
+    public bool HandleTransforms()
     {
+        bool anyFired = false;
         if (ElementInternal.LastPosition != Position)
         {
             OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+            anyFired |= true;
         }
         if (ElementInternal.LastSize != Size)
         {
             OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+            anyFired |= true;
         }
         if (ElementInternal.LastRotation != Rotation)
         {
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+            anyFired |= true;
         }
+        return anyFired;
     }
 
     /// <summary>Renders this element.</summary>
