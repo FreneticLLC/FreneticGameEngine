@@ -34,6 +34,6 @@ public class UIImage(Texture image, UILayout layout) : UIElement(UIStyling.Empty
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        View.Rendering.RenderFittedTextureRectangle(View.UIContext, Image, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
+        View.Rendering.RenderFittedTextureRectangle(View.UIContext, Image ?? View.Engine.Textures.White, X, Y, X + Width, Y + Height, Fit, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }
