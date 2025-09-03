@@ -231,7 +231,7 @@ public abstract class UIElement
         {
             if (!ElementInternal.Children.Remove(element))
             {
-                throw new Exception($"UIElement: Failed to remove a child element {element}!");
+                Logs.Error($"UIElement: Failed to remove a child element '{element}' from '{this}'!");
             }
         }
         ElementInternal.ToAdd.Clear();
