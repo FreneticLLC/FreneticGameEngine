@@ -193,6 +193,10 @@ public abstract class UIElement
     /// <param name="child">The child to be removed.</param>
     public virtual void RemoveChild(UIElement child)
     {
+        if (!child.IsValid)
+        {
+            return;
+        }
         if (ElementInternal.Children.Contains(child))
         {
             ElementInternal.ToRemove.Add(child);
