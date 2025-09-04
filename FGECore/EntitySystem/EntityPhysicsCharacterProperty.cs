@@ -179,6 +179,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         {
             return;
         }
+        Characters.RemoveCharacterByBodyHandle(Physics.SpawnedBody.Handle);
         Entity.OnTick -= Tick;
         IsSpawned = false;
     }
