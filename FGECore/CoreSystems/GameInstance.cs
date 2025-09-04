@@ -118,18 +118,19 @@ public abstract class GameInstance
             string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None);
             return $"{documents}/My Games/{simplePathAppend}";
         }
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.None);
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            string library = $"{Path.GetFullPath("~")}/Library/Application Support"; // Seems to be the Mac standard folder for it?
+            string library = $"{home}/Library/Application Support"; // Seems to be the Mac standard folder for it?
             return $"{library}/{simplePathAppend}";
         }
-        string localShare = $"{Path.GetFullPath("~")}/.local/share"; // Gnome (eg Ubuntu) prefers this weird folder
+        string localShare = $"{home}/.local/share"; // Gnome (eg Ubuntu) prefers this weird folder
         if (Directory.Exists(localShare))
         {
             return $"{localShare}/{simplePathAppend}";
         }
         // Screw it, sane default: sub folder within the user dir
-        return $"{Path.GetFullPath("~")}/{simplePathAppend}";
+        return $"{home}/{simplePathAppend}";
     }
 
     /// <summary>Construct and prebuild the game instance.</summary>
