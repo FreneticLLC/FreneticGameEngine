@@ -51,22 +51,6 @@ public class UIDropdown : UIElement
     /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>Represents dropdown logic to perform next tick.</summary>
-        public enum DropdownPhase
-        {
-            /// <summary>Doing nothing.</summary>
-            IDLE,
-
-            /// <summary>Opening the dropdown list.</summary>
-            OPENING,
-
-            /// <summary>Closing the dropdown list.</summary>
-            CLOSING
-        }
-
-        /// <summary>The logic to perform next tick.</summary>
-        public DropdownPhase Phase;
-
         /// <summary>The layer to place the list container on, if any.</summary>
         public UIElement Layer;
 
@@ -92,7 +76,7 @@ public class UIDropdown : UIElement
         Box = new UIBox(boxStyling, layout.AtOrigin());
         Box.AddChild(Entries = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
-        Internal.Layer = layer;
+        Internal.Layer = layer ?? this;
         if (layer is not null)
         {
             Box.Layout.SetPosition(() => X - Internal.Layer.X, () => Y - Internal.Layer.Y);
@@ -104,13 +88,17 @@ public class UIDropdown : UIElement
     /// <summary>Opens the dropdown list.</summary>
     public void Open()
     {
-        Internal.Phase = InternalData.DropdownPhase.OPENING;
+        RemoveChild(Button);
+        Internal.Layer.AddChild(Box);
+        Box.Focus();
     }
 
     /// <summary>Closes the dropdown list.</summary>
     public void Close()
     {
-        Internal.Phase = InternalData.DropdownPhase.CLOSING;
+        Internal.Layer.RemoveChild(Box);
+        AddChild(Button);
+        Button.Focus();
     }
 
     /// <summary>Selects a dropdown choice, closing the container if necessary.</summary>
@@ -122,7 +110,10 @@ public class UIDropdown : UIElement
             return;
         }
         SelectedChoice = choice;
-        Internal.Phase = (Internal.Layer ?? this).HasChild(Box) ? InternalData.DropdownPhase.CLOSING : InternalData.DropdownPhase.IDLE;
+        if (Internal.Layer.HasChild(Box))
+        {
+            Close();
+        }
         Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
         if (choice is not null)
         {
@@ -134,28 +125,6 @@ public class UIDropdown : UIElement
     public void DeselectChoice()
     {
         SelectChoice(null);
-    }
-
-    /// <inheritdoc/>
-    public override void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
-    {
-        base.TickInteraction(mouseX, mouseY, scrollDelta);
-        if (Internal.Phase == InternalData.DropdownPhase.OPENING)
-        {
-            RemoveChild(Button);
-            (Internal.Layer ?? this).AddChild(Box);
-            Box.Focus();
-        }
-        else if (Internal.Phase == InternalData.DropdownPhase.CLOSING)
-        {
-            (Internal.Layer ?? this).RemoveChild(Box);
-            AddChild(Button);
-            Button.Focus();
-        }
-        if (Internal.Phase != InternalData.DropdownPhase.IDLE)
-        {
-            Internal.Phase = InternalData.DropdownPhase.IDLE;
-        }
     }
 
     /// <summary>Adds a choice to the dropdown.</summary>
