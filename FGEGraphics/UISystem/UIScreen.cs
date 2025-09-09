@@ -23,12 +23,6 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement
 {
-    /// <summary>The UI view backing this screen. See <see cref="View"/>.</summary>
-    public ViewUI2D InternalView;
-
-    /// <inheritdoc/>
-    public override ViewUI2D View => InternalView;
-
     /// <summary>
     /// Whether to erase the screen at the beginning of each render call.
     /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
@@ -40,9 +34,8 @@ public class UIScreen : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UIScreen(ViewUI2D view, UILayout layout) : base(UIStyling.Empty, layout)
     {
-        InternalView = view;
+        View = view;
         IsEnabled = false;
-        IsValid = true;
     }
 
     /// <summary>Constructs a screen that covers the entire game window.</summary>
