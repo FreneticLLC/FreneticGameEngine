@@ -109,6 +109,16 @@ public class UIInputBox(string text, string info, FontSet fonts, UILayout pos) :
         TriedToEscape = false;
     }
 
+    /// <summary>Aggressively set the input box text to the given string, leaving the cursor at the end.</summary>
+    /// <param name="text">The new text to have waiting in the input box.</param>
+    public void SetText(string text)
+    {
+        Text = text;
+        MinCursor = text.Length;
+        MaxCursor = text.Length;
+        TriedToEscape = false;
+    }
+
     /// <summary>Deselects this input box.</summary>
     public override void MousePressedOutside()
     {

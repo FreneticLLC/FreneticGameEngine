@@ -258,31 +258,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                                         else
                                         {
                                             string subTextLow = subText.ToLowerFast();
-                                            if (subTextLow.StartsWith("color="))
-                                            {
-                                                Color4F? specifiedColor = Color4F.FromString(subText["color=".Length..]);
-                                                if (specifiedColor.HasValue)
-                                                {
-                                                    currentPart.TextColor = specifiedColor.Value;
-                                                    addedPart.Text = "";
-                                                }
-                                                else
-                                                {
-                                                    addedPart.Text = "^[" + subText.ToString();
-                                                    addedPart.Highlight = true;
-                                                    addedPart.HighlightColor = Color4F.Red;
-                                                }
-                                            }
-                                            else if (subTextLow.StartsWith("url="))
-                                            {
-                                                addedPart.ClickURL = subText["url=".Length..].BeforeAndAfter('|', out addedPart.Text);
-                                            }
-                                            else if (subTextLow.StartsWith("hover="))
-                                            {
-                                                // TODO: Better newline method than this?
-                                                addedPart.HoverText = ParseFancyText(subText["hover=".Length..].Replace("\\n", "\n").BeforeAndAfter('|', out addedPart.Text), "^r^)");
-                                            }
-                                            else if (subTextLow == "lb")
+                                            if (subTextLow == "lb")
                                             {
                                                 addedPart.Text = "[";
                                             }
@@ -292,9 +268,17 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                                             }
                                             else
                                             {
-                                                addedPart.Text = subText;
-                                                addedPart.Highlight = true;
-                                                addedPart.HighlightColor = Color4F.Red;
+                                                (string prefix, string input) = subText.BeforeAndAfter('=');
+                                                if (Engine.TextAdvancedFormatters.TryGetValue(prefix.ToLowerFast(), out Action<string, FontSet, RenderableTextPart, RenderableTextPart> formatter))
+                                                {
+                                                    formatter(input, this, currentPart, addedPart);
+                                                }
+                                                else
+                                                {
+                                                    addedPart.Text = subText;
+                                                    addedPart.Highlight = true;
+                                                    addedPart.HighlightColor = Color4F.Red;
+                                                }
                                             }
                                         }
                                         if (addedPart.Text.Length > 0)
@@ -803,9 +787,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return result;
     }
 
-    /// <summary>Splits a renderable text line at a maximum render width.</summary>
+    /// <summary>Splits a single line of renderable text at a maximum render width, automatically wrapping to new lines to fit the given boundaries.</summary>
     /// <param name="line">The line to split.</param>
-    /// <param name="maxWidth">The maximum render width.</param>
+    /// <param name="maxWidth">The maximum width a line can span before it is auto split, in pixels.</param>
     /// <param name="skippedIndices">A list of character indices ignored in the final result.</param>
     /// <returns>The multiple-line renderable result.</returns>
     public static RenderableText SplitLineAppropriately(RenderableTextLine line, float maxWidth, out List<int> skippedIndices)
@@ -868,9 +852,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         return new() { Lines = [.. lines], Width = (int)totalWidth };
     }
 
-    /// <summary>Splits some text at a maximum render width.</summary>
+    /// <summary>Splits some text at a maximum render width, automatically wrapping to new lines to fit the given boundaries.</summary>
     /// <param name="text">The original (un-split) text.</param>
-    /// <param name="maxWidth">The maximum width.</param>
+    /// <param name="maxWidth">The maximum width a line can span before it is auto split, in pixels.</param>
     /// <returns>The split text.</returns>
     public static RenderableText SplitAppropriately(RenderableText text, int maxWidth)
     {
@@ -885,7 +869,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                 totalWidth = splitLine.Width;
             }
         }
-        return new RenderableText() { Lines = lines.ToArray(), Width = totalWidth };
+        return new RenderableText() { Lines = [.. lines], Width = totalWidth };
     }
 
     /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>

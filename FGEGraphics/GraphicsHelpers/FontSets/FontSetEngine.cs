@@ -14,8 +14,8 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.UtilitySystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
-using OpenTK;
 using OpenTK.Mathematics;
+using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -53,6 +53,13 @@ public class FontSetEngine(GLFontEngine fontEngine)
     /// <summary>Helper function to get the current global tick time.</summary>
     public Func<double> GetGlobalTickTime;
 
+    /// <summary>
+    /// Advanced text format functions, for use with the '^[' format code.
+    /// Map of label to (input, font, currentPart, addedPart) function.
+    /// For example, "^[color=#ff00ff]" style input will read key "color" and will run currentPart.TextColor = specifiedColor.Value; addedPart.Text = "";
+    /// </summary>
+    public Dictionary<string, Action<string, FontSet, RenderableTextPart, RenderableTextPart>> TextAdvancedFormatters = [];
+
     /// <summary>Prepares the FontSet system.</summary>
     /// <param name="getlanghelp">The helper function to get a language data.</param>
     /// <param name="orthobase">The helper function to get the current orthographic matrix.</param>
@@ -71,6 +78,30 @@ public class FontSetEngine(GLFontEngine fontEngine)
         DoubleSize = new FontSet("doublesize", this);
         DoubleSize.Load(GLFonts.Standard.Name, GLFonts.Standard.Size * 2);
         Fonts.Add((DoubleSize.Name, DoubleSize.FontDefault.Size), DoubleSize);
+        TextAdvancedFormatters["color"] = (input, font, currentPart, addedPart) =>
+        {
+            Color4F? specifiedColor = Color4F.FromString(input);
+            if (specifiedColor.HasValue)
+            {
+                currentPart.TextColor = specifiedColor.Value;
+                addedPart.Text = "";
+            }
+            else
+            {
+                addedPart.Text = $"^[color={input}";
+                addedPart.Highlight = true;
+                addedPart.HighlightColor = Color4F.Red;
+            }
+        };
+        TextAdvancedFormatters["url"] = (input, font, currentPart, addedPart) =>
+        {
+            addedPart.ClickURL = input.BeforeAndAfter('|', out addedPart.Text);
+        };
+        TextAdvancedFormatters["hover"] = (input, font, currentPart, addedPart) =>
+        {
+            // TODO: Better newline method than this?
+            addedPart.HoverText = font.ParseFancyText(input.Replace("\\n", "\n").BeforeAndAfter('|', out addedPart.Text), "^r^)");
+        };
     }
 
     /// <summary>
