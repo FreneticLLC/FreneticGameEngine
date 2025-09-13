@@ -105,10 +105,6 @@ public class UIDropdown : UIElement
     /// <param name="choice">The choice to select.</param>
     public void SelectChoice(UIElement choice)
     {
-        if (SelectedChoice == choice)
-        {
-            return;
-        }
         SelectedChoice = choice;
         if (Internal.Layer.HasChild(Box))
         {

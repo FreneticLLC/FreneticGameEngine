@@ -11,47 +11,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement
 {
+    public int ParentWidth => Parent?.Width ?? View.Engine.Window.ClientSize.X;
+
+    public int ParentHeight => Parent?.Height ?? View.Engine.Window.ClientSize.Y;
+
     /// <summary>
     /// Whether to erase the screen at the beginning of each render call.
     /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
     /// </summary>
-    protected bool ResetOnRender = false;
+    protected bool ResetOnRender = false; 
 
-    /// <summary>Constructs a screen that covers a specific portion of the game window.</summary>
+    /// <summary>Constructs a <see cref="UIScreen"/>.</summary>
     /// <param name="view">The client UI view.</param>
-    /// <param name="layout">The layout of the element.</param>
-    public UIScreen(ViewUI2D view, UILayout layout) : base(UIStyling.Empty, layout)
+    /// <param name="layout">The layout of the element. If <c>null</c>, defaults to a layout covering the parent view.</param>
+    public UIScreen(ViewUI2D view, UILayout layout = null) : base(UIStyling.Empty, layout)
     {
         View = view;
         IsEnabled = false;
-    }
-
-    /// <summary>Constructs a screen that covers the entire game window.</summary>
-    /// <param name="view">The client UI view.</param>
-    public UIScreen(ViewUI2D view) : this(view, new UILayout())
-    {
-        InternalConfigurePosition();
+        if (layout is null)
+        {
+            Layout = new();
+            InternalConfigureLayout();
+            Layout.Element = this;
+        }
     }
 
     /// <summary>Internal method to configure the position of the screen as fully covering the actual screen space. Called by the standard constructor.</summary>
-    public void InternalConfigurePosition()
+    public void InternalConfigureLayout()
     {
         Layout.SetAnchor(UIAnchor.TOP_LEFT);
         Layout.SetPosition(0, 0);
-        Layout.SetWidth(() => Parent is null ? View.Engine.Window.ClientSize.X : Parent.Layout.Width);
-        Layout.SetHeight(() => Parent is null ? View.Engine.Window.ClientSize.Y : Parent.Layout.Height);
+        Layout.SetSize(() => ParentWidth, () => ParentHeight);
     }
 
     /// <inheritdoc/>
