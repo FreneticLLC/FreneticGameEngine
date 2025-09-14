@@ -166,6 +166,18 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         }
     }
 
+    public void DeselectAll()
+    {
+        foreach (UIElement selectedElement in SelectedElements)
+        {
+            selectedElement.IsHovered = false;
+            selectedElement.IsPressed = false;
+            selectedElement.IsStateLocked = false;
+        }
+        SelectedElements.Clear();
+        UpdateLocks();
+    }
+
     /// <summary>Adds a selectable element to this group.</summary>
     /// <param name="element">The element to add.</param>
     /// <param name="selected">Whether the element should already be selected.</param>

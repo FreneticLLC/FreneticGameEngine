@@ -79,4 +79,16 @@ public class UIScreen : UIElement
 
     /// <inheritdoc/>
     public override bool CanInteract(int x, int y) => true;
+
+    /// <inheritdoc/>
+    public override void Init()
+    {
+        SwitchTo();
+    }
+
+    /// <inheritdoc/>
+    public override void Destroy()
+    {
+        SwitchFrom();
+    }
 }
