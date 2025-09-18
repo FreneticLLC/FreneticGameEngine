@@ -27,8 +27,8 @@ public abstract class PropertyHelper
     /// </summary>
     public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = [];
 
-    /// <summary>Lock to prevent a new helper from being initialized multiple times across multiple threads. Only the writeclaim is used, read claim is ignored for perf reasons.</summary>
-    public static ManyReadOneWriteLock NewHelpersLock = new(1);
+    /// <summary>Lock to prevent a new helper from being initialized multiple times across multiple threads.</summary>
+    public static LockObject NewHelpersLock = new();
 
     /// <summary>Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.</summary>
     public static class Internal
@@ -73,223 +73,225 @@ public abstract class PropertyHelper
         {
             return EnsureHandled(typeof(object));
         }
-        using ManyReadOneWriteLock.WriteClaim claim = NewHelpersLock.LockWrite();
-        if (PropertiesHelper.TryGetValue(propType, out helper)) // re-check inside lock
+        lock (NewHelpersLock)
         {
-            return helper;
-        }
-        Internal.CPropID++;
-        List<PrioritizedField> fieldsDebuggable = [];
-        List<PrioritizedField> fieldsAutoSaveable = [];
-        FieldInfo[] fields = propType.GetFields(BindingFlags.Public | BindingFlags.Instance);
-        for (int i = 0; i < fields.Length; i++)
-        {
-            // Just in case!
-            if (fields[i].IsStatic || !fields[i].IsPublic)
+            if (PropertiesHelper.TryGetValue(propType, out helper)) // re-check inside lock
             {
-                continue;
+                return helper;
             }
-            PropertyPriority propPrio = fields[i].GetCustomAttribute<PropertyPriority>();
-            double prio = 0;
-            if (propPrio != null)
+            Internal.CPropID++;
+            List<PrioritizedField> fieldsDebuggable = [];
+            List<PrioritizedField> fieldsAutoSaveable = [];
+            FieldInfo[] fields = propType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            for (int i = 0; i < fields.Length; i++)
             {
-                prio = propPrio.Priority;
+                // Just in case!
+                if (fields[i].IsStatic || !fields[i].IsPublic)
+                {
+                    continue;
+                }
+                PropertyPriority propPrio = fields[i].GetCustomAttribute<PropertyPriority>();
+                double prio = 0;
+                if (propPrio != null)
+                {
+                    prio = propPrio.Priority;
+                }
+                PropertyDebuggable dbgable = fields[i].GetCustomAttribute<PropertyDebuggable>();
+                if (dbgable != null)
+                {
+                    fieldsDebuggable.Add(new PrioritizedField(prio, fields[i]));
+                }
+                PropertyAutoSavable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSavable>();
+                if (autosaveable != null)
+                {
+                    fieldsAutoSaveable.Add(new PrioritizedField(prio, fields[i]));
+                }
             }
-            PropertyDebuggable dbgable = fields[i].GetCustomAttribute<PropertyDebuggable>();
-            if (dbgable != null)
+            List<PrioritizedSharpProperty> getterPropertiesDebuggable = [];
+            List<PrioritizedSharpProperty> getterSetterPropertiesSaveable = [];
+            List<PrioritizedSharpProperty> validityTestProperties = [];
+            PropertyInfo[] sharpProperties = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo sharpProperty in sharpProperties)
             {
-                fieldsDebuggable.Add(new PrioritizedField(prio, fields[i]));
+                if (!sharpProperty.CanRead)
+                {
+                    continue;
+                }
+                PropertyPriority propPrio = sharpProperty.GetCustomAttribute<PropertyPriority>();
+                double prio = 0;
+                if (propPrio != null)
+                {
+                    prio = propPrio.Priority;
+                }
+                PropertyDebuggable dbgable = sharpProperty.GetCustomAttribute<PropertyDebuggable>();
+                if (dbgable != null)
+                {
+                    getterPropertiesDebuggable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
+                }
+                PropertyAutoSavable savable = sharpProperty.GetCustomAttribute<PropertyAutoSavable>();
+                if (sharpProperty.CanWrite && savable != null)
+                {
+                    getterSetterPropertiesSaveable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
+                }
+                PropertyRequiredBool validifier = sharpProperty.GetCustomAttribute<PropertyRequiredBool>();
+                if (validifier != null && sharpProperty.GetMethod.ReturnType == typeof(bool))
+                {
+                    validityTestProperties.Add(new PrioritizedSharpProperty(prio, sharpProperty));
+                }
             }
-            PropertyAutoSavable autosaveable = fields[i].GetCustomAttribute<PropertyAutoSavable>();
-            if (autosaveable != null)
+            fieldsDebuggable = [.. fieldsDebuggable.OrderBy((k) => k.Priority)];
+            fieldsAutoSaveable = [.. fieldsAutoSaveable.OrderBy((k) => k.Priority)];
+            getterPropertiesDebuggable = [.. getterPropertiesDebuggable.OrderBy((k) => k.Priority)];
+            getterSetterPropertiesSaveable = [.. getterSetterPropertiesSaveable.OrderBy((k) => k.Priority)];
+            validityTestProperties = [.. validityTestProperties.OrderBy((k) => k.Priority)];
+            string newTypeID = $"__FGE_Property_{Internal.CPropID}__{propType.Name} __";
+            AssemblyName asmName = new(newTypeID);
+            AssemblyBuilder asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndCollect);
+            ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(newTypeID);
+            TypeBuilder generatedType = moduleBuilder.DefineType(newTypeID + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
+            MethodBuilder debugTypedMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutputTyped", MethodAttributes.Public | MethodAttributes.Virtual);
+            GenericTypeParameterBuilder debugTypedGenericParam = debugTypedMethodBuilder.DefineGenericParameters("T")[0];
+            debugTypedGenericParam.SetGenericParameterAttributes(GenericParameterAttributes.None);
+            debugTypedMethodBuilder.SetParameters(debugTypedGenericParam, typeof(Dictionary<string, string>));
+            debugTypedMethodBuilder.SetReturnType(typeof(void));
+            ILGenerator ilgen = debugTypedMethodBuilder.GetILGenerator();
+            Label nextLabel = default;
+            for (int i = 0; i < validityTestProperties.Count; i++)
             {
-                fieldsAutoSaveable.Add(new PrioritizedField(prio, fields[i]));
+                if (i > 0)
+                {
+                    ilgen.MarkLabel(nextLabel);
+                }
+                nextLabel = ilgen.DefineLabel();
+                ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
+                                             //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
+                ilgen.Emit(OpCodes.Call, validityTestProperties[i].SharpProperty.GetMethod); // Call the method and load the method's return value (always a bool).
+                ilgen.Emit(OpCodes.Brtrue, nextLabel); // if b is false:
+                ilgen.Emit(OpCodes.Ret); // Return NOW!
             }
-        }
-        List<PrioritizedSharpProperty> getterPropertiesDebuggable = [];
-        List<PrioritizedSharpProperty> getterSetterPropertiesSaveable = [];
-        List<PrioritizedSharpProperty> validityTestProperties = [];
-        PropertyInfo[] sharpProperties = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        foreach (PropertyInfo sharpProperty in sharpProperties)
-        {
-            if (!sharpProperty.CanRead)
-            {
-                continue;
-            }
-            PropertyPriority propPrio = sharpProperty.GetCustomAttribute<PropertyPriority>();
-            double prio = 0;
-            if (propPrio != null)
-            {
-                prio = propPrio.Priority;
-            }
-            PropertyDebuggable dbgable = sharpProperty.GetCustomAttribute<PropertyDebuggable>();
-            if (dbgable != null)
-            {
-                getterPropertiesDebuggable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
-            }
-            PropertyAutoSavable savable = sharpProperty.GetCustomAttribute<PropertyAutoSavable>();
-            if (sharpProperty.CanWrite && savable != null)
-            {
-                getterSetterPropertiesSaveable.Add(new PrioritizedSharpProperty(prio, sharpProperty));
-            }
-            PropertyRequiredBool validifier = sharpProperty.GetCustomAttribute<PropertyRequiredBool>();
-            if (validifier != null && sharpProperty.GetMethod.ReturnType == typeof(bool))
-            {
-                validityTestProperties.Add(new PrioritizedSharpProperty(prio, sharpProperty));
-            }
-        }
-        fieldsDebuggable = [.. fieldsDebuggable.OrderBy((k) => k.Priority)];
-        fieldsAutoSaveable = [.. fieldsAutoSaveable.OrderBy((k) => k.Priority)];
-        getterPropertiesDebuggable = [.. getterPropertiesDebuggable.OrderBy((k) => k.Priority)];
-        getterSetterPropertiesSaveable = [.. getterSetterPropertiesSaveable.OrderBy((k) => k.Priority)];
-        validityTestProperties = [.. validityTestProperties.OrderBy((k) => k.Priority)];
-        string newTypeID = $"__FGE_Property_{Internal.CPropID}__{propType.Name} __";
-        AssemblyName asmName = new(newTypeID);
-        AssemblyBuilder asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.RunAndCollect);
-        ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule(newTypeID);
-        TypeBuilder generatedType = moduleBuilder.DefineType(newTypeID + "__CENTRAL", TypeAttributes.Class | TypeAttributes.Public, typeof(PropertyHelper));
-        MethodBuilder debugTypedMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutputTyped", MethodAttributes.Public | MethodAttributes.Virtual);
-        GenericTypeParameterBuilder debugTypedGenericParam = debugTypedMethodBuilder.DefineGenericParameters("T")[0];
-        debugTypedGenericParam.SetGenericParameterAttributes(GenericParameterAttributes.None);
-        debugTypedMethodBuilder.SetParameters(debugTypedGenericParam, typeof(Dictionary<string, string>));
-        debugTypedMethodBuilder.SetReturnType(typeof(void));
-        ILGenerator ilgen = debugTypedMethodBuilder.GetILGenerator();
-        Label nextLabel = default;
-        for (int i = 0; i < validityTestProperties.Count; i++)
-        {
-            if (i > 0)
+            if (validityTestProperties.Count > 0)
             {
                 ilgen.MarkLabel(nextLabel);
             }
-            nextLabel = ilgen.DefineLabel();
-            ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
-            //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-            ilgen.Emit(OpCodes.Call, validityTestProperties[i].SharpProperty.GetMethod); // Call the method and load the method's return value (always a bool).
-            ilgen.Emit(OpCodes.Brtrue, nextLabel); // if b is false:
-            ilgen.Emit(OpCodes.Ret); // Return NOW!
-        }
-        if (validityTestProperties.Count > 0)
-        {
-            ilgen.MarkLabel(nextLabel);
-        }
-        foreach (PrioritizedField prioFIeld in fieldsDebuggable)
-        {
-            FieldInfo field = prioFIeld.Field;
-            bool isClass = field.FieldType.IsClass;
-            PropertyHelper pht = EnsureHandled(field.FieldType);
-            bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
-            ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
-            if (is_handlable)
+            foreach (PrioritizedField prioFIeld in fieldsDebuggable)
             {
-                ilgen.Emit(OpCodes.Ldstr, field.FieldType.FullName + "(" + field.Name + ")"); // Load the field name and full type as a string.
-            }
-            else
-            {
-                ilgen.Emit(OpCodes.Ldstr, field.FieldType.Name + "(" + field.Name + ")"); // Load the field name and type as a string.
-            }
-            ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
-            //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
-            ilgen.Emit(OpCodes.Ldfld, field); // Load the field's value.
-            if (isClass) // If a class
-            {
+                FieldInfo field = prioFIeld.Field;
+                bool isClass = field.FieldType.IsClass;
+                PropertyHelper pht = EnsureHandled(field.FieldType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
+                ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
                 if (is_handlable)
                 {
-                    // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
-                    ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
+                    ilgen.Emit(OpCodes.Ldstr, field.FieldType.FullName + "(" + field.Name + ")"); // Load the field name and full type as a string.
                 }
                 else
                 {
-                    // CODE: vals.Add("FType(fname)", Stringify(p.fname));
-                    ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
+                    ilgen.Emit(OpCodes.Ldstr, field.FieldType.Name + "(" + field.Name + ")"); // Load the field name and type as a string.
                 }
+                ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
+                                             //ilgen.Emit(OpCodes.Castclass, t); // Cast 'p' to the correct property type. // TODO: Necessity?
+                ilgen.Emit(OpCodes.Ldfld, field); // Load the field's value.
+                if (isClass) // If a class
+                {
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", Stringify(p.fname));
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
+                    }
+                }
+                else // if a struct
+                {
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
+                        MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(field.FieldType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
+                        MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(field.FieldType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
+                }
+                ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
-            else // if a struct
+            foreach (PrioritizedSharpProperty prioSharpProperty in getterPropertiesDebuggable)
             {
+                PropertyInfo sharpProperty = prioSharpProperty.SharpProperty;
+                bool isClass = sharpProperty.GetMethod.ReturnType.IsClass;
+                PropertyHelper pht = EnsureHandled(sharpProperty.GetMethod.ReturnType);
+                bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
+                ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
                 if (is_handlable)
                 {
-                    // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
-                    MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(field.FieldType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.FullName + "(" + sharpProperty.Name + ")"); // Load the field name and full return type as a string.
                 }
                 else
                 {
-                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
-                    MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(field.FieldType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.Name + "(" + sharpProperty.Name + ")"); // Load the method name and return type as a string.
                 }
+                ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
+                                             //ilgen.Emit(OpCodes.Castclass, propType); // Cast 'p' to the correct property type. // TODO: Necessity?
+                ilgen.Emit(OpCodes.Call, sharpProperty.GetMethod); // Call the method and load the method's return value.
+                if (isClass) // If a class
+                {
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", Stringify(p.fname));
+                        ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
+                    }
+                }
+                else // if a struct
+                {
+                    if (is_handlable)
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
+                        MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
+                    else
+                    {
+                        // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
+                        MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
+                        ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
+                    }
+                }
+                ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
             }
-            ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
+            ilgen.Emit(OpCodes.Ret);
+            generatedType.DefineMethodOverride(debugTypedMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutputTyped);
+            // Create a helper method that automatically type-casts.
+            MethodBuilder debugOutMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), [typeof(object), typeof(Dictionary<string, string>)]);
+            ILGenerator ilgen2 = debugOutMethodBuilder.GetILGenerator();
+            ilgen2.Emit(OpCodes.Ldarg_0);
+            ilgen2.Emit(OpCodes.Ldarg_1);
+            ilgen2.Emit(OpCodes.Ldarg_2);
+            MethodInfo mxi = debugTypedMethodBuilder.MakeGenericMethod(propType);
+            ilgen2.Emit(OpCodes.Call, mxi);
+            ilgen2.Emit(OpCodes.Ret);
+            generatedType.DefineMethodOverride(debugOutMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutput);
+            Type res = generatedType.CreateType();
+            PropertyHelper propHolder = Activator.CreateInstance(res) as PropertyHelper;
+            propHolder.PropertyType = propType;
+            propHolder.FieldsDebuggable.AddRange(fieldsDebuggable);
+            propHolder.FieldsAutoSaveable.AddRange(fieldsAutoSaveable);
+            propHolder.GetterPropertiesDebuggable.AddRange(getterPropertiesDebuggable);
+            propHolder.GetterSetterSaveable.AddRange(getterSetterPropertiesSaveable);
+            propHolder.ValidityTestGetterProperties.AddRange(validityTestProperties);
+            PropertiesHelper.Add(propType, propHolder);
+            return propHolder;
         }
-        foreach (PrioritizedSharpProperty prioSharpProperty in getterPropertiesDebuggable)
-        {
-            PropertyInfo sharpProperty = prioSharpProperty.SharpProperty;
-            bool isClass = sharpProperty.GetMethod.ReturnType.IsClass;
-            PropertyHelper pht = EnsureHandled(sharpProperty.GetMethod.ReturnType);
-            bool is_handlable = pht.FieldsAutoSaveable.Count > 0 || pht.FieldsDebuggable.Count > 0 || pht.GetterPropertiesDebuggable.Count > 0 || pht.GetterSetterSaveable.Count > 0;
-            ilgen.Emit(OpCodes.Ldarg_2); // Load the 'vals' Dictionary.
-            if (is_handlable)
-            {
-                ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.FullName + "(" + sharpProperty.Name + ")"); // Load the field name and full return type as a string.
-            }
-            else
-            {
-                ilgen.Emit(OpCodes.Ldstr, sharpProperty.GetMethod.ReturnType.Name + "(" + sharpProperty.Name + ")"); // Load the method name and return type as a string.
-            }
-            ilgen.Emit(OpCodes.Ldarg_1); // Load the 'p' Property.
-            //ilgen.Emit(OpCodes.Castclass, propType); // Cast 'p' to the correct property type. // TODO: Necessity?
-            ilgen.Emit(OpCodes.Call, sharpProperty.GetMethod); // Call the method and load the method's return value.
-            if (isClass) // If a class
-            {
-                if (is_handlable)
-                {
-                    // CODE: vals.Add("FType(fname)", StringifyDebuggable(p.fname));
-                    ilgen.Emit(OpCodes.Call, ReflectedMethods.StringifyDebuggable); // Convert the field's value to a string.
-                }
-                else
-                {
-                    // CODE: vals.Add("FType(fname)", Stringify(p.fname));
-                    ilgen.Emit(OpCodes.Call, ReflectedMethods.Stringify); // Convert the field's value to a string.
-                }
-            }
-            else // if a struct
-            {
-                if (is_handlable)
-                {
-                    // CODE: vals.Add("FType(fname)", StringifyDebuggableStruct<FType>(p.fname));
-                    MethodInfo structy = ReflectedMethods.StringifyDebuggableStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
-                }
-                else
-                {
-                    // CODE: vals.Add("FType(fname)", StringifyStruct<FType>(p.fname));
-                    MethodInfo structy = ReflectedMethods.StringifyStruct.MakeGenericMethod(sharpProperty.GetMethod.ReturnType);
-                    ilgen.Emit(OpCodes.Call, structy); // Convert the field's value to a string.
-                }
-            }
-            ilgen.Emit(OpCodes.Call, ReflectedMethods.DictionaryStringString_Add); // Call Dictionary<string, string>.Add(string, string).
-        }
-        ilgen.Emit(OpCodes.Ret);
-        generatedType.DefineMethodOverride(debugTypedMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutputTyped);
-        // Create a helper method that automatically type-casts.
-        MethodBuilder debugOutMethodBuilder = generatedType.DefineMethod("GetDebuggableInfoOutput", MethodAttributes.Public | MethodAttributes.Virtual, typeof(void), [typeof(object), typeof(Dictionary<string, string>)]);
-        ILGenerator ilgen2 = debugOutMethodBuilder.GetILGenerator();
-        ilgen2.Emit(OpCodes.Ldarg_0);
-        ilgen2.Emit(OpCodes.Ldarg_1);
-        ilgen2.Emit(OpCodes.Ldarg_2);
-        MethodInfo mxi = debugTypedMethodBuilder.MakeGenericMethod(propType);
-        ilgen2.Emit(OpCodes.Call, mxi);
-        ilgen2.Emit(OpCodes.Ret);
-        generatedType.DefineMethodOverride(debugOutMethodBuilder, ReflectedMethods.PropertyHelper_GetDebuggableInfoOutput);
-        Type res = generatedType.CreateType();
-        PropertyHelper propHolder = Activator.CreateInstance(res) as PropertyHelper;
-        propHolder.PropertyType = propType;
-        propHolder.FieldsDebuggable.AddRange(fieldsDebuggable);
-        propHolder.FieldsAutoSaveable.AddRange(fieldsAutoSaveable);
-        propHolder.GetterPropertiesDebuggable.AddRange(getterPropertiesDebuggable);
-        propHolder.GetterSetterSaveable.AddRange(getterSetterPropertiesSaveable);
-        propHolder.ValidityTestGetterProperties.AddRange(validityTestProperties);
-        PropertiesHelper.Add(propType, propHolder);
-        return propHolder;
     }
 
     /// <summary>
