@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.FileSystems;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.PropertySystem;
 
@@ -25,6 +26,9 @@ public abstract class PropertyHelper
     /// A mapping of types to their property maps. Do note: if a type object is lost (Assembly is collected and dropped), the properties on that type are also lost.
     /// </summary>
     public static readonly ConditionalWeakTable<Type, PropertyHelper> PropertiesHelper = [];
+
+    /// <summary>Lock to prevent a new helper from being initialized multiple times across multiple threads. Only the writeclaim is used, read claim is ignored for perf reasons.</summary>
+    public static ManyReadOneWriteLock NewHelpersLock = new(1);
 
     /// <summary>Internal data useful to the <see cref="PropertyHelper"/> class - not meant for external access.</summary>
     public static class Internal
@@ -68,6 +72,11 @@ public abstract class PropertyHelper
         if (propType.IsValueType) // TODO: Remove need for this check!!!
         {
             return EnsureHandled(typeof(object));
+        }
+        using ManyReadOneWriteLock.WriteClaim claim = NewHelpersLock.LockWrite();
+        if (PropertiesHelper.TryGetValue(propType, out helper)) // re-check inside lock
+        {
+            return helper;
         }
         Internal.CPropID++;
         List<PrioritizedField> fieldsDebuggable = [];
