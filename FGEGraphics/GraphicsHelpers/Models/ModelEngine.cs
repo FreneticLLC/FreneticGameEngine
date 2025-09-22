@@ -264,6 +264,7 @@ public class ModelEngine
             ModelMesh modmesh = new(mesh.Name, model);
             bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
             bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
+            bool hascolors = mesh.Colors is not null && mesh.Colors.Length == mesh.Vertices.Length;
             if (!hasn)
             {
                 Logs.Warning($"Mesh has no normals! ({name})");
@@ -277,23 +278,9 @@ public class ModelEngine
             for (int i = 0; i < mesh.Vertices.Length; i++)
             {
                 builder.Vertices[i] = mesh.Vertices[i].ToOpenTK();
-                if (!hastc)
-                {
-                    builder.TexCoords[i] = new Vector3(0, 0, 0);
-                }
-                else
-                {
-                    builder.TexCoords[i] = new Vector3((float)mesh.TexCoords[i].X, 1 - (float)mesh.TexCoords[i].Y, 0);
-                }
-                if (!hasn)
-                {
-                    builder.Normals[i] = new Vector3(0f, 0f, 1f);
-                }
-                else
-                {
-                    builder.Normals[i] = mesh.Normals[i].ToOpenTK();
-                }
-                builder.Colors[i] = new Vector4(1, 1, 1, 1); // TODO: From the mesh?
+                builder.TexCoords[i] = hastc ? new Vector3(mesh.TexCoords[i].X, 1 - mesh.TexCoords[i].Y, 0) : new Vector3(0, 0, 0);
+                builder.Normals[i] = hasn ? mesh.Normals[i].ToOpenTK() : new Vector3(0f, 0f, 1f);
+                builder.Colors[i] = hascolors ? mesh.Colors[i].ToOpenTK() : new Vector4(1, 1, 1, 1); // TODO: From the mesh?
             }
             for (int i = 0; i < mesh.Indices.Length; i++)
             {

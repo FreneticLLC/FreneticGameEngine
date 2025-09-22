@@ -26,13 +26,14 @@ public class Model3D
 
     /// <summary>The default matrix of the model.</summary>
     public Matrix4x4 MatrixA;
+
+    /// <summary>User-tag on this model. Often this is an FGEGraphics Model instance.</summary>
+    public object Tag;
 }
 
 /// <summary>Represents a single mesh of an abstract 3D model.</summary>
 public class Model3DMesh
 {
-    // TODO: Remove dependence on BEPU, use FGE types for Vector3 and Matrix.
-
     /// <summary>The vertices on this mesh.</summary>
     public Vector3[] Vertices;
 
@@ -44,6 +45,9 @@ public class Model3DMesh
 
     /// <summary>The texture coordinates on this mesh.</summary>
     public Vector2[] TexCoords;
+
+    /// <summary>The color data on this mesh.</summary>
+    public Vector4[] Colors;
 
     /// <summary>The bones on this mesh.</summary>
     public Model3DBone[] Bones;
