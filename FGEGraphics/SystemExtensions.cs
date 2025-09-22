@@ -102,6 +102,14 @@ public static class SystemExtensions
         return new Vector3(loc.X, loc.Y, loc.Z);
     }
 
+    /// <summary>Converts a <see cref="System.Numerics.Vector4"/> to an OpenTK <see cref="Vector4"/>.</summary>
+    /// <param name="loc">The <see cref="System.Numerics.Vector4"/>.</param>
+    /// <returns>The OpenTK <see cref="Vector4"/>.</returns>
+    public static Vector4 ToOpenTK(this System.Numerics.Vector4 loc)
+    {
+        return new Vector4(loc.X, loc.Y, loc.Z, loc.W);
+    }
+
     /// <summary>Converts an OpenTK Vector3D to a <see cref="Location"/>.</summary>
     /// <param name="vec">The OpenTK Vector3D.</param>
     /// <returns>The <see cref="Location"/>.</returns>

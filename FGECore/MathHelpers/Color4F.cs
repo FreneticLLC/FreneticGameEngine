@@ -12,10 +12,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Numerics;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using FGECore.UtilitySystems;
 
 namespace FGECore.MathHelpers;
 
@@ -139,6 +139,9 @@ public struct Color4F : IEquatable<Color4F>
             B = value.B;
         }
     }
+
+    /// <summary>Returns a <see cref="Vector4"/> containing the R,G,B float values of this <see cref="Color4F"/>.</summary>
+    public readonly Vector4 ToNumerics() => new(R, G, B, A);
 
     /// <summary>Returns a 16-byte set representation of this color (4 x 32-bit float).</summary>
     /// <returns>The color bytes.</returns>

@@ -13,8 +13,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 using FreneticUtilities.FreneticToolkit;
-using FGECore.UtilitySystems;
 
 namespace FGECore.MathHelpers;
 
@@ -109,6 +109,9 @@ public struct Color3F
 
     /// <summary>Returns a <see cref="Location"/> containing the R,G,B float values of this <see cref="Color3F"/>.</summary>
     public readonly Location ToLocation() => new(R, G, B);
+
+    /// <summary>Returns a <see cref="Vector3"/> containing the R,G,B float values of this <see cref="Color3F"/>.</summary>
+    public readonly Vector3 ToNumerics() => new(R, G, B);
 
     /// <summary>
     /// Returns a 12-byte set representation of this color.
