@@ -164,11 +164,22 @@ public class ViewUI2D
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
             element.UpdateStyle();
-            element.HandleTransforms();
         }
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        while (true) // TODO: this seems reckless
         {
-            element.UpdateTransforms(Client.Delta, Vector3.Zero);
+            foreach (UIElement element in CurrentScreen.AllChildren())
+            {
+                element.UpdateTransforms(Client.Delta, Vector3.Zero);
+            }
+            bool anyUpdated = false;
+            foreach (UIElement element in CurrentScreen.AllChildren())
+            {
+                anyUpdated |= element.HandleTransforms();
+            }
+            if (!anyUpdated)
+            {
+                break;
+            }
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);

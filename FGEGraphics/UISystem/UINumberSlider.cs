@@ -35,6 +35,8 @@ public class UINumberSlider : UIElement
     /// <summary>Whether the slider should use integers instead of decimals.</summary>
     public bool Integer;
 
+    public int Digits = -1;
+
     /// <summary>The current slider value.</summary>
     public double Value;
 
@@ -86,7 +88,8 @@ public class UINumberSlider : UIElement
         int step = (int)Math.Round((value - Min) / interval);
         double lower = Min + interval * step;
         double higher = Min + interval * (step + 1);
-        return (value - lower) <= (higher - value) ? lower : higher;
+        double chosen = (value - lower) <= (higher - value) ? lower : higher;
+        return Digits >= 1 ? Math.Round(chosen, Digits) : chosen;
     }
 
     /// <inheritdoc/>
@@ -141,7 +144,7 @@ public class UINumberSlider : UIElement
     public static UIListGroup WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
     {
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
-        slider.OnValueEdit += _ => label.TextContent = slider.Value.ToString(label.Format);
+        slider.OnValueEdit += _ => label.Value = slider.Value;
         label.OnTextSubmit += _ =>
         {
             double newValue = slider.GetCorrectedValue(label.Value, slider.Integer ? 1.0 : 0.0);
