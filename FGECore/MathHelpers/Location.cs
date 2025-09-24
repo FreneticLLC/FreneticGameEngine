@@ -445,6 +445,11 @@ public struct Location : IEquatable<Location>
     /// <returns>whether the location is infinite.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool IsInfinite() => double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
+
+    /// <summary>Returns whether the location is either NaN or infinite.</summary>
+    /// <returns>whether the location is either NaN or infinite.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly bool IsNaNOrInfinite() => IsNaN() || IsInfinite();
     #endregion
 
     #region operators

@@ -281,10 +281,26 @@ public class ModelEngine
                 builder.TexCoords[i] = hastc ? new Vector3(mesh.TexCoords[i].X, 1 - mesh.TexCoords[i].Y, 0) : new Vector3(0, 0, 0);
                 builder.Normals[i] = hasn ? mesh.Normals[i].ToOpenTK() : new Vector3(0f, 0f, 1f);
                 builder.Colors[i] = hascolors ? mesh.Colors[i].ToOpenTK() : new Vector4(1, 1, 1, 1); // TODO: From the mesh?
+#if DEBUG
+                if (builder.Vertices[i].ToLocation().IsNaNOrInfinite() || builder.TexCoords[i].ToLocation().IsNaNOrInfinite() || builder.Normals[i].ToLocation().IsNaNOrInfinite())
+                {
+                    throw new Exception($"Mesh has invalid vertex data! ({name}) (index={i}, vertex={builder.Vertices[i]}, tc={builder.TexCoords[i]}, normal={builder.Normals[i]}, color={builder.Colors[i]})");
+                }
+                if (builder.Normals[i].LengthSquared < 0.01f)
+                {
+                    throw new Exception($"Mesh has invalid normal vector! ({name}) (index={i}, normal={builder.Normals[i]})");
+                }
+#endif
             }
             for (int i = 0; i < mesh.Indices.Length; i++)
             {
                 builder.Indices[i] = mesh.Indices[i];
+#if DEBUG
+                if (mesh.Indices[i] >= mesh.Vertices.Length)
+                {
+                    throw new Exception($"Mesh has invalid index {mesh.Indices[i]} (vertex count {mesh.Vertices.Length})! ({name})");
+                }
+#endif
             }
             int bc = mesh.Bones.Length;
             if (bc > View3DInternalData.MAX_BONES)
