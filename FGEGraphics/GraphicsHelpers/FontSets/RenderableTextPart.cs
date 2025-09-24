@@ -187,11 +187,11 @@ public class RenderableText()
     public int Width;
 
     /// <summary>Constructs renderable text from a single line.</summary>
-    /// <param name="singleLine">The text line.</param>
-    public RenderableText(RenderableTextLine singleLine) : this()
+    /// <param name="lines">The text lines.</param>
+    public RenderableText(params RenderableTextLine[] lines) : this()
     {
-        Lines = [singleLine];
-        Width = singleLine.Width;
+        Lines = lines;
+        Width = lines.Length == 0 ? 0 : lines.Max(line => line.Width);
     }
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
