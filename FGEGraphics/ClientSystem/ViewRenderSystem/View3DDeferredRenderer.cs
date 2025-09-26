@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Shaders;
@@ -407,7 +408,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             // TODO: An ambient light source?
             foreach (LightObject light in Config.Lights)
             {
-                if (light is SkyLight || State.CameraFrustum == null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
+                if (light is SkyLight || State.CameraFrustum is null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
                     double d1 = (light.EyePos - Config.CameraPos).LengthSquared();
                     double d2 = Config.LightMaxDistance * Config.LightMaxDistance + light.MaxDistance * light.MaxDistance;
@@ -937,7 +938,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             State.RenderLights = true;
             foreach (LightObject light in Config.Lights)
             {
-                if (light is SkyLight || frustumToUse == null || frustumToUse.ContainsSphere(light.EyePos, light.MaxDistance))
+                if (light is SkyLight || frustumToUse is null || frustumToUse.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
                     lightc += light.InternalLights.Count;
                 }
@@ -947,7 +948,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             float[] shadowMatrices = new float[View3DInternalData.LIGHTS_MAX * 16];
             foreach (LightObject light in Config.Lights)
             {
-                if (light is SkyLight || frustumToUse == null || frustumToUse.ContainsSphere(light.EyePos, light.MaxDistance))
+                if (light is SkyLight || frustumToUse is null || frustumToUse.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
                     foreach (Light subLight in light.InternalLights)
                     {

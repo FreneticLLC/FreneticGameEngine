@@ -232,7 +232,7 @@ public class View3D : View3DCoreDataSet
         GL.ClearBuffer(ClearBuffer.Depth, 0, View3DInternalData.ARR_FLOAT_1F_1);
         State.CameraBasePos = Config.CameraPos;
         State.CameraAdjust = -cameraForwardVector.CrossProduct(cameraUpVector) * 0.25;
-        if (Engine.Client.VR != null)
+        if (Engine.Client.VR is not null)
         {
             //cameraAdjust = -cameraAdjust;
             State.CameraAdjust = Location.Zero;
@@ -243,7 +243,7 @@ public class View3D : View3DCoreDataSet
         State.OffsetWorld = Matrix4d.CreateTranslation((-State.RenderRelative).ToOpenTK3D());
         Matrix4d outviewD;
         State.CameraRelativePosition = (State.CameraBasePos - State.RenderRelative).ToOpenTK();
-        if (Engine.Client.VR != null)
+        if (Engine.Client.VR is not null)
         {
             Matrix4 proj = Engine.Client.VR.GetProjection(true, Engine.ZNear, Engine.ZFar());
             Matrix4 view = Engine.Client.VR.Eye(true, State.CameraRelativePosition); // TODO: account for player height?
@@ -276,8 +276,8 @@ public class View3D : View3DCoreDataSet
             State.OutViewMatrix = view * proj_out;
             Matrix4d projd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV),
                 (float)Config.Width / (float)Config.Height, Engine.ZNear, Engine.ZFar()); // TODO: View3D-level vars?
-            Location bxd = Engine.Render3DView ? (Config.CameraPos + State.CameraAdjust) : Config.CameraPos;
-            Matrix4d viewd = Matrix4d.LookAt(bxd.ToOpenTK3D(), (bxd + cameraForwardVector).ToOpenTK3D(), cameraUpVector.ToOpenTK3D());
+            Location mainCamera = Engine.Render3DView ? (Config.CameraPos + State.CameraAdjust) : Config.CameraPos;
+            Matrix4d viewd = Matrix4d.LookAt(mainCamera.ToOpenTK3D(), (mainCamera + cameraForwardVector).ToOpenTK3D(), cameraUpVector.ToOpenTK3D());
             State.PrimaryMatrixd = viewd * projd;
             Matrix4d proj_outd = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Engine.FOV), (float)Config.Width / (float)Config.Height, 60f, Engine.ZFarOut()); // TODO: View3D-level vars?
             outviewD = viewd * proj_outd;
@@ -292,6 +292,13 @@ public class View3D : View3DCoreDataSet
         State.CameraFrustum = new Frustum(State.PrimaryMatrixd.ConvertD());
         State.SecondEyeFrustum = new Frustum(State.PrimaryMatrix_OffsetFor3Dd.ConvertD());
         State.CurrentFrustum = State.CameraFrustum;
+#if DEBUG
+        Location expectedFrustumCenter = Config.CameraPos + cameraForwardVector * (Engine.ZNear + (Engine.ZFar() - Engine.ZNear) * 0.5);
+        if (!State.CameraFrustum.Contains(expectedFrustumCenter))
+        {
+            throw new Exception($"Camera frustum is invalid: camera forward-center {expectedFrustumCenter} is not contained by {State.CameraFrustum}");
+        }
+#endif
         GraphicsUtil.CheckError("AfterSetup");
     }
 }

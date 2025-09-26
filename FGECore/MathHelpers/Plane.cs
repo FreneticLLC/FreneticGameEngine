@@ -43,7 +43,7 @@ public class Plane
         Vertex2 = v2;
         Vertex3 = v3;
         Normal = (v2 - v1).CrossProduct(v3 - v1).Normalize();
-        NormalDistance = -(Normal.Dot(Vertex1));
+        NormalDistance = -Normal.Dot(Vertex1);
     }
 
     /// <summary>Constructs a plane, with a known normal.</summary>
@@ -69,6 +69,9 @@ public class Plane
         Normal = _normal * fact;
         NormalDistance = _d * fact;
     }
+
+    /// <summary>Returns a centerpoint of this plane.</summary>
+    public Location CenterPoint => Normal * -NormalDistance;
 
     /// <summary>Finds where a line hits the plane, if anywhere.</summary>
     /// <param name="start">The start of the line.</param>
@@ -136,13 +139,13 @@ public class Plane
     }
 
     /// <summary>
-    /// Converts the plane to a simple string form of [(X, Y, Z)/(X, Y, Z)/(X, Y, Z)]
+    /// Converts the plane to a simple string form of [(X, Y, Z)/Dist] of the normal-form of the plane.
     /// Inverts <see cref="FromString(string)"/>.
     /// </summary>
     /// <returns>The plane string.</returns>
     public override string ToString()
     {
-        return "[" + Vertex1.ToString() + "/" + Vertex2.ToString() + "/" + Vertex3.ToString() + "]";
+        return $"[{Normal}/{NormalDistance}]";
     }
 
     /// <summary>
@@ -150,14 +153,18 @@ public class Plane
     /// Inverts <see cref="ToString"/>.
     /// </summary>
     /// <param name="input">The plane string.</param>
-    /// <returns>A plane.</returns>
+    /// <returns>A plane, or null if invalid input.</returns>
     public static Plane FromString(string input)
     {
         string[] data = input.Replace('[', ' ').Replace(']', ' ').Replace(" ", "").SplitFast('/');
-        if (data.Length < 3)
+        if (data.Length == 3)
         {
-            return null;
+            return new Plane(Location.FromString(data[0]), Location.FromString(data[1]), Location.FromString(data[2]));
         }
-        return new Plane(Location.FromString(data[0]), Location.FromString(data[1]), Location.FromString(data[2]));
+        if (data.Length == 2)
+        {
+            return new Plane(Location.FromString(data[0]), double.Parse(data[1]));
+        }
+        return null;
     }
 }

@@ -393,6 +393,11 @@ public struct Location : IEquatable<Location>
         double bZ = Z * cospitch - X * sinpitch;
         return new Location(bX * cosyaw - Y * sinyaw, bX * sinyaw + Y * cosyaw, bZ);
     }
+
+    /// <summary>Linearly interpolates between this location and another by a certain amount.</summary>
+    /// <param name="two">The second location.</param>
+    /// <param name="amount">The amount to interpolate by, between 0 and 1.</param>
+    public readonly Location LerpTowards(Location two, double amount) => this + (two - this) * amount;
     #endregion
 
     #region utilities

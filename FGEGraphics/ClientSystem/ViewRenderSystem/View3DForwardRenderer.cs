@@ -46,7 +46,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
             // TODO: An ambient light source?
             foreach (LightObject light in Config.Lights)
             {
-                if (light is SkyLight || State.CameraFrustum == null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
+                if (light is SkyLight || State.CameraFrustum is null || State.CameraFrustum.ContainsSphere(light.EyePos, light.MaxDistance))
                 {
                     GraphicsUtil.CheckError("Render/Fast - PreSingle");
                     double d1 = (light.EyePos - Config.CameraPos).LengthSquared();

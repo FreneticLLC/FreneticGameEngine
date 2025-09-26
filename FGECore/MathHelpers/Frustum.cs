@@ -12,7 +12,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using BepuUtilities;
 
 namespace FGECore.MathHelpers;
 
@@ -146,5 +145,11 @@ public class Frustum(Matrix4x4 matrix)
             return false;
         }
         return true;
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"Frustum(Near: {Near}, Far: {Far}, Left: {Left}, Right: {Right}, Top: {Top}, Bottom: {Bottom})";
     }
 }
