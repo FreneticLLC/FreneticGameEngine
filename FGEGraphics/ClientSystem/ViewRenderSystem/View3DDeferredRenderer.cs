@@ -426,7 +426,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                         if (light is PointLight pl && !pl.CastShadows)
                         {
                             Matrix4 smat = Matrix4.Identity;
-                            Vector3d eyep = pl.EyePos.ToOpenTK3D() - Config.CameraPos.ToOpenTK3D();
+                            Vector3d eyep = pl.EyePos.ToOpenTK3D() - State.RenderRelative.ToOpenTK3D();
                             Color3F col = light.InternalLights[0].Color * (float)maxrangemult;
                             Matrix4 light_data = new(
                                 (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
@@ -463,7 +463,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                     continue;
                                 }
                                 Matrix4 smat = subLight.GetMatrix(View);
-                                Vector3d eyep = light is SkyLight se ? -se.Direction.ToOpenTK3D() : subLight.EyePosition - Config.CameraPos.ToOpenTK3D();
+                                Vector3d eyep = light is SkyLight se ? -se.Direction.ToOpenTK3D() : subLight.EyePosition - State.RenderRelative.ToOpenTK3D();
                                 Color3F col = subLight.Color * (float)maxrangemult;
                                 Matrix4 light_data = new(
                                     (float)eyep.X, (float)eyep.Y, (float)eyep.Z, // light_pos
