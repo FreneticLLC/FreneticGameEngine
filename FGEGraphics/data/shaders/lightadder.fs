@@ -55,7 +55,6 @@ void main() // Let's put all code in main, why not...
 {
 	//color = vec4(texture(shadowtex, vec3(f.texcoord.xy, 1.0)).x, 0.0, 0.0, 1.0); return; // ------------------------------------------
 	vec3 res_color = vec3(0.0);
-	float aff = 0.0;
 	// Gather all the texture information.
 	vec3 normal = texture(normaltex, f.texcoord).xyz;
 	vec3 position = texture(positiontex, f.texcoord).xyz;
@@ -109,7 +108,7 @@ void main() // Let's put all code in main, why not...
 			light_path -= position;
 			light_length = length(light_path); // How far the light is from this pixel.
 			float d = light_length / light_radius; // How far the pixel is from the end of the light.
-			float atten = clamp(1.0 - (d * d), 0.0, 1.0); // How weak the light is here, based purely on distance so far.
+			atten = clamp(1.0 - (d * d), 0.0, 1.0); // How weak the light is here, based purely on distance so far.
 			if (is_point == 0 && light_type >= 0.5) // If this is a conical (spot light)...
 			{
 				atten *= 1.0 - (f_spos.x * f_spos.x + f_spos.y * f_spos.y); // Weaken the light based on how far towards the edge of the cone/circle it is. Bright in the center, dark in the corners.
@@ -203,7 +202,6 @@ void main() // Let's put all code in main, why not...
 		}
 		vec3 specular = vec3(pow(max(dot(reflect(L, N), normalize(position - eye_pos)), 0.0), 200.0) * specular_albedo * renderhint.x) * HDR_Mod; // Find out how much specular light to apply.
 		res_color += (vec3(depth, depth, depth) * atten * (diffuse * light_color) * diffuset.xyz) + (min(specular, 1.0) * light_color * atten * depth); // Put it all together now.
-		aff += atten;
 	}
 	res_color += (ambient + vec3(renderhint.z > 2.0 ? (renderhint.z - 2.0) : renderhint.z)) * HDR_Mod * diffuset.xyz; // Add ambient light.
 	color = vec4(res_color * ssao_mod, diffuset.w);
