@@ -35,7 +35,7 @@ public class UINumberSlider : UIElement
     /// <summary>Whether the slider should use integers instead of decimals.</summary>
     public bool Integer;
 
-    /// <summary>The number of digits to round the slider value to, or <code>-1</code> for no rounding.</summary>
+    /// <summary>The number of digits to round the slider value to, or <c>-1</c> for no rounding.</summary>
     public int Digits = -1;
 
     /// <summary>The current slider value.</summary>
