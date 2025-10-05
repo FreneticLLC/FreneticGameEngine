@@ -16,6 +16,7 @@ using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
+
 using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.UISystem;

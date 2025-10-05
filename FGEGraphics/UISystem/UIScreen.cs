@@ -33,7 +33,7 @@ public class UIScreen : UIElement
     /// Whether to erase the screen at the beginning of each render call.
     /// <para>Generally only used if this UI is considered the dominant central point of a view.</para>
     /// </summary>
-    protected bool ResetOnRender = false; 
+    public bool ResetOnRender = false;
 
     /// <summary>Constructs a <see cref="UIScreen"/>.</summary>
     /// <param name="view">The client UI view.</param>
