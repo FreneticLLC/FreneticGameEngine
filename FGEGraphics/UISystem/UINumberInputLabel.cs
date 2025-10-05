@@ -26,8 +26,10 @@ public class UINumberInputLabel : UIInputLabel
     /// <summary>Character matcher for decimal number labels.</summary>
     public static readonly AsciiMatcher DecimalMatcher = new(AsciiMatcher.Digits + "-.e");
 
+    /// <summary>The minimum label value.</summary>
     public double Min;
 
+    /// <summary>The maximum label value.</summary>
     public double Max;
 
     /// <summary>Whether the label should be an integer instead of a decimal.</summary>

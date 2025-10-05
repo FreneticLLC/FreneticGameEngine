@@ -166,6 +166,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         }
     }
 
+    /// <summary>Deselects all elements and updates the group state.</summary>
     public void DeselectAll()
     {
         foreach (UIElement selectedElement in SelectedElements)

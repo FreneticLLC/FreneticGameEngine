@@ -163,6 +163,8 @@ public class UIListGroup : UIGroup
         }
     }
 
+    /// <summary>Removes all elements from the list and resets their positions.</summary>
+    /// <param name="removeChildren">Whether to remove the elements as children.</param>
     public void RemoveAllItems(bool removeChildren = true)
     {
         foreach (UIElement item in Items)

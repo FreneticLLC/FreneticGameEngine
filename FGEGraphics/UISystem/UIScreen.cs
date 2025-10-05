@@ -23,8 +23,10 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement
 {
+    /// <summary>The width of the element or window containing this screen.</summary>
     public int ParentWidth => Parent?.Width ?? View.Engine.Window.ClientSize.X;
 
+    /// <summary>The height of the element or window containing this screen.</summary>
     public int ParentHeight => Parent?.Height ?? View.Engine.Window.ClientSize.Y;
 
     /// <summary>
