@@ -364,9 +364,16 @@ public abstract class UIElement
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
-    public void UpdateStyle()
+    public void UpdateStyle(bool updateText = false)
     {
         SetStyle(Styling.Get(this));
+        if (updateText)
+        {
+            foreach (UIText text in ElementInternal.Texts)
+            {
+                text.UpdateRenderables();
+            }
+        }
     }
 
     /// <summary>Ran when <see cref="Style"/> changes value.</summary>
