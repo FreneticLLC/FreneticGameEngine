@@ -129,7 +129,7 @@ public class UIScrollGroup : UIElement
         public int MaxValue = -1;
 
         /// <summary>How fast the direction can be scrolled (in position units per scroll tick).</summary>
-        public int ScrollSpeed = 10;
+        public int ScrollSpeed = 30;
 
         /// <summary>The scroll bar button, if any.</summary>
         public UIBox ScrollBar = null;
