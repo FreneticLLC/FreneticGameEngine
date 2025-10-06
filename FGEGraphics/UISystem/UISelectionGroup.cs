@@ -40,7 +40,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     public bool IsLocked = false;
 
     /// <summary>The selectable elements managed by this group.</summary>
-    public HashSet<UIElement> Elements = [];
+    public List<UIElement> Elements = [];
 
     /// <summary>The list of currently selected elements.</summary>
     public List<UIElement> SelectedElements = [];
