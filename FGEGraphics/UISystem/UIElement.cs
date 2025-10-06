@@ -31,6 +31,9 @@ public abstract class UIElement
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
+    /// <summary>Gets the UI view this element is attached to.</summary>
+    public ViewUI2D View;
+
     /// <summary>Styling logic for this element.</summary>
     public UIStyling Styling;
 
@@ -39,9 +42,6 @@ public abstract class UIElement
 
     /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
     public UILayout Layout;
-
-    /// <summary>Gets the UI view this element is attached to.</summary>
-    public virtual ViewUI2D View => Parent.View;
 
     /// <summary>Whether this element has been added to a parent element, <c>false</c> if not yet added or already removed.</summary>
     public bool IsValid;
@@ -171,7 +171,7 @@ public abstract class UIElement
     /// <param name="child">The element to be parented.</param>
     public virtual void AddChild(UIElement child)
     {
-        if (child.Parent is not null)
+        if (child.IsValid)
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
@@ -183,10 +183,7 @@ public abstract class UIElement
         {
             throw new Exception("Tried to add a child that already belongs to this element!");
         }
-        child.Parent = this;
         child.IsValid = true;
-        child.UpdateStyle();
-        child.Init();
     }
 
     /// <summary>Removes a child from this element.</summary>
@@ -206,8 +203,6 @@ public abstract class UIElement
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
         child.IsValid = false;
-        child.Parent = null;
-        child.Destroy();
     }
 
     /// <summary>Removes all children from this element.</summary>
@@ -230,6 +225,16 @@ public abstract class UIElement
         foreach (UIElement element in ElementInternal.ToAdd)
         {
             ElementInternal.Children.Add(element);
+            element.Parent = this;
+            if (View is not null)
+            {
+                foreach (UIElement child in element.AllChildren(toAdd: true))
+                {
+                    child.View = View;
+                }
+            }
+            element.UpdateStyle();
+            element.Init();
         }
         foreach (UIElement element in ElementInternal.ToRemove)
         {
@@ -237,6 +242,9 @@ public abstract class UIElement
             {
                 Logs.Error($"UIElement: Failed to remove a child element '{element}' from '{this}'!");
             }
+            element.Destroy();
+            element.Parent = null;
+            element.View = null;
         }
         ElementInternal.ToAdd.Clear();
         ElementInternal.ToRemove.Clear();
@@ -357,9 +365,16 @@ public abstract class UIElement
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
-    public void UpdateStyle()
+    public void UpdateStyle(bool updateText = false)
     {
         SetStyle(Styling.Get(this));
+        if (updateText)
+        {
+            foreach (UIText text in ElementInternal.Texts)
+            {
+                text.UpdateRenderables();
+            }
+        }
     }
 
     /// <summary>Ran when <see cref="Style"/> changes value.</summary>
@@ -545,20 +560,25 @@ public abstract class UIElement
     }
 
     /// <summary>Fires relevant events if this element's transforms have changed.</summary>
-    public void HandleTransforms()
+    public bool HandleTransforms()
     {
+        bool anyFired = false;
         if (ElementInternal.LastPosition != Position)
         {
             OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+            anyFired |= true;
         }
         if (ElementInternal.LastSize != Size)
         {
             OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+            anyFired |= true;
         }
         if (ElementInternal.LastRotation != Rotation)
         {
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+            anyFired |= true;
         }
+        return anyFired;
     }
 
     /// <summary>Renders this element.</summary>

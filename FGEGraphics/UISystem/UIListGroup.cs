@@ -152,7 +152,7 @@ public class UIListGroup : UIGroup
             throw new Exception("Tried to remove an item that does not belong to this list!");
         }
         UpdateOffsets(item, -GetItemSize(item));
-        item.Layout.SetPosition(0, 0);
+        item.Layout.SetPosition(0, 0); // TODO: reset?
         item.OnPositionChange -= Internal.Updaters[item];
         Items.Remove(item);
         Internal.Offsets.Remove(item);
@@ -160,6 +160,24 @@ public class UIListGroup : UIGroup
         if (removeChild)
         {
             RemoveChild(item);
+        }
+    }
+
+    /// <summary>Removes all elements from the list and resets their positions.</summary>
+    /// <param name="removeChildren">Whether to remove the elements as children.</param>
+    public void RemoveAllItems(bool removeChildren = true)
+    {
+        foreach (UIElement item in Items)
+        {
+            item.Layout.SetPosition(0, 0);
+            item.OnPositionChange -= Internal.Updaters[item];
+        }
+        Items.Clear();
+        Internal.Offsets.Clear();
+        Internal.Updaters.Clear();
+        if (removeChildren)
+        {
+            RemoveAllChildren();
         }
     }
 }

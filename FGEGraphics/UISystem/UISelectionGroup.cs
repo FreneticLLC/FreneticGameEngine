@@ -133,6 +133,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="element">The element to select.</param>
     public void SelectElement(UIElement element)
     {
+        if (SelectedElements.Contains(element))
+        {
+            return;
+        }
         element.IsPressed = true;
         element.IsStateLocked = true;
         SelectedElements.Add(element);
@@ -148,6 +152,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="element">The element to deselect.</param>
     public void DeselectElement(UIElement element)
     {
+        if (!SelectedElements.Contains(element))
+        {
+            return;
+        }
         SelectedElements.Remove(element);
         element.IsHovered = false;
         element.IsPressed = false;
@@ -158,12 +166,29 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         }
     }
 
+    /// <summary>Deselects all elements and updates the group state.</summary>
+    public void DeselectAll()
+    {
+        foreach (UIElement selectedElement in SelectedElements)
+        {
+            selectedElement.IsHovered = false;
+            selectedElement.IsPressed = false;
+            selectedElement.IsStateLocked = false;
+        }
+        SelectedElements.Clear();
+        UpdateLocks();
+    }
+
     /// <summary>Adds a selectable element to this group.</summary>
     /// <param name="element">The element to add.</param>
     /// <param name="selected">Whether the element should already be selected.</param>
     /// <param name="addChild">Whether to add the element as a child.</param>
     public void AddElement(UIElement element, bool selected = false, bool addChild = true)
     {
+        if (Elements.Contains(element))
+        {
+            return;
+        }
         if (selected)
         {
             SelectElement(element);
