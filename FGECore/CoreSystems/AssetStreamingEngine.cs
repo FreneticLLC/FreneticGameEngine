@@ -120,9 +120,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
                     HandleError($"File '{FileName}' not found.");
                 }
             }
-            catch (Exception ex2)
+            catch (Exception ex)
             {
-                Logs.Error($"Exception in asset streaming error handler: {ex2}\nCaused by: File not found.");
+                Logs.CriticalError($"Exception in asset streaming error handler: Caused by: File not found.", ex);
             }
         }
 
@@ -141,9 +141,9 @@ public class AssetStreamingEngine(FileEngine _files, Scheduler _schedule)
                     Logs.Error($"Asset streaming engine encountered error: {message}");
                 }
             }
-            catch (Exception ex2)
+            catch (Exception ex)
             {
-                Logs.Error($"Exception in asset streaming error handler: {ex2}\nCaused by:\n{message}");
+                Logs.CriticalError($"Exception in asset streaming error handler\nCaused by:\n{message}\n", ex);
             }
         }
     }

@@ -46,8 +46,7 @@ public static class GraphicsUtil
                 errorMessage.Append(", ");
             }
         }
-        errorMessage.Append($"\n{StackNoteHelper.Notes}\n{Environment.StackTrace}");
-        Logs.Error($"{errorMessage}");
+        Logs.CriticalError($"{errorMessage}");
     }
 
     /// <summary>Only if DEBUG flag is set, assert that a value must be true, error if it is not.</summary>
@@ -58,7 +57,7 @@ public static class GraphicsUtil
     {
         if (!mustBeTrue)
         {
-            Logs.Error($"Assertion failed: {message}");
+            Logs.CriticalError($"Assertion failed: {message}");
             CheckError("GraphicsUtil DebugAssert");
             throw new Exception($"Assertion failed: {message}");
         }

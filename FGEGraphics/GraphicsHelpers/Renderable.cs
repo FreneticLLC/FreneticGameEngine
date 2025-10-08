@@ -555,9 +555,9 @@ public class Renderable
         Vector4[] weights2 = null;
         if (builder is ListBuilder buildList)
         {
-            if (buildList.Vertices == null)
+            if (buildList.Vertices is null)
             {
-                Logs.Error("Failed to generate VBO, null vertices!");
+                Logs.CriticalError("Failed to generate VBO, null vertices!");
                 return;
             }
             vecs = [.. buildList.Vertices];
@@ -577,9 +577,9 @@ public class Renderable
         }
         else if (builder is ArrayBuilder buildArray)
         {
-            if (buildArray.Vertices == null)
+            if (buildArray.Vertices is null)
             {
-                Logs.Error("Failed to generate VBO, null vertices!");
+                Logs.CriticalError("Failed to generate VBO, null vertices!");
                 return;
             }
             vecs = buildArray.Vertices;
@@ -588,7 +588,7 @@ public class Renderable
             texs = buildArray.TexCoords;
             tangs = buildArray.Tangents ?? TangentsFor(vecs, norms, texs);
             cols = buildArray.Colors;
-            if (buildArray.BoneIDs != null)
+            if (buildArray.BoneIDs is not null)
             {
                 Internal.HasBones = true;
                 ids = buildArray.BoneIDs;
@@ -599,28 +599,28 @@ public class Renderable
         }
         else
         {
-            Logs.Error("Failed to generate VBO, unknown builder type '" + builder + "'!");
+            Logs.CriticalError($"Failed to generate VBO, unknown builder type '{builder}'!");
             return;
         }
         if (vecs.Length == 0)
         {
-            Logs.Error("Failed to generate VBO, empty vertices!");
+            Logs.CriticalError("Failed to generate VBO, empty vertices!");
             return;
         }
 #if DEBUG
         if (vecs.Length != norms.Length || vecs.Length != texs.Length || vecs.Length != tangs.Length)
         {
-            OutputType.ERROR.Output("Failed to generate VBO, main vertex attribute counts not aligned!");
+            Logs.CriticalError("Failed to generate VBO, main vertex attribute counts not aligned!");
             return;
         }
         if (cols != null && vecs.Length != cols.Length)
         {
-            OutputType.ERROR.Output("Failed to generate VBO, vertex color attribute count not aligned!");
+            Logs.CriticalError("Failed to generate VBO, vertex color attribute count not aligned!");
             return;
         }
         if (Internal.HasBones && (vecs.Length != ids.Length || vecs.Length != weights.Length || vecs.Length != ids2.Length || vecs.Length != weights2.Length))
         {
-            OutputType.ERROR.Output("Failed to generate VBO, vertex bone attribute counts not aligned!");
+            Logs.CriticalError("Failed to generate VBO, vertex bone attribute counts not aligned!");
             return;
         }
 #endif
