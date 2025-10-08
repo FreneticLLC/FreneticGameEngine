@@ -144,6 +144,21 @@ public class PropertyHolder
         return [];
     }
 
+    /// <summary>
+    /// Gets all properties with a specific interface.
+    /// <para>Returns an empty list when nothing is found.</para>
+    /// </summary>
+    /// <typeparam name="T">The type of the interface.</typeparam>
+    /// <returns>All the objects.</returns>
+    public IEnumerable<T> EnumerateAllInterfacedProperties<T>()
+    {
+        if (PropertyInternals.HeldInterfaces.TryGetValue(typeof(T), out List<object> objs))
+        {
+            return objs.Cast<T>();
+        }
+        return [];
+    }
+
     /// <summary>Sends a signal to all properties with a specific interface.</summary>
     /// <typeparam name="T">The type of the interface.</typeparam>
     /// <param name="signal">The signal to send.</param>
