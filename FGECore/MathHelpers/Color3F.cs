@@ -141,6 +141,26 @@ public struct Color3F
             );
     }
 
+    /// <summary>Returns a hex string form of this color, in the format #RRGGBB.</summary>
+    public readonly string ToHexString() => $"#{IR:X2}{IG:X2}{IB:X2}";
+
+    /// <summary>Parses a hex string form of a color, in the format #RRGGBB or RRGGBB.</summary>
+    public static Color3F FromHexString(string hex)
+    {
+        if (hex.StartsWith('#'))
+        {
+            hex = hex[1..];
+        }
+        if (hex.Length != 6)
+        {
+            throw new FormatException("Hex color strings must be in the format #RRGGBB");
+        }
+        int r = Convert.ToInt32(hex[0..2], 16);
+        int g = Convert.ToInt32(hex[2..4], 16);
+        int b = Convert.ToInt32(hex[4..6], 16);
+        return new Color3F(r / 255f, g / 255f, b / 255f);
+    }
+
     /// <summary>Returns a string form of this color.</summary>
     public override readonly string ToString() => $"({R}, {G}, {B})";
 
