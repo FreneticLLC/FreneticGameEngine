@@ -12,10 +12,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
+using FGECore.MathHelpers;
 using FGECore.UtilitySystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using OpenTK.Mathematics;
-using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
