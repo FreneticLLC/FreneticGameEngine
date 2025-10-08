@@ -29,6 +29,12 @@ public class Logs
         OutputType.ERROR.Output(message);
     }
 
+    /// <summary>A major error.</summary>
+    public static void Error(string message, Exception ex)
+    {
+        SysConsole.Output(message, ex);
+    }
+
     /// <summary>A (probably) ignorable error.</summary>
     public static void Warning(string message)
     {
