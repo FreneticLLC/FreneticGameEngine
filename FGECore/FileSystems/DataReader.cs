@@ -107,6 +107,15 @@ public class DataReader(DataStream stream)
         return new Location(x, y, z);
     }
 
+    /// <summary>Read a Color3F object (12 bytes).</summary>
+    public Color3F ReadColor3F()
+    {
+        float r = ReadFloat();
+        float g = ReadFloat();
+        float b = ReadFloat();
+        return new Color3F(r, g, b);
+    }
+
     /// <summary>Read a quaternion object (32 bytes).</summary>
     public Quaternion ReadQuaternion()
     {
