@@ -287,7 +287,13 @@ public class EntityPhysicsProperty : BasicEntityProperty
         return new((*min - pos).ToLocation(), (*max - pos).ToLocation());
     }
 
-    /// <summary>Fired when the entity is added to the world.</summary>
+    /// <inheritdoc/>
+    public override void OnAdded()
+    {
+        PhysicsWorld ??= Engine.PhysicsWorldGeneric;
+    }
+
+    /// <inheritdoc/>
     public override void OnSpawn()
     {
         if (IsSpawned)
@@ -305,7 +311,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         Entity.OnOrientationChanged += DoOrientationCheckEvent;
     }
 
-    /// <summary>Fired when the entity is removed from the world.</summary>
+    /// <inheritdoc/>
     public override void OnDespawn()
     {
         if (HandledRemove)
