@@ -36,8 +36,8 @@ public class PropertyHolder
         /// <param name="propObj">The property object instance.</param>
         public readonly void NoticeProperty(PropertyHolder holder, Type type, Property propObj)
         {
-            propObj.Holder = holder;
-            propObj.Helper = PropertyHelper.EnsureHandled(type);
+            propObj.PropHolder = holder;
+            propObj.PropHelper = PropertyHelper.EnsureHandled(type);
             foreach (Type iface in type.GetInterfaces())
             {
                 if (HeldInterfaces.TryGetValue(iface, out List<Object> objs))
@@ -69,7 +69,7 @@ public class PropertyHolder
             }
             prop.OnRemoved();
             holder.OnRemoved(prop);
-            prop.Holder = null;
+            prop.PropHolder = null;
         }
     }
 
@@ -418,7 +418,7 @@ public class PropertyHolder
     /// <returns>The property.</returns>
     public void AddProperty(Property prop)
     {
-        if (prop.Holder != null)
+        if (prop.PropHolder != null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }
@@ -446,7 +446,7 @@ public class PropertyHolder
             return p;
         }
         Property constructedProperty = constructor();
-        if (constructedProperty.Holder != null)
+        if (constructedProperty.PropHolder != null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }
@@ -470,7 +470,7 @@ public class PropertyHolder
             return p as T;
         }
         T res = constructor();
-        if (res.Holder != null)
+        if (res.PropHolder != null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }

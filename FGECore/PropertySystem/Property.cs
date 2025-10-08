@@ -19,17 +19,17 @@ namespace FGECore.PropertySystem;
 public abstract class Property
 {
     /// <summary>The holder of this property. Modifying this value could lead to errors!</summary>
-    public PropertyHolder Holder = null;
+    public PropertyHolder PropHolder = null;
 
     /// <summary>The system that helps this property's field information.</summary>
-    public PropertyHelper Helper = null;
+    public PropertyHelper PropHelper = null;
 
     /// <summary>Gets the debug output for this property.</summary>
     /// <returns>The debuggable data.</returns>
     public Dictionary<string, string> GetDebuggable()
     {
         Dictionary<string, string> strs = [];
-        Helper.GetDebuggableInfoOutput(this, strs);
+        PropHelper.GetDebuggableInfoOutput(this, strs);
         return strs;
     }
 
@@ -37,7 +37,7 @@ public abstract class Property
     /// <returns>Whether it is held.</returns>
     public bool IsHeld()
     {
-        return Holder != null;
+        return PropHolder != null;
     }
 
     /// <summary>Returns whether this property is currently held by something, and outputs the holder if so (otherwise, outputs null).</summary>
@@ -45,7 +45,7 @@ public abstract class Property
     /// <returns>Whether it is held.</returns>
     public bool IsHeld(out PropertyHolder outholder)
     {
-        return (outholder = Holder) != null;
+        return (outholder = PropHolder) != null;
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public abstract class Property
     public virtual Property DuplicateClean()
     {
         Property p = MemberwiseClone() as Property;
-        p.Holder = null;
+        p.PropHolder = null;
         return p;
     }
 
