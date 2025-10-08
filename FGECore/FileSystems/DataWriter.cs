@@ -48,6 +48,15 @@ public class DataWriter(DataStream stream)
         WriteFloat(loc.ZF);
     }
 
+    /// <summary>Writes a Color3F object (12 bytes).</summary>
+    /// <param name="color">The data.</param>
+    public void WriteColor3F(Color3F color)
+    {
+        WriteFloat(color.R);
+        WriteFloat(color.G);
+        WriteFloat(color.B);
+    }
+
     /// <summary>Write a quaternion object (32 bytes).</summary>
     /// <param name="quat">The data.</param>
     public void WriteQuaternion(Quaternion quat)
