@@ -68,7 +68,7 @@ public abstract class EntityShapeHelper(PhysicsSpace _space)
     /// <summary>Duplicates this shape helper, making it ready to be used in a different space if desired.</summary>
     public virtual EntityShapeHelper Duplicate(PhysicsSpace space)
     {
-        EntityShapeHelper copy = (EntityShapeHelper)MemberwiseClone();
+        EntityShapeHelper copy = MemberwiseClone() as EntityShapeHelper;
         copy.ShapeIndex = default;
         copy.Space = space;
         return copy;
