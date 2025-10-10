@@ -65,6 +65,15 @@ public abstract class EntityShapeHelper(PhysicsSpace _space)
         }
     }
 
+    /// <summary>Duplicates this shape helper, making it ready to be used in a different space if desired.</summary>
+    public virtual EntityShapeHelper Duplicate(PhysicsSpace space)
+    {
+        EntityShapeHelper copy = (EntityShapeHelper)MemberwiseClone();
+        copy.ShapeIndex = default;
+        copy.Space = space;
+        return copy;
+    }
+
     /// <summary>Call <see cref="Simulation.Sweep{TShape, TSweepHitHandler}(in TShape, in RigidPose, in BodyVelocity, float, BufferPool, ref TSweepHitHandler)"/> for this shape.</summary>
     /// <typeparam name="TSweepHitHandler">Type of the callbacks executed when a sweep impacts an object in the scene.</typeparam>
     /// <param name="simulation">The backing simulation.</param>
