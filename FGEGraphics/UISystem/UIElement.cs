@@ -74,6 +74,9 @@ public abstract class UIElement
     /// <summary>The absolute rotation.</summary>
     public float Rotation;
 
+    /// <summary>The absolute scale.</summary>
+    public float Scale;
+
     /// <summary>Gets the absolute X coordinate.</summary>
     /// <seealso cref="Position"/>
     public int X => Position.X;
@@ -140,6 +143,9 @@ public abstract class UIElement
 
         /// <summary>The last absolute rotation.</summary>
         public float LastRotation;
+
+        /// <summary>The last absolute scale.</summary>
+        public float LastScale;
 
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
@@ -554,8 +560,10 @@ public abstract class UIElement
         ElementInternal.LastPosition = Position;
         ElementInternal.LastSize = Size;
         ElementInternal.LastRotation = Rotation;
+        ElementInternal.LastScale = Scale;
         Position = new(x, y);
-        Size = new(Layout.Width, Layout.Height);
+        Scale = Layout.Scale;
+        Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
         Rotation = rotation.Z;
     }
 
@@ -578,6 +586,7 @@ public abstract class UIElement
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
             anyFired |= true;
         }
+        // TODO: handle scale
         return anyFired;
     }
 
