@@ -79,7 +79,7 @@ public class AnimationEngine
         }
         catch (Exception ex)
         {
-            Logs.Error($"Loading an animation: {ex}");
+            Logs.CriticalError($"Loading an animation", ex);
             sa = new() { Name = namelow, Length = 1, Engine = this };
             Animations.Add(sa.Name, sa);
             return sa;

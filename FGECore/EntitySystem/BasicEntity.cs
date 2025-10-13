@@ -164,7 +164,7 @@ public abstract class BasicEntity : PropertyHolder
                 strMap[nm] = id;
             }
             dw.WriteVarInt(id);
-            saveme.Helper.SaveNC(saveme, dw, strs, strMap);
+            saveme.PropHelper.SaveNC(saveme, dw, strs, strMap);
         }
     }
 

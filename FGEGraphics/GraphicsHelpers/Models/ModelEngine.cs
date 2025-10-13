@@ -137,7 +137,7 @@ public class ModelEngine
         }
         catch (Exception ex)
         {
-            Logs.Error($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Error}': {ex}");
+            Logs.CriticalError($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Error}'", ex);
             return null;
         }
     }
@@ -162,7 +162,7 @@ public class ModelEngine
         }
         catch (Exception ex)
         {
-            Logs.Error(ex.ToString());
+            Logs.CriticalError($"Reading model '{modelname}'", ex);
         }
         Loaded ??= new Model(modelname) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
         LoadedModels.Add(modelname, Loaded);

@@ -140,13 +140,30 @@ public sealed class DataStream : Stream
         }
     }
 
-    /// <summary>Set the length of the underlying buffer.</summary>
-    /// <param name="res_len">The resultant length.</param>
+    /// <summary>Set the total length of the underlying buffer, including any existing data.</summary>
+    /// <param name="res_len">The resultant length. If the length is less than the current data length, the buffer will be shrunk to contain exactly the current data.</param>
     public void SetCapacity(long res_len)
     {
+        if (Ind == 0 && Wrapped.Length == res_len)
+        {
+            return;
+        }
         byte[] t = new byte[res_len];
         Array.Copy(Wrapped, Ind, t, 0, Math.Min(res_len, Len));
         Wrapped = t;
+    }
+
+    /// <summary>Expands the buffer to ensure at least the given number of additional bytes can be written. May allocate more than requested. Does nothing if the space is already present.</summary>
+    /// <param name="newCapacity">The minimum number of free bytes to add.</param>
+    public void EnsureCapacity(long newCapacity)
+    {
+        long totalNeeded = Len + newCapacity;
+        long newCap = Wrapped.Length;
+        while (newCap < totalNeeded)
+        {
+            newCap *= 2;
+        }
+        SetCapacity(newCap);
     }
 
     /// <summary>Reads a single byte, or returns -1.</summary>

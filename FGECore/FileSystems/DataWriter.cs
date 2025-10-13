@@ -27,6 +27,10 @@ public class DataWriter(DataStream stream)
 
     private readonly byte[] HelperBytes = new byte[32];
 
+    /// <summary>Expands the underlying buffer to ensure at least the given number of additional bytes can be written. May allocate more than requested. Does nothing if the space is already present.</summary>
+    /// <param name="newCapacity">The minimum number of free bytes to add.</param>
+    public void EnsureCapacity(int newCapacity) => Internal.EnsureCapacity(newCapacity);
+
     /// <summary>Write a location object (24 bytes).</summary>
     /// <param name="loc">The data.</param>
     public void WriteLocation(Location loc)
@@ -42,6 +46,15 @@ public class DataWriter(DataStream stream)
         WriteFloat(loc.XF);
         WriteFloat(loc.YF);
         WriteFloat(loc.ZF);
+    }
+
+    /// <summary>Writes a Color3F object (12 bytes).</summary>
+    /// <param name="color">The data.</param>
+    public void WriteColor3F(Color3F color)
+    {
+        WriteFloat(color.R);
+        WriteFloat(color.G);
+        WriteFloat(color.B);
     }
 
     /// <summary>Write a quaternion object (32 bytes).</summary>

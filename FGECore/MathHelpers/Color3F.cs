@@ -9,11 +9,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Numerics;
+using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FGECore.MathHelpers;
@@ -141,8 +142,44 @@ public struct Color3F
             );
     }
 
-    /// <summary>Returns a string form of this color.</summary>
+    /// <summary>Returns a hex string form of this color, in the format #RRGGBB.
+    /// Inverts <see cref="FromHexString(string)"/>.</summary>
+    public readonly string ToHexString() => $"#{IR:X2}{IG:X2}{IB:X2}";
+
+    /// <summary>Parses a hex string form of a color, in the format #RRGGBB or RRGGBB.
+    /// Inverts <see cref="ToHexString"/>.</summary>
+    public static Color3F FromHexString(string hex)
+    {
+        if (hex.StartsWith('#'))
+        {
+            hex = hex[1..];
+        }
+        if (hex.Length != 6)
+        {
+            throw new FormatException("Hex color strings must be in the format #RRGGBB");
+        }
+        int r = Convert.ToInt32(hex[0..2], 16);
+        int g = Convert.ToInt32(hex[2..4], 16);
+        int b = Convert.ToInt32(hex[4..6], 16);
+        return new Color3F(r / 255f, g / 255f, b / 255f);
+    }
+
+    /// <summary>Returns a string form of this color, in the format (R, G, B).
+    /// Inverts <see cref="FromString(string)"/>.</summary>
     public override readonly string ToString() => $"({R}, {G}, {B})";
+
+    /// <summary>Parses a string form of a color, in the format (R, G, B) or R, G, B.
+    /// Inverts <see cref="ToString"/>.</summary>
+    /// <param name="input">The input string.</param>
+    public static Color3F FromString(string input)
+    {
+        string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
+        if (data.Length != 3)
+        {
+            throw new FormatException("Color3F strings must be in the format (R, G, B) or R, G, B");
+        }
+        return new(StringConversionHelper.StringToFloat(data[0]), StringConversionHelper.StringToFloat(data[1]), StringConversionHelper.StringToFloat(data[2]));
+    }
 
     /// <summary>Adds two colors together.</summary>
     public static Color3F operator +(Color3F c1, Color3F c2) => new(c1.R + c2.R, c1.G + c2.G, c1.B + c2.B);

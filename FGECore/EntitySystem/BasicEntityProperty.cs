@@ -20,7 +20,7 @@ namespace FGECore.EntitySystem;
 public abstract class BasicEntityProperty : Property
 {
     /// <summary>Gets the entity associated with a property.</summary>
-    public BasicEntity Entity => Holder as BasicEntity;
+    public BasicEntity Entity => PropHolder as BasicEntity;
 
     /// <summary>Gets the engine associated with a property.</summary>
     public BasicEngine Engine => Entity.EngineGeneric;
@@ -40,7 +40,7 @@ public abstract class BasicEntityProperty : Property
 public class BasicEntityProperty<T, T2> : BasicEntityProperty where T: BasicEntity<T, T2> where T2: BasicEngine<T, T2>
 {
     /// <summary>Gets the entity associated with a property.</summary>
-    public new T Entity => Holder as T;
+    public new T Entity => PropHolder as T;
 
     /// <summary>Gets the engine associated with a property.</summary>
     public new T2 Engine => Entity.Engine;

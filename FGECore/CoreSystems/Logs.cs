@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using FGECore.StackNoteSystem;
 
 namespace FGECore.CoreSystems;
 
@@ -27,6 +29,23 @@ public class Logs
     public static void Error(string message)
     {
         OutputType.ERROR.Output(message);
+    }
+
+    /// <summary>A major error, with a stack trace.</summary>
+    public static void CriticalError(string message)
+    {
+        OutputType.ERROR.Output($"{message}\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
+    }
+
+    /// <summary>A major error, with a stack trace.</summary>
+    public static void CriticalError(string message, Exception ex)
+    {
+        if (ex is ThreadAbortException)
+        {
+            // Shouldn't be possible, but has happened before, so...
+            throw ex;
+        }
+        OutputType.ERROR.Output($"{message}: {ex}\n\n{StackNoteHelper.Notes}");
     }
 
     /// <summary>A (probably) ignorable error.</summary>
