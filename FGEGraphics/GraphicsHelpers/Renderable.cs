@@ -643,7 +643,7 @@ public class Renderable
         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(tangs.Length * Vector3.SizeInBytes), tangs, Internal.BufferMode);
         Internal.LastVRAM += tangs.Length * Vector3.SizeInBytes;
         // Color buffer
-        if (cols != null)
+        if (cols is not null)
         {
             Internal.HasColors = true;
             Internal.ColorVBO = new("Renderable_ColorVBO", BufferTarget.ArrayBuffer);
