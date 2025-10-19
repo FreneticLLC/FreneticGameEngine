@@ -282,23 +282,35 @@ public static class GraphicsUtil
     }
 
     /// <summary>Binds shader buffer object data directly, equivalent to <code>BindBuffer(target, id); BufferData(target, data, etc); BindBuffer(0);</code></summary>
-    public static void BindBufferData<T>(BufferTarget bufferTarget, uint bufferId, T[] data, BufferUsageHint hint) where T : unmanaged
+    public static void BindBufferData<T>(BufferTarget bufferTarget, TrackedBuffer buffer, T[] data, BufferUsageHint hint) where T : unmanaged
     {
-        BindBufferData(bufferTarget, bufferId, data, data.Length, hint);
+        BindBufferData(bufferTarget, buffer, data, data.Length, hint);
     }
 
     /// <summary>Binds shader buffer object data directly, equivalent to <code>BindBuffer(target, id); BufferData(target, data, etc); BindBuffer(0);</code></summary>
-    public static unsafe void BindBufferData<T>(BufferTarget bufferTarget, uint bufferId, T[] data, int len, BufferUsageHint hint) where T: unmanaged
+    public static unsafe void BindBufferData<T>(BufferTarget bufferTarget, TrackedBuffer buffer, T[] data, int len, BufferUsageHint hint) where T: unmanaged
     {
-        GL.BindBuffer(bufferTarget, bufferId);
+#if DEBUG
+        if (buffer is null || !buffer.IsValid)
+        {
+            throw new Exception($"Attempted to bind data to an invalid (already disposed) buffer: {buffer?.Source ?? "null"}!");
+        }
+#endif
+        GL.BindBuffer(bufferTarget, buffer.ID);
         GL.BufferData(bufferTarget, len * sizeof(T), data, hint); // sizeof(T) is 'unsafe' because it's not compile time known, but *is* JIT-Compile time known
         GL.BindBuffer(bufferTarget, 0);
     }
 
     /// <summary>Binds shader buffer object data directly as null/empty, equivalent to <code>BindBuffer(target, id); BufferData(target, 0, IntPtr.Zero, etc); BindBuffer(0);</code></summary>
-    public static void BindBufferDataEmpty(BufferTarget bufferTarget, uint bufferId, int len, BufferUsageHint hint)
+    public static void BindBufferDataEmpty(BufferTarget bufferTarget, TrackedBuffer buffer, int len, BufferUsageHint hint)
     {
-        GL.BindBuffer(bufferTarget, bufferId);
+#if DEBUG
+        if (buffer is null || !buffer.IsValid)
+        {
+            throw new Exception($"Attempted to bind data to an invalid (already disposed) buffer: {buffer?.Source ?? "null"}!");
+        }
+#endif
+        GL.BindBuffer(bufferTarget, buffer.ID);
         GL.BufferData(bufferTarget, len, IntPtr.Zero, hint);
         GL.BindBuffer(bufferTarget, 0);
     }
