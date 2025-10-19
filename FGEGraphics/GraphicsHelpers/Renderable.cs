@@ -538,6 +538,7 @@ public class Renderable
     /// <param name="builder">The builder to use.</param>
     public void GenerateVBO(Builder builder)
     {
+        GraphicsUtil.CheckError("Pre- GenerateVBO");
         if (Generated)
         {
             Destroy();
@@ -719,7 +720,7 @@ public class Renderable
         // Clean up
         GL.BindVertexArray(0);
         Generated = true;
-
+        GraphicsUtil.CheckError("Renderable - GenerateVBO", this);
     }
 
     /// <summary>Renders the VBO fully, without handling textures at all.</summary>

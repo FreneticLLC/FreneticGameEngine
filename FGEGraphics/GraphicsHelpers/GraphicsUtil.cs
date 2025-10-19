@@ -36,7 +36,7 @@ public static class GraphicsUtil
         }
         StringBuilder errorMessage = new();
         string contextText = context is null ? "" : $"(context=`{context}`): ";
-        errorMessage.Append($"OpenGL error [{callerLocationLabel} {contextText}(bound shader=`{ShaderEngine.BoundNow?.Name ?? "(none)"}`)]: ");
+        errorMessage.Append($"OpenGL error [{callerLocationLabel} {contextText}(bound shader=`{BoundShader}`=`{ShaderEngine.BoundNow?.Name ?? "(none)"}`, texture=`{BoundTexture}`)]: ");
         while (ec != ErrorCode.NoError)
         {
             errorMessage.Append($"{ec}");
@@ -90,11 +90,11 @@ public static class GraphicsUtil
     {
         GL.GenBuffers(1, out uint buffer);
         GL.BindBuffer(target, buffer);
-        LabelObject(ObjectLabelIdentifier.Buffer, buffer, $"FGEBuffer_{source}");
 #if DEBUG
         ActiveBuffers[buffer] = source;
         CheckError("GraphicsUtil GenBuffer", source);
 #endif
+        LabelObject(ObjectLabelIdentifier.Buffer, buffer, $"FGEBuffer_{source}");
         return buffer;
     }
 
@@ -158,6 +158,8 @@ public static class GraphicsUtil
         /// <param name="target">What buffer target to bind the buffer to.</param>
         public TrackedBuffer(string source, BufferTarget target)
         {
+            Source = source;
+            Target = target;
             ID = GenBuffer(source, target);
         }
 
@@ -192,6 +194,7 @@ public static class GraphicsUtil
                 throw new Exception($"Attempted to bind an invalid (already disposed) buffer: {Source}!");
             }
             GL.BindBuffer(Target, ID);
+            CheckError("TrackedBuffer Bind", this);
         }
 
         /// <summary>Dipose the buffer.</summary>
@@ -202,6 +205,12 @@ public static class GraphicsUtil
                 DeleteBuffer(ID);
                 IsValid = false;
             }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"TrackedBuffer(ID={ID}, Source=`{Source}`, Target={Target}, IsValid={IsValid})";
         }
     }
 
@@ -419,6 +428,7 @@ public static class GraphicsUtil
     public static void UseProgram(string source, int shader)
     {
 #if DEBUG
+        ShaderEngine.BoundNow = null;
         if (shader < 0)
         {
             throw new Exception($"Attempted to use invalid shader program ID {shader}!");

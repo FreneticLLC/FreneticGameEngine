@@ -112,8 +112,8 @@ public class Shader
         }
         LastBindTime = Engine.cTime;
         CheckValid();
-        ShaderEngine.BoundNow = this;
         GraphicsUtil.UseProgram("Shader Bind", Internal_Program);
+        ShaderEngine.BoundNow = this;
         return NewVersion;
     }
 }
