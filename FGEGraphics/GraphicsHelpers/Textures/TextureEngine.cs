@@ -483,7 +483,7 @@ public class TextureEngine : IDisposable
         texture.Height = bmp.Height;
         if (!texture.OwnsItsTextureId)
         {
-            texture.OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_FromBitmap_{texture.Name}", TextureTarget.Texture2D);
+            texture.OriginalInternalID = new($"FGETexture_FromBitmap_{texture.Name}", TextureTarget.Texture2D);
             texture.InternalTexture = texture.OriginalInternalID;
             texture.OwnsItsTextureId = true;
         }
@@ -545,7 +545,7 @@ public class TextureEngine : IDisposable
             Name = name,
             Width = 2,
             Height = 2,
-            OriginalInternalID = (int)GraphicsUtil.GenTexture($"FGETexture_ForColor_{name}", TextureTarget.Texture2D)
+            OriginalInternalID = new($"FGETexture_ForColor_{name}", TextureTarget.Texture2D)
         };
         texture.InternalTexture = texture.OriginalInternalID;
         texture.OwnsItsTextureId = true;

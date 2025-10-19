@@ -38,7 +38,7 @@ public class Model(string _name)
     public string Name = _name;
 
     /// <summary>LOD helper data.</summary>
-    public KeyValuePair<int, int>[] LODHelper = null;
+    public (GraphicsUtil.TrackedTexture, GraphicsUtil.TrackedTexture)[] LODHelper = null;
 
     /// <summary>The LOD box.</summary>
     public AABB LODBox = default;
@@ -263,39 +263,39 @@ public class Model(string _name)
         Matrix4 xrot = Matrix4.CreateRotationX((float)Math.PI * 0.5f);
         Matrix4 finalTranslate = transform * Matrix4.CreateTranslation(vpos);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Key);
+        LODHelper[0].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[0].Value);
+        LODHelper[0].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * xrot * Matrix4.CreateRotationZ((float)Math.PI * 0.25f) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Key);
+        LODHelper[1].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[1].Value);
+        LODHelper[1].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.X, wid.Z, 1f) * xrot * Matrix4.CreateRotationZ((float)Math.PI * 0.75f) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Key);
+        LODHelper[2].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[2].Value);
+        LODHelper[2].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * xrot * Matrix4.CreateRotationZ((float)Math.PI * -0.25f) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Key);
+        LODHelper[3].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[3].Value);
+        LODHelper[3].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Y, wid.Z, 1f) * xrot * Matrix4.CreateRotationZ((float)Math.PI * -0.75f) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Key);
+        LODHelper[4].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[4].Value);
+        LODHelper[4].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Key);
+        LODHelper[5].Item1.Bind();
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, LODHelper[5].Value);
+        LODHelper[5].Item2.Bind();
         Engine.Window.Rendering3D.RenderRectangle3D(off1 * Matrix4.CreateScale(wid.Z, wid.X, 1f) * Matrix4.CreateRotationX((float)Math.PI) * finalTranslate);
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
     }
 
     /// <summary>Draws the model.</summary>

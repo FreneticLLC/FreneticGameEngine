@@ -311,21 +311,8 @@ public class ShaderEngine
             index += FILE_START.Length;
         }
         fileText = fileText.Insert(index, specialadder);
-        int shaderObject = GL.CreateShader(ShaderType.ComputeShader);
-        GraphicsUtil.LabelObject(ObjectLabelIdentifier.Shader, (uint)shaderObject, $"FGEComputeShader_{fileName}");
-        GL.ShaderSource(shaderObject, fileText);
-        GL.CompileShader(shaderObject);
-        string SHD_Info = GL.GetShaderInfoLog(shaderObject);
-        GL.GetShader(shaderObject, ShaderParameter.CompileStatus, out int SHD_Status);
-        if (SHD_Status != 1)
-        {
-#if DEBUG
-            File.WriteAllText($"temp_shd_{fileName.Replace('\\', '/').Replace("/", "_")}.txt", fileText);
-#endif
-            throw new Exception($"Error creating ComputeShader '{fileName}'. Error status: {SHD_Status}, info: {SHD_Info}");
-        }
-        int program = GL.CreateProgram();
-        GraphicsUtil.LabelObject(ObjectLabelIdentifier.Program, (uint)program, $"FGEComputeShaderProg_{fileName}");
+        int shaderObject = GraphicsUtil.CreateShader(ShaderType.ComputeShader, $"FGEComputeShader_{fileName}", fileText);
+        int program = GraphicsUtil.CreateProgram($"FGEComputeShaderProg_{fileName}");
         GL.AttachShader(program, shaderObject);
         GL.LinkProgram(program);
         string str = GL.GetProgramInfoLog(program);
@@ -362,50 +349,22 @@ public class ShaderEngine
             }
             VS = PatchDefs(VS, ReusableDefValues);
             FS = PatchDefs(FS, ReusableDefValues);
-            if (GS != null)
+            if (GS is not null)
             {
                 GS = PatchDefs(GS, ReusableDefValues);
             }
         }
         int geomObject = -1;
-        if (GS != null)
+        if (GS is not null)
         {
-            geomObject = GL.CreateShader(ShaderType.GeometryShader);
-            GraphicsUtil.LabelObject(ObjectLabelIdentifier.Shader, (uint)geomObject, $"FGEGeomShader_{name}");
-            GL.ShaderSource(geomObject, GS);
-            GL.CompileShader(geomObject);
-            string GS_Info = GL.GetShaderInfoLog(geomObject);
-            GL.GetShader(geomObject, ShaderParameter.CompileStatus, out int GS_Status);
-            if (GS_Status != 1)
-            {
-                throw new Exception($"Error creating GeometryShader '{name}'. Error status: {GS_Status}, info: {GS_Info}");
-            }
+            geomObject = GraphicsUtil.CreateShader(ShaderType.GeometryShader, $"FGEGeomShader_{name}", GS);
         }
-        int vertexObject = GL.CreateShader(ShaderType.VertexShader);
-        GraphicsUtil.LabelObject(ObjectLabelIdentifier.Shader, (uint)vertexObject, $"FGEVertShader_{name}");
-        GL.ShaderSource(vertexObject, VS);
-        GL.CompileShader(vertexObject);
-        string VS_Info = GL.GetShaderInfoLog(vertexObject);
-        GL.GetShader(vertexObject, ShaderParameter.CompileStatus, out int VS_Status);
-        if (VS_Status != 1)
-        {
-            throw new Exception($"Error creating VertexShader '{name}'. Error status: {VS_Status}, info: {VS_Info}");
-        }
-        int fragmentObject = GL.CreateShader(ShaderType.FragmentShader);
-        GraphicsUtil.LabelObject(ObjectLabelIdentifier.Shader, (uint)fragmentObject, $"FGEFragShader_{name}");
-        GL.ShaderSource(fragmentObject, FS);
-        GL.CompileShader(fragmentObject);
-        string FS_Info = GL.GetShaderInfoLog(fragmentObject);
-        GL.GetShader(fragmentObject, ShaderParameter.CompileStatus, out int FS_Status);
-        if (FS_Status != 1)
-        {
-            throw new Exception($"Error creating FragmentShader '{name}'. Error status: {FS_Status}, info: {FS_Info}");
-        }
-        int program = GL.CreateProgram();
-        GraphicsUtil.LabelObject(ObjectLabelIdentifier.Program, (uint)program, $"FGEShaderProg_{name}");
+        int vertexObject = GraphicsUtil.CreateShader(ShaderType.VertexShader, $"FGEVertShader_{name}", VS);
+        int fragmentObject = GraphicsUtil.CreateShader(ShaderType.FragmentShader, $"FGEFragShader_{name}", FS);
+        int program = GraphicsUtil.CreateProgram($"FGEShaderProg_{name}");
         GL.AttachShader(program, fragmentObject);
         GL.AttachShader(program, vertexObject);
-        if (GS != null)
+        if (GS is not null)
         {
             GL.AttachShader(program, geomObject);
         }

@@ -41,10 +41,10 @@ public class SkyLight : LightObject
     public int FBO = -1;
 
     /// <summary>The FBO Texture.</summary>
-    public int FBO_Tex = -1;
+    public GraphicsUtil.TrackedTexture FBO_Tex;
 
     /// <summary>The FBO Depth Texture.</summary>
-    public int FBO_DepthTex = -1;
+    public GraphicsUtil.TrackedTexture FBO_DepthTex;
 
     /// <summary>The width of the shadow texture.</summary>
     public int TexWidth = 0;
@@ -78,21 +78,21 @@ public class SkyLight : LightObject
         MaxDistance = radius;
         TexWidth = twidth;
         FBO = GL.GenFramebuffer();
-        FBO_Tex = (int)GraphicsUtil.GenTexture("SkyLight_FBO_Tex", TextureTarget.Texture2D);
+        FBO_Tex = new("SkyLight_FBO_Tex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, TexWidth, TexWidth, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        FBO_DepthTex = (int)GraphicsUtil.GenTexture("SkyLight_FBO_DepthTex", TextureTarget.Texture2D);
+        FBO_DepthTex = new("SkyLight_FBO_DepthTex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, TexWidth, TexWidth, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, FBO_DepthTex, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex.ID, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, FBO_DepthTex.ID, 0);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
@@ -100,8 +100,8 @@ public class SkyLight : LightObject
     public void Destroy()
     {
         GL.DeleteFramebuffer(FBO);
-        GL.DeleteTexture(FBO_Tex);
-        GL.DeleteTexture(FBO_DepthTex);
+        FBO_Tex.Dispose();
+        FBO_DepthTex.Dispose();
     }
 
     /// <summary>Repositions the sky light.</summary>

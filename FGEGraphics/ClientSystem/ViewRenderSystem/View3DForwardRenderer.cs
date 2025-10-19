@@ -147,8 +147,8 @@ public class View3DForwardRenderer : View3DCoreDataSet
         if (Engine.Forward_Shadows)
         {
             GL.ActiveTexture(TextureUnit.Texture5);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+            GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
+            Internal.FBO_Shadow_DepthTexture.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
         }
         float fogDist = 1.0f / Engine.FogMaxDist();
@@ -271,41 +271,41 @@ public class View3DForwardRenderer : View3DCoreDataSet
                 GL.Uniform2(7, new Vector2(60f, Engine.ZFarOut())); // TODO: View3D-level Vars!
                 GL.Uniform3(8, State.CameraRelativePosition);
                 GL.ActiveTexture(TextureUnit.Texture5);
-                GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_OutView_DepthTexture);
+                Internal.FBO_OutView_DepthTexture.Bind();
                 GL.ActiveTexture(TextureUnit.Texture4);
-                GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.PositionTexture);
+                State.DeferredTarget.PositionTexture.Bind();
                 GL.ActiveTexture(TextureUnit.Texture3);
-                GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
+                State.DeferredTarget.DepthTexture.Bind();
                 GL.ActiveTexture(TextureUnit.Texture2);
-                GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.NormalsTexture);
+                State.DeferredTarget.NormalsTexture.Bind();
                 GL.ActiveTexture(TextureUnit.Texture1);
-                GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DiffuseTexture);
+                State.DeferredTarget.DiffuseTexture.Bind();
                 GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.Rh2Texture);
+                State.DeferredTarget.Rh2Texture.Bind();
                 GL.Disable(EnableCap.DepthTest);
                 GL.Disable(EnableCap.CullFace);
                 Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
                 GL.Enable(EnableCap.DepthTest);
                 GL.Enable(EnableCap.CullFace);
                 GL.ActiveTexture(TextureUnit.Texture5);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
                 GL.ActiveTexture(TextureUnit.Texture4);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
                 GL.ActiveTexture(TextureUnit.Texture3);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
                 GL.ActiveTexture(TextureUnit.Texture2);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
                 GL.ActiveTexture(TextureUnit.Texture1);
                 Engine.Textures.NormalDef.Bind();
                 GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
             }
         }
         if (Engine.DisplayDecals)
         {
             Shaders.Forward.Decals = Shaders.Forward.Decals.Bind();
             GL.ActiveTexture(TextureUnit.Texture4);
-            GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
+            State.DeferredTarget.DepthTexture.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
             State.FBOid = FBOID.FORWARD_EXTRAS;
             GL.DepthMask(false);
@@ -404,12 +404,12 @@ public class View3DForwardRenderer : View3DCoreDataSet
         if (Engine.Forward_Shadows)
         {
             GL.ActiveTexture(TextureUnit.Texture5);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+            GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
+            Internal.FBO_Shadow_DepthTexture.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
         }
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.DepthMask(true);
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

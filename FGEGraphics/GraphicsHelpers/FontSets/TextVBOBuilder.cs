@@ -151,10 +151,10 @@ public struct TextVBOBuilder
         {
             return;
         }
-        GL.BindTexture(TextureTarget.Texture2D, engine.TextureMain);
+        engine.TextureMain.Bind();
         GL.BindVertexArray(VAO);
         GL.DrawElements(PrimitiveType.Points, Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
         GL.BindVertexArray(0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
     }
 }

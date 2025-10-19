@@ -29,22 +29,22 @@ public class DeferredRenderTarget
     public uint FBO;
 
     /// <summary>OpenGL diffuse texture.</summary>
-    public uint DiffuseTexture;
+    public GraphicsUtil.TrackedTexture DiffuseTexture;
 
     /// <summary>OpenGL position texture.</summary>
-    public uint PositionTexture;
+    public GraphicsUtil.TrackedTexture PositionTexture;
 
     /// <summary>OpenGL normals texture.</summary>
-    public uint NormalsTexture;
+    public GraphicsUtil.TrackedTexture NormalsTexture;
 
     /// <summary>OpenGL depth texture.</summary>
-    public uint DepthTexture;
+    public GraphicsUtil.TrackedTexture DepthTexture;
 
     /// <summary>OpenGL Render hint texture.</summary>
-    public uint RenderhintTexture;
+    public GraphicsUtil.TrackedTexture RenderhintTexture;
 
     /// <summary>OpenGL render hint (2) texture.</summary>
-    public uint Rh2Texture;
+    public GraphicsUtil.TrackedTexture Rh2Texture;
 
     /// <summary>Render helper.</summary>
     public Renderer Rendering;
@@ -61,30 +61,30 @@ public class DeferredRenderTarget
         Height = _height;
         GL.GenFramebuffers(1, out FBO);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-        DiffuseTexture = GraphicsUtil.GenTexture("DeferredRenderTarget_Diffuse", TextureTarget.Texture2D);
+        DiffuseTexture = new("DeferredRenderTarget_Diffuse", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DiffuseTexture, 0);
-        PositionTexture = GraphicsUtil.GenTexture("DeferredRenderTarget_Position", TextureTarget.Texture2D);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DiffuseTexture.ID, 0);
+        PositionTexture = new("DeferredRenderTarget_Position", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, PositionTexture, 0);
-        NormalsTexture = GraphicsUtil.GenTexture("DeferredRenderTarget_Normals", TextureTarget.Texture2D);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, PositionTexture.ID, 0);
+        NormalsTexture = new("DeferredRenderTarget_Normals", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, NormalsTexture, 0);
-        DepthTexture = GraphicsUtil.GenTexture("DeferredRenderTarget_Depth", TextureTarget.Texture2D);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, NormalsTexture.ID, 0);
+        DepthTexture = new("DeferredRenderTarget_Depth", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, DepthTexture, 0);
-        RenderhintTexture = GraphicsUtil.GenTexture("DeferredRenderTarget_Renderhint", TextureTarget.Texture2D);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, DepthTexture.ID, 0);
+        RenderhintTexture = new("DeferredRenderTarget_Renderhint", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment3, TextureTarget.Texture2D, RenderhintTexture, 0);
-        Rh2Texture = GraphicsUtil.GenTexture("DeferredRenderTarget_Renderhint2", TextureTarget.Texture2D);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment3, TextureTarget.Texture2D, RenderhintTexture.ID, 0);
+        Rh2Texture = new("DeferredRenderTarget_Renderhint2", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment4, TextureTarget.Texture2D, Rh2Texture, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment4, TextureTarget.Texture2D, Rh2Texture.ID, 0);
         view.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
@@ -93,17 +93,17 @@ public class DeferredRenderTarget
     {
         GL.DeleteFramebuffer(FBO);
         GraphicsUtil.CheckError("RS4P - Destroy - 0.1");
-        GL.DeleteTexture(DiffuseTexture);
+        DiffuseTexture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy - 0.2");
-        GL.DeleteTexture(PositionTexture);
+        PositionTexture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy - 0.3");
-        GL.DeleteTexture(NormalsTexture);
+        NormalsTexture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy - 0.5");
-        GL.DeleteTexture(DepthTexture);
+        DepthTexture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy - 0.6");
-        GL.DeleteTexture(RenderhintTexture);
+        RenderhintTexture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy - 0.7");
-        GL.DeleteTexture(Rh2Texture);
+        Rh2Texture.Dispose();
         GraphicsUtil.CheckError("RS4P - Destroy");
     }
 

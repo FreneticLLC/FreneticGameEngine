@@ -269,7 +269,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
         State.DeferredTarget.Bind(View);
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Decal_Depth);
+        Internal.FBO_Decal_Depth.Bind();
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.DepthMask(false);
         GraphicsUtil.CheckError("Render - Decals - 0");
@@ -301,7 +301,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GraphicsUtil.CheckError("Render - Decals - Final");
         GL.DepthMask(true);
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture0);
     }
 
@@ -382,18 +382,18 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             }
         }
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.PositionTexture);
+        State.DeferredTarget.PositionTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture2);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.NormalsTexture);
+        State.DeferredTarget.NormalsTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture3);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
+        State.DeferredTarget.DepthTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
-        GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
+        Internal.FBO_Shadow_DepthTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture5);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.RenderhintTexture);
+        State.DeferredTarget.RenderhintTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture6);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DiffuseTexture);
+        State.DeferredTarget.DiffuseTexture.Bind();
         GL.Uniform3(ShaderLocations.Deferred.LightAdder.AMBIENT, Config.Ambient.ToOpenTK());
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
         GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
@@ -497,7 +497,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             }
         lights_apply:
             GL.ActiveTexture(TextureUnit.Texture4);
-            GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+            Internal.FBO_Shadow_DepthTexture.Bind();
             GL.Uniform2(ShaderLocations.Deferred.LightAdder.Z_DISTANCE, new Vector2(Engine.ZNear, Engine.ZFar()));
             GL.UniformMatrix4(ShaderLocations.Deferred.LightAdder.SSAO_PROJECTION, false, ref State.PrimaryMatrix); // TODO: In 3D/VR, render both eyes separately here for SSAO accuracy?
             GL.Uniform1(ShaderLocations.Deferred.LightAdder.LIGHTS_USED, (float)c);
@@ -505,7 +505,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.UniformMatrix4(10 + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, light_dat);
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
             View3D.StandardBlend();
             GraphicsUtil.CheckError("AfterLighting");
             RenderPass_HDR();
@@ -527,7 +527,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.DepthTest);
-            GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Screen_Texture);
+            Internal.FBO_Screen_Texture.Bind();
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_DynamicExposure);
             View.DrawBuffer(DrawBufferMode.ColorAttachment0);
@@ -607,33 +607,33 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         Internal.PreviousPFResult = v2;
         GL.Uniform1(ShaderLocations.Deferred.FinalPass.DO_GRAYSCALE, Engine.Deferred_Grayscale ? 1f : 0f);
         GL.ActiveTexture(TextureUnit.Texture3);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
+        State.DeferredTarget.DepthTexture.Bind();
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Screen_Texture);
+        Internal.FBO_Screen_Texture.Bind();
         GL.ActiveTexture(TextureUnit.Texture6);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.Rh2Texture);
+        State.DeferredTarget.Rh2Texture.Bind();
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DiffuseTexture);
+        State.DeferredTarget.DiffuseTexture.Bind();
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
         GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GraphicsUtil.CheckError("FirstRenderToBasePassPre");
         Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         GraphicsUtil.CheckError("FirstRenderToBasePassComplete");
         GL.ActiveTexture(TextureUnit.Texture6);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture5);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture4);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GraphicsUtil.CheckError("AmidTextures");
         GL.ActiveTexture(TextureUnit.Texture3);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture2);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture1);
         Engine.Textures.NormalDef.Bind();
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.Enable(EnableCap.DepthTest);
         GraphicsUtil.CheckError("PreBlendFunc");
         //GL.BlendFunc(1, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -824,9 +824,9 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         {
             // TODO: 3d stuff for GodRays.
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, State.DeferredTarget.DepthTexture);
+            State.DeferredTarget.DepthTexture.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_GodRay_Texture_2);
+            Internal.FBO_GodRay_Texture_2.Bind();
             Shaders.Deferred.Godrays = Shaders.Deferred.Godrays.Bind();
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
             GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
@@ -862,16 +862,16 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         {
             // TODO: Merge transp-to-screen and GR pass?
             //GL.Enable(EnableCap.DepthTest);
-            GL.BindTexture(TextureTarget.Texture2D, Internal.FBO_Transparents_Texture);
+            Internal.FBO_Transparents_Texture.Bind();
             Shaders.Deferred.TransparentAdderPass = Shaders.Deferred.TransparentAdderPass.Bind();
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
             GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform1(ShaderLocations.Deferred.TranspAdder.LIGHT_COUNT, (float)lightc);
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
         }
-        GL.UseProgram(0);
+        GraphicsUtil.UseProgram("View3DDeferredRenderer - Bloom", 0);
         ShaderEngine.BoundNow = null;
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.DepthMask(true);
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.CullFace);
@@ -886,17 +886,17 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         if (Engine.AllowLL)
         {
             GL.ActiveTexture(TextureUnit.Texture4);
-            GL.BindTexture(TextureTarget.Texture2DArray, Internal.LL_TransparentTextures[0]);
-            GL.BindImageTexture(4, Internal.LL_TransparentTextures[0], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+            Internal.LL_TransparentTextures[0].Bind();
+            GL.BindImageTexture(4, Internal.LL_TransparentTextures[0].ID, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             GL.ActiveTexture(TextureUnit.Texture5);
-            GL.BindTexture(TextureTarget.TextureBuffer, Internal.LL_TransparentTextures[1]);
-            GL.BindImageTexture(5, Internal.LL_TransparentTextures[1], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.Rgba32f);
+            Internal.LL_TransparentTextures[1].Bind(TextureTarget.TextureBuffer);
+            GL.BindImageTexture(5, Internal.LL_TransparentTextures[1].ID, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.Rgba32f);
             GL.ActiveTexture(TextureUnit.Texture6);
-            GL.BindTexture(TextureTarget.TextureBuffer, Internal.LL_TransparentTextures[2]);
-            GL.BindImageTexture(6, Internal.LL_TransparentTextures[2], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+            Internal.LL_TransparentTextures[2].Bind(TextureTarget.TextureBuffer);
+            GL.BindImageTexture(6, Internal.LL_TransparentTextures[2].ID, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             GL.ActiveTexture(TextureUnit.Texture7);
-            GL.BindTexture(TextureTarget.TextureBuffer, Internal.LL_TransparentTextures[3]);
-            GL.BindImageTexture(7, Internal.LL_TransparentTextures[3], 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
+            Internal.LL_TransparentTextures[3].Bind(TextureTarget.TextureBuffer);
+            GL.BindImageTexture(7, Internal.LL_TransparentTextures[3].ID, 0, false, 0, TextureAccess.ReadWrite, SizedInternalFormat.R32ui);
             GL.ActiveTexture(TextureUnit.Texture0);
             Shaders.Deferred.LLClearerPass.Bind();
             ShaderLocations.Common.SCREEN_SIZE.Set(Config.Width, Config.Height);
@@ -1042,13 +1042,13 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY, View3DInternalData.LIGHTS_MAX, false, shadowMatrices);
             GL.UniformMatrix4(ShaderLocations.Deferred.TranspOnly.SHADOW_MATRIX_ARRAY + View3DInternalData.LIGHTS_MAX, View3DInternalData.LIGHTS_MAX, false, lightData);
             GL.ActiveTexture(TextureUnit.Texture4);
-            GL.BindTexture(TextureTarget.Texture2DArray, Internal.FBO_Shadow_DepthTexture);
+            Internal.FBO_Shadow_DepthTexture.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
             GraphicsUtil.CheckError("PreparedRenderTranspLights");
             Config.Render3D(View);
             GraphicsUtil.CheckError("PostRenderTranspLights");
             GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
             State.RenderLights = false;
         }
