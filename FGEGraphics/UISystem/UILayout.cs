@@ -223,30 +223,30 @@ public class UILayout
     /// <summary>Returns a copy of this layout fixed at the top-left origin.</summary>
     public UILayout AtOrigin() => new UILayout(this).SetOrigin();
 
-    /// <summary>Gets the X value.</summary>
+    /// <summary>Gets the relative X value.</summary>
     public int X => Internal.X.Get() + (Element.Parent != null ? Anchor.GetX(Element) : 0);
 
-    /// <summary>Gets the Y value.</summary>
+    /// <summary>Gets the relative Y value.</summary>
     public int Y => Internal.Y.Get() + (Element.Parent != null ? Anchor.GetY(Element) : 0);
 
-    /// <summary>Gets the width.</summary>
+    /// <summary>Gets the base width (unscaled).</summary>
     public int Width => Internal.Width.Get();
 
-    /// <summary>Gets the height.</summary>
+    /// <summary>Gets the base height (unscaled).</summary>
     public int Height => Internal.Height.Get();
 
     /// <summary>Gets the rotation.</summary>
     public float Rotation => Internal.Rotation.Get();
 
-    /// <summary>Gets the scale.</summary>
+    /// <summary>Gets the relative scale.</summary>
     public float Scale => Internal.Scale.Get() * (Element.Parent?.Scale ?? 1f);
 
-    /// <summary>Gets the position vector.</summary>
+    /// <summary>Gets the relative position vector.</summary>
     public Vector2i Position => new(X, Y);
 
-    /// <summary>Gets the size vector.</summary>
+    /// <summary>Gets the base size vector.</summary>
     public Vector2i Size => new(Width, Height);
 
     /// <summary>Converts this layout's present state to a simple debug string.</summary>
-    public override string ToString() => $"UILayout {{ Position: {Position}, Size: {Size}, Rotation: {Rotation} }}";
+    public override string ToString() => $"UILayout {{ Position: {Position}, Size: {Size}, Rotation: {Rotation}, Scale: {Scale} }}";
 }

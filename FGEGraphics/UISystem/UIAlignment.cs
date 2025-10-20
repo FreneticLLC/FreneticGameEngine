@@ -48,10 +48,10 @@ public static class UIAlignmentExtensions
     /// <summary>Returns the horizontal offset relative to the <paramref name="element"/>'s parent for the given alignment.</summary>
     /// <param name="alignment">The UI alignment.</param>
     /// <param name="element">The child element.</param>
-    public static int GetX(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Layout.Width, element.Layout.Width);
+    public static int GetX(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Width, element.Width);
 
     /// <summary>Returns the vertical offset relative to the <paramref name="element"/>'s parent for the given alignment.</summary>
     /// <param name="alignment">The UI alignment.</param>
     /// <param name="element">The child element.</param>
-    public static int GetY(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Layout.Height, element.Layout.Height);
+    public static int GetY(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Height, element.Height);
 }

@@ -527,6 +527,12 @@ public abstract class UIElement
     // TODO: should this be virtual?
     public virtual void UpdateTransforms(double delta, Vector3 rotation)
     {
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastSize = Size;
+        ElementInternal.LastRotation = Rotation;
+        ElementInternal.LastScale = Scale;
+        Scale = Layout.Scale;
+        Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -557,13 +563,7 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        ElementInternal.LastPosition = Position;
-        ElementInternal.LastSize = Size;
-        ElementInternal.LastRotation = Rotation;
-        ElementInternal.LastScale = Scale;
         Position = new(x, y);
-        Scale = Layout.Scale;
-        Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
         Rotation = rotation.Z;
     }
 
