@@ -99,6 +99,8 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    public bool ScaleSize = true;
+
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
@@ -119,6 +121,9 @@ public abstract class UIElement
 
     /// <summary>Fired when <see cref="Rotation"/> changes value.</summary>
     public Action<float, float> OnRotationChange;
+
+    /// <summary>Fired when <see cref="Scale"/> changes value.</summary>
+    public Action<float, float> OnScaleChange;
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
@@ -521,10 +526,18 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Updates positions of this element and its children.</summary>
+    // TODO: Support rotations
+    /// <summary>
+    /// Updates the absolute layout values for this element in the following order:
+    /// <list type="number">
+    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
+    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
+    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
+    /// <item><see cref="Rotation"/></item>
+    /// </list>
+    /// </summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
-    // TODO: should this be virtual?
     public virtual void UpdateTransforms(double delta, Vector3 rotation)
     {
         ElementInternal.LastPosition = Position;
@@ -532,7 +545,14 @@ public abstract class UIElement
         ElementInternal.LastRotation = Rotation;
         ElementInternal.LastScale = Scale;
         Scale = Layout.Scale;
-        Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
+        if (ScaleSize)
+        {
+            Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
+        }
+        else
+        {
+            Size = new(Layout.Width, Layout.Height);
+        }
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -586,7 +606,11 @@ public abstract class UIElement
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
             anyFired |= true;
         }
-        // TODO: handle scale
+        if (ElementInternal.LastScale != Scale)
+        {
+            OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
+            anyFired = true;
+        }
         return anyFired;
     }
 
