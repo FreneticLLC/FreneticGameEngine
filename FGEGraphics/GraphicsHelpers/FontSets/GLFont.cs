@@ -83,7 +83,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         CharacterLocations = new Dictionary<char, RectangleF>(LOW_CODEPOINT_RANGE_CAP);
         Internal_Font = font;
         BackupFont = new Font(Engine.BackupFontFamily, font.SizeInPoints);
-        AddAll(StringInfo.GetTextElementEnumerator(Engine.CoreTextFileCharacters).AsEnumerable<string>());
+        RecognizeCharacters(Engine.CoreTextFileCharacters);
     }
 
     /// <summary>The format to render strings under.</summary>
@@ -124,7 +124,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         IEnumerable<string> needsAdding = SeparateEmojiAndSpecialChars(input).Distinct().Where(s => !SymbolLocations.ContainsKey(s));
         if (needsAdding.Any())
         {
-            while ((needsAdding = AddAll(needsAdding)) != null)
+            while ((needsAdding = AddAll(needsAdding)) is not null)
             {
                 Engine.Expand();
             }
@@ -255,8 +255,8 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
         RectangleF rec = RectForSymbol(symbol);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y: (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
-            (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y: (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
         return rec.Width;
     }
 
@@ -271,8 +271,8 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     public float DrawSingleCharacter(char character, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
         RectangleF rec = RectForSymbol(character);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y : (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH,
-            (rec.X + rec.Width) / Engine.CurrentHeight, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y : (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
         return rec.Width;
     }
 
