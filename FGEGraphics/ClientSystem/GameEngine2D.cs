@@ -140,35 +140,35 @@ public class GameEngine2D : GameEngineBase
     // TODO: Name these coherently
     int c_FBO;
 
-    uint c_FBO_Tex;
+    GraphicsUtil.TrackedTexture c_FBO_Tex;
 
     int l_FBO;
 
-    uint l_FBO_Tex;
+    GraphicsUtil.TrackedTexture l_FBO_Tex;
 
     /// <summary>Calculates and loads some light helper information.</summary>
     public void LoadLightHelpers()
     {
         c_FBO = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, c_FBO);
-        c_FBO_Tex = GraphicsUtil.GenTexture("GameEngine2D_LightHelper_C_FBO_Tex", TextureTarget.Texture2D);
+        c_FBO_Tex = new("GameEngine2D_LightHelper_C_FBO_Tex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, c_FBO_Tex, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, c_FBO_Tex.ID, 0);
         l_FBO = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, l_FBO);
-        l_FBO_Tex = GraphicsUtil.GenTexture("GameEngine2D_LightHelper_L_FBO_Tex", TextureTarget.Texture2D);
+        l_FBO_Tex = new("GameEngine2D_LightHelper_L_FBO_Tex", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f, Window.ClientSize.X / Pixelation, Window.ClientSize.Y / Pixelation, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, l_FBO_Tex, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, l_FBO_Tex.ID, 0);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GraphicsUtil.CheckError("LoadLightHelpers");
     }
 
@@ -176,9 +176,9 @@ public class GameEngine2D : GameEngineBase
     public override void ReloadScreenBuffers()
     {
         GL.DeleteFramebuffer(c_FBO);
-        GL.DeleteTexture(c_FBO_Tex);
+        c_FBO_Tex.Dispose();
         GL.DeleteFramebuffer(l_FBO);
-        GL.DeleteTexture(l_FBO_Tex);
+        l_FBO_Tex.Dispose();
         LoadLightHelpers();
     }
 
@@ -421,15 +421,15 @@ public class GameEngine2D : GameEngineBase
                 GL.Uniform1(8, Lights[i].ExtraLightDist);
                 GL.Uniform4(21, new Vector4(ViewCenterInverse.X / OriginalScaler.X, Math.Max(OriginalScaler.X, OriginalScaler.Y), ViewCenterInverse.Y / OriginalScaler.Y + 1.0f, Lights[i].IsSkyLight ? 1.0f : 0.0f));
             }
-            GL.BindTexture(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D, Lights[i].FBO_Tex);
+            Lights[i].FBO_Tex.Bind(OneDLights ? TextureTarget.Texture1D : TextureTarget.Texture2D);
             RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
         }
         GraphicsUtil.CheckError("Render - Lights combined");
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, l_FBO_Tex);
+        l_FBO_Tex.Bind();
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, c_FBO_Tex);
+        c_FBO_Tex.Bind();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         GL.DrawBuffer(DrawBufferMode.Back);
         Shader_Addlighttoscene.Bind();
@@ -442,9 +442,9 @@ public class GameEngine2D : GameEngineBase
         GL.Viewport(0, 0, Window.ClientSize.X, Window.ClientSize.Y);
         RenderHelper.RenderRectangle(MainRenderContext, -1, -1, 1, 1);
         GraphicsUtil.CheckError("Render - Added");
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.ActiveTexture(TextureUnit.Texture0);
         Shaders.ColorMult2D.Bind();
         GraphicsUtil.CheckError("Render - Complete");

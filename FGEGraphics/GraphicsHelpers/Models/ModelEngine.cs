@@ -60,18 +60,23 @@ public class ModelEngine
     /// <param name="tclient">Backing client.</param>
     public void Init(AnimationEngine engine, GameClientWindow tclient)
     {
+        GraphicsUtil.CheckError("ModelEngine - Init - Pre");
         Window = tclient;
         AnimEngine = engine;
         Handler = new ModelHandler();
         LoadedModels = new Dictionary<string, Model>(128);
         Cube = GenerateCube();
+        GraphicsUtil.CheckError("ModelEngine - Init - Cube");
         LoadedModels.Add("cube", Cube);
         Cylinder = FromScene(ShapeGenerators.GenerateCylinder(1, 5, 20), "cylinder");
         LoadedModels.Add("cylinder", Cylinder);
+        GraphicsUtil.CheckError("ModelEngine - Init - Cyl");
         Sphere = FromScene(ShapeGenerators.GenerateUVSphere(1, 10, 60), "sphere");
         LoadedModels.Add("sphere", Sphere);
+        GraphicsUtil.CheckError("ModelEngine - Init - Sphere");
         Clear = new Model("clear") { Engine = this, Skinned = true, Original = new Model3D() };
         LoadedModels.Add("clear", Clear);
+        GraphicsUtil.CheckError("ModelEngine - Init - Final");
     }
 
     /// <summary>Generates a cube model.</summary>

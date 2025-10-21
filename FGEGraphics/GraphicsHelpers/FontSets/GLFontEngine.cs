@@ -72,8 +72,8 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     /// <summary>The currently used CPU-Side GLFont mega texture.</summary>
     public Bitmap CurrentBMP;
 
-    /// <summary>The GPU-Side mega texture ID.</summary>
-    public int TextureMain = -1;
+    /// <summary>The GPU-Side mega texture.</summary>
+    public GraphicsUtil.TrackedTexture TextureMain;
 
     /// <summary>The current X coordinate in the GLFont mega texture.</summary>
     public int CX = 26;
@@ -87,17 +87,14 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     /// <summary>Update the CPU-Side mega texture onto the GPU.</summary>
     public void UpdateTexture()
     {
-        if (TextureMain != -1)
-        {
-            GL.DeleteTexture(TextureMain);
-        }
-        TextureMain = (int)GraphicsUtil.GenTexture("GLFontEngine_TextureMain", TextureTarget.Texture2D);
+        TextureMain?.Dispose();
+        TextureMain = new("GLFontEngine_TextureMain", TextureTarget.Texture2D);
         BitmapData bmp_data = CurrentBMP.LockBits(new Rectangle(0, 0, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
         CurrentBMP.UnlockBits(bmp_data);
         GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
     }
 
     /// <summary>Keep this public and valid: if it gets released by the GC, the fonts it contains are lost for some reason!</summary>

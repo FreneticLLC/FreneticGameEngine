@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -12,10 +12,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.PhysicsSystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
-using FGECore.PhysicsSystem;
 
 namespace FGECore.EntitySystem.PhysicsHelpers;
 

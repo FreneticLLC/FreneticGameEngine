@@ -72,7 +72,7 @@ public class UI3DSubEngine : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        GL.BindTexture(TextureTarget.Texture2D, SubEngine.MainView.Internal.CurrentFBOTexture);
+        SubEngine.MainView.Internal.CurrentFBOTexture.Bind();
         View.Rendering.RenderRectangle(View.UIContext, X, Y + Height, X + Width, Y, new Vector3(-0.5f, -0.5f, Rotation));
     }
 }

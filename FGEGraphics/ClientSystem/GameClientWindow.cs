@@ -243,6 +243,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         using var _push = StackNoteHelper.UsePush("GameClientWindow - Start, run", this);
         Logs.ClientInit("GameEngine loading...");
+        GraphicsUtil.Init();
         Window = new GameWindow(new GameWindowSettings() { UpdateFrequency = MaxFps }, new NativeWindowSettings()
         {
             ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),
@@ -412,7 +413,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             GL.Disable(EnableCap.CullFace);
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
             GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
-            GL.BindTexture(TextureTarget.Texture2D, Engine3D.MainView.Internal.CurrentFBOTexture);
+            Engine3D.MainView.Internal.CurrentFBOTexture.Bind();
             Rendering3D.RenderRectangle(-1, -1, 1, 1);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
@@ -422,9 +423,9 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         MainUI.Draw();
         GraphicsUtil.CheckError("GameClient - PostUI");
         // Fourth step: clean up!
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.BindVertexArray(0);
-        GL.UseProgram(0);
+        GraphicsUtil.UseProgram("GameClientWindow - PostRender/PreTick", 0);
         ShaderEngine.BoundNow = null;
         // Semi-final step: Tick logic!
         GraphicsUtil.CheckError("GameClient - PreTick");

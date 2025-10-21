@@ -50,15 +50,15 @@ public class PointLight2D
         if (Engine.OneDLights)
         {
             Width = 8192;
-            FBO_Tex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Tex", TextureTarget.Texture1D);
+            FBO_Tex = new("PointLight2D_FBO_Tex", TextureTarget.Texture1D);
             GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.R32f, Width, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (uint)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
-            GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture1D, FBO_Tex, 0);
+            GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture1D, FBO_Tex.ID, 0);
             GraphicsUtil.CheckError("PointLight2D init - 1D Tex");
-            FBO_DTex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Depth", TextureTarget.Texture1D);
+            FBO_DTex = new("PointLight2D_FBO_Depth", TextureTarget.Texture1D);
             GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.DepthComponent, Width, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
             GraphicsUtil.CheckError("PointLight2D init - 1D DTex - Tex");
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (uint)TextureMinFilter.Linear);
@@ -66,21 +66,21 @@ public class PointLight2D
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (uint)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapT, (uint)TextureWrapMode.ClampToEdge);
             GraphicsUtil.CheckError("PointLight2D init - 1D DTex");
-            GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture1D, FBO_DTex, 0);
+            GL.FramebufferTexture1D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture1D, FBO_DTex.ID, 0);
             GraphicsUtil.CheckError("PointLight2D init - 1D DTex Attach");
         }
         else
         {
-            FBO_Tex = (int)GraphicsUtil.GenTexture("PointLight2D_FBO_Tex", TextureTarget.Texture2D);
+            FBO_Tex = new("PointLight2D_FBO_Tex", TextureTarget.Texture2D);
             // TODO: Utilities.NextPowerOfTwo? Should probably only be added if it's confirmed as need (POT-only hardware on OpenGL 4.3 is unlikely... NPOTs are common!)
             Width = (int)(Strength * 2f);
             // TODO: Alpha texture!?
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Width, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GraphicsUtil.TexParamLinearClamp();
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, FBO_Tex.ID, 0);
         }
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         SubDivider = Math.Max((float)Math.Sqrt(Strength) * sdscale, 1f);
         GraphicsUtil.CheckError("PointLight2D init");
     }
@@ -88,11 +88,8 @@ public class PointLight2D
     /// <summary>Destroys the light object.</summary>
     public void Destroy()
     {
-        GL.DeleteTexture(FBO_Tex);
-        if (FBO_DTex > 0)
-        {
-            GL.DeleteTexture(FBO_DTex);
-        }
+        FBO_Tex?.Dispose();
+        FBO_DTex?.Dispose();
         GL.DeleteFramebuffer(FBO);
         GraphicsUtil.CheckError("PointLight2D destroy");
     }
@@ -107,10 +104,10 @@ public class PointLight2D
     public int FBO;
 
     /// <summary>The FrameBufferObject texture used by this Point Light 2D.</summary>
-    public int FBO_Tex;
+    public GraphicsUtil.TrackedTexture FBO_Tex;
 
     /// <summary>The FrameBufferObject depth-texture used by this point light 1d_2d.</summary>
-    public int FBO_DTex;
+    public GraphicsUtil.TrackedTexture FBO_DTex;
 
     /// <summary>The maximum width of this point light 2D's effects.</summary>
     public int Width;

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
+using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem;
 using OpenTK.Graphics.OpenGL4;
 
@@ -23,10 +24,10 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(UIStyling.Empty, layout)
+public class UINativeTexture(Func<GraphicsUtil.TrackedTexture> texture, UILayout layout) : UIElement(UIStyling.Empty, layout)
 {
     /// <summary>The texture to display.</summary>
-    public Func<uint> Texture = texture;
+    public Func<GraphicsUtil.TrackedTexture> Texture = texture;
 
     /// <summary>Whether the texture is flipped vertically.</summary>
     // TODO: Put transforms on UILayout
@@ -35,7 +36,7 @@ public class UINativeTexture(Func<uint> texture, UILayout layout) : UIElement(UI
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        GL.BindTexture(TextureTarget.Texture2D, Texture());
+        Texture().Bind();
         float ymin = Flip ? Y + Height : Y;
         float ymax = Flip ? Y : Y + Height;
         View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, new OpenTK.Mathematics.Vector3(-0.5f, -0.5f, Rotation));

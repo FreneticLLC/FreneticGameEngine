@@ -39,10 +39,10 @@ public class Texture : IEquatable<Texture>
     public Texture Replacement;
 
     /// <summary>The internal OpenGL texture ID.</summary>
-    public int InternalTexture = -1;
+    public GraphicsUtil.TrackedTexture InternalTexture;
 
     /// <summary>The original OpenGL texture ID that formed this texture.</summary>
-    public int OriginalInternalID = -1;
+    public GraphicsUtil.TrackedTexture OriginalInternalID;
 
     /// <summary>Whether the texture loaded properly.</summary>
     public bool LoadedProperly = false;
@@ -59,14 +59,14 @@ public class Texture : IEquatable<Texture>
     /// <summary>Removes the texture from OpenGL.</summary>
     public void Destroy()
     {
-        if (OwnsItsTextureId && OriginalInternalID > -1 && GL.IsTexture(OriginalInternalID))
+        if (OwnsItsTextureId && OriginalInternalID is not null)
         {
-            GL.DeleteTexture(OriginalInternalID);
+            OriginalInternalID.Dispose();
         }
         LoadedProperly = false;
         OwnsItsTextureId = false;
-        InternalTexture = -1;
-        OriginalInternalID = -1;
+        InternalTexture = null;
+        OriginalInternalID = null;
     }
 
     /// <summary>Removes the texture from the system.</summary>
@@ -83,9 +83,9 @@ public class Texture : IEquatable<Texture>
     /// <param name="flip">Whether to flip the Y.</param>
     public Bitmap SaveToBMP(bool flip = false)
     {
-        GL.BindTexture(TextureTarget.Texture2D, OriginalInternalID);
+        OriginalInternalID.Bind();
         Bitmap bmp = new(Width, Height);
-        BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
         bmp.UnlockBits(data);
         if (flip)
@@ -101,7 +101,7 @@ public class Texture : IEquatable<Texture>
     /// <summary>Checks if the texture is valid, and replaces it if needed.</summary>
     public void CheckValid()
     {
-        if (OriginalInternalID == -1)
+        if (OriginalInternalID is null)
         {
             if (RemappedTo is not null)
             {
@@ -141,12 +141,12 @@ public class Texture : IEquatable<Texture>
         LastBindTime = Engine.CurrentTime;
         CheckValid();
 #if DEBUG
-        if (InternalTexture == -1)
+        if (InternalTexture is null)
         {
             Logs.Warning($"Trying to bind internally invalid texture: {Name}");
         }
 #endif
-        GL.BindTexture(TextureTarget.Texture2D, InternalTexture);
+        InternalTexture.Bind();
     }
 
     /// <summary>Gets the name of the texture.</summary>

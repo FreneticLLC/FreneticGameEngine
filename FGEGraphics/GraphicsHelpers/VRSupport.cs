@@ -228,7 +228,7 @@ public class VRSupport
         {
             eColorSpace = EColorSpace.Auto,
             eType = EGraphicsAPIConvention.API_OpenGL,
-            handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
+            handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture.ID)
         };
         VRTextureBounds_t bounds = new()
         {
@@ -246,7 +246,7 @@ public class VRSupport
         {
             eColorSpace = EColorSpace.Auto,
             eType = EGraphicsAPIConvention.API_OpenGL,
-            handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture)
+            handle = new IntPtr(Window.Engine3D.MainView.Internal.CurrentFBOTexture.ID)
         };
         VRTextureBounds_t rbounds = new()
         {
@@ -338,7 +338,7 @@ public class VRControllerTextureEngine
     public int FBO;
 
     /// <summary>The texture.</summary>
-    public uint Texture;
+    public GraphicsUtil.TrackedTexture Texture;
 
     /// <summary>The base texture.</summary>
     public Texture BaseTexture;
@@ -359,13 +359,13 @@ public class VRControllerTextureEngine
     public void GenerateFirst()
     {
         FBO = GL.GenFramebuffer();
-        Texture = GraphicsUtil.GenTexture("VRController_FBO_Texture", TextureTarget.Texture2D);
+        Texture = new("VRController_FBO_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 512, 512, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
         GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture, 0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture.ID, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
@@ -403,7 +403,7 @@ public class VRControllerTextureEngine
             Vector2 hsize = pressed ? PressSpotHalfSize : TouchSpotHalfSize;
             tclient.Engine3D.Rendering.RenderRectangle(cont.TrackPad.X - hsize.X, cont.TrackPad.Y - hsize.X, cont.TrackPad.X + hsize.X, cont.TrackPad.Y + hsize.Y);
         }
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         tclient.Engine3D.Rendering.SetColor(Color4.White, tclient.Engine3D.MainView);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, tclient.Engine3D.MainView.Internal.LastBoundFramebuffer);
         GL.Enable(EnableCap.CullFace);
@@ -414,7 +414,7 @@ public class VRControllerTextureEngine
     public void Destroy()
     {
         GL.DeleteFramebuffer(FBO);
-        GL.DeleteTexture(Texture);
+        Texture.Dispose();
     }
 }
 
