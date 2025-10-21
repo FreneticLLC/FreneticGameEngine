@@ -61,11 +61,22 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <summary>How tall a rendered symbol is.</summary>
     public int Height;
 
-    /// <summary>The size of <see cref="LowCodepointLocs"/>.</summary>
-    public const int LOW_CODEPOINT_RANGE_CAP = 8192;
+    /// <summary>Internal data for <see cref="GLFont"/>.</summary>
+    public struct InternalData()
+    {
+        /// <summary>The format to render strings under.</summary>
+        public static StringFormat RenderFormat;
 
-    /// <summary>Low code-point range symbol rectangle locations.</summary>
-    private readonly RectangleF[] LowCodepointLocs = new RectangleF[LOW_CODEPOINT_RANGE_CAP];
+        /// <summary>The size of <see cref="LowCodepointLocs"/>.</summary>
+        public const int LOW_CODEPOINT_RANGE_CAP = 8192;
+
+        // TODO: Internal struct
+        /// <summary>Low code-point range symbol rectangle locations.</summary>
+        public readonly RectangleF[] LowCodepointLocs = new RectangleF[LOW_CODEPOINT_RANGE_CAP];
+    }
+
+    /// <summary>Internal data for <see cref="GLFont"/>.</summary>
+    public InternalData Internal = new();
 
     /// <summary>Constructs a GLFont.</summary>
     /// <param name="font">The CPU font to use.</param>
@@ -79,21 +90,18 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         Bold = font.Bold;
         Italic = font.Italic;
         Height = font.Height;
-        SymbolLocations = new Dictionary<string, RectangleF>(LOW_CODEPOINT_RANGE_CAP);
-        CharacterLocations = new Dictionary<char, RectangleF>(LOW_CODEPOINT_RANGE_CAP);
+        SymbolLocations = new Dictionary<string, RectangleF>(InternalData.LOW_CODEPOINT_RANGE_CAP);
+        CharacterLocations = new Dictionary<char, RectangleF>(InternalData.LOW_CODEPOINT_RANGE_CAP);
         Internal_Font = font;
         BackupFont = new Font(Engine.BackupFontFamily, font.SizeInPoints);
         RecognizeCharacters(Engine.CoreTextFileCharacters);
     }
 
-    /// <summary>The format to render strings under.</summary>
-    readonly static StringFormat RenderFormat;
-
     /// <summary>Prepares static helpers.</summary>
     static GLFont()
     {
-        RenderFormat = new StringFormat(StringFormat.GenericTypographic);
-        RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap | StringFormatFlags.NoClip;
+        InternalData.RenderFormat = new StringFormat(StringFormat.GenericTypographic);
+        InternalData.RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap | StringFormatFlags.NoClip;
     }
 
     /// <summary>Returns 'true' if a <see cref="RecognizeCharacters(string)"/> call might be needed for the text (characters outside of quick-lookup range, or characters not already recognized). This call exists for opti reasons only.</summary>
@@ -149,13 +157,13 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         foreach (string inputSymbol in input)
         {
             bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(':') && inputSymbol.EndsWith(':');
-            Font fnt = (inputSymbol.Length == 1 ? Internal_Font : BackupFont);
+            Font fnt = inputSymbol.Length == 1 ? Internal_Font : BackupFont;
             string chr = inputSymbol == "\t" ? "    " : inputSymbol;
             int nwidth = Height;
             float rawHeight = Height;
             if (!isEmoji)
             {
-                SizeF measured = gfx.MeasureString(chr, fnt, new PointF(0, 0), RenderFormat);
+                SizeF measured = gfx.MeasureString(chr, fnt, new PointF(0, 0), InternalData.RenderFormat);
                 nwidth = (int)Math.Ceiling(measured.Width);
                 // TODO: These added values are hacks to compensate for font sizes not matching character sizes. A better measure method should be used instead.
                 rawHeight = measured.Height + Math.Min(6, fnt.SizeInPoints * 0.3f);
@@ -186,7 +194,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             }
             else
             {
-                gfx.DrawString(chr, fnt, brush, new PointF(X, Y), RenderFormat);
+                gfx.DrawString(chr, fnt, brush, new PointF(X, Y), InternalData.RenderFormat);
             }
             processed++;
             RectangleF rect = new(X, Y, nwidth, rawHeight);
@@ -194,9 +202,9 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             if (chr.Length == 1)
             {
                 CharacterLocations[inputSymbol[0]] = rect;
-                if (chr[0] < LOW_CODEPOINT_RANGE_CAP)
+                if (chr[0] < InternalData.LOW_CODEPOINT_RANGE_CAP)
                 {
-                    LowCodepointLocs[inputSymbol[0]] = rect;
+                    Internal.LowCodepointLocs[inputSymbol[0]] = rect;
                 }
             }
             X += nwidth + 8; // TODO: 8 -> ???
@@ -217,15 +225,15 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <returns>A rectangle containing the precise location of a symbol.</returns>
     public RectangleF RectForSymbol(string symbol)
     {
-        if (symbol.Length == 1 && symbol[0] < LOW_CODEPOINT_RANGE_CAP)
+        if (symbol.Length == 1 && symbol[0] < InternalData.LOW_CODEPOINT_RANGE_CAP)
         {
-            return LowCodepointLocs[symbol[0]];
+            return Internal.LowCodepointLocs[symbol[0]];
         }
         if (SymbolLocations.TryGetValue(symbol, out RectangleF rect))
         {
             return rect;
         }
-        return LowCodepointLocs['?'];
+        return Internal.LowCodepointLocs['?'];
     }
 
     /// <summary>Gets the location of a symbol.</summary>
@@ -233,15 +241,15 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <returns>A rectangle containing the precise location of a symbol.</returns>
     public RectangleF RectForSymbol(char symbol)
     {
-        if (symbol < LOW_CODEPOINT_RANGE_CAP)
+        if (symbol < InternalData.LOW_CODEPOINT_RANGE_CAP)
         {
-            return LowCodepointLocs[symbol];
+            return Internal.LowCodepointLocs[symbol];
         }
         if (CharacterLocations.TryGetValue(symbol, out RectangleF rect))
         {
             return rect;
         }
-        return LowCodepointLocs['?'];
+        return Internal.LowCodepointLocs['?'];
     }
 
     /// <summary>Draws a single symbol at a specified location.</summary>
@@ -436,7 +444,6 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     {
         if (disposing)
         {
-            RenderFormat.Dispose();
             BackupFont.Dispose();
             Internal_Font.Dispose();
         }
