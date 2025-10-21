@@ -148,7 +148,7 @@ public static class GraphicsUtil
 #endif
     }
 
-    /// <summary>Creates multiple tracked buffers.</summary>
+    /// <summary>Creates multiple tracked buffers. Does not bind.</summary>
     /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
     /// <param name="count">How many to generate.</param>
     /// <param name="target">What buffer target to bind the buffer to.</param>
@@ -164,7 +164,7 @@ public static class GraphicsUtil
         return tracked;
     }
 
-    /// <summary>Represents a buffer in a trackable, single-disposable way. Also immediately binds the buffer.</summary>
+    /// <summary>Represents a buffer in a trackable, single-disposable way.</summary>
     public class TrackedBuffer
     {
         /// <summary>Create a new tracked buffer, binds it immediately.</summary>
