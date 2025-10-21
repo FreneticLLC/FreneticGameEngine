@@ -99,6 +99,10 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    /// <summary>
+    /// Whether this element should scale its width based on <see cref="Scale"/>.
+    /// Even if this value is <c>false</c>, this element's scale still applies to its children.
+    /// </summary>
     public bool ScaleSize = true;
 
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
@@ -609,6 +613,10 @@ public abstract class UIElement
         if (ElementInternal.LastScale != Scale)
         {
             OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
+            foreach (UIText text in ElementInternal.Texts)
+            {
+                text.UpdateRenderables();
+            }
             anyFired = true;
         }
         return anyFired;

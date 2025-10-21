@@ -60,6 +60,8 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <summary>Name of the font set.</summary>
     public string Name = _name.ToLowerFast();
 
+    public int Size;// = fontsize;
+
     /// <summary>Height, in pixels, of this fontset (based on <see cref="FontDefault"/>'s height) (ie how tall a standard symbol is, or how wide the line gap needs to be).</summary>
     public int Height => FontDefault.Height;
 
@@ -76,6 +78,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         FontBoldHalf = Engine.GLFonts.GetFont(fontname, true, false, fontsize / 2);
         FontItalicHalf = Engine.GLFonts.GetFont(fontname, false, true, fontsize / 2);
         FontBoldItalicHalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
+        Size = fontsize;
     }
 
     /// <summary>All colors used by the different font set options.</summary>

@@ -36,6 +36,7 @@ public class UILabel : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
+        ScaleSize = false;
         Text = new UIText(this, text, true, Layout.Width);
         Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
     }
@@ -43,7 +44,10 @@ public class UILabel : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+        if (style.CanRenderText(Text))
+        {
+            style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+        }
     }
 
     /// <summary>Constructs a label with an icon attached at the side.</summary>

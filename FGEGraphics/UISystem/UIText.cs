@@ -26,7 +26,7 @@ public class UIText
     public const string Null = "null";
 
     /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
-    public bool Empty => (Internal.Content?.Length ?? 0) == 0;
+    public bool Empty => (Internal.Content?.Length ?? 0) == 0 || Internal.Element.Scale == 0;
 
     /// <summary>The UI style to use for rendering this text.</summary>
     public UIStyle Style => Internal.Style ?? Internal.Element.Style;
@@ -91,7 +91,9 @@ public class UIText
     public RenderableText CreateRenderable(UIStyle style)
     {
         string styled = style.TextStyling(Content); // FIXME: this doesn't play well with translatable text.
-        RenderableText renderable = style.TextFont.ParseFancyText(styled, style.TextBaseColor);
+        var font = style.TextFont.Engine.GetFont(style.TextFont.Name, (int)(style.TextFont.Size * Internal.Element.Scale));
+        Logs.Debug("Getting font " + style.TextFont.Name + " with size " + (int)(style.TextFont.Size * Internal.Element.Scale) + " (normal: " + style.TextFont.Size + ")");
+        RenderableText renderable = font.ParseFancyText(styled, style.TextBaseColor);
         if (Internal.MaxWidth > 0)
         {
             renderable = FontSet.SplitAppropriately(renderable, Internal.MaxWidth);
@@ -157,7 +159,7 @@ public class UIText
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => Renderable?.Lines?.Length * Style.TextFont?.Height ?? 0;
+    public int Height => (int)(Internal.Element.Scale * Renderable?.Lines?.Length * Style.TextFont?.Height ?? 0);
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIText text) => text.Renderable;
