@@ -74,7 +74,6 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     {
         Engine = eng;
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-        Engine.Shaders.ColorMultShader.Bind();
         Name = font.Name;
         Size = (int)(font.Size * eng.DPIScale);
         Bold = font.Bold;
@@ -181,6 +180,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             if (isEmoji)
             {
                 Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
+                // TODO: This is incompatible with the texture streaming system and will store nothing. Need to use the streaming support here!
                 using Bitmap bmp = t.SaveToBMP();
                 gfx.DrawImage(bmp, new Rectangle(X, Y, nwidth, nwidth));
             }
