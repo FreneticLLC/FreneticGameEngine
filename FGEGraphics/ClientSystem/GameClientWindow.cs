@@ -243,6 +243,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         using var _push = StackNoteHelper.UsePush("GameClientWindow - Start, run", this);
         Logs.ClientInit("GameEngine loading...");
+        GraphicsUtil.Init();
         Window = new GameWindow(new GameWindowSettings() { UpdateFrequency = MaxFps }, new NativeWindowSettings()
         {
             ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight),

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FGECore;
 using FGECore.CoreSystems;
@@ -23,12 +24,22 @@ namespace FGEGraphics.GraphicsHelpers;
 /// <summary>Helper class for graphical systems.</summary>
 public static class GraphicsUtil
 {
+    /// <summary>Initialize the graphics utility.</summary>
+    public static void Init()
+    {
+        GraphicsThreadID = Environment.CurrentManagedThreadId;
+    }
+
     /// <summary>Checks errors when debug is enabled.</summary>
     /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
     /// <param name="context">An optional context object.</param>
     [Conditional("DEBUG")]
     public static void CheckError(string callerLocationLabel, object context = null)
     {
+        if (Environment.CurrentManagedThreadId != GraphicsThreadID)
+        {
+            Logs.CriticalError($"OpenGL call made from non-graphics thread! (Thread '{Thread.CurrentThread.Name}'/{Environment.CurrentManagedThreadId} vs expected {GraphicsThreadID})");
+        }
         ErrorCode ec = GL.GetError();
         if (ec == ErrorCode.NoError)
         {
@@ -75,6 +86,9 @@ public static class GraphicsUtil
 
     /// <summary>Map of all current active/allocated shaders to their source strings.</summary>
     public static Dictionary<int, string> ActiveShaders = [];
+
+    /// <summary>ID of the thread that OpenGL is expected to run on.</summary>
+    public static long GraphicsThreadID;
 
     /// <summary>Which shader ID is currently bound, or 0 if none.</summary>
     public static int BoundShader = 0;
@@ -153,7 +167,7 @@ public static class GraphicsUtil
     /// <summary>Represents a buffer in a trackable, single-disposable way. Also immediately binds the buffer.</summary>
     public class TrackedBuffer
     {
-        /// <summary>Create a new tracked buffer.</summary>
+        /// <summary>Create a new tracked buffer, binds it immediately.</summary>
         /// <param name="source">A string that identifies the source of this buffer, for debugging usage.</param>
         /// <param name="target">What buffer target to bind the buffer to.</param>
         public TrackedBuffer(string source, BufferTarget target)

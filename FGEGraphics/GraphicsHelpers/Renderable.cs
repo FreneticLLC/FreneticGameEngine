@@ -478,7 +478,7 @@ public class Renderable
         {
             for (int i = 0; i < tangs.Length; i++)
             {
-                tangs[i] = new Vector3(0, 0, 0);
+                tangs[i] = new Vector3(0, 0, 0); // TODO: This is wrong
             }
             return tangs;
         }
@@ -565,9 +565,9 @@ public class Renderable
             inds = [.. buildList.Indices];
             norms = [.. buildList.Normals];
             texs = [.. buildList.TexCoords];
-            tangs = buildList.Tangents != null ? [.. buildList.Tangents] : TangentsFor(vecs, norms, texs);
+            tangs = buildList.Tangents is not null ? [.. buildList.Tangents] : TangentsFor(vecs, norms, texs);
             cols = buildList.Colors?.ToArray();
-            if (buildList.BoneIDs != null)
+            if (buildList.BoneIDs is not null)
             {
                 Internal.HasBones = true;
                 ids = [.. buildList.BoneIDs];
