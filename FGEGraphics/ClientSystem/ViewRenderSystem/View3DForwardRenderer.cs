@@ -261,6 +261,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, State.DeferredTarget.FBO);
             GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+            GraphicsUtil.CheckError("Render/Fast - PreReflect");
             if (Engine.ForwardReflections)
             {
                 Shaders.Forward.PostProcess = Shaders.Forward.PostProcess.Bind();
@@ -299,6 +300,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
                 Engine.Textures.NormalDef.Bind();
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
+                GraphicsUtil.CheckError("Render/Fast - Reflections");
             }
         }
         if (Engine.DisplayDecals)
@@ -337,6 +339,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
         GL.ActiveTexture(TextureUnit.Texture0);
         State.FBOid = FBOID.FORWARD_TRANSP;
         Patches.PreTransparentPatch?.Invoke(fogDist, shadowmat_dat, light_dat, c);
+        GraphicsUtil.CheckError("Render/Fast - PreTranspPatch");
         Shaders.Forward.BasicTransparent_NoBones.Bind();
         GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
         GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
@@ -352,6 +355,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
         }
         //GL.Uniform2(14, zfar_rel);
         Engine.Rendering.SetColor(Color4.White, View);
+        GraphicsUtil.CheckError("Render/Fast - BasicTransparent_NoBones Unifs");
         Shaders.Forward.BasicTransparent.Bind();
         GL.UniformMatrix4(1, false, ref State.PrimaryMatrix);
         GL.UniformMatrix4(2, false, ref View3DInternalData.IdentityMatrix);
@@ -367,9 +371,10 @@ public class View3DForwardRenderer : View3DCoreDataSet
         }
         //GL.Uniform2(14, zfar_rel);
         Engine.Rendering.SetColor(Color4.White, View);
-        Config.PostFirstRender?.Invoke();
         GraphicsUtil.CheckError("Render/Fast - Transp Unifs");
-        if (Engine.Render3DView || Engine.Client.VR != null)
+        Config.PostFirstRender?.Invoke();
+        GraphicsUtil.CheckError("Render/Fast - PostFirstRender");
+        if (Engine.Render3DView || Engine.Client.VR is not null)
         {
             View.Viewport(Config.Width / 2, 0, Config.Width / 2, Config.Height);
             Config.Render3D(View);
@@ -401,6 +406,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
             GraphicsUtil.CheckError("Render/Fast - Transp");
         }
         Patches.EndPatch?.Invoke();
+        GraphicsUtil.CheckError("Render/Fast - EndPatch");
         if (Engine.Forward_Shadows)
         {
             GL.ActiveTexture(TextureUnit.Texture5);
