@@ -305,6 +305,11 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             Shaders.MCM_GOOD_GRAPHICS = false;
             Shaders.ShutUpIntel = true;
         }
+        if (GLVendor.ToLowerFast().Contains("ati technologies"))
+        {
+            Logs.ClientInit("Some AMD GPUs have been seen messing up shader compiles, enabling workaround.");
+            Shaders.ShutUpIntel = true;
+        }
         Shaders.InitShaderSystem(Files);
         Logs.ClientInit("GameClient loading texture helpers...");
         Textures = new TextureEngine();

@@ -211,7 +211,7 @@ public class View3DForwardRenderer : View3DCoreDataSet
         Shaders.Forward.BasicSolid.Bind();
         basicUniforms(Engine.Forward_Lights);
         GraphicsUtil.CheckError("Render/Fast - Uniforms - Forward BasicSolid");
-        if (Engine.Render3DView || Engine.Client.VR != null)
+        if (Engine.Render3DView || Engine.Client.VR is not null)
         {
             View.Viewport(Config.Width / 2, 0, Config.Width / 2, Config.Height);
             Config.Render3D(View);
