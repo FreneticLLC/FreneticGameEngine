@@ -201,8 +201,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GraphicsUtil.CheckError("RenderLineBox: Pre");
         if (min.IsNaN() || min.IsInfinite() || max.IsNaN() || max.IsInfinite())
         {
-            Logs.Warning($"Invalid line box from {min} to {max}");
-            Logs.Debug(Environment.StackTrace);
+            Logs.CriticalError($"Invalid line box from {min} to {max}");
             return;
         }
         GL.ActiveTexture(TextureUnit.Texture0);
