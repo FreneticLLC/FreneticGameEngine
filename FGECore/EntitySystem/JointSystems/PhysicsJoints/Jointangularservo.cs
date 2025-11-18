@@ -17,31 +17,32 @@ using BepuPhysics.Constraints;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
-/// <summary>Constrains two bodies to have a target relative rotation around a specified axis using servo (position-based) control.</summary>
+/// <summary>Drives rotation of a local axis toward a target angle using a servo, with spring/damping and speed/force limits.
+/// The target can be changed at runtime via <see cref="SetTargetAngle"/>.</summary>
 public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e2, Location axis) : PhysicsJointBase<AngularServo>(e1, e2)
 {
-    /// <summary>The local axis on body A around which rotation is controlled.</summary>
+    /// <summary>Local axis on <see cref="PhysicsJointBase.One"/> to rotate around.</summary>
     public Location Axis = axis;
 
-    /// <summary>Target angle in radians around the axis.</summary>
+    /// <summary>Target angle (radians) of the <see cref="Axis"/> of <see cref="PhysicsJointBase.One"/>.</summary>
     public float TargetAngle = 0;
 
-    /// <summary>Maximum angular speed the servo can rotate at (radians per second).</summary>
+    /// <summary>Maximum speed this servo can try to move at.</summary>
     public float MaximumSpeed = float.MaxValue;
 
-    /// <summary>Maximum torque the servo can apply.</summary>
+    /// <summary>Maximum amount of force this servo can output.</summary>
     public float MaximumForce = float.MaxValue;
 
-    /// <summary>Base speed for the servo controller.</summary>
+    /// <summary>Minimum move speed. Clamped by <see cref="MaximumSpeed"/> and by error per step to avoid overshoot.</summary>
     public float BaseSpeed = 0;
 
-    /// <summary>Target number of undamped oscillations per second.</summary>
+    /// <summary>Undamped oscillations per second. Higher corrects faster.</summary>
     public float SpringFrequency = 20;
 
-    /// <summary>Ratio of the spring's actual damping to its critical damping. 0 is undamped, 1 is critically damped, and higher values are overdamped.</summary>
+    /// <summary>Damping ratio. 1 = fastest without overshoot, < 1 oscillates, > 1 slower/overdamped.</summary>
     public float SpringDamping = 1;
 
-    /// <summary>Sets the target angle and immediately reapplies.</summary>
+    /// <summary>Use to change the target during play (steering/aiming). If the joint is added, reapplies so the new angle is used next frame; otherwise it takes effect when added.</summary>
     public void SetTargetAngle(float angleInRadians)
     {
         TargetAngle = angleInRadians;
