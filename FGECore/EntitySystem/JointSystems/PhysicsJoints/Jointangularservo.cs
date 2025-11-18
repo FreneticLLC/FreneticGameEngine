@@ -43,7 +43,7 @@ public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e
     public float SpringDamping = 1;
 
 
-    /// <summary>Use to change the target angle (steering/aiming). If the joint is added, reapplies so the new angle is used next frame. 
+    /// <summary>Use to change the target angle (steering/aiming). If the target angle is changed, reapplies so the new angle is used next frame. 
     /// Otherwise it takes effect when added.</summary>
     public void SetTargetAngle(float angleInRadians)
     {
