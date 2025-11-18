@@ -352,70 +352,85 @@ public class Model(string _name)
             return;
         }
         Skinned = true;
-        if (Engine.Window.Files.TryReadFileText($"models/{Name}.skin", out string fileText)) // TODO: `.fmi` files
+        if (Engine.Window.Files.TryReadFileText($"models/{Name}.fmi", out string fileText))
         {
-            string[] data = fileText.SplitFast('\n');
-            int c = 0;
-            foreach (string datum in data)
-            {
-                if (datum.Length > 0)
-                {
-                    string[] datums = datum.SplitFast('=');
-                    if (datums.Length == 2)
-                    {
-                        Texture tex = texs.GetTexture(datums[1]);
-                        bool success = false;
-                        string datic = datums[0].BeforeAndAfter(":::", out string typer).ToLowerFast();
-                        typer = typer.ToLowerFast();
-                        for (int i = 0; i < Meshes.Count; i++)
-                        {
-                            if (Meshes[i].NameLower == datic)
-                            {
-                                if (typer == "specular")
-                                {
-                                    Meshes[i].BaseRenderable.SpecularTexture = tex;
-                                }
-                                else if (typer == "reflectivity")
-                                {
-                                    Meshes[i].BaseRenderable.ReflectivityTexture = tex;
-                                }
-                                else if (typer == "normal")
-                                {
-                                    Meshes[i].BaseRenderable.NormalTexture = tex;
-                                }
-                                else if (typer == "")
-                                {
-                                    Meshes[i].BaseRenderable.ColorTexture = tex;
-                                }
-                                else
-                                {
-                                    Logs.Warning($"Unknown skin entry typer: '{typer}', expected reflectivity, specular, or simply no specification!");
-                                }
-                                c++;
-                                success = true;
-                            }
-                        }
-                        if (!success)
-                        {
-                            Logs.Warning($"Unknown skin entry {datums[0]}");
-                            StringBuilder all = new(Meshes.Count * 100);
-                            for (int i = 0; i < Meshes.Count; i++)
-                            {
-                                all.Append(Meshes[i].Name + ", ");
-                            }
-                            Logs.Warning($"Available: {all}");
-                        }
-                    }
-                }
-            }
-            if (c == 0)
-            {
-                Logs.Warning($"No entries in {Name}.skin");
-            }
+        }
+        else if (Engine.Window.Files.TryReadFileText($"models/{Name}.skin", out fileText)) // TODO: Legacy format
+        {
         }
         else
         {
-            Logs.Warning($"Can't find models/{Name}.skin!");
+            Logs.Warning($"Can't find models/{Name}.fmi!");
+            return;
+        }
+        string[] lines = fileText.SplitFast('\n');
+        LoadSkinFromLines(texs, lines);
+    }
+
+    /// <summary>Loads the skin for this model based on lines of skinning data.</summary>
+    /// <param name="texs">The relevant texture engine.</param>
+    /// <param name="lines">The lines of texture info data to load.</param>
+    public void LoadSkinFromLines(TextureEngine texs, string[] lines)
+    {
+        Skinned = true;
+        int appliedMeshes = 0;
+        foreach (string line in lines)
+        {
+            if (line.Length == 0)
+            {
+                continue;
+            }
+            string[] datums = line.SplitFast('=');
+            if (datums.Length != 2)
+            {
+                Logs.Warning($"Invalid line in model info file models/{Name}.fmi: {line}");
+                continue;
+            }
+            if (datums[0] == "model")
+            {
+                continue;
+            }
+            Texture tex = texs.GetTexture(datums[1]);
+            bool success = false;
+            string meshName = datums[0].BeforeAndAfter(":::", out string texType).ToLowerFast();
+            texType = texType.ToLowerFast();
+            for (int i = 0; i < Meshes.Count; i++)
+            {
+                if (Meshes[i].NameLower != meshName)
+                {
+                    continue;
+                }
+                if (texType == "specular")
+                {
+                    Meshes[i].BaseRenderable.SpecularTexture = tex;
+                }
+                else if (texType == "reflectivity")
+                {
+                    Meshes[i].BaseRenderable.ReflectivityTexture = tex;
+                }
+                else if (texType == "normal")
+                {
+                    Meshes[i].BaseRenderable.NormalTexture = tex;
+                }
+                else if (texType == "" || texType == "color")
+                {
+                    Meshes[i].BaseRenderable.ColorTexture = tex;
+                }
+                else
+                {
+                    Logs.Warning($"Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
+                }
+                appliedMeshes++;
+                success = true;
+            }
+            if (!success)
+            {
+                Logs.Warning($"Unknown skin entry {datums[0]}, available: {Meshes.Select(m => m.Name).JoinString(", ")}");
+            }
+        }
+        if (appliedMeshes == 0)
+        {
+            Logs.Warning($"No valid texture entries in {Name}.fmi, cannot apply as skin");
         }
     }
 

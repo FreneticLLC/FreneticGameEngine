@@ -12,15 +12,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
 using FGECore.ModelSystems;
-using FGECore.PhysicsSystem;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
-using OpenTK;
+using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK.Mathematics;
 
 namespace FGEGraphics.GraphicsHelpers.Models;
@@ -126,23 +126,27 @@ public class ModelEngine
     /// Loads a model from file by name.
     /// <para>Note: Most users should not use this method. Instead, use <see cref="GetModel(string)"/>.</para>
     /// </summary>
-    /// <param name="filename">The name.</param>
-    /// <returns>The model.</returns>
+    /// <param name="filename">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
+    /// <returns>The loaded model, or null if it failed to load.</returns>
     public Model LoadModel(string filename)
     {
         try
         {
             filename = FileEngine.CleanFileName(filename);
-            if (!Window.Files.TryReadFileData($"models/{filename}.vmd", out byte[] bits))
+            if (Window.Files.TryReadFileData($"models/{filename}.fmd", out byte[] bits))
             {
-                Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Base}' does not exist.");
-                return null;
+                return FromBytes(filename, bits);
             }
-            return FromBytes(filename, bits);
+            if (Window.Files.TryReadFileData($"models/{filename}.vmd", out byte[] vbits)) // TODO: Legacy format
+            {
+                return FromBytes(filename, vbits);
+            }
+            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{filename}.fmd{TextStyle.Base}' does not exist.");
+            return null;
         }
         catch (Exception ex)
         {
-            Logs.CriticalError($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.vmd{TextStyle.Error}'", ex);
+            Logs.CriticalError($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.fmd{TextStyle.Error}'", ex);
             return null;
         }
     }
@@ -151,8 +155,8 @@ public class ModelEngine
     /// Gets the model object for a specific model name.
     /// If the relevant model exists but is not yet loaded, will load it from file.
     /// </summary>
-    /// <param name="modelname">The name of the model.</param>
-    /// <returns>A valid model object.</returns>
+    /// <param name="modelname">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
+    /// <returns>A valid model object. If the model cannot be loaded, a placeholder cube will be substituted.</returns>
     public Model GetModel(string modelname)
     {
         modelname = FileEngine.CleanFileName(modelname);
@@ -174,13 +178,22 @@ public class ModelEngine
         return Loaded;
     }
 
-    /// <summary>Dynamically loads a model (returns a temporary copy of 'Cube', then fills it in when possible).</summary>
-    /// <param name="modelName">The model name to load.</param>
-    /// <returns>The model object.</returns>
-    public Model DynamicLoadModel(string modelName)
+    /// <summary>Dynamically loads a direct data (.fmd - Frenetic Model Data) format model (by default returns a temporary copy of 'Cube', then fills it in when possible).
+    /// <para><see cref="Model.IsLoaded"/> will be <c>false</c> until loaded, then <c>true</c> when ready. May stay false forever if the model file does not exist.</para></summary>
+    /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
+    /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
+    /// <param name="loadInto">Optional, existing model object to load the model data into. If unspecified, a placeholder cube model will be generated.</param>
+    /// <param name="onLoad">Optional action to fire after the model data has loaded. Does not fire if the model fails to load. Fires on window sync thread.</param>
+    /// <param name="setLoaded">If true, set <see cref="Model.IsLoaded"/> to true. If false, do not (eg for onLoad to have its own action).</param>
+    /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
+    public Model GetDirectModelDynamic(string modelName, bool loadNow = false, Model loadInto = null, Action onLoad = null, bool setLoaded = true)
     {
         modelName = FileEngine.CleanFileName(modelName);
-        Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+        Model model = loadInto ?? new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+        if (loadInto is null)
+        {
+            LoadedModels.Add(modelName, model);
+        }
         void processLoad(byte[] data)
         {
             Model3D scene = Handler.LoadModel(data);
@@ -202,18 +215,142 @@ public class ModelEngine
                 model.ModelMin = new Location(-0.5);
                 model.ModelMax = new Location(0.5);
                 model.ModelBoundsSet = false;
-                model.IsLoaded = true;
+                model.IsLoaded = setLoaded;
+                onLoad?.Invoke();
             });
         }
         void fileMissing()
         {
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}' does not exist.");
+            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}' does not exist.");
         }
         void handleError(string message)
         {
-            Logs.Error($"Failed to load model from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Base}': {message}");
+            Logs.Error($"Failed to load model from data filename '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}': {message}");
         }
-        Window.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
+        if (loadNow)
+        {
+            if (Window.Files.TryReadFileData($"models/{modelName}.fmd", out byte[] bits))
+            {
+                processLoad(bits);
+            }
+            else
+            {
+                fileMissing();
+            }
+        }
+        else
+        {
+            Window.AssetStreaming.AddGoal($"models/{modelName}.fmd", false, processLoad, fileMissing, handleError);
+        }
+        return model;
+    }
+
+    /// <summary>Dynamically loads an info (.fmi - Frenetic Model Info) format model (by default returns a temporary copy of 'Cube', then fills it in when possible).
+    /// <para><see cref="Model.IsLoaded"/> will be <c>false</c> until loaded, then <c>true</c> when ready. May stay false forever if the model file does not exist.</para></summary>
+    /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
+    /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used. Textures will be loaded with highest priority, but may not be instant still.</param>
+    /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
+    public Model GetModelFromInfoDynamic(string modelName, bool loadNow = false)
+    {
+        modelName = FileEngine.CleanFileName(modelName);
+        Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+        void processLoad(byte[] data)
+        {
+            string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
+            string[] lines = fileText.SplitFast('\n');
+            foreach (string line in lines)
+            {
+                if (line.Length == 0)
+                {
+                    continue;
+                }
+                string[] datums = line.SplitFast('=');
+                if (datums.Length != 2)
+                {
+                    Logs.Warning($"Invalid line in model info file models/{modelName}.fmi: {line}");
+                    continue;
+                }
+                if (datums[0] == "model")
+                {
+                    GetDirectModelDynamic(modelName, loadNow: loadNow, loadInto: model, onLoad: loadTextures, setLoaded: false);
+                }
+            }
+            void loadTextures()
+            {
+                foreach (string line in lines)
+                {
+                    if (line.Length == 0)
+                    {
+                        continue;
+                    }
+                    string[] datums = line.SplitFast('=');
+                    if (datums.Length != 2 || datums[0] == "model")
+                    {
+                        continue;
+                    }
+                    Texture tex = Window.Textures.DynamicLoadTexture(datums[1], loadNow);
+                    bool success = false;
+                    string meshName = datums[0].BeforeAndAfter(":::", out string texType).ToLowerFast();
+                    texType = texType.ToLowerFast();
+                    foreach (ModelMesh mesh in model.Meshes)
+                    {
+                        if (mesh.NameLower != meshName)
+                        {
+                            continue;
+                        }
+                        if (texType == "specular")
+                        {
+                            mesh.BaseRenderable.SpecularTexture = tex;
+                        }
+                        else if (texType == "reflectivity")
+                        {
+                            mesh.BaseRenderable.ReflectivityTexture = tex;
+                        }
+                        else if (texType == "normal")
+                        {
+                            mesh.BaseRenderable.NormalTexture = tex;
+                        }
+                        else if (texType == "" || texType == "color")
+                        {
+                            mesh.BaseRenderable.ColorTexture = tex;
+                        }
+                        else
+                        {
+                            Logs.Warning($"Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
+                        }
+                        success = true;
+                    }
+                    if (!success)
+                    {
+                        Logs.Warning($"Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
+                    }
+                }
+            }
+        }
+        void fileMissing()
+        {
+            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}' does not exist.");
+        }
+        void handleError(string message)
+        {
+            Logs.Error($"Failed to load model from info filename '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}': {message}");
+        }
+        if (loadNow)
+        {
+            if (Window.Files.TryReadFileData($"models/{modelName}.fmi", out byte[] bits))
+            {
+                processLoad(bits);
+            }
+            else
+            {
+                fileMissing();
+            }
+        }
+        else
+        {
+            Window.AssetStreaming.AddGoal($"models/{modelName}.fmi", false, processLoad, fileMissing, handleError);
+        }
+        LoadedModels.Add(modelName, model);
         return model;
     }
 
