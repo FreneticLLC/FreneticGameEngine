@@ -24,38 +24,37 @@ public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e
     /// <summary>Local axis on <see cref="PhysicsJointBase.One"/> to rotate around.</summary>
     public Location Axis = axis;
 
-    /// <summary>Target angle (radians) of the <see cref="Axis"/> of <see cref="PhysicsJointBase.One"/>.</summary>
-    public float TargetAngle = 0;
+    /// <summary>Target offset distance between the two entities' anchor points.</summary>
+    public float TargetOffset = 1f;
 
     /// <summary>Maximum speed this servo can try to move at.</summary>
-    public float MaximumSpeed = float.MaxValue;
+    public float MaxSpeed = float.MaxValue;
 
     /// <summary>Maximum amount of force this servo can output.</summary>
-    public float MaximumForce = float.MaxValue;
+    public float MaxForce = float.MaxValue;
 
-    /// <summary>Minimum move speed. Clamped by <see cref="MaximumSpeed"/> and by error per step to avoid overshoot.</summary>
+    /// <summary>Minimum move speed. Clamped by <see cref="MaxSpeed"/> and by error per step to avoid overshoot.</summary>
     public float BaseSpeed = 0;
 
-    /// <summary>Undamped oscillations per second. Higher corrects faster.</summary>
+    /// <summary>Target number of undamped oscillations per second.</summary>
     public float SpringFrequency = 20;
 
-    /// <summary>Damping ratio. 1 = fastest without overshoot, &lt; 1 oscillates, &gt; 1 is slower/overdamped.</summary>
+    /// <summary>Ratio of the spring's actual damping to its critical damping. 0 is undamped, 1 is critically damped, and higher values are overdamped.</summary>
     public float SpringDamping = 1;
-
 
     /// <summary>Use to change the target angle (steering/aiming). If the target angle is changed, reapplies so the new angle is used next frame. 
     /// Otherwise it takes effect when added.</summary>
     public void SetTargetAngle(float angleInRadians)
     {
-        TargetAngle = angleInRadians;
+        TargetOffset = angleInRadians;
         Reapply();
     }
 
     /// <inheritdoc/>
     public override AngularServo CreateJointDescription() => new()
     {
-        TargetRelativeRotationLocalA = System.Numerics.Quaternion.CreateFromAxisAngle(Axis.ToNumerics(), TargetAngle),
+        TargetRelativeRotationLocalA = System.Numerics.Quaternion.CreateFromAxisAngle(Axis.ToNumerics(), TargetOffset),
         SpringSettings = new SpringSettings(SpringFrequency, SpringDamping),
-        ServoSettings = new ServoSettings(MaximumSpeed, BaseSpeed, MaximumForce)
+        ServoSettings = new ServoSettings(MaxSpeed, BaseSpeed, MaxForce)
     };
 }
