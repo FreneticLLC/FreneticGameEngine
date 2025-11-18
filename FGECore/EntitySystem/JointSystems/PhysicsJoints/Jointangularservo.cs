@@ -39,10 +39,12 @@ public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e
     /// <summary>Undamped oscillations per second. Higher corrects faster.</summary>
     public float SpringFrequency = 20;
 
-    /// <summary>Damping ratio. 1 = fastest without overshoot, < 1 oscillates, > 1 slower/overdamped.</summary>
+    /// <summary>Damping ratio. 1 = fastest without overshoot, &lt; 1 oscillates, &gt; 1 is slower/overdamped.</summary>
     public float SpringDamping = 1;
 
-    /// <summary>Use to change the target during play (steering/aiming). If the joint is added, reapplies so the new angle is used next frame; otherwise it takes effect when added.</summary>
+
+    /// <summary>Use to change the target angle (steering/aiming). If the joint is added, reapplies so the new angle is used next frame. 
+    /// Otherwise it takes effect when added.</summary>
     public void SetTargetAngle(float angleInRadians)
     {
         TargetAngle = angleInRadians;
