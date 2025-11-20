@@ -32,7 +32,7 @@ public class ModelEngine
     public Dictionary<string, Model> LoadedModels;
 
     /// <summary>Internal model helper from the core.</summary>
-    public ModelHandler Handler;
+    public CoreModelEngine CoreModels;
 
     /// <summary>A generic 1x1x1 cube model.</summary>
     public Model Cube;
@@ -60,59 +60,20 @@ public class ModelEngine
     /// <param name="tclient">Backing client.</param>
     public void Init(AnimationEngine engine, GameClientWindow tclient)
     {
+        CoreModels = new(tclient);
         GraphicsUtil.CheckError("ModelEngine - Init - Pre");
         Window = tclient;
         AnimEngine = engine;
-        Handler = new ModelHandler();
-        LoadedModels = new Dictionary<string, Model>(128);
-        Cube = GenerateCube();
-        GraphicsUtil.CheckError("ModelEngine - Init - Cube");
+        LoadedModels = new(128);
+        Cube = FromScene(null, CoreModels.Cube, "cube");
         LoadedModels.Add("cube", Cube);
-        Cylinder = FromScene(ShapeGenerators.GenerateCylinder(1, 5, 20), "cylinder");
+        Cylinder = FromScene(null, CoreModels.Cylinder, "cylinder");
         LoadedModels.Add("cylinder", Cylinder);
-        GraphicsUtil.CheckError("ModelEngine - Init - Cyl");
-        Sphere = FromScene(ShapeGenerators.GenerateUVSphere(1, 10, 60), "sphere");
+        Sphere = FromScene(null, CoreModels.Sphere, "sphere");
         LoadedModels.Add("sphere", Sphere);
-        GraphicsUtil.CheckError("ModelEngine - Init - Sphere");
-        Clear = new Model("clear") { Engine = this, Skinned = true, Original = new Model3D() };
+        Clear = new Model("clear") { Engine = this, Skinned = true, Original = CoreModels.Clear };
         LoadedModels.Add("clear", Clear);
         GraphicsUtil.CheckError("ModelEngine - Init - Final");
-    }
-
-    /// <summary>Generates a cube model.</summary>
-    /// <returns>The cube model.</returns>
-    public Model GenerateCube()
-    {
-        Model m = new("cube")
-        {
-            Engine = this,
-            Skinned = true,
-            ModelMin = new Location(-0.5),
-            ModelMax = new Location(0.5)
-        };
-        ModelMesh mm = new("cube", m);
-        Renderable.ListBuilder builder = new();
-        builder.Prepare();
-        TextureCoordinates tc = new();
-        builder.AddSide(Location.UnitX, tc, offs: true, scale: 0.5f);
-        builder.AddSide(Location.UnitY, tc, offs: true, scale: 0.5f);
-        builder.AddSide(Location.UnitZ, tc, offs: true, scale: 0.5f);
-        builder.AddSide(-Location.UnitX, tc, offs: true, scale: 0.5f);
-        builder.AddSide(-Location.UnitY, tc, offs: true, scale: 0.5f);
-        builder.AddSide(-Location.UnitZ, tc, offs: true, scale: 0.5f);
-        m.Original = new Model3D();
-        Model3DMesh m3m = new()
-        {
-            Name = "cube",
-            Indices = [.. builder.Indices],
-            Vertices = [.. builder.Vertices.ConvertAll((o) => o.ToLocation().ToNumerics())],
-            TexCoords = [.. builder.TexCoords.ConvertAll((o) => new System.Numerics.Vector2(o.X, o.Y))],
-            Normals = [.. builder.Normals.ConvertAll((o) => o.ToLocation().ToNumerics())]
-        };
-        m.Original.Meshes = [m3m];
-        mm.BaseRenderable.GenerateVBO(builder);
-        m.AddMesh(mm);
-        return m;
     }
 
     /// <summary>Update delta time tracker.</summary>
@@ -123,39 +84,10 @@ public class ModelEngine
     }
 
     /// <summary>
-    /// Loads a model from file by name.
-    /// <para>Note: Most users should not use this method. Instead, use <see cref="GetModel(string)"/>.</para>
-    /// </summary>
-    /// <param name="filename">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
-    /// <returns>The loaded model, or null if it failed to load.</returns>
-    public Model LoadModel(string filename)
-    {
-        try
-        {
-            filename = FileEngine.CleanFileName(filename);
-            if (Window.Files.TryReadFileData($"models/{filename}.fmd", out byte[] bits))
-            {
-                return FromBytes(filename, bits);
-            }
-            if (Window.Files.TryReadFileData($"models/{filename}.vmd", out byte[] vbits)) // TODO: Legacy format
-            {
-                return FromBytes(filename, vbits);
-            }
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{filename}.fmd{TextStyle.Base}' does not exist.");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Logs.CriticalError($"Failed to load model from filename '{TextStyle.Standout}models/{filename}.fmd{TextStyle.Error}'", ex);
-            return null;
-        }
-    }
-
-    /// <summary>
     /// Gets the model object for a specific model name.
     /// If the relevant model exists but is not yet loaded, will load it from file.
     /// </summary>
-    /// <param name="modelname">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
+    /// <param name="modelname">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
     /// <returns>A valid model object. If the model cannot be loaded, a placeholder cube will be substituted.</returns>
     public Model GetModel(string modelname)
     {
@@ -164,17 +96,17 @@ public class ModelEngine
         {
             return existingModel;
         }
-        Model Loaded = null;
+        Model Loaded;
         try
         {
-            Loaded = LoadModel(modelname);
+            Loaded = GetModelFromInfoDynamic(modelname, loadNow: true);
         }
         catch (Exception ex)
         {
             Logs.CriticalError($"Reading model '{modelname}'", ex);
+            Loaded = new Model(modelname) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+            LoadedModels.Add(modelname, Loaded);
         }
-        Loaded ??= new Model(modelname) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
-        LoadedModels.Add(modelname, Loaded);
         return Loaded;
     }
 
@@ -194,11 +126,10 @@ public class ModelEngine
         {
             LoadedModels.Add(modelName, model);
         }
-        void processLoad(byte[] data)
+        CoreModels.LoadDirectModelDynamic(modelName, scene =>
         {
-            Model3D scene = Handler.LoadModel(data);
             List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
-            Model mod = FromSceneNoGenerate(scene, modelName, builders);
+            Model mod = FromSceneNoGenerate(null, scene, modelName, builders);
             Window.Schedule.ScheduleSyncTask(() =>
             {
                 foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
@@ -218,30 +149,7 @@ public class ModelEngine
                 model.IsLoaded = setLoaded;
                 onLoad?.Invoke();
             });
-        }
-        void fileMissing()
-        {
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}' does not exist.");
-        }
-        void handleError(string message)
-        {
-            Logs.Error($"Failed to load model from data filename '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}': {message}");
-        }
-        if (loadNow)
-        {
-            if (Window.Files.TryReadFileData($"models/{modelName}.fmd", out byte[] bits))
-            {
-                processLoad(bits);
-            }
-            else
-            {
-                fileMissing();
-            }
-        }
-        else
-        {
-            Window.AssetStreaming.AddGoal($"models/{modelName}.fmd", false, processLoad, fileMissing, handleError);
-        }
+        }, loadNow: loadNow);
         return model;
     }
 
@@ -254,30 +162,12 @@ public class ModelEngine
     {
         modelName = FileEngine.CleanFileName(modelName);
         Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
-        void processLoad(byte[] data)
+        CoreModels.GetModelFromInfoDynamic(modelName, scene =>
         {
-            string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
-            string[] lines = fileText.SplitFast('\n');
-            foreach (string line in lines)
+            Window.Schedule.ScheduleSyncTask(() =>
             {
-                if (line.Length == 0)
-                {
-                    continue;
-                }
-                string[] datums = line.SplitFast('=');
-                if (datums.Length != 2)
-                {
-                    Logs.Warning($"Invalid line in model info file models/{modelName}.fmi: {line}");
-                    continue;
-                }
-                if (datums[0] == "model")
-                {
-                    GetDirectModelDynamic(modelName, loadNow: loadNow, loadInto: model, onLoad: loadTextures, setLoaded: false);
-                }
-            }
-            void loadTextures()
-            {
-                foreach (string line in lines)
+                FromScene(model, scene, modelName);
+                foreach (string line in scene.InfoDataLines)
                 {
                     if (line.Length == 0)
                     {
@@ -316,62 +206,30 @@ public class ModelEngine
                         }
                         else
                         {
-                            Logs.Warning($"Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
+                            Logs.Warning($"While loading model '{modelName}': Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
                         }
                         success = true;
                     }
                     if (!success)
                     {
-                        Logs.Warning($"Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
+                        Logs.Warning($"While loading model '{modelName}': Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
                     }
                 }
-            }
-        }
-        void fileMissing()
-        {
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}' does not exist.");
-        }
-        void handleError(string message)
-        {
-            Logs.Error($"Failed to load model from info filename '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}': {message}");
-        }
-        if (loadNow)
-        {
-            if (Window.Files.TryReadFileData($"models/{modelName}.fmi", out byte[] bits))
-            {
-                processLoad(bits);
-            }
-            else
-            {
-                fileMissing();
-            }
-        }
-        else
-        {
-            Window.AssetStreaming.AddGoal($"models/{modelName}.fmi", false, processLoad, fileMissing, handleError);
-        }
+            });
+        }, loadNow: loadNow);
         LoadedModels.Add(modelName, model);
         return model;
     }
 
-    /// <summary>loads a model from a file byte array.</summary>
-    /// <param name="name">The name of the model.</param>
-    /// <param name="data">The .obj file string.</param>
-    /// <returns>A valid model.</returns>
-    public Model FromBytes(string name, byte[] data)
-    {
-        Model3D scene = Handler.LoadModel(data);
-        return FromScene(scene, name);
-    }
-
     /// <summary>Converts a core Scene to a renderable model.</summary>
+    /// <param name="loadInto">Optional model to load the data into.</param>
     /// <param name="scene">The backing model.</param>
     /// <param name="name">The name to use.</param>
-    /// <returns>The model.</returns>
-    public Model FromScene(Model3D scene, string name)
+    /// <returns>The model, fully generated and ready to render.</returns>
+    public Model FromScene(Model loadInto, Model3D scene, string name)
     {
         List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
-        Model mod = FromSceneNoGenerate(scene, name, builders);
+        Model mod = FromSceneNoGenerate(loadInto, scene, name, builders);
         foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
         {
             builder.Key.BaseRenderable.GenerateVBO(builder.Value);
@@ -381,18 +239,18 @@ public class ModelEngine
     }
 
     /// <summary>Converts a core Scene to a renderable model, without running the VBO generate step.</summary>
+    /// <param name="loadInto">Optional model to load the data into.</param>
     /// <param name="scene">The backing model.</param>
     /// <param name="name">The name to use.</param>
     /// <param name="vboBuilders">The VBO builders for output.</param>
-    /// <returns>The model.</returns>
-    public Model FromSceneNoGenerate(Model3D scene, string name, List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> vboBuilders)
+    /// <returns>The model, not generated yet.</returns>
+    public Model FromSceneNoGenerate(Model loadInto, Model3D scene, string name, List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> vboBuilders)
     {
-        Model model = new(name)
-        {
-            Engine = this,
-            Original = scene,
-            Root = scene.MatrixA.Convert()
-        };
+        Model model = loadInto ?? new(name) { Engine = this };
+        model.Meshes = [];
+        model.MeshMap = [];
+        model.Original = scene;
+        model.Root = scene.MatrixA.Convert();
         if (scene.Meshes.Length == 0)
         {
             throw new Exception($"Scene has no meshes! ({name})");
@@ -481,7 +339,7 @@ public class ModelEngine
         model.RootNode = new ModelNode() { Parent = null, Name = scene.RootNode.Name.ToLowerFast() };
         List<ModelNode> allNodes = [];
         PopulateChildren(model.RootNode, scene.RootNode, model, AnimEngine, allNodes);
-        for (int i = 0; i < model.Meshes.Count; i++)
+        for (int i = 0; i < scene.Meshes.Length; i++)
         {
             for (int x = 0; x < scene.Meshes[i].Bones.Length; x++)
             {
