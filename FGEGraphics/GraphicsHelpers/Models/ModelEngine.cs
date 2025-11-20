@@ -209,6 +209,7 @@ public class ModelEngine
                             Logs.Warning($"While loading model '{modelName}': Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
                         }
                         success = true;
+                        model.Skinned = true;
                     }
                     if (!success)
                     {

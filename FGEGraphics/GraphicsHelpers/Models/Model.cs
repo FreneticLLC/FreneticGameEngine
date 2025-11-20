@@ -343,30 +343,6 @@ public class Model(string _name)
     /// <summary>Whether this model has a skin already.</summary>
     public bool Skinned = false;
 
-    /// <summary>Loads the skin for this model.</summary>
-    /// <param name="texs">Texture engine.</param>
-    public void LoadSkin(TextureEngine texs)
-    {
-        if (Skinned)
-        {
-            return;
-        }
-        Skinned = true;
-        if (Engine.Window.Files.TryReadFileText($"models/{Name}.fmi", out string fileText))
-        {
-        }
-        else if (Engine.Window.Files.TryReadFileText($"models/{Name}.skin", out fileText)) // TODO: Legacy format
-        {
-        }
-        else
-        {
-            Logs.Warning($"Can't find models/{Name}.fmi!");
-            return;
-        }
-        string[] lines = fileText.SplitFast('\n');
-        LoadSkinFromLines(texs, lines);
-    }
-
     /// <summary>Loads the skin for this model based on lines of skinning data.</summary>
     /// <param name="texs">The relevant texture engine.</param>
     /// <param name="lines">The lines of texture info data to load.</param>
