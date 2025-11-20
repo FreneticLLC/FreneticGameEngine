@@ -11,10 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using FGECore.CoreSystems;
 using FGECore.ModelSystems;
 
-namespace FGEGraphics.GraphicsHelpers.Models;
+namespace FGECore.ModelSystems;
 
 /// <summary>Generates shapes and returns them as a model.</summary>
 public static class ShapeGenerators
