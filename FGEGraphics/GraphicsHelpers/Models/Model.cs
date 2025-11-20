@@ -418,14 +418,14 @@ public class Model(string _name)
                 }
                 else
                 {
-                    Logs.Warning($"Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
+                    Logs.Warning($"While skinning model '{Name}': Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
                 }
                 appliedMeshes++;
                 success = true;
             }
             if (!success)
             {
-                Logs.Warning($"Unknown skin entry {datums[0]}, available: {Meshes.Select(m => m.Name).JoinString(", ")}");
+                Logs.Warning($"While skinning model '{Name}': Unknown skin entry {datums[0]}, available: {Meshes.Select(m => m.Name).JoinString(", ")}");
             }
         }
         if (appliedMeshes == 0)
@@ -445,7 +445,7 @@ public class Model(string _name)
         return ret;
     }
 
-    /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+    /// <inheritdoc/>
     public override string ToString()
     {
         return $"Model({Name})";

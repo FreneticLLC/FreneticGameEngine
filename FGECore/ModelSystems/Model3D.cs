@@ -29,6 +29,22 @@ public class Model3D
 
     /// <summary>User-tag on this model. Often this is an FGEGraphics Model instance.</summary>
     public object Tag;
+
+    /// <summary>(Potentially null) info data lines that sourced this model, often containing texture data.</summary>
+    public string[] InfoDataLines;
+
+    /// <summary>Returns a simple shallow copy of this <see cref="Model3D"/>.</summary>
+    public Model3D Duplicate()
+    {
+        return new()
+        {
+            Meshes = Meshes,
+            RootNode = RootNode,
+            MatrixA = MatrixA,
+            Tag = Tag,
+            InfoDataLines = InfoDataLines
+        };
+    }
 }
 
 /// <summary>Represents a single mesh of an abstract 3D model.</summary>
