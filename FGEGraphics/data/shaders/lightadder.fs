@@ -98,12 +98,12 @@ void main() // Let's put all code in main, why not...
 		vec3 light_path = light_pos; // What path a light ray has to travel down in theory to get from the source to the current pixel.
 		float atten = 1.0;
 		float light_length = 1.0;
-        float extraZOff = 0;
+		float extraZOff = 0;
 		if (should_sqrt >= 0.5) // If inverse square trick is enabled (generally this will be 1.0 or 0.0)
 		{
 			f_spos.x = sign(f_spos.x) * fix_sqr(1.0 - abs(f_spos.x)); // Inverse square the relative position while preserving the sign. Shadow creation buffer also did this.
 			f_spos.y = sign(f_spos.y) * fix_sqr(1.0 - abs(f_spos.y)); // This section means that coordinates near the center of the light view will have more pixels per area available than coordinates far from the center.
-            extraZOff = 0.001;
+			extraZOff = 0.001;
 		}
 		else
 		{
