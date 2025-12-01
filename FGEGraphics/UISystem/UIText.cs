@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGEGraphics.UISystem;
 
@@ -92,6 +93,7 @@ public class UIText
     {
         string styledContent = style.TextStyling(Content); // FIXME: this doesn't play well with translatable text.
         int fontSize = (int)(style.TextFont.Size * Internal.Element.Scale);
+        // TODO: cache this somewhere, as it's likely for many elements with text to have the same scale value
         FontSet font = style.TextFont.Engine.Fonts
             .Where(pair => pair.Value.Name == style.TextFont.Name)
             .MinBy(pair => Math.Abs(pair.Key.Item2 - fontSize))
@@ -194,11 +196,7 @@ public class UIText
             List<RenderableTextLine> textLines = [.. text.Renderable.Lines];
             if (lines.Count != 0)
             {
-                RenderableTextLine combinedLine = new()
-                {
-                    Parts = [.. lines[^1].Line.Parts, .. textLines[0].Parts],
-                    Width = lines[^1].Line.Width + textLines[0].Width
-                };
+                RenderableTextLine combinedLine = new([.. lines[^1].Line.Parts, .. textLines[0].Parts]);
                 lines[^1] = (lines[^1].Font, combinedLine);
                 textLines.RemoveAt(0);
             }

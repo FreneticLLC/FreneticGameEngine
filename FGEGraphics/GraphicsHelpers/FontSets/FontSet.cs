@@ -377,11 +377,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                         }
                     }
                 }
-                outLines[i] = new RenderableTextLine()
-                {
-                    Parts = [.. parts],
-                    Width = (int)Math.Ceiling(X)
-                };
+                outLines[i] = new RenderableTextLine([.. parts]);
                 maxWidth = Math.Max(maxWidth, outLines[i].Width);
             }
             RenderableText result = new() { Lines = outLines, Width = maxWidth };

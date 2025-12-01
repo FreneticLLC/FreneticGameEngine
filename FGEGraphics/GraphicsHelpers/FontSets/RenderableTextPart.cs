@@ -6,14 +6,15 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -23,6 +24,7 @@ public class RenderableTextPart
     /// <summary>The actual characters of text to render.</summary>
     public string Text;
 
+    // TODO: should this be a float?
     /// <summary>The horizontal width of the text, in pixels.</summary>
     public float Width;
 
@@ -158,46 +160,6 @@ public class RenderableTextPart
     public override string ToString() => Text;
 }
 
-/// <summary>Represents a single line of renderable text.</summary>
-public class RenderableTextLine
-{
-    /// <summary>An array of all parts within the line.</summary>
-    public RenderableTextPart[] Parts;
-
-    /// <summary>The total width of the line.</summary>
-    public int Width;
-
-    /// <summary>Implements <see cref="Object.ToString"/> to make an un-separated string of the contents.</summary>
-    public override string ToString() => string.Concat<RenderableTextPart>(Parts);
-
-    /// <summary>The total text length of this line.</summary>
-    public int Length => Parts.Sum(part => part.Text.Length);
-}
-
-/// <summary>Represents a section of renderable text.</summary>
-public class RenderableText()
-{
-    /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
-    public static readonly RenderableText Empty = new() { Lines = [], Width = 0 };
-
-    /// <summary>An array of all lines of text.</summary>
-    public RenderableTextLine[] Lines;
-
-    /// <summary>The maximum width of the text.</summary>
-    public int Width;
-
-    /// <summary>Constructs renderable text from a single line.</summary>
-    /// <param name="lines">The text lines.</param>
-    public RenderableText(params RenderableTextLine[] lines) : this()
-    {
-        Lines = lines;
-        Width = lines.Length == 0 ? 0 : lines.Max(line => line.Width);
-    }
-
-    /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
-    public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
-}
-
 /// <summary>A mutable <see cref="RenderableTextLine"/> builder.</summary>
 /// <param name="parts">A list of parts within the line.</param>
 /// <param name="width">The line width.</param>
@@ -250,5 +212,5 @@ public class EditableTextLine(List<RenderableTextPart> parts, float width, int l
     }
 
     /// <summary>Builds a new <see cref="RenderableTextLine"/> from the editable values.</summary>
-    public RenderableTextLine ToRenderable() => new() { Parts = [.. Parts], Width = (int)Width };
+    public RenderableTextLine ToRenderable() => new([.. Parts]);
 }
