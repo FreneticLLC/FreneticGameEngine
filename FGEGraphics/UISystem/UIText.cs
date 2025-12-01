@@ -90,10 +90,13 @@ public class UIText
     /// <returns>The resulting renderable object.</returns>
     public RenderableText CreateRenderable(UIStyle style)
     {
-        string styled = style.TextStyling(Content); // FIXME: this doesn't play well with translatable text.
-        var font = style.TextFont.Engine.GetFont(style.TextFont.Name, (int)(style.TextFont.Size * Internal.Element.Scale));
-        Logs.Debug("Getting font " + style.TextFont.Name + " with size " + (int)(style.TextFont.Size * Internal.Element.Scale) + " (normal: " + style.TextFont.Size + ")");
-        RenderableText renderable = font.ParseFancyText(styled, style.TextBaseColor);
+        string styledContent = style.TextStyling(Content); // FIXME: this doesn't play well with translatable text.
+        int fontSize = (int)(style.TextFont.Size * Internal.Element.Scale);
+        FontSet font = style.TextFont.Engine.Fonts
+            .Where(pair => pair.Value.Name == style.TextFont.Name)
+            .MinBy(pair => Math.Abs(pair.Key.Item2 - fontSize))
+            .Value;
+        RenderableText renderable = font.ParseFancyText(styledContent, style.TextBaseColor);
         if (Internal.MaxWidth > 0)
         {
             renderable = FontSet.SplitAppropriately(renderable, Internal.MaxWidth);
