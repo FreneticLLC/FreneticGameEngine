@@ -796,7 +796,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         skippedIndices = [];
         if (line.Width < maxWidth)
         {
-            return new(line);
+            return new([line]);
         }
         int charIndex = 0;
         float totalWidth = 0;

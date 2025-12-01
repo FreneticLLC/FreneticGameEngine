@@ -209,7 +209,7 @@ public class UIText
         foreach ((FontSet font, RenderableTextLine line) in lines)
         {
             List<int> skippedIndices = null;
-            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new(line);
+            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new([line]);
             yield return new(font, splitText, y, skippedIndices ?? []);
             y += font.Height * splitText.Lines.Length;
         }

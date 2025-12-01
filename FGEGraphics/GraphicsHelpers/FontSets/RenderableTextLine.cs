@@ -17,6 +17,11 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 /// <summary>Represents a single line of renderable text.</summary>
 public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Height)
 {
+    public static readonly RenderableTextLine Empty = new();
+
+    public RenderableTextLine() : this([], 0, 0)
+    { }
+
     public RenderableTextLine(RenderableTextPart[] parts)
         : this(parts,
               (int)parts.Sum(part => part.Width),

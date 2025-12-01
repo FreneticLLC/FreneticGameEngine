@@ -15,24 +15,20 @@ using System.Threading.Tasks;
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 /// <summary>Represents a section of renderable text.</summary>
-public class RenderableText()
+public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
     public static readonly RenderableText Empty = new() { Lines = [], Width = 0 };
 
-    /// <summary>An array of all lines of text.</summary>
-    public RenderableTextLine[] Lines;
+    public RenderableText() : this([], 0, 0)
+    { }
 
-    /// <summary>The maximum width of the text.</summary>
-    public int Width;
-
-    /// <summary>Constructs renderable text from a single line.</summary>
     /// <param name="lines">The text lines.</param>
-    public RenderableText(params RenderableTextLine[] lines) : this()
-    {
-        Lines = lines;
-        Width = lines.Length == 0 ? 0 : lines.Max(line => line.Width);
-    }
+    public RenderableText(RenderableTextLine[] lines) : 
+        this(lines,
+            lines.Length > 0 ? lines.Max(line => line.Width) : 0,
+            lines.Sum(line => line.Height))
+    { }
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);
