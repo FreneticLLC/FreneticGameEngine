@@ -1105,7 +1105,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.ReadPixels(0, 0, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, PixelFormat.Red, PixelType.Float, Internal.DynamicExposureResult);
             View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             GL.ReadBuffer(ReadBufferMode.None);
-            float exp = FindExp(Internal.DynamicExposureResult);
+            float exp = FindExp(Internal.DynamicExposureResult) / 5;
             exp = Math.Clamp(exp, 0.4f, 5);
             exp = (float)Math.Sqrt(exp);
             exp = 1f / exp;
