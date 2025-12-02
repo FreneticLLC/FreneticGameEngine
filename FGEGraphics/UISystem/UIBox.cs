@@ -72,9 +72,9 @@ public class UIBox : UIElement
             float ymax = Flip ? Y : Y + Height;
             View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
         }
-        if (style.CanRenderText(Text))
+        if (Text.CanBeRenderedBy(style))
         {
-            style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));
+            Text.Render(style, X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2);
         }
     }
 }

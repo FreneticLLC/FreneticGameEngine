@@ -44,9 +44,9 @@ public class UILabel : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        if (style.CanRenderText(Text))
+        if (Text.CanBeRenderedBy(style))
         {
-            style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+            Text.Render(style, X, Y);
         }
     }
 

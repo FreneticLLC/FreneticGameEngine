@@ -6,17 +6,18 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FreneticUtilities.FreneticExtensions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FGEGraphics.UISystem;
 
@@ -69,7 +70,7 @@ public class UIText
     public UIText(UIElement element, string content, bool required = false, int maxWidth = -1, UIStyle style = null /* TODO: UIStyling? */)
     {
         content ??= (required ? Null : null);
-        if (style is not null && !style.CanRenderText())
+        if (style is not null && !style.CanRenderText)
         {
             throw new Exception("Internal text style must support text rendering");
         }
@@ -123,7 +124,7 @@ public class UIText
         Internal.Renderables ??= [];
         foreach (UIStyle style in Internal.Element.ElementInternal.Styles)
         {
-            if (style.CanRenderText())
+            if (style.CanRenderText)
             {
                 Internal.Renderables[style] = CreateRenderable(style);
             }
@@ -152,6 +153,7 @@ public class UIText
         }
     }
 
+    // TODO: fix docs
     /// <summary>
     /// The <see cref="RenderableText"/> object corresponding to the current style.
     /// If <see cref="UIStyle.CanRenderText(UIText)"/> returns <c>false</c>, this returns <see cref="RenderableText.Empty"/>.
@@ -166,8 +168,13 @@ public class UIText
     /// <summary>The total height of the text.</summary>
     public int Height => Renderable?.Height ?? 0;
 
-    /// <summary>Returns <see cref="Renderable"/>.</summary>
-    public static implicit operator RenderableText(UIText text) => text.Renderable;
+    public bool CanBeRenderedBy(UIStyle style) => !Empty && style.CanRenderText && (Internal.Style == style || (Internal.Renderables?.ContainsKey(style) ?? false));
+
+    // TODO: more options (see DrawFancyText)
+    public void Render(UIStyle style, int x, int y)
+    {
+        style.TextFont.DrawFancyText(Renderable, new Location(x, y, 0));
+    }
 
     /// <summary>An individual UI text chain piece.</summary>
     /// <param name="Font">The font to render the chain piece with.</param>
@@ -189,7 +196,7 @@ public class UIText
         List<(FontSet Font, RenderableTextLine Line)> lines = [];
         foreach (UIText text in chain)
         {
-            if (!text.Style.CanRenderText(text))
+            if (!text.CanBeRenderedBy(text.Style))
             {
                 continue;
             }

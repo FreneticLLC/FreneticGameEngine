@@ -364,7 +364,7 @@ public abstract class UIElement
         }
         if (ElementInternal.Styles.Add(style))
         {
-            if (style.CanRenderText())
+            if (style.CanRenderText)
             {
                 foreach (UIText text in ElementInternal.Texts)
                 {

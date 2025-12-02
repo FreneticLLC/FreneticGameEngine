@@ -557,10 +557,10 @@ public class UIInputLabel : UIElement
         GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
         int y = ScrollGroup.Y + TextPadding;
-        bool renderInfo = TextContent.Length == 0 && Style.CanRenderText(PlaceholderInfo);
+        bool renderInfo = TextContent.Length == 0 && PlaceholderInfo.CanBeRenderedBy(Style);
         if (renderInfo)
         {
-            Style.TextFont.DrawFancyText(PlaceholderInfo, new Location(x, y, 0));
+            PlaceholderInfo.Render(Style, x, y);
         }
         else
         {
