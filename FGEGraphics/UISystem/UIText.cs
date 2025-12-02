@@ -159,9 +159,22 @@ public class UIText
     /// If <see cref="UIStyle.CanRenderText(UIText)"/> returns <c>false</c>, this returns <see cref="RenderableText.Empty"/>.
     /// </summary>
     public RenderableText Renderable => !Empty 
-        ? Internal.Renderable ?? Internal.Renderables?.GetValueOrDefault(Internal.Element.Style, RenderableText.Empty) 
+        ? Internal.Renderable ?? Internal.Renderables?.GetValueOrDefault(Internal.Element.Style, null) ?? RenderableText.Empty 
         : RenderableText.Empty;
 
+    public Vector2i GetSize()
+    {
+        RenderableText renderable = Renderable;
+        if (renderable.IsEmpty)
+        {
+            return Vector2i.Zero;
+        }
+        int trueHeight = (int)((Internal.Style ?? Internal.Element.Style).FontHeight * renderable.Lines.Length * Internal.Element.Scale);
+        int trueWidth = (int)((float)trueHeight / renderable.Height * Renderable.Width);
+        return new Vector2i(trueWidth, trueHeight);
+    }
+
+    // TODO: remove
     /// <summary>The total width of the text.</summary>
     public int Width => Renderable?.Width ?? 0;
 
@@ -173,7 +186,10 @@ public class UIText
     // TODO: more options (see DrawFancyText)
     public void Render(UIStyle style, int x, int y)
     {
-        style.TextFont.DrawFancyText(Renderable, new Location(x, y, 0));
+        Vector2i trueSize = GetSize();
+        int trueX = x + (trueSize.X - Renderable.Width) / 2;
+        int trueY = y + (trueSize.Y - Renderable.Height) / 2;
+        style.TextFont.DrawFancyText(Renderable, new Location(trueX, trueY, 0));
     }
 
     /// <summary>An individual UI text chain piece.</summary>

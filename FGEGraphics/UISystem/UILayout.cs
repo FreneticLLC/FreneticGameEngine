@@ -101,6 +101,8 @@ public class UILayout
         return this;
     }
 
+    public UILayout SetPosition(Vector2i pair) => SetPosition(pair.X, pair.Y);
+
     /// <summary>Sets a constant position.</summary>
     /// <returns>This object.</returns>
     public UILayout SetPosition(Location location) => SetPosition((int)location.X, (int)location.Y);
@@ -129,6 +131,8 @@ public class UILayout
         Internal.Height = new() { Constant = height };
         return this;
     }
+
+    public UILayout SetSize(Vector2i vector) => SetSize(vector.X, vector.Y);
 
     /// <summary>Sets a constant rotation.</summary>
     /// <returns>This object.</returns>

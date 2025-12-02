@@ -38,7 +38,8 @@ public class UILabel : UIElement
     {
         ScaleSize = false;
         Text = new UIText(this, text, true, Layout.Width);
-        Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
+        // TODO: cache size
+        Layout.SetSize(() => Text.GetSize().X, () => Text.GetSize().Y); // TODO: padding
     }
 
     /// <inheritdoc/>

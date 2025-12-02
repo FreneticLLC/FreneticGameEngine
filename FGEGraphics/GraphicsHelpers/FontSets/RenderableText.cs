@@ -20,6 +20,8 @@ public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
     public static readonly RenderableText Empty = new();
 
+    // TODO: add to other renderable classes
+    public bool IsEmpty => Lines is null || Lines.Length == 0 || Width == 0 || Height == 0;
     public RenderableText() : this([], 0, 0)
     { }
 
