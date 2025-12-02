@@ -202,7 +202,6 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             string[] lines = text.Replace('\r', ' ').Replace("^q", "\"").SplitFast('\n');
             RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
             RenderableTextPart currentPart = new() { Font = FontDefault };
-            int maxWidth = 0;
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -378,9 +377,8 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     }
                 }
                 outLines[i] = new RenderableTextLine([.. parts]);
-                maxWidth = Math.Max(maxWidth, outLines[i].Width);
             }
-            RenderableText result = new() { Lines = outLines, Width = maxWidth };
+            RenderableText result = new([.. outLines]);
             FancyTextCache[(baseColor, originalText)] = result;
             return result;
         }
@@ -848,7 +846,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             charIndex += word.Length;
         }
         BuildLine();
-        return new() { Lines = [.. lines], Width = (int)totalWidth };
+        return new RenderableText([.. lines]);
     }
 
     /// <summary>Splits some text at a maximum render width, automatically wrapping to new lines to fit the given boundaries.</summary>
@@ -858,17 +856,12 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     public static RenderableText SplitAppropriately(RenderableText text, int maxWidth)
     {
         List<RenderableTextLine> lines = [];
-        int totalWidth = 0;
         foreach (RenderableTextLine line in text.Lines)
         {
             RenderableText splitLine = SplitLineAppropriately(line, maxWidth, out _);
             lines.AddRange(splitLine.Lines);
-            if (splitLine.Width > totalWidth)
-            {
-                totalWidth = splitLine.Width;
-            }
         }
-        return new RenderableText() { Lines = [.. lines], Width = totalWidth };
+        return new RenderableText([.. lines]);
     }
 
     /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>

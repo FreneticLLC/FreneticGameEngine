@@ -24,8 +24,8 @@ public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Heig
 
     public RenderableTextLine(RenderableTextPart[] parts)
         : this(parts,
-              (int)parts.Sum(part => part.Width),
-              parts.Length > 0 ? parts.Max(part => part.Font.Height) : 0)
+              (int)parts.Sum(part => part?.Width),
+              parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : 0)
     { }
 
     public override string ToString() => string.Concat<RenderableTextPart>(Parts);

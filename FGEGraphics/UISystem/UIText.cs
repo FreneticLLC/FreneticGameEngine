@@ -164,7 +164,7 @@ public class UIText
     public int Width => Renderable?.Width ?? 0;
 
     /// <summary>The total height of the text.</summary>
-    public int Height => (int)(Internal.Element.Scale * Renderable?.Lines?.Length * Style.TextFont?.Height ?? 0);
+    public int Height => Renderable?.Height ?? 0;
 
     /// <summary>Returns <see cref="Renderable"/>.</summary>
     public static implicit operator RenderableText(UIText text) => text.Renderable;

@@ -18,16 +18,16 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
-    public static readonly RenderableText Empty = new() { Lines = [], Width = 0 };
+    public static readonly RenderableText Empty = new();
 
     public RenderableText() : this([], 0, 0)
     { }
 
     /// <param name="lines">The text lines.</param>
-    public RenderableText(RenderableTextLine[] lines) : 
+    public RenderableText(RenderableTextLine[] lines) :
         this(lines,
-            lines.Length > 0 ? lines.Max(line => line.Width) : 0,
-            lines.Sum(line => line.Height))
+            lines.Length > 0 ? lines.Max(line => line?.Width ?? 0) : 0,
+            lines.Sum(line => line?.Height ?? 0))
     { }
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
