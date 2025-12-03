@@ -392,13 +392,6 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
-    /// <param name="from">The previous style.</param>
-    /// <param name="to">The new style.</param>
-    public virtual void StyleChanged(UIStyle from, UIStyle to)
-    {
-    }
-
     /// <summary>
     /// Returns whether this element can be interacted with at the specified position.
     /// This constraint also affects this element's children.
@@ -598,21 +591,25 @@ public abstract class UIElement
         if (ElementInternal.LastPosition != Position)
         {
             OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+            PositionChanged(ElementInternal.LastPosition, Position);
             anyFired |= true;
         }
         if (ElementInternal.LastSize != Size)
         {
             OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+            SizeChanged(ElementInternal.LastSize, Size);
             anyFired |= true;
         }
         if (ElementInternal.LastRotation != Rotation)
         {
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+            RotationChanged(ElementInternal.LastRotation, Rotation);
             anyFired |= true;
         }
         if (ElementInternal.LastScale != Scale)
         {
             OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
+            ScaleChanged(ElementInternal.LastScale, Scale);
             foreach (UIText text in ElementInternal.Texts)
             {
                 text.UpdateRenderables();
@@ -696,6 +693,29 @@ public abstract class UIElement
     /// <summary>Ran when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public virtual void Clicked()
     { 
+    }
+
+    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
+    /// <param name="from">The previous style.</param>
+    /// <param name="to">The new style.</param>
+    public virtual void StyleChanged(UIStyle from, UIStyle to)
+    {
+    }
+
+    public virtual void PositionChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    public virtual void SizeChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    public virtual void RotationChanged(float from, float to)
+    {
+    }
+
+    public virtual void ScaleChanged(float from, float to)
+    {
     }
 
     /// <summary>Focuses on the element and fires <see cref="Focused"/>.</summary>

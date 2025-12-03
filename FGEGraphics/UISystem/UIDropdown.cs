@@ -110,7 +110,7 @@ public class UIDropdown : UIElement
         {
             Close();
         }
-        Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
+        Button.Label.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
         if (choice is not null)
         {
             OnChoiceSelect?.Invoke(choice);
