@@ -19,6 +19,8 @@ using FGECore.PhysicsSystem;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
 using FGECore.CoreSystems;
+using BepuPhysics;
+using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.ModelSystems;
 
@@ -58,6 +60,43 @@ public class ModelHandler
             Model3DMesh mesh = new();
             mod.Meshes[m] = mesh;
             mesh.Name = dr.ReadFullString();
+            string low = mesh.Name.ToLowerFast();
+            if (low.StartsWith("nocollide_"))
+            {
+                mesh.IsNoCollideMesh = true;
+            }
+            else if (low.StartsWith("collisionconvex_"))
+            {
+                mesh.IsCollisionConvexMesh = true;
+                mesh.IsVisible = false;
+                if (mod.CollisionType == Model3DCollisionType.CONVEX)
+                {
+                    mod.CollisionType = Model3DCollisionType.COMPOUND_CONVEX;
+                }
+                else if (mod.CollisionType == Model3DCollisionType.NONE)
+                {
+                    mod.CollisionType = Model3DCollisionType.CONVEX;
+                }
+            }
+            else if (low.StartsWith("collisioncomplex_"))
+            {
+                mesh.IsCollisionComplexMesh = true;
+                mesh.IsVisible = false;
+                mod.CollisionType = Model3DCollisionType.COMPLEX;
+            }
+            else if (low.StartsWith("marker_"))
+            {
+                mesh.IsMarker = true;
+                mesh.IsVisible = false;
+            }
+            else if (low.StartsWith("norender_"))
+            {
+                mesh.IsVisible = false;
+            }
+            else
+            {
+                mesh.IsVisible = true;
+            }
             int vertexCount = dr.ReadInt();
             mesh.Vertices = new Vector3[vertexCount];
             for (int v = 0; v < vertexCount; v++)
@@ -163,7 +202,7 @@ public class ModelHandler
     {
         foreach (Model3DMesh mesh in input.Meshes)
         {
-            if (mesh.Name.ToLowerFast().Contains("collision"))
+            if (mesh.IsCollisionComplexMesh || mesh.IsCollisionConvexMesh)
             {
                 yield return mesh.Vertices;
             }
@@ -177,7 +216,7 @@ public class ModelHandler
     {
         foreach (Model3DMesh mesh in input.Meshes)
         {
-            if (!mesh.Name.ToLowerFast().Contains("nocollide"))
+            if (!mesh.IsNoCollideMesh)
             {
                 yield return mesh.Vertices;
             }

@@ -258,7 +258,7 @@ public class ModelEngine
         }
         foreach (Model3DMesh mesh in scene.Meshes)
         {
-            if (mesh.Name.ToLowerFast().Contains("collision") || mesh.Name.ToLowerFast().Contains("norender"))
+            if (!mesh.IsVisible)
             {
                 continue;
             }
