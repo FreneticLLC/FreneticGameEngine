@@ -63,7 +63,7 @@ public class ModelHandler
             string low = mesh.Name.ToLowerFast();
             if (low.StartsWith("nocollide_"))
             {
-                mesh.IsNoCollideMesh = true;
+                mesh.NoCollide = true;
             }
             else if (low.StartsWith("collisionconvex_"))
             {
@@ -88,6 +88,7 @@ public class ModelHandler
             {
                 mesh.IsMarker = true;
                 mesh.IsVisible = false;
+                mesh.NoCollide = true;
             }
             else if (low.StartsWith("norender_"))
             {
@@ -216,7 +217,7 @@ public class ModelHandler
     {
         foreach (Model3DMesh mesh in input.Meshes)
         {
-            if (!mesh.IsNoCollideMesh)
+            if (!mesh.NoCollide)
             {
                 yield return mesh.Vertices;
             }

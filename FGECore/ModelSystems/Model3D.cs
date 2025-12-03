@@ -84,7 +84,7 @@ public class Model3DMesh
     public bool IsCollisionConvexMesh = false;
 
     /// <summary>If true, this mesh renders as normal but is excluded from collision calculation.</summary>
-    public bool IsNoCollideMesh = false;
+    public bool NoCollide = false;
 
     /// <summary>If true, this mesh should render visibly (excludes collision, marker, etc.).</summary>
     public bool IsVisible = true;
