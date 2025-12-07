@@ -6,6 +6,9 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
+using FGEGraphics.UISystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +34,17 @@ public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
             lines.Length > 0 ? lines.Max(line => line?.Width ?? 0) : 0,
             lines.Sum(line => line?.Height ?? 0))
     { }
+
+    public Vector2i GetTrueSize(FontSet fontSet)
+    {
+        if (IsEmpty)
+        {
+            return Vector2i.Zero;
+        }
+        int trueHeight = fontSet.Height * Lines.Length;
+        int trueWidth = (int)((float)trueHeight / Height * Width);
+        return new Vector2i(trueWidth, trueHeight);
+    }
 
     /// <summary>Implements <see cref="Object.ToString"/> to make a "\n" separated string of the contents.</summary>
     public override string ToString() => string.Join<RenderableTextLine>('\n', Lines);

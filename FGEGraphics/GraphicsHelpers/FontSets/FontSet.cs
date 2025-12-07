@@ -907,4 +907,6 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     {
         return FontDefault.GetHashCode();
     }
+
+    public override string ToString() => $"FontSet(Name = {_name}, Size = {Size})";
 }
