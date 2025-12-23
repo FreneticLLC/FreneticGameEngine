@@ -21,6 +21,7 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
+using FGECore.UtilitySystems;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
@@ -329,9 +330,6 @@ public class FGE3DAudioEngine
                         CloseAndStop();
                         return;
                     }
-                    long newTime = Stopwatch.GetTimestamp();
-                    double elSec = (newTime - lastTime) / (double)Stopwatch.Frequency;
-                    lastTime = newTime;
                     bool needsFill = Instance.AudioBacker.PreprocessStep();
                     if (needsFill)
                     {
@@ -396,11 +394,11 @@ public class FGE3DAudioEngine
                         Instance.CurrentLevel = newCurrentLevel;
                         Instance.SoundCount = Instance.Playing.Count;
                     }
+                    long newTime = Stopwatch.GetTimestamp();
+                    double elSec = (newTime - lastTime) / (double)Stopwatch.Frequency;
+                    lastTime = newTime;
                     int ms = PAUSE - (int)(elSec * 1000.0);
-                    if (ms > 0)
-                    {
-                        Thread.Sleep(ms);
-                    }
+                    CommonUtilities.StableSleep(ms, newTime);
                 }
             }
             catch (Exception ex)

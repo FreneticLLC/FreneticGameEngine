@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.ServerSystem.EntitySystem;
 using FGECore.StackNoteSystem;
+using FGECore.UtilitySystems;
 
 namespace FGECore.ServerSystem;
 
@@ -122,17 +123,10 @@ public class ServerGameInstance : GameInstance<ServerEntity, ServerEngine>
                     Internal.TotalDelta -= tdelt;
                 }
                 // Only sleep for target milliseconds/tick minus how long the tick took... this is imprecise but that's okay
-                double elapsedSeconds = (Stopwatch.GetTimestamp() - Internal.TickStartTimestamp) / (double)Stopwatch.Frequency;
+                long timeStamp = Stopwatch.GetTimestamp();
+                double elapsedSeconds = (timeStamp - Internal.TickStartTimestamp) / (double)Stopwatch.Frequency;
                 targetTime = (int)Math.Floor((1000d / targetFps) - (elapsedSeconds * 1000));
-                // Only sleep at all if we're not lagging
-                if (targetTime > 0)
-                {
-                    if (targetTime > 5 || !Thread.Yield())
-                    {
-                        // Try to sleep for the target time - very imprecise, thus we deal with precision inside the tick code
-                        Thread.Sleep(targetTime);
-                    }
-                }
+                CommonUtilities.StableSleep(targetTime, timeStamp);
             }
         }
         catch (ThreadAbortException)

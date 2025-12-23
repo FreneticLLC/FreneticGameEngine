@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.MathHelpers;
+using System.Diagnostics;
+using FGECore.CoreSystems;
 
 namespace FGECore.UtilitySystems;
 
@@ -134,5 +136,44 @@ public static class CommonUtilities
             c++;
         }
         return creation;
+    }
+
+    /// <summary><see cref="Stopwatch.Frequency"/>, per millisecond instead of per second.</summary>
+    private static readonly double StopwatchFreqPerMs = Stopwatch.Frequency / 1000.0;
+
+    /// <summary>Inverse of <see cref="StopwatchFreqPerMs"/>.</summary>
+    private static readonly double StopwatchMsPerFreq = 1000.0 / Stopwatch.Frequency;
+
+    /// <summary>Like <see cref="Thread.Sleep(int)"/>, but designed to try to hit the target duration very closely.</summary>
+    /// <param name="ms">Time, in milliseconds, to wait.</param>
+    /// <param name="startStamp">Optional start timestamp (<see cref="Stopwatch.GetTimestamp"/>) for the sleep period, leave as -1 to autocalculate.</param>
+    public static void StableSleep(int ms, long startStamp = -1)
+    {
+        if (ms <= 0) // If we've overshot a target, fast return.
+        {
+            return;
+        }
+        long startTime = startStamp == -1 ? Stopwatch.GetTimestamp() : startStamp;
+        long targetTime = startTime + (long)(ms * StopwatchFreqPerMs);
+        long timeNow = targetTime - Stopwatch.GetTimestamp();
+        while (timeNow > 0)
+        {
+            double timeNowMs = timeNow * StopwatchMsPerFreq;
+            if (timeNowMs > 10)
+            {
+                // For big delays, try to sleep for most of the targeted wait - very imprecise, but aim to return early and get more precise afterward.
+                // OS can target anywhere from 5ms to 15ms or do weird big values, so we're just rough estimating and hoping for the best.
+                // TODO: Maybe some OS-specific awareness here to improve precision?
+                Thread.Sleep((int)(timeNowMs - 10));
+            }
+            else if (timeNowMs > 5)
+            {
+                // This also risks OS precision issues.
+                // Also if yield returns false this is just a busy-wait, but that's okay.
+                Thread.Yield();
+            }
+            // At 5 and below, just busy wait (to try to hit the target as close as possible).
+            timeNow = targetTime - Stopwatch.GetTimestamp();
+        }
     }
 }
