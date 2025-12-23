@@ -183,7 +183,7 @@ public struct Color4F : IEquatable<Color4F>
     }
 
     /// <summary>A float of 1/255.</summary>
-    public const float BYTE_TO_FLOAT = 1f / 255f;
+    private const float BYTE_TO_FLOAT = 1f / 255f;
 
     /// <summary>
     /// Constructs a Color4F from 4 bytes.
@@ -209,6 +209,13 @@ public struct Color4F : IEquatable<Color4F>
     {
         return new Color4F(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT, 1);
     }
+
+    /// <summary>
+    /// Converts this color to a BGRA packed integer.
+    /// Does not behave properly for out-of-range colors (any component below 0 or above 1).
+    /// Inverts <see cref="FromBgraInt(uint)"/>.
+    /// </summary>
+    public readonly uint ToBgraInt() => (uint)IB | ((uint)IG << 8) | ((uint)IR << 16) | ((uint)IA << 24);
 
     /// <summary>
     /// Constructs a Color4F from an BGRA packed integer.
