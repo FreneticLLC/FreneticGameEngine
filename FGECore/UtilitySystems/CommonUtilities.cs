@@ -82,38 +82,6 @@ public static class CommonUtilities
         return toret.ToString();
     }
 
-    /// <summary>Alphabetical character matcher (a-z, A-Z).</summary>
-    public static readonly AsciiMatcher AlphabetMatcher = new(AsciiMatcher.BothCaseLetters);
-
-    /// <summary>Valid ASCII symbols for a plaintext alphanumeric username (a-z, A-Z, 0-9, _).</summary>
-    public static readonly AsciiMatcher UsernameValidationMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + "_");
-
-    /// <summary>
-    /// Validates a username as correctly formatted, as plaintext alphanumeric ASCII (a-z, A-Z, 0-9, _).
-    /// Also enforces length between 3 and 15 symbols, inclusive.
-    /// </summary>
-    /// <param name="str">The username to validate.</param>
-    /// <returns>Whether the username is valid.</returns>
-    public static bool ValidateUsername(string str)
-    {
-        if (str == null)
-        {
-            return false;
-        }
-        // Length = 3-15
-        if (str.Length < 3 || str.Length > 15)
-        {
-            return false;
-        }
-        // Starts A-Z
-        if (!AlphabetMatcher.IsMatch(str[0]))
-        {
-            return false;
-        }
-        // All symbols are a-z, A-Z, 0-9, _
-        return UsernameValidationMatcher.IsOnlyMatches(str);
-    }
-
     /// <summary>Formats a <see cref="long"/> with comma-separated thousands ("123,456" style notation).</summary>
     /// <param name="input">The number.</param>
     /// <returns>The formatted string.</returns>
