@@ -29,6 +29,25 @@ public class Model3D
 
     /// <summary>User-tag on this model. Often this is an FGEGraphics Model instance.</summary>
     public object Tag;
+
+    /// <summary>(Potentially null) info data lines that sourced this model, often containing texture data.</summary>
+    public string[] InfoDataLines;
+
+    /// <summary>The type of collision data this model provides.</summary>
+    public Model3DCollisionType CollisionType = Model3DCollisionType.NONE;
+
+    /// <summary>Returns a simple shallow copy of this <see cref="Model3D"/>.</summary>
+    public Model3D Duplicate()
+    {
+        return new()
+        {
+            Meshes = Meshes,
+            RootNode = RootNode,
+            MatrixA = MatrixA,
+            Tag = Tag,
+            InfoDataLines = InfoDataLines
+        };
+    }
 }
 
 /// <summary>Represents a single mesh of an abstract 3D model.</summary>
@@ -54,6 +73,21 @@ public class Model3DMesh
 
     /// <summary>The name of this mesh.</summary>
     public string Name;
+
+    /// <summary>If true, this is a pseudo-mesh used as a special marker.</summary>
+    public bool IsMarker = false;
+
+    /// <summary>If true, this is a pseudo-mesh used as a complex collision mesh.</summary>
+    public bool IsCollisionComplexMesh = false;
+
+    /// <summary>If true, this is a pseudo-mesh used a a convex collision mesh.</summary>
+    public bool IsCollisionConvexMesh = false;
+
+    /// <summary>If true, this mesh renders as normal but is excluded from collision calculation.</summary>
+    public bool NoCollide = false;
+
+    /// <summary>If true, this mesh should render visibly (excludes collision, marker, etc.).</summary>
+    public bool IsVisible = true;
 }
 
 /// <summary>Represents a single bone in an abstract 3D model mesh.</summary>
@@ -86,4 +120,17 @@ public class Model3DNode
 
     /// <summary>All children of this node.</summary>
     public Model3DNode[] Children;
+}
+
+/// <summary>Enumeration of possible collision types found in a 3D model.</summary>
+public enum Model3DCollisionType
+{
+    /// <summary>No collision data provided.</summary>
+    NONE,
+    /// <summary>Has complex mesh component.</summary>
+    COMPLEX,
+    /// <summary>A single convex component.</summary>
+    CONVEX,
+    /// <summary>Multiple convex components.</summary>
+    COMPOUND_CONVEX
 }

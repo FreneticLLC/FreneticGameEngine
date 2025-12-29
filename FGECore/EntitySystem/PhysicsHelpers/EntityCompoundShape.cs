@@ -29,12 +29,29 @@ public class EntityCompoundShape : EntityShapeHelper
         Volume = _volume;
     }
 
+    /// <summary>Other registered shape indices (usually children of this compound).</summary>
+    public TypedIndex[] OtherRegistered = [];
+
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
     public override EntityCompoundShape Register()
     {
         EntityCompoundShape dup = MemberwiseClone() as EntityCompoundShape;
         dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Compound)BepuShape);
         return dup;
+    }
+
+    /// <inheritdoc/>
+    public override void Unregister()
+    {
+        base.Unregister();
+        foreach (TypedIndex other in OtherRegistered)
+        {
+            if (other.Exists)
+            {
+                Space.Internal.CoreSimulation.Shapes.Remove(other);
+            }
+        }
+        OtherRegistered = [];
     }
 
     /// <inheritdoc/>

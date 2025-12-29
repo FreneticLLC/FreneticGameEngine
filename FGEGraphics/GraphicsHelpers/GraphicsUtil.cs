@@ -30,6 +30,9 @@ public static class GraphicsUtil
         GraphicsThreadID = Environment.CurrentManagedThreadId;
     }
 
+    /// <summary>ID of the thread that OpenGL is expected to run on.</summary>
+    public static long GraphicsThreadID;
+
     /// <summary>Checks errors when debug is enabled.</summary>
     /// <param name="callerLocationLabel">A simple text string describing the source calling location.</param>
     /// <param name="context">An optional context object.</param>
@@ -47,7 +50,9 @@ public static class GraphicsUtil
         }
         StringBuilder errorMessage = new();
         string contextText = context is null ? "" : $"(context=`{context}`): ";
+#if DEBUG
         errorMessage.Append($"OpenGL error [{callerLocationLabel} {contextText}(bound shader=`{BoundShader}`=`{ShaderEngine.BoundNow?.Name ?? "(none)"}`, texture=`{BoundTexture}`)]: ");
+#endif
         while (ec != ErrorCode.NoError)
         {
             errorMessage.Append($"{ec}");
@@ -86,9 +91,6 @@ public static class GraphicsUtil
 
     /// <summary>Map of all current active/allocated shaders to their source strings.</summary>
     public static Dictionary<int, string> ActiveShaders = [];
-
-    /// <summary>ID of the thread that OpenGL is expected to run on.</summary>
-    public static long GraphicsThreadID;
 
     /// <summary>Which shader ID is currently bound, or 0 if none.</summary>
     public static int BoundShader = 0;

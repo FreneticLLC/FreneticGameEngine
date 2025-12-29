@@ -29,7 +29,7 @@ public struct StackNote
     {
         try
         {
-            string relatedString = Related == null ? "None" : Related.ToString().Replace("\n", "\\n");
+            string relatedString = Related is null ? "None" : Related.ToString().Replace("\n", "\\n");
             return $"{Note} ({relatedString})";
         }
         catch (Exception ex)

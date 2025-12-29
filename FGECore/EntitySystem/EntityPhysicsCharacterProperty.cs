@@ -52,6 +52,11 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     [PropertyAutoSavable]
     public float SpeedStanding = 4, SpeedCrouching = 2, SpeedProne = 1;
 
+    /// <summary>The upward speed this character achieves from a jump.</summary>
+    [PropertyDebuggable]
+    [PropertyAutoSavable]
+    public float JumpSpeed = 6;
+
     /// <summary>The multiplier over body height when the character's stance changes.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
@@ -133,7 +138,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     public void SetStance(float heightMod, float speed)
     {
         CurrentSpeed = speed;
-        //CurrentHeight = heightMod * BaseHeight;
+        CurrentHeight = heightMod * BodyHeight;
         // TODO: Actually resize the physics body
         // TODO: Reject or delay impossible growth
     }
@@ -156,7 +161,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         controller.LocalUp = Vector3.UnitZ;
         // TODO: Customizable values for these.
         controller.CosMaximumSlope = MathF.Cos(MathF.PI * 0.4f);
-        controller.JumpVelocity = 6;
+        controller.JumpVelocity = JumpSpeed;
         controller.MaximumVerticalForce = 100 * Physics.Mass;
         controller.MaximumHorizontalForce = 80 * Physics.Mass;
         controller.MinimumSupportDepth = BodyRadius * -0.1f;
@@ -194,6 +199,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     public void Tick()
     {
         ref CharacterController controller = ref Controller;
+        // TODO: Step up/down support
         Vector3 velocity = Movement.ToNumerics() * CurrentSpeed;
         if (!Physics.SpawnedBody.Awake && (TryingToJump || velocity.LengthSquared() > 0 || controller.ViewDirection != ViewDirection.ToNumerics()))
         {
