@@ -134,12 +134,29 @@ public class UILabel2 : UIElement
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        if (!IsEmpty)
+        if (GetRenderable(style) is RenderableText renderable)
         {
-            RenderableText renderable = GetRenderable(style);
             int trueX = X + Layout.Anchor.AlignmentX.GetPosition(Width, renderable.Width);
             int trueY = Y + Layout.Anchor.AlignmentY.GetPosition(Height, renderable.Height);
             style.TextFont.DrawFancyText(renderable, new Location(trueX, trueY, 0));
         }
+    }
+
+    /// <summary>Constructs a label with an icon attached at the side.</summary>
+    /// <param name="text">The text to display on the label.</param>
+    /// <param name="icon">The texture of the icon.</param>
+    /// <param name="spacing">The space between the label and icon.</param>
+    /// <param name="styling">The styling of the label.</param>
+    /// <param name="layout">The layout of the element.</param>
+    /// <param name="listAnchor">The anchor to use when positioning the label and the icon in a list.</param>
+    /// <returns>A tuple of the label, icon, and their list container.</returns>
+    public static (UILabel2 Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    {
+        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UILabel2 label = new(text, styling, layout.AtOrigin());
+        UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
+        list.AddListItem(label);
+        list.AddListItem(image);
+        return (label, image, list);
     }
 }

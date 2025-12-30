@@ -139,15 +139,15 @@ public class UIDropdown : UIElement
         choice.OnClick += () => SelectChoice(choice);
     }
 
-    /// <summary>Adds a <see cref="UILabel"/> as a choice to the dropdown.</summary>
+    /// <summary>Adds a <see cref="UILabel2"/> as a choice to the dropdown.</summary>
     /// <param name="choice">The choice text.</param>
     /// <param name="styling">The label styles.</param>
     /// <param name="tag">An optional value attached to the resulting label.</param>
     /// <returns>The created label.</returns>
-    public UILabel AddLabelChoice(string choice, UIStyling styling, object tag = null)
+    public UILabel2 AddLabelChoice(string choice, UIStyling styling, object tag = null)
     {
-        UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
-        AddChoice(label, () => label.Text.Content);
+        UILabel2 label = new(choice, styling, new UILayout()) { Tag = tag };
+        AddChoice(label, () => label.Content);
         return label;
     }
 }
