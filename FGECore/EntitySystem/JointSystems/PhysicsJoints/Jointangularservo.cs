@@ -24,8 +24,8 @@ public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e
     /// <summary>Local axis on <see cref="PhysicsJointBase.One"/> to rotate around.</summary>
     public Location Axis = axis;
 
-    /// <summary>Target offset distance between the two entities' anchor points.</summary>
-    public float TargetOffset = 1f;
+    /// <summary>Target angle (radians) of the <see cref="Axis"/> of <see cref="PhysicsJointBase.One"/>.</summary>
+    public float TargetAngle = 0;
 
     /// <summary>Maximum speed this servo can try to move at.</summary>
     public float MaxSpeed = float.MaxValue;
