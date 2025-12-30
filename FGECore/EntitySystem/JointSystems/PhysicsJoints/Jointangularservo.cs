@@ -46,14 +46,14 @@ public class JointAngularServo(EntityPhysicsProperty e1, EntityPhysicsProperty e
     /// Otherwise it takes effect when added.</summary>
     public void SetTargetAngle(float angleInRadians)
     {
-        TargetOffset = angleInRadians;
+        TargetAngle = angleInRadians;
         Reapply();
     }
 
     /// <inheritdoc/>
     public override AngularServo CreateJointDescription() => new()
     {
-        TargetRelativeRotationLocalA = System.Numerics.Quaternion.CreateFromAxisAngle(Axis.ToNumerics(), TargetOffset),
+        TargetRelativeRotationLocalA = System.Numerics.Quaternion.CreateFromAxisAngle(Axis.ToNumerics(), TargetAngle),
         SpringSettings = new SpringSettings(SpringFrequency, SpringDamping),
         ServoSettings = new ServoSettings(MaxSpeed, BaseSpeed, MaxForce)
     };
