@@ -63,11 +63,11 @@ public class UIToggleBox : UIBox
     /// <param name="labelStyling">The styling of the label.</param>
     /// <param name="listAnchor">The anchor to use when positioning the box and the icon in a list.</param>
     /// <returns>A tuple of the toggle box, label, and their list container.</returns>
-    public static (UIToggleBox Box, UILabel2 Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = default, UIAnchor listAnchor = null)
+    public static (UIToggleBox Box, UILabel Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = default, UIAnchor listAnchor = null)
     {
         UIToggleBox box = new(styling, layout.AtOrigin(), toggled);
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
-        UILabel2 label = new(text, labelStyling.IsEmpty ? styling.Bind(box) : labelStyling, new UILayout());
+        UILabel label = new(text, labelStyling.IsEmpty ? styling.Bind(box) : labelStyling, new UILayout());
         list.AddListItem(box);
         list.AddListItem(label);
         return (box, label, list);
