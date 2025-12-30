@@ -702,18 +702,30 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Ran when <see cref="Position"/> changes value.</summary>
+    /// <param name="from">The previous position.</param>
+    /// <param name="to">The new position.</param>
     public virtual void PositionChanged(Vector2i from, Vector2i to)
     {
     }
 
+    /// <summary>Ran when <see cref="Size"/> changes value.</summary>
+    /// <param name="from">The previous size.</param>
+    /// <param name="to">The new size.</param>
     public virtual void SizeChanged(Vector2i from, Vector2i to)
     {
     }
 
+    /// <summary>Ran when <see cref="Rotation"/> changes value.</summary>
+    /// <param name="from">The previous rotation.</param>
+    /// <param name="to">The new rotation.</param>
     public virtual void RotationChanged(float from, float to)
     {
     }
 
+    /// <summary>Ran when <see cref="Scale"/> changes value.</summary>
+    /// <param name="from">The previous scale.</param>
+    /// <param name="to">The new scale.</param>
     public virtual void ScaleChanged(float from, float to)
     {
     }

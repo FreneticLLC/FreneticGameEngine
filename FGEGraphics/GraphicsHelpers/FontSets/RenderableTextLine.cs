@@ -17,16 +17,24 @@ namespace FGEGraphics.GraphicsHelpers.FontSets;
 /// <summary>Represents a single line of renderable text.</summary>
 public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Height)
 {
+    /// <summary>An empty <see cref="RenderableTextLine"/> instance</summary>
     public static readonly RenderableTextLine Empty = new();
 
+    /// <summary>Constructs an empty <see cref="RenderableTextLine"/> instance.</summary>
     public RenderableTextLine() : this([], 0, 0)
     { }
 
+    /// <summary>
+    /// Constructs a <see cref="RenderableTextLine"/> from an array of parts 
+    /// that also describe the <see cref="Width"/> and <see cref="Height"/>.
+    /// </summary>
+    /// <param name="parts">The text parts.</param>
     public RenderableTextLine(RenderableTextPart[] parts)
         : this(parts,
               (int)parts.Sum(part => part?.Width),
               parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : 0)
     { }
 
+    /// <inheritdoc/>
     public override string ToString() => string.Concat<RenderableTextPart>(Parts);
 }

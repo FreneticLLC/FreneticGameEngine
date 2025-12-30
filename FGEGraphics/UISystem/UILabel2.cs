@@ -22,22 +22,29 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple piece of text on a screen.</summary>
 public class UILabel2 : UIElement
 {
-    /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
+    /// <summary>Whether the label is empty and shouldn't be rendered.</summary>
     public bool IsEmpty => Internal.Content.Length == 0;
 
     /// <summary>Data internal to a <see cref="UILabel2"/> instance.</summary>
     public struct InternalData()
     {
+        /// <summary>The label text content.</summary>
         public string Content;
 
-        /// <summary>The maximum total width of this text, if any.</summary>
+        /// <summary>The maximum width of the text content.</summary>
         public int MaxWidth;
 
+        /// <summary>A cache of UI styles and their corresponding renderable objects.</summary>
         public Dictionary<UIStyle, RenderableText> Renderables = [];
     }
 
+    /// <summary>Data internal to a <see cref="UILabel2"/> instance.</summary>
     public InternalData Internal;
 
+    /// <summary>
+    /// Gets or sets the label text content.
+    /// <b>Note:</b> setting this value recomputes the <see cref="RenderableText"/> cache.
+    /// </summary>
     public string Content
     {
         get => Internal.Content;
@@ -48,6 +55,10 @@ public class UILabel2 : UIElement
         }
     }
 
+    /// <summary>
+    /// Gets or sets the maximum width of the text content.
+    /// <b>Note:</b> setting this value recomputes the <see cref="RenderableText"/> cache.
+    /// </summary>
     public int MaxWidth
     {
         get => Internal.MaxWidth;
@@ -67,7 +78,7 @@ public class UILabel2 : UIElement
         Internal = new() { Content = text ?? "" };
     }
 
-    /// <summary>Creates a <see cref="RenderableText"/> of the text <see cref="Content"/> given a style.</summary>
+    /// <summary>Creates a <see cref="RenderableText"/> object from <see cref="Content"/> given a style.</summary>
     /// <param name="style">The UI style to use.</param>
     /// <returns>The resulting renderable object.</returns>
     public RenderableText CreateRenderable(UIStyle style)
@@ -94,6 +105,11 @@ public class UILabel2 : UIElement
         return renderable;
     }
 
+    /// <summary>
+    /// Updates the <see cref="RenderableText"/> cache. 
+    /// If <see cref="IsEmpty"/> is <c>true</c>, clears the cache.
+    /// Otherwise, recreates all renderable objects in the cache.
+    /// </summary>
     public void UpdateRenderables()
     {
         if (IsEmpty)
@@ -108,6 +124,7 @@ public class UILabel2 : UIElement
         }
     }
 
+    /// <inheritdoc/>
     public override void StyleChanged(UIStyle from, UIStyle to)
     {
         if (!IsEmpty && to.CanRenderText && !Internal.Renderables.ContainsKey(to))
@@ -120,6 +137,7 @@ public class UILabel2 : UIElement
         }
     }
 
+    /// <inheritdoc/>
     public override void ScaleChanged(float from, float to)
     {
         UpdateRenderables();
@@ -129,6 +147,8 @@ public class UILabel2 : UIElement
         }
     }
 
+    /// <summary>Returns the cached <see cref="RenderableText"/> object corresponding to the given style, or <c>null</c> if none is present.</summary>
+    /// <param name="style">The UI style to query.</param>
     public RenderableText GetRenderable(UIStyle style) => !IsEmpty && Internal.Renderables.TryGetValue(style, out RenderableText renderable) ? renderable : null;
 
     /// <inheritdoc/>

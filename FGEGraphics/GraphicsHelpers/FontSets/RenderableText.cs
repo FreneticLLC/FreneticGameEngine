@@ -24,7 +24,10 @@ public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
     public static readonly RenderableText Empty = new();
 
     // TODO: add to other renderable classes
-    public bool IsEmpty => Lines is null || Lines.Length == 0 || Width == 0 || Height == 0;
+    /// <summary>Whether the text is empty and shouldn't be rendered.</summary>
+    public bool IsEmpty = Lines is null || Lines.Length == 0 || Width == 0 || Height == 0;
+    
+    /// <summary>Constructs an empty <see cref="RenderableText"/> instance.</summary>
     public RenderableText() : this([], 0, 0)
     { }
 
@@ -35,6 +38,8 @@ public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
             lines.Sum(line => line?.Height ?? 0))
     { }
 
+    /// <summary>Returns the width and height of this renderable object scaled to the given font set.</summary>
+    /// <param name="fontSet">The font set.</param>
     public Vector2i GetTrueSize(FontSet fontSet)
     {
         if (IsEmpty)

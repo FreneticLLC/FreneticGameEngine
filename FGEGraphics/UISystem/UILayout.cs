@@ -101,6 +101,8 @@ public class UILayout
         return this;
     }
 
+    /// <summary>Sets a constant position.</summary>
+    /// <returns>This object.</returns>
     public UILayout SetPosition(Vector2i pair) => SetPosition(pair.X, pair.Y);
 
     /// <summary>Sets a constant position.</summary>
@@ -132,7 +134,13 @@ public class UILayout
         return this;
     }
 
+    /// <summary>Sets a constant size.</summary>
+    /// <returns>This object.</returns>
     public UILayout SetSize(Vector2i vector) => SetSize(vector.X, vector.Y);
+
+    /// <summary>Sets a constant size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Location location) => SetSize((int)location.X, (int)location.Y);
 
     /// <summary>Sets a constant rotation.</summary>
     /// <returns>This object.</returns>
@@ -177,6 +185,10 @@ public class UILayout
 
     /// <summary>Sets a dynamic position.</summary>
     /// <returns>This object.</returns>
+    public UILayout SetPosition(Func<Vector2i> vector) => SetPosition(() => vector().X, () => vector().Y);
+
+    /// <summary>Sets a dynamic position.</summary>
+    /// <returns>This object.</returns>
     public UILayout SetPosition(Func<Location> location) => SetPosition(() => (int)location().X, () => (int)location().Y);
 
     /// <summary>Sets a dynamic width.</summary>
@@ -203,6 +215,14 @@ public class UILayout
         Internal.Height = new() { Dynamic = height };
         return this;
     }
+
+    /// <summary>Sets a dynamic size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Func<Vector2i> vector) => SetSize(() => vector().X, () => vector().Y);
+
+    /// <summary>Sets a dynamic size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Func<Location> location) => SetSize(() => (int)location().X, () => (int)location().Y);
 
     /// <summary>Sets a dynamic rotation.</summary>
     /// <returns>This object.</returns>
