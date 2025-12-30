@@ -98,10 +98,12 @@ void main() // Let's put all code in main, why not...
 		vec3 light_path = light_pos; // What path a light ray has to travel down in theory to get from the source to the current pixel.
 		float atten = 1.0;
 		float light_length = 1.0;
+		float extraZOff = 0;
 		if (should_sqrt >= 0.5) // If inverse square trick is enabled (generally this will be 1.0 or 0.0)
 		{
 			f_spos.x = sign(f_spos.x) * fix_sqr(1.0 - abs(f_spos.x)); // Inverse square the relative position while preserving the sign. Shadow creation buffer also did this.
 			f_spos.y = sign(f_spos.y) * fix_sqr(1.0 - abs(f_spos.y)); // This section means that coordinates near the center of the light view will have more pixels per area available than coordinates far from the center.
+			extraZOff = 0.001;
 		}
 		else
 		{
@@ -168,7 +170,7 @@ void main() // Let's put all code in main, why not...
 						{
 							offz = -0.000001; // Force it to the threshold value to reduce errors.
 						}
-						//offz -= 0.001; // Set it a bit farther regardless to reduce bad shadows.
+						offz -= extraZOff; // Set it a bit farther regardless to reduce bad shadows. // TODO: This shouldn't be needed, is the above code wrong? Sqrt logic messes with it maybe?
 						float rd = texture(shadowtex, vec3(fs.x + x * jump, fs.y + y * jump, float(i))).r; // Calculate the depth of the pixel.
 						depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
 						depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.

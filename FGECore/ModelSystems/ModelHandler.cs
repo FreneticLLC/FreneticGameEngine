@@ -19,6 +19,8 @@ using FGECore.PhysicsSystem;
 using BepuPhysics.Collidables;
 using BepuUtilities.Memory;
 using FGECore.CoreSystems;
+using BepuPhysics;
+using FGECore.EntitySystem.PhysicsHelpers;
 
 namespace FGECore.ModelSystems;
 
@@ -58,6 +60,44 @@ public class ModelHandler
             Model3DMesh mesh = new();
             mod.Meshes[m] = mesh;
             mesh.Name = dr.ReadFullString();
+            string low = mesh.Name.ToLowerFast();
+            if (low.StartsWith("nocollide_"))
+            {
+                mesh.NoCollide = true;
+            }
+            else if (low.StartsWith("collisionconvex_"))
+            {
+                mesh.IsCollisionConvexMesh = true;
+                mesh.IsVisible = false;
+                if (mod.CollisionType == Model3DCollisionType.CONVEX)
+                {
+                    mod.CollisionType = Model3DCollisionType.COMPOUND_CONVEX;
+                }
+                else if (mod.CollisionType == Model3DCollisionType.NONE)
+                {
+                    mod.CollisionType = Model3DCollisionType.CONVEX;
+                }
+            }
+            else if (low.StartsWith("collisioncomplex_"))
+            {
+                mesh.IsCollisionComplexMesh = true;
+                mesh.IsVisible = false;
+                mod.CollisionType = Model3DCollisionType.COMPLEX;
+            }
+            else if (low.StartsWith("marker_"))
+            {
+                mesh.IsMarker = true;
+                mesh.IsVisible = false;
+                mesh.NoCollide = true;
+            }
+            else if (low.StartsWith("norender_"))
+            {
+                mesh.IsVisible = false;
+            }
+            else
+            {
+                mesh.IsVisible = true;
+            }
             int vertexCount = dr.ReadInt();
             mesh.Vertices = new Vector3[vertexCount];
             for (int v = 0; v < vertexCount; v++)
@@ -163,7 +203,7 @@ public class ModelHandler
     {
         foreach (Model3DMesh mesh in input.Meshes)
         {
-            if (mesh.Name.ToLowerFast().Contains("collision"))
+            if (mesh.IsCollisionComplexMesh || mesh.IsCollisionConvexMesh)
             {
                 yield return mesh.Vertices;
             }
@@ -177,7 +217,7 @@ public class ModelHandler
     {
         foreach (Model3DMesh mesh in input.Meshes)
         {
-            if (!mesh.Name.ToLowerFast().Contains("nocollide"))
+            if (!mesh.NoCollide)
             {
                 yield return mesh.Vertices;
             }
@@ -213,7 +253,7 @@ public class ModelHandler
         return resultVertices;
     }
 
-    /// <summary>Converts a mesh to a BEPU perfect mesh.</summary>
+    /// <summary>Converts a model to a BEPU perfect mesh.</summary>
     /// <param name="space">The relevant physics space.</param>
     /// <param name="input">The model.</param>
     /// <param name="verts">The vertice count if needed.</param>
@@ -231,7 +271,7 @@ public class ModelHandler
         return new Mesh(triangles, Vector3.One, space.Internal.Pool);
     }
 
-    /// <summary>Converts a mesh to a BEPU convex hull.</summary>
+    /// <summary>Converts a model to a BEPU convex hull.</summary>
     /// <param name="space">The relevant physics space.</param>
     /// <param name="input">The model.</param>
     /// <param name="verts">The vertex count if needed.</param>
@@ -241,6 +281,33 @@ public class ModelHandler
         Span<Vector3> vertices = new(GetCollisionVertices(input));
         verts = vertices.Length;
         return MeshToBepuConvex(space, vertices, out center);
+    }
+
+    /// <summary>Converts a model to a BEPU compound of convex hulls. Only works if there is convex data within the model. Implicitly recenters meshes via the compound.</summary>
+    /// <param name="space">The relevant physics space.</param>
+    /// <param name="verts">The vertex count if needed.</param>
+    /// <param name="input">The model.</param>
+    public static EntityCompoundShape MeshToBepuConvexCompound(PhysicsSpace space, Model3D input, out int verts)
+    {
+        verts = 0;
+        space.Internal.Pool.Take(input.Meshes.Count(m => m.IsCollisionConvexMesh), out Buffer<CompoundChild> children);
+        List<TypedIndex> registered = [];
+        int childIndex = 0;
+        double volume = 0;
+        foreach (Model3DMesh mesh in input.Meshes)
+        {
+            if (mesh.IsCollisionConvexMesh)
+            {
+                ConvexHull hull = MeshToBepuConvex(space, mesh.Vertices, out Location center);
+                volume += EntityConvexHullShape.EstimateVolume(hull);
+                TypedIndex index = space.Internal.CoreSimulation.Shapes.Add(hull);
+                registered.Add(index);
+                children[childIndex++] = new(new RigidPose(-center.ToNumerics(), System.Numerics.Quaternion.Identity), index);
+                verts += mesh.Vertices.Length;
+            }
+        }
+        Compound created = new(children);
+        return new(created, volume, space) { OtherRegistered = [.. registered] };
     }
 
     /// <summary>Converts a mesh to a BEPU convex hull.</summary>

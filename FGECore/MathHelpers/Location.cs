@@ -592,6 +592,7 @@ public struct Location : IEquatable<Location>
     /// Designed to avoid changing in character length between multiple calls.
     /// Inverts <see cref="FromString(string)"/>.
     /// </summary>
+    /// <param name="len">How many leading 0s to pad to.</param>
     /// <returns>The stable location string.</returns>
     public readonly string ToStableString(int len) => $"({FormatStable(X, len)}, {FormatStable(Y, len)}, {FormatStable(Z, len)})";
 

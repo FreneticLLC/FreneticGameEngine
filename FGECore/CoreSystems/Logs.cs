@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FGECore.StackNoteSystem;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.CoreSystems;
 
@@ -34,7 +35,17 @@ public class Logs
     /// <summary>A major error, with a stack trace.</summary>
     public static void CriticalError(string message)
     {
-        OutputType.ERROR.Output($"{message}\n{Environment.StackTrace}\n\n{StackNoteHelper.Notes}");
+        string[] stack = Environment.StackTrace.Split('\n');
+        int skip = 0;
+        if (stack.Length > 1 && stack[1].Trim() == "at System.Environment.get_StackTrace()")
+        {
+            skip = 1;
+            if (stack.Length > 2 && stack[2].Trim().StartsWith("at FGECore.CoreSystems.Logs.CriticalError("))
+            {
+                skip = 2;
+            }
+        }
+        OutputType.ERROR.Output($"{message}\n{stack.Skip(skip).JoinString("\n")}\n\n{StackNoteHelper.Notes}");
     }
 
     /// <summary>A major error, with a stack trace.</summary>

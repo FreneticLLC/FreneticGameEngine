@@ -57,6 +57,16 @@ public class DataWriter(DataStream stream)
         WriteFloat(color.B);
     }
 
+    /// <summary>Writes a Color4F object (16 bytes).</summary>
+    /// <param name="color">The data.</param>
+    public void WriteColor4F(Color4F color)
+    {
+        WriteFloat(color.R);
+        WriteFloat(color.G);
+        WriteFloat(color.B);
+        WriteFloat(color.A);
+    }
+
     /// <summary>Write a quaternion object (32 bytes).</summary>
     /// <param name="quat">The data.</param>
     public void WriteQuaternion(Quaternion quat)

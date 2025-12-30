@@ -318,6 +318,8 @@ public class ASyncScheduleItem : ScheduleItem
         {
             if (UnImportant)
             {
+                // TODO: Split the important vs unimportant thread pools? Or signal importance to a scheduler directly?
+                // I don't think thread priority works outside Windows, so relying on this is not ideal.
                 Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
             }
             MyAction.Invoke();

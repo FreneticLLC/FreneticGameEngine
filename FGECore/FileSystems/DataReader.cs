@@ -116,6 +116,16 @@ public class DataReader(DataStream stream)
         return new Color3F(r, g, b);
     }
 
+    /// <summary>Read a Color4F object (16 bytes).</summary>
+    public Color4F ReadColor4F()
+    {
+        float r = ReadFloat();
+        float g = ReadFloat();
+        float b = ReadFloat();
+        float a = ReadFloat();
+        return new Color4F(r, g, b, a);
+    }
+
     /// <summary>Read a quaternion object (32 bytes).</summary>
     public Quaternion ReadQuaternion()
     {

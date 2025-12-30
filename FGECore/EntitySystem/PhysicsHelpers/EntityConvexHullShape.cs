@@ -27,12 +27,19 @@ public class EntityConvexHullShape : EntityShapeHelper
     public EntityConvexHullShape(ConvexHull hull, PhysicsSpace space) : base(space)
     {
         BepuShape = hull;
-        Volume = 0;
+        Volume = EstimateVolume(hull);
+    }
+
+    /// <summary>Gets an estimate of the total volume of the hull.</summary>
+    public static double EstimateVolume(ConvexHull hull)
+    {
+        double volume = 0;
         ConvexHull.ConvexHullTriangleSource tris = new(hull);
         while (tris.GetNextTriangle(out Vector3 a, out Vector3 b, out Vector3 c))
         {
-            Volume += MeshInertiaHelper.ComputeTetrahedronVolume(a, b, c);
+            volume += MeshInertiaHelper.ComputeTetrahedronVolume(a, b, c);
         }
+        return volume;
     }
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>

@@ -29,10 +29,10 @@ public class StackNoteSet
     /// <summary>Gets a string output of the current stack notes.</summary>
     public override string ToString()
     {
-        string main = string.Concat(Notes.Take(Depth).Select(note => $" -> {note}\n"));
+        string main = string.Concat(Notes.Take(Depth).Reverse().Select(note => $" -> {note}\n"));
         if (MaxDepth > Depth)
         {
-            return main + "\nOver depth:\n" + string.Concat(Notes.Skip(Depth).Take(MaxDepth - Depth).Select(note => $" -> {note}\n"));
+            return main + "\nOver depth:\n" + string.Concat(Notes.Skip(Depth).Take(Math.Min(2, MaxDepth - Depth)).Reverse().Select(note => $" -> {note}\n"));
         }
         return main;
     }

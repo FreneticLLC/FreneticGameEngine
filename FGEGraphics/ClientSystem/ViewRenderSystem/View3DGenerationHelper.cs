@@ -184,7 +184,7 @@ public class View3DGenerationHelper : View3DCoreDataSet
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
         GraphicsUtil.CheckError("Load - View3D - Light - Godray");
-        // HDR FBO
+        // Dynamic Exposure FBO
         Internal.FBO_DynamicExposure = GL.GenFramebuffer();
         Internal.FBO_DynamicExposure_Texture = new("View3DGenHelper_FBO_DynamicExposure_Texture", TextureTarget.Texture2D);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R32f, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, 0, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
