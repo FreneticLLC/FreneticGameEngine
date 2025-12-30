@@ -161,9 +161,6 @@ public abstract class UIElement
 
         /// <summary>Styles registered on this element.</summary>
         public HashSet<UIStyle> Styles = [];
-
-        /// <summary>Text objects registered on this element.</summary>
-        public List<UIText> Texts = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -350,7 +347,6 @@ public abstract class UIElement
 
     /// <summary>
     /// Sets the style of this element.
-    /// <para>Additionally, updates any <see cref="UIText"/> objects attached to this element.</para>
     /// <para>Fires <see cref="OnStyleChange"/> and <see cref="StyleChanged(UIStyle, UIStyle)"/>.</para>
     /// </summary>
     /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
@@ -362,34 +358,15 @@ public abstract class UIElement
         {
             return;
         }
-        if (ElementInternal.Styles.Add(style))
-        {
-            if (style.CanRenderText)
-            {
-                foreach (UIText text in ElementInternal.Texts)
-                {
-                    if (!text.Empty && text.Internal.Style is null)
-                    {
-                        text.Internal.Renderables[style] = text.CreateRenderable(style);
-                    }
-                }
-            }
-        }
+        ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
-    public void UpdateStyle(bool updateText = false)
+    public void UpdateStyle()
     {
         SetStyle(Styling.Get(this));
-        if (updateText)
-        {
-            foreach (UIText text in ElementInternal.Texts)
-            {
-                text.UpdateRenderables();
-            }
-        }
     }
 
     /// <summary>
@@ -610,10 +587,6 @@ public abstract class UIElement
         {
             OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
             ScaleChanged(ElementInternal.LastScale, Scale);
-            foreach (UIText text in ElementInternal.Texts)
-            {
-                text.UpdateRenderables();
-            }
             anyFired = true;
         }
         return anyFired;

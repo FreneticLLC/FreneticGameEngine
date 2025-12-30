@@ -8,6 +8,7 @@
 
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Textures;
 using FreneticUtilities.FreneticExtensions;
@@ -20,12 +21,12 @@ using System.Threading.Tasks;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a simple piece of text on a screen.</summary>
-public class UILabel2 : UIElement
+public class UILabel : UIElement
 {
     /// <summary>Whether the label is empty and shouldn't be rendered.</summary>
     public bool IsEmpty => Internal.Content.Length == 0;
 
-    /// <summary>Data internal to a <see cref="UILabel2"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
     public struct InternalData()
     {
         /// <summary>The label text content.</summary>
@@ -38,7 +39,7 @@ public class UILabel2 : UIElement
         public Dictionary<UIStyle, RenderableText> Renderables = [];
     }
 
-    /// <summary>Data internal to a <see cref="UILabel2"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
     public InternalData Internal;
 
     /// <summary>
@@ -73,9 +74,10 @@ public class UILabel2 : UIElement
     /// <param name="text">The text to display on the label.</param>
     /// <param name="styling">The style of the label.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UILabel2(string text, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Internal = new() { Content = text ?? "" };
+        UpdateRenderables();
     }
 
     /// <summary>Creates a <see cref="RenderableText"/> object from <see cref="Content"/> given a style.</summary>
@@ -170,13 +172,73 @@ public class UILabel2 : UIElement
     /// <param name="layout">The layout of the element.</param>
     /// <param name="listAnchor">The anchor to use when positioning the label and the icon in a list.</param>
     /// <returns>A tuple of the label, icon, and their list container.</returns>
-    public static (UILabel2 Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
-        UILabel2 label = new(text, styling, layout.AtOrigin());
+        UILabel label = new(text, styling, layout.AtOrigin());
         UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
         list.AddListItem(label);
         list.AddListItem(image);
         return (label, image, list);
+    }
+
+    /// <summary>An individual UI text chain piece.</summary>
+    /// <param name="Font">The font to render the chain piece with.</param>
+    /// <param name="Text">The chain piece text.</param>
+    /// <param name="YOffset">The y-offset relative to the first piece.</param>
+    /// <param name="SkippedIndices">A list of character indices ignored in <see cref="FontSet.SplitLineAppropriately(RenderableTextLine, float, out List{int})"/>.</param>
+    public record ChainPiece(FontSet Font, RenderableText Text, float YOffset, List<int> SkippedIndices);
+
+    /// <summary>
+    /// Iterates through some UI text objects and returns <see cref="ChainPiece"/>s, where each chain piece contains a single line.
+    /// This properly handles consecutive text objects even spanning multiple lines.
+    /// </summary>
+    /// <param name="chain">The UI text objects.</param>
+    /// <param name="maxWidth">The wrapping width of the chain.</param>
+    /// <returns>The text chain.</returns>
+    // TODO: Fix blank lines not being counted
+    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UILabel> chain, float maxWidth = -1)
+    {
+        List<(FontSet Font, RenderableTextLine Line)> lines = [];
+        foreach (UILabel label in chain)
+        {
+            if (label.GetRenderable(label.Style) is not RenderableText renderable)
+            {
+                continue;
+            }
+            List<RenderableTextLine> textLines = [.. renderable.Lines];
+            if (lines.Count != 0)
+            {
+                RenderableTextLine combinedLine = new([.. lines[^1].Line.Parts, .. textLines[0].Parts]);
+                lines[^1] = (lines[^1].Font, combinedLine);
+                textLines.RemoveAt(0);
+            }
+            foreach (RenderableTextLine line in textLines)
+            {
+                lines.Add((label.Style.TextFont, line));
+            }
+        }
+        float y = 0;
+        foreach ((FontSet font, RenderableTextLine line) in lines)
+        {
+            List<int> skippedIndices = null;
+            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new([line]);
+            yield return new(font, splitText, y, skippedIndices ?? []);
+            y += font.Height * splitText.Lines.Length;
+        }
+    }
+
+    /// <summary>Renders a text chain.</summary>
+    /// <seealso cref="IterateChain(IEnumerable{UILabel}, float)"/>
+    /// <param name="chain">The UI text objects.</param>
+    /// <param name="x">The starting x position.</param>
+    /// <param name="y">The starting y position.</param>
+    public static void RenderChain(IEnumerable<ChainPiece> chain, float x, float y)
+    {
+        GraphicsUtil.CheckError("UIElementText - PreRenderChain");
+        foreach (ChainPiece piece in chain)
+        {
+            piece.Font.DrawFancyText(piece.Text, new Location(x, y + piece.YOffset, 0));
+        }
     }
 }

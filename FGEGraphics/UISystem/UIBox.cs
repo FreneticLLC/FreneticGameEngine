@@ -29,7 +29,7 @@ public class UIBox : UIElement
     public bool Flip = false;
 
     /// <summary>The text to display inside this box.</summary>
-    public UILabel2 Label;
+    public UILabel Label;
 
     /// <summary>Constructs a <see cref="UIBox"/>.</summary>
     /// <param name="styling">The styling of the element.</param>
@@ -37,7 +37,7 @@ public class UIBox : UIElement
     /// <param name="text">Text to display inside the box.</param>
     public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
     {
-        AddChild(Label = new UILabel2(text, styling.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
+        AddChild(Label = new UILabel(text, styling.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
 
     /// <inheritdoc/>
