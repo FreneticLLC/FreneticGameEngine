@@ -12,6 +12,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.EntitySystem;
 
 namespace FGECore.PropertySystem;
 
@@ -40,7 +41,7 @@ public class PropertyHolder
             propObj.PropHelper = PropertyHelper.EnsureHandled(type);
             foreach (Type iface in type.GetInterfaces())
             {
-                if (HeldInterfaces.TryGetValue(iface, out List<Object> objs))
+                if (HeldInterfaces.TryGetValue(iface, out List<object> objs))
                 {
                     objs.Add(propObj);
                 }
@@ -62,7 +63,7 @@ public class PropertyHolder
             HeldProperties.Remove(type);
             foreach (Type iface in type.GetInterfaces())
             {
-                if (HeldInterfaces.TryGetValue(iface, out List<Object> objs))
+                if (HeldInterfaces.TryGetValue(iface, out List<object> objs))
                 {
                     objs.Remove(prop);
                 }
@@ -418,7 +419,7 @@ public class PropertyHolder
     /// <returns>The property.</returns>
     public void AddProperty(Property prop)
     {
-        if (prop.PropHolder != null)
+        if (prop.PropHolder is not null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }
@@ -446,7 +447,7 @@ public class PropertyHolder
             return p;
         }
         Property constructedProperty = constructor();
-        if (constructedProperty.PropHolder != null)
+        if (constructedProperty.PropHolder is not null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }
@@ -470,7 +471,7 @@ public class PropertyHolder
             return p as T;
         }
         T res = constructor();
-        if (res.PropHolder != null)
+        if (res.PropHolder is not null)
         {
             throw new InvalidOperationException("That property is already held by something!");
         }

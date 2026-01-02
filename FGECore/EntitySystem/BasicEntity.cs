@@ -68,6 +68,9 @@ public abstract class BasicEntity : PropertyHolder
     /// <summary>The owning engine.</summary>
     public abstract BasicEngine EngineGeneric { get; }
 
+    /// <summary>The owning game instance.</summary>
+    public GameInstance InstanceGeneric => EngineGeneric.OwningInstanceGeneric;
+
     /// <summary>Constructs the <see cref="BasicEntity"/>.</summary>
     public BasicEntity()
     {
@@ -201,6 +204,9 @@ public abstract class BasicEntity<T, T2> : BasicEntity where T : BasicEntity<T, 
 {
     /// <summary>The owning engine.</summary>
     public T2 Engine;
+
+    /// <summary>The owning game instance.</summary>
+    public GameInstance<T, T2> Instance => Engine.OwningInstance;
 
     /// <summary>The owning engine.</summary>
     public override BasicEngine EngineGeneric => Engine;
