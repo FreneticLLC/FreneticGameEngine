@@ -246,7 +246,7 @@ public class UIInputLabel : UIElement
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
         UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
-        ScrollGroup.AddChild(LabelRenderable = new UIRenderable(RenderLabel));
+        ScrollGroup.AddScrollableChild(LabelRenderable = new UIRenderable(RenderLabel));
         AddChild(ScrollGroup);
         InputStyle = inputStyle;
         HighlightStyle = highlightStyle;

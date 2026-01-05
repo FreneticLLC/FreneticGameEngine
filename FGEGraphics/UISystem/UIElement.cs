@@ -161,15 +161,10 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Adds a child to this element.</summary>
+    /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
     /// <param name="child">The element to be parented.</param>
-    public virtual void AddChild(UIElement child)
+    public virtual void AddChildInternal(UIElement child)
     {
-        if (child.IsValid)
-        {
-            throw new Exception("Tried to add a child that already has a parent!");
-        }
-        ElementInternal.Children = [.. ElementInternal.Children, child];
         child.IsValid = true;
         child.Parent = this;
         if (View is not null)
@@ -183,9 +178,50 @@ public abstract class UIElement
         child.Init();
     }
 
+    /// <summary>Adds a child to this element.</summary>
+    /// <param name="child">The element to be parented.</param>
+    public void AddChild(UIElement child)
+    {
+        if (child is null || child.IsValid || child == this)
+        {
+            throw new Exception("Tried to add a child that is invalid (null, self, or already has a parent)!");
+        }
+        ElementInternal.Children = [.. ElementInternal.Children, child];
+        AddChildInternal(child);
+    }
+
+    /// <summary>Adds multiple children to this element. Akin to calling <see cref="AddChild(UIElement)"/> in a loop, but will reduced performance penalty.</summary>
+    /// <param name="children">The elements to be parented.</param>
+    public void AddChildren(IEnumerable<UIElement> children)
+    {
+        if (children.Any(c => c.IsValid))
+        {
+            throw new Exception("Tried to add a child that already has a parent!");
+        }
+        ElementInternal.Children = [.. ElementInternal.Children, .. children];
+        foreach (UIElement child in children)
+        {
+            AddChildInternal(child);
+        }
+    }
+
+    /// <summary>Internal handler, removes a child from this element. Do not call directly.</summary>
+    /// <param name="child">The child to be removed.</param>
+    public virtual void RemoveChildInternal(UIElement child)
+    {
+        if (!child.IsValid)
+        {
+            return;
+        }
+        child.IsValid = false;
+        child.Destroy();
+        child.Parent = null;
+        child.View = null;
+    }
+
     /// <summary>Removes a child from this element.</summary>
     /// <param name="child">The child to be removed.</param>
-    public virtual void RemoveChild(UIElement child)
+    public void RemoveChild(UIElement child)
     {
         if (!child.IsValid)
         {
@@ -196,10 +232,7 @@ public abstract class UIElement
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
         ElementInternal.Children = [.. ElementInternal.Children.Where(c => c != child)];
-        child.IsValid = false;
-        child.Destroy();
-        child.Parent = null;
-        child.View = null;
+        RemoveChildInternal(child);
     }
 
     /// <summary>Removes all children from this element.</summary>
@@ -207,8 +240,9 @@ public abstract class UIElement
     {
         foreach (UIElement child in ElementInternal.Children)
         {
-            RemoveChild(child);
+            RemoveChildInternal(child);
         }
+        ElementInternal.Children.Clear();
     }
 
     /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
@@ -354,16 +388,17 @@ public abstract class UIElement
     /// <param name="scrollDelta">The scroll wheel change.</param>
     public virtual void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
     {
+        ViewUI2D view = View;
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
-            if (ElementInternal.IsMouseHovered && !View.Internal.Scrolled)
+            if (ElementInternal.IsMouseHovered && !view.Internal.Scrolled)
             {
                 if (scrollDelta.X != 0 || scrollDelta.Y != 0)
                 {
-                    View.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
+                    view.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
                 }
             }
-            if (!ElementInternal.IsMouseHovered && View.HeldElement is null)
+            if (!ElementInternal.IsMouseHovered && view.HeldElement is null)
             {
                 ElementInternal.IsMouseHovered = true;
                 if (IsEnabled && !IsStateLocked)
@@ -371,8 +406,9 @@ public abstract class UIElement
                     IsHovered = true;
                 }
                 MouseEntered();
+                if (!IsValid) { return; }
             }
-            if (View.MouseDown && !View.MousePreviouslyDown && View.HeldElement is null)
+            if (view.MouseDown && !view.MousePreviouslyDown && view.HeldElement is null)
             {
                 if (IsEnabled)
                 {
@@ -380,12 +416,13 @@ public abstract class UIElement
                     {
                         IsPressed = true;
                     }
-                    View.HeldElement = this;
+                    view.HeldElement = this;
                     Focus();
                 }
                 MousePressed();
+                if (!IsValid) { return; }
             }
-            else if (!View.MouseDown && View.MousePreviouslyDown && View.HeldElement == this)
+            else if (!view.MouseDown && view.MousePreviouslyDown && view.HeldElement == this)
             {
                 if (IsEnabled)
                 {
@@ -395,12 +432,14 @@ public abstract class UIElement
                     }
                     OnClick?.Invoke();
                     Clicked();
-                    View.HeldElement = null;
+                    view.HeldElement = null;
+                    if (!IsValid) { return; }
                 }
                 MouseReleased();
+                if (!IsValid) { return; }
             }
         }
-        else if (ElementInternal.IsMouseHovered && (!View.MouseDown || View.HeldElement != this))
+        else if (ElementInternal.IsMouseHovered && (!view.MouseDown || view.HeldElement != this))
         {
             ElementInternal.IsMouseHovered = false;
             if (IsEnabled)
@@ -410,24 +449,28 @@ public abstract class UIElement
                     IsHovered = false;
                     IsPressed = false;
                 }
-                if (View.HeldElement == this)
+                if (view.HeldElement == this)
                 {
-                    View.HeldElement = null;
+                    view.HeldElement = null;
                 }
             }
             MouseExited();
-            if (View.MousePreviouslyDown)
+            if (!IsValid) { return; }
+            if (view.MousePreviouslyDown)
             {
                 MouseReleasedOutside();
+                if (!IsValid) { return; }
             }
         }
-        if (View.MouseDown && View.HeldElement != this)
+        if (view.MouseDown && view.HeldElement != this)
         {
             if (IsFocused)
             {
                 Unfocus();
+                if (!IsValid) { return; }
             }
             MousePressedOutside();
+            if (!IsValid) { return; }
         }
     }
 
@@ -443,10 +486,12 @@ public abstract class UIElement
         if (keys.Escaped)
         {
             Unfocus();
+            if (!IsValid) { return; }
         }
         if (keys.LeftRights != 0 || keys.Scrolls != 0)
         {
             Navigated(keys.LeftRights, keys.Scrolls);
+            if (!IsValid) { return; }
         }
     }
 
