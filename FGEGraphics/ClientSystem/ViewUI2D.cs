@@ -208,7 +208,10 @@ public class ViewUI2D
         ICollection<UIElement> elements = [.. CurrentScreen.AllChildren()];
         foreach (UIElement element in elements.Reverse())
         {
-            element.TickInteraction(mouseX, mouseY, scrollDelta);
+            if (element.IsValid)
+            {
+                element.TickInteraction(mouseX, mouseY, scrollDelta);
+            }
         }
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
