@@ -24,17 +24,15 @@ public static class MathUtilities
     /// <summary>Returns a one-length vector of the Yaw/Pitch angle input (in radians).</summary>
     /// <param name="yaw">The yaw angle, in radians.</param>
     /// <param name="pitch">The pitch angle, in radians.</param>
-    /// <returns>.</returns>
     public static Location ForwardVector(double yaw, double pitch)
     {
         double cp = Math.Cos(pitch);
-        return new Location(-(cp * Math.Cos(yaw)), -(cp * Math.Sin(yaw)), (Math.Sin(pitch)));
+        return new Location(cp * Math.Cos(yaw), cp * Math.Sin(yaw), Math.Sin(pitch));
     }
 
     /// <summary>Returns a one-length vector of the Yaw/Pitch angle input in degrees.</summary>
     /// <param name="yaw">The yaw angle, in radians.</param>
     /// <param name="pitch">The pitch angle, in radians.</param>
-    /// <returns>.</returns>
     public static Location ForwardVectorDegrees(double yaw, double pitch)
     {
         return ForwardVector(yaw * PI180, pitch * PI180);
