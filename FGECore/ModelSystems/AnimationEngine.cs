@@ -17,16 +17,19 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using FGECore.MathHelpers;
-using FGECore.UtilitySystems;
 
 namespace FGECore.ModelSystems;
 
 /// <summary>System for animations.</summary>
 public class AnimationEngine
 {
+    /// <summary>The backing files engine.</summary>
+    public FileEngine Files;
+
     /// <summary>Constructs the animation helper.</summary>
-    public AnimationEngine()
+    public AnimationEngine(FileEngine fileEngine)
     {
+        Files = fileEngine;
         Animations = [];
         // TODO: These should not be defined here.
         string[] HBones = [ "neck02", "neck03", "head", "jaw", "levator02.l", "levator02.r", "special01", "special03", "special06.l", "special06.r",
@@ -62,9 +65,8 @@ public class AnimationEngine
 
     /// <summary>Gets an animation by name.</summary>
     /// <param name="name">The name.</param>
-    /// <param name="Files">The file system.</param>
     /// <returns>The animation.</returns>
-    public SingleAnimation GetAnimation(string name, FileEngine Files)
+    public SingleAnimation GetAnimation(string name)
     {
         string namelow = name.ToLowerFast();
         if (Animations.TryGetValue(namelow, out SingleAnimation sa))
@@ -73,7 +75,7 @@ public class AnimationEngine
         }
         try
         {
-            sa = LoadAnimation(namelow, Files);
+            sa = LoadAnimation(namelow);
             Animations.Add(sa.Name, sa);
             return sa;
         }
@@ -88,11 +90,10 @@ public class AnimationEngine
 
     /// <summary>Loads an animation by name.</summary>
     /// <param name="name">The name.</param>
-    /// <param name="Files">The file system.</param>
     /// <returns>The animation.</returns>
-    SingleAnimation LoadAnimation(string name, FileEngine Files)
+    SingleAnimation LoadAnimation(string name)
     {
-        if (Files.TryReadFileText("animations/" + name + ".anim", out string fileText))
+        if (Files.TryReadFileText($"animations/{name}.anim", out string fileText))
         {
             SingleAnimation created = new() { Name = name };
             string[] data = fileText.SplitFast('\n');

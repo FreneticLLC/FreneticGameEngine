@@ -86,9 +86,6 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>The 2D rendering helper, for any UI or general 2D logic.</summary>
     public Renderer2D Rendering2D;
 
-    /// <summary>The 3D animation helper.</summary>
-    public AnimationEngine Animations;
-
     /// <summary>The keyboard input helper.</summary>
     public KeyHandler Keyboard;
 
@@ -329,7 +326,6 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         Keyboard = new KeyHandler(this);
         MainUI = new ViewUI2D(this);
         Logs.ClientInit("GameClient loading model engine...");
-        Animations = new AnimationEngine();
         Models = new ModelEngine();
         Models.Init(Animations, this);
         Logs.ClientInit("GameClient loading render helper...");

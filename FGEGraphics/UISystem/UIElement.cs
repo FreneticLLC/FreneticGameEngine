@@ -135,12 +135,6 @@ public abstract class UIElement
         /// <summary>This element's children.</summary>
         public List<UIElement> Children = [];
 
-        /// <summary>Elements queued to be added as children.</summary>
-        public List<UIElement> ToAdd = [];
-
-        /// <summary>Child elements queued to be removed.</summary>
-        public List<UIElement> ToRemove = [];
-
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
 
@@ -179,42 +173,78 @@ public abstract class UIElement
         }
     }
 
+    /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
+    /// <param name="child">The element to be parented.</param>
+    public virtual void AddChildInternal(UIElement child)
+    {
+        child.IsValid = true;
+        child.Parent = this;
+        if (View is not null)
+        {
+            foreach (UIElement subChild in child.AllChildren())
+            {
+                subChild.View = View;
+            }
+        }
+        child.UpdateStyle();
+        child.Init();
+    }
+
     /// <summary>Adds a child to this element.</summary>
     /// <param name="child">The element to be parented.</param>
-    public virtual void AddChild(UIElement child)
+    public void AddChild(UIElement child)
     {
-        if (child.IsValid)
+        if (child is null || child.IsValid || child == this)
+        {
+            throw new Exception("Tried to add a child that is invalid (null, self, or already has a parent)!");
+        }
+        ElementInternal.Children = [.. ElementInternal.Children, child];
+        AddChildInternal(child);
+    }
+
+    /// <summary>Adds multiple children to this element. Akin to calling <see cref="AddChild(UIElement)"/> in a loop, but will reduced performance penalty.</summary>
+    /// <param name="children">The elements to be parented.</param>
+    public void AddChildren(IEnumerable<UIElement> children)
+    {
+        if (children.Any(c => c.IsValid))
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
-        if (!ElementInternal.Children.Contains(child))
+        ElementInternal.Children = [.. ElementInternal.Children, .. children];
+        foreach (UIElement child in children)
         {
-            ElementInternal.ToAdd.Add(child);
+            AddChildInternal(child);
         }
-        else if (!ElementInternal.ToRemove.Remove(child))
-        {
-            throw new Exception("Tried to add a child that already belongs to this element!");
-        }
-        child.IsValid = true;
     }
 
-    /// <summary>Removes a child from this element.</summary>
+    /// <summary>Internal handler, removes a child from this element. Do not call directly.</summary>
     /// <param name="child">The child to be removed.</param>
-    public virtual void RemoveChild(UIElement child)
+    public virtual void RemoveChildInternal(UIElement child)
     {
         if (!child.IsValid)
         {
             return;
         }
-        if (ElementInternal.Children.Contains(child))
+        child.IsValid = false;
+        child.Destroy();
+        child.Parent = null;
+        child.View = null;
+    }
+
+    /// <summary>Removes a child from this element.</summary>
+    /// <param name="child">The child to be removed.</param>
+    public void RemoveChild(UIElement child)
+    {
+        if (!child.IsValid)
         {
-            ElementInternal.ToRemove.Add(child);
+            return;
         }
-        else if (!ElementInternal.ToAdd.Remove(child))
+        if (!ElementInternal.Children.Contains(child))
         {
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
-        child.IsValid = false;
+        ElementInternal.Children = [.. ElementInternal.Children.Where(c => c != child)];
+        RemoveChildInternal(child);
     }
 
     /// <summary>Removes all children from this element.</summary>
@@ -222,51 +252,19 @@ public abstract class UIElement
     {
         foreach (UIElement child in ElementInternal.Children)
         {
-            RemoveChild(child);
+            RemoveChildInternal(child);
         }
-        ElementInternal.ToAdd.Clear();
+        ElementInternal.Children.Clear();
     }
 
-    /// <summary>Returns whether this element is the parent of another element.</summary>
+    /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
     /// <param name="element">The possible child element.</param>
-    public bool HasChild(UIElement element) => element.IsValid && (ElementInternal.Children.Contains(element) || ElementInternal.ToAdd.Contains(element)) && !ElementInternal.ToRemove.Contains(element);
-
-    /// <summary>Adds and removes any queued children.</summary>
-    public void UpdateChildren()
-    {
-        foreach (UIElement element in ElementInternal.ToAdd)
-        {
-            ElementInternal.Children.Add(element);
-            element.Parent = this;
-            if (View is not null)
-            {
-                foreach (UIElement child in element.AllChildren(toAdd: true))
-                {
-                    child.View = View;
-                }
-            }
-            element.UpdateStyle();
-            element.Init();
-        }
-        foreach (UIElement element in ElementInternal.ToRemove)
-        {
-            if (!ElementInternal.Children.Remove(element))
-            {
-                Logs.Error($"UIElement: Failed to remove a child element '{element}' from '{this}'!");
-            }
-            element.Destroy();
-            element.Parent = null;
-            element.View = null;
-        }
-        ElementInternal.ToAdd.Clear();
-        ElementInternal.ToRemove.Clear();
-    }
+    public bool HasChild(UIElement element) => element.Parent == this;
 
     // TODO: 'filter' predicate parameter
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="includeSelf">Whether to include this element.</param>
-    /// <param name="toAdd">Whether to include elements that are queued to be children.</param>
-    public IEnumerable<UIElement> AllChildren(bool includeSelf = true, bool toAdd = false)
+    public IEnumerable<UIElement> AllChildren(bool includeSelf = true)
     {
         if (includeSelf)
         {
@@ -274,19 +272,9 @@ public abstract class UIElement
         }
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid) // TODO: is this a good check?
+            if (element.IsValid)
             {
-                foreach (UIElement child in element.AllChildren(true, toAdd))
-                {
-                    yield return child;
-                }
-            }
-        }
-        if (toAdd)
-        {
-            foreach (UIElement element in ElementInternal.ToAdd)
-            {
-                foreach (UIElement child in element.AllChildren(true, toAdd))
+                foreach (UIElement child in element.AllChildren(true))
                 {
                     yield return child;
                 }
@@ -294,7 +282,6 @@ public abstract class UIElement
         }
     }
 
-    // TODO: remove these?
     /// <summary>Gets all children that contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
@@ -330,7 +317,7 @@ public abstract class UIElement
     /// <param name="y">The Y position to check for.</param>
     public bool SelfContains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
 
-    /// <summary>Returns whether this element's boundaries, or any of its childrens' boundaries, contain the position on the screen.</summary>
+    /// <summary>Returns whether this element's boundaries, or any of its childrens' (or sub-childrens') boundaries, contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     public bool Contains(int x, int y)
@@ -386,16 +373,17 @@ public abstract class UIElement
     /// <param name="scrollDelta">The scroll wheel change.</param>
     public virtual void TickInteraction(int mouseX, int mouseY, Vector2 scrollDelta)
     {
+        ViewUI2D view = View;
         if (SelfContains(mouseX, mouseY) && CanInteract(mouseX, mouseY))
         {
-            if (ElementInternal.IsMouseHovered && !View.Internal.Scrolled)
+            if (ElementInternal.IsMouseHovered && !view.Internal.Scrolled)
             {
                 if (scrollDelta.X != 0 || scrollDelta.Y != 0)
                 {
-                    View.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
+                    view.Internal.Scrolled = MouseScrolled(scrollDelta.X, scrollDelta.Y);
                 }
             }
-            if (!ElementInternal.IsMouseHovered && View.HeldElement is null)
+            if (!ElementInternal.IsMouseHovered && view.HeldElement is null)
             {
                 ElementInternal.IsMouseHovered = true;
                 if (IsEnabled && !IsStateLocked)
@@ -403,8 +391,9 @@ public abstract class UIElement
                     IsHovered = true;
                 }
                 MouseEntered();
+                if (!IsValid) { return; }
             }
-            if (View.MouseDown && !View.MousePreviouslyDown && View.HeldElement is null)
+            if (view.MouseDown && !view.MousePreviouslyDown && view.HeldElement is null)
             {
                 if (IsEnabled)
                 {
@@ -412,12 +401,13 @@ public abstract class UIElement
                     {
                         IsPressed = true;
                     }
-                    View.HeldElement = this;
+                    view.HeldElement = this;
                     Focus();
                 }
                 MousePressed();
+                if (!IsValid) { return; }
             }
-            else if (!View.MouseDown && View.MousePreviouslyDown && View.HeldElement == this)
+            else if (!view.MouseDown && view.MousePreviouslyDown && view.HeldElement == this)
             {
                 if (IsEnabled)
                 {
@@ -427,12 +417,14 @@ public abstract class UIElement
                     }
                     OnClick?.Invoke();
                     Clicked();
-                    View.HeldElement = null;
+                    view.HeldElement = null;
+                    if (!IsValid) { return; }
                 }
                 MouseReleased();
+                if (!IsValid) { return; }
             }
         }
-        else if (ElementInternal.IsMouseHovered && (!View.MouseDown || View.HeldElement != this))
+        else if (ElementInternal.IsMouseHovered && (!view.MouseDown || view.HeldElement != this))
         {
             ElementInternal.IsMouseHovered = false;
             if (IsEnabled)
@@ -442,24 +434,28 @@ public abstract class UIElement
                     IsHovered = false;
                     IsPressed = false;
                 }
-                if (View.HeldElement == this)
+                if (view.HeldElement == this)
                 {
-                    View.HeldElement = null;
+                    view.HeldElement = null;
                 }
             }
             MouseExited();
-            if (View.MousePreviouslyDown)
+            if (!IsValid) { return; }
+            if (view.MousePreviouslyDown)
             {
                 MouseReleasedOutside();
+                if (!IsValid) { return; }
             }
         }
-        if (View.MouseDown && View.HeldElement != this)
+        if (view.MouseDown && view.HeldElement != this)
         {
             if (IsFocused)
             {
                 Unfocus();
+                if (!IsValid) { return; }
             }
             MousePressedOutside();
+            if (!IsValid) { return; }
         }
     }
 
@@ -475,10 +471,12 @@ public abstract class UIElement
         if (keys.Escaped)
         {
             Unfocus();
+            if (!IsValid) { return; }
         }
         if (keys.LeftRights != 0 || keys.Scrolls != 0)
         {
             Navigated(keys.LeftRights, keys.Scrolls);
+            if (!IsValid) { return; }
         }
     }
 
@@ -492,11 +490,14 @@ public abstract class UIElement
     /// <param name="delta">The time since the last tick.</param>
     public void TickAll(double delta)
     {
-        foreach (UIElement element in AllChildren())
+        TickInput();
+        Tick(delta);
+        foreach (UIElement element in ElementInternal.Children)
         {
-            element.UpdateChildren();
-            element.TickInput();
-            element.Tick(delta);
+            if (element.IsValid)
+            {
+                element.TickAll(delta);
+            }
         }
     }
 

@@ -248,7 +248,7 @@ public class UIInputLabel : UIElement
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
         LabelRenderable = new UIRenderable(RenderLabel);
         LabelRenderable.AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)));
-        ScrollGroup.AddChild(LabelRenderable);
+        ScrollGroup.AddScrollableChild(LabelRenderable);
         AddChild(ScrollGroup);
         InputStyle = inputStyle;
         HighlightStyle = highlightStyle;

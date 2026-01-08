@@ -19,6 +19,7 @@ using FGECore.EntitySystem;
 using FGECore.FileSystems;
 using FGECore.StackNoteSystem;
 using FGECore.UtilitySystems;
+using FGECore.ModelSystems;
 
 namespace FGECore.CoreSystems;
 
@@ -97,6 +98,9 @@ public abstract class GameInstance
     /// <summary>Additional action to call during the instance tick, if any.</summary>
     public Action OnTick;
 
+    /// <summary>The 3D animation helper.</summary>
+    public AnimationEngine Animations;
+
     /// <summary>The <see cref="SysConsole"/> output type for "init" messages.</summary>
     public abstract OutputType InitOutputType { get; }
 
@@ -150,6 +154,7 @@ public abstract class GameInstance
         Files.Init(Folder_Data, realMods, realSaves);
         AssetStreaming = new AssetStreamingEngine(Files, Schedule);
         AssetStreaming.Init();
+        Animations = new AnimationEngine(Files);
         IsInitialized = true;
         Watchdog = new InstanceWatchdog(this);
         Watchdog.Start();

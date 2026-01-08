@@ -25,6 +25,9 @@ public abstract class BasicEntityProperty : Property
     /// <summary>Gets the engine associated with a property.</summary>
     public BasicEngine Engine => Entity.EngineGeneric;
 
+    /// <summary>Gets the game instance associated with a property.</summary>
+    public GameInstance Instance => Engine.OwningInstanceGeneric;
+
     /// <summary>Run when the entity is spawned.</summary>
     public virtual void OnSpawn()
     {
@@ -44,4 +47,7 @@ public class BasicEntityProperty<T, T2> : BasicEntityProperty where T: BasicEnti
 
     /// <summary>Gets the engine associated with a property.</summary>
     public new T2 Engine => Entity.Engine;
+
+    /// <summary>Gets the game instance associated with a property.</summary>
+    public new GameInstance<T, T2> Instance => Engine.OwningInstance;
 }

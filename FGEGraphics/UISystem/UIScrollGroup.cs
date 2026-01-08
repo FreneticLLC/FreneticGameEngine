@@ -27,8 +27,8 @@ public class UIScrollGroup : UIElement
     /// <summary>The vertical scroll axis.</summary>
     public Axis ScrollY;
 
-    /// <summary>The scissor layer for child elements.</summary>
-    public UIScissorGroup ScissorLayer;
+    /// <summary>The scrollable scissor layer for child elements.</summary>
+    public UIScissorGroup ScrollableLayer;
 
     /// <summary>The scroll bar layer (above the scissor layer).</summary>
     public UIGroup ScrollBarLayer;
@@ -65,15 +65,15 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScissorLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
+        base.AddChild(ScrollableLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
     }
 
     /// <inheritdoc/>
-    public override void AddChild(UIElement child)
+    public void AddScrollableChild(UIElement child)
     {
         UILayout original = new(child.Layout);
         child.Layout.SetPosition(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
-        ScissorLayer.AddChild(child);
+        ScrollableLayer.AddChild(child);
     }
 
     /// <inheritdoc/>
