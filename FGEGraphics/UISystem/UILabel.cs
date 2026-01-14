@@ -37,6 +37,8 @@ public class UILabel : UIElement
 
         /// <summary>A cache of UI styles and their corresponding renderable objects.</summary>
         public Dictionary<UIStyle, RenderableText> Renderables = [];
+
+        public Action OnRenderablesUpdate;
     }
 
     /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
@@ -123,18 +125,25 @@ public class UILabel : UIElement
             Internal.Renderables = ElementInternal.Styles
                 .Select(style => (style, CreateRenderable(style)))
                 .ToDictionary();
+            Internal.OnRenderablesUpdate?.Invoke();
         }
     }
 
     /// <inheritdoc/>
     public override void StyleChanged(UIStyle from, UIStyle to)
     {
+        //Logs.Debug($"UILabel with content: {Content}, StyleChanged");
+        //Logs.Debug($"- from: {from}");
+        //Logs.Debug($"- to: {to}");
         if (!IsEmpty && to.CanRenderText && !Internal.Renderables.ContainsKey(to))
         {
+            //Logs.Debug("- Creating renderable...");
             Internal.Renderables[to] = CreateRenderable(to);
+            //Logs.Debug("- Renderable: " + Internal.Renderables[to]);
         }
         if (Scale != 0 && Internal.Renderables.TryGetValue(to, out RenderableText renderable))
         {
+            //Logs.Debug("- Setting layout...");
             Layout.SetSize(renderable.GetTrueSize(to.TextFont));
         }
     }
@@ -180,65 +189,5 @@ public class UILabel : UIElement
         list.AddListItem(label);
         list.AddListItem(image);
         return (label, image, list);
-    }
-
-    /// <summary>An individual UI text chain piece.</summary>
-    /// <param name="Font">The font to render the chain piece with.</param>
-    /// <param name="Text">The chain piece text.</param>
-    /// <param name="YOffset">The y-offset relative to the first piece.</param>
-    /// <param name="SkippedIndices">A list of character indices ignored in <see cref="FontSet.SplitLineAppropriately(RenderableTextLine, float, out List{int})"/>.</param>
-    public record ChainPiece(FontSet Font, RenderableText Text, float YOffset, List<int> SkippedIndices);
-
-    /// <summary>
-    /// Iterates through some UI text objects and returns <see cref="ChainPiece"/>s, where each chain piece contains a single line.
-    /// This properly handles consecutive text objects even spanning multiple lines.
-    /// </summary>
-    /// <param name="chain">The UI text objects.</param>
-    /// <param name="maxWidth">The wrapping width of the chain.</param>
-    /// <returns>The text chain.</returns>
-    // TODO: Fix blank lines not being counted
-    public static IEnumerable<ChainPiece> IterateChain(IEnumerable<UILabel> chain, float maxWidth = -1)
-    {
-        List<(FontSet Font, RenderableTextLine Line)> lines = [];
-        foreach (UILabel label in chain)
-        {
-            if (label.GetRenderable(label.Style) is not RenderableText renderable)
-            {
-                continue;
-            }
-            List<RenderableTextLine> textLines = [.. renderable.Lines];
-            if (lines.Count != 0)
-            {
-                RenderableTextLine combinedLine = new([.. lines[^1].Line.Parts, .. textLines[0].Parts]);
-                lines[^1] = (lines[^1].Font, combinedLine);
-                textLines.RemoveAt(0);
-            }
-            foreach (RenderableTextLine line in textLines)
-            {
-                lines.Add((label.Style.TextFont, line));
-            }
-        }
-        float y = 0;
-        foreach ((FontSet font, RenderableTextLine line) in lines)
-        {
-            List<int> skippedIndices = null;
-            RenderableText splitText = maxWidth > 0 ? FontSet.SplitLineAppropriately(line, maxWidth, out skippedIndices) : new([line]);
-            yield return new(font, splitText, y, skippedIndices ?? []);
-            y += font.Height * splitText.Lines.Length;
-        }
-    }
-
-    /// <summary>Renders a text chain.</summary>
-    /// <seealso cref="IterateChain(IEnumerable{UILabel}, float)"/>
-    /// <param name="chain">The UI text objects.</param>
-    /// <param name="x">The starting x position.</param>
-    /// <param name="y">The starting y position.</param>
-    public static void RenderChain(IEnumerable<ChainPiece> chain, float x, float y)
-    {
-        GraphicsUtil.CheckError("UIElementText - PreRenderChain");
-        foreach (ChainPiece piece in chain)
-        {
-            piece.Font.DrawFancyText(piece.Text, new Location(x, y + piece.YOffset, 0));
-        }
     }
 }
