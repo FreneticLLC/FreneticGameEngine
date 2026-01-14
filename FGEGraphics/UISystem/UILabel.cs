@@ -120,7 +120,7 @@ public class UILabel : UIElement
         }
         else
         {
-            Internal.Renderables = Internal.Renderables.Keys
+            Internal.Renderables = ElementInternal.Styles
                 .Select(style => (style, CreateRenderable(style)))
                 .ToDictionary();
         }

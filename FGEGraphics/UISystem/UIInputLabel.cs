@@ -68,10 +68,10 @@ public class UIInputLabel : UIElement
     public UILabel PlaceholderInfo;
 
     /// <summary>The UI style of normal input content.</summary>
-    public UIStyle InputStyle;
+    public UIStyling InputStyling;
 
     /// <summary>The UI style of highlighted input content.</summary>
-    public UIStyle HighlightStyle;
+    public UIStyling HighlightStyling;
 
     /// <summary>Whether the input label supports multiple lines.</summary>
     public bool Multiline = true;
@@ -221,8 +221,8 @@ public class UIInputLabel : UIElement
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
     /// <param name="styling">The styling logic of the element.</param>
-    /// <param name="inputStyle">The style of normal input content.</param>
-    /// <param name="highlightStyle">The style of highlighted input content.</param>
+    /// <param name="inputStyling">The style of normal input content.</param>
+    /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
     /// <param name="renderBox">Whether to render a box behind the input label.</param>
@@ -233,7 +233,7 @@ public class UIInputLabel : UIElement
     /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
     /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
     /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styling, layout)
     {
         if (renderBox)
         {
@@ -250,12 +250,12 @@ public class UIInputLabel : UIElement
         LabelRenderable.AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)));
         ScrollGroup.AddScrollableChild(LabelRenderable);
         AddChild(ScrollGroup);
-        InputStyle = inputStyle;
-        HighlightStyle = highlightStyle;
+        InputStyling = inputStyling;
+        HighlightStyling = highlightStyling;
         Internal.MaxWidth = maxWidth;
-        Internal.TextLeft = new(null, InputStyle, new UILayout());
-        Internal.TextBetween = new(null, HighlightStyle, new UILayout());
-        Internal.TextRight = new(null, InputStyle, new UILayout());
+        AddChild(Internal.TextLeft = new(null, InputStyling, new UILayout()) { RenderSelf = false });
+        AddChild(Internal.TextBetween = new(null, HighlightStyling, new UILayout()) { RenderSelf = false });
+        AddChild(Internal.TextRight = new(null, InputStyling, new UILayout()) { RenderSelf = false });
         TextContent = defaultText;
     }
 
@@ -573,8 +573,8 @@ public class UIInputLabel : UIElement
         }
         // TODO: Cursor blink modes
         View.Engine.Textures.White.Bind();
-        Renderer2D.SetColor(InputStyle.BorderColor);
-        int lineWidth = InputStyle.BorderThickness / 2;
+        Renderer2D.SetColor(Internal.TextBetween.Style.BorderColor);
+        int lineWidth = Internal.TextBetween.Style.BorderThickness / 2;
         int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).Style.TextFont.Height;
         View.Rendering.RenderRectangle(View.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
