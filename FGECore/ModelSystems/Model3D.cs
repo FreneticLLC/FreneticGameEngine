@@ -9,9 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
+using BepuPhysics;
+using BepuPhysics.Collidables;
+using FGECore.EntitySystem.PhysicsHelpers;
+using FGECore.MathHelpers;
+using FGECore.PhysicsSystem;
 
 namespace FGECore.ModelSystems;
 
@@ -35,6 +40,47 @@ public class Model3D
 
     /// <summary>The type of collision data this model provides.</summary>
     public Model3DCollisionType CollisionType = Model3DCollisionType.NONE;
+
+    /// <summary>The physics shape for this model, if calculated. Do not read directly, use <see cref="GetShape(PhysicsSpace)"/>.</summary>
+    public EntityShapeHelper Shape;
+
+    /// <summary>Creates an appropriate entity shape for this model.</summary>
+    /// <param name="space">The physics space that this shape will be registered into.</param>
+    public EntityShapeHelper GetShape(PhysicsSpace space)
+    {
+        if (Shape is null)
+        {
+            switch (CollisionType)
+            {
+                case Model3DCollisionType.CONVEX:
+                    Shape = ModelHandler.MeshToBepuConvexSingle(space, this, out _);
+                    break;
+                case Model3DCollisionType.COMPLEX:
+                    Mesh bepuMesh = ModelHandler.MeshToBepu(space, this, out _);
+                    Shape = new EntityMeshShape(bepuMesh, space);
+                    break;
+                case Model3DCollisionType.COMPOUND_CONVEX:
+                    Shape = ModelHandler.MeshToBepuConvexCompound(space, this, out _);
+                    break;
+                case Model3DCollisionType.NONE:
+                default:
+                    Location start = Meshes[0].Vertices[0].ToLocation();
+                    AABB box = new(start, start);
+                    foreach (Model3DMesh mesh in Meshes)
+                    {
+                        foreach (Vector3 vert in mesh.Vertices)
+                        {
+                            box.Include(vert.ToLocation());
+                        }
+                    }
+                    EntityBoxShape boxShape = new(box.Max - box.Min, space);
+                    Location center = (box.Min + box.Max) / 2;
+                    Shape = new EntityCompoundShape([new(boxShape, new RigidPose(-center.ToNumerics()))], boxShape.Volume, space);
+                    break;
+            }
+        }
+        return Shape.Duplicate(space);
+    }
 
     /// <summary>Returns a simple shallow copy of this <see cref="Model3D"/>.</summary>
     public Model3D Duplicate()
@@ -125,7 +171,7 @@ public class Model3DNode
 /// <summary>Enumeration of possible collision types found in a 3D model.</summary>
 public enum Model3DCollisionType
 {
-    /// <summary>No collision data provided.</summary>
+    /// <summary>No collision data provided. Will be handled like a simple AABB.</summary>
     NONE,
     /// <summary>Has complex mesh component.</summary>
     COMPLEX,

@@ -290,24 +290,35 @@ public class ModelHandler
     public static EntityCompoundShape MeshToBepuConvexCompound(PhysicsSpace space, Model3D input, out int verts)
     {
         verts = 0;
-        space.Internal.Pool.Take(input.Meshes.Count(m => m.IsCollisionConvexMesh), out Buffer<CompoundChild> children);
-        List<TypedIndex> registered = [];
-        int childIndex = 0;
         double volume = 0;
+        List<EntityCompoundShape.EntityCompoundChild> children = [];
         foreach (Model3DMesh mesh in input.Meshes)
         {
             if (mesh.IsCollisionConvexMesh)
             {
                 ConvexHull hull = MeshToBepuConvex(space, mesh.Vertices, out Location center);
-                volume += EntityConvexHullShape.EstimateVolume(hull);
-                TypedIndex index = space.Internal.CoreSimulation.Shapes.Add(hull);
-                registered.Add(index);
-                children[childIndex++] = new(new RigidPose(-center.ToNumerics(), System.Numerics.Quaternion.Identity), index);
+                EntityConvexHullShape hullShape = new(hull, space);
+                volume += hullShape.Volume;
+                children.Add(new(hullShape, new(-center.ToNumerics(), System.Numerics.Quaternion.Identity)));
                 verts += mesh.Vertices.Length;
             }
         }
-        Compound created = new(children);
-        return new(created, volume, space) { OtherRegistered = [.. registered] };
+        return new(children, volume, space);
+    }
+
+    /// <summary>Converts a model to a BEPU compound of a single convex hull. Only works if there is convex data within the model. Implicitly recenters meshes via the compound.</summary>
+    /// <param name="space">The relevant physics space.</param>
+    /// <param name="verts">The vertex count if needed.</param>
+    /// <param name="input">The model.</param>
+    public static EntityCompoundShape MeshToBepuConvexSingle(PhysicsSpace space, Model3D input, out int verts)
+    {
+        List<EntityCompoundShape.EntityCompoundChild> children = [];
+        Span<Vector3> vertices = new(GetCollisionVertices(input));
+        ConvexHull hull = MeshToBepuConvex(space, vertices, out Location center);
+        EntityConvexHullShape hullShape = new(hull, space);
+        children.Add(new(hullShape, new(-center.ToNumerics(), System.Numerics.Quaternion.Identity)));
+        verts = vertices.Length;
+        return new(children, hullShape.Volume, space);
     }
 
     /// <summary>Converts a mesh to a BEPU convex hull.</summary>
