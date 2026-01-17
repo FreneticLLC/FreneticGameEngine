@@ -314,7 +314,7 @@ public class Model(string _name)
         hAnim = headanim;
         tAnim = torsoanim;
         lAnim = legsanim;
-        bool any = hAnim != null || tAnim != null || lAnim != null || forceBones;
+        bool any = hAnim is not null || tAnim is not null || lAnim is not null || forceBones;
         if (any)
         {
             // globalInverse = Root.Inverted();

@@ -85,8 +85,7 @@ public class Model3D
                         }
                     }
                     EntityBoxShape boxShape = new(box.Max - box.Min, space);
-                    Location center = (box.Min + box.Max) / 2;
-                    Shape = new EntityCompoundShape([new(boxShape, new RigidPose(-center.ToNumerics()))], boxShape.Volume, space);
+                    Shape = new EntityCompoundShape([new(boxShape, new RigidPose(box.Center.ToNumerics()))], boxShape.Volume, space);
                     break;
             }
         }
