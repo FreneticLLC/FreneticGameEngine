@@ -130,7 +130,7 @@ public class ModelEngine
         {
             List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
             Model mod = FromSceneNoGenerate(null, scene, modelName, builders);
-            Window.Schedule.ScheduleSyncTask(() =>
+            void proc()
             {
                 foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
                 {
@@ -143,12 +143,20 @@ public class ModelEngine
                 model.RootNode = mod.RootNode;
                 model.LODHelper = null;
                 model.LODBox = default;
-                model.ModelMin = new Location(-0.5);
-                model.ModelMax = new Location(0.5);
-                model.ModelBoundsSet = false;
+                AABB bounds = scene.GetBounds();
+                model.ModelMin = bounds.Min;
+                model.ModelMax = bounds.Max;
                 model.IsLoaded = setLoaded;
                 onLoad?.Invoke();
-            });
+            }
+            if (loadNow)
+            {
+                proc();
+            }
+            else
+            {
+                Window.Schedule.ScheduleSyncTask(proc);
+            }
         }, loadNow: loadNow);
         return model;
     }
@@ -164,9 +172,12 @@ public class ModelEngine
         Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
         CoreModels.GetModelFromInfoDynamic(modelName, scene =>
         {
-            Window.Schedule.ScheduleSyncTask(() =>
+            void proc()
             {
                 FromScene(model, scene, modelName);
+                AABB bounds = scene.GetBounds();
+                model.ModelMin = bounds.Min;
+                model.ModelMax = bounds.Max;
                 foreach (string line in scene.InfoDataLines)
                 {
                     if (line.Length == 0)
@@ -216,7 +227,15 @@ public class ModelEngine
                         Logs.Warning($"While loading model '{modelName}': Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
                     }
                 }
-            });
+            }
+            if (loadNow)
+            {
+                proc();
+            }
+            else
+            {
+                Window.Schedule.ScheduleSyncTask(proc);
+            }
         }, loadNow: loadNow);
         LoadedModels.Add(modelName, model);
         return model;

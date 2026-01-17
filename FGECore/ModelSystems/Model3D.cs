@@ -50,6 +50,21 @@ public class Model3D
     /// <summary>If true, this model is populated with valid data. If false, it has in some way failed.</summary>
     public bool IsValid = false;
 
+    /// <summary>Calculates a simple bounding box for this model.</summary>
+    public AABB GetBounds()
+    {
+        Location start = Meshes[0].Vertices[0].ToLocation();
+        AABB box = new(start, start);
+        foreach (Model3DMesh mesh in Meshes)
+        {
+            foreach (Vector3 vert in mesh.Vertices)
+            {
+                box.Include(vert.ToLocation());
+            }
+        }
+        return box;
+    }
+
     /// <summary>Creates an appropriate entity shape for this model.</summary>
     /// <param name="space">The physics space that this shape will be registered into.</param>
     public EntityShapeHelper GetShape(PhysicsSpace space)
@@ -75,15 +90,7 @@ public class Model3D
                         Shape = new EntityBoxShape(new Location(1, 1, 1), space);
                         break;
                     }
-                    Location start = Meshes[0].Vertices[0].ToLocation();
-                    AABB box = new(start, start);
-                    foreach (Model3DMesh mesh in Meshes)
-                    {
-                        foreach (Vector3 vert in mesh.Vertices)
-                        {
-                            box.Include(vert.ToLocation());
-                        }
-                    }
+                    AABB box = GetBounds();
                     EntityBoxShape boxShape = new(box.Max - box.Min, space);
                     Shape = new EntityCompoundShape([new(boxShape, new RigidPose(box.Center.ToNumerics()))], boxShape.Volume, space);
                     break;

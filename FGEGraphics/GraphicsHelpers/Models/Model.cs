@@ -52,9 +52,6 @@ public class Model(string _name)
     /// <summary>The root node.</summary>
     public ModelNode RootNode;
 
-    /// <summary>Whether the model bounds are set and known.</summary>
-    public bool ModelBoundsSet = false;
-
     /// <summary>The minimum model bound.</summary>
     public Location ModelMin;
 
