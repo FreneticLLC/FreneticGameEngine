@@ -379,7 +379,7 @@ public struct Location : IEquatable<Location>
     }
 
     /// <summary>Rotates an X-forward movement vector by a certain yaw and pitch (in radians).
-    /// Specifically, this assumes that Y values should be excluded from pitch application, such as 'Forward' (X) motion follows the pitch direction, and 'Sideways' (Y) motion disregards pitch.</summary>
+    /// Specifically, this assumes that Y values should be excluded from pitch application, such that 'Forward' (X) motion follows the pitch direction, and 'Sideways' (Y) motion disregards pitch.</summary>
     /// <param name="yaw">The yaw to rotate by (in radians).</param>
     /// <param name="pitch">The pitch to rotate by (in radians).</param>
     /// <returns>The rotated vector.</returns>

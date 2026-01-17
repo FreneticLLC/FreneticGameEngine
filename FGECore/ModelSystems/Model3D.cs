@@ -23,14 +23,17 @@ namespace FGECore.ModelSystems;
 /// <summary>Represents an abstract 3D model.</summary>
 public class Model3D
 {
+    /// <summary>Name of this model. Often a partial filename matched to <see cref="CoreModelEngine"/>'s inputs.</summary>
+    public string Name;
+
     /// <summary>The meshes that compose this model.</summary>
-    public Model3DMesh[] Meshes;
+    public Model3DMesh[] Meshes = [];
 
     /// <summary>The root bone node of the model.</summary>
     public Model3DNode RootNode;
 
     /// <summary>The default matrix of the model.</summary>
-    public Matrix4x4 MatrixA;
+    public Matrix4x4 MatrixA = Matrix4x4.Identity;
 
     /// <summary>User-tag on this model. Often this is an FGEGraphics Model instance.</summary>
     public object Tag;
@@ -43,6 +46,9 @@ public class Model3D
 
     /// <summary>The physics shape for this model, if calculated. Do not read directly, use <see cref="GetShape(PhysicsSpace)"/>.</summary>
     public EntityShapeHelper Shape;
+
+    /// <summary>If true, this model is populated with valid data. If false, it has in some way failed.</summary>
+    public bool IsValid = false;
 
     /// <summary>Creates an appropriate entity shape for this model.</summary>
     /// <param name="space">The physics space that this shape will be registered into.</param>
@@ -64,6 +70,11 @@ public class Model3D
                     break;
                 case Model3DCollisionType.NONE:
                 default:
+                    if (Meshes.Length == 0)
+                    {
+                        Shape = new EntityBoxShape(new Location(1, 1, 1), space);
+                        break;
+                    }
                     Location start = Meshes[0].Vertices[0].ToLocation();
                     AABB box = new(start, start);
                     foreach (Model3DMesh mesh in Meshes)
