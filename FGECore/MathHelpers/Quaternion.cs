@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.UtilitySystems;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.MathHelpers;
 
@@ -175,7 +176,21 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
     /// <returns>Equality.</returns>
     public readonly bool Equals(Quaternion b) => this == b;
 
-    /// <summary>Returns a simple string of this Quaternion.</summary>
+    /// <summary>Creates a Quaternion from a simple string.
+    /// Inverts <see cref="ToString"/>.</summary>
+    /// <param name="input">The input string.</param>
+    public static Quaternion FromString(string input)
+    {
+        string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
+        if (data.Length != 4)
+        {
+            throw new ArgumentException($"Invalid Quaternion string: {input}");
+        }
+        return new(StringConversionHelper.StringToDouble(data[0]), StringConversionHelper.StringToDouble(data[1]), StringConversionHelper.StringToDouble(data[2]), StringConversionHelper.StringToDouble(data[3]));
+    }
+
+    /// <summary>Returns a simple string of this Quaternion.
+    /// Inverted by <see cref="FromString(string)"/>.</summary>
     /// <returns>The simple string.</returns>
     public override readonly string ToString() => $"({X}, {Y}, {Z}, {W})";
 
