@@ -29,7 +29,7 @@ public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
     public Model EntityModel;
 
     /// <summary>The render scale.</summary>
-    public Location Scale;
+    public Location Scale = Location.One;
 
     /// <summary>The diffuse color texture.</summary>
     public Texture DiffuseTexture;

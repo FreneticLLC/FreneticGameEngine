@@ -23,6 +23,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Trees;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
+using FGECore.CoreSystems;
 
 namespace FGECore.EntitySystem;
 
@@ -301,7 +302,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
             return;
         }
         PhysicsWorld ??= Engine.PhysicsWorldGeneric;
-        if (Shape == null)
+        if (Shape is null)
         {
             return;
         }
@@ -596,5 +597,11 @@ public class EntityPhysicsProperty : BasicEntityProperty
         float totalDamping = AngularDamping + AngularDampingBoost;
         float remainder = 1 - totalDamping;
         AngularDampingBoost += damping * remainder;
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{nameof(EntityPhysicsProperty)}(Velocity={LinearVelocity.ToBasicString()}, Shape={Shape}, Mass={Mass}, IsSpawned={IsSpawned})";
     }
 }
