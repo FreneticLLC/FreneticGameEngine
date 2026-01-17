@@ -176,6 +176,22 @@ public class Model3DNode
 
     /// <summary>All children of this node.</summary>
     public Model3DNode[] Children;
+
+    /// <summary>Get all nodes in the hierarchy below and including this one.</summary>
+    public IEnumerable<Model3DNode> AllNodes()
+    {
+        yield return this;
+        foreach (Model3DNode child in Children)
+        {
+            foreach (Model3DNode desc in child.AllNodes())
+            {
+                yield return desc;
+            }
+        }
+    }
+
+    /// <summary>Get the full final matrix for this node.</summary>
+    public Matrix4x4 GetMatrix() => Parent is null ? MatrixA : Parent.GetMatrix() * MatrixA;
 }
 
 /// <summary>Enumeration of possible collision types found in a 3D model.</summary>
