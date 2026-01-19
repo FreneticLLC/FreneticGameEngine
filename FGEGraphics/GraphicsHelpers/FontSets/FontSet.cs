@@ -60,6 +60,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <summary>Name of the font set.</summary>
     public string Name = _name.ToLowerFast();
 
+    /// <summary>Size of the font set.</summary>
+    public int Size;// = fontsize;
+
     /// <summary>Height, in pixels, of this fontset (based on <see cref="FontDefault"/>'s height) (ie how tall a standard symbol is, or how wide the line gap needs to be).</summary>
     public int Height => FontDefault.Height;
 
@@ -76,6 +79,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         FontBoldHalf = Engine.GLFonts.GetFont(fontname, true, false, fontsize / 2);
         FontItalicHalf = Engine.GLFonts.GetFont(fontname, false, true, fontsize / 2);
         FontBoldItalicHalf = Engine.GLFonts.GetFont(fontname, true, true, fontsize / 2);
+        Size = fontsize;
     }
 
     /// <summary>All colors used by the different font set options.</summary>
@@ -199,7 +203,6 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             string[] lines = text.Replace('\r', ' ').Replace("^q", "\"").SplitFast('\n');
             RenderableTextLine[] outLines = new RenderableTextLine[lines.Length];
             RenderableTextPart currentPart = new() { Font = FontDefault };
-            int maxWidth = 0;
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -374,14 +377,9 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                         }
                     }
                 }
-                outLines[i] = new RenderableTextLine()
-                {
-                    Parts = [.. parts],
-                    Width = (int)Math.Ceiling(X)
-                };
-                maxWidth = Math.Max(maxWidth, outLines[i].Width);
+                outLines[i] = new RenderableTextLine([.. parts]);
             }
-            RenderableText result = new() { Lines = outLines, Width = maxWidth };
+            RenderableText result = new([.. outLines]);
             FancyTextCache[(baseColor, originalText)] = result;
             return result;
         }
@@ -422,7 +420,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     /// <param name="extraShadow">Optional: If set to true, will cause a drop shadow to be drawn behind all text (even if '^d' is flipped off).</param>
     public void DrawFancyText(RenderableText text, Location position, int maxY = int.MaxValue, float transmod = 1, bool extraShadow = false)
     {
-        if (text.Lines is null)
+        if (text.Lines is null || text.Lines.Length == 0)
         {
             return;
         }
@@ -797,7 +795,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         skippedIndices = [];
         if (line.Width < maxWidth)
         {
-            return new(line);
+            return new([line]);
         }
         int charIndex = 0;
         float totalWidth = 0;
@@ -849,7 +847,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
             charIndex += word.Length;
         }
         BuildLine();
-        return new() { Lines = [.. lines], Width = (int)totalWidth };
+        return new RenderableText([.. lines]);
     }
 
     /// <summary>Splits some text at a maximum render width, automatically wrapping to new lines to fit the given boundaries.</summary>
@@ -859,17 +857,12 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     public static RenderableText SplitAppropriately(RenderableText text, int maxWidth)
     {
         List<RenderableTextLine> lines = [];
-        int totalWidth = 0;
         foreach (RenderableTextLine line in text.Lines)
         {
             RenderableText splitLine = SplitLineAppropriately(line, maxWidth, out _);
             lines.AddRange(splitLine.Lines);
-            if (splitLine.Width > totalWidth)
-            {
-                totalWidth = splitLine.Width;
-            }
         }
-        return new RenderableText() { Lines = [.. lines], Width = totalWidth };
+        return new RenderableText([.. lines]);
     }
 
     /// <summary>Draws a rectangle to a <see cref="TextVBOBuilder"/> to be displayed on screen.</summary>
@@ -915,4 +908,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     {
         return FontDefault.GetHashCode();
     }
+
+    /// <inheritdoc/>
+    public override string ToString() => $"FontSet(Name = {_name}, Size = {Size})";
 }
