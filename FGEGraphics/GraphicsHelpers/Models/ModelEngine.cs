@@ -88,8 +88,9 @@ public class ModelEngine
     /// If the relevant model exists but is not yet loaded, will load it from file.
     /// </summary>
     /// <param name="modelname">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
+    /// <param name="loadNow">If true, the model must load immediately. If false, it can lazy-load.</param>
     /// <returns>A valid model object. If the model cannot be loaded, a placeholder cube will be substituted.</returns>
-    public Model GetModel(string modelname)
+    public Model GetModel(string modelname, bool loadNow = true)
     {
         modelname = FileEngine.CleanFileName(modelname);
         if (LoadedModels.TryGetValue(modelname, out Model existingModel))
@@ -99,7 +100,7 @@ public class ModelEngine
         Model Loaded;
         try
         {
-            Loaded = GetModelFromInfoDynamic(modelname, loadNow: true);
+            Loaded = GetModelFromInfoDynamic(modelname, loadNow: loadNow);
         }
         catch (Exception ex)
         {
@@ -144,8 +145,7 @@ public class ModelEngine
                 model.LODHelper = null;
                 model.LODBox = default;
                 AABB bounds = scene.GetBounds();
-                model.ModelMin = bounds.Min;
-                model.ModelMax = bounds.Max;
+                model.ModelBounds = bounds;
                 model.IsLoaded = setLoaded;
                 onLoad?.Invoke();
             }
@@ -176,8 +176,7 @@ public class ModelEngine
             {
                 FromScene(model, scene, modelName);
                 AABB bounds = scene.GetBounds();
-                model.ModelMin = bounds.Min;
-                model.ModelMax = bounds.Max;
+                model.ModelBounds = bounds;
                 foreach (string line in scene.InfoDataLines)
                 {
                     if (line.Length == 0)

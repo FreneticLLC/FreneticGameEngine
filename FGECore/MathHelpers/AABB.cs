@@ -30,6 +30,9 @@ public struct AABB(Location _min, Location _max)
     /// <summary>Returns the center of the box - that is, (Min+Max)/2.</summary>
     public readonly Location Center => (Min + Max) * 0.5;
 
+    /// <summary>Returns the full size of the box - that is, Max-Min.</summary>
+    public readonly Location Size => Max - Min;
+
     /// <summary>Returns whether the box intersects another box.</summary>
     /// <param name="box2">The second box.</param>
     public readonly bool Intersects(in AABB box2)

@@ -52,11 +52,8 @@ public class Model(string _name)
     /// <summary>The root node.</summary>
     public ModelNode RootNode;
 
-    /// <summary>The minimum model bound.</summary>
-    public Location ModelMin;
-
-    /// <summary>The maximum model bound.</summary>
-    public Location ModelMax;
+    /// <summary>The model spatial boundaries as a simple axis-aligned bounding box. When unset, defaults to [-0.5, 0.5] as a placeholder.</summary>
+    public AABB ModelBounds = new(new(-0.5), new(0.5));
 
     /// <summary>Whether the model is loaded yet.</summary>
     public bool IsLoaded = false;
