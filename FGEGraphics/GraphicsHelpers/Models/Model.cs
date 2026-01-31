@@ -58,6 +58,9 @@ public class Model(string _name)
     /// <summary>Whether the model is loaded yet.</summary>
     public bool IsLoaded = false;
 
+    /// <summary>Any actions to trigger once this model is loaded, if it is not already.</summary>
+    public List<Action<Model>> OnLoadActions = [];
+
     /// <summary>Adds a mesh to this model.</summary>
     /// <param name="mesh">The mesh to add.</param>
     public void AddMesh(ModelMesh mesh)

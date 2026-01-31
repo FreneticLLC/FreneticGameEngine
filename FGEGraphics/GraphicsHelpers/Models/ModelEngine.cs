@@ -89,18 +89,35 @@ public class ModelEngine
     /// </summary>
     /// <param name="modelname">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
     /// <param name="loadNow">If true, the model must load immediately. If false, it can lazy-load.</param>
+    /// <param name="onLoad">Action to fire when the model loads, Runs on the main thread.</param>
     /// <returns>A valid model object. If the model cannot be loaded, a placeholder cube will be substituted.</returns>
-    public Model GetModel(string modelname, bool loadNow = true)
+    public Model GetModel(string modelname, bool loadNow = true, Action<Model> onLoad = null)
     {
         modelname = FileEngine.CleanFileName(modelname);
         if (LoadedModels.TryGetValue(modelname, out Model existingModel))
         {
+            if (existingModel.IsLoaded)
+            {
+                onLoad?.Invoke(existingModel);
+            }
+            else
+            {
+                if (onLoad is not null)
+                {
+                    existingModel.OnLoadActions.Add(onLoad);
+                }
+                if (loadNow)
+                {
+                    // TODO: Spinwait until loaded
+                }
+                return existingModel;
+            }
             return existingModel;
         }
         Model Loaded;
         try
         {
-            Loaded = GetModelFromInfoDynamic(modelname, loadNow: loadNow);
+            Loaded = GetModelFromInfoDynamic(modelname, loadNow: loadNow, onLoad: onLoad);
         }
         catch (Exception ex)
         {
@@ -116,10 +133,10 @@ public class ModelEngine
     /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
     /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
     /// <param name="loadInto">Optional, existing model object to load the model data into. If unspecified, a placeholder cube model will be generated.</param>
-    /// <param name="onLoad">Optional action to fire after the model data has loaded. Does not fire if the model fails to load. Fires on window sync thread.</param>
+    /// <param name="onLoad">Optional action to fire after the model data has loaded. Runs on the main thread.</param>
     /// <param name="setLoaded">If true, set <see cref="Model.IsLoaded"/> to true. If false, do not (eg for onLoad to have its own action).</param>
     /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
-    public Model GetDirectModelDynamic(string modelName, bool loadNow = false, Model loadInto = null, Action onLoad = null, bool setLoaded = true)
+    public Model GetDirectModelDynamic(string modelName, bool loadNow = false, Model loadInto = null, Action<Model> onLoad = null, bool setLoaded = true)
     {
         modelName = FileEngine.CleanFileName(modelName);
         Model model = loadInto ?? new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
@@ -147,7 +164,12 @@ public class ModelEngine
                 AABB bounds = scene.GetBounds();
                 model.ModelBounds = bounds;
                 model.IsLoaded = setLoaded;
-                onLoad?.Invoke();
+                onLoad?.Invoke(model);
+                foreach (Action<Model> action in model.OnLoadActions)
+                {
+                    action.Invoke(model);
+                }
+                model.OnLoadActions.Clear();
             }
             if (loadNow)
             {
@@ -165,11 +187,13 @@ public class ModelEngine
     /// <para><see cref="Model.IsLoaded"/> will be <c>false</c> until loaded, then <c>true</c> when ready. May stay false forever if the model file does not exist.</para></summary>
     /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
     /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used. Textures will be loaded with highest priority, but may not be instant still.</param>
+    /// <param name="onLoad">Action to fire when the model loads (off thread) or immediately (same thread) if loadNow is true.</param>
     /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
-    public Model GetModelFromInfoDynamic(string modelName, bool loadNow = false)
+    public Model GetModelFromInfoDynamic(string modelName, bool loadNow = false, Action<Model> onLoad = null)
     {
         modelName = FileEngine.CleanFileName(modelName);
         Model model = new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
+        LoadedModels.Add(modelName, model);
         CoreModels.GetModelFromInfoDynamic(modelName, scene =>
         {
             void proc()
@@ -226,6 +250,12 @@ public class ModelEngine
                         Logs.Warning($"While loading model '{modelName}': Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
                     }
                 }
+                onLoad?.Invoke(model);
+                foreach (Action<Model> action in model.OnLoadActions)
+                {
+                    action.Invoke(model);
+                }
+                model.OnLoadActions.Clear();
             }
             if (loadNow)
             {
@@ -236,7 +266,6 @@ public class ModelEngine
                 Window.Schedule.ScheduleSyncTask(proc);
             }
         }, loadNow: loadNow);
-        LoadedModels.Add(modelName, model);
         return model;
     }
 
