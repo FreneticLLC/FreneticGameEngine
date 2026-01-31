@@ -45,6 +45,9 @@ public struct AABB(Location _min, Location _max)
     /// <summary>Converts the AABB to a string, in the form (X, Y, Z)/(X, Y, Z)</summary>
     public override readonly string ToString() => $"{Min}/{Max}";
 
+    /// <summary>Converts the AABB to a string, in the form (Min=(X, Y, Z), Max=(X, Y, Z), Center=(X, Y, Z), Size=(X, Y, Z)), limited to 2 decimal digits.</summary>
+    public readonly string ToDebugString() => $"(Min={Min.ToBasicString()}, Max={Max.ToBasicString()}, Center={Center.ToBasicString()}, Size={Size.ToBasicString()})";
+
     /// <summary>Includes a Location into the box's space, expanding as needed (but not shrinking).</summary>
     /// <param name="pos">The position to include.</param>
     public void Include(in Location pos)
