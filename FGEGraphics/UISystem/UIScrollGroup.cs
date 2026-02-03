@@ -161,13 +161,13 @@ public class UIScrollGroup : UIElement
             }
             if (vertical)
             {
-                layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(width);
+                layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(() => (int)(width * ScrollBar.Scale));
             }
             else
             {
-                layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(width);
+                layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(() => (int)(width * ScrollBar.Scale));
             }
-            ScrollBar = new(styling, layout);
+            ScrollBar = new(styling, layout) { ScaleSize = false };
         }
 
         /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
