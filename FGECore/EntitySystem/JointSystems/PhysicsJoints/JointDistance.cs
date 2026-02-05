@@ -29,8 +29,8 @@ public class JointDistance(EntityPhysicsProperty e1, EntityPhysicsProperty e2, f
     public Location OffsetOne = e1pos;
 
     /// <summary>Offset from <see cref="PhysicsJointBase.Two"/> to its anchor.</summary>
-    public Location Offset2 = e2pos;
+    public Location OffsetTwo = e2pos;
 
     /// <inheritdoc/>
-    public override DistanceLimit CreateJointDescription() => new(OffsetOne.ToNumerics(), Offset2.ToNumerics(), Min, Max, new SpringSettings(20, 1));
+    public override DistanceLimit CreateJointDescription() => new(OffsetOne.ToNumerics(), OffsetTwo.ToNumerics(), Min, Max, new SpringSettings(20, 1));
 }
