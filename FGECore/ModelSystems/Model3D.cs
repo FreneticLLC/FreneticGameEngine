@@ -57,6 +57,10 @@ public class Model3D
         AABB box = new(start, start);
         foreach (Model3DMesh mesh in Meshes)
         {
+            if (!mesh.IsVisible)
+            {
+                continue;
+            }
             foreach (Vector3 vert in mesh.Vertices)
             {
                 box.Include(vert.ToLocation());
