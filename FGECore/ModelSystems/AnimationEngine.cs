@@ -377,8 +377,8 @@ public class SingleAnimationNode
     }
 
     /// <summary>Gets the final matrix for a bone.</summary>
-    /// <param name="aTime">The time.</param>
-    /// <param name="adjs">The adjustments if any.</param>
+    /// <param name="aTime">The animation timestamp.</param>
+    /// <param name="adjs">The adjustments, if any.</param>
     /// <returns>The resultant matrix.</returns>
     public Matrix4x4 GetBoneTotalMatrix(double aTime, Dictionary<string, Matrix4x4> adjs = null)
     {
