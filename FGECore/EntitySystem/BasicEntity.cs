@@ -126,7 +126,7 @@ public abstract class BasicEntity : PropertyHolder
         OnPositionChanged?.Invoke(position);
     }
 
-    /// <summary>Gets a string debug helper for this entity.</summary>
+    /// <inheritdoc/>
     public override string ToString()
     {
         return $"BasicEntity of type: {GetType().Name}, ID: {EID}, with properties: {PropertyList()}";
@@ -135,10 +135,11 @@ public abstract class BasicEntity : PropertyHolder
     /// <summary>Gets a string list of all properties, with debug informational output.</summary>
     public string DebugPropList()
     {
+        // TODO: A stringbuilder would be a lot more efficient here
         return string.Join(" | ", EnumerateAllProperties().Select((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().Select((k) => k.Key + ": " + k.Value)) + "}"));
     }
 
-    /// <summary>Gets a string list of all property names, pipe separated.</summary>
+    /// <summary>Gets a string list of all property names, pipe separated. Used for debugging.</summary>
     public string PropertyList()
     {
         return string.Join(" | ", EnumerateAllPropertyTypes().Select(t => t.Name));

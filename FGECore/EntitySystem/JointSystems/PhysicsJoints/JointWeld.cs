@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BepuPhysics;
 using BepuPhysics.Constraints;
+using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 
@@ -30,5 +31,11 @@ public class JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : Phy
         RigidPose.Invert(rt1, out RigidPose rt1inv);
         RigidPose.MultiplyWithoutOverlap(rt2, rt1inv, out Offset);
         return new() { LocalOffset = Offset.Position, LocalOrientation = Offset.Orientation, SpringSettings = new SpringSettings(20, 1) };
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{base.ToString()}(OffsetPos={Offset.Position.ToLocation().ToBasicString()}, Orient={Offset.Orientation.ToCore()})";
     }
 }
