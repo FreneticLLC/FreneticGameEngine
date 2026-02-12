@@ -72,8 +72,6 @@ void main()
 	pos1 *= simplebone_matrix;
 	nor1 *= simplebone_matrix;
 #endif
-	pos1 = vec4(position, 1.0);
-	nor1 = vec4(normal, 1.0);
 	f.color = color;
 	if (f.color == vec4(0.0, 0.0, 0.0, 1.0))
 	{
