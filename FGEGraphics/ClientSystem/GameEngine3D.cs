@@ -216,6 +216,7 @@ public class GameEngine3D : GameEngineBase
             if (ShouldRender(ce.Renderer, view.State.RenderingShadows))
             {
                 using var _push2 = StackNoteHelper.UsePush("GameEngine3D - Render Specific Entity", ce);
+                ce.Renderer?.OnPreRender?.Invoke();
                 ce.Renderer?.RenderStandard(MainContext);
                 ce.OnRendered?.Invoke(MainContext);
             }

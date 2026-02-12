@@ -34,6 +34,9 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
     /// <summary>The identity Quaternion: one with no rotation applied.</summary>
     public static readonly Quaternion Identity = new(0, 0, 0, 1);
 
+    /// <summary>A Quaternion of (NaN, NaN, NaN, NaN).</summary>
+    public static readonly Quaternion NaN = new(double.NaN, double.NaN, double.NaN, double.NaN);
+
     /// <summary>The X component of this Quaternion.</summary>
     [FieldOffset(0)]
     public double X = _x;
@@ -418,6 +421,10 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
         return new Quaternion(X * aFraction + end.X * bFraction, Y * aFraction + end.Y * bFraction,
             Z * aFraction + end.Z * bFraction, W * aFraction + end.W * bFraction);
     }
+
+    /// <summary>Returns whether the quaternion is NaN (ie, any component within is NaN).</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly bool IsNaN() => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z) || double.IsNaN(W);
 }
 
 /// <summary>Helper extensions for <see cref="Quaternion"/>.</summary>

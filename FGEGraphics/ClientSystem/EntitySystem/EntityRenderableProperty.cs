@@ -47,31 +47,25 @@ public abstract class EntityRenderableProperty : ClientEntityProperty
     [PropertyAutoSavable]
     public double RenderingPriorityOrder = 0;
 
+    /// <summary>Alternate render location. Set to <see cref="Location.NaN"/> to disable.</summary>
+    public Location AltRenderAt = Location.NaN;
+
+    /// <summary>Alternate render orientation. Set to <see cref="Quaternion.NaN"/> to disable.</summary>
+    public Quaternion AltRenderOrientation = Quaternion.NaN;
+
     /// <summary>
     /// Where the entity should render at.
-    /// <para>Use <see cref="BasicEntity.SetPosition(Location)"/> to update this.</para>
+    /// <para>Use <see cref="BasicEntity.SetPosition(Location)"/> to update this, or <see cref="AltRenderAt"/> to override this.</para>
     /// </summary>
     [PropertyDebuggable]
-    public Location RenderAt
-    {
-        get
-        {
-            return Entity.LastKnownPosition;
-        }
-    }
+    public Location RenderAt => AltRenderAt.IsNaN() ? Entity.LastKnownPosition : AltRenderAt;
 
     /// <summary>
     /// What orientation to render the entity at.
     /// <para>Use <see cref="BasicEntity.SetOrientation(Quaternion)"/> to update this.</para>
     /// </summary>
     [PropertyDebuggable]
-    public Quaternion RenderOrientation
-    {
-        get
-        {
-            return Entity.LastKnownOrientation;
-        }
-    }
+    public Quaternion RenderOrientation => AltRenderOrientation.IsNaN() ? Entity.LastKnownOrientation : AltRenderOrientation;
 
     /// <summary>Fired when the entity is spawned.</summary>
     public override void OnSpawn()
@@ -126,6 +120,9 @@ public abstract class EntityRenderableProperty : ClientEntityProperty
     public virtual void OtherOrientationPatch()
     {
     }
+
+    /// <summary>Event-action fired just before the entity render call.</summary>
+    public Action OnPreRender;
 
     /// <summary>Render the entity as seen by a top-down map.</summary>
     /// <param name="context">The render context.</param>
