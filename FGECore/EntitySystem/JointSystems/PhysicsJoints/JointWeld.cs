@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.MathHelpers;
 using BepuPhysics;
 using BepuPhysics.Constraints;
-using FGECore.MathHelpers;
 
 namespace FGECore.EntitySystem.JointSystems.PhysicsJoints;
 

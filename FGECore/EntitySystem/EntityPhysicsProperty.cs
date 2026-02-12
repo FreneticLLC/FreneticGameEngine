@@ -12,6 +12,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
@@ -23,7 +24,6 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Trees;
 
 using Quaternion = FGECore.MathHelpers.Quaternion;
-using FGECore.CoreSystems;
 
 namespace FGECore.EntitySystem;
 

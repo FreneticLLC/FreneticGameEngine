@@ -13,9 +13,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.UtilitySystems;
-using FreneticUtilities.FreneticExtensions;
 
 namespace FGECore.MathHelpers;
 
