@@ -47,6 +47,8 @@ void main()
 	vec4 pos1;
 	vec4 nor1;
 #if MCM_GEOM_ACTIVE
+    pos1 = vec4(position, 1.0);
+    nor1 = vec4(normal, 1.0);
 #else
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
 	mat4 BT = mat4(1.0);
