@@ -60,7 +60,7 @@ public struct UIStyling
         if (Dynamic is not null)
         {
             Func<UIElement, UIStyle> dynamic = Dynamic;
-            return new(element => dynamic(element));
+            return new(_ => dynamic(element));
         }
         return this;
     }

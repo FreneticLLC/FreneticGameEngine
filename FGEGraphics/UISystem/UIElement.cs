@@ -74,6 +74,9 @@ public abstract class UIElement
     /// <summary>The absolute rotation.</summary>
     public float Rotation;
 
+    /// <summary>The absolute scale.</summary>
+    public float Scale;
+
     /// <summary>Gets the absolute X coordinate.</summary>
     /// <seealso cref="Position"/>
     public int X => Position.X;
@@ -96,6 +99,12 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    /// <summary>
+    /// Whether this element should scale its width based on <see cref="Scale"/>.
+    /// Even if this value is <c>false</c>, this element's scale still applies to its children.
+    /// </summary>
+    public bool ScaleSize = true;
+
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
@@ -117,6 +126,9 @@ public abstract class UIElement
     /// <summary>Fired when <see cref="Rotation"/> changes value.</summary>
     public Action<float, float> OnRotationChange;
 
+    /// <summary>Fired when <see cref="Scale"/> changes value.</summary>
+    public Action<float, float> OnScaleChange;
+
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
     {
@@ -135,14 +147,14 @@ public abstract class UIElement
         /// <summary>The last absolute rotation.</summary>
         public float LastRotation;
 
+        /// <summary>The last absolute scale.</summary>
+        public float LastScale;
+
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
 
         /// <summary>Styles registered on this element.</summary>
         public HashSet<UIStyle> Styles = [];
-
-        /// <summary>Text objects registered on this element.</summary>
-        public List<UIText> Texts = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -322,7 +334,6 @@ public abstract class UIElement
 
     /// <summary>
     /// Sets the style of this element.
-    /// <para>Additionally, updates any <see cref="UIText"/> objects attached to this element.</para>
     /// <para>Fires <see cref="OnStyleChange"/> and <see cref="StyleChanged(UIStyle, UIStyle)"/>.</para>
     /// </summary>
     /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
@@ -334,41 +345,15 @@ public abstract class UIElement
         {
             return;
         }
-        if (ElementInternal.Styles.Add(style))
-        {
-            if (style.CanRenderText())
-            {
-                foreach (UIText text in ElementInternal.Texts)
-                {
-                    if (!text.Empty && text.Internal.Style is null)
-                    {
-                        text.Internal.Renderables[style] = text.CreateRenderable(style);
-                    }
-                }
-            }
-        }
+        ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
-    public void UpdateStyle(bool updateText = false)
+    public void UpdateStyle()
     {
         SetStyle(Styling.Get(this));
-        if (updateText)
-        {
-            foreach (UIText text in ElementInternal.Texts)
-            {
-                text.UpdateRenderables();
-            }
-        }
-    }
-
-    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
-    /// <param name="from">The previous style.</param>
-    /// <param name="to">The new style.</param>
-    public virtual void StyleChanged(UIStyle from, UIStyle to)
-    {
     }
 
     /// <summary>
@@ -516,12 +501,33 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Updates positions of this element and its children.</summary>
+    // TODO: Support rotations
+    /// <summary>
+    /// Updates the absolute layout values for this element in the following order:
+    /// <list type="number">
+    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
+    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
+    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
+    /// <item><see cref="Rotation"/></item>
+    /// </list>
+    /// </summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
-    // TODO: should this be virtual?
     public virtual void UpdateTransforms(double delta, Vector3 rotation)
     {
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastSize = Size;
+        ElementInternal.LastRotation = Rotation;
+        ElementInternal.LastScale = Scale;
+        Scale = Layout.Scale;
+        if (ScaleSize)
+        {
+            Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
+        }
+        else
+        {
+            Size = new(Layout.Width, Layout.Height);
+        }
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -552,11 +558,7 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        ElementInternal.LastPosition = Position;
-        ElementInternal.LastSize = Size;
-        ElementInternal.LastRotation = Rotation;
         Position = new(x, y);
-        Size = new(Layout.Width, Layout.Height);
         Rotation = rotation.Z;
     }
 
@@ -567,17 +569,26 @@ public abstract class UIElement
         if (ElementInternal.LastPosition != Position)
         {
             OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+            PositionChanged(ElementInternal.LastPosition, Position);
             anyFired |= true;
         }
         if (ElementInternal.LastSize != Size)
         {
             OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+            SizeChanged(ElementInternal.LastSize, Size);
             anyFired |= true;
         }
         if (ElementInternal.LastRotation != Rotation)
         {
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+            RotationChanged(ElementInternal.LastRotation, Rotation);
             anyFired |= true;
+        }
+        if (ElementInternal.LastScale != Scale)
+        {
+            OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
+            ScaleChanged(ElementInternal.LastScale, Scale);
+            anyFired = true;
         }
         return anyFired;
     }
@@ -656,6 +667,41 @@ public abstract class UIElement
     /// <summary>Ran when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public virtual void Clicked()
     { 
+    }
+
+    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
+    /// <param name="from">The previous style.</param>
+    /// <param name="to">The new style.</param>
+    public virtual void StyleChanged(UIStyle from, UIStyle to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Position"/> changes value.</summary>
+    /// <param name="from">The previous position.</param>
+    /// <param name="to">The new position.</param>
+    public virtual void PositionChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Size"/> changes value.</summary>
+    /// <param name="from">The previous size.</param>
+    /// <param name="to">The new size.</param>
+    public virtual void SizeChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Rotation"/> changes value.</summary>
+    /// <param name="from">The previous rotation.</param>
+    /// <param name="to">The new rotation.</param>
+    public virtual void RotationChanged(float from, float to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Scale"/> changes value.</summary>
+    /// <param name="from">The previous scale.</param>
+    /// <param name="to">The new scale.</param>
+    public virtual void ScaleChanged(float from, float to)
+    {
     }
 
     /// <summary>Focuses on the element and fires <see cref="Focused"/>.</summary>

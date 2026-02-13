@@ -100,7 +100,7 @@ public class UINumberInputLabel : UIInputLabel
             Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
             return result;
         }
-        if (result.Length == 0 && !PlaceholderInfo.Empty)
+        if (result.Length == 0 && !PlaceholderInfo.IsEmpty)
         {
             return "";
         }

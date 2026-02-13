@@ -41,7 +41,7 @@ public class UIToggleBox : UIBox
     public void SetToggled(bool toggled)
     {
         Toggled = toggled;
-        Text.Content = Toggled ? "X" : null;
+        Label.Content = Toggled ? "X" : null;
     }
 
     /// <summary>Toggles this box.</summary>

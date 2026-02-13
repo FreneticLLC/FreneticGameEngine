@@ -18,15 +18,15 @@ namespace FGEGraphics.UISystem;
 public enum UIAlignment
 {
     /// <summary>(Horizontal only) Left alignment.</summary>
-    LEFT = 0,
+    LEFT,
     /// <summary>(Vertical only) Top alignment.</summary>
-    TOP = LEFT,
+    TOP,
     /// <summary>Center alignment.</summary>
-    CENTER = 1,
+    CENTER,
     /// <summary>(Horizontal only) Right alignment.</summary>
-    RIGHT = 2,
+    RIGHT,
     /// <summary>(Vertical only) Bottom alignment.</summary>
-    BOTTOM = RIGHT
+    BOTTOM
 }
 
 /// <summary>Helper methods for <see cref="UIAlignment"/>.</summary>
@@ -39,19 +39,19 @@ public static class UIAlignmentExtensions
     public static int GetPosition(this UIAlignment alignment, int parentDimension, int childDimension)
         => alignment switch
         {
-            UIAlignment.LEFT => 0,
+            UIAlignment.LEFT or UIAlignment.TOP => 0,
             UIAlignment.CENTER => parentDimension / 2 - childDimension / 2,
-            UIAlignment.RIGHT => parentDimension - childDimension,
+            UIAlignment.RIGHT or UIAlignment.BOTTOM => parentDimension - childDimension,
             _ => throw new NotImplementedException(),
         };
 
     /// <summary>Returns the horizontal offset relative to the <paramref name="element"/>'s parent for the given alignment.</summary>
     /// <param name="alignment">The UI alignment.</param>
     /// <param name="element">The child element.</param>
-    public static int GetX(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Layout.Width, element.Layout.Width);
+    public static int GetX(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Width, element.Width);
 
     /// <summary>Returns the vertical offset relative to the <paramref name="element"/>'s parent for the given alignment.</summary>
     /// <param name="alignment">The UI alignment.</param>
     /// <param name="element">The child element.</param>
-    public static int GetY(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Layout.Height, element.Layout.Height);
+    public static int GetY(this UIAlignment alignment, UIElement element) => alignment.GetPosition(element.Parent.Height, element.Height);
 }

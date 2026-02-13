@@ -22,5 +22,6 @@ public class UIGroup : UIElement
     public UIGroup(UILayout layout) : base(UIStyling.Empty, layout)
     {
         IsEnabled = false;
+        ScaleSize = false;
     }
 }

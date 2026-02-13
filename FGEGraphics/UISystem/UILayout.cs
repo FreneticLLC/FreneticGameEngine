@@ -45,7 +45,7 @@ public class UILayout
         public Value<int> X, Y, Width, Height;
 
         /// <summary>Internal coordinate data. Generally, do not use.</summary>
-        public Value<float> Rotation;
+        public Value<float> Rotation, Scale;
     }
 
     /// <summary>Internal data that should usually not be accessed directly.</summary>
@@ -57,6 +57,7 @@ public class UILayout
         SetPosition(0, 0);
         SetSize(0, 0);
         SetRotation(0f);
+        SetScale(1f);
     }
 
     /// <summary>Constructs a new layout as a copy of another layout without the attached <see cref="Element"/>.</summary>
@@ -102,6 +103,10 @@ public class UILayout
 
     /// <summary>Sets a constant position.</summary>
     /// <returns>This object.</returns>
+    public UILayout SetPosition(Vector2i pair) => SetPosition(pair.X, pair.Y);
+
+    /// <summary>Sets a constant position.</summary>
+    /// <returns>This object.</returns>
     public UILayout SetPosition(Location location) => SetPosition((int)location.X, (int)location.Y);
 
     /// <summary>Sets a constant width.</summary>
@@ -129,11 +134,27 @@ public class UILayout
         return this;
     }
 
+    /// <summary>Sets a constant size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Vector2i vector) => SetSize(vector.X, vector.Y);
+
+    /// <summary>Sets a constant size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Location location) => SetSize((int)location.X, (int)location.Y);
+
     /// <summary>Sets a constant rotation.</summary>
     /// <returns>This object.</returns>
     public UILayout SetRotation(float rotation)
     {
         Internal.Rotation = new() { Constant = rotation };
+        return this;
+    }
+
+    /// <summary>Sets a constant scale.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetScale(float scale)
+    {
+        Internal.Scale = new() { Constant = scale };
         return this;
     }
 
@@ -164,6 +185,10 @@ public class UILayout
 
     /// <summary>Sets a dynamic position.</summary>
     /// <returns>This object.</returns>
+    public UILayout SetPosition(Func<Vector2i> vector) => SetPosition(() => vector().X, () => vector().Y);
+
+    /// <summary>Sets a dynamic position.</summary>
+    /// <returns>This object.</returns>
     public UILayout SetPosition(Func<Location> location) => SetPosition(() => (int)location().X, () => (int)location().Y);
 
     /// <summary>Sets a dynamic width.</summary>
@@ -191,11 +216,27 @@ public class UILayout
         return this;
     }
 
+    /// <summary>Sets a dynamic size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Func<Vector2i> vector) => SetSize(() => vector().X, () => vector().Y);
+
+    /// <summary>Sets a dynamic size.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetSize(Func<Location> location) => SetSize(() => (int)location().X, () => (int)location().Y);
+
     /// <summary>Sets a dynamic rotation.</summary>
     /// <returns>This object.</returns>
     public UILayout SetRotation(Func<float> rotation)
     {
         Internal.Rotation = new() { Dynamic = rotation };
+        return this;
+    }
+
+    /// <summary>Sets a dynamic scale.</summary>
+    /// <returns>This object.</returns>
+    public UILayout SetScale(Func<float> scale)
+    {
+        Internal.Scale = new() { Dynamic = scale };
         return this;
     }
 
@@ -206,27 +247,30 @@ public class UILayout
     /// <summary>Returns a copy of this layout fixed at the top-left origin.</summary>
     public UILayout AtOrigin() => new UILayout(this).SetOrigin();
 
-    /// <summary>Gets the X value.</summary>
+    /// <summary>Gets the relative X value.</summary>
     public int X => Internal.X.Get() + (Element.Parent != null ? Anchor.GetX(Element) : 0);
 
-    /// <summary>Gets the Y value.</summary>
+    /// <summary>Gets the relative Y value.</summary>
     public int Y => Internal.Y.Get() + (Element.Parent != null ? Anchor.GetY(Element) : 0);
 
-    /// <summary>Gets the width.</summary>
+    /// <summary>Gets the base width (unscaled).</summary>
     public int Width => Internal.Width.Get();
 
-    /// <summary>Gets the height.</summary>
+    /// <summary>Gets the base height (unscaled).</summary>
     public int Height => Internal.Height.Get();
 
     /// <summary>Gets the rotation.</summary>
     public float Rotation => Internal.Rotation.Get();
 
-    /// <summary>Gets the position vector.</summary>
+    /// <summary>Gets the relative scale.</summary>
+    public float Scale => Internal.Scale.Get() * (Element.Parent?.Scale ?? 1f);
+
+    /// <summary>Gets the relative position vector.</summary>
     public Vector2i Position => new(X, Y);
 
-    /// <summary>Gets the size vector.</summary>
+    /// <summary>Gets the base size vector.</summary>
     public Vector2i Size => new(Width, Height);
 
     /// <summary>Converts this layout's present state to a simple debug string.</summary>
-    public override string ToString() => $"UILayout {{ Position: {Position}, Size: {Size}, Rotation: {Rotation} }}";
+    public override string ToString() => $"UILayout {{ Position: {Position}, Size: {Size}, Rotation: {Rotation}, Scale: {Scale} }}";
 }
