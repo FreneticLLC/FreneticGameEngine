@@ -28,7 +28,7 @@ public abstract class Entity2DRenderableProperty : EntityRenderableProperty
     {
         if (AutoUpdatePriorityZ)
         {
-            RenderingPriorityOrder = RenderAt.Z;
+            RenderingPriorityOrder = Entity.RenderAt.Z;
         }
     }
 
@@ -43,7 +43,7 @@ public abstract class Entity2DRenderableProperty : EntityRenderableProperty
     {
         get
         {
-            return (float)RenderOrientation.Angle2D;
+            return (float)Entity.RenderOrientation.Angle2D;
         }
         set
         {

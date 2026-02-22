@@ -58,6 +58,7 @@ public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
     /// </summary>
     public bool VisibleThroughWalls
     {
+        // TODO: Maybe just offset the shader depth rather than disabling the depth test, thus fixing the visual glitch behavior.
         get
         {
             return DisabledCaps.Contains(EnableCap.DepthTest);
@@ -89,7 +90,7 @@ public class EntitySimple3DRenderableModelProperty : EntityRenderableProperty
             DiffuseTexture.Bind();
         }
         context.Engine.Rendering.SetColor(Color, context.Engine.MainView);
-        Matrix4d mat = Matrix4d.CreateScale(Scale.ToOpenTK3D()) * Matrix4d.CreateFromQuaternion(RenderOrientation.ToOpenTKDoubles()) * Matrix4d.CreateTranslation(RenderAt.ToOpenTK3D());
+        Matrix4d mat = Matrix4d.CreateScale(Scale.ToOpenTK3D()) * Matrix4d.CreateFromQuaternion(Entity.RenderOrientation.ToOpenTKDoubles()) * Matrix4d.CreateTranslation(Entity.RenderAt.ToOpenTK3D());
         context.Engine.MainView.SetMatrix(ShaderLocations.Common.WORLD, mat);
         EntityModel.Draw(context);
         foreach (EnableCap ec in DisabledCaps)

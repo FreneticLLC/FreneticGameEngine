@@ -248,8 +248,10 @@ public class PhysicsSpace
     public void Tick(double delta)
     {
         Internal.DeltaAccumulator += delta;
+        bool didTick = false;
         while (Internal.DeltaAccumulator >= UpdateDelta)
         {
+            didTick = true;
             double updateBy = UpdateDelta;
             while (Internal.DeltaAccumulator >= updateBy * 3)
             {
@@ -262,6 +264,13 @@ public class PhysicsSpace
             }
             Internal.DeltaAccumulator -= updateBy;
             Internal.CoreSimulation.Timestep((float)updateBy, Internal.BepuThreadDispatcher);
+        }
+        if (didTick)
+        {
+            foreach (EntityPhysicsProperty physEnt in Internal.EntitiesByPhysicsID)
+            {
+                physEnt?.TickUpdates();
+            }
         }
     }
 

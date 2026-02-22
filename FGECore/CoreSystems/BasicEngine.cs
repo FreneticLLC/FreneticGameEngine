@@ -32,7 +32,10 @@ public abstract class BasicEngine
     /// <summary>Current frame delta (seconds).</summary>
     public double Delta;
 
-    /// <summary>How long the game has run (seconds).</summary>
+    /// <summary>How long the game has run (seconds).
+    /// TODO: This should maybe a long count of Microseconds, to avoid precision issues with double after a long time?
+    /// This will stop accurately measuring microseconds approximately after 3 years of a server running. Which is, like, fine? Cause nothing is more precise than milliseconds. But. Ehhh.
+    /// </summary>
     public double GlobalTickTime = 1.0;
 
     /// <summary>The current highest EntityID value.</summary>

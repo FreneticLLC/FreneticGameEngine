@@ -30,12 +30,12 @@ public abstract class NonPhysicalJointBase(BasicEntity _one, BasicEntity _two) :
     /// <summary>Calculate the joint's logic and apply it.</summary>
     public abstract void Solve();
 
-    /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Enable"/>.</summary>
+    /// <inheritdoc/>
     public override void Enable()
     {
     }
 
-    /// <summary>A default do-nothing implementation of <see cref="GenericBaseJoint.Disable"/>.</summary>
+    /// <inheritdoc/>
     public override void Disable()
     {
     }

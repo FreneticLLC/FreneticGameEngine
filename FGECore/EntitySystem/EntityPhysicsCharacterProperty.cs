@@ -139,6 +139,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     {
         CurrentSpeed = speed;
         CurrentHeight = heightMod * BodyHeight;
+        Physics.PhysToWorldOffset = new Location(0, 0, -CurrentHeight * 0.5);
         // TODO: Actually resize the physics body
         // TODO: Reject or delay impossible growth
     }
