@@ -38,10 +38,10 @@ public abstract class BasicEntity : PropertyHolder
     /// </summary>
     public Action OnTick;
 
-    /// <summary>Last position known that this entity was or is exactly upon. This is often the actual entity position value.</summary>
+    /// <summary>Last position known that this entity was or is exactly upon. This is often the actual entity position value. Do not set directly, use <see cref="SetPosition(Location)"/>.</summary>
     public Location LastKnownPosition;
 
-    /// <summary>Last orientation known that this entity was or is exactly upon. This is often the actual entity orientation value.</summary>
+    /// <summary>Last orientation known that this entity was or is exactly upon. This is often the actual entity orientation value. Do not set directly, use <see cref="SetOrientation(Quaternion)"/>.</summary>
     public Quaternion LastKnownOrientation = Quaternion.Identity;
 
     /// <summary>Alternate render location. Set to <see cref="Location.NaN"/> to disable.</summary>
