@@ -50,12 +50,12 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     /// <summary>How fast the character can move.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public float SpeedStanding = 4, SpeedCrouching = 2, SpeedProne = 1;
+    public double SpeedStanding = 4, SpeedCrouching = 2, SpeedProne = 1;
 
     /// <summary>The upward speed this character achieves from a jump.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public float JumpSpeed = 6;
+    public double JumpSpeed = 6;
 
     /// <summary>The multiplier over body height when the character's stance changes.</summary>
     [PropertyDebuggable]
@@ -63,7 +63,10 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     public float HeightModStanding = 1, HeightModCrouching = 0.5f, HeightModProne = 0.3f;
 
     /// <summary>The character's current speed (changes when stance does).</summary>
-    public float CurrentSpeed = 4;
+    public double CurrentSpeed = 4;
+
+    /// <summary>A temporary multiplier over the current speed. Usually this value is '1', but some properties may modify this.</summary>
+    public double LocalSpeedModifier = 1;
 
     /// <summary>The character's current height (changes when stance does).</summary>
     public float CurrentHeight = 2f;
@@ -135,7 +138,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     }
 
     /// <summary>Changes the character's current stance details.</summary>
-    public void SetStance(float heightMod, float speed)
+    public void SetStance(float heightMod, double speed)
     {
         CurrentSpeed = speed;
         CurrentHeight = heightMod * BodyHeight;
@@ -162,7 +165,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         controller.LocalUp = Vector3.UnitZ;
         // TODO: Customizable values for these.
         controller.CosMaximumSlope = MathF.Cos(MathF.PI * 0.4f);
-        controller.JumpVelocity = JumpSpeed;
+        controller.JumpVelocity = (float)JumpSpeed;
         controller.MaximumVerticalForce = 100 * Physics.Mass;
         controller.MaximumHorizontalForce = 80 * Physics.Mass;
         controller.MinimumSupportDepth = BodyRadius * -0.1f;
@@ -201,7 +204,8 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     {
         ref CharacterController controller = ref Controller;
         // TODO: Step up/down support
-        Vector3 velocity = Movement.ToNumerics() * CurrentSpeed;
+        double actualSpeed = CurrentSpeed * LocalSpeedModifier;
+        Vector3 velocity = Movement.ToNumerics() * (float)actualSpeed;
         if (!Physics.SpawnedBody.Awake && (TryingToJump || velocity.LengthSquared() > 0 || controller.ViewDirection != ViewDirection.ToNumerics()))
         {
             Physics.SpawnedBody.Awake = true;
@@ -211,7 +215,7 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
         controller.TryJump = TryingToJump;
         if (!controller.Supported && MaximumAerialForce > 0 && Physics.SpawnedBody.LocalInertia.InverseMass > 0)
         {
-            Location airMoveGoal = Quaternion.GetQuaternionBetween(Location.UnitY, ViewDirection.WithZ(0).Normalize()).Transform(Movement * CurrentSpeed * AerialVelocityFraction);
+            Location airMoveGoal = Quaternion.GetQuaternionBetween(Location.UnitY, ViewDirection.WithZ(0).Normalize()).Transform(Movement * actualSpeed * AerialVelocityFraction);
             Location rawVelocity = Physics.SpawnedBody.Velocity.Linear.ToLocation();
             Location absoluteAirMoveGoal = airMoveGoal.Abs();
             Location absoluteVelocity = rawVelocity.Abs();
