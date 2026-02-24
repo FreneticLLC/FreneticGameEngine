@@ -379,7 +379,7 @@ public struct Location : IEquatable<Location>
     }
 
     /// <summary>Rotates an X-forward movement vector by a certain yaw and pitch (in radians).
-    /// Specifically, this assumes that Y values should be excluded from pitch application, such as 'Forward' (X) motion follows the pitch direction, and 'Sideways' (Y) motion disregards pitch.</summary>
+    /// Specifically, this assumes that Y values should be excluded from pitch application, such that 'Forward' (X) motion follows the pitch direction, and 'Sideways' (Y) motion disregards pitch.</summary>
     /// <param name="yaw">The yaw to rotate by (in radians).</param>
     /// <param name="pitch">The pitch to rotate by (in radians).</param>
     /// <returns>The rotated vector.</returns>
@@ -441,18 +441,15 @@ public struct Location : IEquatable<Location>
     /// <returns>The hash code.</returns>
     public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
-    /// <summary>Returns whether the location is NaN.</summary>
-    /// <returns>whether the location is NaN.</returns>
+    /// <summary>Returns whether the location is NaN (ie, any component within is NaN).</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool IsNaN() => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
 
-    /// <summary>Returns whether the location is infinite.</summary>
-    /// <returns>whether the location is infinite.</returns>
+    /// <summary>Returns whether the location is infinite (ie, any component within is infinite).</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool IsInfinite() => double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
 
-    /// <summary>Returns whether the location is either NaN or infinite.</summary>
-    /// <returns>whether the location is either NaN or infinite.</returns>
+    /// <summary>Returns whether the location is either NaN or infinite (ie, any component within is NaN or infinite).</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool IsNaNOrInfinite() => IsNaN() || IsInfinite();
     #endregion

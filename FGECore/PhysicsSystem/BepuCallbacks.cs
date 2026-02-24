@@ -110,11 +110,11 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
         if (ContactSpringiness.AngularFrequency == 0 && ContactSpringiness.TwiceDampingRatio == 0)
         {
             // TODO: ?
-            ContactSpringiness = new SpringSettings(15, 0.8f);
+            ContactSpringiness = new SpringSettings(30, 0.5f);
         }
         if (MinimumRecoveryVelocity == 0)
         {
-            MinimumRecoveryVelocity = 15;
+            MinimumRecoveryVelocity = 2;
         }
         Space.Internal.Characters.Initialize(simulation);
     }
@@ -178,7 +178,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
                 pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
                 // TODO: Sustained contacts might not re-call this method, ie the values here will not be kept accurate
                 float projectedVel = Math.Abs(Vector3.Dot(validOne.LinearVelocity.ToNumerics(), avgNorm));
-                pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * 2 * projectedVel);
+                pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * projectedVel);
                 pairMaterial.SpringSettings.TwiceDampingRatio = validOne.RecoveryDamping;
             }
             else

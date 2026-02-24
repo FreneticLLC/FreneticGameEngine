@@ -12,20 +12,28 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.EntitySystem.PhysicsHelpers;
+using FGECore.MathHelpers;
+using FGECore.PhysicsSystem;
+using BepuPhysics;
+using BepuPhysics.Collidables;
 
 namespace FGECore.ModelSystems;
 
 /// <summary>Represents an abstract 3D model.</summary>
 public class Model3D
 {
+    /// <summary>Name of this model. Often a partial filename matched to <see cref="CoreModelEngine"/>'s inputs.</summary>
+    public string Name;
+
     /// <summary>The meshes that compose this model.</summary>
-    public Model3DMesh[] Meshes;
+    public Model3DMesh[] Meshes = [];
 
     /// <summary>The root bone node of the model.</summary>
     public Model3DNode RootNode;
 
     /// <summary>The default matrix of the model.</summary>
-    public Matrix4x4 MatrixA;
+    public Matrix4x4 MatrixA = Matrix4x4.Identity;
 
     /// <summary>User-tag on this model. Often this is an FGEGraphics Model instance.</summary>
     public object Tag;
@@ -35,6 +43,65 @@ public class Model3D
 
     /// <summary>The type of collision data this model provides.</summary>
     public Model3DCollisionType CollisionType = Model3DCollisionType.NONE;
+
+    /// <summary>The physics shape for this model, if calculated. Do not read directly, use <see cref="GetShape(PhysicsSpace)"/>.</summary>
+    public EntityShapeHelper Shape;
+
+    /// <summary>If true, this model is populated with valid data. If false, it has in some way failed.</summary>
+    public bool IsValid = false;
+
+    /// <summary>Calculates a simple bounding box for this model.</summary>
+    public AABB GetBounds()
+    {
+        Location start = Meshes[0].Vertices[0].ToLocation();
+        AABB box = new(start, start);
+        foreach (Model3DMesh mesh in Meshes)
+        {
+            if (!mesh.IsVisible)
+            {
+                continue;
+            }
+            foreach (Vector3 vert in mesh.Vertices)
+            {
+                box.Include(vert.ToLocation());
+            }
+        }
+        return box;
+    }
+
+    /// <summary>Creates an appropriate entity shape for this model.</summary>
+    /// <param name="space">The physics space that this shape will be registered into.</param>
+    public EntityShapeHelper GetShape(PhysicsSpace space)
+    {
+        if (Shape is null)
+        {
+            switch (CollisionType)
+            {
+                case Model3DCollisionType.CONVEX:
+                    Shape = ModelHandler.MeshToBepuConvexSingle(space, this, out _);
+                    break;
+                case Model3DCollisionType.COMPLEX:
+                    Mesh bepuMesh = ModelHandler.MeshToBepu(space, this, out _);
+                    Shape = new EntityMeshShape(bepuMesh, space);
+                    break;
+                case Model3DCollisionType.COMPOUND_CONVEX:
+                    Shape = ModelHandler.MeshToBepuConvexCompound(space, this, out _);
+                    break;
+                case Model3DCollisionType.NONE:
+                default:
+                    if (Meshes.Length == 0)
+                    {
+                        Shape = new EntityBoxShape(new Location(1, 1, 1), space);
+                        break;
+                    }
+                    AABB box = GetBounds();
+                    EntityBoxShape boxShape = new(box.Max - box.Min, space);
+                    Shape = new EntityCompoundShape([new(boxShape, new RigidPose(box.Center.ToNumerics()))], boxShape.Volume, space);
+                    break;
+            }
+        }
+        return Shape.Duplicate(space);
+    }
 
     /// <summary>Returns a simple shallow copy of this <see cref="Model3D"/>.</summary>
     public Model3D Duplicate()
@@ -120,12 +187,28 @@ public class Model3DNode
 
     /// <summary>All children of this node.</summary>
     public Model3DNode[] Children;
+
+    /// <summary>Get all nodes in the hierarchy below and including this one.</summary>
+    public IEnumerable<Model3DNode> AllNodes()
+    {
+        yield return this;
+        foreach (Model3DNode child in Children)
+        {
+            foreach (Model3DNode desc in child.AllNodes())
+            {
+                yield return desc;
+            }
+        }
+    }
+
+    /// <summary>Get the full final matrix for this node.</summary>
+    public Matrix4x4 GetMatrix() => Parent is null ? MatrixA : Parent.GetMatrix() * MatrixA;
 }
 
 /// <summary>Enumeration of possible collision types found in a 3D model.</summary>
 public enum Model3DCollisionType
 {
-    /// <summary>No collision data provided.</summary>
+    /// <summary>No collision data provided. Will be handled like a simple AABB.</summary>
     NONE,
     /// <summary>Has complex mesh component.</summary>
     COMPLEX,

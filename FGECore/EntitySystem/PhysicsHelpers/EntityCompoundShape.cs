@@ -22,43 +22,69 @@ namespace FGECore.EntitySystem.PhysicsHelpers;
 /// <summary>A compound shape (shape made of several other shapes) for an entity.</summary>
 public class EntityCompoundShape : EntityShapeHelper
 {
+    /// <summary>Child shape information for a compound entity shape.</summary>
+    /// <param name="Shape">The child shape.</param>
+    /// <param name="Pose">The pose of the child shape relative to the compound's origin.</param>
+    public record struct EntityCompoundChild(EntityShapeHelper Shape, RigidPose Pose);
+
+    /// <summary>All child-shapes of this entity.</summary>
+    public List<EntityCompoundChild> Children = [];
+
     /// <summary>Constructs a new <see cref="EntityCompoundShape"/> from the specified compound object and volume estimate.</summary>
-    public EntityCompoundShape(Compound compound, double _volume, PhysicsSpace space) : base(space)
+    public EntityCompoundShape(List<EntityCompoundChild> compound, double _volume, PhysicsSpace space) : base(space)
     {
-        BepuShape = compound;
+        Children = compound;
+        BepuShape = null;
         Volume = _volume;
     }
-
-    /// <summary>Other registered shape indices (usually children of this compound).</summary>
-    public TypedIndex[] OtherRegistered = [];
 
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
     public override EntityCompoundShape Register()
     {
         EntityCompoundShape dup = MemberwiseClone() as EntityCompoundShape;
-        dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add((Compound)BepuShape);
+        Space.Internal.Pool.Take(dup.Children.Count, out Buffer<CompoundChild> children);
+        int childIndex = 0;
+        foreach (EntityCompoundChild child in dup.Children)
+        {
+            TypedIndex childShapeInd = child.Shape.Register().ShapeIndex;
+            children[childIndex++] = new(child.Pose, childShapeInd);
+        }
+        Compound created = new(children);
+        dup.BepuShape = created;
+        dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(created);
         return dup;
+    }
+
+    /// <inheritdoc/>
+    public override EntityShapeHelper Duplicate(PhysicsSpace space)
+    {
+        EntityCompoundShape shape = base.Duplicate(space) as EntityCompoundShape;
+        shape.Children = [.. Children];
+        return shape;
     }
 
     /// <inheritdoc/>
     public override void Unregister()
     {
         base.Unregister();
-        foreach (TypedIndex other in OtherRegistered)
+        foreach (EntityCompoundChild child in Children)
         {
-            if (other.Exists)
-            {
-                Space.Internal.CoreSimulation.Shapes.Remove(other);
-            }
+            child.Shape.Unregister();
         }
-        OtherRegistered = [];
     }
 
     /// <inheritdoc/>
     public override string ToString()
     {
+        return $"{nameof(EntityCompoundShape)}({Children.Count} children)";
+    }
+
+    /// <summary>Implements <see cref="EntityShapeHelper.ComputeInertia(float, out BodyInertia)"/>.</summary>
+    public override void ComputeInertia(float mass, out BodyInertia inertia)
+    {
         Compound compound = (Compound)BepuShape;
-        return $"{nameof(EntityCompoundShape)}({compound.ChildCount} children)";
+        float[] childMasses = [.. Enumerable.Repeat(mass / Children.Count, Children.Count)];
+        inertia = compound.ComputeInertia(childMasses, Space.Internal.CoreSimulation.Shapes);
     }
 
     /// <inheritdoc/>

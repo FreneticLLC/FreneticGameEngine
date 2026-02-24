@@ -60,4 +60,10 @@ public abstract class GenericBaseJoint : IEquatable<GenericBaseJoint>
         }
         return JointID == other.JointID;
     }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"Joint/{GetType().Name}(JointID={JointID}, EntityOne={EntityOne}, EntityTwo={EntityTwo})";
+    }
 }

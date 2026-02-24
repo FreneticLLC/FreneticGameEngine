@@ -28,12 +28,12 @@ public abstract class BasicEntityProperty : Property
     /// <summary>Gets the game instance associated with a property.</summary>
     public GameInstance Instance => Engine.OwningInstanceGeneric;
 
-    /// <summary>Run when the entity is spawned.</summary>
+    /// <summary>Run when the entity is spawned. Also runs when the property is added to an already-spawned entity.</summary>
     public virtual void OnSpawn()
     {
     }
 
-    /// <summary>Run when the entity is de-spawned.</summary>
+    /// <summary>Run when the entity is de-spawned. Also runs when the property is removed from an already-spawned entity.</summary>
     public virtual void OnDespawn()
     {
     }

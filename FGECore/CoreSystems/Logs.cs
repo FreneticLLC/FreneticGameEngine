@@ -12,8 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FGECore.StackNoteSystem;
 using FreneticUtilities.FreneticExtensions;
+using FGECore.StackNoteSystem;
 
 namespace FGECore.CoreSystems;
 

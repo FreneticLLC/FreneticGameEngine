@@ -38,11 +38,31 @@ public abstract class BasicEntity : PropertyHolder
     /// </summary>
     public Action OnTick;
 
-    /// <summary>Last position known that this entity was or is exactly upon.</summary>
+    /// <summary>Last position known that this entity was or is exactly upon. This is often the actual entity position value. Do not set directly, use <see cref="SetPosition(Location)"/>.</summary>
     public Location LastKnownPosition;
 
-    /// <summary>Last orientation known that this entity was or is exactly upon.</summary>
+    /// <summary>Last orientation known that this entity was or is exactly upon. This is often the actual entity orientation value. Do not set directly, use <see cref="SetOrientation(Quaternion)"/>.</summary>
     public Quaternion LastKnownOrientation = Quaternion.Identity;
+
+    /// <summary>Alternate render location. Set to <see cref="Location.NaN"/> to disable.</summary>
+    public Location AltRenderAt = Location.NaN;
+
+    /// <summary>Alternate render orientation. Set to <see cref="Quaternion.NaN"/> to disable.</summary>
+    public Quaternion AltRenderOrientation = Quaternion.NaN;
+
+    /// <summary>
+    /// Where the entity should render at.
+    /// <para>Use <see cref="SetPosition(Location)"/> to update this, or <see cref="AltRenderAt"/> to override this.</para>
+    /// </summary>
+    [PropertyDebuggable]
+    public Location RenderAt => AltRenderAt.IsNaN() ? LastKnownPosition : AltRenderAt;
+
+    /// <summary>
+    /// What orientation to render the entity at.
+    /// <para>Use <see cref="SetOrientation(Quaternion)"/> to update this.</para>
+    /// </summary>
+    [PropertyDebuggable]
+    public Quaternion RenderOrientation => AltRenderOrientation.IsNaN() ? LastKnownOrientation : AltRenderOrientation;
 
     /// <summary>
     /// Fired when the entity is moved.
@@ -126,7 +146,7 @@ public abstract class BasicEntity : PropertyHolder
         OnPositionChanged?.Invoke(position);
     }
 
-    /// <summary>Gets a string debug helper for this entity.</summary>
+    /// <inheritdoc/>
     public override string ToString()
     {
         return $"BasicEntity of type: {GetType().Name}, ID: {EID}, with properties: {PropertyList()}";
@@ -135,10 +155,11 @@ public abstract class BasicEntity : PropertyHolder
     /// <summary>Gets a string list of all properties, with debug informational output.</summary>
     public string DebugPropList()
     {
+        // TODO: A stringbuilder would be a lot more efficient here
         return string.Join(" | ", EnumerateAllProperties().Select((p) => p.GetPropertyName() + ": {" + string.Join(", ", p.GetDebuggable().Select((k) => k.Key + ": " + k.Value)) + "}"));
     }
 
-    /// <summary>Gets a string list of all property names, pipe separated.</summary>
+    /// <summary>Gets a string list of all property names, pipe separated. Used for debugging.</summary>
     public string PropertyList()
     {
         return string.Join(" | ", EnumerateAllPropertyTypes().Select(t => t.Name));

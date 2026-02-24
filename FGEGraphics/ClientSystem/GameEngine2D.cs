@@ -297,10 +297,11 @@ public class GameEngine2D : GameEngineBase
         RenderAllObjectsPre?.Invoke(lights);
         // This dups the list inherently, preventing glitches from removal while rendering, helpfully!
         foreach (ClientEntity ent in Entities.Values
-            .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow == null || shouldShadow(e)))
+            .Where((e) => ShouldRender(e.Renderer, lights) && (shouldShadow is null || shouldShadow(e)))
             .OrderBy((e) => e.Renderer.RenderingPriorityOrder))
         {
             using var _push2 = StackNoteHelper.UsePush("GameEngine2D - Render Specific Entity", ent);
+            ent.Renderer.OnPreRender?.Invoke();
             ent.Renderer.RenderStandard2D(MainRenderContext);
             ent.OnRendered2D?.Invoke(MainRenderContext);
         }

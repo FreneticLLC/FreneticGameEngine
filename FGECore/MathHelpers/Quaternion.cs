@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.UtilitySystems;
 
@@ -32,6 +33,9 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
 {
     /// <summary>The identity Quaternion: one with no rotation applied.</summary>
     public static readonly Quaternion Identity = new(0, 0, 0, 1);
+
+    /// <summary>A Quaternion of (NaN, NaN, NaN, NaN).</summary>
+    public static readonly Quaternion NaN = new(double.NaN, double.NaN, double.NaN, double.NaN);
 
     /// <summary>The X component of this Quaternion.</summary>
     [FieldOffset(0)]
@@ -175,7 +179,21 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
     /// <returns>Equality.</returns>
     public readonly bool Equals(Quaternion b) => this == b;
 
-    /// <summary>Returns a simple string of this Quaternion.</summary>
+    /// <summary>Creates a Quaternion from a simple string.
+    /// Inverts <see cref="ToString"/>.</summary>
+    /// <param name="input">The input string.</param>
+    public static Quaternion FromString(string input)
+    {
+        string[] data = input.Replace('(', ' ').Replace(')', ' ').Replace(" ", "").SplitFast(',');
+        if (data.Length != 4)
+        {
+            throw new ArgumentException($"Invalid Quaternion string: {input}");
+        }
+        return new(StringConversionHelper.StringToDouble(data[0]), StringConversionHelper.StringToDouble(data[1]), StringConversionHelper.StringToDouble(data[2]), StringConversionHelper.StringToDouble(data[3]));
+    }
+
+    /// <summary>Returns a simple string of this Quaternion.
+    /// Inverted by <see cref="FromString(string)"/>.</summary>
     /// <returns>The simple string.</returns>
     public override readonly string ToString() => $"({X}, {Y}, {Z}, {W})";
 
@@ -403,6 +421,10 @@ public struct Quaternion(double _x, double _y, double _z, double _w) : IEquatabl
         return new Quaternion(X * aFraction + end.X * bFraction, Y * aFraction + end.Y * bFraction,
             Z * aFraction + end.Z * bFraction, W * aFraction + end.W * bFraction);
     }
+
+    /// <summary>Returns whether the quaternion is NaN (ie, any component within is NaN).</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly bool IsNaN() => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z) || double.IsNaN(W);
 }
 
 /// <summary>Helper extensions for <see cref="Quaternion"/>.</summary>

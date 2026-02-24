@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -7,8 +7,8 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,9 +52,13 @@ public class CoreModelEngine
     public CoreModelEngine(GameInstance _instance)
     {
         Instance = _instance;
+        Cube.Name = "cube";
         LoadedModels["cube"] = Cube;
+        Cylinder.Name = "cylinder";
         LoadedModels["cylinder"] = Cylinder;
+        Sphere.Name = "sphere";
         LoadedModels["sphere"] = Sphere;
+        Clear.Name = "clear";
         LoadedModels["clear"] = Clear;
     }
 
@@ -75,6 +79,7 @@ public class CoreModelEngine
         void processLoad(byte[] data)
         {
             Model3D scene = Handler.LoadModel(data);
+            scene.Name = modelName;
             LoadedDirectModels[modelName] = scene;
             onLoad(scene);
         }
@@ -144,6 +149,7 @@ public class CoreModelEngine
             void doNextStep(Model3D model)
             {
                 model = model.Duplicate();
+                model.Name = modelName;
                 model.InfoDataLines = lines;
                 LoadedModels[modelName] = model;
                 onLoad?.Invoke(model);

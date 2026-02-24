@@ -8,15 +8,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
-using FGECore.MathHelpers;
-using System.Diagnostics;
 using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 
 namespace FGECore.UtilitySystems;
 

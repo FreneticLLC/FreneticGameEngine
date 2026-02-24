@@ -7,6 +7,7 @@
     <RegisterForComInterop>false</RegisterForComInterop>
     <OutputPath>bin\Release</OutputPath>
     <DocumentationFile>bin\Release\FGEGraphics.xml</DocumentationFile>
+    <Nullable>Disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DefineConstants>TRACE;DEBUG</DefineConstants>

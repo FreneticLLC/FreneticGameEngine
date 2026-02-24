@@ -70,7 +70,8 @@ public class EntitySimple2DRenderableBoxProperty : Entity2DRenderableProperty
         }
         GraphicsHelpers.Renderer2D.SetColor(BoxColor);
         Vector2 sz = BoxSize;
-        context.Engine.RenderHelper.RenderRectangle(context, (float)RenderAt.X + BoxUpLeft.X, (float)RenderAt.Y + BoxUpLeft.Y,
-            (float)RenderAt.X + BoxDownRight.X, (float)RenderAt.Y + BoxDownRight.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
+        Location renderAt = Entity.RenderAt;
+        context.Engine.RenderHelper.RenderRectangle(context, (float)renderAt.X + BoxUpLeft.X, (float)renderAt.Y + BoxUpLeft.Y,
+            (float)renderAt.X + BoxDownRight.X, (float)renderAt.Y + BoxDownRight.Y, new Vector3(BoxUpLeft.X / sz.X, BoxDownRight.Y / sz.Y, RenderAngle));
     }
 }

@@ -23,13 +23,13 @@ public class JointBallSocket(EntityPhysicsProperty e1, EntityPhysicsProperty e2,
     public Location OffsetOne = pos1;
 
     /// <summary>Offset from <see cref="PhysicsJointBase.Two"/> to its anchor.</summary>
-    public Location Offset2 = pos2;
+    public Location OffsetTwo = pos2;
 
     /// <inheritdoc/>
     public override BallSocket CreateJointDescription() => new()
     {
         LocalOffsetA = OffsetOne.ToNumerics(),
-        LocalOffsetB = Offset2.ToNumerics(),
+        LocalOffsetB = OffsetTwo.ToNumerics(),
         SpringSettings = new SpringSettings(20, 1)
     };
 }
