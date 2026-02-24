@@ -65,7 +65,7 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScrollableLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
+        base.AddChild(ScrollableLayer = new UIScissorGroup(layout.AtOrigin().SetSize(() => Width, () => Height)));
     }
 
     /// <inheritdoc/>
@@ -115,6 +115,13 @@ public class UIScrollGroup : UIElement
         ScrollX.TickMouseScroll(horizontal);
         ScrollY.TickMouseScroll(vertical);
         return true;
+    }
+
+    /// <inheritdoc/>
+    public override void ScaleChanged(float from, float to)
+    {
+        ScrollX.Clamp();
+        ScrollY.Clamp();
     }
 
     /// <summary>Contains scroll state for a direction.</summary>
@@ -177,6 +184,12 @@ public class UIScrollGroup : UIElement
             MaxValue = 0;
         }
 
+        /// <summary>Clamps the <see cref="Value"/> between <c>0</c> and <see cref="MaxValue"/>.</summary>
+        public void Clamp()
+        {
+            Value = Math.Clamp(Value, 0, MaxValue);
+        }
+
         /// <summary>Scrolls to encompass a min/max offset pair.</summary>
         /// <param name="min">The min offset.</param>
         /// <param name="max">The max offset.</param>
@@ -207,7 +220,7 @@ public class UIScrollGroup : UIElement
                 BarHeldOffset = (int)mousePos - (vertical ? ScrollBar.Y : ScrollBar.X);
             }
             Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
-            Value = Math.Clamp(Value, 0, MaxValue);
+            Clamp();
         }
 
         /// <summary>Ticks the scroll value based on the <paramref name="scrollDelta"/>.</summary>
