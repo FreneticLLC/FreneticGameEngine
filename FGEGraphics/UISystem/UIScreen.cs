@@ -42,6 +42,7 @@ public class UIScreen : UIElement
     {
         View = view;
         IsEnabled = false;
+        ScaleSize = false;
         if (layout is null)
         {
             Layout = new();
