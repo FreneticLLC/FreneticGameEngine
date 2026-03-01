@@ -26,6 +26,11 @@ public class JointForceWeld : NonPhysicalJointBase
     /// <para>Do not modify this after construction, instead rebuild with a new value.</para></summary>
     public bool VisualOnly;
 
+    /// <summary>If true, and both entities are physics entities, any separation entity two has from entity one will be applied back onto entity one as a force. Essentially making this joint actual more like a physics weld (not actually identical).
+    /// TODO: the implementation is not stable
+    /// </summary>
+    public bool SendForceBack = false;
+
     /// <summary>The relative pose offset from entity One to entity Two.</summary>
     public RigidPose Offset;
     
@@ -52,31 +57,53 @@ public class JointForceWeld : NonPhysicalJointBase
         RigidPose.MultiplyWithoutOverlap(rt2, rt1inv, out Offset);
     }
 
-    /// <summary>Value of <see cref="BasicEngine.GlobalTickTime"/> when this joint was last solved. This is a special case to allow perfect orderly solving of chained weld joints.</summary>
+    /// <summary>Value of <see cref="BasicEngine.NonPhysicalJointSolves"/> when this joint was last solved. This is a special case to allow perfect orderly solving of chained weld joints.</summary>
     public double LastSolveTime = -1;
 
-    /// <summary>Implements <see cref="NonPhysicalJointBase.Solve"/>.</summary>
-    public override void Solve()
+    /// <summary>
+    /// TODO: Arbitrary constants. Need proper handling decisions for these.
+    /// </summary>
+    public const double MinSeparationForce = 0.0001, SeparationForceFactor = 0.9;
+
+    /// <inheritdoc/>
+    public override void Solve(double delta)
     {
-        if (LastSolveTime == EngineGeneric.GlobalTickTime)
+        if (LastSolveTime == EngineGeneric.NonPhysicalJointSolves)
         {
             return;
         }
-        LastSolveTime = EngineGeneric.GlobalTickTime;
+        LastSolveTime = EngineGeneric.NonPhysicalJointSolves;
         if (One.Joints.FirstOrDefault(j => j is JointForceWeld jfw && jfw.Two == One) is JointForceWeld joint)
         {
-            joint.Solve();
+            joint.Solve(delta);
         }
         RigidPose onePose = GetPoseFrom(One);
         RigidPose.MultiplyWithoutOverlap(Offset, onePose, out RigidPose result);
+        Location pos = result.Position.ToLocation() + WorldOffset;
         if (VisualOnly)
         {
-            Two.AltRenderAt = result.Position.ToLocation() + WorldOffset;
+            Two.AltRenderAt = pos;
             Two.AltRenderOrientation = result.Orientation.ToCore();
         }
         else
         {
-            Two.SetPosition(result.Position.ToLocation() + WorldOffset);
+            // TODO: These should probably be stored
+            if (One.TryGetProperty(out EntityPhysicsProperty physOne) && Two.TryGetProperty(out EntityPhysicsProperty physTwo))
+            {
+                // TODO: Figure out angular velocity stable relative transfer
+                if (SendForceBack)
+                {
+                    // TODO: Downtrack if there's multiple forcewelds to the root and apply the force to that
+                    Location separation = pos - Two.LastKnownPosition;
+                    if (separation.LengthSquared() > MinSeparationForce)
+                    {
+                        physOne.ApplyForce(pos - One.LastKnownPosition, separation * (physTwo.Mass / delta) * SeparationForceFactor);
+                    }
+                }
+                // TODO: Grab angular velocity
+                physTwo.LinearVelocity = physOne.LinearVelocity;
+            }
+            Two.SetPosition(pos);
             Two.SetOrientation(result.Orientation.ToCore());
         }
     }

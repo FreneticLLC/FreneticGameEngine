@@ -187,7 +187,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// <summary>Temporary (single-physics-tick) boost to angular damping.</summary>
     public float AngularDampingBoost = 0;
 
-    /// <summary>Gets or sets the entity's linear velocity.</summary>
+    /// <summary>Gets or sets the entity's linear velocity. This is the vector that will be traveled per second.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public Location LinearVelocity
@@ -206,7 +206,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
     }
 
-    /// <summary>Gets or sets the entity's angular velocity.</summary>
+    /// <summary>Gets or sets the entity's angular velocity. This is angular change in radians per second on each of the 3 possible axes of rotation (X, Y, Z).</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
     public Location AngularVelocity
@@ -430,8 +430,8 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// <summary>
     /// Applies a force directly to the physics entity's body.
     /// The force is assumed to be perfectly central to the entity.
-    /// Note: this is a force, not a velocity. Mass is relevant.
-    /// This will activate the entity.
+    /// Note: this is a force, not a velocity. Mass is relevant. That force divided by mass is the exact change in linear velocity.
+    /// This will activate the entity. Unspawned entities will calculate in only a very simple manner.
     /// </summary>
     /// <param name="force">The force to apply.</param>
     public void ApplyForce(Location force)
@@ -452,7 +452,8 @@ public class EntityPhysicsProperty : BasicEntityProperty
     /// The origin is relative to the body's centerpoint (so eg 0,0,1 is a force 1 unit above the entity that will cause it to spin).
     /// The further you get from the centerpoint, the more spin and less linear motion will be applied.
     /// Note: this is a force, not a velocity. Mass is relevant.
-    /// This will activate the entity.
+    /// If you apply a central force (origin 0,0,0), that force divided by mass is the exact change in linear velocity.
+    /// This will activate the entity. Unspawned entities will calculate in only a very simple manner.
     /// </summary>
     /// <param name="origin">Where to apply the force at.</param>
     /// <param name="force">The force to apply.</param>

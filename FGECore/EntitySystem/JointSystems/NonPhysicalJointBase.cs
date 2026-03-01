@@ -28,7 +28,7 @@ public abstract class NonPhysicalJointBase(BasicEntity _one, BasicEntity _two) :
     public override BasicEntity EntityTwo => Two;
 
     /// <summary>Calculate the joint's logic and apply it.</summary>
-    public abstract void Solve();
+    public abstract void Solve(double delta);
 
     /// <inheritdoc/>
     public override void Enable()

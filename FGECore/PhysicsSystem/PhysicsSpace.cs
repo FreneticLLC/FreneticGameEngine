@@ -266,7 +266,7 @@ public class PhysicsSpace
             {
                 physEnt?.TickUpdates();
             }
-            Engine.TickNonPhysicalJoints();
+            Engine.TickNonPhysicalJoints(updateBy);
         }
     }
 

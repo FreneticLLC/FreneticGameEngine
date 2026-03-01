@@ -115,15 +115,19 @@ public abstract class BasicEngine
         joint.EntityTwo.Joints.Remove(joint);
     }
 
+    /// <summary>How many times <see cref="TickNonPhysicalJoints(double)"/> has been called.</summary>
+    public long NonPhysicalJointSolves = 0;
+
     /// <summary>Tick all non-physical joints once. Normally called right after a physics engine timestep.</summary>
-    public void TickNonPhysicalJoints()
+    public void TickNonPhysicalJoints(double delta)
     {
+        NonPhysicalJointSolves++;
         try
         {
             StackNoteHelper.Push("BasicEngine - Update Joints", this);
             foreach (NonPhysicalJointBase joint in NonPhysicalJoints)
             {
-                joint.Solve();
+                joint.Solve(delta);
             }
         }
         finally

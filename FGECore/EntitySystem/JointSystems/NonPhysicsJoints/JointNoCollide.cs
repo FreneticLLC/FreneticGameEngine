@@ -42,7 +42,7 @@ public class JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _t
     }
 
     /// <summary>Implementation of <see cref="NonPhysicalJointBase.Solve"/> that does nothing.</summary>
-    public override void Solve()
+    public override void Solve(double delta)
     {
         // Do nothing
     }
