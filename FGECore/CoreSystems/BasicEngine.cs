@@ -115,6 +115,23 @@ public abstract class BasicEngine
         joint.EntityTwo.Joints.Remove(joint);
     }
 
+    /// <summary>Tick all non-physical joints once. Normally called right after a physics engine timestep.</summary>
+    public void TickNonPhysicalJoints()
+    {
+        try
+        {
+            StackNoteHelper.Push("BasicEngine - Update Joints", this);
+            foreach (NonPhysicalJointBase joint in NonPhysicalJoints)
+            {
+                joint.Solve();
+            }
+        }
+        finally
+        {
+            StackNoteHelper.Pop();
+        }
+    }
+
     /// <summary>Shuts down the <see cref="BasicEngine"/> and disposes any used resources.</summary>
     public virtual void Shutdown()
     {
@@ -346,18 +363,6 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
         {
             StackNoteHelper.Push("BasicEngine - Update Physics", PhysicsWorld);
             PhysicsWorld.Tick(Delta);
-        }
-        finally
-        {
-            StackNoteHelper.Pop();
-        }
-        try
-        {
-            StackNoteHelper.Push("BasicEngine - Update Joints", this);
-            foreach (NonPhysicalJointBase joint in NonPhysicalJoints)
-            {
-                joint.Solve();
-            }
         }
         finally
         {
