@@ -62,5 +62,5 @@ public class EditableTextLine(List<RenderableTextPart> parts, float width, int l
     }
 
     /// <summary>Builds a new <see cref="RenderableTextLine"/> from the editable values.</summary>
-    public RenderableTextLine ToRenderable() => new([.. Parts]);
+    public RenderableTextLine ToRenderable(int height = 0) => new([.. Parts], height);
 }

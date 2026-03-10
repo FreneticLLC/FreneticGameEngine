@@ -377,7 +377,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                         }
                     }
                 }
-                outLines[i] = new RenderableTextLine([.. parts]);
+                outLines[i] = new RenderableTextLine([.. parts], Height);
             }
             RenderableText result = new([.. outLines]);
             FancyTextCache[(baseColor, originalText)] = result;

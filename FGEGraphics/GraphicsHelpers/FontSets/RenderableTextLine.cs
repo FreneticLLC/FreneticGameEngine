@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -29,10 +29,10 @@ public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Heig
     /// that also describe the <see cref="Width"/> and <see cref="Height"/>.
     /// </summary>
     /// <param name="parts">The text parts.</param>
-    public RenderableTextLine(RenderableTextPart[] parts)
+    public RenderableTextLine(RenderableTextPart[] parts, int height = 0)
         : this(parts,
               (int)parts.Sum(part => part?.Width),
-              parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : 0)
+              parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : height)
     { }
 
     /// <inheritdoc/>
