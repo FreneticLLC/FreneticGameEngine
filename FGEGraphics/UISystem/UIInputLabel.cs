@@ -246,13 +246,10 @@ public class UIInputLabel : UIElement
             //layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
             AddChild(Box = new(UIStyle.Empty, new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
         }
-        int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
+        int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0; // there should definitely be a system for this
         UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
-        //LabelRenderable = new UIRenderable(RenderLabel);
-        PlaceholderInfo = new UILabel(placeholderInfo, styling, new UILayout().SetPosition(() => TextPadding, () => TextPadding));
-        //sLabelRenderable.AddChild();
-        //ScrollGroup.AddScrollableChild(LabelRenderable);
+        AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         AddChild(ScrollGroup);
         InputStyling = inputStyling;
         HighlightStyling = highlightStyling;
@@ -261,7 +258,6 @@ public class UIInputLabel : UIElement
         Internal.TextChain.AddLabel(Internal.TextLeft = new(null, InputStyling, new UILayout()));
         Internal.TextChain.AddLabel(Internal.TextBetween = new(null, HighlightStyling, new UILayout()));
         Internal.TextChain.AddLabel(Internal.TextRight = new(null, InputStyling, new UILayout()));
-        //LabelRenderable.AddChild(Internal.TextChain);
         ScrollGroup.AddScrollableChild(Internal.TextChain);
         TextContent = defaultText;
     }
@@ -323,7 +319,7 @@ public class UIInputLabel : UIElement
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        if (TextContent.Length > 0)
+        if (!Internal.TextChain.Internal.CursorOffset.IsNaN())
         {
             UpdateScrollGroupX();
             UpdateScrollGroupY();
@@ -335,8 +331,9 @@ public class UIInputLabel : UIElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain.UpdateRenderables();
-        Internal.TextChain.Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.Zero;
+        Internal.TextChain.Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.NaN;
         UpdateScrollGroup();
+        PlaceholderInfo.RenderSelf = TextContent.Length == 0;
     }
 
     /// <summary>Performs a user edit on the text content.</summary>

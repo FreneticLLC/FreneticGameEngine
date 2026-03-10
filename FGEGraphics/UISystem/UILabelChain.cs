@@ -22,7 +22,7 @@ public class UILabelChain(UIStyling styling, UILayout layout) : UIElement(stylin
     {
         public List<Renderable> Renderables = [];
 
-        public Location CursorOffset = Location.Zero;
+        public Location CursorOffset = Location.NaN;
 
         /// <summary>An individual UI text chain piece.</summary>
         /// <param name="Font">The font to render the chain piece with.</param>
@@ -50,7 +50,6 @@ public class UILabelChain(UIStyling styling, UILayout layout) : UIElement(stylin
     /// <param name="chain">The UI text objects.</param>
     /// <param name="maxWidth">The wrapping width of the chain.</param>
     /// <returns>The text chain.</returns>
-    // TODO: Fix blank lines not being counted
 
     /// <summary>
     /// 
@@ -104,7 +103,10 @@ public class UILabelChain(UIStyling styling, UILayout layout) : UIElement(stylin
         {
             renderable.Font.DrawFancyText(renderable.Text, new Location(X, Y + renderable.YOffset, 0));
         }
-        // todo: guard behind 'selected' or smth
+        if (Internal.CursorOffset.IsNaN())
+        {
+            return;
+        }
         View.Engine.Textures.White.Bind();
         Renderer2D.SetColor(style.BorderColor);
         int lineWidth = style.BorderThickness / 2;
