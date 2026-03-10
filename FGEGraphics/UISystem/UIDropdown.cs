@@ -27,6 +27,9 @@ namespace FGEGraphics.UISystem;
 // TODO: Add choice at index, remove choice
 public class UIDropdown : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Dropdown";
+
     /// <summary>The text to display when no choice is selected.</summary>
     public string PlaceholderInfo;
 

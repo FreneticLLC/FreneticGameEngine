@@ -24,6 +24,9 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple box on the screen.</summary>
 public class UIBox : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => OnClick is null ? "Button" : "Box";
+
     // TODO: move to UILayout
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;

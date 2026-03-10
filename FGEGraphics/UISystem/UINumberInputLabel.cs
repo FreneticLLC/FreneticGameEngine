@@ -140,10 +140,5 @@ public class UINumberInputLabel : UIInputLabel
     }
 
     /// <inheritdoc/>
-    public override List<string> GetDebugInfo()
-    {
-        List<string> info = base.GetDebugInfo();
-        info.Add($"^7Value: ^3{Value}");
-        return info;
-    }
+    public override List<string> GetDebugInfo() => [$"^7Value: ^3{Value}"];
 }

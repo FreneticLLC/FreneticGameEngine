@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -25,6 +25,9 @@ public class UILabel : UIElement
 {
     /// <summary>Whether the label is empty and shouldn't be rendered.</summary>
     public bool IsEmpty => Internal.Content.Length == 0;
+
+    /// <inheritdoc/>
+    public override string Name => $"Label \"{(Content.Length <= 32 ? Content : Content[..32])}{(Content.Length > 32 ? "..." : "")}\"";
 
     /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
     public struct InternalData()

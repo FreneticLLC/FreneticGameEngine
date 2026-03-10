@@ -21,6 +21,9 @@ namespace FGEGraphics.UISystem;
 // TODO: add utility list + scrollgroup class
 public class UIScrollGroup : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Scroll Group";
+
     /// <summary>The horizontal scroll axis.</summary>
     public Axis ScrollX;
 
@@ -240,10 +243,5 @@ public class UIScrollGroup : UIElement
     }
 
     /// <inheritdoc/>
-    public override List<string> GetDebugInfo()
-    {
-        List<string> info = base.GetDebugInfo();
-        info.Add($"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})");
-        return info;
-    }
+    public override List<string> GetDebugInfo() => [$"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})"];
 }

@@ -18,6 +18,9 @@ namespace FGEGraphics.UISystem;
 /// <param name="layout">The layout of the element.</param>
 public class UISelectionGroup(UILayout layout) : UIGroup(layout)
 {
+    /// <inheritdoc/>
+    public override string Name => "Selection Group";
+
     /// <summary>The minimum allowed number of selected elements, or <c>-1</c> for no lower bound.</summary>
     public int MinSelections = -1;
 

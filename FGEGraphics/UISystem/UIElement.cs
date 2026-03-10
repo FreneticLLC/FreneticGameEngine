@@ -99,6 +99,10 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    public virtual string Name { get; set; } = null;
+
+    public bool IgnoreDebug = false;
+
     /// <summary>
     /// Whether this element should scale its width based on <see cref="Scale"/>.
     /// Even if this value is <c>false</c>, this element's scale still applies to its children.
@@ -137,6 +141,8 @@ public abstract class UIElement
 
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
+
+        public int TreeLevel;
 
         /// <summary>The last absolute position.</summary>
         public Vector2i LastPosition;
@@ -179,6 +185,10 @@ public abstract class UIElement
     {
         child.IsValid = true;
         child.Parent = this;
+        foreach (UIElement subChild in child.AllChildren())
+        {
+            subChild.ElementInternal.TreeLevel = subChild.Parent.ElementInternal.TreeLevel + 1;
+        }
         if (View is not null)
         {
             foreach (UIElement subChild in child.AllChildren())
@@ -228,6 +238,7 @@ public abstract class UIElement
         child.IsValid = false;
         child.Destroy();
         child.Parent = null;
+        child.ElementInternal.TreeLevel = 0;
         child.View = null;
     }
 
@@ -740,13 +751,17 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
-    public virtual List<string> GetDebugInfo()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public List<string> GetBaseDebugInfo()
     {
+        string name = Name ?? GetType().ToString();
         List<string> info = new(4)
         {
-            $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
-            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation}",
+            $"^{(this == View.HeldElement ? "2" : "5")}^u{name} ^&[{ElementInternal.TreeLevel}]",
+            $"^7Position: ^3({X}, {Y}) ^&| ^7Size: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation} ^&| ^7Scale: ^3{Scale}x",
             $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
         };
         if (ElementInternal.Styles.Count > 0)
@@ -756,4 +771,7 @@ public abstract class UIElement
         }
         return info;
     }
+
+    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
+    public virtual List<string> GetDebugInfo() => [];
 }

@@ -20,6 +20,9 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a slider element that can choose between a range of real number values.</summary>
 public class UINumberSlider : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Number Slider";
+
     /// <summary>The minimum slider value.</summary>
     public double Min;
 

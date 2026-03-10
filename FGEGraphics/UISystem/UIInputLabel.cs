@@ -55,6 +55,9 @@ public class UIInputLabel : UIElement
         public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
     }
 
+    /// <inheritdoc/>
+    public override string Name => "Input Label";
+
     /// <summary>The box behind the input label.</summary>
     public UIBox Box = null;
 
@@ -587,10 +590,5 @@ public class UIInputLabel : UIElement
     public override void Render(double delta, UIStyle style) => Box?.Render(delta, style);
 
     /// <inheritdoc/>
-    public override List<string> GetDebugInfo()
-    {
-        List<string> info = base.GetDebugInfo();
-        info.Add($"^7Indices: ^3[{Internal.IndexLeft} {Internal.IndexRight}] ^&| ^7Cursors: ^3[{Internal.CursorStart} {Internal.CursorEnd}]");
-        return info;
-    }
+    public override List<string> GetDebugInfo() => [$"^7Indices: ^3[{Internal.IndexLeft} {Internal.IndexRight}] ^&| ^7Cursors: ^3[{Internal.CursorStart} {Internal.CursorEnd}]"];
 }
