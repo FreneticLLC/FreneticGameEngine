@@ -115,7 +115,7 @@ public class UIInputLabel : UIElement
         public string TextContent = "";
 
         /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
-        public int BoxPadding;
+        public int BoxPadding = 0;
 
         /// <summary>Whether to enforce max width or use a horizontal scroll group.</summary>
         public bool MaxWidth;
@@ -127,7 +127,7 @@ public class UIInputLabel : UIElement
         public int CursorEnd = 0;
 
         /// <summary>The drawn cursor offset location.</summary>
-        public Location CursorOffset;
+        //public Location CursorOffset = Location.Zero;
 
         /// <summary>The minimum cursor position.</summary>
         public readonly int IndexLeft => CursorStart < CursorEnd ? CursorStart : CursorEnd;
@@ -216,7 +216,7 @@ public class UIInputLabel : UIElement
                 }
                 currentIndex++;
             }
-            return Location.NaN;
+            return Location.Zero;
         }
     }
 
@@ -249,18 +249,20 @@ public class UIInputLabel : UIElement
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0;
         UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
-        LabelRenderable = new UIRenderable(RenderLabel);
-        LabelRenderable.AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)));
-        ScrollGroup.AddScrollableChild(LabelRenderable);
+        //LabelRenderable = new UIRenderable(RenderLabel);
+        PlaceholderInfo = new UILabel(placeholderInfo, styling, new UILayout().SetPosition(() => TextPadding, () => TextPadding));
+        //sLabelRenderable.AddChild();
+        //ScrollGroup.AddScrollableChild(LabelRenderable);
         AddChild(ScrollGroup);
         InputStyling = inputStyling;
         HighlightStyling = highlightStyling;
         Internal.MaxWidth = maxWidth;
-        Internal.TextChain = new(new UILayout()) { RenderSelf = false };
+        Internal.TextChain = new(HighlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false };
         Internal.TextChain.AddLabel(Internal.TextLeft = new(null, InputStyling, new UILayout()));
         Internal.TextChain.AddLabel(Internal.TextBetween = new(null, HighlightStyling, new UILayout()));
         Internal.TextChain.AddLabel(Internal.TextRight = new(null, InputStyling, new UILayout()));
-        AddChild(Internal.TextChain);
+        //LabelRenderable.AddChild(Internal.TextChain);
+        ScrollGroup.AddScrollableChild(Internal.TextChain);
         TextContent = defaultText;
     }
 
@@ -302,7 +304,7 @@ public class UIInputLabel : UIElement
             }
         }
         ScrollGroup.ScrollX.MaxValue = Math.Max(maxWidth + TextPadding * 2 - ScrollGroup.Width, 0);
-        ScrollGroup.ScrollX.ScrollToPos((int)Internal.CursorOffset.X, (int)Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
+        ScrollGroup.ScrollX.ScrollToPos((int)Internal.TextChain.Internal.CursorOffset.X, (int)Internal.TextChain.Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
     }
 
     /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
@@ -315,14 +317,17 @@ public class UIInputLabel : UIElement
         }
         int lastLineHeight = Internal.TextLeft.Style.FontHeight + TextPadding * 2;
         ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        ScrollGroup.ScrollY.ScrollToPos((int)Internal.CursorOffset.Y, (int)Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
+        ScrollGroup.ScrollY.ScrollToPos((int)Internal.TextChain.Internal.CursorOffset.Y, (int)Internal.TextChain.Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        UpdateScrollGroupX();
-        UpdateScrollGroupY();
+        if (TextContent.Length > 0)
+        {
+            UpdateScrollGroupX();
+            UpdateScrollGroupY();
+        }    
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
@@ -330,7 +335,7 @@ public class UIInputLabel : UIElement
     {
         Internal.UpdateTextComponents();
         Internal.TextChain.UpdateRenderables();
-        Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.NaN;
+        Internal.TextChain.Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.Zero;
         UpdateScrollGroup();
     }
 
@@ -483,8 +488,8 @@ public class UIInputLabel : UIElement
             return;
         }
         bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        float relMouseX = View.Client.MouseX - (LabelRenderable.X + TextPadding);
-        float relMouseY = View.Client.MouseY - (LabelRenderable.Y + TextPadding);
+        float relMouseX = View.Client.MouseX - (Internal.TextChain.X);
+        float relMouseY = View.Client.MouseY - (Internal.TextChain.Y);
         UILabelChain.InternalData.Renderable lastPiece = Internal.TextChain.Internal.Renderables[^1];
         if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
@@ -558,7 +563,7 @@ public class UIInputLabel : UIElement
     }
 
     /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
-    public void RenderLabel(UIElement elem, double delta, UIStyle style)
+    /*public void RenderLabel(UIElement elem, double delta, UIStyle style)
     {
         GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
         int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
@@ -584,7 +589,7 @@ public class UIInputLabel : UIElement
         View.Rendering.RenderRectangle(View.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
         GraphicsUtil.CheckError("UIInputLabel - PostRenderLabel", this);
-    }
+    }*/
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style) => Box?.Render(delta, style);

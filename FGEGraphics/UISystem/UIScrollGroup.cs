@@ -190,7 +190,10 @@ public class UIScrollGroup : UIElement
         /// <summary>Clamps the <see cref="Value"/> between <c>0</c> and <see cref="MaxValue"/>.</summary>
         public void Clamp()
         {
-            Value = Math.Clamp(Value, 0, MaxValue);
+            if (MaxValue > 0)
+            {
+                Value = Math.Clamp(Value, 0, MaxValue);
+            }
         }
 
         /// <summary>Scrolls to encompass a min/max offset pair.</summary>

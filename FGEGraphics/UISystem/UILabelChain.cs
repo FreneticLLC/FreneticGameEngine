@@ -1,6 +1,8 @@
-﻿using FGECore.MathHelpers;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-public class UILabelChain(UILayout layout) : UIElement(UIStyle.Empty, layout)
+public class UILabelChain(UIStyling styling, UILayout layout) : UIElement(styling, layout)
 {
     public List<UILabel> Labels = [];
 
@@ -19,6 +21,8 @@ public class UILabelChain(UILayout layout) : UIElement(UIStyle.Empty, layout)
     public struct InternalData()
     {
         public List<Renderable> Renderables = [];
+
+        public Location CursorOffset = Location.Zero;
 
         /// <summary>An individual UI text chain piece.</summary>
         /// <param name="Font">The font to render the chain piece with.</param>
@@ -73,6 +77,7 @@ public class UILabelChain(UILayout layout) : UIElement(UIStyle.Empty, layout)
                 lines.Add((label.Style.TextFont, line));
             }
         }
+        int width = 0;
         float y = 0;
         foreach ((FontSet font, RenderableTextLine line) in lines)
         {
@@ -80,6 +85,14 @@ public class UILabelChain(UILayout layout) : UIElement(UIStyle.Empty, layout)
             RenderableText splitText = MaxWidth > 0 ? FontSet.SplitLineAppropriately(line, MaxWidth, out skippedIndices) : new([line]);
             Internal.Renderables.Add(new(font, splitText, y, skippedIndices ?? []));
             y += font.Height * splitText.Lines.Length;
+            if (splitText.Width > width)
+            {
+                width = splitText.Width;
+            }
+        }
+        if (Internal.Renderables.Count > 0)
+        {
+            Layout.SetWidth(width).SetHeight((int) y);
         }
     }
 
@@ -91,5 +104,12 @@ public class UILabelChain(UILayout layout) : UIElement(UIStyle.Empty, layout)
         {
             renderable.Font.DrawFancyText(renderable.Text, new Location(X, Y + renderable.YOffset, 0));
         }
+        // todo: guard behind 'selected' or smth
+        View.Engine.Textures.White.Bind();
+        Renderer2D.SetColor(style.BorderColor);
+        int lineWidth = style.BorderThickness / 2;
+        int lineHeight = style.TextFont.Height;
+        View.Rendering.RenderRectangle(View.UIContext, X + Internal.CursorOffset.XF - lineWidth, Y + Internal.CursorOffset.YF, X + Internal.CursorOffset.XF + lineWidth, Y + Internal.CursorOffset.YF + lineHeight);
+        Renderer2D.SetColor(Color4.White);
     }
 }
