@@ -145,7 +145,7 @@ public class UIInputLabel : UIElement
         public UILabel TextRight;
 
         /// <summary>A text chain generated from <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
-        public UILabelChain TextChain;
+        public UIParagraph TextChain;
         
         /// <summary>Sets both cursor positions at a single index.</summary>
         /// <param name="cursorPos">The cursor positions.</param>
@@ -188,7 +188,7 @@ public class UIInputLabel : UIElement
             cursorIndex -= TextChain.Internal.Renderables.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
             for (int i = 0; i < TextChain.Internal.Renderables.Count; i++)
             {
-                UILabelChain.InternalData.Renderable piece = TextChain.Internal.Renderables[i];
+                UIParagraph.InternalData.Renderable piece = TextChain.Internal.Renderables[i];
                 for (int j = 0; j < piece.Text.Lines.Length; j++)
                 {
                     RenderableTextPart[] parts = piece.Text.Lines[j].Parts;
@@ -289,7 +289,7 @@ public class UIInputLabel : UIElement
             return;
         }
         int maxWidth = 0;
-        foreach (UILabelChain.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
+        foreach (UIParagraph.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
         {
             if (piece.Text.Width > maxWidth)
             {
@@ -484,14 +484,14 @@ public class UIInputLabel : UIElement
         bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
         float relMouseX = View.Client.MouseX - (Internal.TextChain.X);
         float relMouseY = View.Client.MouseY - (Internal.TextChain.Y);
-        UILabelChain.InternalData.Renderable lastPiece = Internal.TextChain.Internal.Renderables[^1];
+        UIParagraph.InternalData.Renderable lastPiece = Internal.TextChain.Internal.Renderables[^1];
         if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
         {
             TickMousePosition(TextContent.Length, shiftDown);
             return;
         }
         int indexOffset = 0;
-        foreach (UILabelChain.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
+        foreach (UIParagraph.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
         {
             for (int i = 0; i < piece.Text.Lines.Length; i++)
             {
