@@ -41,6 +41,7 @@ public class UILabel : UIElement
         /// <summary>A cache of UI styles and their corresponding renderable objects.</summary>
         public Dictionary<UIStyle, RenderableText> Renderables = [];
 
+        /// <summary>Fired after the renderables cache is updated.</summary>
         public Action OnRenderablesUpdate;
     }
 
@@ -135,18 +136,12 @@ public class UILabel : UIElement
     /// <inheritdoc/>
     public override void StyleChanged(UIStyle from, UIStyle to)
     {
-        //Logs.Debug($"UILabel with content: {Content}, StyleChanged");
-        //Logs.Debug($"- from: {from}");
-        //Logs.Debug($"- to: {to}");
         if (!IsEmpty && to.CanRenderText && !Internal.Renderables.ContainsKey(to))
         {
-            //Logs.Debug("- Creating renderable...");
             Internal.Renderables[to] = CreateRenderable(to);
-            //Logs.Debug("- Renderable: " + Internal.Renderables[to]);
         }
         if (Scale != 0 && Internal.Renderables.TryGetValue(to, out RenderableText renderable))
         {
-            //Logs.Debug("- Setting layout...");
             Layout.SetSize(renderable.GetTrueSize(to.TextFont));
         }
     }

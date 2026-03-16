@@ -126,9 +126,6 @@ public class UIInputLabel : UIElement
         /// <summary>The end cursor position.</summary>
         public int CursorEnd = 0;
 
-        /// <summary>The drawn cursor offset location.</summary>
-        //public Location CursorOffset = Location.Zero;
-
         /// <summary>The minimum cursor position.</summary>
         public readonly int IndexLeft => CursorStart < CursorEnd ? CursorStart : CursorEnd;
 
@@ -558,35 +555,6 @@ public class UIInputLabel : UIElement
         // TODO: Handle ctrl+Z, ctrl+Y
         // TODO: Handle HOME, END
     }
-
-    /// <summary>Renderer for the <see cref="LabelRenderable"/>.</summary>
-    /*public void RenderLabel(UIElement elem, double delta, UIStyle style)
-    {
-        GraphicsUtil.CheckError("UIInputLabel - PreRenderLabel", this);
-        int x = ScrollGroup.X + TextPadding; // FIXME: when using elem instead of ScrollGroup, the x (and only x) is ~intmin
-        int y = ScrollGroup.Y + TextPadding;
-        bool renderInfo = TextContent.Length == 0 && !PlaceholderInfo.IsEmpty;
-        if (renderInfo)
-        {
-            PlaceholderInfo.Render(delta);
-        }
-        else
-        {
-            Internal.TextChain.Render(delta);
-        }
-        if (Internal.CursorOffset.IsNaN())
-        {
-            return;
-        }
-        // TODO: Cursor blink modes
-        View.Engine.Textures.White.Bind();
-        Renderer2D.SetColor(Internal.TextBetween.Style.BorderColor);
-        int lineWidth = Internal.TextBetween.Style.BorderThickness / 2;
-        int lineHeight = (renderInfo ? PlaceholderInfo : Internal.TextLeft).Style.TextFont.Height;
-        View.Rendering.RenderRectangle(View.UIContext, x + Internal.CursorOffset.XF - lineWidth, y + Internal.CursorOffset.YF, x + Internal.CursorOffset.XF + lineWidth, y + Internal.CursorOffset.YF + lineHeight);
-        Renderer2D.SetColor(Color4.White);
-        GraphicsUtil.CheckError("UIInputLabel - PostRenderLabel", this);
-    }*/
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style) => Box?.Render(delta, style);

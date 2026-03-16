@@ -99,8 +99,10 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    /// <summary>The debug name of this element.</summary>
     public virtual string Name { get; set; } = null;
 
+    /// <summary>Whether this element displays additional information in debug mode.</summary>
     public bool IgnoreDebug = false;
 
     /// <summary>
@@ -142,6 +144,7 @@ public abstract class UIElement
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
 
+        /// <summary>The node distance of this element relative to the root element.</summary>
         public int TreeLevel;
 
         /// <summary>The last absolute position.</summary>
