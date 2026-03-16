@@ -58,23 +58,16 @@ public class UIInputLabel : UIElement
     /// <inheritdoc/>
     public override string Name => "Input Label";
 
+    public UIInputParagraph Paragraph;
+
     /// <summary>The box behind the input label.</summary>
     public UIBox Box = null;
 
     /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
 
-    /// <summary>The label text to render within the <see cref="ScrollGroup"/>.</summary>
-    public UIRenderable LabelRenderable;
-
     /// <summary>The text to display when the input is empty.</summary>
     public UILabel PlaceholderInfo;
-
-    /// <summary>The UI style of normal input content.</summary>
-    public UIStyling InputStyling;
-
-    /// <summary>The UI style of highlighted input content.</summary>
-    public UIStyling HighlightStyling;
 
     /// <summary>Whether the input label supports multiple lines.</summary>
     public bool Multiline = true;
@@ -92,18 +85,18 @@ public class UIInputLabel : UIElement
     public Action<string> OnTextSubmit;
     
     /// <summary>Gets or sets the input text content.</summary>
-    public string TextContent
+    public string Content
     {
-        get => Internal.TextContent;
+        get => Paragraph.Content;
         set
         {
-            Internal.SetTextContent(value);
-            UpdateText();
+            Paragraph.Content = value;
+            UpdateRenderState();
         }
     }
 
     /// <summary>The current number of input text lines.</summary>
-    public int Lines => Internal.TextChain.Internal.Renderables.Sum(piece => piece.Text.Lines.Length);
+    public int Lines => Paragraph.Internal.Renderables.Sum(piece => piece.Text.Lines.Length);
 
     /// <summary>The padding offset for the rendered text, if any.</summary>
     public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) : 0;
@@ -111,110 +104,11 @@ public class UIInputLabel : UIElement
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The raw text content.</summary>
-        public string TextContent = "";
-
         /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
         public int BoxPadding = 0;
 
         /// <summary>Whether to enforce max width or use a horizontal scroll group.</summary>
-        public bool MaxWidth;
-
-        /// <summary>The start cursor position. Acts as an anchorpoint for the end cursor.</summary>
-        public int CursorStart = 0;
-
-        /// <summary>The end cursor position.</summary>
-        public int CursorEnd = 0;
-
-        /// <summary>The minimum cursor position.</summary>
-        public readonly int IndexLeft => CursorStart < CursorEnd ? CursorStart : CursorEnd;
-
-        /// <summary>The maximum cursor position.</summary>
-        public readonly int IndexRight => CursorEnd > CursorStart ? CursorEnd : CursorStart;
-
-        /// <summary>Whether a string of text is selected between the indices.</summary>
-        public readonly bool HasSelection => CursorStart != CursorEnd;
-
-        /// <summary>The text preceding <see cref="IndexLeft"/>.</summary>
-        public UILabel TextLeft;
-
-        /// <summary>The text between <see cref="IndexLeft"/> and <see cref="IndexRight"/>.</summary>
-        public UILabel TextBetween;
-
-        /// <summary>The text following <see cref="IndexRight"/>.</summary>
-        public UILabel TextRight;
-
-        /// <summary>A text chain generated from <see cref="TextLeft"/>, <see cref="TextBetween"/>, and <see cref="TextRight"/>.</summary>
-        public UIParagraph TextChain;
-        
-        /// <summary>Sets both cursor positions at a single index.</summary>
-        /// <param name="cursorPos">The cursor positions.</param>
-        public void SetPosition(int cursorPos) => CursorStart = CursorEnd = cursorPos;
-        
-        /// <summary>Clamps the cursor positions to the <see cref="TextContent"/> bounds.</summary>
-        public void ClampPositions()
-        {
-            CursorStart = Math.Clamp(CursorStart, 0, TextContent.Length);
-            CursorEnd = Math.Clamp(CursorEnd, 0, TextContent.Length);
-        }
-
-        /// <summary>Sets the input text content.</summary>
-        /// <param name="content">The new text content.</param>
-        public void SetTextContent(string content)
-        {
-            if (TextContent != content)
-            {
-                TextContent = content ?? "";
-                ClampPositions();
-            }
-        }
-
-        /// <summary>Updates the text components based on the cursor positions.</summary>
-        public readonly void UpdateTextComponents()
-        {
-            TextLeft.Content = TextContent[..IndexLeft];
-            TextBetween.Content = TextContent[IndexLeft..IndexRight];
-            TextRight.Content = TextContent[IndexRight..];
-        }
-
-        /// <summary>Calculates a screen cursor offset given the current <see cref="TextChain"/>, or <see cref="Location.NaN"/> if none.</summary>
-        // TODO: Account for formatting codes
-        // TODO: out of range exception here somewhere
-        public readonly Location GetCursorOffset()
-        {
-            double xOffset = 0;
-            int cursorIndex = CursorEnd;
-            int currentIndex = 0;
-            cursorIndex -= TextChain.Internal.Renderables.Sum(piece => piece.SkippedIndices.Where(index => index <= cursorIndex).Count());
-            for (int i = 0; i < TextChain.Internal.Renderables.Count; i++)
-            {
-                UIParagraph.InternalData.Renderable piece = TextChain.Internal.Renderables[i];
-                for (int j = 0; j < piece.Text.Lines.Length; j++)
-                {
-                    RenderableTextPart[] parts = piece.Text.Lines[j].Parts;
-                    if (parts.Length == 0 && i == TextChain.Internal.Renderables.Count - 1)
-                    {
-                        return new Location(0, piece.YOffset, 0);
-                    }
-                    foreach (RenderableTextPart part in parts)
-                    {
-                        if (currentIndex + part.Text.Length < cursorIndex)
-                        {
-                            currentIndex += part.Text.Length;
-                            xOffset += part.Width;
-                            continue;
-                        }
-                        int relIndex = cursorIndex - currentIndex;
-                        double x = xOffset + (part.Text.Length > 0 ? piece.Font.MeasureFancyText(part.Text[..relIndex]) : 0);
-                        double y = piece.YOffset + j * piece.Font.Height;
-                        return new Location(x, y, 0);
-                    }
-                    xOffset = 0;
-                }
-                currentIndex++;
-            }
-            return Location.Zero;
-        }
+        public bool HasMaxWidth;
     }
 
     /// <summary>Constructs an input label.</summary>
@@ -241,29 +135,24 @@ public class UIInputLabel : UIElement
             // TODO: properly handle padding
             //UILayout baseLayout = new(layout);
             //layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
-            AddChild(Box = new(UIStyle.Empty, new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
+            AddChild(Box = new(styling.Bind(this), new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
         }
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0; // there should definitely be a system for this
         UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
-        AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         AddChild(ScrollGroup);
-        InputStyling = inputStyling;
-        HighlightStyling = highlightStyling;
-        Internal.MaxWidth = maxWidth;
-        Internal.TextChain = new(HighlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false };
-        Internal.TextChain.AddLabel(Internal.TextLeft = new(null, InputStyling, new UILayout()));
-        Internal.TextChain.AddLabel(Internal.TextBetween = new(null, HighlightStyling, new UILayout()));
-        Internal.TextChain.AddLabel(Internal.TextRight = new(null, InputStyling, new UILayout()));
-        ScrollGroup.AddScrollableChild(Internal.TextChain);
-        TextContent = defaultText;
+        AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
+        Internal.HasMaxWidth = maxWidth;
+        Content = defaultText;
     }
 
     /// <inheritdoc/>
     public override void Focused()
     {
         TickMouse();
-        UpdateScrollGroup();
+        Paragraph.RenderCursor = true;
+        UpdateRenderState();
     }
 
     /// <inheritdoc/>
@@ -275,48 +164,45 @@ public class UIInputLabel : UIElement
             return;
         }
         SubmitText();
-        Internal.SetPosition(0);
-        UpdateText();
+        Paragraph.SetCursorPosition(0);
+        Paragraph.RenderCursor = false;
+        Paragraph.UpdateRenderState();
         ScrollGroup.ScrollX.Reset();
         ScrollGroup.ScrollY.Reset();
+        PlaceholderInfo.RenderSelf = Content.Length == 0;
     }
 
+    // FIXME: Paragraph.Width still retains last value when deleting all, incorrect MaxValue calculation 
     /// <summary>Updates the horizontal scroll values based on the text width and cursor position.</summary>
     public void UpdateScrollGroupX()
     {
-        if (Internal.MaxWidth)
+        if (Internal.HasMaxWidth)
         {
             return;
         }
-        int maxWidth = 0;
-        foreach (UIParagraph.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
-        {
-            if (piece.Text.Width > maxWidth)
-            {
-                maxWidth = piece.Text.Width;
-            }
-        }
-        ScrollGroup.ScrollX.MaxValue = Math.Max(maxWidth + TextPadding * 2 - ScrollGroup.Width, 0);
-        ScrollGroup.ScrollX.ScrollToPos((int)Internal.TextChain.Internal.CursorOffset.X, (int)Internal.TextChain.Internal.CursorOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
+        ScrollGroup.ScrollX.MaxValue = Math.Max(Paragraph.Width + TextPadding * 2 - ScrollGroup.Width, 0);
+        ScrollGroup.ScrollX.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
+        ScrollGroup.ScrollX.Clamp();
     }
 
     /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
     public void UpdateScrollGroupY()
     {
-        if (Internal.TextChain.Internal.Renderables.Count <= 1)
+        if (Paragraph.Internal.Renderables.Count == 0)
         {
             ScrollGroup.ScrollY.Reset();
             return;
         }
-        int lastLineHeight = Internal.TextLeft.Style.FontHeight + TextPadding * 2;
-        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Internal.TextChain.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        ScrollGroup.ScrollY.ScrollToPos((int)Internal.TextChain.Internal.CursorOffset.Y, (int)Internal.TextChain.Internal.CursorOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
+        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.FontHeight + TextPadding * 2;
+        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
+        ScrollGroup.ScrollY.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
+        ScrollGroup.ScrollX.Clamp();
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        if (!Internal.TextChain.Internal.CursorOffset.IsNaN())
+        if (!Paragraph.InputInternal.CursorRenderOffset.IsNaN())
         {
             UpdateScrollGroupX();
             UpdateScrollGroupY();
@@ -324,13 +210,11 @@ public class UIInputLabel : UIElement
     }
 
     /// <summary>Updates the text components based on the cursor positions.</summary>
-    public void UpdateText()
+    public void UpdateRenderState()
     {
-        Internal.UpdateTextComponents();
-        Internal.TextChain.UpdateRenderables();
-        Internal.TextChain.Internal.CursorOffset = IsFocused ? Internal.GetCursorOffset() : Location.NaN;
+        Paragraph.UpdateRenderState();
         UpdateScrollGroup();
-        PlaceholderInfo.RenderSelf = TextContent.Length == 0;
+        PlaceholderInfo.RenderSelf = Content.Length == 0;
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -340,17 +224,17 @@ public class UIInputLabel : UIElement
     /// <param name="beforeUpdate">Fires after the text content is set but before internal values are updated.</param>
     public void EditText(EditType type, string diff, string result, Action beforeUpdate = null)
     {
-        Internal.SetTextContent(ValidateEdit(type, diff, result));
+        Paragraph.SetContent(ValidateEdit(type, diff, result));
         beforeUpdate?.Invoke();
-        UpdateText();
-        (type == EditType.SUBMIT ? OnTextSubmit : OnTextEdit)?.Invoke(TextContent);
+        UpdateRenderState();
+        (type == EditType.SUBMIT ? OnTextSubmit : OnTextEdit)?.Invoke(Content);
     }
 
     /// <summary>Validates a user edit of the text content.</summary>
     /// <param name="type">The edit operation.</param>
     /// <param name="diff">The added or deleted text.</param>
     /// <param name="result">The result of the operation pre-validation.</param>
-    /// <returns>A validated <see cref="TextContent"/> string.</returns>
+    /// <returns>A validated <see cref="Content"/> string.</returns>
     public virtual string ValidateEdit(EditType type, string diff, string result)
     {
         if (type != EditType.ADD)
@@ -362,13 +246,14 @@ public class UIInputLabel : UIElement
         if (MaxLength > 0 && overflow > 0)
         {
             string newDiff = overflow < diff.Length ? diff[..(diff.Length - overflow)] : "";
-            result = result[..(Internal.IndexLeft - diff.Length)] + newDiff + result[Internal.IndexRight..];
+            result = result[..(Paragraph.CursorLeft - diff.Length)] + newDiff + result[Paragraph.CursorRight..];
         }
         if (!Multiline && result.Contains('\n'))
         {
             result = result.Replace("\n", "");
         }
-        Internal.SetPosition(Internal.IndexLeft - (originalLength - result.Length));
+        // TODO: this shouldn't be here
+        Paragraph.SetCursorPosition(Paragraph.CursorLeft - (originalLength - result.Length));
         return result;
     }
 
@@ -378,8 +263,8 @@ public class UIInputLabel : UIElement
     /// <param name="indexRight">The right index position.</param>
     public void AddText(string text, int indexLeft, int indexRight)
     {
-        string result = TextContent[..indexLeft] + text + TextContent[indexRight..];
-        Internal.SetPosition(Internal.IndexLeft + text.Length);
+        string result = Content[..indexLeft] + text + Content[indexRight..];
+        Paragraph.SetCursorPosition(Paragraph.CursorLeft + text.Length);
         EditText(EditType.ADD, text, result);
     }
 
@@ -388,31 +273,31 @@ public class UIInputLabel : UIElement
     /// <param name="indexRight">The right index position.</param>
     public void DeleteText(int indexLeft, int indexRight)
     {
-        string diff = TextContent[indexLeft..indexRight];
-        string result = TextContent[..indexLeft] + TextContent[indexRight..];
-        EditText(EditType.DELETE, diff, result, () => Internal.SetPosition(indexLeft));
+        string diff = Content[indexLeft..indexRight];
+        string result = Content[..indexLeft] + Content[indexRight..];
+        EditText(EditType.DELETE, diff, result, () => Paragraph.SetCursorPosition(indexLeft));
     }
 
     /// <summary>Submits the current text content.</summary>
-    public void SubmitText() => EditText(EditType.SUBMIT, "", TextContent);
+    public void SubmitText() => EditText(EditType.SUBMIT, "", Content);
 
     /// <summary>Deletes text based on the <see cref="KeyHandlerState.InitBS"/> value.</summary>
     /// <param name="keys">The current keyboard state.</param>
     public void TickBackspaces(KeyHandlerState keys)
     {
-        if (keys.InitBS == 0 || TextContent.Length == 0 || Internal.IndexRight == 0)
+        if (keys.InitBS == 0 || Content.Length == 0 || Paragraph.CursorRight == 0)
         {
             return;
         }
-        if (Internal.HasSelection)
+        if (Paragraph.HasSelection)
         {
-            DeleteText(Internal.IndexLeft, Internal.IndexRight);
+            DeleteText(Paragraph.CursorLeft, Paragraph.CursorRight);
             keys.InitBS--;
         }
         if (keys.InitBS > 0)
         {
-            int index = Math.Max(Internal.IndexLeft - keys.InitBS, 0);
-            DeleteText(index, Internal.IndexRight);
+            int index = Math.Max(Paragraph.CursorLeft - keys.InitBS, 0);
+            DeleteText(index, Paragraph.CursorRight);
         }
     }
 
@@ -422,7 +307,7 @@ public class UIInputLabel : UIElement
     {
         if (keys.KeyboardString.Length > 0)
         {
-            AddText(keys.KeyboardString, Internal.IndexLeft, Internal.IndexRight);
+            AddText(keys.KeyboardString, Paragraph.CursorLeft, Paragraph.CursorRight);
         }
     }
 
@@ -435,20 +320,20 @@ public class UIInputLabel : UIElement
             return;
         }
         bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        if (Internal.HasSelection && !shiftDown)
+        if (Paragraph.HasSelection && !shiftDown)
         {
-            Internal.CursorEnd = horizontal < 0 ? Internal.IndexLeft : Internal.IndexRight;
+            Paragraph.CursorEnd = horizontal < 0 ? Paragraph.CursorLeft : Paragraph.CursorRight;
         }
         else
         {
-            Internal.CursorEnd += horizontal;
+            Paragraph.CursorEnd += horizontal;
         }
         if (!shiftDown)
         {
-            Internal.CursorStart = Internal.CursorEnd;
+            Paragraph.CursorStart = Paragraph.CursorEnd;
         }
-        Internal.ClampPositions();
-        UpdateText();
+        Paragraph.ClampCursorPositions();
+        UpdateRenderState();
     }
 
     /// <summary>Handles the mouse being pressed at a cursor position.</summary>
@@ -457,22 +342,22 @@ public class UIInputLabel : UIElement
     // TODO: Account for formatting codes
     public void TickMousePosition(int cursorPos, bool shiftDown)
     {
-        if (Internal.CursorEnd == cursorPos && View.MousePreviouslyDown == shiftDown)
+        if (Paragraph.CursorEnd == cursorPos && View.MousePreviouslyDown == shiftDown)
         {
             return;
         }
-        Internal.CursorEnd = Math.Max(cursorPos, 0);
+        Paragraph.CursorEnd = Math.Max(cursorPos, 0);
         if (!View.MousePreviouslyDown && !shiftDown)
         {
-            Internal.CursorStart = Internal.CursorEnd;
+            Paragraph.CursorStart = Paragraph.CursorEnd;
         }
-        UpdateText();
+        UpdateRenderState();
     }
 
     /// <summary>Modifies the current selection based on mouse clicks/drags.</summary>
     public void TickMouse()
     {
-        if (!View.MouseDown || Internal.TextChain.Internal.Renderables.Count == 0)
+        if (!View.MouseDown || Paragraph.Internal.Renderables.Count == 0)
         {
             return;
         }
@@ -482,44 +367,12 @@ public class UIInputLabel : UIElement
             return;
         }
         bool shiftDown = View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift);
-        float relMouseX = View.Client.MouseX - (Internal.TextChain.X);
-        float relMouseY = View.Client.MouseY - (Internal.TextChain.Y);
-        UIParagraph.InternalData.Renderable lastPiece = Internal.TextChain.Internal.Renderables[^1];
-        if (lastPiece.YOffset + (lastPiece.Font.Height * lastPiece.Text.Lines.Length) < relMouseY)
+        int relMouseX = (int)View.Client.MouseX - Paragraph.X;
+        int relMouseY = (int)View.Client.MouseY - Paragraph.Y;
+        int mouseCursorPosition = Paragraph.GetIndexForLocation(relMouseX, relMouseY);
+        if (mouseCursorPosition != -1)
         {
-            TickMousePosition(TextContent.Length, shiftDown);
-            return;
-        }
-        int indexOffset = 0;
-        foreach (UIParagraph.InternalData.Renderable piece in Internal.TextChain.Internal.Renderables)
-        {
-            for (int i = 0; i < piece.Text.Lines.Length; i++)
-            {
-                RenderableTextLine line = piece.Text.Lines[i];
-                string content = line.ToString();
-                if (piece.YOffset + (i + 1) * piece.Font.Height >= relMouseY)
-                {
-                    if (line.Width < relMouseX)
-                    {
-                        TickMousePosition(indexOffset + content.Length, shiftDown);
-                        return;
-                    }
-                    float lastWidth = 0;
-                    for (int j = 0; j <= content.Length; j++)
-                    {
-                        float width = piece.Font.MeasureFancyText(content[..j]);
-                        if (width >= relMouseX)
-                        {
-                            int diff = relMouseX - lastWidth >= width - relMouseX ? 0 : 1;
-                            TickMousePosition(indexOffset + j - diff, shiftDown);
-                            return;
-                        }
-                        lastWidth = width;
-                    }
-                }
-                indexOffset += content.Length;
-            }
-            indexOffset++;
+            TickMousePosition(mouseCursorPosition, shiftDown);
         }
     }
 
@@ -527,15 +380,17 @@ public class UIInputLabel : UIElement
     /// <param name="keys">The current keyboard state.</param>
     public void TickControlKeys(KeyHandlerState keys)
     {
-        if (keys.CopyPressed && Internal.HasSelection)
+        if (keys.CopyPressed && Paragraph.HasSelection)
         {
-            TextCopy.ClipboardService.SetText(Internal.TextBetween.Content);
+            // TODO: Paragraph.SelectedContent
+            TextCopy.ClipboardService.SetText(Paragraph.InputInternal.LabelCenter.Content);
         }
         if (keys.AllPressed)
         {
-            Internal.CursorStart = 0;
-            Internal.CursorEnd = TextContent.Length;
-            UpdateText();
+            // TODO: Paragraph.SelectAll()
+            Paragraph.CursorStart = 0;
+            Paragraph.CursorEnd = Content.Length;
+            UpdateRenderState();
         }
     }
 
@@ -555,10 +410,4 @@ public class UIInputLabel : UIElement
         // TODO: Handle ctrl+Z, ctrl+Y
         // TODO: Handle HOME, END
     }
-
-    /// <inheritdoc/>
-    public override void Render(double delta, UIStyle style) => Box?.Render(delta, style);
-
-    /// <inheritdoc/>
-    public override List<string> GetDebugInfo() => [$"^7Indices: ^3[{Internal.IndexLeft} {Internal.IndexRight}] ^&| ^7Cursors: ^3[{Internal.CursorStart} {Internal.CursorEnd}]"];
 }

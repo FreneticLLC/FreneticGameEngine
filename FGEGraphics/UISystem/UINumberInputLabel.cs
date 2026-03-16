@@ -59,7 +59,7 @@ public class UINumberInputLabel : UIInputLabel
         set
         {
             NumberLabelInternal.Value = value;
-            TextContent = value.ToString(Format);
+            Content = value.ToString(Format);
         }
     }
 
@@ -96,8 +96,8 @@ public class UINumberInputLabel : UIInputLabel
         {
             string toAdd = CharacterMatcher.TrimToMatches(diff);
             // FIXME: range errors when replacing text. maybe need EditType.Replace
-            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexRight..];
-            Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
+            result = result[..(Paragraph.CursorLeft - diff.Length)] + toAdd + result[Paragraph.CursorRight..];
+            Paragraph.SetCursorPosition(Paragraph.CursorLeft - diff.Length + toAdd.Length);
             return result;
         }
         if (result.Length == 0 && !PlaceholderInfo.IsEmpty)

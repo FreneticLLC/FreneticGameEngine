@@ -156,10 +156,10 @@ public class UINumberSlider : UIElement
         };
         if (trackLabelEdits)
         {
-            label.OnTextEdit += _ => slider.Value = double.TryParse(label.TextContent, out double value) ? Math.Clamp(value, slider.Min, slider.Max) : slider.Default;
+            label.OnTextEdit += _ => slider.Value = double.TryParse(label.Content, out double value) ? Math.Clamp(value, slider.Min, slider.Max) : slider.Default;
         }
         label.PlaceholderInfo.Content = null;
-        label.TextContent = slider.Default.ToString(label.Format);
+        label.Content = slider.Default.ToString(label.Format);
         list.AddListItem(slider);
         list.AddListItem(label);
         return list;
