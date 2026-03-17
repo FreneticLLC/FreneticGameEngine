@@ -25,6 +25,9 @@ public class JointNoCollide(EntityPhysicsProperty _one, EntityPhysicsProperty _t
     /// <summary>Reference to the second entity's physics property.</summary>
     public EntityPhysicsProperty PhysicsTwo = _two;
 
+    /// <inheritdoc/>
+    public override bool JointImpliesPhysicalLinkage => false;
+
     /// <summary>Implements <see cref="GenericBaseJoint.Enable"/>.</summary>
     public override void Enable()
     {

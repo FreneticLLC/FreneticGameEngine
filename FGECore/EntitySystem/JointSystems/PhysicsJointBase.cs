@@ -23,11 +23,14 @@ public abstract class PhysicsJointBase : GenericBaseJoint
     /// <summary>The applicable physics entities for this joint.</summary>
     public EntityPhysicsProperty One, Two;
 
-    /// <summary>Implements <see cref="GenericBaseJoint.EntityOne"/>.</summary>
+    /// <inheritdoc/>
     public override BasicEntity EntityOne => One.Entity;
 
-    /// <summary>Implements <see cref="GenericBaseJoint.EntityTwo"/>.</summary>
+    /// <inheritdoc/>
     public override BasicEntity EntityTwo => Two.Entity;
+
+    /// <inheritdoc/>
+    public override bool JointImpliesPhysicalLinkage => true;
 
     /// <summary>Gets the relevant <see cref="PhysicsSpace"/>.</summary>
     public PhysicsSpace PhysicsWorld => One.PhysicsWorld;

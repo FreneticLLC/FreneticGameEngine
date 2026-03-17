@@ -37,6 +37,9 @@ public class JointForceWeld : NonPhysicalJointBase
     /// <summary>Gets the Physics world offset value.</summary>
     public Location WorldOffset => EngineGeneric.PhysicsWorldGeneric.Offset;
 
+    /// <inheritdoc/>
+    public override bool JointImpliesPhysicalLinkage => true;
+
     /// <summary>Gets the correct pose reference data for the given entity. Location is offset by <see cref="WorldOffset"/>.</summary>
     public RigidPose GetPoseFrom(BasicEntity entity)
     {

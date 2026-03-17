@@ -24,6 +24,9 @@ public abstract class GenericBaseJoint : IEquatable<GenericBaseJoint>
     /// <summary>Get the second entity in the joint.</summary>
     public abstract BasicEntity EntityTwo { get; }
 
+    /// <summary>If true, the joint implies a physical linkage between two entities. This is used for example when determining whether a teleport on one entity should teleport the other.</summary>
+    public abstract bool JointImpliesPhysicalLinkage { get; }
+
     /// <summary>Get the generic engine backing this joint.</summary>
     public BasicEngine EngineGeneric => EntityOne.EngineGeneric;
 
