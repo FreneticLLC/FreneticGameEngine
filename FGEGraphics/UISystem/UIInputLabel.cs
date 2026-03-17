@@ -58,6 +58,7 @@ public class UIInputLabel : UIElement
     /// <inheritdoc/>
     public override string Name => "Input Label";
 
+    /// <summary>The paragraph to display the state of this input label.</summary>
     public UIInputParagraph Paragraph;
 
     /// <summary>The box behind the input label.</summary>
