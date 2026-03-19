@@ -177,7 +177,7 @@ public partial class SysConsole
         /// <param name="text">The text to write.</param>
         public static void WriteInternal(string text)
         {
-            if (FSOUT != null)
+            if (FSOUT is not null)
             {
                 byte[] b = StringConversionHelper.UTF8Encoding.GetBytes(text);
                 FSOUT.Write(b, 0, b.Length);

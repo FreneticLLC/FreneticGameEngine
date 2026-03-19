@@ -13,9 +13,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using BepuPhysics;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
+using BepuPhysics;
 
 namespace FGECore.EntitySystem.JointSystems.NonPhysicsJoints;
 
