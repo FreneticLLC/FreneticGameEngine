@@ -61,7 +61,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
     public string Name = _name.ToLowerFast();
 
     /// <summary>Size of the font set.</summary>
-    public int Size;// = fontsize;
+    public int Size;
 
     /// <summary>Height, in pixels, of this fontset (based on <see cref="FontDefault"/>'s height) (ie how tall a standard symbol is, or how wide the line gap needs to be).</summary>
     public int Height => FontDefault.Height;

@@ -6,8 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using BepuUtilities.Collections;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;

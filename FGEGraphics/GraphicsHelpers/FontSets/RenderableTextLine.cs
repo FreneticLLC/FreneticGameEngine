@@ -15,6 +15,9 @@ using System.Threading.Tasks;
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 /// <summary>Represents a single line of renderable text.</summary>
+/// <param name="Parts">The text parts.</param>
+/// <param name="Width">The line width.</param>
+/// <param name="Height">The line height.</param>
 public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Height)
 {
     /// <summary>An empty <see cref="RenderableTextLine"/> instance</summary>
@@ -29,10 +32,9 @@ public record RenderableTextLine(RenderableTextPart[] Parts, int Width, int Heig
     /// that also describe the <see cref="Width"/> and <see cref="Height"/>.
     /// </summary>
     /// <param name="parts">The text parts.</param>
+    /// <param name="height">The line height.</param>
     public RenderableTextLine(RenderableTextPart[] parts, int height = 0)
-        : this(parts,
-              (int)parts.Sum(part => part?.Width),
-              parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : height)
+        : this(parts, (int)parts.Sum(part => part?.Width), parts.Length > 0 ? parts.Max(part => part?.Font.Height ?? 0) : height)
     { }
 
     /// <inheritdoc/>

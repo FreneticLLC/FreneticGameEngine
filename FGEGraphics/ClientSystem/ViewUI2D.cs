@@ -130,8 +130,7 @@ public class ViewUI2D
         }
         IEnumerable<(int, IEnumerable<string>)> topDebugStack = debugInfoStack.Take(Math.Min(5, debugInfoStack.Count));
         int minimumTreeLevel = topDebugStack.Min(entry => entry.Item1);
-        string debugInfo = topDebugStack
-            .Select(entry =>
+        string debugInfo = topDebugStack.Select(entry =>
             {
                 string prefix = new(' ', (entry.Item1 - minimumTreeLevel) * 2);
                 return entry.Item2.Select(line => $"{prefix}{line}").JoinString("\n");

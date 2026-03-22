@@ -1,4 +1,4 @@
-﻿//
+//
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
 // See README.md or LICENSE.txt in the FreneticGameEngine source root for the contents of the license.
@@ -18,6 +18,9 @@ using System.Threading.Tasks;
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
 /// <summary>Represents a section of renderable text.</summary>
+/// <param name="Lines">The text lines.</param>
+/// <param name="Width">The total text width.</param>
+/// <param name="Height">The total text height.</param>
 public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
 {
     /// <summary>An empty <see cref="RenderableText"/> instance.</summary>
@@ -33,9 +36,7 @@ public record RenderableText(RenderableTextLine[] Lines, int Width, int Height)
 
     /// <param name="lines">The text lines.</param>
     public RenderableText(RenderableTextLine[] lines) :
-        this(lines,
-            lines.Length > 0 ? lines.Max(line => line?.Width ?? 0) : 0,
-            lines.Sum(line => line?.Height ?? 0))
+        this(lines, lines.Length > 0 ? lines.Max(line => line?.Width ?? 0) : 0, lines.Sum(line => line?.Height ?? 0))
     { }
 
     /// <summary>Returns the width and height of this renderable object scaled to the given font set.</summary>
