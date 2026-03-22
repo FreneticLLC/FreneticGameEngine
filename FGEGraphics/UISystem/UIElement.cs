@@ -761,12 +761,12 @@ public abstract class UIElement
     public List<string> GetBaseDebugInfo()
     {
         string name = Name ?? GetType().ToString();
-        List<string> info = new(4)
-        {
+        List<string> info =
+        [
             $"^{(this == View.HeldElement ? "2" : "5")}^u{name} ^&[{ElementInternal.TreeLevel}]",
             $"^7Position: ^3({X}, {Y}) ^&| ^7Size: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation} ^&| ^7Scale: ^3{Scale}x",
             $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
-        };
+        ];
         if (ElementInternal.Styles.Count > 0)
         {
             List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
