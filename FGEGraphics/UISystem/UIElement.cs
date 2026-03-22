@@ -103,7 +103,7 @@ public abstract class UIElement
     public virtual string Name { get; set; } = null;
 
     /// <summary>Whether this element displays additional information in debug mode.</summary>
-    public bool IgnoreDebug = false;
+    public bool AllowDebug = true;
 
     /// <summary>
     /// Whether this element should scale its width based on <see cref="Scale"/>.

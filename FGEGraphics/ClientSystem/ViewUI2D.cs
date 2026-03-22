@@ -118,7 +118,7 @@ public class ViewUI2D
         Stack<(int, IEnumerable<string>)> debugInfoStack = [];
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
-            if (element.ElementInternal.IsMouseHovered && !element.IgnoreDebug)
+            if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
             {
                 List<string> debugLines = [.. element.GetBaseDebugInfo(), .. element.GetDebugInfo()];
                 debugInfoStack.Push((element.ElementInternal.TreeLevel, debugLines.Select(line => $"^r^0^h^o^e{line}^r")));
