@@ -98,17 +98,17 @@ public class EntityPhysicsCharacterProperty : BasicEntityProperty
     public enum Stance
     {
         /// <summary>The character is standing normally.</summary>
-        STANDING,
+        STANDING = 1,
         /// <summary>The character is crouching.</summary>
-        CROUCHING,
+        CROUCHING = 2,
         /// <summary>The character is prone (laying down).</summary>
-        PRONE
+        PRONE = 3
     }
 
     /// <summary>Which stance the character is currently in.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
-    public Stance CurrentStance = Stance.STANDING;
+    public Stance CurrentStance = 0;
 
     /// <summary>Set to true to indicate that the character should be trying to jump (will only actually jump if ground supports it).</summary>
     [PropertyDebuggable]
