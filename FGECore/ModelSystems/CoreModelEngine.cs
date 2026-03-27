@@ -160,7 +160,7 @@ public class CoreModelEngine
         }
         void fileMissing()
         {
-            Logs.Warning($"[CoreModelEngine] Cannot load non-existence model info file '{TextStyle.Standout}{targetPath}{TextStyle.Base}'. {Instance.Files.WarnWhyFileMissing(targetPath)}");
+            Logs.Warning($"[CoreModelEngine] Cannot load non-existent model info file '{TextStyle.Standout}{targetPath}{TextStyle.Base}'. {Instance.Files.WarnWhyFileMissing(targetPath)}");
             onFailure?.Invoke();
         }
         void handleError(string message)
