@@ -105,13 +105,27 @@ public class ModelHandler
                 float f1 = dr.ReadFloat();
                 float f2 = dr.ReadFloat();
                 float f3 = dr.ReadFloat();
-                mesh.Vertices[v] = new Vector3(f1, f2, f3);
+                Vector3 vert = new(f1, f2, f3);
+                mesh.Vertices[v] = vert;
+#if DEBUG
+                if (vert.LengthSquared() > 9999999 || vert.ToLocation().IsNaNOrInfinite())
+                {
+                    throw new Exception($"Model3D: Invalid vertex data in mesh {mesh.Name}, vertex index {v}, value is {vert} (contains infinite, nan, or extremely massive value).");
+                }
+#endif
             }
             int indiceCount = dr.ReadInt() * 3;
             mesh.Indices = new uint[indiceCount];
             for (int i = 0; i < indiceCount; i++)
             {
-                mesh.Indices[i] = dr.ReadUInt();
+                uint ind = dr.ReadUInt();
+                mesh.Indices[i] = ind;
+#if DEBUG
+                if (ind > vertexCount)
+                {
+                    throw new Exception($"Model3D: Invalid index data in mesh {mesh.Name}, index {i}, value is {ind} (expected range [0..{vertexCount}]).");
+                }
+#endif
             }
             int tcCount = dr.ReadInt();
             mesh.TexCoords = new Vector2[tcCount];
@@ -119,7 +133,14 @@ public class ModelHandler
             {
                 float f1 = dr.ReadFloat();
                 float f2 = dr.ReadFloat();
-                mesh.TexCoords[t] = new Vector2(f1, f2);
+                Vector2 tc = new(f1, f2);
+                mesh.TexCoords[t] = tc;
+#if DEBUG
+                if (tc.X < -1 || tc.Y < -1 || tc.X > 2 || tc.Y > 2 || new Location(tc.X, tc.Y, 0).IsNaNOrInfinite())
+                {
+                    throw new Exception($"Model3D: Invalid texture-coordinate data in mesh {mesh.Name}, index {t}, value is {tc} (expected range [0..1]).");
+                }
+#endif
             }
             int normCount = dr.ReadInt();
             mesh.Normals = new Vector3[normCount];
@@ -128,7 +149,14 @@ public class ModelHandler
                 float f1 = dr.ReadFloat();
                 float f2 = dr.ReadFloat();
                 float f3 = dr.ReadFloat();
-                mesh.Normals[n] = new Vector3(f1, f2, f3);
+                Vector3 normal = new(f1, f2, f3);
+                mesh.Normals[n] = normal;
+#if DEBUG
+                if (normal.LengthSquared() > 1.01 || normal.LengthSquared() < 0.99 || normal.ToLocation().IsNaNOrInfinite())
+                {
+                    throw new Exception($"Model3D: Invalid normal data in mesh {mesh.Name}, normal index {n}, value is {normal} length-squared={normal.LengthSquared()} (expected length squared always exactly 1.0).");
+                }
+#endif
             }
             int boneCount = dr.ReadInt();
             mesh.Bones = new Model3DBone[boneCount];
