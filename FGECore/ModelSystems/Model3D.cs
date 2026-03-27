@@ -53,11 +53,11 @@ public class Model3D
     /// <summary>Calculates a simple bounding box for this model.</summary>
     public AABB GetBounds()
     {
-        Location start = Meshes[0].Vertices[0].ToLocation();
+        Location start = Meshes.First(m => m.IsVisible && !m.NoCollide).Vertices[0].ToLocation();
         AABB box = new(start, start);
         foreach (Model3DMesh mesh in Meshes)
         {
-            if (!mesh.IsVisible)
+            if (!mesh.IsVisible || mesh.NoCollide)
             {
                 continue;
             }
