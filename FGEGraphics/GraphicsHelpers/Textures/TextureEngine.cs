@@ -175,9 +175,10 @@ public class TextureEngine : IDisposable
             Width = White.Width,
             Height = White.Height
         };
+        string targetName = $"textures/{textureName}.png";
         void handleError(string message)
         {
-            Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}': {message}");
+            Logs.Error($"Failed to load texture from filename '{TextStyle.Standout}{targetName}{TextStyle.Base}': {message}");
             Schedule.ScheduleSyncTask(() =>
             {
                 texture.Destroy();
@@ -247,7 +248,7 @@ public class TextureEngine : IDisposable
         void irrelevantMissing() { }
         void fileMissing()
         {
-            Logs.Warning($"Cannot load texture, file '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Base}' does not exist.");
+            Logs.Warning($"Cannot load non-existent texture '{TextStyle.Standout}{targetName}{TextStyle.Base}'. {Files.WarnWhyFileMissing(targetName)}");
             Schedule.ScheduleSyncTask(() =>
             {
                 texture.Destroy();
@@ -256,12 +257,12 @@ public class TextureEngine : IDisposable
         }
         if (highPriority)
         {
-            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.FASTEST);
+            AssetStreaming.AddGoal(targetName, false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.FASTEST);
         }
         else
         {
             AssetStreaming.AddGoal($"textures/{textureName}.thumb.jpg", false, processThumb, irrelevantMissing, handleError, priority: AssetStreamingEngine.GoalPriority.FAST);
-            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.SLOW);
+            AssetStreaming.AddGoal(targetName, false, processLoad, fileMissing, handleError, AlternateImageFileExtensions, priority: AssetStreamingEngine.GoalPriority.SLOW);
         }
         return texture;
     }

@@ -347,6 +347,27 @@ public class FileEngine
         return false;
     }
 
+    /// <summary>Create a debug warning message to explain why a file path does not exist, checking for the existence of folders in the path. Only makes sense if the file is missing.</summary>
+    /// <param name="filename">The name of the file.</param>
+    public string WarnWhyFileMissing(string filename)
+    {
+        filename = CleanFileName(filename);
+        if (FileExists(filename))
+        {
+            return $"File '{filename}' does exist.";
+        }
+        string[] folders = filename.SplitFast('/');
+        for (int i = 1; i < folders.Length; i++)
+        {
+            string folderPath = folders.Take(i).JoinString("/");
+            if (!FolderExists(folderPath))
+            {
+                return $"Folder '{folderPath}' does not exist";
+            }
+        }
+        return $"The folder path exists, but the file '{folders[^1]}' does not exist";
+    }
+
     /// <summary>Returns whether a file exists within a package (overriding any raw files except the saves folder) by the given name.</summary>
     /// <param name="filename">The name of the file.</param>
     /// <returns>A boolean indicating whether the file exists.</returns>

@@ -76,6 +76,7 @@ public class CoreModelEngine
             onLoad(existing);
             return;
         }
+        string targetPath = $"models/{modelName}.fmd";
         void processLoad(byte[] data)
         {
             Model3D scene = Handler.LoadModel(data);
@@ -85,17 +86,17 @@ public class CoreModelEngine
         }
         void fileMissing()
         {
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}' does not exist.");
+            Logs.Warning($"[CoreModelEngine] Cannot load non-existent model data '{TextStyle.Standout}{targetPath}{TextStyle.Base}'. {Instance.Files.WarnWhyFileMissing(targetPath)}");
             onFailure?.Invoke();
         }
         void handleError(string message)
         {
-            Logs.Error($"Failed to load model from data filename '{TextStyle.Standout}models/{modelName}.fmd{TextStyle.Base}': {message}");
+            Logs.Error($"[CoreModelEngine] Failed to load model from data filename '{TextStyle.Standout}{targetPath}{TextStyle.Base}': {message}");
             onFailure?.Invoke();
         }
         if (loadNow)
         {
-            if (Instance.Files.TryReadFileData($"models/{modelName}.fmd", out byte[] bits))
+            if (Instance.Files.TryReadFileData(targetPath, out byte[] bits))
             {
                 processLoad(bits);
             }
@@ -106,7 +107,7 @@ public class CoreModelEngine
         }
         else
         {
-            Instance.AssetStreaming.AddGoal($"models/{modelName}.fmd", false, processLoad, fileMissing, handleError);
+            Instance.AssetStreaming.AddGoal(targetPath, false, processLoad, fileMissing, handleError);
         }
     }
 
@@ -124,6 +125,7 @@ public class CoreModelEngine
             onLoad(existing);
             return;
         }
+        string targetPath = $"models/{modelName}.fmi";
         void processLoad(byte[] data)
         {
             string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
@@ -138,7 +140,7 @@ public class CoreModelEngine
                 string[] datums = line.SplitFast('=');
                 if (datums.Length != 2)
                 {
-                    Logs.Warning($"Invalid line in model info file models/{modelName}.fmi: {line}");
+                    Logs.Warning($"[CoreModelEngine] Invalid line in model info file '{targetPath}' (missing a '=' symbol): {line}");
                     continue;
                 }
                 if (datums[0] == "model")
@@ -158,17 +160,17 @@ public class CoreModelEngine
         }
         void fileMissing()
         {
-            Logs.Warning($"Cannot load model, file '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}' does not exist.");
+            Logs.Warning($"[CoreModelEngine] Cannot load non-existence model info file '{TextStyle.Standout}{targetPath}{TextStyle.Base}'. {Instance.Files.WarnWhyFileMissing(targetPath)}");
             onFailure?.Invoke();
         }
         void handleError(string message)
         {
-            Logs.Error($"Failed to load model from info filename '{TextStyle.Standout}models/{modelName}.fmi{TextStyle.Base}': {message}");
+            Logs.Error($"[CoreModelEngine] Failed to load model from info filename '{TextStyle.Standout}{targetPath}{TextStyle.Base}': {message}");
             onFailure?.Invoke();
         }
         if (loadNow)
         {
-            if (Instance.Files.TryReadFileData($"models/{modelName}.fmi", out byte[] bits))
+            if (Instance.Files.TryReadFileData(targetPath, out byte[] bits))
             {
                 processLoad(bits);
             }
@@ -179,7 +181,7 @@ public class CoreModelEngine
         }
         else
         {
-            Instance.AssetStreaming.AddGoal($"models/{modelName}.fmi", false, processLoad, fileMissing, handleError);
+            Instance.AssetStreaming.AddGoal(targetPath, false, processLoad, fileMissing, handleError);
         }
     }
 }

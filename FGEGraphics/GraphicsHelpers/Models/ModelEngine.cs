@@ -240,14 +240,14 @@ public class ModelEngine
                         }
                         else
                         {
-                            Logs.Warning($"While loading model '{modelName}': Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)!");
+                            Logs.Warning($"[FGE ModelEngine] While loading model '{modelName}': Unknown model info texture type: '{texType}', expected 'reflectivity', 'specular', 'normal', or empty (color)! From .fmi data line '{line}'");
                         }
                         success = true;
                         model.Skinned = true;
                     }
                     if (!success)
                     {
-                        Logs.Warning($"While loading model '{modelName}': Unknown skin entry {datums[0]}, available: {model.Meshes.Select(m => m.Name).JoinString(", ")}");
+                        Logs.Warning($"[FGE ModelEngine] While loading model '{modelName}': Unknown skin entry '{datums[0]}' in the .fmi skin data, available skinnable meshes in the model data: [{model.Meshes.Select(m => m.Name).JoinString(", ")}]. Check that the skin name is correct and/or the model meshes were exported with the intended names.");
                     }
                 }
                 onLoad?.Invoke(model);
