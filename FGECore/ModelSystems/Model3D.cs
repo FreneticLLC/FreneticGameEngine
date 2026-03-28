@@ -17,6 +17,7 @@ using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
+using FGECore.CoreSystems;
 
 namespace FGECore.ModelSystems;
 
@@ -65,6 +66,11 @@ public class Model3D
             {
                 box.Include(vert.ToLocation());
             }
+        }
+        if (box.Min.IsNaNOrInfinite() || box.Max.IsNaNOrInfinite())
+        {
+            Logs.Error($"Model {Name} has invalid bounds ({box}), defaulting to [-1..1] backup.");
+            box = new(-Location.One, Location.One);
         }
         return box;
     }
