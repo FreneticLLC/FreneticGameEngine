@@ -29,8 +29,10 @@ public class ModelHandler
 {
     /// <summary>Loads a model from .FMD (Frenetic Model Data) input.</summary>
     /// <param name="data">The input FMD data.</param>
-    public Model3D LoadModel(byte[] data)
+    /// <param name="offset">Optional vertex offset.</param>
+    public Model3D LoadModel(byte[] data, Location offset = default)
     {
+        Vector3 offsetFloat = offset.ToNumerics();
         // TODO: Remove VMD option!
         if (data.Length < "FMD001".Length || (data[0] != 'F' && data[0] != 'V') || data[1] != 'M' || data[2] != 'D')
         {
@@ -106,7 +108,7 @@ public class ModelHandler
                 float f2 = dr.ReadFloat();
                 float f3 = dr.ReadFloat();
                 Vector3 vert = new(f1, f2, f3);
-                mesh.Vertices[v] = vert;
+                mesh.Vertices[v] = vert + offsetFloat;
 #if DEBUG
                 if (vert.LengthSquared() > 9999999 || vert.ToLocation().IsNaNOrInfinite())
                 {

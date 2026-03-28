@@ -17,6 +17,7 @@ using FreneticUtilities.FreneticToolkit;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
+using FGECore.MathHelpers;
 
 namespace FGECore.ModelSystems;
 
@@ -67,11 +68,13 @@ public class CoreModelEngine
     /// <param name="onLoad">Action to fire after the model data has loaded. Does not fire if the model fails to load. Fire on an arbitrary thread.</param>
     /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
     /// <param name="onFailure">Optional action to fire when loading fails for any reason.</param>
+    /// <param name="offset">Optional vertex offset to apply.</param>
     /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
-    public void InternalLoadDirectModelDynamic(string modelName, Action<Model3D> onLoad, Action onFailure = null, bool loadNow = false)
+    public void InternalLoadDirectModelDynamic(string modelName, Action<Model3D> onLoad, Action onFailure = null, bool loadNow = false, Location offset = default)
     {
         modelName = FileEngine.CleanFileName(modelName);
-        if (LoadedDirectModels.TryGetValue(modelName, out Model3D existing))
+        string cacheKey = offset == Location.Zero ? modelName : $"{modelName}\noffset={offset}";
+        if (LoadedDirectModels.TryGetValue(cacheKey, out Model3D existing))
         {
             onLoad(existing);
             return;
@@ -79,9 +82,9 @@ public class CoreModelEngine
         string targetPath = $"models/{modelName}.fmd";
         void processLoad(byte[] data)
         {
-            Model3D scene = Handler.LoadModel(data);
+            Model3D scene = Handler.LoadModel(data, offset);
             scene.Name = modelName;
-            LoadedDirectModels[modelName] = scene;
+            LoadedDirectModels[cacheKey] = scene;
             onLoad(scene);
         }
         void fileMissing()
@@ -138,6 +141,7 @@ public class CoreModelEngine
             string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
             string[] lines = fileText.SplitFast('\n');
             string fmdName = cleanName;
+            Location offset = Location.Zero;
             foreach (string line in lines)
             {
                 if (line.Length == 0)
@@ -153,6 +157,10 @@ public class CoreModelEngine
                 if (datums[0] == "model")
                 {
                     fmdName = datums[1];
+                }
+                else if (datums[0] == "offset")
+                {
+                    offset = Location.FromString(datums[1]);
                 }
             }
             void doNextStep(Model3D model)
