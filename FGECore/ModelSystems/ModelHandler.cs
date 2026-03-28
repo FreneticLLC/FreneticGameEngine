@@ -32,7 +32,6 @@ public class ModelHandler
     /// <param name="offset">Optional vertex offset.</param>
     public Model3D LoadModel(byte[] data, Location offset = default)
     {
-        Vector3 offsetFloat = offset.ToNumerics();
         // TODO: Remove VMD option!
         if (data.Length < "FMD001".Length || (data[0] != 'F' && data[0] != 'V') || data[1] != 'M' || data[2] != 'D')
         {
@@ -108,7 +107,7 @@ public class ModelHandler
                 float f2 = dr.ReadFloat();
                 float f3 = dr.ReadFloat();
                 Vector3 vert = new(f1, f2, f3);
-                mesh.Vertices[v] = vert + offsetFloat;
+                mesh.Vertices[v] = vert;
 #if DEBUG
                 if (vert.LengthSquared() > 9999999 || vert.ToLocation().IsNaNOrInfinite())
                 {
@@ -184,14 +183,23 @@ public class ModelHandler
             if (node.Name.StartsWithFast("marker_center"))
             {
                 Matrix4x4 mat = Matrix4x4.Transpose(node.GetMatrix());
-                offsetFloat = -mat.Translation;
-                foreach (Model3DMesh mesh in mod.Meshes)
+                offset -= mat.Translation.ToLocation();
+            }
+        }
+        if (offset.LengthSquared() > 0.0001)
+        {
+            // TODO: Maybe a rot too?
+            Vector3 offsetFloat = offset.ToNumerics();
+            foreach (Model3DMesh mesh in mod.Meshes)
+            {
+                for (int v = 0; v < mesh.Vertices.Length; v++)
                 {
-                    for (int v = 0; v < mesh.Vertices.Length; v++)
-                    {
-                        mesh.Vertices[v] += offsetFloat;
-                    }
+                    mesh.Vertices[v] += offsetFloat;
                 }
+            }
+            foreach (Model3DNode n in mod.RootNode.AllNodes())
+            {
+                n.MatrixA = Matrix4x4.Transpose(Matrix4x4.Multiply(Matrix4x4.Transpose(n.MatrixA), Matrix4x4.CreateTranslation(offsetFloat)));
             }
         }
         return mod;
