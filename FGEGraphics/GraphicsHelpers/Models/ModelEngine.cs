@@ -128,61 +128,6 @@ public class ModelEngine
         return Loaded;
     }
 
-    /// <summary>Dynamically loads a direct data (.fmd - Frenetic Model Data) format model (by default returns a temporary copy of 'Cube', then fills it in when possible).
-    /// <para><see cref="Model.IsLoaded"/> will be <c>false</c> until loaded, then <c>true</c> when ready. May stay false forever if the model file does not exist.</para></summary>
-    /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmd".</param>
-    /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
-    /// <param name="loadInto">Optional, existing model object to load the model data into. If unspecified, a placeholder cube model will be generated.</param>
-    /// <param name="onLoad">Optional action to fire after the model data has loaded. Runs on the main thread.</param>
-    /// <param name="setLoaded">If true, set <see cref="Model.IsLoaded"/> to true. If false, do not (eg for onLoad to have its own action).</param>
-    /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
-    public Model GetDirectModelDynamic(string modelName, bool loadNow = false, Model loadInto = null, Action<Model> onLoad = null, bool setLoaded = true)
-    {
-        modelName = FileEngine.CleanFileName(modelName);
-        Model model = loadInto ?? new(modelName) { Engine = this, Root = Cube.Root, RootNode = Cube.RootNode, Meshes = Cube.Meshes, MeshMap = Cube.MeshMap, Original = Cube.Original };
-        if (loadInto is null)
-        {
-            LoadedModels.Add(modelName, model);
-        }
-        CoreModels.LoadDirectModelDynamic(modelName, scene =>
-        {
-            List<KeyValuePair<ModelMesh, Renderable.ArrayBuilder>> builders = [];
-            Model mod = FromSceneNoGenerate(null, scene, modelName, builders);
-            void proc()
-            {
-                foreach (KeyValuePair<ModelMesh, Renderable.ArrayBuilder> builder in builders)
-                {
-                    builder.Key.BaseRenderable.GenerateVBO(builder.Value);
-                }
-                model.Meshes = mod.Meshes;
-                model.MeshMap = mod.MeshMap;
-                model.Original = mod.Original;
-                model.Root = mod.Root;
-                model.RootNode = mod.RootNode;
-                model.LODHelper = null;
-                model.LODBox = default;
-                AABB bounds = scene.GetBounds();
-                model.ModelBounds = bounds;
-                model.IsLoaded = setLoaded;
-                onLoad?.Invoke(model);
-                foreach (Action<Model> action in model.OnLoadActions)
-                {
-                    action.Invoke(model);
-                }
-                model.OnLoadActions.Clear();
-            }
-            if (loadNow)
-            {
-                proc();
-            }
-            else
-            {
-                Window.Schedule.ScheduleSyncTask(proc);
-            }
-        }, loadNow: loadNow);
-        return model;
-    }
-
     /// <summary>Dynamically loads an info (.fmi - Frenetic Model Info) format model (by default returns a temporary copy of 'Cube', then fills it in when possible).
     /// <para><see cref="Model.IsLoaded"/> will be <c>false</c> until loaded, then <c>true</c> when ready. May stay false forever if the model file does not exist.</para></summary>
     /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>

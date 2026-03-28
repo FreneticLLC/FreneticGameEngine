@@ -68,7 +68,7 @@ public class CoreModelEngine
     /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
     /// <param name="onFailure">Optional action to fire when loading fails for any reason.</param>
     /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
-    public void LoadDirectModelDynamic(string modelName, Action<Model3D> onLoad, Action onFailure = null, bool loadNow = false)
+    public void InternalLoadDirectModelDynamic(string modelName, Action<Model3D> onLoad, Action onFailure = null, bool loadNow = false)
     {
         modelName = FileEngine.CleanFileName(modelName);
         if (LoadedDirectModels.TryGetValue(modelName, out Model3D existing))
@@ -156,7 +156,7 @@ public class CoreModelEngine
                 LoadedModels[modelName] = model;
                 onLoad?.Invoke(model);
             }
-            LoadDirectModelDynamic(fmdName, loadNow: loadNow, onLoad: doNextStep, onFailure: onFailure);
+            InternalLoadDirectModelDynamic(fmdName, loadNow: loadNow, onLoad: doNextStep, onFailure: onFailure);
         }
         void fileMissing()
         {
