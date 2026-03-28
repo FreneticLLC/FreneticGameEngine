@@ -179,6 +179,21 @@ public class ModelHandler
             }
         }
         mod.RootNode = ReadSingleNode(null, dr);
+        foreach (Model3DNode node in mod.RootNode.AllNodes())
+        {
+            if (node.Name.StartsWithFast("marker_center"))
+            {
+                Matrix4x4 mat = Matrix4x4.Transpose(node.GetMatrix());
+                offsetFloat = -mat.Translation;
+                foreach (Model3DMesh mesh in mod.Meshes)
+                {
+                    for (int v = 0; v < mesh.Vertices.Length; v++)
+                    {
+                        mesh.Vertices[v] += offsetFloat;
+                    }
+                }
+            }
+        }
         return mod;
     }
 
