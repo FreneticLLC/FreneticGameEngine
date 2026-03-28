@@ -76,7 +76,7 @@ public static class SimplexNoise
 }
 
 // mcmonkey - Below code changed from float to double.
-// mcmonkey - additional, empty doc comments were removed, and doc summaries received added periods.
+// mcmonkey - additional, empty doc comments were removed, and doc summaries received added periods, and some basic C# syntax cleanup.
 
 /// <summary>
 /// Implementation of the Perlin simplex noise, an improved Perlin noise algorithm.
@@ -148,7 +148,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
 
         // Calculate the contribution from the three corners
         double t0 = 0.5f - x0 * x0 - y0 * y0;
-        if (t0 < 0.0f) n0 = 0.0f;
+        if (t0 < 0.0f)
+        {
+            n0 = 0.0f;
+        }
         else
         {
             t0 *= t0;
@@ -156,7 +159,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
         }
 
         double t1 = 0.5f - x1 * x1 - y1 * y1;
-        if (t1 < 0.0f) n1 = 0.0f;
+        if (t1 < 0.0f)
+        {
+            n1 = 0.0f;
+        }
         else
         {
             t1 *= t1;
@@ -164,7 +170,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
         }
 
         double t2 = 0.5f - x2 * x2 - y2 * y2;
-        if (t2 < 0.0f) n2 = 0.0f;
+        if (t2 < 0.0f)
+        {
+            n2 = 0.0f;
+        }
         else
         {
             t2 *= t2;
@@ -245,7 +254,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
 
         // Calculate the contribution from the four corners
         double t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
-        if (t0 < 0.0f) n0 = 0.0f;
+        if (t0 < 0.0f)
+        {
+            n0 = 0.0f;
+        }
         else
         {
             t0 *= t0;
@@ -253,7 +265,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
         }
 
         double t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1;
-        if (t1 < 0.0f) n1 = 0.0f;
+        if (t1 < 0.0f)
+        {
+            n1 = 0.0f;
+        }
         else
         {
             t1 *= t1;
@@ -261,7 +276,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
         }
 
         double t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2;
-        if (t2 < 0.0f) n2 = 0.0f;
+        if (t2 < 0.0f)
+        {
+            n2 = 0.0f;
+        }
         else
         {
             t2 *= t2;
@@ -269,7 +287,10 @@ public class SimplexNoiseInternal // mcmonkey - class rename
         }
 
         double t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3;
-        if (t3 < 0.0f) n3 = 0.0f;
+        if (t3 < 0.0f)
+        {
+            n3 = 0.0f;
+        }
         else
         {
             t3 *= t3;
@@ -324,7 +345,11 @@ public class SimplexNoiseInternal // mcmonkey - class rename
     {
         long h = hash & 15;
         double grad = 1.0f + (h & 7);   // Gradient value 1.0, 2.0, ..., 8.0
-        if ((h & 8) != 0) grad = -grad;         // Set a random sign for the gradient
+        // Set a random sign for the gradient
+        if ((h & 8) != 0)
+        {
+            grad = -grad;
+        }
         return (grad * x);           // Multiply the gradient with the distance
     }
 

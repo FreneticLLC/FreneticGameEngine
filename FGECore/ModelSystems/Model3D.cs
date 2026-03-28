@@ -12,12 +12,12 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.EntitySystem.PhysicsHelpers;
 using FGECore.MathHelpers;
 using FGECore.PhysicsSystem;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using FGECore.CoreSystems;
 
 namespace FGECore.ModelSystems;
 

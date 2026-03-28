@@ -127,7 +127,9 @@ public unsafe class CharacterControllers : IDisposable
         FGEDebug.Assert(bodyHandle.Value >= 0 && (bodyHandle.Value >= bodyHandleToCharacterIndex.Length || bodyHandleToCharacterIndex[bodyHandle.Value] == -1),
             "Cannot allocate more than one character for the same body handle.");
         if (bodyHandle.Value >= bodyHandleToCharacterIndex.Length)
+        {
             ResizeBodyHandleCapacity(Math.Max(bodyHandle.Value + 1, bodyHandleToCharacterIndex.Length * 2));
+        }
         var characterIndex = characters.Count;
         ref var character = ref characters.Allocate(pool);
         character = default;
@@ -344,7 +346,9 @@ public unsafe class CharacterControllers : IDisposable
         FGEDebug.Assert(contactCollectionWorkerCaches.Allocated && workerIndex < contactCollectionWorkerCaches.Length && contactCollectionWorkerCaches[workerIndex].SupportCandidates.Allocated,
             "Worker caches weren't properly allocated; did you forget to call PrepareForContacts before collision detection?");
         if (manifold.Count == 0)
+        {
             return false;
+        }
         //It's possible for neither, one, or both collidables to be a character. Check each one, treating the other as a potential support.
         var aIsCharacter = TryReportContacts(pair.A, pair.B, pair, ref manifold, workerIndex);
         var bIsCharacter = TryReportContacts(pair.B, pair.A, pair, ref manifold, workerIndex);
@@ -821,11 +825,15 @@ public unsafe class CharacterControllers : IDisposable
         }
         var targetHandleCapacity = BufferPool.GetCapacityForCount<int>(Math.Max(lastOccupiedIndex + 1, bodyHandleCapacity));
         if (targetHandleCapacity != bodyHandleToCharacterIndex.Length)
+        {
             ResizeBodyHandleCapacity(targetHandleCapacity);
+        }
 
         var targetCharacterCapacity = BufferPool.GetCapacityForCount<int>(Math.Max(characters.Count, characterCapacity));
         if (targetCharacterCapacity != characters.Span.Length)
+        {
             characters.Resize(targetCharacterCapacity, pool);
+        }
     }
 
     bool disposed;
