@@ -112,25 +112,32 @@ public class CoreModelEngine
     }
 
     /// <summary>Dynamically loads an info (.fmi - Frenetic Model Info) format model (by default returns a temporary copy of 'Cube', then fills it in when possible).</summary>
-    /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi".</param>
+    /// <param name="modelName">The relative filename, including folder path, beneath the 'models/' dir. For example, "vehicles/car" as input will match to the file at "models/vehicles/car.fmi". This can also be 'direct:name:model=somefmd'.</param>
     /// <param name="loadNow">If true, the model must load immediately, even if the game will freeze because of it. If false, a dynamic load with a placeholder will be used.</param>
     /// <param name="onLoad">Action to fire after the model data has loaded. Does not fire if the model fails to load. Fire on an arbitrary thread.</param>
     /// <param name="onFailure">Optional action to fire when loading fails for any reason.</param>
     /// <returns>The model object, generally only containing placeholder cube data initially.</returns>
     public void GetModelFromInfoDynamic(string modelName, Action<Model3D> onLoad, Action onFailure = null, bool loadNow = false)
     {
-        modelName = FileEngine.CleanFileName(modelName);
-        if (LoadedModels.TryGetValue(modelName, out Model3D existing))
+        string cleanName = FileEngine.CleanFileName(modelName);
+        if (LoadedModels.TryGetValue(cleanName, out Model3D existing))
         {
             onLoad(existing);
             return;
         }
-        string targetPath = $"models/{modelName}.fmi";
+        string targetPath = $"models/{cleanName}.fmi";
+        if (modelName.StartsWith("direct:"))
+        {
+            string data = modelName["direct:".Length..];
+            (string name, string content) = data.BeforeAndAfter(':');
+            processLoad(StringConversionHelper.UTF8Encoding.GetBytes(content));
+            return;
+        }
         void processLoad(byte[] data)
         {
             string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
             string[] lines = fileText.SplitFast('\n');
-            string fmdName = modelName;
+            string fmdName = cleanName;
             foreach (string line in lines)
             {
                 if (line.Length == 0)
@@ -151,9 +158,9 @@ public class CoreModelEngine
             void doNextStep(Model3D model)
             {
                 model = model.Duplicate();
-                model.Name = modelName;
+                model.Name = cleanName;
                 model.InfoDataLines = lines;
-                LoadedModels[modelName] = model;
+                LoadedModels[cleanName] = model;
                 onLoad?.Invoke(model);
             }
             InternalLoadDirectModelDynamic(fmdName, loadNow: loadNow, onLoad: doNextStep, onFailure: onFailure);
