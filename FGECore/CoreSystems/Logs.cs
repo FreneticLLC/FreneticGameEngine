@@ -29,7 +29,7 @@ public class Logs
     /// <summary>A major error.</summary>
     public static void Error(string message)
     {
-        OutputType.ERROR.Output(message);
+        OutputType.ERROR.Output($"{message}\n\n{StackNoteHelper.Notes}");
     }
 
     /// <summary>A major error, with a stack trace.</summary>
