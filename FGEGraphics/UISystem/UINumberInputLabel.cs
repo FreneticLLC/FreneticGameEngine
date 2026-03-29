@@ -27,10 +27,10 @@ public class UINumberInputLabel : UIInputLabel
     public static readonly AsciiMatcher DecimalMatcher = new(AsciiMatcher.Digits + "-.e");
 
     /// <summary>The minimum label value.</summary>
-    public double Min;
+    public double Min = double.MinValue;
 
     /// <summary>The maximum label value.</summary>
-    public double Max;
+    public double Max = double.MaxValue;
 
     /// <summary>Whether the label should be an integer instead of a decimal.</summary>
     public bool Integer;
@@ -59,7 +59,7 @@ public class UINumberInputLabel : UIInputLabel
         set
         {
             NumberLabelInternal.Value = value;
-            TextContent = value.ToString(Format);
+            Content = value.ToString(Format);
         }
     }
 
@@ -96,11 +96,11 @@ public class UINumberInputLabel : UIInputLabel
         {
             string toAdd = CharacterMatcher.TrimToMatches(diff);
             // FIXME: range errors when replacing text. maybe need EditType.Replace
-            result = result[..(Internal.IndexLeft - diff.Length)] + toAdd + result[Internal.IndexRight..];
-            Internal.SetPosition(Internal.IndexLeft - diff.Length + toAdd.Length);
+            result = result[..(Paragraph.CursorLeft - diff.Length)] + toAdd + result[Paragraph.CursorRight..];
+            Paragraph.SetCursorPosition(Paragraph.CursorLeft - diff.Length + toAdd.Length);
             return result;
         }
-        if (result.Length == 0 && !PlaceholderInfo.Empty)
+        if (result.Length == 0 && !PlaceholderInfo.IsEmpty)
         {
             return "";
         }
@@ -140,10 +140,5 @@ public class UINumberInputLabel : UIInputLabel
     }
 
     /// <inheritdoc/>
-    public override List<string> GetDebugInfo()
-    {
-        List<string> info = base.GetDebugInfo();
-        info.Add($"^7Value: ^3{Value}");
-        return info;
-    }
+    public override List<string> GetDebugInfo() => [$"^7Value: ^3{Value}"];
 }

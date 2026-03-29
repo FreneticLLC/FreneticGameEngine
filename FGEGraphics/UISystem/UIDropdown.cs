@@ -27,6 +27,9 @@ namespace FGEGraphics.UISystem;
 // TODO: Add choice at index, remove choice
 public class UIDropdown : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Dropdown";
+
     /// <summary>The text to display when no choice is selected.</summary>
     public string PlaceholderInfo;
 
@@ -110,7 +113,7 @@ public class UIDropdown : UIElement
         {
             Close();
         }
-        Button.Text.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
+        Button.Label.Content = choice is not null ? Internal.ToStrings[choice]() : PlaceholderInfo;
         if (choice is not null)
         {
             OnChoiceSelect?.Invoke(choice);
@@ -147,7 +150,7 @@ public class UIDropdown : UIElement
     public UILabel AddLabelChoice(string choice, UIStyling styling, object tag = null)
     {
         UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
-        AddChoice(label, () => label.Text.Content);
+        AddChoice(label, () => label.Content);
         return label;
     }
 }

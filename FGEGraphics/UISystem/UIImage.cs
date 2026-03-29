@@ -25,6 +25,9 @@ namespace FGEGraphics.UISystem;
 /// <param name="layout">The layout of the element.</param>
 public class UIImage(Texture image, UILayout layout) : UIElement(UIStyling.Empty, layout)
 {
+    /// <inheritdoc/>
+    public override string Name => $"Image \"{Image.Name}\"";
+
     /// <summary>The image to display.</summary>
     public Texture Image = image;
 

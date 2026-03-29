@@ -20,6 +20,9 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a slider element that can choose between a range of real number values.</summary>
 public class UINumberSlider : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Number Slider";
+
     /// <summary>The minimum slider value.</summary>
     public double Min;
 
@@ -153,10 +156,10 @@ public class UINumberSlider : UIElement
         };
         if (trackLabelEdits)
         {
-            label.OnTextEdit += _ => slider.Value = double.TryParse(label.TextContent, out double value) ? Math.Clamp(value, slider.Min, slider.Max) : slider.Default;
+            label.OnTextEdit += _ => slider.Value = double.TryParse(label.Content, out double value) ? Math.Clamp(value, slider.Min, slider.Max) : slider.Default;
         }
         label.PlaceholderInfo.Content = null;
-        label.TextContent = slider.Default.ToString(label.Format);
+        label.Content = slider.Default.ToString(label.Format);
         list.AddListItem(slider);
         list.AddListItem(label);
         return list;

@@ -53,4 +53,16 @@ public record UIAnchor(UIAlignment AlignmentX, UIAlignment AlignmentY)
 
     /// <summary>Bottom right UI Anchor. See <see cref="UIAnchor"/>.</summary>
     public static readonly UIAnchor BOTTOM_RIGHT = new(UIAlignment.RIGHT, UIAlignment.BOTTOM);
+
+    /// <summary>An array of all standard UI Anchors. See <see cref="UIAnchor"/>.</summary>
+    public static readonly UIAnchor[] VALUES = [TOP_LEFT, TOP_CENTER, TOP_RIGHT, CENTER_LEFT, CENTER, CENTER_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT];
+
+    /// <summary>An array of UI Anchors representing corners. See <see cref="UIAnchor"/>.</summary>
+    public static readonly UIAnchor[] CORNERS = [TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT];
+
+    /// <summary>An array of UI Anchors representing cardinal directions. See <see cref="UIAnchor"/>.</summary>
+    public static readonly UIAnchor[] DIRECTIONS = [TOP_CENTER, CENTER_LEFT, CENTER_RIGHT, BOTTOM_CENTER];
+
+    /// <inheritdoc/>
+    public override string ToString() => AlignmentX == AlignmentY ? AlignmentX.ToString() : $"{AlignmentX} {AlignmentY}";
 }

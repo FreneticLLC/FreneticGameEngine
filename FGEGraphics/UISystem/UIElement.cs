@@ -74,6 +74,9 @@ public abstract class UIElement
     /// <summary>The absolute rotation.</summary>
     public float Rotation;
 
+    /// <summary>The absolute scale.</summary>
+    public float Scale;
+
     /// <summary>Gets the absolute X coordinate.</summary>
     /// <seealso cref="Position"/>
     public int X => Position.X;
@@ -96,6 +99,18 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public bool RenderSelf = true;
 
+    /// <summary>The debug name of this element.</summary>
+    public virtual string Name { get; set; } = null;
+
+    /// <summary>Whether this element displays additional information in debug mode.</summary>
+    public bool AllowDebug = true;
+
+    /// <summary>
+    /// Whether this element should scale its width based on <see cref="Scale"/>.
+    /// Even if this value is <c>false</c>, this element's scale still applies to its children.
+    /// </summary>
+    public bool ScaleSize = true;
+
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
@@ -117,6 +132,9 @@ public abstract class UIElement
     /// <summary>Fired when <see cref="Rotation"/> changes value.</summary>
     public Action<float, float> OnRotationChange;
 
+    /// <summary>Fired when <see cref="Scale"/> changes value.</summary>
+    public Action<float, float> OnScaleChange;
+
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
     {
@@ -125,6 +143,9 @@ public abstract class UIElement
 
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
+
+        /// <summary>The node distance of this element relative to the root element.</summary>
+        public int TreeLevel;
 
         /// <summary>The last absolute position.</summary>
         public Vector2i LastPosition;
@@ -135,14 +156,14 @@ public abstract class UIElement
         /// <summary>The last absolute rotation.</summary>
         public float LastRotation;
 
+        /// <summary>The last absolute scale.</summary>
+        public float LastScale;
+
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
 
         /// <summary>Styles registered on this element.</summary>
         public HashSet<UIStyle> Styles = [];
-
-        /// <summary>Text objects registered on this element.</summary>
-        public List<UIText> Texts = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -167,6 +188,10 @@ public abstract class UIElement
     {
         child.IsValid = true;
         child.Parent = this;
+        foreach (UIElement subChild in child.AllChildren())
+        {
+            subChild.ElementInternal.TreeLevel = subChild.Parent.ElementInternal.TreeLevel + 1;
+        }
         if (View is not null)
         {
             foreach (UIElement subChild in child.AllChildren())
@@ -216,6 +241,7 @@ public abstract class UIElement
         child.IsValid = false;
         child.Destroy();
         child.Parent = null;
+        child.ElementInternal.TreeLevel = 0;
         child.View = null;
     }
 
@@ -322,7 +348,6 @@ public abstract class UIElement
 
     /// <summary>
     /// Sets the style of this element.
-    /// <para>Additionally, updates any <see cref="UIText"/> objects attached to this element.</para>
     /// <para>Fires <see cref="OnStyleChange"/> and <see cref="StyleChanged(UIStyle, UIStyle)"/>.</para>
     /// </summary>
     /// <param name="style">The new style. Defaults to <see cref="UIStyle.Empty"/> if <c>null</c>.</param>
@@ -334,41 +359,15 @@ public abstract class UIElement
         {
             return;
         }
-        if (ElementInternal.Styles.Add(style))
-        {
-            if (style.CanRenderText())
-            {
-                foreach (UIText text in ElementInternal.Texts)
-                {
-                    if (!text.Empty && text.Internal.Style is null)
-                    {
-                        text.Internal.Renderables[style] = text.CreateRenderable(style);
-                    }
-                }
-            }
-        }
+        ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
-    public void UpdateStyle(bool updateText = false)
+    public void UpdateStyle()
     {
         SetStyle(Styling.Get(this));
-        if (updateText)
-        {
-            foreach (UIText text in ElementInternal.Texts)
-            {
-                text.UpdateRenderables();
-            }
-        }
-    }
-
-    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
-    /// <param name="from">The previous style.</param>
-    /// <param name="to">The new style.</param>
-    public virtual void StyleChanged(UIStyle from, UIStyle to)
-    {
     }
 
     /// <summary>
@@ -516,12 +515,33 @@ public abstract class UIElement
         }
     }
 
-    /// <summary>Updates positions of this element and its children.</summary>
+    // TODO: Support rotations
+    /// <summary>
+    /// Updates the absolute layout values for this element in the following order:
+    /// <list type="number">
+    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
+    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
+    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
+    /// <item><see cref="Rotation"/></item>
+    /// </list>
+    /// </summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
-    // TODO: should this be virtual?
     public virtual void UpdateTransforms(double delta, Vector3 rotation)
     {
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastSize = Size;
+        ElementInternal.LastRotation = Rotation;
+        ElementInternal.LastScale = Scale;
+        Scale = Layout.Scale;
+        if (ScaleSize)
+        {
+            Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
+        }
+        else
+        {
+            Size = new(Layout.Width, Layout.Height);
+        }
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -552,11 +572,7 @@ public abstract class UIElement
             x = bx;
             y = by;
         }*/
-        ElementInternal.LastPosition = Position;
-        ElementInternal.LastSize = Size;
-        ElementInternal.LastRotation = Rotation;
         Position = new(x, y);
-        Size = new(Layout.Width, Layout.Height);
         Rotation = rotation.Z;
     }
 
@@ -567,17 +583,26 @@ public abstract class UIElement
         if (ElementInternal.LastPosition != Position)
         {
             OnPositionChange?.Invoke(ElementInternal.LastPosition, Position);
+            PositionChanged(ElementInternal.LastPosition, Position);
             anyFired |= true;
         }
         if (ElementInternal.LastSize != Size)
         {
             OnSizeChange?.Invoke(ElementInternal.LastSize, Size);
+            SizeChanged(ElementInternal.LastSize, Size);
             anyFired |= true;
         }
         if (ElementInternal.LastRotation != Rotation)
         {
             OnRotationChange?.Invoke(ElementInternal.LastRotation, Rotation);
+            RotationChanged(ElementInternal.LastRotation, Rotation);
             anyFired |= true;
+        }
+        if (ElementInternal.LastScale != Scale)
+        {
+            OnScaleChange?.Invoke(ElementInternal.LastScale, Scale);
+            ScaleChanged(ElementInternal.LastScale, Scale);
+            anyFired = true;
         }
         return anyFired;
     }
@@ -658,6 +683,41 @@ public abstract class UIElement
     { 
     }
 
+    /// <summary>Ran when <see cref="Style"/> changes value.</summary>
+    /// <param name="from">The previous style.</param>
+    /// <param name="to">The new style.</param>
+    public virtual void StyleChanged(UIStyle from, UIStyle to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Position"/> changes value.</summary>
+    /// <param name="from">The previous position.</param>
+    /// <param name="to">The new position.</param>
+    public virtual void PositionChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Size"/> changes value.</summary>
+    /// <param name="from">The previous size.</param>
+    /// <param name="to">The new size.</param>
+    public virtual void SizeChanged(Vector2i from, Vector2i to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Rotation"/> changes value.</summary>
+    /// <param name="from">The previous rotation.</param>
+    /// <param name="to">The new rotation.</param>
+    public virtual void RotationChanged(float from, float to)
+    {
+    }
+
+    /// <summary>Ran when <see cref="Scale"/> changes value.</summary>
+    /// <param name="from">The previous scale.</param>
+    /// <param name="to">The new scale.</param>
+    public virtual void ScaleChanged(float from, float to)
+    {
+    }
+
     /// <summary>Focuses on the element and fires <see cref="Focused"/>.</summary>
     public void Focus()
     {
@@ -694,15 +754,19 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
-    public virtual List<string> GetDebugInfo()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public List<string> GetBaseDebugInfo()
     {
-        List<string> info = new(4)
-        {
-            $"^t^0^h^{(this == View.HeldElement ? "2" : "5")}^u{GetType()}",
-            $"^r^t^0^h^o^e^7Position: ^3({X}, {Y}) ^&| ^7Dimensions: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation}",
+        string name = Name ?? GetType().ToString();
+        List<string> info =
+        [
+            $"^{(this == View.HeldElement ? "2" : "5")}^u{name} ^&[{ElementInternal.TreeLevel}]",
+            $"^7Position: ^3({X}, {Y}) ^&| ^7Size: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation} ^&| ^7Scale: ^3{Scale}x",
             $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
-        };
+        ];
         if (ElementInternal.Styles.Count > 0)
         {
             List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
@@ -710,4 +774,7 @@ public abstract class UIElement
         }
         return info;
     }
+
+    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
+    public virtual List<string> GetDebugInfo() => [];
 }

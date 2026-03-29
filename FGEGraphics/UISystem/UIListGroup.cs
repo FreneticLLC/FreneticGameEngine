@@ -21,6 +21,9 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 public class UIListGroup : UIGroup
 {
+    /// <inheritdoc/>
+    public override string Name => "List";
+
     /// <summary>Whether the list should expand vertically.</summary>
     public bool Vertical;
 
