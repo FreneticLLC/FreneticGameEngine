@@ -120,6 +120,12 @@ public abstract class UIElement
     /// <summary>Fired when the user unfocuses this element.</summary>
     public Action OnUnfocus;
 
+    /// <summary>Fired when the element is added as a child to another element.</summary>
+    public Action OnAdd;
+
+    /// <summary>Fired when the element is removed from its parent.</summary>
+    public Action OnRemove;
+
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>
     public Action<UIStyle, UIStyle> OnStyleChange;
 
@@ -146,6 +152,10 @@ public abstract class UIElement
 
         /// <summary>The node distance of this element relative to the root element.</summary>
         public int TreeLevel;
+
+        // TODO: improve
+        /// <summary>Whether this element has been drawn to the screen.</summary>
+        public bool HasDrawn;
 
         /// <summary>The last absolute position.</summary>
         public Vector2i LastPosition;
@@ -200,7 +210,8 @@ public abstract class UIElement
             }
         }
         child.UpdateStyle();
-        child.Init();
+        child.Added();
+        child.OnAdd?.Invoke();
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -239,7 +250,8 @@ public abstract class UIElement
             return;
         }
         child.IsValid = false;
-        child.Destroy();
+        child.Removed();
+        child.OnRemove?.Invoke();
         child.Parent = null;
         child.ElementInternal.TreeLevel = 0;
         child.View = null;
@@ -744,7 +756,17 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Preps the element.</summary>
+    /// <summary>Ran when the element is added to another element as a child.</summary>
+    public virtual void Added()
+    {
+    }
+
+    /// <summary>Ran when the element is removed from its parent.</summary>
+    public virtual void Removed()
+    { 
+    }
+
+    /// <summary>Ran before the first frame is drawn.</summary>
     public virtual void Init()
     {
     }

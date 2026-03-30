@@ -193,6 +193,14 @@ public class ViewUI2D
                 break;
             }
         }
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            if (!element.ElementInternal.HasDrawn)
+            {
+                element.Init();
+                element.ElementInternal.HasDrawn = true;
+            }
+        }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
         if (IsDebug)

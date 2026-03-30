@@ -141,11 +141,11 @@ public class UIInputLabel : UIElement
         int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0; // there should definitely be a system for this
         UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
         ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
+        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         AddChild(ScrollGroup);
-        AddChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         Internal.HasMaxWidth = maxWidth;
-        Content = defaultText;
+        Paragraph.SetContent(defaultText);
     }
 
     /// <inheritdoc/>
@@ -410,5 +410,11 @@ public class UIInputLabel : UIElement
         TickControlKeys(keys);
         // TODO: Handle ctrl+Z, ctrl+Y
         // TODO: Handle HOME, END
+    }
+
+    /// <inheritdoc/>
+    public override void Init()
+    {
+        UpdateRenderState();
     }
 }

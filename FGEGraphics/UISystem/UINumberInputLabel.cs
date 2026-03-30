@@ -26,6 +26,9 @@ public class UINumberInputLabel : UIInputLabel
     /// <summary>Character matcher for decimal number labels.</summary>
     public static readonly AsciiMatcher DecimalMatcher = new(AsciiMatcher.Digits + "-.e");
 
+    /// <inheritdoc/>
+    public override string Name => "Number Input Label";
+
     /// <summary>The minimum label value.</summary>
     public double Min = double.MinValue;
 
