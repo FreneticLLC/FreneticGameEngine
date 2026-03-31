@@ -99,33 +99,45 @@ public class ViewUI2D
         CurrentScreen = DefaultScreen;
     }
 
-    /// <summary>Draws information specific to <see cref="IsDebug"/> mode.</summary>
-    public void DrawDebug()
+    /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
+    public void DrawDebugOutlines()
     {
-        List<string> debugInfo = [];
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
             Engine.Textures.White.Bind();
             Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
             Renderer2D.SetColor(outlineColor);
-            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
+            Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
             Renderer2D.SetColor(Color4F.White);
-            if (element.ElementInternal.IsMouseHovered)
+        }
+    }
+
+    /// <summary>Draws information specific to debug mode.</summary>
+    public void DrawDebugInfo()
+    {
+        Stack<(int, IEnumerable<string>)> debugInfoStack = [];
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
             {
-                debugInfo.Add(element.GetDebugInfo().JoinString("\n"));
+                List<string> debugLines = [.. element.GetBaseDebugInfo(), .. element.GetDebugInfo()];
+                debugInfoStack.Push((element.ElementInternal.TreeLevel, debugLines.Select(line => $"^r^0^h^o^e{line}^r")));
             }
         }
-        string content = debugInfo.JoinString("\n\n");
-        RenderableText text = Client.FontSets.Standard.ParseFancyText(content, "^r^0^e^7");
-        // TODO: This should be in a generic 'tooltip' system somewhere. And also account for RTL text.
-        float x = Client.MouseX + text.Width < Client.WindowWidth
-            ? Client.MouseX + 10
-            : Client.MouseX - text.Width - 10;
-        float textHeight = text.Lines.Length * Client.FontSets.Standard.Height;
-        float y = Client.MouseY + textHeight < Client.WindowHeight
-            ? Client.MouseY + 20
-            : Client.MouseY - textHeight - 20;
-        Client.FontSets.Standard.DrawFancyText(text, new((int)x, (int)y, 0));
+        if (debugInfoStack.Count == 0)
+        {
+            return;
+        }
+        IEnumerable<(int, IEnumerable<string>)> topDebugStack = debugInfoStack.Take(Math.Min(5, debugInfoStack.Count));
+        int minimumTreeLevel = topDebugStack.Min(entry => entry.Item1);
+        string debugInfo = topDebugStack.Select(entry =>
+            {
+                string prefix = new(' ', (entry.Item1 - minimumTreeLevel) * 2);
+                return entry.Item2.Select(line => $"{prefix}{line}").JoinString("\n");
+            })
+            .JoinString("\n\n");
+        RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
+        Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
@@ -181,11 +193,23 @@ public class ViewUI2D
                 break;
             }
         }
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            if (!element.ElementInternal.HasDrawn)
+            {
+                element.Init();
+                element.ElementInternal.HasDrawn = true;
+            }
+        }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
         if (IsDebug)
         {
-            DrawDebug();
+            DrawDebugOutlines();
+            //if (Client.Keyboard.BuildingState.AltPressed)
+            //{
+                DrawDebugInfo();
+            //}
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;

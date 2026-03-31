@@ -20,5 +20,8 @@ namespace FGEGraphics.UISystem;
 public class UIRenderable(Action<UIElement, double, UIStyle> renderer) : UIElement(UIStyling.Empty, new UILayout())
 {
     /// <inheritdoc/>
+    public override string Name => "Renderable";
+
+    /// <inheritdoc/>
     public override void Render(double delta, UIStyle style) => renderer(this, delta, style);
 }

@@ -22,6 +22,9 @@ namespace FGEGraphics.UISystem;
 // TODO: generalize beyond an 'X' when toggled
 public class UIToggleBox : UIBox
 {
+    /// <inheritdoc/>
+    public override string Name => "Toggle Box";
+
     /// <summary>Whether this box is toggled on.</summary>
     public bool Toggled = false;
 
@@ -41,7 +44,7 @@ public class UIToggleBox : UIBox
     public void SetToggled(bool toggled)
     {
         Toggled = toggled;
-        Text.Content = Toggled ? "X" : null;
+        Label.Content = Toggled ? "X" : null;
     }
 
     /// <summary>Toggles this box.</summary>

@@ -17,10 +17,14 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple container of several UI elements.</summary>
 public class UIGroup : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Group";
+
     /// <summary>Constructs a new group.</summary>
     /// <param name="layout">The layout of the element.</param>
     public UIGroup(UILayout layout) : base(UIStyling.Empty, layout)
     {
         IsEnabled = false;
+        ScaleSize = false;
     }
 }

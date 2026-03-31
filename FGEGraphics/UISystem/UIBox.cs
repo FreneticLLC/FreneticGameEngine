@@ -24,12 +24,15 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple box on the screen.</summary>
 public class UIBox : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => OnClick is null ? "Button" : "Box";
+
     // TODO: move to UILayout
     /// <summary>Whether this box is vertically flipped.</summary>
     public bool Flip = false;
 
     /// <summary>The text to display inside this box.</summary>
-    public UIText Text;
+    public UILabel Label;
 
     /// <summary>Constructs a <see cref="UIBox"/>.</summary>
     /// <param name="styling">The styling of the element.</param>
@@ -37,7 +40,7 @@ public class UIBox : UIElement
     /// <param name="text">Text to display inside the box.</param>
     public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
     {
-        Text = new(this, text);
+        AddChild(Label = new UILabel(text, styling.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
 
     /// <inheritdoc/>
@@ -71,10 +74,6 @@ public class UIBox : UIElement
             float ymin = Flip ? Y + Height : Y;
             float ymax = Flip ? Y : Y + Height;
             View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
-        }
-        if (style.CanRenderText(Text))
-        {
-            style.TextFont.DrawFancyText(Text, new Location(X + Width / 2 - Text.Width / 2, Y + Height / 2 - Text.Height / 2, 0));
         }
     }
 }

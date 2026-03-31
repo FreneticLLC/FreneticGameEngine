@@ -22,6 +22,9 @@ namespace FGEGraphics.UISystem;
 public class UIScissorGroup(UILayout layout) : UIGroup(layout)
 {
     /// <inheritdoc/>
+    public override string Name => "Scissor Group";
+
+    /// <inheritdoc/>
     public override IEnumerable<UIElement> GetChildrenAt(int x, int y) => SelfContains(x, y) ? base.GetChildrenAt(x, y) : [];
 
     /// <inheritdoc/>

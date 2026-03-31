@@ -27,8 +27,58 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents a simple piece of text on a screen.</summary>
 public class UILabel : UIElement
 {
-    /// <summary>The text to display on this label.</summary>
-    public UIText Text;
+    /// <summary>Whether the label is empty and shouldn't be rendered.</summary>
+    public bool IsEmpty => Internal.Content.Length == 0;
+
+    /// <inheritdoc/>
+    public override string Name => $"Label \"{(Content.Length <= 32 ? Content : Content[..32])}{(Content.Length > 32 ? "..." : "")}\"";
+
+    /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
+    public struct InternalData()
+    {
+        /// <summary>The label text content.</summary>
+        public string Content;
+
+        /// <summary>The maximum width of the text content.</summary>
+        public int MaxWidth;
+
+        /// <summary>A cache of UI styles and their corresponding renderable objects.</summary>
+        public Dictionary<UIStyle, RenderableText> Renderables = [];
+
+        /// <summary>Fired after the renderables cache is updated.</summary>
+        public Action OnRenderablesUpdate;
+    }
+
+    /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
+    public InternalData Internal;
+
+    /// <summary>
+    /// Gets or sets the label text content.
+    /// <b>Note:</b> setting this value recomputes the <see cref="RenderableText"/> cache.
+    /// </summary>
+    public string Content
+    {
+        get => Internal.Content;
+        set
+        {
+            Internal.Content = value ?? "";
+            UpdateRenderables();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum width of the text content.
+    /// <b>Note:</b> setting this value recomputes the <see cref="RenderableText"/> cache.
+    /// </summary>
+    public int MaxWidth
+    {
+        get => Internal.MaxWidth;
+        set
+        {
+            Internal.MaxWidth = value;
+            UpdateRenderables();
+        }
+    }
 
     /// <summary>Constructs a new label.</summary>
     /// <param name="text">The text to display on the label.</param>
@@ -36,14 +86,93 @@ public class UILabel : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Text = new UIText(this, text, true, Layout.Width);
-        Layout.SetSize(() => Text.Width, () => Text.Height); // TODO: padding
+        Internal = new() { Content = text ?? "" };
+        UpdateRenderables();
     }
+
+    /// <summary>Creates a <see cref="RenderableText"/> object from <see cref="Content"/> given a style.</summary>
+    /// <param name="style">The UI style to use.</param>
+    /// <returns>The resulting renderable object.</returns>
+    public RenderableText CreateRenderable(UIStyle style)
+    {
+        int fontSize = (int)(style.TextFont.Size * Scale);
+        if (fontSize == 0)
+        {
+            return RenderableText.Empty;
+        }
+        // TODO: cache this somewhere, as it's likely for many elements with text to have the same scale value
+        IEnumerable<KeyValuePair<(string, int), FontSet>> fontVariants = style.TextFont.Engine.Fonts.Where(pair => pair.Value.Name == style.TextFont.Name);
+        if (!fontVariants.Any())
+        {
+            return RenderableText.Empty;
+        }
+        IEnumerable<KeyValuePair<(string, int), FontSet>> fittingFonts = fontVariants.Where(pair => pair.Key.Item2 <= fontSize);
+        ((string, int) _, FontSet font) = fittingFonts.Any() ? fittingFonts.MinBy(pair => fontSize - pair.Key.Item2) : fontVariants.MinBy(pair => Math.Abs(fontSize - pair.Key.Item2));
+        string styledContent = style.TextStyling(Internal.Content); // FIXME: this doesn't play well with translatable text.
+        RenderableText renderable = font.ParseFancyText(styledContent, style.TextBaseColor);
+        if (Internal.MaxWidth > 0)
+        {
+            renderable = FontSet.SplitAppropriately(renderable, Internal.MaxWidth);
+        }
+        return renderable;
+    }
+
+    /// <summary>
+    /// Updates the <see cref="RenderableText"/> cache. 
+    /// If <see cref="IsEmpty"/> is <c>true</c>, clears the cache.
+    /// Otherwise, recreates all renderable objects in the cache.
+    /// </summary>
+    public void UpdateRenderables()
+    {
+        if (IsEmpty)
+        {
+            Internal.Renderables.Clear();
+        }
+        else
+        {
+            Internal.Renderables = ElementInternal.Styles
+                .Select(style => (style, CreateRenderable(style)))
+                .ToDictionary();
+            Internal.OnRenderablesUpdate?.Invoke();
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void StyleChanged(UIStyle from, UIStyle to)
+    {
+        if (!IsEmpty && to.CanRenderText && !Internal.Renderables.ContainsKey(to))
+        {
+            Internal.Renderables[to] = CreateRenderable(to);
+        }
+        if (Scale != 0 && Internal.Renderables.TryGetValue(to, out RenderableText renderable))
+        {
+            Layout.SetSize(renderable.GetTrueSize(to.TextFont));
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void ScaleChanged(float from, float to)
+    {
+        UpdateRenderables();
+        if (from == 0 && GetRenderable(Style) is RenderableText renderable)
+        {
+            Layout.SetSize(renderable.GetTrueSize(Style.TextFont));
+        }
+    }
+
+    /// <summary>Returns the cached <see cref="RenderableText"/> object corresponding to the given style, or <c>null</c> if none is present.</summary>
+    /// <param name="style">The UI style to query.</param>
+    public RenderableText GetRenderable(UIStyle style) => !IsEmpty && Internal.Renderables.TryGetValue(style, out RenderableText renderable) ? renderable : null;
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        style.TextFont.DrawFancyText(Text, new Location(X, Y, 0));
+        if (GetRenderable(style) is RenderableText renderable)
+        {
+            int trueX = X + Layout.Anchor.AlignmentX.GetPosition(Width, renderable.Width);
+            int trueY = Y + Layout.Anchor.AlignmentY.GetPosition(Height, renderable.Height);
+            style.TextFont.DrawFancyText(renderable, new Location(trueX, trueY, 0));
+        }
     }
 
     /// <summary>Constructs a label with an icon attached at the side.</summary>

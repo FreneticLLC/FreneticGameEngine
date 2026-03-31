@@ -75,9 +75,5 @@ public record UIStyle
     public int FontHeight => TextFont?.Height ?? 0;
 
     /// <summary>Returns whether this style can render text in general.</summary>
-    public bool CanRenderText() => TextFont is not null;
-
-    /// <summary>Returns whether this style can render the specified text.</summary>
-    /// <param name="text">The UI text object to check.</param>
-    public bool CanRenderText(UIText text) => !text.Empty && CanRenderText() && (text.Internal.Style == this || (text.Internal.Renderables?.ContainsKey(this) ?? false));
+    public bool CanRenderText => TextFont is not null;
 }

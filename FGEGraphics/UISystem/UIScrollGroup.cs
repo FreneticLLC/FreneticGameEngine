@@ -21,6 +21,9 @@ namespace FGEGraphics.UISystem;
 // TODO: add utility list + scrollgroup class
 public class UIScrollGroup : UIElement
 {
+    /// <inheritdoc/>
+    public override string Name => "Scroll Group";
+
     /// <summary>The horizontal scroll axis.</summary>
     public Axis ScrollX;
 
@@ -65,7 +68,7 @@ public class UIScrollGroup : UIElement
                 ScrollBarLayer.AddChild(ScrollY.ScrollBar);
             }
         }
-        base.AddChild(ScrollableLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
+        base.AddChild(ScrollableLayer = new UIScissorGroup(layout.AtOrigin().SetSize(() => Width, () => Height)));
     }
 
     /// <inheritdoc/>
@@ -117,6 +120,13 @@ public class UIScrollGroup : UIElement
         return true;
     }
 
+    /// <inheritdoc/>
+    public override void ScaleChanged(float from, float to)
+    {
+        ScrollX.Clamp();
+        ScrollY.Clamp();
+    }
+
     /// <summary>Contains scroll state for a direction.</summary>
     /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
     /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
@@ -161,13 +171,13 @@ public class UIScrollGroup : UIElement
             }
             if (vertical)
             {
-                layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(width);
+                layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(() => (int)(width * ScrollBar.Scale));
             }
             else
             {
-                layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(width);
+                layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(() => (int)(width * ScrollBar.Scale));
             }
-            ScrollBar = new(styling, layout);
+            ScrollBar = new(styling, layout) { ScaleSize = false };
         }
 
         /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
@@ -175,6 +185,15 @@ public class UIScrollGroup : UIElement
         {
             Value = 0;
             MaxValue = 0;
+        }
+
+        /// <summary>Clamps the <see cref="Value"/> between <c>0</c> and <see cref="MaxValue"/>.</summary>
+        public void Clamp()
+        {
+            if (MaxValue >= 0)
+            {
+                Value = Math.Clamp(Value, 0, MaxValue);
+            }
         }
 
         /// <summary>Scrolls to encompass a min/max offset pair.</summary>
@@ -207,7 +226,7 @@ public class UIScrollGroup : UIElement
                 BarHeldOffset = (int)mousePos - (vertical ? ScrollBar.Y : ScrollBar.X);
             }
             Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
-            Value = Math.Clamp(Value, 0, MaxValue);
+            Clamp();
         }
 
         /// <summary>Ticks the scroll value based on the <paramref name="scrollDelta"/>.</summary>
@@ -227,10 +246,5 @@ public class UIScrollGroup : UIElement
     }
 
     /// <inheritdoc/>
-    public override List<string> GetDebugInfo()
-    {
-        List<string> info = base.GetDebugInfo();
-        info.Add($"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})");
-        return info;
-    }
+    public override List<string> GetDebugInfo() => [$"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})"];
 }
