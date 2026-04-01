@@ -225,6 +225,9 @@ public class EntityPhysicsProperty : BasicEntityProperty
         }
     }
 
+    /// <summary>Gets the raw physics position in physics space, only valid for spawned entities, distinct from <see cref="Position"/> which is in global coordinates.</summary>
+    public Vector3 RawPosition => SpawnedBody.Pose.Position;
+
     /// <summary>Gets or sets the entity's physics body position, or intended spawn position.</summary>
     [PropertyDebuggable]
     [PropertyAutoSavable]
