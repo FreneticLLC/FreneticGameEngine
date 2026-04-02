@@ -224,6 +224,12 @@ public abstract class GameInstance
         using var _push = StackNoteHelper.UsePush("GameInstance - Tick Scheduler", Schedule);
         Schedule.RunAllSyncTasks(Delta);
     }
+
+    /// <summary>Tell the game to shutdown before the next tick.</summary>
+    public void RequestShutdown()
+    {
+        ShutdownRequestedToken.Cancel();
+    }
 }
 
 /// <summary>
