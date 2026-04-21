@@ -25,7 +25,7 @@ namespace FGEGraphics.UISystem;
 public class UIBox : UIElement
 {
     /// <inheritdoc/>
-    public override string Name => OnClick is null ? "Button" : "Box";
+    public override string Name => OnClick is not null ? "Button" : "Box";
 
     // TODO: move to UILayout
     /// <summary>Whether this box is vertically flipped.</summary>
