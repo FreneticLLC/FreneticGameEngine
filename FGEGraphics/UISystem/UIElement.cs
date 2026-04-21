@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -780,19 +781,31 @@ public abstract class UIElement
     /// 
     /// </summary>
     /// <returns></returns>
-    public List<string> GetBaseDebugInfo()
+    public List<string> GetBaseDebugInfo(string baseColor)
     {
         string name = Name ?? GetType().ToString();
         List<string> info =
         [
-            $"^{(this == View.HeldElement ? "2" : "5")}^u{name} ^&[{ElementInternal.TreeLevel}]",
-            $"^7Position: ^3({X}, {Y}) ^&| ^7Size: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation} ^&| ^7Scale: ^3{Scale}x",
-            $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
+            $"^{(this == View.HeldElement ? "2" : "5")}^u{name}{baseColor} ^&[{ElementInternal.TreeLevel}] ^&: ^3({X}, {Y}) ^&: ^3({Width}w, {Height}h) ^&: ^3{Rotation}deg ^&: ^3{Scale}x",
+            //$"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
         ];
-        if (ElementInternal.Styles.Count > 0)
+        /*if (ElementInternal.Styles.Count > 0)
         {
             List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
             info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+        }*/
+        foreach (MemberInfo memberInfo in GetType().GetMembers())
+        {
+            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
+            {
+                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this)
+                    : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this)
+                    : null;
+                if (value is not null)
+                {
+                    info.Add($"^7{memberInfo.Name}: ^3{value}");
+                }
+            }
         }
         return info;
     }

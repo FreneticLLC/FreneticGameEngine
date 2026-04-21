@@ -29,6 +29,12 @@ using OpenTK.Windowing.Common;
 
 namespace FGEGraphics.ClientSystem;
 
+// toggle debug mode: f4
+// toggle tree: alt kp5
+// scroll tree: alt kp2, kp8
+// expand/contract tree: shift scroll
+// scroll view modes: alt kp4, kp6
+
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
@@ -138,7 +144,7 @@ public class ViewUI2D
         {
             if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
             {
-                List<string> infoLines = [.. element.GetBaseDebugInfo(), .. element.GetDebugInfo()];
+                List<string> infoLines = [.. element.GetBaseDebugInfo("^r^0^h^o^e"), .. element.GetDebugInfo()];
                 infoStack.Push((element.ElementInternal.TreeLevel, infoLines.Select(line => $"^r^0^h^o^e{line}^r")));
             }
         }
