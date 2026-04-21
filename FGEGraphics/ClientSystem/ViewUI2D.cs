@@ -85,6 +85,14 @@ public class ViewUI2D
 
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
+
+        public bool ShowDebugTree = true;
+
+        public int DebugTreeIndex = 0;
+
+        public int DebugTreeEntries = 5;
+
+        public int DebugTreeSize;
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -97,6 +105,42 @@ public class ViewUI2D
         Client = client;
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
+        Client.Window.KeyDown += args =>
+        {
+            if (args.Key == Keys.F4)
+            {
+                IsDebug = !IsDebug;
+            }
+            if (args.Alt)
+            {
+                if (args.Shift)
+                {
+                    if (args.Key == Keys.KeyPad2 && Internal.DebugTreeEntries > 1)
+                    {
+                        Internal.DebugTreeEntries--;
+                    }
+                    else if (args.Key == Keys.KeyPad8 && Internal.DebugTreeEntries < Internal.DebugTreeSize)
+                    {
+                        Internal.DebugTreeEntries++;
+                    }
+                }
+                else
+                {
+                    if (args.Key == Keys.KeyPad5)
+                    {
+                        Internal.ShowDebugTree = !Internal.ShowDebugTree;
+                    }
+                    else if (args.Key == Keys.KeyPad2)
+                    {
+                        Internal.DebugTreeIndex++;
+                    }
+                    else if (args.Key == Keys.KeyPad8 && Internal.DebugTreeIndex > 0)
+                    {
+                        Internal.DebugTreeIndex--;
+                    }
+                }
+            }
+        };
     }
 
     /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
@@ -108,34 +152,47 @@ public class ViewUI2D
             Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
             Renderer2D.SetColor(outlineColor);
             Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+            if (element == HeldElement)
+            {
+                Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+            }
             Renderer2D.SetColor(Color4F.White);
         }
     }
 
+    // TODO: renamings needed
     /// <summary>Draws information specific to debug mode.</summary>
-    public void DrawDebugInfo()
+    public void DrawDebugTree()
     {
-        Stack<(int, IEnumerable<string>)> debugInfoStack = [];
+        Stack<(int, IEnumerable<string>)> infoStack = [];
         foreach (UIElement element in CurrentScreen.AllChildren())
         {
             if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
             {
-                List<string> debugLines = [.. element.GetBaseDebugInfo(), .. element.GetDebugInfo()];
-                debugInfoStack.Push((element.ElementInternal.TreeLevel, debugLines.Select(line => $"^r^0^h^o^e{line}^r")));
+                List<string> infoLines = [.. element.GetBaseDebugInfo(), .. element.GetDebugInfo()];
+                infoStack.Push((element.ElementInternal.TreeLevel, infoLines.Select(line => $"^r^0^h^o^e{line}^r")));
             }
         }
-        if (debugInfoStack.Count == 0)
+        // TODO: purify
+        Internal.DebugTreeSize = infoStack.Count;
+        //Internal.DebugTreeIndex = Math.Max(Internal.DebugTreeIndex, Internal.DebugTreeSize - 1);
+        if (infoStack.Count == 0)
         {
             return;
         }
-        IEnumerable<(int, IEnumerable<string>)> topDebugStack = debugInfoStack.Take(Math.Min(5, debugInfoStack.Count));
-        int minimumTreeLevel = topDebugStack.Min(entry => entry.Item1);
-        string debugInfo = topDebugStack.Select(entry =>
+        // TODO: track max
+        int index = Math.Min(Internal.DebugTreeIndex, infoStack.Count);
+        Range infoRange = new(index, Math.Min(index + Internal.DebugTreeEntries, infoStack.Count));
+        int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
+        IEnumerable<(int, IEnumerable<string>)> infoChunk = infoStack.Take(infoRange);
+        int minimumTreeLevel = infoChunk.Min(entry => entry.Item1);
+        string debugInfo = infoChunk.Select(entry =>
             {
                 string prefix = new(' ', (entry.Item1 - minimumTreeLevel) * 2);
                 return entry.Item2.Select(line => $"{prefix}{line}").JoinString("\n");
             })
             .JoinString("\n\n");
+        debugInfo += $"\n\n^r^0^h^o^e^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{infoStack.Count - infoRange.End.Value}]^r";
         RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
         Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
     }
@@ -206,10 +263,10 @@ public class ViewUI2D
         if (IsDebug)
         {
             DrawDebugOutlines();
-            //if (Client.Keyboard.BuildingState.AltPressed)
-            //{
-                DrawDebugInfo();
-            //}
+            if (Internal.ShowDebugTree)
+            {
+                DrawDebugTree();
+            }
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;
