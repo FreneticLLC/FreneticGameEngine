@@ -25,6 +25,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Windowing.Common;
 
 namespace FGEGraphics.ClientSystem;
 
@@ -86,13 +87,17 @@ public class ViewUI2D
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
 
-        public bool ShowDebugTree = true;
+        /// <summary>Whether to draw textual debug information about the hovered elements, if any.</summary>
+        public bool ShowDebugInfo = true;
 
-        public int DebugTreeIndex = 0;
+        /// <summary>The list position of the entry at the top of the debug info tree.</summary>
+        public int DebugInfoStartIndex = 0;
 
-        public int DebugTreeEntries = 5;
+        /// <summary>The number of entries displayed in the debug info tree.</summary>
+        public int DebugInfoEntries = 5;
 
-        public int DebugTreeSize;
+        /// <summary>The total size of the debug info tree.</summary>
+        public int DebugInfoTreeSize;
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -105,42 +110,7 @@ public class ViewUI2D
         Client = client;
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
-        Client.Window.KeyDown += args =>
-        {
-            if (args.Key == Keys.F4)
-            {
-                IsDebug = !IsDebug;
-            }
-            if (args.Alt)
-            {
-                if (args.Shift)
-                {
-                    if (args.Key == Keys.KeyPad2 && Internal.DebugTreeEntries > 1)
-                    {
-                        Internal.DebugTreeEntries--;
-                    }
-                    else if (args.Key == Keys.KeyPad8 && Internal.DebugTreeEntries < Internal.DebugTreeSize)
-                    {
-                        Internal.DebugTreeEntries++;
-                    }
-                }
-                else
-                {
-                    if (args.Key == Keys.KeyPad5)
-                    {
-                        Internal.ShowDebugTree = !Internal.ShowDebugTree;
-                    }
-                    else if (args.Key == Keys.KeyPad2)
-                    {
-                        Internal.DebugTreeIndex++;
-                    }
-                    else if (args.Key == Keys.KeyPad8 && Internal.DebugTreeIndex > 0)
-                    {
-                        Internal.DebugTreeIndex--;
-                    }
-                }
-            }
-        };
+        Client.Window.KeyDown += HandleKeyEvent;
     }
 
     /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
@@ -160,9 +130,8 @@ public class ViewUI2D
         }
     }
 
-    // TODO: renamings needed
-    /// <summary>Draws information specific to debug mode.</summary>
-    public void DrawDebugTree()
+    /// <summary>Draws debug information about the hovered elements, if any.</summary>
+    public void DrawDebugInfoTree()
     {
         Stack<(int, IEnumerable<string>)> infoStack = [];
         foreach (UIElement element in CurrentScreen.AllChildren())
@@ -174,16 +143,18 @@ public class ViewUI2D
             }
         }
         // TODO: purify
-        Internal.DebugTreeSize = infoStack.Count;
-        //Internal.DebugTreeIndex = Math.Max(Internal.DebugTreeIndex, Internal.DebugTreeSize - 1);
+        Internal.DebugInfoTreeSize = infoStack.Count;
+        Internal.DebugInfoStartIndex = Math.Max(0, Math.Min(Internal.DebugInfoStartIndex, Internal.DebugInfoTreeSize - 1));
         if (infoStack.Count == 0)
         {
             return;
         }
-        // TODO: track max
-        int index = Math.Min(Internal.DebugTreeIndex, infoStack.Count);
-        Range infoRange = new(index, Math.Min(index + Internal.DebugTreeEntries, infoStack.Count));
+        Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, infoStack.Count));
         int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
+        if (numberInfoEntries <= 0)
+        {
+            return;
+        }
         IEnumerable<(int, IEnumerable<string>)> infoChunk = infoStack.Take(infoRange);
         int minimumTreeLevel = infoChunk.Min(entry => entry.Item1);
         string debugInfo = infoChunk.Select(entry =>
@@ -263,9 +234,9 @@ public class ViewUI2D
         if (IsDebug)
         {
             DrawDebugOutlines();
-            if (Internal.ShowDebugTree)
+            if (Internal.ShowDebugInfo)
             {
-                DrawDebugTree();
+                DrawDebugInfoTree();
             }
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
@@ -296,5 +267,42 @@ public class ViewUI2D
         }
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
+    }
+
+    public void HandleKeyEvent(KeyboardKeyEventArgs args)
+    {
+        if (args.Key == Keys.F4)
+        {
+            IsDebug = !IsDebug;
+        }
+        if (args.Alt)
+        {
+            if (args.Shift)
+            {
+                if (args.Key == Keys.KeyPad2 && Internal.DebugInfoEntries > 1)
+                {
+                    Internal.DebugInfoEntries--;
+                }
+                else if (args.Key == Keys.KeyPad8 && Internal.DebugInfoEntries < Internal.DebugInfoTreeSize)
+                {
+                    Internal.DebugInfoEntries++;
+                }
+            }
+            else
+            {
+                if (args.Key == Keys.KeyPad5)
+                {
+                    Internal.ShowDebugInfo = !Internal.ShowDebugInfo;
+                }
+                else if (args.Key == Keys.KeyPad2 && Internal.DebugInfoStartIndex < Internal.DebugInfoTreeSize - 1)
+                {
+                    Internal.DebugInfoStartIndex++;
+                }
+                else if (args.Key == Keys.KeyPad8 && Internal.DebugInfoStartIndex > 0)
+                {
+                    Internal.DebugInfoStartIndex--;
+                }
+            }
+        }
     }
 }
