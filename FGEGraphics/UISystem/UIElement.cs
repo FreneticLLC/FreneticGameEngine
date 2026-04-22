@@ -806,6 +806,8 @@ public abstract class UIElement
     /// </summary>
     public virtual List<string> GetDebugInfo() => [];
 
+    /// <summary>Returns complete debug information, including all base and extra text, about this element.</summary>
+    /// <param name="baseColor">The base text styling.</param>
     public string GetAllDebugInfo(string baseColor)
     {
         List<string> info = GetBaseDebugInfo(baseColor, detailed: true);

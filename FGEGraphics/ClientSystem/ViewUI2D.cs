@@ -39,6 +39,7 @@ namespace FGEGraphics.ClientSystem;
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
+    /// <summary>The base text styling for debug information.</summary>
     public static readonly string DEBUG_BASE_COLOR = "^r^0^h^o^e";
 
     /// <summary>The backing client window.</summary>
@@ -96,8 +97,6 @@ public class ViewUI2D
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
 
-        public Stack<UIElement> DebugHoveredElements = [];
-
         /// <summary>Whether to draw textual debug information about the hovered elements, if any.</summary>
         public bool ShowDebugInfo = true;
 
@@ -146,28 +145,31 @@ public class ViewUI2D
         }
     }
 
-    /// <summary>Draws debug information about the hovered elements, if any.</summary>
-    public void DrawDebugInfoTree(Stack<(int, IEnumerable<string>)> infoStack)
+    /// <summary>Gets debug information about the hovered elements, if any.</summary>
+    public string GetDebugInfo(List<UIElement> hoveredElements)
     {
-        Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, infoStack.Count));
+        if (Internal.ShowDetailedDebugInfo)
+        {
+            return hoveredElements[Internal.DebugInfoStartIndex].GetAllDebugInfo(DEBUG_BASE_COLOR);
+        }
+        Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, hoveredElements.Count));
         int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
         if (numberInfoEntries <= 0)
         {
-            return;
+            return null;
         }
-        IEnumerable<(int, IEnumerable<string>)> infoChunk = infoStack.Take(infoRange);
-        int minimumTreeLevel = infoChunk.Min(entry => entry.Item1);
-        string debugInfo = infoChunk.Select(entry =>
+        IEnumerable<UIElement> elementsToDisplay = hoveredElements.Take(infoRange);
+        int minimumTreeLevel = elementsToDisplay.Min(element => element.ElementInternal.TreeLevel);
+        string debugInfo = elementsToDisplay.Select(element =>
             {
-                string prefix = new(' ', (entry.Item1 - minimumTreeLevel) * 2);
-                return entry.Item2.Select(line => $"{prefix}{line}").JoinString("\n");
+                string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
+                return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
             })
             .JoinString("\n\n");
-        debugInfo += $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{infoStack.Count - infoRange.End.Value}]^r";
-        RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
-        Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
+        return debugInfo + $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{hoveredElements.Count - infoRange.End.Value}]^r";
     }
 
+    /// <summary>Draws debug information over the current screen.</summary>
     public void DrawDebug()
     {
         List<UIElement> hoveredElements = [];
@@ -182,33 +184,10 @@ public class ViewUI2D
         Internal.DebugInfoTreeSize = hoveredElements.Count;
         Internal.DebugInfoStartIndex = Math.Max(0, Math.Min(Internal.DebugInfoStartIndex, Internal.DebugInfoTreeSize - 1));
         DrawDebugOutlines();
-        if (Internal.ShowDebugInfo && hoveredElements.Count > 0)
+        if (Internal.ShowDebugInfo && hoveredElements.Count > 0 && GetDebugInfo(hoveredElements) is string debugInfo)
         {
-            if (Internal.ShowDetailedDebugInfo)
-            {
-                UIElement element = hoveredElements.ElementAt(Internal.DebugInfoStartIndex);
-                RenderableText text = Client.FontSets.Standard.ParseFancyText(element.GetAllDebugInfo(DEBUG_BASE_COLOR));
-                Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
-            }
-            else
-            {
-                Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, hoveredElements.Count));
-                int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
-                if (numberInfoEntries > 0)
-                {
-                    IEnumerable<UIElement> chunk = hoveredElements.Take(infoRange);
-                    int minimumTreeLevel = chunk.Min(element => element.ElementInternal.TreeLevel);
-                    string debugInfo = chunk.Select(element =>
-                    {
-                        string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
-                        return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
-                    })
-                    .JoinString("\n\n");
-                    debugInfo += $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{hoveredElements.Count - infoRange.End.Value}]^r";
-                    RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
-                    Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
-                }
-            }
+            RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo);
+            Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
         }
     }
 
