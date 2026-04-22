@@ -71,9 +71,11 @@ public class UIInputLabel : UIElement
     public UILabel PlaceholderInfo;
 
     /// <summary>Whether the input label supports multiple lines.</summary>
+    [UIDebug]
     public bool Multiline = true;
 
     /// <summary>The max length of the text, or 0 if uncapped.</summary>
+    [UIDebug]
     public int MaxLength = 0;
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>

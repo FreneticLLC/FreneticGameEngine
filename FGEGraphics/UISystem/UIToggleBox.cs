@@ -26,6 +26,7 @@ public class UIToggleBox : UIBox
     public override string Name => "Toggle Box";
 
     /// <summary>Whether this box is toggled on.</summary>
+    [UIDebug]
     public bool Toggled = false;
 
     /// <summary>Fired when this box is toggled on or off.</summary>

@@ -819,7 +819,8 @@ public abstract class UIElement
                     : null;
                 if (value is not null)
                 {
-                    info.Add($"^7{memberInfo.Name}: ^3{value}");
+                    string color = value is bool boolValue ? (boolValue ? "2" : "1") : "3";
+                    info.Add($"^7{memberInfo.Name}: ^{color}{value}");
                 }
             }
         }

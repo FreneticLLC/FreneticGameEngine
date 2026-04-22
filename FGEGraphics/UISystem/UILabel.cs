@@ -70,6 +70,7 @@ public class UILabel : UIElement
     /// Gets or sets the maximum width of the text content.
     /// <b>Note:</b> setting this value recomputes the <see cref="RenderableText"/> cache.
     /// </summary>
+    [UIDebug]
     public int MaxWidth
     {
         get => Internal.MaxWidth;

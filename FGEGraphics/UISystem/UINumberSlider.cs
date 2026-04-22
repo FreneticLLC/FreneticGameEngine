@@ -24,27 +24,35 @@ public class UINumberSlider : UIElement
     public override string Name => "Number Slider";
 
     /// <summary>The minimum slider value.</summary>
+    [UIDebug]
     public double Min;
 
     /// <summary>The maximum slider value.</summary>
+    [UIDebug]
     public double Max;
 
     /// <summary>The default slider value.</summary>
+    [UIDebug]
     public double Default;
 
     /// <summary>The grid-snapping interval. Set to <c>0.0</c> or less for a gridless slider.</summary>
+    [UIDebug]
     public double Interval;
 
     /// <summary>Whether the slider should use integers instead of decimals.</summary>
+    [UIDebug]
     public bool Integer;
 
     /// <summary>The number of digits to round the slider value to, or <c>-1</c> for no rounding.</summary>
+    [UIDebug]
     public int Digits = -1;
 
     /// <summary>The current slider value.</summary>
+    [UIDebug]
     public double Value;
 
     /// <summary>The current slider progress (<c>0.0</c> to <c>1.0</c>).</summary>
+    [UIDebug]
     public double Progress => (Value - Min) / (Max - Min);
 
     /// <summary>The box placed at the current slider progress.</summary>
