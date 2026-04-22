@@ -20,6 +20,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -30,7 +31,7 @@ using OpenTK.Windowing.Common;
 namespace FGEGraphics.ClientSystem;
 
 // toggle debug mode: f4
-// toggle tree: alt kp5
+// cycle thru hover info: alt kp5
 // scroll tree: alt kp2, kp8
 // expand/contract tree: shift scroll
 // scroll view modes: alt kp4, kp6
@@ -38,6 +39,8 @@ namespace FGEGraphics.ClientSystem;
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
+    public static readonly string DEBUG_BASE_COLOR = "^r^0^h^o^e";
+
     /// <summary>The backing client window.</summary>
     public GameClientWindow Client;
 
@@ -93,8 +96,13 @@ public class ViewUI2D
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
 
+        public Stack<UIElement> DebugHoveredElements = [];
+
         /// <summary>Whether to draw textual debug information about the hovered elements, if any.</summary>
         public bool ShowDebugInfo = true;
+
+        /// <summary>Whether to draw the debug information at the cursor position.</summary>
+        public bool ShowDetailedDebugInfo = false;
 
         /// <summary>The list position of the entry at the top of the debug info tree.</summary>
         public int DebugInfoStartIndex = 0;
@@ -128,33 +136,19 @@ public class ViewUI2D
             Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
             Renderer2D.SetColor(outlineColor);
             Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+            // TODO: rendering stroke thickness
             if (element == HeldElement)
             {
-                Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+                Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
+                Rendering.RenderRectangle(UIContext, element.X + 2, element.Y + 2, element.X + element.Width - 2, element.Y + element.Height - 2, new(-0.5f, -0.5f, element.Rotation), true);
             }
             Renderer2D.SetColor(Color4F.White);
         }
     }
 
     /// <summary>Draws debug information about the hovered elements, if any.</summary>
-    public void DrawDebugInfoTree()
+    public void DrawDebugInfoTree(Stack<(int, IEnumerable<string>)> infoStack)
     {
-        Stack<(int, IEnumerable<string>)> infoStack = [];
-        foreach (UIElement element in CurrentScreen.AllChildren())
-        {
-            if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
-            {
-                List<string> infoLines = [.. element.GetBaseDebugInfo("^r^0^h^o^e"), .. element.GetDebugInfo()];
-                infoStack.Push((element.ElementInternal.TreeLevel, infoLines.Select(line => $"^r^0^h^o^e{line}^r")));
-            }
-        }
-        // TODO: purify
-        Internal.DebugInfoTreeSize = infoStack.Count;
-        Internal.DebugInfoStartIndex = Math.Max(0, Math.Min(Internal.DebugInfoStartIndex, Internal.DebugInfoTreeSize - 1));
-        if (infoStack.Count == 0)
-        {
-            return;
-        }
         Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, infoStack.Count));
         int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
         if (numberInfoEntries <= 0)
@@ -169,9 +163,53 @@ public class ViewUI2D
                 return entry.Item2.Select(line => $"{prefix}{line}").JoinString("\n");
             })
             .JoinString("\n\n");
-        debugInfo += $"\n\n^r^0^h^o^e^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{infoStack.Count - infoRange.End.Value}]^r";
+        debugInfo += $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{infoStack.Count - infoRange.End.Value}]^r";
         RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
         Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
+    }
+
+    public void DrawDebug()
+    {
+        List<UIElement> hoveredElements = [];
+        foreach (UIElement element in CurrentScreen.AllChildren())
+        {
+            if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
+            {
+                hoveredElements.Add(element);
+            }
+        }
+        hoveredElements.Reverse();
+        Internal.DebugInfoTreeSize = hoveredElements.Count;
+        Internal.DebugInfoStartIndex = Math.Max(0, Math.Min(Internal.DebugInfoStartIndex, Internal.DebugInfoTreeSize - 1));
+        DrawDebugOutlines();
+        if (Internal.ShowDebugInfo && hoveredElements.Count > 0)
+        {
+            if (Internal.ShowDetailedDebugInfo)
+            {
+                UIElement element = hoveredElements.ElementAt(Internal.DebugInfoStartIndex);
+                RenderableText text = Client.FontSets.Standard.ParseFancyText(element.GetAllDebugInfo(DEBUG_BASE_COLOR));
+                Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
+            }
+            else
+            {
+                Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, hoveredElements.Count));
+                int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
+                if (numberInfoEntries > 0)
+                {
+                    IEnumerable<UIElement> chunk = hoveredElements.Take(infoRange);
+                    int minimumTreeLevel = chunk.Min(element => element.ElementInternal.TreeLevel);
+                    string debugInfo = chunk.Select(element =>
+                    {
+                        string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
+                        return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
+                    })
+                    .JoinString("\n\n");
+                    debugInfo += $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{hoveredElements.Count - infoRange.End.Value}]^r";
+                    RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo, "^r^0^e^7");
+                    Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
+                }
+            }
+        }
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
@@ -239,11 +277,7 @@ public class ViewUI2D
         CurrentScreen.RenderAll(Client.Delta);
         if (IsDebug)
         {
-            DrawDebugOutlines();
-            if (Internal.ShowDebugInfo)
-            {
-                DrawDebugInfoTree();
-            }
+            DrawDebug();
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;
@@ -275,6 +309,7 @@ public class ViewUI2D
         Internal.Scrolled = false;
     }
 
+    /// <summary>Listens for debug keybinds and updates <see cref="Internal"/> accordingly.</summary>
     public void HandleKeyEvent(KeyboardKeyEventArgs args)
     {
         if (args.Key == Keys.F4)
@@ -285,6 +320,10 @@ public class ViewUI2D
         {
             if (args.Shift)
             {
+                if (args.Key == Keys.KeyPad5)
+                {
+                    Internal.ShowDetailedDebugInfo = !Internal.ShowDetailedDebugInfo;
+                }
                 if (args.Key == Keys.KeyPad2 && Internal.DebugInfoEntries > 1)
                 {
                     Internal.DebugInfoEntries--;

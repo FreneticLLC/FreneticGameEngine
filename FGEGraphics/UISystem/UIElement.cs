@@ -16,6 +16,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
 
 using Vector2i = FGECore.MathHelpers.Vector2i;
@@ -777,23 +778,38 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public List<string> GetBaseDebugInfo(string baseColor)
+    /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>)..</summary>
+    /// <param name="baseColor">The base text styling.</param>
+    /// <param name="detailed">Whether to include extra base information.</param>
+    public List<string> GetBaseDebugInfo(string baseColor, bool detailed)
     {
-        string name = Name ?? GetType().ToString();
-        List<string> info =
-        [
-            $"^{(this == View.HeldElement ? "2" : "5")}^u{name}{baseColor} ^&[{ElementInternal.TreeLevel}] ^&: ^3({X}, {Y}) ^&: ^3({Width}w, {Height}h) ^&: ^3{Rotation}deg ^&: ^3{Scale}x",
-            //$"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
-        ];
-        /*if (ElementInternal.Styles.Count > 0)
+        List<string> info = [];
+        string header = $"^{(this == View.HeldElement ? "2" : "5")}^u{Name ?? GetType().ToString()}{baseColor} ^&[{ElementInternal.TreeLevel}]";
+        string transforms = $"^3({X}, {Y}) ^&: ^3({Width}w, {Height}h) ^&: ^3{Rotation}deg ^&: ^3{Scale}x";
+        info.Add(detailed ? header : $"{header} ^&: {transforms}");
+        if (detailed)
         {
-            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
-            info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
-        }*/
+            info.Add(transforms);
+            info.Add($"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}");
+            if (ElementInternal.Styles.Count > 0)
+            {
+                List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
+                info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+            }
+        }
+        return info;
+    }
+
+    /// <summary>
+    /// Returns extra debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>).
+    /// Properties and fields can be added here automatically with <see cref="UIDebugAttribute"/>.
+    /// </summary>
+    public virtual List<string> GetDebugInfo() => [];
+
+    public string GetAllDebugInfo(string baseColor)
+    {
+        List<string> info = GetBaseDebugInfo(baseColor, detailed: true);
+        info.AddRange(GetDebugInfo());
         foreach (MemberInfo memberInfo in GetType().GetMembers())
         {
             if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
@@ -807,9 +823,6 @@ public abstract class UIElement
                 }
             }
         }
-        return info;
+        return info.Select(line => baseColor + line).JoinString("\n");
     }
-
-    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
-    public virtual List<string> GetDebugInfo() => [];
 }
