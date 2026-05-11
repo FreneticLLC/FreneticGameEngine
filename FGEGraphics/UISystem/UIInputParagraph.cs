@@ -98,9 +98,9 @@ public class UIInputParagraph : UIParagraph
         Styling = styling;
         TextStyling = textStyling;
         HighlightStyling = highlightStyling;
-        AddLabel(InputInternal.LabelLeft = new UILabel("", textStyling, new UILayout()));
-        AddLabel(InputInternal.LabelCenter = new UILabel("", highlightStyling, new UILayout()));
-        AddLabel(InputInternal.LabelRight = new UILabel("", textStyling, new UILayout()));
+        AddLabel(InputInternal.LabelLeft = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelCenter = new UILabel("", highlightStyling, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelRight = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
     }
 
     /// <summary>Ensures the cursor positions lie within the current paragraph <see cref="Content"/>.</summary>
