@@ -110,7 +110,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>Fired when the window is loading. Use this to load any data you need.</summary>
     public Action OnWindowLoad;
 
-    /// <summary>Fired when the window is closed.</summary>
+    /// <summary>Fired when the window is actually fully closed.</summary>
     public Action OnWindowClosed;
 
     /// <summary>Whether the program should forcibly shut down when the window is closed.</summary>
@@ -187,12 +187,12 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         get
         {
-            return Window == null ? Internal.WindowWidth : Window.ClientSize.X;
+            return Window is null ? Internal.WindowWidth : Window.ClientSize.X;
         }
         set
         {
             Internal.WindowWidth = value;
-            if (Window != null)
+            if (Window is not null)
             {
                 Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
             }
@@ -204,12 +204,12 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         get
         {
-            return Window == null ? Internal.WindowHeight : Window.ClientSize.Y;
+            return Window is null ? Internal.WindowHeight : Window.ClientSize.Y;
         }
         set
         {
             Internal.WindowHeight = value;
-            if (Window != null)
+            if (Window is not null)
             {
                 Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
             }
@@ -221,13 +221,13 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     {
         get
         {
-            return Window == null ? new FGECore.MathHelpers.Vector2i(Internal.WindowWidth, Internal.WindowHeight) : new FGECore.MathHelpers.Vector2i(Window.ClientSize.X, Window.ClientSize.Y);
+            return Window is null ? new FGECore.MathHelpers.Vector2i(Internal.WindowWidth, Internal.WindowHeight) : new FGECore.MathHelpers.Vector2i(Window.ClientSize.X, Window.ClientSize.Y);
         }
         set
         {
             Internal.WindowWidth = value.X;
             Internal.WindowHeight = value.Y;
-            if (Window != null)
+            if (Window is not null)
             {
                 Window.ClientSize = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
             }
@@ -358,9 +358,11 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
     /// <summary>Called when the window is closed.</summary>
     public void Window_Closed(CancelEventArgs args)
     {
-        if (!InstanceShutdownToken.IsCancellationRequested)
+        if (!InstanceShutdownToken.IsCancellationRequested && IsInitialized)
         {
-            InstanceShutdown();
+            Logs.ClientInfo("Window close requested...");
+            args.Cancel = true;
+            ShutdownRequestedToken.Cancel();
             return;
         }
         OnWindowClosed?.Invoke();
@@ -370,11 +372,20 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
             SysConsole.ShutDown();
             Environment.Exit(0);
         }
+        else
+        {
+            Logs.ClientInfo("Window closed, regular exit now.");
+        }
     }
 
     /// <summary>Renders a single frame of the game, and also ticks.</summary>
     public void Window_RenderFrame(FrameEventArgs e)
     {
+        if (ShutdownRequestedToken.IsCancellationRequested)
+        {
+            InstanceShutdown();
+            return;
+        }
         using var _push = StackNoteHelper.UsePush("GameClientWindow - Render and tick frame", this);
         // First step: check delta
         if (e.Time <= 0.0)
@@ -404,7 +415,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         // Third step: general game rendering
         CurrentEngine.RenderSingleFrame();
         GraphicsUtil.CheckError("GameClient - PostMainEngine");
-        if (VR != null) // VR Push-To-Screen
+        if (VR is not null) // VR Push-To-Screen
         {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.DrawBuffer(DrawBufferMode.Back);
