@@ -30,12 +30,6 @@ using OpenTK.Windowing.Common;
 
 namespace FGEGraphics.ClientSystem;
 
-// toggle debug mode: f4
-// cycle thru hover info: alt kp5
-// scroll tree: alt kp2, kp8
-// expand/contract tree: shift scroll
-// scroll view modes: alt kp4, kp6
-
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
