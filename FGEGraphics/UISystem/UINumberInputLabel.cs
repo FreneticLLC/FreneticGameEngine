@@ -82,11 +82,7 @@ public class UINumberInputLabel : UIInputLabel
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="renderBox">Whether to render a box behind the label.</param>
     /// <param name="boxPadding">The padding between the box and the label.</param>
-    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
-    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
-    /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
-    /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
-    public UINumberInputLabel(bool integer, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", styling, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
+    public UINumberInputLabel(bool integer, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0) : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", styling, inputStyle, highlightStyle, layout, false, renderBox, boxPadding)
     {
         Integer = integer;
         Format = format ?? (integer ? "0" : "0.0");

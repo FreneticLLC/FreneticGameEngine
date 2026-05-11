@@ -26,58 +26,37 @@ public class UIScrollGroup : UIElement
 
     /// <summary>The horizontal scroll axis.</summary>
     [UIDebug]
-    public Axis ScrollX;
+    public ScrollAxis XAxis;
 
     /// <summary>The vertical scroll axis.</summary>
     [UIDebug]
-    public Axis ScrollY;
-
-    /// <summary>The scrollable scissor layer for child elements.</summary>
-    public UIScissorGroup ScrollableLayer;
+    public ScrollAxis YAxis;
 
     /// <summary>The scroll bar layer (above the scissor layer).</summary>
     public UIGroup ScrollBarLayer;
 
+    /// <summary>The scrollable scissor layer for child elements.</summary>
+    public UIScissorGroup ScrollableLayer;
+
     /// <summary>Whether either of the scroll bars are pressed.</summary>
-    public bool ScrollBarPressed => ScrollX.ScrollBar?.IsPressed ?? ScrollY.ScrollBar?.IsPressed ?? false;
+    public bool ScrollBarPressed => XAxis.ScrollBar?.IsPressed ?? YAxis.ScrollBar?.IsPressed ?? false;
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="barStyling">The scroll bar styles.</param>
-    /// <param name="barWidth">The width of the scroll bars.</param>
-    /// <param name="barX">Whether to add a horizontal scroll bar.</param>
-    /// <param name="barY">Whether to add a vertical scroll bar.</param>
-    /// <param name="barXAnchor">The anchor of the horizontal scroll bar.</param>
-    /// <param name="barYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIScrollGroup(UILayout layout, UIStyling barStyling = default, int barWidth = 0, bool barX = false, bool barY = false, UIAnchor barXAnchor = null, UIAnchor barYAnchor = null) : base(UIStyling.Empty, layout)
+    public UIScrollGroup(UILayout layout) : base(UIStyling.Empty, layout)
     {
-        if (barXAnchor?.AlignmentX == UIAlignment.CENTER || barYAnchor?.AlignmentY == UIAlignment.CENTER)
-        {
-            throw new Exception("UIScrollGroup scroll bars must have non-central scroll directions");
-        }
         // TODO: Fix scroll bar overlap
-        ScrollX = new(false, () => Width/* - (barY ? barWidth : 0)*/, barX, barWidth, barStyling, new UILayout().SetAnchor(barXAnchor ?? UIAnchor.BOTTOM_LEFT));
-        ScrollY = new(true, () => Height/* - (barX ? barWidth : 0)*/, barY, barWidth, barStyling, new UILayout().SetAnchor(barYAnchor ?? UIAnchor.TOP_RIGHT));
-        if (ScrollX.ScrollBar is not null || ScrollY.ScrollBar is not null)
-        {
-            base.AddChild(ScrollBarLayer = new(layout.AtOrigin().SetSize(() => Width, () => Height)));
-            if (ScrollX.ScrollBar is not null)
-            {
-                ScrollBarLayer.AddChild(ScrollX.ScrollBar);
-            }
-            if (ScrollY.ScrollBar is not null)
-            {
-                ScrollBarLayer.AddChild(ScrollY.ScrollBar);
-            }
-        }
-        base.AddChild(ScrollableLayer = new UIScissorGroup(layout.AtOrigin().SetSize(() => Width, () => Height)));
+        XAxis = new(this, false);
+        YAxis = new(this, true);
+        AddChild(ScrollBarLayer = new UIGroup(layout.AtOrigin()));
+        AddChild(ScrollableLayer = new UIScissorGroup(layout.AtOrigin()));
     }
 
     /// <inheritdoc/>
     public void AddScrollableChild(UIElement child)
     {
         UILayout original = new(child.Layout);
-        child.Layout.SetPosition(() => original.Internal.X.Get() - ScrollX.Value, () => original.Internal.Y.Get() - ScrollY.Value);
+        child.Layout.SetPosition(() => original.Internal.X.Get() - XAxis.Value, () => original.Internal.Y.Get() - YAxis.Value);
         ScrollableLayer.AddChild(child);
     }
 
@@ -85,13 +64,13 @@ public class UIScrollGroup : UIElement
     public override void Tick(double delta)
     {
         base.Tick(delta);
-        if (ScrollX.ScrollBar is not null)
+        if (XAxis.ScrollBar is not null)
         {
-            ScrollX.TickMouseDrag(View.Client.MouseX, X);
+            XAxis.TickMouseDrag(View.Client.MouseX, X);
         }
-        if (ScrollY.ScrollBar is not null)
+        if (YAxis.ScrollBar is not null)
         {
-            ScrollY.TickMouseDrag(View.Client.MouseY, Y);
+            YAxis.TickMouseDrag(View.Client.MouseY, Y);
         }
     }
 
@@ -100,8 +79,8 @@ public class UIScrollGroup : UIElement
     {
         if (!ScrollBarPressed)
         {
-            ScrollX.TickMouseScroll(horizontal);
-            ScrollY.TickMouseScroll(vertical);
+            XAxis.TickMouseScroll(horizontal);
+            YAxis.TickMouseScroll(vertical);
         }
     }
 
@@ -112,28 +91,32 @@ public class UIScrollGroup : UIElement
         {
             return true;
         }
-        if (ScrollY.MaxValue == 0 || View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
+        if (YAxis.MaxValue == 0 || View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
             horizontal = vertical;
             vertical = 0;
         }
-        ScrollX.TickMouseScroll(horizontal);
-        ScrollY.TickMouseScroll(vertical);
+        XAxis.TickMouseScroll(horizontal);
+        YAxis.TickMouseScroll(vertical);
         return true;
     }
 
     /// <inheritdoc/>
     public override void ScaleChanged(float from, float to)
     {
-        ScrollX.Clamp();
-        ScrollY.Clamp();
+        XAxis.Clamp();
+        YAxis.Clamp();
     }
 
     /// <summary>Contains scroll state for a direction.</summary>
     /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
-    /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
-    public class Axis(bool vertical, Func<int> rangeLength)
+    /// <param name="length">The length of the outer group's relevant dimension.</param>
+    public class ScrollAxis(UIScrollGroup scrollGroup, bool vertical)
     {
+        public UIScrollGroup ScrollGroup = scrollGroup;
+
+        public bool Vertical = vertical;
+
         /// <summary>The current scroll position.</summary>
         public int Value = 0;
 
@@ -146,32 +129,33 @@ public class UIScrollGroup : UIElement
         /// <summary>The scroll bar button, if any.</summary>
         public UIBox ScrollBar = null;
 
+        // TODO: maybe explain more? this is the mouse position relative to the bar position when first clicking / dragging it
         /// <summary>The held position offset of the scroll bar.</summary>
         public int BarHeldOffset = -1;
 
         /// <summary>The length of the outer group's relevant dimension.</summary>
-        public int RangeLength => rangeLength();
+        public int Length => Vertical ? ScrollGroup.Height : ScrollGroup.Width;
 
         /// <summary>The length of the scroll bar.</summary>
-        public int BarLength => MaxValue > 0 ? (int)((double)RangeLength / (MaxValue + RangeLength) * RangeLength) : 0;
+        public int BarLength => MaxValue > 0 ? (int)((double)Length / (MaxValue + Length) * Length) : 0;
 
         /// <summary>The scroll bar's position offset.</summary>
-        public int BarPosition => MaxValue > 0 ? (int)((RangeLength - BarLength) * ((double)Value / MaxValue)) : 0;
+        public int BarPosition => MaxValue > 0 ? (int)((Length - BarLength) * ((double)Value / MaxValue)) : 0;
 
-        /// <summary>Constructs a scroll direction.</summary>
-        /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
-        /// <param name="rangeLength">The length of the outer group's relevant dimension.</param>
-        /// <param name="hasBar">Whether to create the <see cref="ScrollBar"/>.</param>
-        /// <param name="width">The width of the <see cref="ScrollBar"/>.</param>
-        /// <param name="styling">The <see cref="ScrollBar"/> styles.</param>
-        /// <param name="layout">The base layout of the <see cref="ScrollBar"/>.</param>
-        public Axis(bool vertical, Func<int> rangeLength, bool hasBar, int width, UIStyling styling, UILayout layout) : this(vertical, rangeLength)
+        public void AddScrollBar(UIStyling styling, int width, UIAnchor anchor = null)
         {
-            if (!hasBar)
+            if ((Vertical && anchor?.AlignmentY == UIAlignment.CENTER) || (!Vertical && anchor?.AlignmentX == UIAlignment.CENTER))
             {
-                return;
+                throw new Exception($"Tried to add a scroll bar with a central scroll direction: {anchor}");
             }
-            if (vertical)
+            if (ScrollBar is not null)
+            {
+                throw new Exception("TODO");
+            }
+            anchor ??= Vertical ? UIAnchor.TOP_RIGHT : UIAnchor.BOTTOM_LEFT;
+            UILayout layout = new UILayout().SetAnchor(anchor);
+            // TODO: this seems like a good "transpose" opportunity
+            if (Vertical)
             {
                 layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(() => (int)(width * ScrollBar.Scale));
             }
@@ -180,8 +164,16 @@ public class UIScrollGroup : UIElement
                 layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(() => (int)(width * ScrollBar.Scale));
             }
             ScrollBar = new(styling, layout) { ScaleSize = false };
+            ScrollGroup.ScrollBarLayer.AddChild(ScrollBar);
         }
 
+        public void RemoveScrollBar()
+        {
+            ScrollGroup.ScrollBarLayer.RemoveChild(ScrollBar);
+            ScrollBar = null;
+        }
+
+        // TODO: why is this needed??
         /// <summary>Sets the <see cref="Value"/> and <see cref="MaxValue"/> to 0.</summary>
         public void Reset()
         {
@@ -198,6 +190,7 @@ public class UIScrollGroup : UIElement
             }
         }
 
+        // TODO: what does this do??
         /// <summary>Scrolls to encompass a min/max offset pair.</summary>
         /// <param name="min">The min offset.</param>
         /// <param name="max">The max offset.</param>
@@ -207,9 +200,9 @@ public class UIScrollGroup : UIElement
             {
                 Value = min;
             }
-            else if (max > RangeLength)
+            else if (max > Length)
             {
-                Value += max - RangeLength;
+                Value += max - Length;
             }
         }
 
@@ -225,9 +218,9 @@ public class UIScrollGroup : UIElement
             }
             if (BarHeldOffset == -1)
             {
-                BarHeldOffset = (int)mousePos - (vertical ? ScrollBar.Y : ScrollBar.X);
+                BarHeldOffset = (int)mousePos - (Vertical ? ScrollBar.Y : ScrollBar.X);
             }
-            Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (RangeLength - BarLength) * MaxValue);
+            Value = (int)((double)(mousePos - groupPos - BarHeldOffset) / (Length - BarLength) * MaxValue);
             Clamp();
         }
 
