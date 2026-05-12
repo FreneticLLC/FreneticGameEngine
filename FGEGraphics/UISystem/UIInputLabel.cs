@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Text alignment
 // TODO: Cap text length
 // TODO: HasEdited
-public class UIInputLabel : UIElement
+public class UIInputLabel : UIBox
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
@@ -51,7 +51,7 @@ public class UIInputLabel : UIElement
         /// <summary>The styling logic for an input label.</summary>
         public readonly UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
 
-        /// <summary>Calls <see cref="UIStyling(System.Func{UIElement, UIStyle})"/>.</summary>
+        /// <summary>Calls <see cref="UIStyling(Func{UIElement, UIStyle})"/>.</summary>
         public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
     }
 
@@ -60,9 +60,6 @@ public class UIInputLabel : UIElement
 
     /// <summary>The paragraph to display the state of this input label.</summary>
     public UIInputParagraph Paragraph;
-
-    /// <summary>The box behind the input label.</summary>
-    public UIBox Box = null;
 
     /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
@@ -102,14 +99,11 @@ public class UIInputLabel : UIElement
     public int Lines => Paragraph.Internal.Renderables.Sum(piece => piece.Text.Lines.Length);
 
     /// <summary>The padding offset for the rendered text, if any.</summary>
-    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) : 0;
+    public int TextPadding => /*Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) :*/ 0;
 
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
-        public int BoxPadding = 0;
-
         /// <summary>Whether to enforce max width or use a horizontal scroll group.</summary>
         public bool HasMaxWidth;
     }
@@ -122,21 +116,9 @@ public class UIInputLabel : UIElement
     /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
-    /// <param name="renderBox">Whether to render a box behind the input label.</param>
-    /// <param name="boxPadding">The padding between the box and the label.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true) : base(styling, layout)
     {
-        if (renderBox)
-        {
-            Internal.BoxPadding = boxPadding;
-            // TODO: properly handle padding
-            //UILayout baseLayout = new(layout);
-            //layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
-            AddChild(Box = new(styling.Bind(this), new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
-        }
-        int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0; // there should definitely be a system for this
-        UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupLayout) { IsEnabled = false };
+        ScrollGroup = new(layout.Copy().SetOrigin()) { IsEnabled = false };
         ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         AddChild(ScrollGroup);
