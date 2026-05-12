@@ -82,7 +82,7 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
-        AddChild(Button = new(UIStyle.Empty, layout.AtOrigin().SetWidth(layout.Height / 2)) { RenderSelf = false, IsEnabled = false });
+        AddChild(Button = new(UIStyle.Empty, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { RenderSelf = false, IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 

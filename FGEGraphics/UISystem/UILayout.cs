@@ -68,6 +68,10 @@ public class UILayout
         Internal = layout.Internal;
     }
 
+    /// <summary>Returns a copy of this layout.</summary>
+    /// <seealso cref="UILayout(UILayout)"/>
+    public UILayout Copy() => new(this);
+
     /// <summary>Sets the anchor.</summary>
     /// <returns>This object.</returns>
     public UILayout SetAnchor(UIAnchor anchor)
@@ -244,8 +248,15 @@ public class UILayout
     /// <returns>This object.</returns>
     public UILayout SetOrigin() => SetAnchor(UIAnchor.TOP_LEFT).SetPosition(0, 0);
 
-    /// <summary>Returns a copy of this layout fixed at the top-left origin.</summary>
-    public UILayout AtOrigin() => new UILayout(this).SetOrigin();
+    /// <summary>Flips X and Y, width and height, and the rotation direction.</summary>
+    /// <returns>This object.</returns>
+    public UILayout Transpose()
+    {
+        (Internal.X, Internal.Y) = (Internal.Y, Internal.X);
+        (Internal.Width, Internal.Height) = (Internal.Height, Internal.Width);
+        // TODO: flip the sign of rotation efficiently
+        return this;
+    }
 
     /// <summary>Gets the relative X value.</summary>
     public int X => Internal.X.Get() + (Element.Parent != null ? Anchor.GetX(Element) : 0);

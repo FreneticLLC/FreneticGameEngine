@@ -69,7 +69,7 @@ public class UIToggleBox : UIBox
     /// <returns>A tuple of the toggle box, label, and their list container.</returns>
     public static (UIToggleBox Box, UILabel Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = default, UIAnchor listAnchor = null)
     {
-        UIToggleBox box = new(styling, layout.AtOrigin(), toggled);
+        UIToggleBox box = new(styling, layout.Copy().SetOrigin(), toggled);
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
         UILabel label = new(text, labelStyling.IsEmpty ? styling.Bind(box) : labelStyling, new UILayout());
         list.AddListItem(box);

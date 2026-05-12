@@ -48,8 +48,8 @@ public class UIScrollGroup : UIElement
         // TODO: Fix scroll bar overlap
         XAxis = new(this, false);
         YAxis = new(this, true);
-        AddChild(ScrollBarLayer = new UIGroup(layout.AtOrigin()));
-        AddChild(ScrollableLayer = new UIScissorGroup(layout.AtOrigin()));
+        AddChild(ScrollBarLayer = new UIGroup(layout.Copy().SetOrigin()));
+        AddChild(ScrollableLayer = new UIScissorGroup(layout.Copy().SetOrigin()));
     }
 
     /// <inheritdoc/>
@@ -158,16 +158,13 @@ public class UIScrollGroup : UIElement
             {
                 throw new Exception("TODO");
             }
-            anchor ??= Vertical ? UIAnchor.TOP_RIGHT : UIAnchor.BOTTOM_LEFT;
-            UILayout layout = new UILayout().SetAnchor(anchor);
-            // TODO: this seems like a good "transpose" opportunity
-            if (Vertical)
+            UILayout layout = new UILayout()
+                .SetAnchor(anchor ?? (Vertical ? UIAnchor.TOP_RIGHT : UIAnchor.BOTTOM_LEFT))
+                .SetY(() => BarPosition).SetHeight(() => BarLength)
+                .SetWidth(() => (int)(width * ScrollBar.Scale));
+            if (!Vertical)
             {
-                layout.SetY(() => BarPosition).SetHeight(() => BarLength).SetWidth(() => (int)(width * ScrollBar.Scale));
-            }
-            else
-            {
-                layout.SetX(() => BarPosition).SetWidth(() => BarLength).SetHeight(() => (int)(width * ScrollBar.Scale));
+                layout.Transpose();
             }
             ScrollBar = new(styling, layout) { ScaleSize = false };
             ScrollGroup.ScrollBarLayer.AddChild(ScrollBar);

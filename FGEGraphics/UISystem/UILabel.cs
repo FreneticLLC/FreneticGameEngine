@@ -187,7 +187,7 @@ public class UILabel : UIElement
     public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
-        UILabel label = new(text, styling, layout.AtOrigin());
+        UILabel label = new(text, styling, layout.Copy().SetOrigin());
         UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
         list.AddListItem(label);
         list.AddListItem(image);
