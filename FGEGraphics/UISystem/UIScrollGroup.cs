@@ -108,13 +108,15 @@ public class UIScrollGroup : UIElement
         YAxis.Clamp();
     }
 
-    /// <summary>Contains scroll state for a direction.</summary>
-    /// <param name="vertical">Whether the direction is vertical or horizontal.</param>
-    /// <param name="length">The length of the outer group's relevant dimension.</param>
+    /// <summary>Represents the state of a <see cref="UIScrollGroup"/> scroll axis.</summary>
+    /// <param name="scrollGroup">The parent scroll group of the axis.</param>
+    /// <param name="vertical">Whether the axis is vertical or horizontal.</param>
     public class ScrollAxis(UIScrollGroup scrollGroup, bool vertical)
     {
+        /// <summary>The parent scroll group of the axis.</summary>
         public UIScrollGroup ScrollGroup = scrollGroup;
 
+        /// <summary>Whether the axis is vertical or horizontal.</summary>
         public bool Vertical = vertical;
 
         /// <summary>The current scroll position.</summary>
@@ -142,6 +144,10 @@ public class UIScrollGroup : UIElement
         /// <summary>The scroll bar's position offset.</summary>
         public int BarPosition => MaxValue > 0 ? (int)((Length - BarLength) * ((double)Value / MaxValue)) : 0;
 
+        /// <summary>Adds a scroll bar to the parent <see cref="UIScrollGroup"/> that can be dragged by the mouse.</summary>
+        /// <param name="styling">The styling logic of the scroll bar.</param>
+        /// <param name="width">The width of the scroll bar (where the length aligns with the scroll direction).</param>
+        /// <param name="anchor">The positional anchor of the scroll bar.</param>
         public void AddScrollBar(UIStyling styling, int width, UIAnchor anchor = null)
         {
             if ((Vertical && anchor?.AlignmentY == UIAlignment.CENTER) || (!Vertical && anchor?.AlignmentX == UIAlignment.CENTER))
@@ -167,6 +173,7 @@ public class UIScrollGroup : UIElement
             ScrollGroup.ScrollBarLayer.AddChild(ScrollBar);
         }
 
+        /// <summary>Removes the <see cref="ScrollBar"/> from the parent <see cref="UIScrollGroup"/>.</summary>
         public void RemoveScrollBar()
         {
             ScrollGroup.ScrollBarLayer.RemoveChild(ScrollBar);
