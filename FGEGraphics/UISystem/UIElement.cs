@@ -99,7 +99,7 @@ public abstract class UIElement
     public object Tag = null;
 
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
-    public bool RenderSelf = true;
+    public UIRenderMode RenderMode = UIRenderMode.FULL;
 
     /// <summary>The debug name of this element.</summary>
     public virtual string Name { get; set; } = null;
@@ -637,13 +637,19 @@ public abstract class UIElement
     public virtual void RenderAll(double delta)
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
-        Render(delta);
-        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
-        foreach (UIElement child in ElementInternal.Children)
+        if (RenderMode == UIRenderMode.FULL)
         {
-            if (child.IsValid && child.RenderSelf)
+            Render(delta);
+        }
+        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
+        if (RenderMode != UIRenderMode.NONE)
+        {
+            foreach (UIElement child in ElementInternal.Children)
             {
-                child.RenderAll(delta);
+                if (child.IsValid)
+                {
+                    child.RenderAll(delta);
+                }
             }
         }
         GraphicsUtil.CheckError("UIElement - PostRenderAll", this);

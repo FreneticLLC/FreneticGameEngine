@@ -148,7 +148,7 @@ public class UIInputLabel : UIBox
         Paragraph.UpdateRenderState();
         ScrollGroup.XAxis.Reset();
         ScrollGroup.YAxis.Reset();
-        PlaceholderInfo.RenderSelf = Content.Length == 0;
+        PlaceholderInfo.RenderMode = Content.Length == 0 ? UIRenderMode.FULL : UIRenderMode.NONE;
     }
 
     // FIXME: Paragraph.Width still retains last value when deleting all, incorrect MaxValue calculation 
@@ -193,7 +193,7 @@ public class UIInputLabel : UIBox
     {
         Paragraph.UpdateRenderState();
         UpdateScrollGroup();
-        PlaceholderInfo.RenderSelf = Content.Length == 0;
+        PlaceholderInfo.RenderMode = Content.Length == 0 ? UIRenderMode.FULL : UIRenderMode.NONE;
     }
 
     /// <summary>Performs a user edit on the text content.</summary>

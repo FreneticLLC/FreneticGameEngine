@@ -62,7 +62,7 @@ public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
     {
         Labels.Add(label);
         AddChild(label);
-        label.RenderSelf = false;
+        label.RenderMode = UIRenderMode.NONE;
         //label.Internal.OnRenderablesUpdate += UpdateRenderables;
     }
 
