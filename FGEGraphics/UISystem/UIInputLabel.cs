@@ -118,7 +118,7 @@ public class UIInputLabel : UIBox
     /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
     public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true) : base(styling, layout)
     {
-        ScrollGroup = new(layout.Copy().SetOrigin()) { IsEnabled = false };
+        ScrollGroup = new(layout.Container()) { IsEnabled = false };
         ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
         AddChild(ScrollGroup);

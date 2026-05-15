@@ -48,8 +48,8 @@ public class UIScrollGroup : UIElement
         // TODO: Fix scroll bar overlap
         XAxis = new(this, false);
         YAxis = new(this, true);
-        AddChild(ScrollBarLayer = new UIGroup(layout.Copy().SetOrigin()));
-        AddChild(ScrollableLayer = new UIScissorGroup(layout.Copy().SetOrigin()));
+        AddChild(ScrollBarLayer = new UIGroup(layout.Container()));
+        AddChild(ScrollableLayer = new UIScissorGroup(layout.Container()));
     }
 
     /// <inheritdoc/>

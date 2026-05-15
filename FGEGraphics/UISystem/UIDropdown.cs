@@ -76,8 +76,8 @@ public class UIDropdown : UIElement
     public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
         PlaceholderInfo = text ?? "null";
-        AddChild(Button = new UIBox(buttonStyling, layout.Copy().SetOrigin(), text) { OnClick = Open });
-        Box = new UIBox(boxStyling, layout.Copy().SetOrigin());
+        AddChild(Button = new UIBox(buttonStyling, layout.Container(), text) { OnClick = Open });
+        Box = new UIBox(boxStyling, layout.Container());
         Box.AddChild(Entries = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
         Internal.Layer = layer ?? this;
