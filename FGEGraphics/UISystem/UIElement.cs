@@ -373,6 +373,7 @@ public abstract class UIElement
         {
             return;
         }
+        ElementInternal.Style = style;
         ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);

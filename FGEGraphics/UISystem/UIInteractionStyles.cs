@@ -36,6 +36,10 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
     /// <summary>The style of a disabled element.</summary>
     public UIStyle Disabled = disabled;
 
+    // TODO: should this also be a record
+    public UIInteractionStyles(UIInteractionStyles styles) : this(styles.Normal, styles.Hover, styles.Press, styles.Disabled)
+    { }
+
     /// <summary>The styling logic for an interactable element.</summary>
     public virtual UIStyle Styling(UIElement element) => element.IsPressed ? Press
         : element.IsHovered ? Hover

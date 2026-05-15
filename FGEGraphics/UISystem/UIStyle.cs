@@ -36,6 +36,8 @@ public record UIStyle
     /// <summary>How thick the border outline should be (or <c>0</c> for none).</summary>
     public int BorderThickness = 0;
 
+    public int Padding = 0;
+
     /// <summary>How big the drop-shadow effect should be (or <c>0</c> for none).</summary>
     public int DropShadowLength = 0;
 
@@ -57,6 +59,9 @@ public record UIStyle
     {
     }
 
+    // TODO: since this is a record, we can simply do:
+    //   style with { }
+    // TODO: determine whether UIStyle should stay a record
     /// <summary>Constructs a new style as a copy of another style.</summary>
     /// <param name="style">The style to copy.</param>
     public UIStyle(UIStyle style)
@@ -65,11 +70,14 @@ public record UIStyle
         BaseTexture = style.BaseTexture;
         BorderColor = style.BorderColor;
         BorderThickness = style.BorderThickness;
+        Padding = style.Padding;
         DropShadowLength = style.DropShadowLength;
         TextFont = style.TextFont;
         TextStyling = style.TextStyling;
         TextBaseColor = style.TextBaseColor;
     }
+
+    public int Inset => BorderThickness + Padding;
 
     /// <summary>Returns the font height, or <c>0</c> if <see cref="TextFont"/> is <c>null</c>.</summary>
     public int FontHeight => TextFont?.Height ?? 0;

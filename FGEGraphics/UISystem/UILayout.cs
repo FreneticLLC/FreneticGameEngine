@@ -259,7 +259,9 @@ public class UILayout
     }
 
     // TODO: what else to inherit?
-    public UILayout Container() => new UILayout().SetSize(() => Width, () => Height);
+    public UILayout Container() => new UILayout()
+        .SetPosition(() => Element.Style.Inset, () => Element.Style.Inset)
+        .SetSize(() => Width - Element.Style.Inset * 2, () => Height - Element.Style.Inset * 2);
 
     /// <summary>Gets the relative X value.</summary>
     public int X => Internal.X.Get() + (Element.Parent != null ? Anchor.GetX(Element) : 0);
