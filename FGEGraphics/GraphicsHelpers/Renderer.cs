@@ -209,7 +209,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
         Matrix4d mat = Matrix4d.CreateScale(halfsize.ToOpenTK3D())
-            * (rot != null && rot.HasValue ? rot.Value : Matrix4d.Identity)
+            * (rot is not null && rot.HasValue ? rot.Value : Matrix4d.Identity)
             * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());
         view.SetMatrix(2, mat); // TODO: Client reference!
         GraphicsUtil.CheckError("RenderLineBox: SetMatrix");
