@@ -101,9 +101,6 @@ public class UIInputLabel : UIBox
     /// <summary>The current number of input text lines.</summary>
     public int Lines => Paragraph.Internal.Renderables.Sum(piece => piece.Text.Lines.Length);
 
-    /// <summary>The padding offset for the rendered text, if any.</summary>
-    public int TextPadding => /*Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) :*/ 0;
-
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
@@ -118,14 +115,12 @@ public class UIInputLabel : UIBox
     /// <param name="inputStyling">The style of normal input content.</param>
     /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
     {
         ScrollGroup = new(layout.Container()) { IsEnabled = false };
-        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
-        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
-        Internal.HasMaxWidth = maxWidth;
         Paragraph.SetContent(defaultText);
     }
 
@@ -162,8 +157,8 @@ public class UIInputLabel : UIBox
         {
             return;
         }
-        ScrollGroup.XAxis.MaxValue = Math.Max(Paragraph.Width + TextPadding * 2 - ScrollGroup.Width, 0);
-        ScrollGroup.XAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X + TextPadding * 2 - ScrollGroup.XAxis.Value);
+        ScrollGroup.XAxis.MaxValue = Math.Max(Paragraph.Width - ScrollGroup.Width, 0);
+        ScrollGroup.XAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X - ScrollGroup.XAxis.Value);
         ScrollGroup.XAxis.Clamp();
     }
 
@@ -175,7 +170,7 @@ public class UIInputLabel : UIBox
             ScrollGroup.YAxis.Reset();
             return;
         }
-        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.FontHeight + TextPadding * 2;
+        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.FontHeight;
         ScrollGroup.YAxis.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
         ScrollGroup.YAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.YAxis.Value);
         ScrollGroup.XAxis.Clamp();
