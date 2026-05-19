@@ -40,7 +40,7 @@ public class UIBox : UIElement
     /// <param name="text">Text to display inside the box.</param>
     public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
     {
-        AddChild(Label = new UILabel(text, styling with { Element = this }, new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
+        AddChild(Label = new UILabel(text, styling?.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
 
     /// <inheritdoc/>

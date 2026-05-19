@@ -103,7 +103,7 @@ public class UILabel : UIElement
         {
             return RenderableText.Empty;
         }
-        string styledContent = style.TextStyling(Internal.Content); // FIXME: this doesn't play well with translatable text.
+        string styledContent = style.TextStyling?.Invoke(Internal.Content) ?? Internal.Content; // FIXME: this doesn't play well with translatable text.
         RenderableText renderable = font.ParseFancyText(styledContent, style.TextBaseColor);
         if (Internal.MaxWidth > 0)
         {

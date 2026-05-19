@@ -71,7 +71,7 @@ public class UIToggleBox : UIBox
     {
         UIToggleBox box = new(styling, layout.Copy().SetOrigin(), toggled);
         UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
-        UILabel label = new(text, labelStyling ?? styling with { Element = box }, new UILayout());
+        UILabel label = new(text, labelStyling ?? styling?.Bind(box), new UILayout());
         list.AddListItem(box);
         list.AddListItem(label);
         return (box, label, list);

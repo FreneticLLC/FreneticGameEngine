@@ -118,7 +118,7 @@ public class UIInputLabel : UIBox
     public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
     {
         ScrollGroup = new(layout.Container()) { IsEnabled = false };
-        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling with { Element = this }, new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling?.Bind(this), new UILayout()) { IsEnabled = false });
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
         Paragraph.SetContent(defaultText);

@@ -31,9 +31,9 @@ public readonly struct UIStyleValue<T>
     public static implicit operator UIStyleValue<T>(Func<UIElement, T> dynamic) => new(dynamic);
 
     public static UIStyleValue<T> Interactive(T idle, T hovered, T pressed, T disabled) => new(
-        element => !element.IsEnabled ? disabled
-            : element.IsPressed ? pressed
+        element => element.IsPressed ? pressed
             : element.IsHovered ? hovered
+            : !element.IsEnabled ? disabled
             : idle
     );
 }

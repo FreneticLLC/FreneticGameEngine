@@ -50,4 +50,6 @@ public record UIStyling
             TextBaseColor = TextBaseColor.Get(element)
         };
     }
+
+    public UIStyling Bind(UIElement element) => this with { Element = element };
 }
