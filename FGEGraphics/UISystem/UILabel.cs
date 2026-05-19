@@ -42,11 +42,8 @@ public class UILabel : UIElement
         /// <summary>The maximum width of the text content.</summary>
         public int MaxWidth;
 
-        /// <summary>A cache of UI styles and their corresponding renderable objects.</summary>
-        public Dictionary<UIStyle, RenderableText> Renderables = [];
-
-        /// <summary>Fired after the renderables cache is updated.</summary>
-        public Action OnRenderablesUpdate;
+        /// <summary>The cached renderable object.</summary>
+        public RenderableText Renderable = RenderableText.Empty;
     }
 
     /// <summary>Data internal to a <see cref="UILabel"/> instance.</summary>
@@ -62,7 +59,7 @@ public class UILabel : UIElement
         set
         {
             Internal.Content = value ?? "";
-            UpdateRenderables();
+            UpdateRenderable();
         }
     }
 
@@ -77,7 +74,7 @@ public class UILabel : UIElement
         set
         {
             Internal.MaxWidth = value;
-            UpdateRenderables();
+            UpdateRenderable();
         }
     }
 
@@ -88,7 +85,7 @@ public class UILabel : UIElement
     public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Internal = new() { Content = text ?? "" };
-        UpdateRenderables();
+        UpdateRenderable();
     }
 
     /// <summary>Creates a <see cref="RenderableText"/> object from <see cref="Content"/> given a style.</summary>
@@ -101,14 +98,11 @@ public class UILabel : UIElement
         {
             return RenderableText.Empty;
         }
-        // TODO: cache this somewhere, as it's likely for many elements with text to have the same scale value
-        IEnumerable<KeyValuePair<(string, int), FontSet>> fontVariants = style.TextFont.Engine.Fonts.Where(pair => pair.Value.Name == style.TextFont.Name);
-        if (!fontVariants.Any())
+        FontSet font = style.TextFont.Engine.GetApproximateFont(style.TextFont.Name, fontSize);
+        if (font is null)
         {
             return RenderableText.Empty;
         }
-        IEnumerable<KeyValuePair<(string, int), FontSet>> fittingFonts = fontVariants.Where(pair => pair.Key.Item2 <= fontSize);
-        ((string, int) _, FontSet font) = fittingFonts.Any() ? fittingFonts.MinBy(pair => fontSize - pair.Key.Item2) : fontVariants.MinBy(pair => Math.Abs(fontSize - pair.Key.Item2));
         string styledContent = style.TextStyling(Internal.Content); // FIXME: this doesn't play well with translatable text.
         RenderableText renderable = font.ParseFancyText(styledContent, style.TextBaseColor);
         if (Internal.MaxWidth > 0)
@@ -123,56 +117,40 @@ public class UILabel : UIElement
     /// If <see cref="IsEmpty"/> is <c>true</c>, clears the cache.
     /// Otherwise, recreates all renderable objects in the cache.
     /// </summary>
-    public void UpdateRenderables()
+    public void UpdateRenderable(UIStyle style = null)
     {
-        if (IsEmpty)
-        {
-            Internal.Renderables.Clear();
-        }
-        else
-        {
-            Internal.Renderables = ElementInternal.Styles
-                .Select(style => (style, CreateRenderable(style)))
-                .ToDictionary();
-            Internal.OnRenderablesUpdate?.Invoke();
-        }
+        style ??= Style;
+        Internal.Renderable = !IsEmpty && style.CanRenderText ? CreateRenderable(style) : RenderableText.Empty;
     }
 
     /// <inheritdoc/>
     public override void StyleChanged(UIStyle from, UIStyle to)
     {
-        if (!IsEmpty && to.CanRenderText && !Internal.Renderables.ContainsKey(to))
+        UpdateRenderable(to);
+        if (Scale != 0)
         {
-            Internal.Renderables[to] = CreateRenderable(to);
-        }
-        if (Scale != 0 && Internal.Renderables.TryGetValue(to, out RenderableText renderable))
-        {
-            Layout.SetSize(renderable.GetTrueSize(to.TextFont));
+            Layout.SetSize(Internal.Renderable.GetTrueSize(to.TextFont));
         }
     }
 
     /// <inheritdoc/>
     public override void ScaleChanged(float from, float to)
     {
-        UpdateRenderables();
-        if (from == 0 && GetRenderable(Style) is RenderableText renderable)
+        UpdateRenderable();
+        if (from == 0 && !Internal.Renderable.IsEmpty)
         {
-            Layout.SetSize(renderable.GetTrueSize(Style.TextFont));
+            Layout.SetSize(Internal.Renderable.GetTrueSize(Style.TextFont));
         }
     }
-
-    /// <summary>Returns the cached <see cref="RenderableText"/> object corresponding to the given style, or <c>null</c> if none is present.</summary>
-    /// <param name="style">The UI style to query.</param>
-    public RenderableText GetRenderable(UIStyle style) => !IsEmpty && Internal.Renderables.TryGetValue(style, out RenderableText renderable) ? renderable : null;
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
-        if (GetRenderable(style) is RenderableText renderable)
+        if (!Internal.Renderable.IsEmpty)
         {
-            int trueX = X + Layout.Anchor.AlignmentX.GetPosition(Width, renderable.Width);
-            int trueY = Y + Layout.Anchor.AlignmentY.GetPosition(Height, renderable.Height);
-            style.TextFont.DrawFancyText(renderable, new Location(trueX, trueY, 0));
+            int trueX = X + Layout.Anchor.AlignmentX.GetPosition(Width, Internal.Renderable.Width);
+            int trueY = Y + Layout.Anchor.AlignmentY.GetPosition(Height, Internal.Renderable.Height);
+            style.TextFont.DrawFancyText(Internal.Renderable, new Location(trueX, trueY, 0));
         }
     }
 

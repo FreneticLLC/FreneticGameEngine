@@ -74,11 +74,11 @@ public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
         List<(FontSet Font, RenderableTextLine Line)> lines = [];
         foreach (UILabel label in Labels)
         {
-            if (label.GetRenderable(label.Style) is not RenderableText renderable)
+            if (label.Internal.Renderable.IsEmpty)
             {
                 continue;
             }
-            List<RenderableTextLine> textLines = [.. renderable.Lines];
+            List<RenderableTextLine> textLines = [.. label.Internal.Renderable.Lines];
             if (lines.Count != 0)
             {
                 RenderableTextLine combinedLine = new([.. lines[^1].Line.Parts, .. textLines[0].Parts]);

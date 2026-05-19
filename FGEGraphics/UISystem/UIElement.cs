@@ -175,7 +175,7 @@ public abstract class UIElement
         public UIStyle Style = UIStyle.Empty;
 
         /// <summary>Styles registered on this element.</summary>
-        public HashSet<UIStyle> Styles = [];
+        //public HashSet<UIStyle> Styles = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -374,7 +374,7 @@ public abstract class UIElement
             return;
         }
         ElementInternal.Style = style;
-        ElementInternal.Styles.Add(style);
+        //ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
@@ -798,11 +798,11 @@ public abstract class UIElement
         {
             info.Add(transforms);
             info.Add($"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}");
-            if (ElementInternal.Styles.Count > 0)
+            /*if (ElementInternal.Styles.Count > 0)
             {
                 List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
                 info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
-            }
+            }*/
         }
         return info;
     }
