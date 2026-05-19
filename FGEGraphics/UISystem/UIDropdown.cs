@@ -133,7 +133,7 @@ public class UIDropdown : UIElement
     public void AddChoice(UIElement choice, Func<string> label)
     {
         // TODO: configurable appearance
-        UIStyle containerStyle = Entries.Items.Count % 2 == 0 ? UIStyle.Empty : new UIStyle { BaseColor = new(0, 0, 0, 0.25f) };
+        UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f) };
         UIBox container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
         container.AddChild(choice);

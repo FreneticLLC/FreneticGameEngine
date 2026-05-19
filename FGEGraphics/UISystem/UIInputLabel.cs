@@ -47,16 +47,16 @@ public class UIInputLabel : UIBox
     // TODO: rethink
     /// <summary>Wraps a <see cref="UIInteractionStyles"/> instance with logic specific to input labels.</summary>
     /// <param name="styles">The base interaction styles.</param>
-    public struct Styles(UIInteractionStyles styles)
+    /*public struct Styles(UIInteractionStyles styles)
     {
         public UIInteractionStyles BaseStyles = styles;
 
         /// <summary>The styling logic for an input label.</summary>
         public readonly UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
 
-        /// <summary>Calls <see cref="UIStyling(Func{UIElement, UIStyle})"/>.</summary>
-        public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
-    }
+        /// <summary>Calls <see cref="UIStylingOld(Func{UIElement, UIStyle})"/>.</summary>
+        public static implicit operator UIStylingOld(Styles styles) => new(styles.Styling);
+    }*/
 
     /// <inheritdoc/>
     public override string Name => "Input Label";
@@ -118,7 +118,7 @@ public class UIInputLabel : UIBox
     public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
     {
         ScrollGroup = new(layout.Container()) { IsEnabled = false };
-        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling with { Element = this }, new UILayout()) { IsEnabled = false });
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
         Paragraph.SetContent(defaultText);

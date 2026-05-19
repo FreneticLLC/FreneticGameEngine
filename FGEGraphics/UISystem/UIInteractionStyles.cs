@@ -59,6 +59,6 @@ public class UIInteractionStyles(UIStyle normal, UIStyle hover, UIStyle press, U
         return new(normal, hover, press, disabled);
     }
 
-    /// <summary>Calls <see cref="UIStyling(Func{UIElement, UIStyle})"/>.</summary>
-    public static implicit operator UIStyling(UIInteractionStyles styles) => new(styles.Styling);
+    /// <summary>Calls <see cref="UIStylingOld(Func{UIElement, UIStyle})"/>.</summary>
+    public static implicit operator UIStylingOld(UIInteractionStyles styles) => new(styles.Styling);
 }

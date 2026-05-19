@@ -69,7 +69,7 @@ public class UINumberSlider : UIElement
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling,layout)
+    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
@@ -82,7 +82,7 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
-        AddChild(Button = new(UIStyle.Empty, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { RenderMode = UIRenderMode.NONE, IsEnabled = false });
+        AddChild(Button = new(null, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { RenderMode = UIRenderMode.NONE, IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
     }
 

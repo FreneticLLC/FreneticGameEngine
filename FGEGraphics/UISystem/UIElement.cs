@@ -173,9 +173,6 @@ public abstract class UIElement
 
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
-
-        /// <summary>Styles registered on this element.</summary>
-        //public HashSet<UIStyle> Styles = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -374,7 +371,6 @@ public abstract class UIElement
             return;
         }
         ElementInternal.Style = style;
-        //ElementInternal.Styles.Add(style);
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
@@ -382,7 +378,7 @@ public abstract class UIElement
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
     public void UpdateStyle()
     {
-        SetStyle(Styling.Get(this));
+        SetStyle(Styling?.Get(this) ?? UIStyle.Empty);
     }
 
     /// <summary>

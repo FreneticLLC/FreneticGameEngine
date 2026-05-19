@@ -43,7 +43,7 @@ public class UIScrollGroup : UIElement
 
     /// <summary>Constructs the UI scroll group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    public UIScrollGroup(UILayout layout) : base(UIStyling.Empty, layout)
+    public UIScrollGroup(UILayout layout) : base(null, layout)
     {
         // TODO: Fix scroll bar overlap
         XAxis = new(this, false);

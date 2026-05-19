@@ -16,6 +16,7 @@ using FGECore.MathHelpers;
 using FGECore.UtilitySystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using OpenTK.Mathematics;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 

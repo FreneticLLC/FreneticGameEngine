@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents multiple <see cref="UILabel"/>s chained together.</summary>
 /// <param name="layout">The layout of the element.</param>
-public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
+public class UIParagraph(UILayout layout) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => "Paragraph";
