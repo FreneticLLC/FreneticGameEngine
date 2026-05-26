@@ -370,6 +370,11 @@ public class ShaderEngine
         }
         GL.LinkProgram(program);
         string str = GL.GetProgramInfoLog(program);
+        GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int linkStatus);
+        if (linkStatus != 1)
+        {
+            throw new Exception($"Error linking shader program '{name}'. Link status: {linkStatus}, info: {str}");
+        }
         if (str.Length != 0)
         {
             Logs.ClientInfo($"Linked shader '{name}' with message: '{str}'");

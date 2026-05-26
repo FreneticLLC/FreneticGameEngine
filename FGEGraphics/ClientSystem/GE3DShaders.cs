@@ -13,6 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.ClientSystem.ViewRenderSystem;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem;
 
@@ -57,8 +60,12 @@ public class GE3DShaders
             + (forShad ? ",MCM_SHADOWS" : "");
         Forward.BasicSolid = Shaders.GetShader("forward" + def + forw_extra);
         Forward.BasicSolid_NoBones = Shaders.GetShader("forward" + def + ",MCM_NO_BONES" + forw_extra);
+        string plantWind = ",MCM_NO_BONES,MCM_PLANT_WIND";
+        Forward.BasicSolid_PlantWind = Shaders.GetShader("forward" + def + plantWind + forw_extra);
         Forward.BasicTransparent = Shaders.GetShader("forward" + def + ",MCM_TRANSP" + forw_extra);
         Forward.BasicTransparent_NoBones = Shaders.GetShader("forward" + def + ",MCM_TRANSP,MCM_NO_BONES" + forw_extra);
+        Deferred.GBufferSolid_PlantWind = Shaders.GetShader("fbo" + def + plantWind);
+        Deferred.ShadowPass_PlantWind = Shaders.GetShader("shadow" + def + plantWind);
         if (AllowLL)
         {
             Deferred.Transparents_LL = Shaders.GetShader("transponly" + def + ",MCM_LL");
@@ -97,6 +104,9 @@ public class GE3DShaders
 
         /// <summary>The shader used for forward ('fast') rendering of data, with no bones.</summary>
         public Shader BasicSolid_NoBones;
+
+        /// <summary>The shader used for forward ('fast') rendering of dynamic plant leaves.</summary>
+        public Shader BasicSolid_PlantWind;
 
         /// <summary>The shader used for forward ('fast') rendering of transparent data.</summary>
         public Shader BasicTransparent;
@@ -138,6 +148,9 @@ public class GE3DShaders
         /// <summary>The Shadow Pass shader, with bones off.</summary>
         public Shader ShadowPass_NoBones;
 
+        /// <summary>The Shadow Pass shader for dynamic plant leaves.</summary>
+        public Shader ShadowPass_PlantWind;
+
         /// <summary>The Shadow Pass shader, for particles.</summary>
         public Shader ShadowPass_Particles;
 
@@ -158,6 +171,9 @@ public class GE3DShaders
 
         /// <summary>The G-Buffer FBO shader.</summary>
         public Shader GBufferSolid;
+
+        /// <summary>The G-Buffer FBO shader for dynamic plant leaves.</summary>
+        public Shader GBufferSolid_PlantWind;
 
         /// <summary>The G-Buffer FBO shader, for alltransparents (Skybox mainly).</summary>
         public Shader GBuffer_SkyBox;
@@ -240,4 +256,88 @@ public class GE3DShaders
 
     /// <summary>Shader objects for deferred rendering.</summary>
     public DeferredShaders Deferred;
+
+    /// <summary>Uniform location for dynamic plant wind strength (must not overlap forward.fs loc 20-21).</summary>
+    public const int PLANT_WIND_STRENGTH = 22;
+
+    /// <summary>Uniform location for dynamic plant wind animation speed scale.</summary>
+    public const int PLANT_WIND_SPEED = 23;
+
+    /// <summary>Binds the default entity solid shader for the current render target (no bones).</summary>
+    /// <param name="fbo">The active framebuffer pass.</param>
+    /// <returns>The bound shader.</returns>
+    public Shader BindEntitySolidForFbo(FBOID fbo)
+    {
+        if (fbo == FBOID.FORWARD_SOLID)
+        {
+            return Forward.BasicSolid_NoBones.Bind();
+        }
+        if (fbo == FBOID.MAIN)
+        {
+            return Deferred.GBufferSolid.Bind();
+        }
+        if (fbo == FBOID.REFRACT)
+        {
+            return Deferred.GBuffer_Refraction.Bind();
+        }
+        if (fbo == FBOID.SHADOWS || fbo == FBOID.STATIC_SHADOWS || fbo == FBOID.DYNAMIC_SHADOWS)
+        {
+            return Deferred.ShadowPass_NoBones.Bind();
+        }
+        return Forward.BasicSolid_NoBones.Bind();
+    }
+
+    /// <summary>Binds the plant-wind shader variant appropriate for the current render target.</summary>
+    /// <param name="fbo">The active framebuffer pass.</param>
+    /// <returns>The bound shader.</returns>
+    public Shader BindPlantWindForFbo(FBOID fbo)
+    {
+        Shader plant = fbo switch
+        {
+            FBOID.FORWARD_SOLID => Forward.BasicSolid_PlantWind,
+            FBOID.MAIN => Deferred.GBufferSolid_PlantWind,
+            FBOID.SHADOWS or FBOID.STATIC_SHADOWS or FBOID.DYNAMIC_SHADOWS => Deferred.ShadowPass_PlantWind,
+            _ => Forward.BasicSolid_PlantWind,
+        };
+        if (!plant.LoadedProperly)
+        {
+            return BindEntitySolidForFbo(fbo);
+        }
+        return plant.Bind();
+    }
+
+    /// <summary>Uploads pass-level uniforms onto the currently bound plant-wind program (required after every bind).</summary>
+    /// <param name="view">The active view.</param>
+    /// <param name="fbo">The active framebuffer pass.</param>
+    public void ApplyPlantWindPassUniforms(View3D view, FBOID fbo)
+    {
+        GameEngine3D engine = view.Engine;
+        if (fbo == FBOID.MAIN)
+        {
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref view.State.PrimaryMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+            GL.Uniform4(ShaderLocations.Deferred.GBuffer.FogColor, new Vector4(view.Config.FogCol.ToOpenTK(), view.Config.FogAlpha));
+            GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(view.Config.Width, view.Config.Height, engine.ZNear, engine.ZFar()));
+        }
+        else if (fbo.IsForward())
+        {
+            Matrix4 proj = view.State.IsSecondEye ? view.State.PrimaryMatrix_OffsetFor3D : view.State.PrimaryMatrix;
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref proj);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+            GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(view.Config.Width, view.Config.Height, engine.ZNear, engine.ZFar()));
+            GL.Uniform4(12, new Vector4(view.Config.FogCol.ToOpenTK(), view.Config.FogAlpha));
+            GL.Uniform3(ShaderLocations.Common.CAMERA_POSITION.Location, view.State.CameraRelativePosition);
+            float fogDist = 1.0f / engine.FogMaxDist();
+            fogDist *= fogDist;
+            GL.Uniform1(13, fogDist);
+            GL.Uniform3(18, -engine.SunAdjustDirection.ToOpenTK());
+            GL.Uniform3(19, engine.SunAdjustBackupLight.Xyz);
+            GL.Uniform1(16, 0.2f);
+        }
+        else if (fbo == FBOID.SHADOWS || fbo == FBOID.STATIC_SHADOWS || fbo == FBOID.DYNAMIC_SHADOWS)
+        {
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref view.State.PrimaryMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+        }
+    }
 }

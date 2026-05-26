@@ -10,6 +10,7 @@
 
 #define MCM_GEOM_ACTIVE 0
 #define MCM_NO_BONES 0
+#define MCM_PLANT_WIND 0
 #define MCM_GEOM_FOURD_TEXTURE 0
 
 layout (location = 0) in vec3 position;
@@ -45,6 +46,11 @@ layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, r
 // ...
 layout (location = 100) uniform mat4 simplebone_matrix = mat4(1.0);
 layout (location = 101) uniform mat4 boneTrans[MAX_BONES];
+layout (location = 6) uniform float time;
+#endif
+
+#if MCM_PLANT_WIND
+#include plantwind.inc
 #endif
 
 #if MCM_GEOM_ACTIVE
@@ -85,12 +91,14 @@ void main()
 #if MCM_GEOM_ACTIVE
 	f.position = model_matrix * vec4(position, 1.0);
 #else
-#if MCM_NO_BONES
-	const float rem = 1.0;
+	vec4 pos1;
+#if MCM_PLANT_WIND
+	vec3 windPos = apply_plant_wind(position, tangent, texcoords.z);
+	pos1 = vec4(windPos, 1.0);
+#elif MCM_NO_BONES
+	pos1 = vec4(position, 1.0);
 #else
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
-#endif
-	vec4 pos1;
 	mat4 BT = mat4(1.0);
 	if (rem < 0.99)
 	{
@@ -109,6 +117,7 @@ void main()
 	{
 		pos1 = vec4(position, 1.0);
 	}
+#endif
 	pos1 *= simplebone_matrix;
 	f.position = projection * model_matrix * vec4(pos1.xyz, 1.0);
 	if (should_sqrt >= 0.5)

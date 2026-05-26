@@ -46,7 +46,7 @@ public class EntityCompoundShape : EntityShapeHelper
         int childIndex = 0;
         foreach (EntityCompoundChild child in dup.Children)
         {
-            TypedIndex childShapeInd = child.Shape.Register().ShapeIndex;
+            TypedIndex childShapeInd = child.Shape.Register().RegisterForCompound();
             children[childIndex++] = new(child.Pose, childShapeInd);
         }
         Compound created = new(children);

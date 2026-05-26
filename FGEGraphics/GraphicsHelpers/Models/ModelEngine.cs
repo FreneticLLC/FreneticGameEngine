@@ -258,6 +258,11 @@ public class ModelEngine
             bool hastc = mesh.TexCoords.Length == mesh.Vertices.Length;
             bool hasn = mesh.Normals.Length == mesh.Vertices.Length;
             bool hascolors = mesh.Colors is not null && mesh.Colors.Length == mesh.Vertices.Length;
+            bool hasWind = mesh.WindPivots is not null && mesh.WindPivots.Length == mesh.Vertices.Length && mesh.WindPhases is not null && mesh.WindPhases.Length == mesh.Vertices.Length;
+            if (hasWind)
+            {
+                modmesh.UsesPlantWind = true;
+            }
             if (!hasn)
             {
                 Logs.Warning($"Mesh has no normals! ({name})");
@@ -268,12 +273,21 @@ public class ModelEngine
             }
             Renderable.ArrayBuilder builder = new();
             builder.Prepare(mesh.Vertices.Length, mesh.Indices.Length);
+            if (hasWind)
+            {
+                builder.Tangents = new Vector3[mesh.Vertices.Length];
+            }
             for (int i = 0; i < mesh.Vertices.Length; i++)
             {
                 builder.Vertices[i] = mesh.Vertices[i].ToOpenTK();
-                builder.TexCoords[i] = hastc ? new Vector3(mesh.TexCoords[i].X, 1 - mesh.TexCoords[i].Y, 0) : new Vector3(0, 0, 0);
+                float windPhase = hasWind ? mesh.WindPhases[i] : 0;
+                builder.TexCoords[i] = hastc ? new Vector3(mesh.TexCoords[i].X, 1 - mesh.TexCoords[i].Y, windPhase) : new Vector3(0, 0, windPhase);
                 builder.Normals[i] = hasn ? mesh.Normals[i].ToOpenTK() : new Vector3(0f, 0f, 1f);
                 builder.Colors[i] = hascolors ? mesh.Colors[i].ToOpenTK() : new Vector4(1, 1, 1, 1); // TODO: From the mesh?
+                if (hasWind)
+                {
+                    builder.Tangents[i] = mesh.WindPivots[i].ToOpenTK();
+                }
 #if DEBUG
                 if (builder.Vertices[i].ToLocation().IsNaNOrInfinite() || builder.TexCoords[i].ToLocation().IsNaNOrInfinite() || builder.Normals[i].ToLocation().IsNaNOrInfinite())
                 {
@@ -295,34 +309,36 @@ public class ModelEngine
                 }
 #endif
             }
-            int bc = mesh.Bones.Length;
-            if (bc > View3DInternalData.MAX_BONES)
+            if (!hasWind && mesh.Bones is not null)
             {
-                Logs.Warning($"Mesh has {bc} bones! ({name})");
-                bc = View3DInternalData.MAX_BONES;
-            }
-            int[] pos = new int[builder.Vertices.Length];
-            for (int i = 0; i < bc; i++)
-            {
-                for (int x = 0; x < mesh.Bones[i].Weights.Length; x++)
+                int bc = mesh.Bones.Length;
+                if (bc > View3DInternalData.MAX_BONES)
                 {
-                    int IDa = mesh.Bones[i].IDs[x];
-                    float Weighta = (float)mesh.Bones[i].Weights[x];
-                    int spot = pos[IDa]++;
-                    if (spot > 7)
+                    Logs.Warning($"Mesh has {bc} bones! ({name})");
+                    bc = View3DInternalData.MAX_BONES;
+                }
+                int[] pos = new int[builder.Vertices.Length];
+                for (int i = 0; i < bc; i++)
+                {
+                    for (int x = 0; x < mesh.Bones[i].Weights.Length; x++)
                     {
-                        //OutputType.WARNING.Output("Too many bones influencing " + vw.VertexID + "!");
-                        ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
-                    }
-                    else if (spot > 3)
-                    {
-                        ForceSet(builder.BoneIDs2, IDa, spot - 4, i);
-                        ForceSet(builder.BoneWeights2, IDa, spot - 4, Weighta);
-                    }
-                    else
-                    {
-                        ForceSet(builder.BoneIDs, IDa, spot, i);
-                        ForceSet(builder.BoneWeights, IDa, spot, Weighta);
+                        int IDa = mesh.Bones[i].IDs[x];
+                        float Weighta = (float)mesh.Bones[i].Weights[x];
+                        int spot = pos[IDa]++;
+                        if (spot > 7)
+                        {
+                            ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
+                        }
+                        else if (spot > 3)
+                        {
+                            ForceSet(builder.BoneIDs2, IDa, spot - 4, i);
+                            ForceSet(builder.BoneWeights2, IDa, spot - 4, Weighta);
+                        }
+                        else
+                        {
+                            ForceSet(builder.BoneIDs, IDa, spot, i);
+                            ForceSet(builder.BoneWeights, IDa, spot, Weighta);
+                        }
                     }
                 }
             }

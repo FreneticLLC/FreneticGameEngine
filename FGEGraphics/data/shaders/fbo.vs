@@ -10,6 +10,7 @@
 
 #define MCM_GEOM_ACTIVE 0
 #define MCM_INVERSE_FADE 0
+#define MCM_PLANT_WIND 0
 #define MCM_GEOM_FOURD_TEXTURE 0
 
 layout (location = 0) in vec3 position;
@@ -70,6 +71,10 @@ layout (location = 100) uniform mat4 simplebone_matrix = mat4(1.0);
 layout (location = 101) uniform mat4 boneTrans[MAX_BONES];
 #endif
 
+#if MCM_PLANT_WIND
+#include plantwind.inc
+#endif
+
 void main()
 {
 	vec4 pos1;
@@ -85,6 +90,11 @@ void main()
 #endif
 	f.color = color * v_color;
 	gl_Position = mv_matrix * vec4(pos1.xyz, 1.0);
+#else
+#if MCM_PLANT_WIND
+	vec3 windPos = apply_plant_wind(position, tangent, texcoords.z);
+	pos1 = vec4(windPos, 1.0);
+	norm1 = vec4(normal, 1.0);
 #else
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
 	mat4 BT = mat4(1.0);
@@ -107,6 +117,7 @@ void main()
 		pos1 = vec4(position, 1.0);
 		norm1 = vec4(normal, 1.0);
 	}
+#endif
 	pos1 *= simplebone_matrix;
 	norm1 *= simplebone_matrix;
 	fi.texcoord = texcoords.xy;
@@ -118,10 +129,16 @@ void main()
 	mv_mat_simple[3][0] = 0.0;
 	mv_mat_simple[3][1] = 0.0;
 	mv_mat_simple[3][2] = 0.0;
-	vec3 tf_normal = (mv_mat_simple * vec4(norm1.xyz, 0.0)).xyz; // TODO: Should BT be here?
-	vec3 tf_tangent = (mv_mat_simple * vec4(tangent, 0.0)).xyz; // TODO: Should BT be here?
-	vec3 tf_bitangent = (mv_mat_simple * vec4(cross(tangent, norm1.xyz), 0.0)).xyz; // TODO: Should BT be here?
-	fi.tbn = (mat3(tf_tangent, tf_bitangent, tf_normal)); // TODO: Neccessity of transpose()?
+	vec3 tf_normal = normalize((mv_mat_simple * vec4(norm1.xyz, 0.0)).xyz);
+#if MCM_PLANT_WIND
+	vec3 upRef = abs(tf_normal.z) < 0.99 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+	vec3 tf_tangent = normalize(cross(upRef, tf_normal));
+	vec3 tf_bitangent = cross(tf_normal, tf_tangent);
+#else
+	vec3 tf_tangent = (mv_mat_simple * vec4(tangent, 0.0)).xyz;
+	vec3 tf_bitangent = (mv_mat_simple * vec4(cross(tangent, norm1.xyz), 0.0)).xyz;
+#endif
+	fi.tbn = mat3(tf_tangent, tf_bitangent, tf_normal);
 #endif
 }
 
