@@ -54,6 +54,9 @@ public class EntityCylinderShape : EntityShapeHelper
         return dup;
     }
 
+    /// <summary>Registers for a compound</summary>
+    public override TypedIndex RegisterForCompound() => CylinderIndex;
+
     /// <summary>Implements <see cref="EntityShapeHelper.Unregister"/>.</summary>
     public override void Unregister()
     {
