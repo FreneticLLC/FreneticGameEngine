@@ -44,20 +44,6 @@ public class UIInputLabel : UIBox
         SUBMIT
     }
 
-    // TODO: rethink
-    /// <summary>Wraps a <see cref="UIInteractionStyles"/> instance with logic specific to input labels.</summary>
-    /// <param name="styles">The base interaction styles.</param>
-    /*public struct Styles(UIInteractionStyles styles)
-    {
-        public UIInteractionStyles BaseStyles = styles;
-
-        /// <summary>The styling logic for an input label.</summary>
-        public readonly UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
-
-        /// <summary>Calls <see cref="UIStylingOld(Func{UIElement, UIStyle})"/>.</summary>
-        public static implicit operator UIStylingOld(Styles styles) => new(styles.Styling);
-    }*/
-
     /// <inheritdoc/>
     public override string Name => "Input Label";
 
