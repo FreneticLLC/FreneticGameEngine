@@ -19,7 +19,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
-public record UIStyle
+public class UIStyle
 {
     /// <summary>An empty element style.</summary>
     public static readonly UIStyle Empty = new() { Name = "Empty" };
