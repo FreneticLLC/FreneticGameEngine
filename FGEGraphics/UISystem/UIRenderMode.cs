@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 //
 // This file is part of the Frenetic Game Engine, created by Frenetic LLC.
 // This code is Copyright (C) Frenetic LLC under the terms of a strict license.
@@ -12,11 +6,21 @@ using System.Threading.Tasks;
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace FGEGraphics.UISystem;
 
+/// <summary>Represents the way a <see cref="UIElement"/> renders to the screen.</summary>
 public enum UIRenderMode
 {
+    /// <summary>Render the element and its children.</summary>
     FULL,
+    /// <summary>Skip the element and render only its children.</summary>
     SKIP_SELF,
+    /// <summary>Skip rendering the element and all of its children.</summary>
     NONE
 }
