@@ -156,7 +156,7 @@ public class UIInputLabel : UIBox
             ScrollGroup.YAxis.Reset();
             return;
         }
-        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.FontHeight;
+        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.TextFont?.Height ?? 0;
         ScrollGroup.YAxis.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
         ScrollGroup.YAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.YAxis.Value);
         ScrollGroup.XAxis.Clamp();

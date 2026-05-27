@@ -33,7 +33,7 @@ public abstract class UIElement
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
-    /// <summary>Gets the UI view this element is attached to.</summary>
+    /// <summary>The UI view this element is attached to.</summary>
     public ViewUI2D View;
 
     /// <summary>Styling logic for this element.</summary>

@@ -126,8 +126,8 @@ public class UINumberSlider : UIElement
     public override void Render(double delta, UIStyle style)
     {
         View.Engine.Textures.White.Bind();
-        Renderer2D.SetColor(style.BorderColor);
-        int lineWidth = style.BorderThickness / 2;
+        Renderer2D.SetColor(style.Stroke);
+        int lineWidth = style.StrokeWeight / 2;
         int centerY = Y + Height / 2;
         View.Rendering.RenderRectangle(View.UIContext, X, centerY - lineWidth, X + Width, centerY + lineWidth);
         if (Interval > 0.0)

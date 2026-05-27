@@ -36,12 +36,12 @@ public record UIStyling
         element = Element ?? element;
         return new()
         {
-            BaseColor = Fill.Get(element),
-            BaseTexture = Texture.Get(element),
-            BorderColor = Stroke.Get(element),
-            BorderThickness = StrokeWeight.Get(element),
+            Fill = Fill.Get(element),
+            Texture = Texture.Get(element),
+            Stroke = Stroke.Get(element),
+            StrokeWeight = StrokeWeight.Get(element),
             Padding = Padding.Get(element),
-            DropShadowLength = ShadowSize.Get(element),
+            ShadowSize = ShadowSize.Get(element),
             TextFont = TextFont.Get(element),
             TextStyling = TextStyling.Get(element),
             TextBaseColor = TextBaseColor.Get(element)

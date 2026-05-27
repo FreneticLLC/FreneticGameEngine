@@ -120,7 +120,7 @@ public class UILabel : UIElement
     public void UpdateRenderable(UIStyle style = null)
     {
         style ??= Style;
-        Internal.Renderable = !IsEmpty && style.CanRenderText ? CreateRenderable(style) : RenderableText.Empty;
+        Internal.Renderable = !IsEmpty && style.TextFont is not null ? CreateRenderable(style) : RenderableText.Empty;
     }
 
     /// <inheritdoc/>
