@@ -33,10 +33,7 @@ public record UIStyling
     public UIStyleValue<string> TextBaseColor = TextStyle.Simple;
 
     public UIStyle Get(UIElement element) {
-        if (Element is not null)
-        {
-            element = Element;
-        }
+        element = Element ?? element;
         return new()
         {
             BaseColor = Fill.Get(element),

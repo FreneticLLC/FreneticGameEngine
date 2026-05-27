@@ -24,7 +24,7 @@ public readonly struct UIStyleValue<T>
         Dynamic = dynamic;
     }
 
-    public readonly T Get(UIElement element) => Constant ?? (Dynamic is not null ? Dynamic.Invoke(element) : default);
+    public readonly T Get(UIElement element) => Dynamic is not null ? Dynamic.Invoke(element) : Constant;
 
     public static implicit operator UIStyleValue<T>(T constant) => new(constant);
 
