@@ -24,7 +24,7 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UINativeTexture(Func<GraphicsUtil.TrackedTexture> texture, UILayout layout) : UIElement(UIStyling.Empty, layout)
+public class UINativeTexture(Func<GraphicsUtil.TrackedTexture> texture, UILayout layout) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => "Native Texture";

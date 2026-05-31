@@ -6,6 +6,10 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGECore.ConsoleHelpers;
+using FGECore.MathHelpers;
+using FGEGraphics.GraphicsHelpers.FontSets;
+using FGEGraphics.GraphicsHelpers.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,60 +18,60 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Represents the styling logic for a <see cref="UIElement"/>.</summary>
-public struct UIStyling
+/// <summary>Represents the styling logic of a <see cref="UIElement"/>.</summary>
+public record UIStyling
 {
-    /// <summary>Empty styling logic. Resolves to <see cref="UIStyle.Empty"/>.</summary>
-    public static readonly UIStyling Empty = new((UIStyle)null);
-
-    /// <summary>A constant style.</summary>
-    public UIStyle Constant;
-
-    /// <summary>A dynamic style. If present, updates the relevant <see cref="UIElement.Style"/> every frame.</summary>
-    public Func<UIElement, UIStyle> Dynamic;
-
-    /// <summary>Whether this style is equivalent to <see cref="Empty"/></summary>
-    public readonly bool IsEmpty => Constant is null && Dynamic is null;
-
-    /// <summary>Constructs styling logic using a constant style.</summary>
-    /// <param name="style">The constant style.</param>
-    public UIStyling(UIStyle style)
-    {
-        Constant = style;
-    }
-
-    /// <summary>Constructs styling logic using a dynamic style.</summary>
-    /// <param name="styling">The dynamic style.</param>
-    public UIStyling(Func<UIElement, UIStyle> styling)
-    {
-        Dynamic = styling;
-    }
-
     /// <summary>
-    /// Returns the style for the specified <paramref name="element"/> based on this styling logic.
-    /// <para>Tries to evaluate <see cref="Constant"/> then <see cref="Dynamic"/>. If neither are present, resolves to <see cref="UIStyle.Empty"/>.</para>
+    /// The element bound to this style.
+    /// <para>If present, calls to <see cref="UIStyleValue{T}.Get(UIElement)"/> will use this element rather than the one passed as an argument.</para>
     /// </summary>
-    /// <param name="element">The element to be styled.</param>
-    public readonly UIStyle Get(UIElement element) => Constant ?? Dynamic?.Invoke(element) ?? UIStyle.Empty;
+    public UIElement Element = null;
 
-    /// <summary>
-    /// If <see cref="Dynamic"/> is present, returns a new <see cref="UIStyling"/> instance with the specified <paramref name="element"/> bound to the dynamic logic.
-    /// Otherwise, returns this instance unaltered.
-    /// </summary>
-    /// <param name="element">The element to bind.</param>
-    public readonly UIStyling Bind(UIElement element)
+    /// <summary>The color to fill an element's interior with.</summary>
+    public UIStyleValue<Color4F> Fill = Color4F.Transparent;
+
+    /// <summary>The texture to draw on an element.</summary>
+    public UIStyleValue<Texture> Texture = default;
+
+    /// <summary>The color to draw an element's outline with.</summary>
+    public UIStyleValue<Color4F> Stroke = Color4F.Transparent;
+
+    /// <summary>The thickness to draw an element's outline with.</summary>
+    public UIStyleValue<int> StrokeWeight = 0;
+
+    /// <summary>The distance between an element's outline and its interior content.</summary>
+    public UIStyleValue<int> Padding = 0;
+
+    /// <summary>The size of the drop shadow on an element.</summary>
+    public UIStyleValue<int> ShadowSize = 0;
+
+    /// <summary>The text font.</summary>
+    public UIStyleValue<FontSet> TextFont = default;
+
+    /// <summary>The text styling effect.</summary>
+    public UIStyleValue<Func<string, string>> TextStyling = default;
+
+    /// <summary>The base color effect for text.</summary>
+    public UIStyleValue<string> TextBaseColor = TextStyle.Simple;
+
+    /// <summary>Returns a new <see cref="UIStyle"/> using style values based on the given <paramref name="element"/>.</summary>
+    public UIStyle Get(UIElement element) 
     {
-        if (Dynamic is not null)
+        element = Element ?? element;
+        return new()
         {
-            Func<UIElement, UIStyle> dynamic = Dynamic;
-            return new(_ => dynamic(element));
-        }
-        return this;
+            Fill = Fill.Get(element),
+            Texture = Texture.Get(element),
+            Stroke = Stroke.Get(element),
+            StrokeWeight = StrokeWeight.Get(element),
+            Padding = Padding.Get(element),
+            ShadowSize = ShadowSize.Get(element),
+            TextFont = TextFont.Get(element),
+            TextStyling = TextStyling.Get(element),
+            TextBaseColor = TextBaseColor.Get(element)
+        };
     }
 
-    /// <summary>Calls <see cref="UIStyling(UIStyle)"/>.</summary>
-    public static implicit operator UIStyling(UIStyle style) => new(style);
-
-    /// <summary>Calls <see cref="UIStyling(Func{UIElement, UIStyle})"/>.</summary>
-    public static implicit operator UIStyling(Func<UIElement, UIStyle> styling) => new(styling);
+    /// <summary>Returns this styling instance with <see cref="Element"/> set to <paramref name="element"/>.</summary>
+    public UIStyling Bind(UIElement element) => this with { Element = element };
 }

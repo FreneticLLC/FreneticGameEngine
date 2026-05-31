@@ -33,7 +33,7 @@ public abstract class UIElement
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
-    /// <summary>Gets the UI view this element is attached to.</summary>
+    /// <summary>The UI view this element is attached to.</summary>
     public ViewUI2D View;
 
     /// <summary>Styling logic for this element.</summary>
@@ -99,7 +99,7 @@ public abstract class UIElement
     public object Tag = null;
 
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
-    public bool RenderSelf = true;
+    public UIRenderMode RenderMode = UIRenderMode.FULL;
 
     /// <summary>The debug name of this element.</summary>
     public virtual string Name { get; set; } = null;
@@ -173,9 +173,6 @@ public abstract class UIElement
 
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
-
-        /// <summary>Styles registered on this element.</summary>
-        public HashSet<UIStyle> Styles = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -373,7 +370,7 @@ public abstract class UIElement
         {
             return;
         }
-        ElementInternal.Styles.Add(style);
+        ElementInternal.Style = style;
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
     }
@@ -381,7 +378,7 @@ public abstract class UIElement
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
     public void UpdateStyle()
     {
-        SetStyle(Styling.Get(this));
+        SetStyle(Styling?.Get(this) ?? UIStyle.Empty);
     }
 
     /// <summary>
@@ -637,13 +634,19 @@ public abstract class UIElement
     public virtual void RenderAll(double delta)
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
-        Render(delta);
-        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
-        foreach (UIElement child in ElementInternal.Children)
+        if (RenderMode == UIRenderMode.FULL)
         {
-            if (child.IsValid && child.RenderSelf)
+            Render(delta);
+        }
+        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
+        if (RenderMode != UIRenderMode.NONE)
+        {
+            foreach (UIElement child in ElementInternal.Children)
             {
-                child.RenderAll(delta);
+                if (child.IsValid)
+                {
+                    child.RenderAll(delta);
+                }
             }
         }
         GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
@@ -791,11 +794,11 @@ public abstract class UIElement
         {
             info.Add(transforms);
             info.Add($"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}");
-            if (ElementInternal.Styles.Count > 0)
+            /*if (ElementInternal.Styles.Count > 0)
             {
                 List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
                 info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
-            }
+            }*/
         }
         return info;
     }

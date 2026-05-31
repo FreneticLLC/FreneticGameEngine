@@ -98,9 +98,9 @@ public class UIInputParagraph : UIParagraph
         Styling = styling;
         TextStyling = textStyling;
         HighlightStyling = highlightStyling;
-        AddLabel(InputInternal.LabelLeft = new UILabel("", textStyling, new UILayout()));
-        AddLabel(InputInternal.LabelCenter = new UILabel("", highlightStyling, new UILayout()));
-        AddLabel(InputInternal.LabelRight = new UILabel("", textStyling, new UILayout()));
+        AddLabel(InputInternal.LabelLeft = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelCenter = new UILabel("", highlightStyling, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelRight = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
     }
 
     /// <summary>Ensures the cursor positions lie within the current paragraph <see cref="Content"/>.</summary>
@@ -188,8 +188,8 @@ public class UIInputParagraph : UIParagraph
             return;
         }
         View.Engine.Textures.White.Bind();
-        Renderer2D.SetColor(style.BorderColor);
-        int lineWidth = style.BorderThickness / 2;
+        Renderer2D.SetColor(style.Stroke);
+        int lineWidth = style.StrokeWeight / 2;
         int lineHeight = style.TextFont.Height;
         View.Rendering.RenderRectangle(View.UIContext, X + InputInternal.CursorRenderOffset.XF - lineWidth, Y + InputInternal.CursorRenderOffset.YF, X + InputInternal.CursorRenderOffset.XF + lineWidth, Y + InputInternal.CursorRenderOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
