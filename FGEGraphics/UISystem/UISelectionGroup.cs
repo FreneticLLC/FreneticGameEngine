@@ -22,9 +22,11 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     public override string Name => "Selection Group";
 
     /// <summary>The minimum allowed number of selected elements, or <c>-1</c> for no lower bound.</summary>
+    [UIDebug]
     public int MinSelections = -1;
 
     /// <summary>The maximum allowed number of selected elements, or <c>-1</c> for no upper bound.</summary>
+    [UIDebug]
     public int MaxSelections
     {
         get => Internal.MaxSelections;
@@ -37,9 +39,11 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     }
 
     /// <summary>Whether the oldest selected element should be dropped when the user selects a new element exceeding the <see cref="MaxSelections"/>.</summary>
+    [UIDebug]
     public bool IsCyclic = false;
 
     /// <summary>Whether non-selected elements are locked and cannot be selected.</summary>
+    [UIDebug]
     public bool IsLocked = false;
 
     /// <summary>The selectable elements managed by this group.</summary>

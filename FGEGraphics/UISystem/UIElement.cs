@@ -9,12 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
 
 using Vector2i = FGECore.MathHelpers.Vector2i;
@@ -776,27 +778,54 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public List<string> GetBaseDebugInfo()
+    /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>)..</summary>
+    /// <param name="baseColor">The base text styling.</param>
+    /// <param name="detailed">Whether to include extra base information.</param>
+    public List<string> GetBaseDebugInfo(string baseColor, bool detailed)
     {
-        string name = Name ?? GetType().ToString();
-        List<string> info =
-        [
-            $"^{(this == View.HeldElement ? "2" : "5")}^u{name} ^&[{ElementInternal.TreeLevel}]",
-            $"^7Position: ^3({X}, {Y}) ^&| ^7Size: ^3({Width}w, {Height}h) ^&| ^7Rotation: ^3{Rotation} ^&| ^7Scale: ^3{Scale}x",
-            $"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled} ^&| ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered} ^&| ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed} ^&| ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}"
-        ];
-        if (ElementInternal.Styles.Count > 0)
+        List<string> info = [];
+        string header = $"^{(this == View.HeldElement ? "2" : "5")}^u{Name ?? GetType().ToString()}{baseColor} ^&[{ElementInternal.TreeLevel}]";
+        string transforms = $"^3({X}, {Y}) ^&: ^3({Width}w, {Height}h) ^&: ^3{Rotation}deg ^&: ^3{Scale}x";
+        info.Add(detailed ? header : $"{header} ^&: {transforms}");
+        if (detailed)
         {
-            List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
-            info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+            info.Add(transforms);
+            info.Add($"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}");
+            if (ElementInternal.Styles.Count > 0)
+            {
+                List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
+                info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
+            }
         }
         return info;
     }
 
-    /// <summary>Returns debug text to display when <see cref="ViewUI2D.IsDebug"/> mode is enabled.</summary>
+    /// <summary>
+    /// Returns extra debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>).
+    /// Properties and fields can be added here automatically with <see cref="UIDebugAttribute"/>.
+    /// </summary>
     public virtual List<string> GetDebugInfo() => [];
+
+    /// <summary>Returns complete debug information, including all base and extra text, about this element.</summary>
+    /// <param name="baseColor">The base text styling.</param>
+    public string GetAllDebugInfo(string baseColor)
+    {
+        List<string> info = GetBaseDebugInfo(baseColor, detailed: true);
+        info.AddRange(GetDebugInfo());
+        foreach (MemberInfo memberInfo in GetType().GetMembers())
+        {
+            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
+            {
+                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this)
+                    : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this)
+                    : null;
+                if (value is not null)
+                {
+                    string color = value is bool boolValue ? (boolValue ? "2" : "1") : "3";
+                    info.Add($"^7{memberInfo.Name}: ^{color}{value}");
+                }
+            }
+        }
+        return info.Select(line => baseColor + line).JoinString("\n");
+    }
 }

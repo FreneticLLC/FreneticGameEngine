@@ -31,6 +31,7 @@ public class UIDropdown : UIElement
     public override string Name => "Dropdown";
 
     /// <summary>The text to display when no choice is selected.</summary>
+    [UIDebug]
     public string PlaceholderInfo;
 
     /// <summary>The button to open the dropdown.</summary>

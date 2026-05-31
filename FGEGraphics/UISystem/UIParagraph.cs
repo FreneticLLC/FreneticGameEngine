@@ -34,6 +34,7 @@ public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
 
     // TODO: getter/setter & recompute renderables like in UILabel
     /// <summary>The maximum width of this paragraph, or <c>-1</c> if the paragraph has no maximum width.</summary>
+    [UIDebug]
     public float MaxWidth = -1;
 
     /// <summary>Gets the text content of this paragraph.</summary>

@@ -30,15 +30,19 @@ public class UINumberInputLabel : UIInputLabel
     public override string Name => "Number Input Label";
 
     /// <summary>The minimum label value.</summary>
+    [UIDebug]
     public double Min = double.MinValue;
 
     /// <summary>The maximum label value.</summary>
+    [UIDebug]
     public double Max = double.MaxValue;
 
     /// <summary>Whether the label should be an integer instead of a decimal.</summary>
+    [UIDebug]
     public bool Integer;
 
     /// <summary>The format string to apply to the label on submission.</summary>
+    [UIDebug]
     public string Format;
 
     /// <summary>The character matcher for this number label type.</summary>
@@ -56,6 +60,7 @@ public class UINumberInputLabel : UIInputLabel
     public NumberLabelInternalData NumberLabelInternal = new();
 
     /// <summary>Gets or sets the decimal value of the label.</summary>
+    [UIDebug]
     public double Value
     {
         get => NumberLabelInternal.Value;
@@ -141,7 +146,4 @@ public class UINumberInputLabel : UIInputLabel
         NumberLabelInternal.Value = 0;
         return "0";
     }
-
-    /// <inheritdoc/>
-    public override List<string> GetDebugInfo() => [$"^7Value: ^3{Value}"];
 }
