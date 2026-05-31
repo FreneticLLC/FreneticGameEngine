@@ -387,8 +387,7 @@ public class SingleAnimationNode
         Matrix4x4 combined = rot * pos;
         if (adjs is not null && adjs.TryGetValue(Name, out Matrix4x4 t))
         {
-            // TODO: Why is this transpose needed?
-            combined = Matrix4x4.Transpose(t) * combined;
+            combined *= t;
         }
         if (Parent is not null)
         {
