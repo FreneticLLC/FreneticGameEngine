@@ -87,7 +87,7 @@ public class Scheduler
         return new() { MyAction = act, Time = delay, OwningEngine = this };
     }
 
-    /// <summary>Creates and schedules a sync task to run on the next frame.</summary>
+    /// <summary>Creates and schedules a sync task to run on the next frame (ie do not execute on the current frame, whereas <see cref="ScheduleSyncTask(Action, double)"/> may run on the same frame).</summary>
     /// <param name="act">The action to run.</param>
     /// <returns>The scheduled item.</returns>
     public SyncScheduleItem RunNextFrame(Action act)

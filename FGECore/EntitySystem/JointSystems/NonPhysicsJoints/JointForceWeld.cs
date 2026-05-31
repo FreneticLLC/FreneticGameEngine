@@ -54,6 +54,12 @@ public class JointForceWeld : NonPhysicalJointBase
     public JointForceWeld(BasicEntity e1, BasicEntity e2, bool isVisualOnly = false) : base(e1, e2)
     {
         VisualOnly = isVisualOnly;
+        CalculateRelativeOffset();
+    }
+
+    /// <summary>Sets the offset to match the current offset between entities.</summary>
+    public void CalculateRelativeOffset()
+    {
         RigidPose rt1 = GetPoseFrom(One);
         RigidPose rt2 = GetPoseFrom(Two);
         RigidPose.Invert(rt1, out RigidPose rt1inv);

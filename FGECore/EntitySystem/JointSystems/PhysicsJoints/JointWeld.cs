@@ -26,8 +26,8 @@ public class JointWeld(EntityPhysicsProperty e1, EntityPhysicsProperty e2) : Phy
     /// <inheritdoc/>
     public override Weld CreateJointDescription()
     {
-        RigidPose rt1 = new(One.Position.ToNumerics(), One.Orientation.ToNumerics());
-        RigidPose rt2 = new(Two.Position.ToNumerics(), Two.Orientation.ToNumerics());
+        RigidPose rt1 = new(One.RawPosition, One.Orientation.ToNumerics());
+        RigidPose rt2 = new(Two.RawPosition, Two.Orientation.ToNumerics());
         RigidPose.Invert(rt1, out RigidPose rt1inv);
         RigidPose.MultiplyWithoutOverlap(rt2, rt1inv, out Offset);
         return new() { LocalOffset = Offset.Position, LocalOrientation = Offset.Orientation, SpringSettings = new SpringSettings(20, 1) };

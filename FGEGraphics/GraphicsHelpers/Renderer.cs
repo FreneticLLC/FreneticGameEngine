@@ -209,7 +209,7 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
         GraphicsUtil.CheckError("RenderLineBox: BindTexture");
         Location halfsize = (max - min) * 0.5;
         Matrix4d mat = Matrix4d.CreateScale(halfsize.ToOpenTK3D())
-            * (rot != null && rot.HasValue ? rot.Value : Matrix4d.Identity)
+            * (rot is not null && rot.HasValue ? rot.Value : Matrix4d.Identity)
             * Matrix4d.CreateTranslation((min + halfsize).ToOpenTK3D());
         view.SetMatrix(2, mat); // TODO: Client reference!
         GraphicsUtil.CheckError("RenderLineBox: SetMatrix");
@@ -392,17 +392,31 @@ public class Renderer(TextureEngine _textures, ShaderEngine _shaders, ModelEngin
 
     /// <summary>Renders a 3D rectangle.</summary>
     /// <param name="mat">The matrix.</param>
-    public void RenderRectangle3D(Matrix4 mat)
+    /// <param name="view">View to render the rectangle in.</param>
+    public void RenderRectangle3D(Matrix4d mat, View3D view)
     {
-        GL.UniformMatrix4(2, false, ref mat);
+        view.SetMatrix(2, mat);
         GL.BindVertexArray(Square.Internal.VAO);
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, IntPtr.Zero);
         GL.BindVertexArray(0);
     }
 
-    /// <summary>
-    /// Renders a circle based on location (vectors normalized down).
-    /// </summary>
+    /// <summary>Renders a flat rectangle in the 3D world, with centered rotation. It is oriented to face Z-Down.</summary>
+    /// <param name="position">The world position to place the rectangle at.</param>
+    /// <param name="view">View to render the rectangle in.</param>
+    /// <param name="xmin">The lower bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymin">The lower bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="xmax">The upper bounds of the the rectangle: X coordinate.</param>
+    /// <param name="ymax">The upper bounds of the the rectangle: Y coordinate.</param>
+    /// <param name="rot">The rotation matrix.</param>
+    public void RenderRectangle3D(Location position, View3D view, double xmin, double ymin, double xmax, double ymax, FGECore.MathHelpers.Quaternion? rot = null)
+    {
+        Matrix4d rotmat = rot is null ? Matrix4d.Identity : Matrix4d.CreateFromQuaternion(rot.Value.ToOpenTKDoubles());
+        Matrix4d mat = Matrix4d.CreateScale(xmax - xmin, ymax - ymin, 1) * Matrix4d.CreateTranslation(xmin, ymin, 0) * rotmat * Matrix4d.CreateTranslation(position.X, position.Y, position.Z);
+        RenderRectangle3D(mat, view);
+    }
+
+    /// <summary>Renders a circle based on location. It is oriented to face Z-Up.</summary>
     /// <param name="center">The Location for the circle to be rendered.</param>
     /// <param name="radius">Radius of the circle.</param>
     /// <param name="view">View to render circle in.</param>

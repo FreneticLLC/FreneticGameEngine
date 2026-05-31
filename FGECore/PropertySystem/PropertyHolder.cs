@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using FGECore.EntitySystem;
@@ -398,6 +397,28 @@ public class PropertyHolder
             return prop as T;
         }
         throw new ArgumentOutOfRangeException("Cannot find property of type: " + typeof(T).Name + ", but was required for object " + this);
+    }
+
+    /// <summary>Gets the property by type, or null.</summary>
+    /// <param name="type">The property class type.</param>
+    public Property GetPropertyOrNull(Type type)
+    {
+        if (PropertyInternals.HeldProperties.TryGetValue(type, out Property prop))
+        {
+            return prop;
+        }
+        return null;
+    }
+
+    /// <summary>Gets the property (with a typeparam-specified type), or null.</summary>
+    /// <typeparam name="T">The property class type.</typeparam>
+    public T GetPropertyyOrNull<T>() where T : Property
+    {
+        if (PropertyInternals.HeldProperties.TryGetValue(typeof(T), out Property prop))
+        {
+            return prop as T;
+        }
+        return null;
     }
 
     /// <summary>
