@@ -172,7 +172,7 @@ public class UIInputLabel : UIBox
         }    
     }
 
-    /// <summary>Updates the text components based on the cursor positions.</summary>
+    /// <summary>Updates the visual state of this label.</summary>
     public void UpdateRenderState()
     {
         Paragraph.UpdateRenderState();

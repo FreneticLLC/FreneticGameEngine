@@ -258,7 +258,7 @@ public class UILayout
         return this;
     }
 
-    // TODO: what else to inherit?
+    /// <summary>Returns a new <see cref="UILayout"/> inhabiting the interior space of this one.</summary>
     public UILayout Container() => new UILayout()
         .SetPosition(() => Element.Style.Inset, () => Element.Style.Inset)
         .SetSize(() => Width - Element.Style.Inset * 2, () => Height - Element.Style.Inset * 2);
