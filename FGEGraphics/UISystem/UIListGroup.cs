@@ -25,12 +25,15 @@ public class UIListGroup : UIGroup
     public override string Name => "List";
 
     /// <summary>Whether the list should expand vertically.</summary>
+    [UIDebug]
     public bool Vertical;
 
     /// <summary>The spacing between each list item.</summary>
+    [UIDebug]
     public int Spacing;
 
     /// <summary>The anchor that the list will expand from.</summary>
+    [UIDebug]
     public UIAnchor Anchor;
 
     /// <summary>The list of elements currently contained within the list.</summary>

@@ -29,6 +29,7 @@ public class UIImage(Texture image, UILayout layout) : UIElement(UIStyling.Empty
     public override string Name => $"Image \"{Image.Name}\"";
 
     /// <summary>The image to display.</summary>
+    [UIDebug]
     public Texture Image = image;
 
     /// <summary>How to fit the image within this element's bounding box.</summary>

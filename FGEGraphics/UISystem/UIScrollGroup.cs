@@ -25,9 +25,11 @@ public class UIScrollGroup : UIElement
     public override string Name => "Scroll Group";
 
     /// <summary>The horizontal scroll axis.</summary>
+    [UIDebug]
     public Axis ScrollX;
 
     /// <summary>The vertical scroll axis.</summary>
+    [UIDebug]
     public Axis ScrollY;
 
     /// <summary>The scrollable scissor layer for child elements.</summary>
@@ -243,8 +245,8 @@ public class UIScrollGroup : UIElement
                 Value = MaxValue;
             }
         }
-    }
 
-    /// <inheritdoc/>
-    public override List<string> GetDebugInfo() => [$"^7Scroll: ^3({ScrollX.Value}, {ScrollY.Value}) ^&| ^7Max Scroll: ^3({ScrollX.MaxValue}, {ScrollY.MaxValue})"];
+        /// <inheritdoc/>
+        public override string ToString() => $"(Value: {Value}, Max: {MaxValue}, Speed: {ScrollSpeed}u/tick)";
+    }
 }
