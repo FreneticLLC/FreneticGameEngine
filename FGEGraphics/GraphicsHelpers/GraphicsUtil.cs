@@ -277,6 +277,12 @@ public static class GraphicsUtil
                 IsValid = false;
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"TrackedTexture(ID={ID}, Source={Source}, Target={Target}, IsValid={IsValid})";
+        }
     }
 
     /// <summary>Generates a new vertex array. Equivalent to <see cref="GL.GenVertexArrays(int, out uint)"/> with a count of 1. Also immediately binds the array.</summary>
