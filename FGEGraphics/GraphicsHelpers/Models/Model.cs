@@ -353,11 +353,16 @@ public class Model(string _name)
         Shader prior = ShaderEngine.BoundNow;
         Shader plantShader = fbo switch
         {
-            FBOID.FORWARD_SOLID => shaders.Forward.BasicSolid_PlantWind,
+            FBOID.FORWARD_SOLID or FBOID.FORWARD_TRANSP => shaders.Forward.BasicSolid_PlantWind,
             FBOID.MAIN => shaders.Deferred.GBufferSolid_PlantWind,
             FBOID.SHADOWS or FBOID.STATIC_SHADOWS or FBOID.DYNAMIC_SHADOWS => shaders.Deferred.ShadowPass_PlantWind,
-            _ => shaders.Forward.BasicSolid_PlantWind,
+            _ => null,
         };
+        if (plantShader is null)
+        {
+            // TODO: Handle other FBOIDs?
+            return;
+        }
         plantShader.Bind();
         GraphicsUtil.CheckError("Model - DrawWithPlantWind - BaseUniforms", this);
         view.SetMatrix(ShaderLocations.Common.WORLD, worldMatrix);
