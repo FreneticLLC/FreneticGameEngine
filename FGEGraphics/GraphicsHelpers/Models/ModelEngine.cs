@@ -309,36 +309,34 @@ public class ModelEngine
                 }
 #endif
             }
-            if (!hasWind && mesh.Bones is not null)
+            int bc = mesh.Bones.Length;
+            if (bc > View3DInternalData.MAX_BONES)
             {
-                int bc = mesh.Bones.Length;
-                if (bc > View3DInternalData.MAX_BONES)
+                Logs.Warning($"Mesh has {bc} bones! ({name})");
+                bc = View3DInternalData.MAX_BONES;
+            }
+            int[] pos = new int[builder.Vertices.Length];
+            for (int i = 0; i < bc; i++)
+            {
+                for (int x = 0; x < mesh.Bones[i].Weights.Length; x++)
                 {
-                    Logs.Warning($"Mesh has {bc} bones! ({name})");
-                    bc = View3DInternalData.MAX_BONES;
-                }
-                int[] pos = new int[builder.Vertices.Length];
-                for (int i = 0; i < bc; i++)
-                {
-                    for (int x = 0; x < mesh.Bones[i].Weights.Length; x++)
+                    int IDa = mesh.Bones[i].IDs[x];
+                    float Weighta = (float)mesh.Bones[i].Weights[x];
+                    int spot = pos[IDa]++;
+                    if (spot > 7)
                     {
-                        int IDa = mesh.Bones[i].IDs[x];
-                        float Weighta = (float)mesh.Bones[i].Weights[x];
-                        int spot = pos[IDa]++;
-                        if (spot > 7)
-                        {
-                            ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
-                        }
-                        else if (spot > 3)
-                        {
-                            ForceSet(builder.BoneIDs2, IDa, spot - 4, i);
-                            ForceSet(builder.BoneWeights2, IDa, spot - 4, Weighta);
-                        }
-                        else
-                        {
-                            ForceSet(builder.BoneIDs, IDa, spot, i);
-                            ForceSet(builder.BoneWeights, IDa, spot, Weighta);
-                        }
+                        //OutputType.WARNING.Output("Too many bones influencing " + vw.VertexID + "!");
+                        ForceSet(builder.BoneWeights, IDa, 3, builder.BoneWeights[IDa][3] + Weighta);
+                    }
+                    else if (spot > 3)
+                    {
+                        ForceSet(builder.BoneIDs2, IDa, spot - 4, i);
+                        ForceSet(builder.BoneWeights2, IDa, spot - 4, Weighta);
+                    }
+                    else
+                    {
+                        ForceSet(builder.BoneIDs, IDa, spot, i);
+                        ForceSet(builder.BoneWeights, IDa, spot, Weighta);
                     }
                 }
             }

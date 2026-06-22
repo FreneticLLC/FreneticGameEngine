@@ -17,12 +17,11 @@ using FGECore.MathHelpers;
 using FGECore.ModelSystems;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
-using OpenTK.Graphics.OpenGL4;
 using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.Shaders;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using FGEGraphics.GraphicsHelpers.Shaders;
 
 namespace FGEGraphics.GraphicsHelpers.Models;
 
@@ -339,6 +338,41 @@ public class Model(string _name)
         GraphicsUtil.CheckError("Model - Draw - Post", this);
     }
 
+    /// <summary>Uploads pass-level uniforms onto the currently bound plant-wind program (required after every bind).</summary>
+    /// <param name="view">The active view.</param>
+    /// <param name="fbo">The active framebuffer pass.</param>
+    public static void ApplyPlantWindPassUniforms(View3D view, FBOID fbo)
+    {
+        GameEngine3D engine = view.Engine;
+        // TODO: View3D should be handling this stuff, not Model!
+        if (fbo == FBOID.MAIN)
+        {
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref view.State.PrimaryMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+            GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(view.Config.Width, view.Config.Height, engine.ZNear, engine.ZFar()));
+        }
+        else if (fbo.IsForward())
+        {
+            Matrix4 proj = view.State.IsSecondEye ? view.State.PrimaryMatrix_OffsetFor3D : view.State.PrimaryMatrix;
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref proj);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+            GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(view.Config.Width, view.Config.Height, engine.ZNear, engine.ZFar()));
+            GL.Uniform4(12, new Vector4(view.Config.FogCol.ToOpenTK(), view.Config.FogAlpha));
+            GL.Uniform3(ShaderLocations.Common.CAMERA_POSITION.Location, view.State.CameraRelativePosition);
+            float fogDist = 1.0f / engine.FogMaxDist();
+            fogDist *= fogDist;
+            GL.Uniform1(13, fogDist);
+            GL.Uniform3(18, -engine.SunAdjustDirection.ToOpenTK());
+            GL.Uniform3(19, engine.SunAdjustBackupLight.Xyz);
+            GL.Uniform1(16, 0.2f);
+        }
+        else if (fbo == FBOID.SHADOWS || fbo == FBOID.STATIC_SHADOWS || fbo == FBOID.DYNAMIC_SHADOWS)
+        {
+            GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref view.State.PrimaryMatrix);
+            GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)engine.GlobalTickTime);
+        }
+    }
+
     /// <summary>Draws meshes, using the plant-wind shader for <see cref="ModelMesh.UsesPlantWind"/> meshes.</summary>
     /// <param name="context">The sourcing render context.</param>
     /// <param name="view">The active 3D view.</param>
@@ -351,6 +385,7 @@ public class Model(string _name)
         GraphicsUtil.CheckError("Model - DrawWithPlantWind - Pre", this);
         LastDrawTime = Engine.CurrentTime;
         FBOID fbo = view.State.FBOid;
+        Shader prior = ShaderEngine.BoundNow;
         Shader plantShader = fbo switch
         {
             FBOID.FORWARD_SOLID => shaders.Forward.BasicSolid_PlantWind,
@@ -358,20 +393,17 @@ public class Model(string _name)
             FBOID.SHADOWS or FBOID.STATIC_SHADOWS or FBOID.DYNAMIC_SHADOWS => shaders.Deferred.ShadowPass_PlantWind,
             _ => shaders.Forward.BasicSolid_PlantWind,
         };
-        if (!plantShader.LoadedProperly)
-        {
-            Draw(context);
-            return;
-        }
-        shaders.BindPlantWindForFbo(fbo);
-        shaders.ApplyPlantWindPassUniforms(view, fbo);
+        plantShader.Bind();
+        ApplyPlantWindPassUniforms(view, fbo);
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - BaseUniforms", this);
         view.SetMatrix(ShaderLocations.Common.WORLD, worldMatrix);
         if (fbo == FBOID.MAIN)
         {
             context.Engine.Rendering.SetMinimumLight(0.0f, view);
         }
-        GL.Uniform1(GE3DShaders.PLANT_WIND_STRENGTH, windStrength);
-        GL.Uniform1(GE3DShaders.PLANT_WIND_SPEED, windSpeedScale);
+        GL.Uniform1(ShaderLocations.Common.PLANT_WIND_STRENGTH, windStrength);
+        GL.Uniform1(ShaderLocations.Common.PLANT_WIND_SPEED, windSpeedScale);
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - PostUniforms", this);
         for (int i = 0; i < Meshes.Count; i++)
         {
             if (Meshes[i].UsesPlantWind)
@@ -379,6 +411,7 @@ public class Model(string _name)
                 Meshes[i].Draw(context);
             }
         }
+        prior.Bind();
         GraphicsUtil.CheckError("Model - DrawWithPlantWind - Post", this);
     }
 

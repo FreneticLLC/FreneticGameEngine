@@ -203,7 +203,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
         GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
-        GL.Uniform4(ShaderLocations.Deferred.GBuffer.FogColor, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+        GL.Uniform4(ShaderLocations.Deferred.GBuffer.FOG_COLOR, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
         GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
         Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);

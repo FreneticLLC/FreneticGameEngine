@@ -2,9 +2,6 @@
 // Vertex wind for dynamic plant leaves. Pivot in tangent.xyz, phase in texcoords.z.
 //
 
-layout (location = 22) uniform float plant_wind_strength = 0.08;
-layout (location = 23) uniform float plant_wind_speed = 1.6;
-
 vec3 apply_plant_wind(in vec3 pos, in vec3 pivot, in float phase)
 {
 	float ts = time * plant_wind_speed;
