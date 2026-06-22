@@ -141,6 +141,12 @@ public class Model3DMesh
     /// <summary>The color data on this mesh.</summary>
     public Vector4[] Colors;
 
+    /// <summary>Per-vertex wind pivot (cluster center) for GPU leaf animation, when set.</summary>
+    public Vector3[] WindPivots;
+
+    /// <summary>Per-vertex wind phase for GPU leaf animation, when set.</summary>
+    public float[] WindPhases;
+
     /// <summary>The bones on this mesh.</summary>
     public Model3DBone[] Bones;
 

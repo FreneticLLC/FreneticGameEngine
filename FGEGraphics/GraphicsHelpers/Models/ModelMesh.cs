@@ -32,6 +32,9 @@ public class ModelMesh
     /// <summary>The bones relevant to this mesh.</summary>
     public List<ModelBone> Bones = [];
 
+    /// <summary>When true, this mesh uses the plant-wind vertex shader path instead of bones.</summary>
+    public bool UsesPlantWind = false;
+
     /// <summary>Constructs the model mesh.</summary>
     /// <param name="_name">The name of it.</param>
     /// <param name="_parent">Parent model, if available.</param>

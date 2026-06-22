@@ -204,6 +204,9 @@ public class View3DForwardRenderer : View3DCoreDataSet
         Shaders.Forward.AllTransparencies_Objects.Bind();
         basicUniforms(false);
         GraphicsUtil.CheckError("Render/Fast - Uniforms - ForwardAllTransparenciesObjects");
+        Shaders.Forward.BasicSolid_PlantWind.Bind();
+        basicUniforms(false);
+        GraphicsUtil.CheckError("Render/Fast - Uniforms - BasicSolidPlantWind");
         Patches.PreSolidPatch?.Invoke(shadowmat_dat, light_dat, fogDist, c);
         Shaders.Forward.BasicSolid_NoBones.Bind();
         basicUniforms(Engine.Forward_Lights);

@@ -18,6 +18,7 @@ using FGECore.ModelSystems;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.ClientSystem.ViewRenderSystem;
 using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.GraphicsHelpers.Shaders;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -335,6 +336,52 @@ public class Model(string _name)
             Meshes[i].Draw(context);
         }
         GraphicsUtil.CheckError("Model - Draw - Post", this);
+    }
+
+    /// <summary>Draws meshes, using the plant-wind shader for <see cref="ModelMesh.UsesPlantWind"/> meshes.</summary>
+    /// <param name="context">The sourcing render context.</param>
+    /// <param name="view">The active 3D view.</param>
+    /// <param name="shaders">The engine 3D shaders.</param>
+    /// <param name="worldMatrix">The entity world matrix (same as other entity draws).</param>
+    /// <param name="windStrength">Wind sway strength.</param>
+    /// <param name="windSpeedScale">Wind animation speed scale.</param>
+    public void DrawWithPlantWind(RenderContext context, View3D view, GE3DShaders shaders, Matrix4d worldMatrix, float windStrength = 0.08f, float windSpeedScale = 1.6f)
+    {
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - Pre", this);
+        LastDrawTime = Engine.CurrentTime;
+        FBOID fbo = view.State.FBOid;
+        Shader prior = ShaderEngine.BoundNow;
+        Shader plantShader = fbo switch
+        {
+            FBOID.FORWARD_SOLID or FBOID.FORWARD_TRANSP => shaders.Forward.BasicSolid_PlantWind,
+            FBOID.MAIN => shaders.Deferred.GBufferSolid_PlantWind,
+            FBOID.SHADOWS or FBOID.STATIC_SHADOWS or FBOID.DYNAMIC_SHADOWS => shaders.Deferred.ShadowPass_PlantWind,
+            _ => null,
+        };
+        if (plantShader is null)
+        {
+            // TODO: Handle other FBOIDs?
+            return;
+        }
+        plantShader.Bind();
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - BaseUniforms", this);
+        view.SetMatrix(ShaderLocations.Common.WORLD, worldMatrix);
+        if (fbo == FBOID.MAIN)
+        {
+            context.Engine.Rendering.SetMinimumLight(0.0f, view);
+        }
+        GL.Uniform1(ShaderLocations.Common.PLANT_WIND_STRENGTH, windStrength);
+        GL.Uniform1(ShaderLocations.Common.PLANT_WIND_SPEED, windSpeedScale);
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - PostUniforms", this);
+        for (int i = 0; i < Meshes.Count; i++)
+        {
+            if (Meshes[i].UsesPlantWind)
+            {
+                Meshes[i].Draw(context);
+            }
+        }
+        prior.Bind();
+        GraphicsUtil.CheckError("Model - DrawWithPlantWind - Post", this);
     }
 
     /// <summary>Whether this model has a skin already.</summary>

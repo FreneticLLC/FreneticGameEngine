@@ -114,6 +114,12 @@ public class View3DDeferredRenderer : View3DCoreDataSet
                                 GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
                                 State.TranspShadows = subLight.TransparentShadows;
                                 subLight.SetProj(View);
+                                Shaders.Deferred.ShadowPass_PlantWind = Shaders.Deferred.ShadowPass_PlantWind.Bind();
+                                View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
+                                GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.SHOULD_SQRT, (subLight is LightOrtho) ? 1.0f : 0.0f);
+                                GL.Uniform1(ShaderLocations.Deferred.Shadow.ALLOW_TRANSPARENCY, subLight.TransparentShadows ? 1.0f : 0.0f);
+                                subLight.SetProj(View);
                                 Shaders.Deferred.ShadowPass_Basic = Shaders.Deferred.ShadowPass_Basic.Bind();
                                 View.SetMatrix(ShaderLocations.Common.WORLD, Matrix4d.Identity);
                                 GraphicsUtil.CheckError("Pre-Prerender3 - Shadows");
@@ -203,8 +209,14 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
         GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
         GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
-        GL.Uniform4(ShaderLocations.Deferred.GBuffer.FogColor, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
+        GL.Uniform4(ShaderLocations.Deferred.GBuffer.FOG_COLOR, new Vector4(Config.FogCol.ToOpenTK(), Config.FogAlpha));
         GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 2");
+        Shaders.Deferred.GBufferSolid_PlantWind = Shaders.Deferred.GBufferSolid_PlantWind.Bind();
+        GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
+        GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
+        GL.Uniform1(ShaderLocations.Deferred.GBuffer.TIME, (float)Engine.GlobalTickTime);
+        GL.Uniform4(ShaderLocations.Deferred.GBuffer.SCREEN_SIZE, new Vector4(Config.Width, Config.Height, Engine.ZNear, Engine.ZFar()));
+        GraphicsUtil.CheckError("Render - GBuffer - Uniforms - 3");
         Shaders.Deferred.GBufferSolid = Shaders.Deferred.GBufferSolid.Bind();
         GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref State.PrimaryMatrix);
         GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
