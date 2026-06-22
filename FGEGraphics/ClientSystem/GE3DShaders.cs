@@ -13,9 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.Shaders;
-using FGEGraphics.ClientSystem.ViewRenderSystem;
-using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 
 namespace FGEGraphics.ClientSystem;
 

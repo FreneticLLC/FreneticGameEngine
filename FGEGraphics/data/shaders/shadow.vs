@@ -41,6 +41,7 @@ layout (location = 2) uniform mat4 model_matrix = mat4(1.0);
 #if MCM_GEOM_ACTIVE
 #else
 layout (location = 5) uniform float should_sqrt = 0.0;
+layout (location = 6) uniform float time;
 // ...
 layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
 // ...
@@ -51,7 +52,6 @@ layout (location = 23) uniform float plant_wind_speed = 1.6;
 // ...
 layout (location = 100) uniform mat4 simplebone_matrix = mat4(1.0);
 layout (location = 101) uniform mat4 boneTrans[MAX_BONES];
-layout (location = 6) uniform float time;
 #endif
 
 #if MCM_GEOM_ACTIVE
