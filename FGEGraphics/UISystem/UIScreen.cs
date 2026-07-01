@@ -38,7 +38,7 @@ public class UIScreen : UIElement
     /// <summary>Constructs a <see cref="UIScreen"/>.</summary>
     /// <param name="view">The client UI view.</param>
     /// <param name="layout">The layout of the element. If <c>null</c>, defaults to a layout covering the parent view.</param>
-    public UIScreen(ViewUI2D view, UILayout layout = null) : base(UIStyling.Empty, layout)
+    public UIScreen(ViewUI2D view, UILayout layout = null) : base(null, layout)
     {
         View = view;
         IsEnabled = false;

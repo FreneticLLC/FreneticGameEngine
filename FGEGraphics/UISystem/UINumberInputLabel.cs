@@ -74,19 +74,13 @@ public class UINumberInputLabel : UIInputLabel
     /// <remarks>Constructs a number input label.</remarks>
     /// <param name="integer">Whether the label should be an integer.</param>
     /// <param name="styling">The styling logic of the element.</param>
-    /// <param name="inputStyle">The style of normal input content.</param>
-    /// <param name="highlightStyle">The style of highlighted input content.</param>
+    /// <param name="inputStyling">The style of normal input content.</param>
+    /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="defaultValue">The default number value.</param>
     /// <param name="format">The format string for the label.</param>
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
-    /// <param name="renderBox">Whether to render a box behind the label.</param>
-    /// <param name="boxPadding">The padding between the box and the label.</param>
-    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
-    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
-    /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
-    /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
-    public UINumberInputLabel(bool integer, UIStyling styling, UIStyle inputStyle, UIStyle highlightStyle, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "", bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, UIAnchor scrollBarXAnchor = null) : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", styling, inputStyle, highlightStyle, layout, false, renderBox, boxPadding, scrollBarStyles, scrollBarWidth, scrollBarX, false, scrollBarXAnchor, null)
+    public UINumberInputLabel(bool integer, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, double defaultValue = 0, string format = null, string placeholderInfo = "") : base(placeholderInfo, placeholderInfo.Length == 0 ? defaultValue.ToString(format) : "", styling, inputStyling, highlightStyling, layout)
     {
         Integer = integer;
         Format = format ?? (integer ? "0" : "0.0");

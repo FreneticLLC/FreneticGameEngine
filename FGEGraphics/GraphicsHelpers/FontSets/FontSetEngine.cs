@@ -16,6 +16,7 @@ using FGECore.MathHelpers;
 using FGECore.UtilitySystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using OpenTK.Mathematics;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -43,6 +44,9 @@ public class FontSetEngine(GLFontEngine fontEngine)
 
     /// <summary>A list of all currently loaded font sets.</summary>
     public Dictionary<(string, int), FontSet> Fonts = [];
+
+    /// <summary>A cache of font names and sizes to their closest font set.</summary>
+    public Dictionary<(string, int), FontSet> ApproximateFonts = [];
 
     /// <summary>Helper function to get a language data.</summary>
     public Func<string[], string> GetLanguageHelper;
@@ -122,5 +126,25 @@ public class FontSetEngine(GLFontEngine fontEngine)
         toret.Load(fontname, fontsize);
         Fonts.Add((toret.Name, fontsize), toret);
         return toret;
+    }
+
+    /// <summary>Returns the closest <see cref="FontSet"/> from the given font name and size.</summary>
+    /// <param name="fontname">The name of the font.</param>
+    /// <param name="fontsize">The size of the font.</param>
+    public FontSet GetApproximateFont(string fontname, int fontsize)
+    {
+        if (ApproximateFonts.TryGetValue((fontname, fontsize), out FontSet found))
+        {
+            return found;
+        }
+        IEnumerable<KeyValuePair<(string, int), FontSet>> fontVariants = Fonts.Where(pair => pair.Value.Name == fontname);
+        if (!fontVariants.Any())
+        {
+            return null;
+        }
+        IEnumerable<KeyValuePair<(string, int), FontSet>> fittingFonts = fontVariants.Where(pair => pair.Key.Item2 <= fontsize);
+        ((string, int) _, FontSet font) = fittingFonts.Any() ? fittingFonts.MinBy(pair => fontsize - pair.Key.Item2) : fontVariants.MinBy(pair => Math.Abs(fontsize - pair.Key.Item2));
+        ApproximateFonts[(fontname, fontsize)] = font;
+        return font;
     }
 }
