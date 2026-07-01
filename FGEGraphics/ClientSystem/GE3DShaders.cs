@@ -57,8 +57,12 @@ public class GE3DShaders
             + (forShad ? ",MCM_SHADOWS" : "");
         Forward.BasicSolid = Shaders.GetShader("forward" + def + forw_extra);
         Forward.BasicSolid_NoBones = Shaders.GetShader("forward" + def + ",MCM_NO_BONES" + forw_extra);
+        string plantWind = ",MCM_NO_BONES,MCM_PLANT_WIND";
+        Forward.BasicSolid_PlantWind = Shaders.GetShader("forward" + def + plantWind + forw_extra);
         Forward.BasicTransparent = Shaders.GetShader("forward" + def + ",MCM_TRANSP" + forw_extra);
         Forward.BasicTransparent_NoBones = Shaders.GetShader("forward" + def + ",MCM_TRANSP,MCM_NO_BONES" + forw_extra);
+        Deferred.GBufferSolid_PlantWind = Shaders.GetShader("fbo" + def + plantWind);
+        Deferred.ShadowPass_PlantWind = Shaders.GetShader("shadow" + def + plantWind);
         if (AllowLL)
         {
             Deferred.Transparents_LL = Shaders.GetShader("transponly" + def + ",MCM_LL");
@@ -97,6 +101,9 @@ public class GE3DShaders
 
         /// <summary>The shader used for forward ('fast') rendering of data, with no bones.</summary>
         public Shader BasicSolid_NoBones;
+
+        /// <summary>The shader used for forward ('fast') rendering of dynamic plant leaves.</summary>
+        public Shader BasicSolid_PlantWind;
 
         /// <summary>The shader used for forward ('fast') rendering of transparent data.</summary>
         public Shader BasicTransparent;
@@ -138,6 +145,9 @@ public class GE3DShaders
         /// <summary>The Shadow Pass shader, with bones off.</summary>
         public Shader ShadowPass_NoBones;
 
+        /// <summary>The Shadow Pass shader for dynamic plant leaves.</summary>
+        public Shader ShadowPass_PlantWind;
+
         /// <summary>The Shadow Pass shader, for particles.</summary>
         public Shader ShadowPass_Particles;
 
@@ -158,6 +168,9 @@ public class GE3DShaders
 
         /// <summary>The G-Buffer FBO shader.</summary>
         public Shader GBufferSolid;
+
+        /// <summary>The G-Buffer FBO shader for dynamic plant leaves.</summary>
+        public Shader GBufferSolid_PlantWind;
 
         /// <summary>The G-Buffer FBO shader, for alltransparents (Skybox mainly).</summary>
         public Shader GBuffer_SkyBox;

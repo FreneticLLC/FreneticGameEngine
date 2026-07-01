@@ -781,7 +781,7 @@ public abstract class UIElement
     {
     }
 
-    /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>)..</summary>
+    /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>).</summary>
     /// <param name="baseColor">The base text styling.</param>
     /// <param name="detailed">Whether to include extra base information.</param>
     public List<string> GetBaseDebugInfo(string baseColor, bool detailed)
@@ -794,11 +794,6 @@ public abstract class UIElement
         {
             info.Add(transforms);
             info.Add($"^7Enabled: ^{(IsEnabled ? "2" : "1")}{IsEnabled}^&, ^7Hovered: ^{(IsHovered ? "2" : "1")}{IsHovered}^&, ^7Pressed: ^{(IsPressed ? "2" : "1")}{IsPressed}^&, ^7Selected: ^{(IsFocused ? "2" : "1")}{IsFocused}");
-            /*if (ElementInternal.Styles.Count > 0)
-            {
-                List<string> styleNames = [.. ElementInternal.Styles.Select(style => style.Name is not null ? $"^{(style == ElementInternal.Style ? "3" : "7")}{style.Name}" : "^1unnamed")];
-                info.Add($"^7Styles: {string.Join("^&, ", styleNames)}");
-            }*/
         }
         return info;
     }
@@ -815,13 +810,12 @@ public abstract class UIElement
     {
         List<string> info = GetBaseDebugInfo(baseColor, detailed: true);
         info.AddRange(GetDebugInfo());
+        // TODO: This should absolutely not be written this way. Raw reflection at runtime is a no-no!
         foreach (MemberInfo memberInfo in GetType().GetMembers())
         {
             if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
             {
-                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this)
-                    : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this)
-                    : null;
+                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this) : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this) : null;
                 if (value is not null)
                 {
                     string color = value is bool boolValue ? (boolValue ? "2" : "1") : "3";

@@ -25,6 +25,7 @@ using System.Text;
 
 namespace Valve.VR;
 
+#pragma warning disable CA2263 // Prefer generic overload when type is known
 
 [StructLayout(LayoutKind.Sequential)]
 public struct IVRSystem
@@ -2826,8 +2827,8 @@ public class CVRScreenshots
 IVRScreenshots FnTable;
 internal CVRScreenshots(IntPtr pInterface)
 {
-    FnTable = (IVRScreenshots)Marshal.PtrToStructure(pInterface, typeof(IVRScreenshots));
-}
+        FnTable = (IVRScreenshots)Marshal.PtrToStructure(pInterface, typeof(IVRScreenshots));
+    }
 public EVRScreenshotError RequestScreenshot(ref uint pOutScreenshotHandle,EVRScreenshotType type,string pchPreviewFilename,string pchVRFilename)
 {
     pOutScreenshotHandle = 0;
@@ -4476,3 +4477,5 @@ public class OpenVR
         ShutdownInternal();
     }
 }
+
+#pragma warning restore CA2263 // Prefer generic overload when type is known

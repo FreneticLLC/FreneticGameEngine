@@ -10,6 +10,7 @@
 
 #define MCM_GEOM_ACTIVE 0
 #define MCM_NO_BONES 0
+#define MCM_PLANT_WIND 0
 #define MCM_GEOM_FOURD_TEXTURE 0
 
 layout (location = 0) in vec3 position;
@@ -40,8 +41,14 @@ layout (location = 2) uniform mat4 model_matrix = mat4(1.0);
 #if MCM_GEOM_ACTIVE
 #else
 layout (location = 5) uniform float should_sqrt = 0.0;
+layout (location = 6) uniform float time;
 // ...
 layout (location = 14) uniform vec3 cameraPos = vec3(0.0); // Camera position, relative to rendering origin.
+// ...
+#if MCM_PLANT_WIND
+layout (location = 22) uniform float plant_wind_strength = 0.08;
+layout (location = 23) uniform float plant_wind_speed = 1.6;
+#endif
 // ...
 layout (location = 100) uniform mat4 simplebone_matrix = mat4(1.0);
 layout (location = 101) uniform mat4 boneTrans[MAX_BONES];
@@ -79,17 +86,24 @@ float fix_sqr(in float inTemp)
 }
 #endif
 
+#if MCM_PLANT_WIND
+#include plantwind.inc
+#endif
 
 void main()
 {
 #if MCM_GEOM_ACTIVE
 	f.position = model_matrix * vec4(position, 1.0);
-#else
+#else // MCM_GEOM_ACTIVE
+#if MCM_PLANT_WIND
+	vec3 windPos = apply_plant_wind(position, tangent, texcoords.z);
+	vec4 pos1 = vec4(windPos, 1.0);
+#else // MCM_PLANT_WIND
 #if MCM_NO_BONES
 	const float rem = 1.0;
-#else
+#else // MCM_NO_BONES
 	float rem = 1.0 - (Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights2[0] + Weights2[1] + Weights2[2] + Weights2[3]);
-#endif
+#endif // else - MCM_NO_BONES
 	vec4 pos1;
 	mat4 BT = mat4(1.0);
 	if (rem < 0.99)
@@ -109,6 +123,7 @@ void main()
 	{
 		pos1 = vec4(position, 1.0);
 	}
+#endif // else - MCM_PLANT_WIND
 	pos1 *= simplebone_matrix;
 	f.position = projection * model_matrix * vec4(pos1.xyz, 1.0);
 	if (should_sqrt >= 0.5)
@@ -117,12 +132,12 @@ void main()
 		f.position.x = sign(f.position.x) * fix_sqr(1.0 - abs(f.position.x));
 		f.position.y = sign(f.position.y) * fix_sqr(1.0 - abs(f.position.y));
 	}
-#endif
+#endif // else - MCM_GEOM_ACTIVE
 #if MCM_GEOM_FOURD_TEXTURE
 	f.texcoord = texcoords;
-#else
+#else // MCM_GEOM_FOURD_TEXTURE
 	f.texcoord = texcoords.xy;
-#endif
+#endif // else - MCM_GEOM_FOURD_TEXTURE
 	f.color = color;
 	gl_Position = f.position;
 }

@@ -312,7 +312,7 @@ public partial class WelcomerForm : Form
     /// <summary>Copies a directory and all child directories and files to a new location.</summary>
     /// <param name="dir">The directory.</param>
     /// <param name="newBase">The new base folder.</param>
-    public void CopyDirectoryAndChildren(string dir, string newBase)
+    public static void CopyDirectoryAndChildren(string dir, string newBase)
     {
         Directory.CreateDirectory(newBase);
         foreach (string f in Directory.GetFileSystemEntries("./" + dir + "/"))

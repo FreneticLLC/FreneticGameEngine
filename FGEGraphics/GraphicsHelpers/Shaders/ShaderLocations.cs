@@ -37,6 +37,13 @@ public static class ShaderLocations
 
         /// <summary>The screen size.</summary>
         public static ShaderUniformVec2 SCREEN_SIZE = new(4);
+
+        // TODO: These shouldn't be common shared hardcodes like this.
+        /// <summary>Dynamic plant wind strength (must not overlap forward.fs loc 20-21).</summary>
+        public const int PLANT_WIND_STRENGTH = 22;
+
+        /// <summary>Dynamic plant wind animation speed scale.</summary>
+        public const int PLANT_WIND_SPEED = 23;
     }
 
     /// <summary>Locations shared by most 2D shaders.</summary>
@@ -90,7 +97,7 @@ public static class ShaderLocations
             public const int TIME = 6;
 
             /// <summary>The fog color including alpha.</summary>
-            public const int FogColor = 18;
+            public const int FOG_COLOR = 18;
         }
 
         /// <summary>Locations used in the lightadder shader.</summary>

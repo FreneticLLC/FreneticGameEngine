@@ -362,7 +362,7 @@ public abstract class PropertyHelper
         public static readonly MethodInfo Object_ToString = typeof(object).GetMethod(nameof(object.ToString), []);
 
         /// <summary>The <see cref="Dictionary{TKey, TValue}.Add(TKey, TValue)"/> method.</summary>
-        public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<string, string>.Add), [typeof(string), typeof(string)]);
+        public static readonly MethodInfo DictionaryStringString_Add = typeof(Dictionary<string, string>).GetMethod(nameof(Dictionary<,>.Add), [typeof(string), typeof(string)]);
 
         /// <summary>The <see cref="GetDebuggableInfoOutput"/> method.</summary>
         public static readonly MethodInfo PropertyHelper_GetDebuggableInfoOutput = typeof(PropertyHelper).GetMethod(nameof(GetDebuggableInfoOutput));

@@ -49,6 +49,9 @@ public abstract class EntityShapeHelper(PhysicsSpace _space)
     /// <summary>Registers the shape into the physics space, and returns the BEPU shape index.</summary>
     public abstract EntityShapeHelper Register();
 
+    /// <summary>Gets the index for an (already registered) shape that can be used within a compound (eg bypass any existing compound-wrapping).</summary>
+    public virtual TypedIndex IndexForCompound => ShapeIndex;
+
     /// <summary>Gets the BEPU convex shape (if possible).</summary>
     public IShape BepuShape;
 

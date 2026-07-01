@@ -192,10 +192,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         set
         {
             Internal.WindowWidth = value;
-            if (Window is not null)
-            {
-                Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
-            }
+            Window?.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
         }
     }
 
@@ -209,10 +206,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         set
         {
             Internal.WindowHeight = value;
-            if (Window is not null)
-            {
-                Window.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
-            }
+            Window?.ClientSize = new OpenTK.Mathematics.Vector2i(Internal.WindowWidth, Internal.WindowHeight);
         }
     }
 
@@ -227,10 +221,7 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         {
             Internal.WindowWidth = value.X;
             Internal.WindowHeight = value.Y;
-            if (Window is not null)
-            {
-                Window.ClientSize = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
-            }
+            Window?.ClientSize = new OpenTK.Mathematics.Vector2i(value.X, value.Y);
         }
     }
 

@@ -54,7 +54,10 @@ public class EntityCylinderShape : EntityShapeHelper
         return dup;
     }
 
-    /// <summary>Implements <see cref="EntityShapeHelper.Unregister"/>.</summary>
+    /// <inheritdoc/>
+    public override TypedIndex IndexForCompound => CylinderIndex;
+
+    /// <inheritdoc/>
     public override void Unregister()
     {
         if (CylinderIndex.Exists)
@@ -70,7 +73,7 @@ public class EntityCylinderShape : EntityShapeHelper
         }
     }
 
-    /// <summary>Implements <see cref="Object.ToString"/>.</summary>
+    /// <inheritdoc/>
     public override string ToString()
     {
         Cylinder cylinder = (Cylinder)BepuShape;

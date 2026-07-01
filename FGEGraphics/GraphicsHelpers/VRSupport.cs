@@ -197,7 +197,7 @@ public class VRSupport
     public void Submit()
     {
         VREvent_t evt = new();
-        while (VR.PollNextEvent(ref evt, (uint)Marshal.SizeOf(typeof(VREvent_t))))
+        while (VR.PollNextEvent(ref evt, (uint)Marshal.SizeOf<VREvent_t>()))
         {
             // No need to do anything here!
         }

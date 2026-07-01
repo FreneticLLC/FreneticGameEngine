@@ -139,10 +139,10 @@ public class LanguageEngine
         string category = pathAndVars[0].ToLowerFast();
         string defPath = pathAndVars[1].ToLowerFast();
         FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-        if (langen != null)
+        if (langen is not null)
         {
             List<string> str = langen.GetStringList(defPath);
-            if (str != null)
+            if (str is not null)
             {
                 return HandleList(str, pathAndVars);
             }
@@ -167,10 +167,10 @@ public class LanguageEngine
         string category = pathAndVars[0].ToLowerFast();
         string defPath = pathAndVars[1].ToLowerFast();
         FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-        if (langen != null)
+        if (langen is not null)
         {
             string str = langen.GetString(defPath, null);
-            if (str != null)
+            if (str is not null)
             {
                 return Handle(str, pathAndVars);
             }
@@ -196,18 +196,18 @@ public class LanguageEngine
         string defPath = pathAndVars[1].ToLowerFast();
         FDSSection lang = GetLangDoc(category, Files);
         FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-        if (lang != null)
+        if (lang is not null)
         {
             List<string> str = lang.GetStringList(defPath);
-            if (str != null)
+            if (str is not null)
             {
                 return HandleList(str, pathAndVars);
             }
         }
-        if (langen != null)
+        if (langen is not null)
         {
             List<string> str = langen.GetStringList(defPath);
-            if (str != null)
+            if (str is not null)
             {
                 return HandleList(str, pathAndVars);
             }
@@ -233,18 +233,18 @@ public class LanguageEngine
         string defPath = pathAndVars[1].ToLowerFast();
         FDSSection lang = GetLangDoc(category, Files);
         FDSSection langen = GetLangDoc(category, Files, DefaultLanguage, EnglishDocuments);
-        if (lang != null)
+        if (lang is not null)
         {
             string str = lang.GetString(defPath, null);
-            if (str != null)
+            if (str is not null)
             {
                 return Handle(str, pathAndVars);
             }
         }
-        if (langen != null)
+        if (langen is not null)
         {
             string str = langen.GetString(defPath, null);
-            if (str != null)
+            if (str is not null)
             {
                 return Handle(str, pathAndVars);
             }

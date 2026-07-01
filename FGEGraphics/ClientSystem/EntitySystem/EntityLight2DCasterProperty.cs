@@ -33,10 +33,7 @@ public class EntityLight2DCasterProperty : ClientEntityProperty
     public void FixPosition(Location pos)
     {
         LightPosition = new Vector2(pos.XF, pos.YF);
-        if (ActualLight != null)
-        {
-            ActualLight.Position = LightPosition;
-        }
+        ActualLight?.Position = LightPosition;
     }
 
     /// <summary>The current position of the light.</summary>

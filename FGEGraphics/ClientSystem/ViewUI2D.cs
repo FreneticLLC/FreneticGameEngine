@@ -154,11 +154,10 @@ public class ViewUI2D
         IEnumerable<UIElement> elementsToDisplay = hoveredElements.Take(infoRange);
         int minimumTreeLevel = elementsToDisplay.Min(element => element.ElementInternal.TreeLevel);
         string debugInfo = elementsToDisplay.Select(element =>
-            {
-                string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
-                return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
-            })
-            .JoinString("\n\n");
+        {
+            string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
+            return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
+        }).JoinString("\n\n");
         return debugInfo + $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{hoveredElements.Count - infoRange.End.Value}]^r";
     }
 
