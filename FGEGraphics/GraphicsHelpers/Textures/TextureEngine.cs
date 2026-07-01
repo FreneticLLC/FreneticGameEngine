@@ -57,6 +57,9 @@ public class TextureEngine : IDisposable
     /// <summary>A default black texture.</summary>
     public Texture Black = null;
 
+    /// <summary>A default middle gray texture.</summary>
+    public Texture Gray = null;
+
     /// <summary>A default normal plane texture.</summary>
     public Texture NormalDef = null;
 
@@ -99,6 +102,8 @@ public class TextureEngine : IDisposable
         LoadedTextures.Add("black", Black);
         Clear = GenerateForColor(Color.Transparent, "clear");
         LoadedTextures.Add("clear", Clear);
+        Gray = GenerateForColor(Color.FromArgb(255, 127, 127, 127), "gray");
+        LoadedTextures.Add("gray", Gray);
         NormalDef = GenerateForColor(Color.FromArgb(255, 127, 127, 255), "normal_def");
         LoadedTextures.Add("normal_def", NormalDef);
     }
