@@ -6,14 +6,15 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using FGECore.CoreSystems;
-using FGECore.MathHelpers;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
