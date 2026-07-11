@@ -11,12 +11,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
-using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
 
 using Vector2i = FGECore.MathHelpers.Vector2i;
