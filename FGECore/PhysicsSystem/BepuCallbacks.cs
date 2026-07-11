@@ -175,7 +175,7 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
             EntityPhysicsProperty validOne = aEntity ?? bEntity;
             if (validOne is not null)
             {
-                pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction;
+                pairMaterial.FrictionCoefficient = validOne.Friction * validOne.Friction; // TODO: is multiply the right op to use here?
                 // TODO: Sustained contacts might not re-call this method, ie the values here will not be kept accurate
                 float projectedVel = Math.Abs(Vector3.Dot(validOne.LinearVelocity.ToNumerics(), avgNorm));
                 pairMaterial.MaximumRecoveryVelocity = Math.Max(MinimumRecoveryVelocity + validOne.Bounciness * 4, validOne.Bounciness * projectedVel);
