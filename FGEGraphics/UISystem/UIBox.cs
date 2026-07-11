@@ -40,37 +40,37 @@ public class UIBox : UIElement
     /// <param name="text">Text to display inside the box.</param>
     public UIBox(UIStyling styling, UILayout layout, string text = null) : base(styling, layout)
     {
-        AddChild(Label = new UILabel(text, styling.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
+        AddChild(Label = new UILabel(text, styling?.Bind(this), new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
 
     /// <inheritdoc/>
     public override void Render(double delta, UIStyle style)
     {
         Vector3 rotation = new(-0.5f, -0.5f, Rotation);
-        bool any = style.DropShadowLength > 0 || style.BorderColor.A > 0 || style.BaseColor.A > 0;
+        bool any = style.ShadowSize > 0 || style.Stroke.A > 0 || style.Fill.A > 0;
         if (any)
         {
             View.Engine.Textures.White.Bind();
-            if (style.DropShadowLength > 0)
+            if (style.ShadowSize > 0)
             {
                 Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
-                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width + style.DropShadowLength, Y + Height + style.DropShadowLength, rotation);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width + style.ShadowSize, Y + Height + style.ShadowSize, rotation);
             }
-            if (style.BorderColor.A > 0 && style.BorderThickness > 0)
+            if (style.Stroke.A > 0 && style.StrokeWeight > 0)
             {
-                Renderer2D.SetColor(style.BorderColor);
+                Renderer2D.SetColor(style.Stroke);
                 View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, rotation);
             }
-            if (style.BaseColor.A > 0)
+            if (style.Fill.A > 0)
             {
-                Renderer2D.SetColor(style.BaseColor);
-                View.Rendering.RenderRectangle(View.UIContext, X + style.BorderThickness, Y + style.BorderThickness, X + Width - style.BorderThickness, Y + Height - style.BorderThickness, rotation);
+                Renderer2D.SetColor(style.Fill);
+                View.Rendering.RenderRectangle(View.UIContext, X + style.StrokeWeight, Y + style.StrokeWeight, X + Width - style.StrokeWeight, Y + Height - style.StrokeWeight, rotation);
             }
             Renderer2D.SetColor(Color4F.White);
         }
-        if (style.BaseTexture is not null)
+        if (style.Texture is not null)
         {
-            style.BaseTexture.Bind();
+            style.Texture.Bind();
             float ymin = Flip ? Y + Height : Y;
             float ymax = Flip ? Y : Y + Height;
             View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);

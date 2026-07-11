@@ -14,17 +14,13 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem;
 
-/// <summary>Represents a simple container of several UI elements.</summary>
-public class UIGroup : UIElement
+/// <summary>Represents the way a <see cref="UIElement"/> renders to the screen.</summary>
+public enum UIRenderMode
 {
-    /// <inheritdoc/>
-    public override string Name => "Group";
-
-    /// <summary>Constructs a new group.</summary>
-    /// <param name="layout">The layout of the element.</param>
-    public UIGroup(UILayout layout) : base(null, layout)
-    {
-        IsEnabled = false;
-        ScaleSize = false;
-    }
+    /// <summary>Render the element and its children.</summary>
+    FULL,
+    /// <summary>Skip the element and render only its children.</summary>
+    SKIP_SELF,
+    /// <summary>Skip rendering the element and all of its children.</summary>
+    NONE
 }

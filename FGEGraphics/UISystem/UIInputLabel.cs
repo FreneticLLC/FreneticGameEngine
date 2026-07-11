@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Text alignment
 // TODO: Cap text length
 // TODO: HasEdited
-public class UIInputLabel : UIElement
+public class UIInputLabel : UIBox
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
@@ -44,25 +44,11 @@ public class UIInputLabel : UIElement
         SUBMIT
     }
 
-    /// <summary>Wraps a <see cref="UIInteractionStyles"/> instance with logic specific to input labels.</summary>
-    /// <param name="styles">The base interaction styles.</param>
-    public struct Styles(UIInteractionStyles styles)
-    {
-        /// <summary>The styling logic for an input label.</summary>
-        public readonly UIStyle Styling(UIElement element) => element.IsFocused ? styles.Press : styles.Styling(element);
-
-        /// <summary>Calls <see cref="UIStyling(System.Func{UIElement, UIStyle})"/>.</summary>
-        public static implicit operator UIStyling(Styles styles) => new(styles.Styling);
-    }
-
     /// <inheritdoc/>
     public override string Name => "Input Label";
 
     /// <summary>The paragraph to display the state of this input label.</summary>
     public UIInputParagraph Paragraph;
-
-    /// <summary>The box behind the input label.</summary>
-    public UIBox Box = null;
 
     /// <summary>The scroll group containing the label text.</summary>
     public UIScrollGroup ScrollGroup;
@@ -101,15 +87,9 @@ public class UIInputLabel : UIElement
     /// <summary>The current number of input text lines.</summary>
     public int Lines => Paragraph.Internal.Renderables.Sum(piece => piece.Text.Lines.Length);
 
-    /// <summary>The padding offset for the rendered text, if any.</summary>
-    public int TextPadding => Box is not null ? (Internal.BoxPadding - ElementInternal.Style.BorderThickness) : 0;
-
     /// <summary>Data internal to a <see cref="UIInputLabel"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The padding between the <see cref="Box"/> and the label.</summary>
-        public int BoxPadding = 0;
-
         /// <summary>Whether to enforce max width or use a horizontal scroll group.</summary>
         public bool HasMaxWidth;
     }
@@ -121,32 +101,12 @@ public class UIInputLabel : UIElement
     /// <param name="inputStyling">The style of normal input content.</param>
     /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="maxWidth">Whether to enforce a max width. If false, will use horizontal scrolling.</param>
-    /// <param name="renderBox">Whether to render a box behind the input label.</param>
-    /// <param name="boxPadding">The padding between the box and the label.</param>
-    /// <param name="scrollBarStyles">The styles for the scroll bar.</param>
-    /// <param name="scrollBarWidth">The width of the scroll bar.</param>
-    /// <param name="scrollBarX">Whether to add a horizontal scroll bar.</param>
-    /// <param name="scrollBarY">Whether to add a vertical scroll bar.</param>
-    /// <param name="scrollBarXAnchor">The anchor of the horizontal scroll bar.</param>
-    /// <param name="scrollBarYAnchor">The anchor of the vertical scroll bar.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout, bool maxWidth = true, bool renderBox = false, int boxPadding = 0, UIInteractionStyles scrollBarStyles = null, int scrollBarWidth = 0, bool scrollBarX = false, bool scrollBarY = false, UIAnchor scrollBarXAnchor = null, UIAnchor scrollBarYAnchor = null) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
     {
-        if (renderBox)
-        {
-            Internal.BoxPadding = boxPadding;
-            // TODO: properly handle padding
-            //UILayout baseLayout = new(layout);
-            //layout.SetSize(() => baseLayout.Width + boxPadding * 2, () => baseLayout.Height + boxPadding * 2);
-            AddChild(Box = new(styling.Bind(this), new UILayout().SetSize(() => layout.Width, () => layout.Height)) { IsEnabled = false });
-        }
-        int Inset() => Box is not null ? ElementInternal.Style.BorderThickness : 0; // there should definitely be a system for this
-        UILayout scrollGroupLayout = new UILayout().SetPosition(Inset, Inset).SetSize(() => layout.Width - Inset() * 2, () => layout.Height - Inset() * 2);
-        ScrollGroup = new(scrollGroupLayout, scrollBarStyles ?? UIStyling.Empty, scrollBarWidth, !maxWidth && scrollBarX, scrollBarY, scrollBarXAnchor, scrollBarYAnchor) { IsEnabled = false };
-        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling.Bind(this), new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
-        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout().SetPosition(() => TextPadding, () => TextPadding)) { IsEnabled = false });
+        ScrollGroup = new(layout.Container()) { IsEnabled = false };
+        ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling?.Bind(this), new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
-        Internal.HasMaxWidth = maxWidth;
         Paragraph.SetContent(defaultText);
     }
 
@@ -161,7 +121,7 @@ public class UIInputLabel : UIElement
     /// <inheritdoc/>
     public override void Unfocused()
     {
-        if ((ScrollGroup.ScrollX.ScrollBar?.IsPressed | ScrollGroup.ScrollY.ScrollBar?.IsPressed) ?? false)
+        if ((ScrollGroup.XAxis.ScrollBar?.IsPressed | ScrollGroup.YAxis.ScrollBar?.IsPressed) ?? false)
         {
             IsFocused = true;
             return;
@@ -170,9 +130,9 @@ public class UIInputLabel : UIElement
         Paragraph.SetCursorPosition(0);
         Paragraph.RenderCursor = false;
         Paragraph.UpdateRenderState();
-        ScrollGroup.ScrollX.Reset();
-        ScrollGroup.ScrollY.Reset();
-        PlaceholderInfo.RenderSelf = Content.Length == 0;
+        ScrollGroup.XAxis.Reset();
+        ScrollGroup.YAxis.Reset();
+        PlaceholderInfo.RenderMode = Content.Length == 0 ? UIRenderMode.FULL : UIRenderMode.NONE;
     }
 
     // FIXME: Paragraph.Width still retains last value when deleting all, incorrect MaxValue calculation 
@@ -183,9 +143,9 @@ public class UIInputLabel : UIElement
         {
             return;
         }
-        ScrollGroup.ScrollX.MaxValue = Math.Max(Paragraph.Width + TextPadding * 2 - ScrollGroup.Width, 0);
-        ScrollGroup.ScrollX.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X + TextPadding * 2 - ScrollGroup.ScrollX.Value);
-        ScrollGroup.ScrollX.Clamp();
+        ScrollGroup.XAxis.MaxValue = Math.Max(Paragraph.Width - ScrollGroup.Width, 0);
+        ScrollGroup.XAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X - ScrollGroup.XAxis.Value);
+        ScrollGroup.XAxis.Clamp();
     }
 
     /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
@@ -193,13 +153,13 @@ public class UIInputLabel : UIElement
     {
         if (Paragraph.Internal.Renderables.Count == 0)
         {
-            ScrollGroup.ScrollY.Reset();
+            ScrollGroup.YAxis.Reset();
             return;
         }
-        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.FontHeight + TextPadding * 2;
-        ScrollGroup.ScrollY.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        ScrollGroup.ScrollY.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.ScrollY.Value);
-        ScrollGroup.ScrollX.Clamp();
+        int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.TextFont?.Height ?? 0;
+        ScrollGroup.YAxis.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
+        ScrollGroup.YAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.YAxis.Value);
+        ScrollGroup.XAxis.Clamp();
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
@@ -212,12 +172,12 @@ public class UIInputLabel : UIElement
         }    
     }
 
-    /// <summary>Updates the text components based on the cursor positions.</summary>
+    /// <summary>Updates the visual state of this label.</summary>
     public void UpdateRenderState()
     {
         Paragraph.UpdateRenderState();
         UpdateScrollGroup();
-        PlaceholderInfo.RenderSelf = Content.Length == 0;
+        PlaceholderInfo.RenderMode = Content.Length == 0 ? UIRenderMode.FULL : UIRenderMode.NONE;
     }
 
     /// <summary>Performs a user edit on the text content.</summary>
@@ -365,7 +325,7 @@ public class UIInputLabel : UIElement
             return;
         }
         bool BarPressed(UIBox bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
-        if (BarPressed(ScrollGroup.ScrollX.ScrollBar) || BarPressed(ScrollGroup.ScrollY.ScrollBar))
+        if (BarPressed(ScrollGroup.XAxis.ScrollBar) || BarPressed(ScrollGroup.YAxis.ScrollBar))
         {
             return;
         }

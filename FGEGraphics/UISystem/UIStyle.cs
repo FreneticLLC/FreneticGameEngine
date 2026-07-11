@@ -19,61 +19,41 @@ using FGEGraphics.GraphicsHelpers.Textures;
 namespace FGEGraphics.UISystem;
 
 /// <summary>Represents the rendering style of a <see cref="UIElement"/>.</summary>
-public record UIStyle
+public class UIStyle
 {
     /// <summary>An empty element style.</summary>
     public static readonly UIStyle Empty = new() { Name = "Empty" };
 
-    /// <summary>What base color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
-    public Color4F BaseColor = Color4F.Transparent;
+    /// <summary>The color to fill an element's interior with.</summary>
+    public Color4F Fill;
 
-    /// <summary>What texture to display (or <c>null</c> for none).</summary>
-    public Texture BaseTexture;
+    /// <summary>The texture to draw on an element.</summary>
+    public Texture Texture;
 
-    /// <summary>What border outline color to use (or <see cref="Color4F.Transparent"/> for none).</summary>
-    public Color4F BorderColor = Color4F.Transparent;
+    /// <summary>The color to draw an element's outline with.</summary>
+    public Color4F Stroke;
 
-    /// <summary>How thick the border outline should be (or <c>0</c> for none).</summary>
-    public int BorderThickness = 0;
+    /// <summary>The thickness to draw an element's outline with.</summary>
+    public int StrokeWeight;
 
-    /// <summary>How big the drop-shadow effect should be (or <c>0</c> for none).</summary>
-    public int DropShadowLength = 0;
+    /// <summary>The distance between an element's outline and its interior content.</summary>
+    public int Padding;
 
-    /// <summary>The text font (or <c>null</c> for none).</summary>
+    /// <summary>The size of the drop shadow on an element.</summary>
+    public int ShadowSize;
+
+    /// <summary>The text font.</summary>
     public FontSet TextFont;
 
-    // TODO: Does the usage of 'Func' work properly in the context of a 'record' that's going into a Dictionary (ie hashcode/equality checks)?
-    /// <summary>The styling effect for text.</summary>
-    public Func<string, string> TextStyling = str => str;
+    /// <summary>The text styling effect.</summary>
+    public Func<string, string> TextStyling;
 
-    /// <summary>The base color effect for text (consider <see cref="TextStyle.Simple"/> if unsure).</summary>
-    public string TextBaseColor = TextStyle.Simple;
+    /// <summary>The base color effect for text.</summary>
+    public string TextBaseColor;
 
-    /// <summary>The name of the element style (for debug info).</summary>
+    /// <summary>The name of the style (for debug info).</summary>
     public string Name;
 
-    /// <summary>Constructs a default element style.</summary>
-    public UIStyle()
-    {
-    }
-
-    /// <summary>Constructs a new style as a copy of another style.</summary>
-    /// <param name="style">The style to copy.</param>
-    public UIStyle(UIStyle style)
-    {
-        BaseColor = style.BaseColor;
-        BaseTexture = style.BaseTexture;
-        BorderColor = style.BorderColor;
-        BorderThickness = style.BorderThickness;
-        DropShadowLength = style.DropShadowLength;
-        TextFont = style.TextFont;
-        TextStyling = style.TextStyling;
-        TextBaseColor = style.TextBaseColor;
-    }
-
-    /// <summary>Returns the font height, or <c>0</c> if <see cref="TextFont"/> is <c>null</c>.</summary>
-    public int FontHeight => TextFont?.Height ?? 0;
-
-    /// <summary>Returns whether this style can render text in general.</summary>
-    public bool CanRenderText => TextFont is not null;
+    /// <summary>The distance between an element's boundary and its interior content.</summary>
+    public int Inset => StrokeWeight + Padding;
 }

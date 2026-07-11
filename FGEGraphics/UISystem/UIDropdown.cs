@@ -76,8 +76,8 @@ public class UIDropdown : UIElement
     public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
         PlaceholderInfo = text ?? "null";
-        AddChild(Button = new UIBox(buttonStyling, layout.AtOrigin(), text) { OnClick = Open });
-        Box = new UIBox(boxStyling, layout.AtOrigin());
+        AddChild(Button = new UIBox(buttonStyling, layout.Container(), text) { OnClick = Open });
+        Box = new UIBox(boxStyling, layout.Container());
         Box.AddChild(Entries = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
         Internal.Layer = layer ?? this;
@@ -133,7 +133,7 @@ public class UIDropdown : UIElement
     public void AddChoice(UIElement choice, Func<string> label)
     {
         // TODO: configurable appearance
-        UIStyle containerStyle = Entries.Items.Count % 2 == 0 ? UIStyle.Empty : new UIStyle { BaseColor = new(0, 0, 0, 0.25f) };
+        UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f) };
         UIBox container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
         container.AddChild(choice);

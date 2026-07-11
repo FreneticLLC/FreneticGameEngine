@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents multiple <see cref="UILabel"/>s chained together.</summary>
 /// <param name="layout">The layout of the element.</param>
-public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
+public class UIParagraph(UILayout layout) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => "Paragraph";
@@ -62,7 +62,7 @@ public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
     {
         Labels.Add(label);
         AddChild(label);
-        label.RenderSelf = false;
+        label.RenderMode = UIRenderMode.NONE;
         //label.Internal.OnRenderablesUpdate += UpdateRenderables;
     }
 
@@ -74,11 +74,11 @@ public class UIParagraph(UILayout layout) : UIElement(UIStyle.Empty, layout)
         List<(FontSet Font, RenderableTextLine Line)> lines = [];
         foreach (UILabel label in Labels)
         {
-            if (label.GetRenderable(label.Style) is not RenderableText renderable)
+            if (label.Internal.Renderable.IsEmpty)
             {
                 continue;
             }
-            List<RenderableTextLine> textLines = [.. renderable.Lines];
+            List<RenderableTextLine> textLines = [.. label.Internal.Renderable.Lines];
             if (lines.Count != 0)
             {
                 RenderableTextLine combinedLine = new([.. lines[^1].Line.Parts, .. textLines[0].Parts]);
