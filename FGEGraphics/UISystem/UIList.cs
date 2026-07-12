@@ -20,7 +20,7 @@ namespace FGEGraphics.UISystem;
 /// Represents an expandable list container of UI elements.
 /// List expansion is in the opposite direction of the supplied <see cref="UIAnchor"/>. 
 /// </summary>
-public class UIListGroup : UIGroup, IStylingAcceptor<UIListGroup.ListStyling>
+public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 {
     public record ListStyling
     {
@@ -49,7 +49,7 @@ public class UIListGroup : UIGroup, IStylingAcceptor<UIListGroup.ListStyling>
     /// <summary>The list of elements currently contained within the list.</summary>
     public List<UIElement> Items = [];
 
-    /// <summary>Data internal to a <see cref="UIListGroup"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
     public struct InternalData()
     {
         /// <summary>Maps items to their positional offsets relative to this list's origin.</summary>
@@ -59,7 +59,7 @@ public class UIListGroup : UIGroup, IStylingAcceptor<UIListGroup.ListStyling>
         public Dictionary<UIElement, Action<Vector2i, Vector2i>> Updaters = [];
     }
 
-    /// <summary>Data internal to a <see cref="UIListGroup"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
     public InternalData Internal = new();
 
     /// <summary>Constructs a new list group.</summary>
@@ -67,8 +67,9 @@ public class UIListGroup : UIGroup, IStylingAcceptor<UIListGroup.ListStyling>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="vertical">Whether the list should expand vertically.</param>
     /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="layout"/> anchor.</param>
-    public UIListGroup(int spacing, UILayout layout, bool vertical = true, UIAnchor anchor = null) : base(layout.SetSize(0, 0))
+    public UIList(int spacing, UILayout layout, bool vertical = true, UIAnchor anchor = null) : base(null, layout.SetSize(0, 0))
     {
+        // ScaleSize = false?
         Anchor = anchor ?? Layout.Anchor;
         if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
         {

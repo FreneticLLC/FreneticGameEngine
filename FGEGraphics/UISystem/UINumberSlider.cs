@@ -154,9 +154,9 @@ public class UINumberSlider : UIElement
     /// <param name="listAnchor">The anchor to use when positioning the slider and the label in a list.</param>
     /// <param name="trackLabelEdits">Whether to update the number slider when the label is momentarily edited.</param>
     /// <returns>A list group containing both elements.</returns>
-    public static UIListGroup WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
+    public static UIList WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
     {
-        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
         slider.OnValueEdit += _ => label.Value = slider.Value;
         label.OnTextSubmit += _ =>
         {
