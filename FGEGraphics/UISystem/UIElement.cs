@@ -6,19 +6,19 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.UISystem;
@@ -189,6 +189,7 @@ public class UIElement
             Layout = layout;
             Layout.Element = this;
         }
+        StylingAcceptors.RegisterApplicators(GetType());
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -379,6 +380,16 @@ public class UIElement
     public void UpdateStyle()
     {
         SetStyle(Styling?.Get(this) ?? UIStyle.Empty);
+        if (Styling is not null && Styling.Components is not null)
+        {
+            foreach (object component in Styling.Components)
+            {
+                if (StylingAcceptors.Applicators.TryGetValue(component.GetType(), out StylingAcceptors.Applicator applicator))
+                {
+                    applicator(this, component);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -866,5 +877,10 @@ public class UIElement
             }
         }
         return info.Select(line => baseColor + line).JoinString("\n");
+    }
+
+    public override string ToString()
+    {
+        return base.ToString();
     }
 }

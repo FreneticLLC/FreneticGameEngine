@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
 namespace FGEGraphics.UISystem;
@@ -19,8 +20,17 @@ namespace FGEGraphics.UISystem;
 /// Represents an expandable list container of UI elements.
 /// List expansion is in the opposite direction of the supplied <see cref="UIAnchor"/>. 
 /// </summary>
-public class UIListGroup : UIGroup
+public class UIListGroup : UIGroup, IStylingAcceptor<UIListGroup.ListStyling>
 {
+    public record ListStyling
+    {
+        public UIStyleValue<bool> Vertical = true;
+
+        public UIStyleValue<int> Spacing;
+
+        public UIStyleValue<UIAnchor> Anchor;
+    }
+
     /// <inheritdoc/>
     public override string Name => "List";
 
@@ -185,5 +195,13 @@ public class UIListGroup : UIGroup
         {
             RemoveAllChildren();
         }
+    }
+
+    public void AcceptStyling(ListStyling styling)
+    {
+        Logs.Debug("Accepting styling " + styling);
+        Vertical = styling.Vertical.Get(this);
+        Spacing = styling.Spacing.Get(this);
+        Anchor = styling.Anchor.Get(this) ?? Layout.Anchor;
     }
 }

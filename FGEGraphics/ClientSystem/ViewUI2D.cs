@@ -94,7 +94,7 @@ public class ViewUI2D
         public bool ShowDebugInfo = true;
 
         /// <summary>Whether to draw the debug information at the cursor position.</summary>
-        public bool ShowDetailedDebugInfo = false;
+        public bool ShowDetailedDebugInfo = true;
 
         /// <summary>The list position of the entry at the top of the debug info tree.</summary>
         public int DebugInfoStartIndex = 0;

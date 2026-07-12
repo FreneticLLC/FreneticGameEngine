@@ -57,6 +57,8 @@ public record UIStyling
     /// <summary>The base color effect for text.</summary>
     public UIStyleValue<string> TextBaseColor = TextStyle.Simple;
 
+    public List<object> Components;
+
     /// <summary>Returns a new <see cref="UIStyle"/> using style values based on the given <paramref name="element"/>.</summary>
     public UIStyle Get(UIElement element) 
     {
