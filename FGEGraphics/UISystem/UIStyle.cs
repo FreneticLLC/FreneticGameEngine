@@ -36,6 +36,8 @@ public class UIStyle
     /// <summary>The thickness to draw an element's outline with.</summary>
     public int StrokeWeight;
 
+    public bool ShowBackground;
+
     /// <summary>The distance between an element's outline and its interior content.</summary>
     public int Padding;
 

@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 /// <para>Sub-classes implement rendering and general logic for a specific type of UI element.</para>
 /// </summary>
 // TODO: Hover text
-public abstract class UIElement
+public class UIElement
 {
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
@@ -102,7 +102,7 @@ public abstract class UIElement
     public UIRenderMode RenderMode = UIRenderMode.FULL;
 
     /// <summary>The debug name of this element.</summary>
-    public virtual string Name { get; set; } = null;
+    public virtual string Name { get; set; } = "Element";
 
     /// <summary>Whether this element displays additional information in debug mode.</summary>
     public bool AllowDebug = true;
@@ -625,9 +625,51 @@ public abstract class UIElement
     {
     }
 
+    public void RenderBackground(UIStyle style)
+    {
+        Vector3 rotation = new(-0.5f, -0.5f, Rotation);
+        bool any = style.ShadowSize > 0 || style.Stroke.A > 0 || style.Fill.A > 0;
+        if (any)
+        {
+            View.Engine.Textures.White.Bind();
+            if (style.ShadowSize > 0)
+            {
+                Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width + style.ShadowSize, Y + Height + style.ShadowSize, rotation);
+            }
+            if (style.Stroke.A > 0 && style.StrokeWeight > 0)
+            {
+                Renderer2D.SetColor(style.Stroke);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, rotation);
+            }
+            if (style.Fill.A > 0)
+            {
+                Renderer2D.SetColor(style.Fill);
+                View.Rendering.RenderRectangle(View.UIContext, X + style.StrokeWeight, Y + style.StrokeWeight, X + Width - style.StrokeWeight, Y + Height - style.StrokeWeight, rotation);
+            }
+            Renderer2D.SetColor(Color4F.White);
+        }
+        if (style.Texture is not null)
+        {
+            style.Texture.Bind();
+            float ymin = Y;
+            float ymax = Y + Height;
+            //float ymin = Flip ? Y + Height : Y;
+            //float ymax = Flip ? Y : Y + Height;
+            View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
+        }
+    }
+
     /// <summary>Renders this element with the current <see cref="Style"/>.</summary>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(double delta) => Render(delta, Style);
+    public void Render(double delta)
+    {
+        if (Style.ShowBackground)
+        {
+            RenderBackground(Style);
+        }
+        Render(delta, Style);
+    }
 
     /// <summary>Renders this element and all of its children recursively.</summary>
     /// <param name="delta">The time since the last render.</param>

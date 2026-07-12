@@ -58,4 +58,6 @@ public readonly struct UIStyleValue<T>
             : !element.IsEnabled ? disabled
             : idle
     );
+
+    public override string ToString() => $"UIStyleValue<{typeof(T).Name}>({(Dynamic is not null ? "dynamic" : Constant?.ToString() ?? "null")})";
 }

@@ -35,10 +35,10 @@ public class UIDropdown : UIElement
     public string PlaceholderInfo;
 
     /// <summary>The button to open the dropdown.</summary>
-    public UIBox Button;
+    public UIButton Button;
 
     /// <summary>The box container surrounding the <see cref="Entries"/>.</summary>
-    public UIBox Box;
+    public UIElement Box;
 
     /// <summary>The dropdown list of choice entries.</summary>
     public UIListGroup Entries;
@@ -76,8 +76,8 @@ public class UIDropdown : UIElement
     public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
     {
         PlaceholderInfo = text ?? "null";
-        AddChild(Button = new UIBox(buttonStyling, layout.Container(), text) { OnClick = Open });
-        Box = new UIBox(boxStyling, layout.Container());
+        AddChild(Button = new UIButton(text, buttonStyling, layout.Container()) { OnClick = Open });
+        Box = new UIElement(boxStyling, layout.Container());
         Box.AddChild(Entries = new UIListGroup(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
         Internal.Layer = layer ?? this;
@@ -134,7 +134,7 @@ public class UIDropdown : UIElement
     {
         // TODO: configurable appearance
         UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f) };
-        UIBox container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
+        UIElement container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
         container.AddChild(choice);
         Entries.AddListItem(container);

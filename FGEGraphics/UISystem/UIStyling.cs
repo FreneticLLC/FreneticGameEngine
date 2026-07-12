@@ -39,6 +39,9 @@ public record UIStyling
     /// <summary>The thickness to draw an element's outline with.</summary>
     public UIStyleValue<int> StrokeWeight = 0;
 
+    // TODO: this may be structural enough to be on UIElement instead of style
+    public UIStyleValue<bool> ShowBackground = false;
+
     /// <summary>The distance between an element's outline and its interior content.</summary>
     public UIStyleValue<int> Padding = 0;
 
@@ -64,6 +67,7 @@ public record UIStyling
             Texture = Texture.Get(element),
             Stroke = Stroke.Get(element),
             StrokeWeight = StrokeWeight.Get(element),
+            ShowBackground = ShowBackground.Get(element),
             Padding = Padding.Get(element),
             ShadowSize = ShadowSize.Get(element),
             TextFont = TextFont.Get(element),
@@ -71,6 +75,8 @@ public record UIStyling
             TextBaseColor = TextBaseColor.Get(element)
         };
     }
+
+    public UIStyling Copy() => this with { };
 
     /// <summary>Returns this styling instance with <see cref="Element"/> set to <paramref name="element"/>.</summary>
     public UIStyling Bind(UIElement element) => this with { Element = element };

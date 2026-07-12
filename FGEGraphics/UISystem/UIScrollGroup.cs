@@ -129,7 +129,7 @@ public class UIScrollGroup : UIElement
         public int ScrollSpeed = 30;
 
         /// <summary>The scroll bar button, if any.</summary>
-        public UIBox ScrollBar = null;
+        public UIElement ScrollBar = null;
 
         // TODO: maybe explain more? this is the mouse position relative to the bar position when first clicking / dragging it
         /// <summary>The held position offset of the scroll bar.</summary>

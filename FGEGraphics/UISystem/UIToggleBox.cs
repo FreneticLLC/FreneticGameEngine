@@ -20,7 +20,7 @@ namespace FGEGraphics.UISystem;
 
 /// <summary>Represents a toggleable box on the screen.</summary>
 // TODO: generalize beyond an 'X' when toggled
-public class UIToggleBox : UIBox
+public class UIToggleBox : UIButton
 {
     /// <inheritdoc/>
     public override string Name => "Toggle Box";
@@ -36,7 +36,7 @@ public class UIToggleBox : UIBox
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="toggled">The initial toggle state.</param>
-    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false) : base(styling, layout)
+    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false) : base(null, styling, layout)
     {
         SetToggled(toggled);
     }

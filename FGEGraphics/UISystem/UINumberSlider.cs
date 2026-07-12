@@ -56,7 +56,7 @@ public class UINumberSlider : UIElement
     public double Progress => (Value - Min) / (Max - Min);
 
     /// <summary>The box placed at the current slider progress.</summary>
-    public UIBox Button;
+    public UIElement Button;
 
     /// <summary>Fired when the user edits the slider value.</summary>
     public Action<double> OnValueEdit;
@@ -82,8 +82,9 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
-        AddChild(Button = new(null, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { RenderMode = UIRenderMode.NONE, IsEnabled = false });
+        AddChild(Button = new(styling.Copy(), layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
+        Styling = styling is not null ? styling with { ShowBackground = false } : null; 
     }
 
     /// <summary>Corrects a slider value to the closest valid position.</summary>

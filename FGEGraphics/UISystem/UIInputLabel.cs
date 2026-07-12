@@ -28,7 +28,7 @@ namespace FGEGraphics.UISystem;
 // TODO: Text alignment
 // TODO: Cap text length
 // TODO: HasEdited
-public class UIInputLabel : UIBox
+public class UIInputLabel : UIElement
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
@@ -324,7 +324,7 @@ public class UIInputLabel : UIBox
         {
             return;
         }
-        bool BarPressed(UIBox bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
+        bool BarPressed(UIElement bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.XAxis.ScrollBar) || BarPressed(ScrollGroup.YAxis.ScrollBar))
         {
             return;
