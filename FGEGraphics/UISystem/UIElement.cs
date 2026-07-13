@@ -37,7 +37,11 @@ public class UIElement
     public ViewUI2D View;
 
     /// <summary>Styling logic for this element.</summary>
-    public UIStyling Styling;
+    public UIStyling Styling
+    {
+        get;
+        set => field = value ?? UIStyling.Empty;
+    }
 
     /// <summary>Gets the current element style.</summary>
     public UIStyle Style => ElementInternal.Style;
@@ -173,6 +177,8 @@ public class UIElement
 
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
+
+        public Dictionary<Type, StylingAcceptors.Applicator> StylingApplicators;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -189,7 +195,7 @@ public class UIElement
             Layout = layout;
             Layout.Element = this;
         }
-        StylingAcceptors.RegisterApplicators(GetType());
+        ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -384,7 +390,7 @@ public class UIElement
         {
             foreach (StylingComponent component in Styling.Components)
             {
-                if (StylingAcceptors.Applicators.TryGetValue(component.GetType(), out StylingAcceptors.Applicator applicator))
+                if (ElementInternal.StylingApplicators.TryGetValue(component.GetType(), out StylingAcceptors.Applicator applicator))
                 {
                     applicator(this, component);
                 }

@@ -24,6 +24,8 @@ public class StylingAcceptors
 
     public static Dictionary<Type, Applicator> Applicators = [];
 
+    public static Dictionary<Type, Dictionary<Type, Applicator>> ApplicatorsByElementType = [];
+
     public static Applicator CompileApplicator(Type iface, Type componentType)
     {
         MethodInfo acceptMethod = iface.GetMethod(nameof(IStylingAcceptor<>.AcceptStyling));
@@ -33,8 +35,13 @@ public class StylingAcceptors
         return Expression.Lambda<Applicator>(body, elementParam, componentParam).Compile();
     }
 
-    public static void RegisterApplicators(Type elementType)
+    public static Dictionary<Type, Applicator> GetOrCreateApplicators(Type elementType)
     {
+        if (ApplicatorsByElementType.TryGetValue(elementType, out Dictionary<Type, Applicator> found))
+        {
+            return found;
+        }
+        Dictionary<Type, Applicator> applicatorsForElement = [];
         foreach (Type iface in elementType.GetInterfaces())
         {
             if (!iface.IsGenericType || iface.GetGenericTypeDefinition() != typeof(IStylingAcceptor<>))
@@ -46,6 +53,9 @@ public class StylingAcceptors
             {
                 Applicators[componentType] = CompileApplicator(iface, componentType);
             }
+            applicatorsForElement[componentType] = Applicators[componentType];
         }
+        ApplicatorsByElementType[elementType] = applicatorsForElement;
+        return applicatorsForElement;
     }
 }

@@ -216,6 +216,7 @@ public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 
     public void ConfigureSize()
     {
+        // TODO: consider padding
         if (Vertical)
         {
             Layout.SetHeight(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Height : 0);

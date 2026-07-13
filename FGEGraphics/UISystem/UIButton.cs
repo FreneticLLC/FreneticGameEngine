@@ -36,8 +36,6 @@ public class UIButton : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UIButton(string text, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        //styling.ShowBackground = true;
-        UIStyling labelStyling = styling is not null ? styling with { Element = this, ShowBackground = false } : null;
-        AddChild(Label = new UILabel(text, labelStyling, new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
+        AddChild(Label = new UILabel(text, Styling.Bind(this) with { ShowBackground = false }, new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
 }

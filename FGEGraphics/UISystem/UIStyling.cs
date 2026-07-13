@@ -21,11 +21,15 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents the styling logic of a <see cref="UIElement"/>.</summary>
 public record UIStyling
 {
+    public static readonly UIStyling Empty = new() { Constant = UIStyle.Empty };
+
     /// <summary>
     /// The element bound to this style.
     /// <para>If present, calls to <see cref="UIStyleValue{T}.Get(UIElement)"/> will use this element rather than the one passed as an argument.</para>
     /// </summary>
     public UIElement Element = null;
+
+    public UIStyle Constant = null;
 
     /// <summary>The color to fill an element's interior with.</summary>
     public UIStyleValue<Color4F> Fill = Color4F.Transparent;
@@ -62,6 +66,10 @@ public record UIStyling
     /// <summary>Returns a new <see cref="UIStyle"/> using style values based on the given <paramref name="element"/>.</summary>
     public UIStyle Get(UIElement element) 
     {
+        if (Constant is not null)
+        {
+            return null;
+        }
         element = Element ?? element;
         return new()
         {

@@ -37,14 +37,13 @@ public class UIDropdown : UIElement
     /// <summary>The button to open the dropdown.</summary>
     public UIButton Button;
 
-    /// <summary>The box container surrounding the <see cref="Entries"/>.</summary>
-    public UIElement Box;
-
     /// <summary>The dropdown list of choice entries.</summary>
     public UIList Entries;
 
+    public UISelectionGroup Selections;
+
     /// <summary>The list of selectable choices in the dropdown.</summary>
-    public List<UIElement> Choices = [];
+    //public List<UIElement> Choices = [];
 
     /// <summary>The currently selected entry in the <see cref="Entries"/>.</summary>
     public UIElement SelectedChoice; // TODO: selection group
@@ -52,12 +51,12 @@ public class UIDropdown : UIElement
     /// <summary>Fired when a choice is selected.</summary>
     public Action<UIElement> OnChoiceSelect;
 
+    /// <summary>The layer to place the list container on, if any.</summary>
+    public UIElement Layer;
+
     /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The layer to place the list container on, if any.</summary>
-        public UIElement Layer;
-
         /// <summary>Maps choices to their string representations.</summary>
         public Dictionary<UIElement, Func<string>> ToStrings = [];
     }
@@ -66,41 +65,32 @@ public class UIDropdown : UIElement
     public InternalData Internal = new();
 
     /// <summary>Constructs a new UI dropdown.</summary>
-    /// <param name="boxPadding">The padding between the <see cref="Box"/> and <see cref="Entries"/> entries.</param>
-    /// <param name="listSpacing">The spacing betwene <see cref="Entries"/> entries.</param>
     /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
     /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="text">The text to display when no choice is selected.</param>
     /// <param name="layer">An optional layer to place the dropdown on. If <c>null</c>, uses this element's layer.</param>
-    public UIDropdown(int boxPadding, int listSpacing, UIStyling buttonStyling, UIStyling boxStyling, UILayout layout, string text = null, UIElement layer = null) : base(buttonStyling, layout)
+    public UIDropdown(string text, UIStyling styling, UILayout layout) : base(null, layout)
     {
         PlaceholderInfo = text ?? "null";
-        AddChild(Button = new UIButton(text, buttonStyling, layout.Container()) { OnClick = Open });
-        Box = new UIElement(boxStyling, layout.Container());
-        Box.AddChild(Entries = new UIList(new() { Components = [new UIList.ListStyling() { Spacing = listSpacing }] }, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
-        Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
-        Internal.Layer = layer ?? this;
-        if (layer is not null)
-        {
-            Box.Layout.SetPosition(() => X - Internal.Layer.X, () => Y - Internal.Layer.Y);
-        }
-        // TODO
-        //Box.OnUnfocus += Close;
+        Layer = this;
+        AddChild(Button = new UIButton(text, styling, layout.Container()) { OnClick = Open });
+        Entries = new UIList(styling, new UILayout().SetAnchor(UIAnchor.TOP_CENTER));
+        Entries.Layout.SetPosition(() => X - Layer.X, () => Y - Layer.Y);
     }
 
     /// <summary>Opens the dropdown list.</summary>
     public void Open()
     {
         RemoveChild(Button);
-        Internal.Layer.AddChild(Box);
-        Box.Focus();
+        Layer.AddChild(Entries);
+        Entries.Focus();
     }
 
     /// <summary>Closes the dropdown list.</summary>
     public void Close()
     {
-        Internal.Layer.RemoveChild(Box);
+        Layer.RemoveChild(Entries);
         AddChild(Button);
         Button.Focus();
     }
@@ -110,7 +100,7 @@ public class UIDropdown : UIElement
     public void SelectChoice(UIElement choice)
     {
         SelectedChoice = choice;
-        if (Internal.Layer.HasChild(Box))
+        if (Layer.HasChild(Entries))
         {
             Close();
         }
@@ -134,11 +124,11 @@ public class UIDropdown : UIElement
     {
         // TODO: configurable appearance
         UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f) };
-        UIElement container = new(containerStyle, new UILayout().SetSize(() => Box.Width, () => choice.Height));
+        UIElement container = new(containerStyle, new UILayout().SetSize(() => Width, () => choice.Height));
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
         container.AddChild(choice);
         Entries.AddListItem(container);
-        Choices.Add(choice);
+        //Choices.Add(choice);
         Internal.ToStrings[choice] = label;
         choice.OnClick += () => SelectChoice(choice);
     }
