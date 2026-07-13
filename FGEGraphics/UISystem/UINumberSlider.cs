@@ -156,7 +156,7 @@ public class UINumberSlider : UIElement
     /// <returns>A list group containing both elements.</returns>
     public static UIList WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
     {
-        UIList list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(null, layout) { Spacing = spacing, Vertical = false, Anchor = listAnchor ?? UIAnchor.TOP_LEFT };
         slider.OnValueEdit += _ => label.Value = slider.Value;
         label.OnTextSubmit += _ =>
         {

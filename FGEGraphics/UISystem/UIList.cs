@@ -36,7 +36,18 @@ public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 
     /// <summary>Whether the list should expand vertically.</summary>
     [UIDebug]
-    public bool Vertical;
+    public bool Vertical
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                ConfigureSize();
+            }
+        }
+    }
 
     /// <summary>The spacing between each list item.</summary>
     [UIDebug]
@@ -44,7 +55,15 @@ public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 
     /// <summary>The anchor that the list will expand from.</summary>
     [UIDebug]
-    public UIAnchor Anchor;
+    public UIAnchor Anchor
+    {
+        get;
+        set
+        {
+            field = value;
+            //CheckAnchor();
+        }
+    }
 
     /// <summary>The list of elements currently contained within the list.</summary>
     public List<UIElement> Items = [];
@@ -63,30 +82,12 @@ public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
     public InternalData Internal = new();
 
     /// <summary>Constructs a new list group.</summary>
-    /// <param name="spacing">The spacing between each child.</param>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="vertical">Whether the list should expand vertically.</param>
-    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="layout"/> anchor.</param>
-    public UIList(int spacing, UILayout layout, bool vertical = true, UIAnchor anchor = null) : base(null, layout.SetSize(0, 0))
+    public UIList(UIStyling styling, UILayout layout) : base(styling, layout)
     {
         // ScaleSize = false?
-        Anchor = anchor ?? Layout.Anchor;
-        if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
-        {
-            throw new Exception("UIListGroup must have a non-central expansion direction");
-        }
-        Vertical = vertical;
-        Spacing = spacing;
-        if (Vertical)
-        {
-            Layout.SetHeight(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Height : 0);
-            Layout.SetWidth(() => Items.Count > 0 ? Items.Max(item => item.Width) : 0);
-        }
-        else
-        {
-            Layout.SetWidth(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Width : 0);
-            Layout.SetHeight(() => Items.Count > 0 ? Items.Max(item => item.Height) : 0);
-        }
+        Vertical = true;
+        Anchor = Layout.Anchor;
     }
 
     // TODO: rename to AddItem
@@ -200,9 +201,30 @@ public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 
     public void AcceptStyling(ListStyling styling)
     {
-        Logs.Debug("Accepting styling " + styling);
         Vertical = styling.Vertical.Get(this);
         Spacing = styling.Spacing.Get(this);
         Anchor = styling.Anchor.Get(this) ?? Layout.Anchor;
+    }
+
+    public void CheckAnchor()
+    {
+        if ((Vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!Vertical && Anchor.AlignmentX == UIAlignment.CENTER))
+        {
+            throw new Exception("UIList must have a non-central expansion direction");
+        }
+    }
+
+    public void ConfigureSize()
+    {
+        if (Vertical)
+        {
+            Layout.SetHeight(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Height : 0);
+            Layout.SetWidth(() => Items.Count > 0 ? Items.Max(item => item.Width) : 0);
+        }
+        else
+        {
+            Layout.SetWidth(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Width : 0);
+            Layout.SetHeight(() => Items.Count > 0 ? Items.Max(item => item.Height) : 0);
+        }
     }
 }

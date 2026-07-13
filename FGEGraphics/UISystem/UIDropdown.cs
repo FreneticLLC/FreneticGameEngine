@@ -78,7 +78,7 @@ public class UIDropdown : UIElement
         PlaceholderInfo = text ?? "null";
         AddChild(Button = new UIButton(text, buttonStyling, layout.Container()) { OnClick = Open });
         Box = new UIElement(boxStyling, layout.Container());
-        Box.AddChild(Entries = new UIList(listSpacing, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
+        Box.AddChild(Entries = new UIList(new() { Components = [new UIList.ListStyling() { Spacing = listSpacing }] }, new UILayout().SetAnchor(UIAnchor.TOP_CENTER).SetPosition(0, boxPadding)));
         Box.Layout.SetHeight(() => Entries.Layout.Height + boxPadding * 2);
         Internal.Layer = layer ?? this;
         if (layer is not null)

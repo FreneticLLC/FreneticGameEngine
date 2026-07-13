@@ -164,7 +164,7 @@ public class UILabel : UIElement
     /// <returns>A tuple of the label, icon, and their list container.</returns>
     public static (UILabel Label, UIImage Icon, UIList List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
-        UIList list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(null, layout) { Spacing = spacing, Vertical = false, Anchor = listAnchor ?? UIAnchor.TOP_LEFT };
         UILabel label = new(text, styling, layout.Copy().SetOrigin());
         UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
         list.AddListItem(label);
