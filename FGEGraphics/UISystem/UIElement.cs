@@ -382,7 +382,7 @@ public class UIElement
         SetStyle(Styling?.Get(this) ?? UIStyle.Empty);
         if (Styling is not null && Styling.Components is not null)
         {
-            foreach (object component in Styling.Components)
+            foreach (StylingComponent component in Styling.Components)
             {
                 if (StylingAcceptors.Applicators.TryGetValue(component.GetType(), out StylingAcceptors.Applicator applicator))
                 {

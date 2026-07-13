@@ -22,7 +22,7 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 {
-    public record ListStyling
+    public record ListStyling : StylingComponent
     {
         public UIStyleValue<bool> Vertical = true;
 
