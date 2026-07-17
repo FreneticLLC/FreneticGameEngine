@@ -220,7 +220,7 @@ public class ViewUI2D
         {
             element.UpdateStyle();
         }
-        while (true) // TODO: this seems reckless
+        for (int i = 0; i < 16; i++) // TODO: this seems reckless
         {
             foreach (UIElement element in CurrentScreen.AllChildren(filter: element => element.TransformSelf))
             {
@@ -234,6 +234,10 @@ public class ViewUI2D
             if (!anyUpdated)
             {
                 break;
+            }
+            if (i == 15)
+            {
+                Logs.Warning("WARNING WARNING PASSED 16 TIMES!!!");
             }
         }
         foreach (UIElement element in CurrentScreen.AllChildren())
