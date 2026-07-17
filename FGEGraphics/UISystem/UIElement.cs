@@ -30,6 +30,9 @@ namespace FGEGraphics.UISystem;
 // TODO: Hover text
 public class UIElement
 {
+    /// <summary>The name of this element.</summary>
+    public virtual string Name { get; set; } = "Element";
+
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
@@ -105,11 +108,10 @@ public class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public UIRenderMode RenderMode = UIRenderMode.FULL;
 
-    /// <summary>The debug name of this element.</summary>
-    public virtual string Name { get; set; } = "Element";
-
     /// <summary>Whether this element displays additional information in debug mode.</summary>
     public bool AllowDebug = true;
+
+    public bool TransformSelf = true;
 
     /// <summary>
     /// Whether this element should scale its width based on <see cref="Scale"/>.
@@ -296,17 +298,17 @@ public class UIElement
     // TODO: 'filter' predicate parameter
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="includeSelf">Whether to include this element.</param>
-    public IEnumerable<UIElement> AllChildren(bool includeSelf = true)
+    public IEnumerable<UIElement> AllChildren(bool includeSelf = true, Func<UIElement, bool> filter = null) 
     {
-        if (includeSelf)
+        if (includeSelf && (filter?.Invoke(this) ?? true))
         {
             yield return this;
         }
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid)
+            if (element.IsValid && (filter?.Invoke(element) ?? true))
             {
-                foreach (UIElement child in element.AllChildren(true))
+                foreach (UIElement child in element.AllChildren(true, filter))
                 {
                     yield return child;
                 }
@@ -543,25 +545,15 @@ public class UIElement
         }
     }
 
-    // TODO: Support rotations
-    /// <summary>
-    /// Updates the absolute layout values for this element in the following order:
-    /// <list type="number">
-    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
-    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
-    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
-    /// <item><see cref="Rotation"/></item>
-    /// </list>
-    /// </summary>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="rotation">The last rotation made in the render chain.</param>
-    public virtual void UpdateTransforms(double delta, Vector3 rotation)
+    public void UpdateScale()
     {
-        ElementInternal.LastPosition = Position;
-        ElementInternal.LastSize = Size;
-        ElementInternal.LastRotation = Rotation;
         ElementInternal.LastScale = Scale;
         Scale = Layout.Scale;
+    }
+
+    public void UpdateSize()
+    {
+        ElementInternal.LastSize = Size;
         if (ScaleSize)
         {
             Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
@@ -570,6 +562,12 @@ public class UIElement
         {
             Size = new(Layout.Width, Layout.Height);
         }
+    }
+
+    public void UpdatePosition(Vector3 rotation)
+    {
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastRotation = Rotation;
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -602,6 +600,25 @@ public class UIElement
         }*/
         Position = new(x, y);
         Rotation = rotation.Z;
+    }
+
+    // TODO: Support rotations
+    /// <summary>
+    /// Updates the absolute layout values for this element in the following order:
+    /// <list type="number">
+    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
+    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
+    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
+    /// <item><see cref="Rotation"/></item>
+    /// </list>
+    /// </summary>
+    /// <param name="delta">The time since the last render.</param>
+    /// <param name="rotation">The last rotation made in the render chain.</param>
+    public virtual void UpdateTransforms(double delta, Vector3 rotation)
+    {
+        UpdateScale();
+        UpdateSize();
+        UpdatePosition(rotation);
     }
 
     /// <summary>Fires relevant events if this element's transforms have changed.</summary>

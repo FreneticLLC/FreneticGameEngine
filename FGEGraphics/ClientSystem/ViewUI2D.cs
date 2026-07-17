@@ -222,7 +222,7 @@ public class ViewUI2D
         }
         while (true) // TODO: this seems reckless
         {
-            foreach (UIElement element in CurrentScreen.AllChildren())
+            foreach (UIElement element in CurrentScreen.AllChildren(filter: element => element.TransformSelf))
             {
                 element.UpdateTransforms(Client.Delta, Vector3.Zero);
             }
