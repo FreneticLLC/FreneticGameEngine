@@ -41,7 +41,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
     public bool Vertical;
 
     /// <summary>The spacing between each list item.</summary>
-    [UIDebug]
+    [UIDebug, SettingNumeric(SettingNumericDisplayType.Slider, 0, 100)]
     public int Spacing;
 
     /// <summary>The anchor that the list will expand from.</summary>
@@ -77,7 +77,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         UpdatePosition(rotation);
         ElementInternal.LastSize = Size;
         int offset = 0;
-        int maxExtension = 50;
+        int maxExtension = 0;
         for (int i = 0; i < ElementInternal.Children.Count; i++)
         {
             UIElement child = ElementInternal.Children[i];

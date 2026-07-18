@@ -1,4 +1,5 @@
 using FGECore.CoreSystems;
+using FGECore.MathHelpers;
 using FreneticUtilities.FreneticDataSyntax;
 using System;
 using System.Collections.Generic;
@@ -128,3 +129,32 @@ public class UIDropdownSetting : UISetting
     }
 }
 
+public class UIDebugPanel : UIList
+{
+    public static UIStyling Styling = new()
+    {
+        Fill = Color4F.White,
+        Stroke = Color4F.Black,
+        StrokeWeight = 2,
+        ShowBackground = true,
+    };
+
+    public UIElement Element;
+
+    public UIDebugPanel(UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
+    {
+        Element = element;
+        foreach ((string name, ElementInternalData.DebugMember debugMember) in element.ElementInternal.DebugMembers)
+        {
+            UIList entry = new(null, new UILayout()) { Spacing = 10, Vertical = false };
+            entry.AddListItem(new UILabel(name, styling with { ShowBackground = false }, new UILayout()));
+            if (UISetting.Create(debugMember.Info, debugMember.Type, this, styling, new UILayout().SetSize(300, 60)) is UISetting setting)
+            {
+                entry.AddListItem(setting);
+                setting.AcceptValue(Element.GetDebug(name));
+                setting.OnValueEmitted += value => Element.SetDebug(name, value);
+            }
+            AddListItem(entry);
+        }
+    }
+}

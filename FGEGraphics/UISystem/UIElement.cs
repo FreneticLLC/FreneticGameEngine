@@ -182,7 +182,11 @@ public class UIElement
 
         public Dictionary<Type, StylingAcceptors.Applicator> StylingApplicators;
 
-        public Dictionary<string, (MemberInfo Member, Type type, Func<object, object> Getter, Action<object, object> Setter)> DebugProperties = [];
+        public record DebugMember(MemberInfo Info, Type Type, Func<object, object> Getter, Action<object, object> Setter);
+
+        public static Dictionary<Type, Dictionary<string, DebugMember>> DebugMembersByElementType = [];
+
+        public Dictionary<string, DebugMember> DebugMembers;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -200,13 +204,7 @@ public class UIElement
             Layout.Element = this;
         }
         ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
-        foreach (MemberInfo memberInfo in GetType().GetMembers())
-        {
-            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
-            {
-                ElementInternal.DebugProperties[memberInfo.Name] = CreateDebugPropertyActions(memberInfo);
-            }
-        }
+        ElementInternal.DebugMembers = GetOrCreateDebugMembers();
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -315,11 +313,14 @@ public class UIElement
         }
         foreach (UIElement element in ElementInternal.Children)
         {
-            if (element.IsValid && (filter?.Invoke(element) ?? true))
+            if (element.IsValid)
             {
                 foreach (UIElement child in element.AllChildren(true, filter))
                 {
-                    yield return child;
+                    if (filter?.Invoke(child) ?? true)
+                    {
+                        yield return child;
+                    }
                 }
             }
         }
@@ -918,15 +919,15 @@ public class UIElement
 
     public object GetDebug(string propertyName)
     {
-        return ElementInternal.DebugProperties[propertyName].Getter(this);
+        return ElementInternal.DebugMembers[propertyName].Getter(this);
     }
 
     public void SetDebug(string propertyName, object value)
     {
-        ElementInternal.DebugProperties[propertyName].Setter(this, value);
+        ElementInternal.DebugMembers[propertyName].Setter(this, value);
     }
 
-    public (MemberInfo, Type, Func<object, object>, Action<object, object>) CreateDebugPropertyActions(MemberInfo member)
+    public ElementInternalData.DebugMember CreateDebugMember(MemberInfo member)
     {
         var instance = Expression.Parameter(typeof(object), "element");
         var typedInstance = Expression.Convert(instance, GetType());
@@ -942,13 +943,31 @@ public class UIElement
         // TODO: bad
         if (!canWrite)
         {
-            return (member, memberType, getter, null);
+            return new(member, memberType, getter, null);
         }
 
         var value = Expression.Parameter(typeof(object), "value");
         var typedValue = Expression.Convert(value, memberType);
         var assignment = Expression.Assign(typedProperty, typedValue);
         var setter = Expression.Lambda<Action<object, object>>(assignment, instance, value).Compile();
-        return (member, memberType, getter, setter);
+        return new(member, memberType, getter, setter);
+    }
+
+    public Dictionary<string, ElementInternalData.DebugMember> GetOrCreateDebugMembers()
+    {
+        if (ElementInternalData.DebugMembersByElementType.TryGetValue(GetType(), out Dictionary<string, ElementInternalData.DebugMember> found))
+        {
+            return found;
+        }
+        Dictionary<string, ElementInternalData.DebugMember> members = [];
+        foreach (MemberInfo memberInfo in GetType().GetMembers())
+        {
+            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
+            {
+                members[memberInfo.Name] = CreateDebugMember(memberInfo);
+            }
+        }
+        ElementInternalData.DebugMembersByElementType[GetType()] = members;
+        return members;
     }
 }
