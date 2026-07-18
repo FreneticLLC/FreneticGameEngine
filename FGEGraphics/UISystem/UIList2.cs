@@ -48,19 +48,6 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
     [UIDebug]
     public UIAnchor Anchor;
 
-    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
-    /*public struct InternalData()
-    {
-        /// <summary>Maps items to their positional offsets relative to this list's origin.</summary>
-        public Dictionary<UIElement, int> Offsets = [];
-
-        /// <summary>Maps items to their positional updating logic.</summary>
-        public Dictionary<UIElement, Action<Vector2i, Vector2i>> Updaters = [];
-    }
-
-    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
-    public InternalData Internal = new();*/
-
     /// <summary>Constructs a new list group.</summary>
     /// <param name="layout">The layout of the element.</param>
     public UIList2(UIStyling styling, UILayout layout) : base(styling, layout)
