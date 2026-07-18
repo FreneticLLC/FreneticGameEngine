@@ -181,6 +181,8 @@ public class UIElement
         public UIStyle Style = UIStyle.Empty;
 
         public Dictionary<Type, StylingAcceptors.Applicator> StylingApplicators;
+
+        public Dictionary<string, (MemberInfo Member, Type type, Func<object, object> Getter, Action<object, object> Setter)> DebugProperties = [];
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -198,6 +200,13 @@ public class UIElement
             Layout.Element = this;
         }
         ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
+        foreach (MemberInfo memberInfo in GetType().GetMembers())
+        {
+            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
+            {
+                ElementInternal.DebugProperties[memberInfo.Name] = CreateDebugPropertyActions(memberInfo);
+            }
+        }
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -905,5 +914,41 @@ public class UIElement
     public override string ToString()
     {
         return base.ToString();
+    }
+
+    public object GetDebug(string propertyName)
+    {
+        return ElementInternal.DebugProperties[propertyName].Getter(this);
+    }
+
+    public void SetDebug(string propertyName, object value)
+    {
+        ElementInternal.DebugProperties[propertyName].Setter(this, value);
+    }
+
+    public (MemberInfo, Type, Func<object, object>, Action<object, object>) CreateDebugPropertyActions(MemberInfo member)
+    {
+        var instance = Expression.Parameter(typeof(object), "element");
+        var typedInstance = Expression.Convert(instance, GetType());
+        (var typedProperty, var memberType, bool canWrite) = member switch
+        {
+            PropertyInfo p => (Expression.Property(typedInstance, p), p.PropertyType, p.CanWrite),
+            FieldInfo f => (Expression.Field(typedInstance, f), f.FieldType, true),
+            _ => throw new ArgumentException("TODO")
+        };
+        var property = Expression.Convert(typedProperty, typeof(object));
+        var getter = Expression.Lambda<Func<object, object>>(property, instance).Compile();
+
+        // TODO: bad
+        if (!canWrite)
+        {
+            return (member, memberType, getter, null);
+        }
+
+        var value = Expression.Parameter(typeof(object), "value");
+        var typedValue = Expression.Convert(value, memberType);
+        var assignment = Expression.Assign(typedProperty, typedValue);
+        var setter = Expression.Lambda<Action<object, object>>(assignment, instance, value).Compile();
+        return (member, memberType, getter, setter);
     }
 }
