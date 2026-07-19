@@ -93,8 +93,8 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         {
             UIElement child = IsReversed ? ElementInternal.Children[^(i + 1)] : ElementInternal.Children[i];
             child.UpdateTransforms(delta, rotation);
-            int inset = (Vertical ? Anchor.AlignmentX : Anchor.AlignmentY).GetPosition(maxDepth, Vertical ? child.Width : child.Height);
-            Vector2i pos = Vertical ? new(X + inset, Y + length) : new(X + length, Y + inset);
+            int inset = Style.Padding + (Vertical ? Anchor.AlignmentX : Anchor.AlignmentY).GetPosition(maxDepth, Vertical ? child.Width : child.Height);
+            Vector2i pos = Vertical ? new(X + inset, Y + Style.Padding + length) : new(X + Style.Padding + length, Y + inset);
             child.ElementInternal.LastPosition = child.Position = pos;
             length += Vertical ? child.Height : child.Width;
             if (i < ElementInternal.Children.Count - 1)
@@ -102,6 +102,8 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
                 length += Spacing;
             }
         }
+        maxDepth += Style.Padding * 2;
+        length += Style.Padding * 2;
         Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
     }
 }
