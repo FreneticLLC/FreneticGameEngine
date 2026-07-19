@@ -48,6 +48,8 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
     [UIDebug]
     public UIAnchor Anchor;
 
+    public bool IsReversed => Vertical && Anchor.AlignmentY == UIAlignment.BOTTOM || !Vertical && Anchor.AlignmentX == UIAlignment.RIGHT;
+
     /// <summary>Constructs a new list group.</summary>
     /// <param name="layout">The layout of the element.</param>
     public UIList2(UIStyling styling, UILayout layout) : base(styling, layout)
@@ -76,33 +78,30 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         UpdateScale();
         UpdatePosition(rotation);
         ElementInternal.LastSize = Size;
-        int offset = 0;
-        int maxExtension = 0;
-        for (int i = 0; i < ElementInternal.Children.Count; i++)
+        int maxDepth = 0;
+        foreach (UIElement child in ElementInternal.Children)
         {
-            UIElement child = ElementInternal.Children[i];
             child.UpdateTransforms(delta, rotation);
-            int pos = (Vertical ? Y : X) + offset;
-            if (Vertical)
+            int childDepth = Vertical ? child.Width : child.Height;
+            if (childDepth > maxDepth)
             {
-                // TODO: this is a bandage
-                child.ElementInternal.LastPosition = child.Position = new(X, pos);
-            }
-            else
-            {
-                child.ElementInternal.LastPosition = child.Position = new(pos, Y);
-            }
-            offset += Vertical ? child.Height : child.Width;
-            if (i < ElementInternal.Children.Count - 1)
-            {
-                offset += Spacing;
-            }
-            int extension = Vertical ? child.Width : child.Height;
-            if (extension > maxExtension)
-            {
-                maxExtension = extension;
+                maxDepth = childDepth;
             }
         }
-        Size = Vertical ? new(maxExtension, offset) : new(offset, maxExtension);
+        int length = 0;
+        for (int i = 0; i < ElementInternal.Children.Count; i++)
+        {
+            UIElement child = IsReversed ? ElementInternal.Children[^(i + 1)] : ElementInternal.Children[i];
+            child.UpdateTransforms(delta, rotation);
+            int inset = (Vertical ? Anchor.AlignmentX : Anchor.AlignmentY).GetPosition(maxDepth, Vertical ? child.Width : child.Height);
+            Vector2i pos = Vertical ? new(X + inset, Y + length) : new(X + length, Y + inset);
+            child.ElementInternal.LastPosition = child.Position = pos;
+            length += Vertical ? child.Height : child.Width;
+            if (i < ElementInternal.Children.Count - 1)
+            {
+                length += Spacing;
+            }
+        }
+        Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
     }
 }

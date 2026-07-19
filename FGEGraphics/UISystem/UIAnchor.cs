@@ -64,7 +64,7 @@ public record UIAnchor(UIAlignment AlignmentX, UIAlignment AlignmentY) : IStatic
     public static readonly UIAnchor[] DIRECTIONS = [TOP_CENTER, CENTER_LEFT, CENTER_RIGHT, BOTTOM_CENTER];
 
     /// <inheritdoc/>
-    public override string ToString() => AlignmentX == AlignmentY ? AlignmentX.ToString() : $"{AlignmentX}_{AlignmentY}";
+    public override string ToString() => AlignmentX == AlignmentY ? AlignmentX.ToString() : $"{AlignmentY}_{AlignmentX}";
 
     public static IEnumerable<UIAnchor> Options => VALUES;
 }
