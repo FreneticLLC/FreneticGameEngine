@@ -17,7 +17,7 @@ namespace FGEGraphics.UISystem;
 /// <summary>Represents logic for placing <see cref="UIElement"/>s on a screen.</summary>
 /// <param name="AlignmentX">The horizontal position alignment.</param>
 /// <param name="AlignmentY">The vertical position alignment.</param>
-public record UIAnchor(UIAlignment AlignmentX, UIAlignment AlignmentY)
+public record UIAnchor(UIAlignment AlignmentX, UIAlignment AlignmentY) : IStaticEnumerable<UIAnchor>
 {
     /// <summary>Returns the horizontal offset relative to the <paramref name="element"/>'s parent.</summary>
     /// <param name="element">The child element.</param>
@@ -64,5 +64,7 @@ public record UIAnchor(UIAlignment AlignmentX, UIAlignment AlignmentY)
     public static readonly UIAnchor[] DIRECTIONS = [TOP_CENTER, CENTER_LEFT, CENTER_RIGHT, BOTTOM_CENTER];
 
     /// <inheritdoc/>
-    public override string ToString() => AlignmentX == AlignmentY ? AlignmentX.ToString() : $"{AlignmentX} {AlignmentY}";
+    public override string ToString() => AlignmentX == AlignmentY ? AlignmentX.ToString() : $"{AlignmentX}_{AlignmentY}";
+
+    public static IEnumerable<UIAnchor> Options => VALUES;
 }

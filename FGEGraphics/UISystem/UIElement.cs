@@ -73,11 +73,13 @@ public class UIElement
     /// <summary>This absolute position.</summary>
     /// <seealso cref="X"/>
     /// <seealso cref="Y"/>
+    [UIDebug]
     public Vector2i Position;
 
     /// <summary>The absolute size.</summary>
     /// <seealso cref="Width"/>
     /// <seealso cref="Height"/>
+    [UIDebug]
     public Vector2i Size;
 
     /// <summary>The absolute rotation.</summary>

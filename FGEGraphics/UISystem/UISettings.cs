@@ -2,7 +2,9 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FreneticUtilities.FreneticDataSyntax;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -20,13 +22,20 @@ public abstract class UISetting(UILayout layout) : UIElement(null, layout)
         {
             return new UIBoolSetting(styling, layout);
         }
-        if (member.GetCustomAttribute<SettingNumeric>() is SettingNumeric numericSetting)
+        if (UINumberSetting.NumberTypes.Contains(memberType))
         {
-            return new UINumberSetting(memberType, numericSetting, styling, layout);
+            SettingNumeric settingInfo = member.GetCustomAttribute<SettingNumeric>() ?? new SettingNumeric(SettingNumericDisplayType.NumberBox, double.MinValue, double.MaxValue);
+            return new UINumberSetting(memberType, settingInfo, styling, layout);
+        }
+        if (memberType.GetInterfaces().Any(iface => iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IStaticEnumerable<>)))
+        {
+            var helper = typeof(StaticEnumerable).GetMethod(nameof(StaticEnumerable.GetOptions)).MakeGenericMethod(memberType);
+            IEnumerable options = (IEnumerable)helper.Invoke(null, null);
+            return new UIDropdownSetting(memberType, options, container, styling, layout);
         }
         if (member.GetCustomAttribute<SettingDropdown>() is SettingDropdown dropdownSetting)
         {
-            return new UIDropdownSetting(memberType, dropdownSetting, container, styling, layout);
+            return new UIDropdownSetting(memberType, dropdownSetting.Options, container, styling, layout);
         }
         return null;
     }
@@ -60,6 +69,8 @@ public class UINumberSetting : UISetting
 {
     /// <summary>Set of core C# data types for basic integer value types.</summary>
     public static HashSet<Type> IntegerTypes = [typeof(int), typeof(long), typeof(short), typeof(byte), typeof(uint), typeof(ulong), typeof(ushort), typeof(sbyte)];
+
+    public static HashSet<Type> NumberTypes = [typeof(float), typeof(double), typeof(decimal), .. IntegerTypes];
 
     public UINumberInputLabel InputLabel;
 
@@ -101,17 +112,12 @@ public class UIDropdownSetting : UISetting
 {
     public UIDropdown Dropdown;
 
-    public UIDropdownSetting(Type valueType, SettingDropdown dropdownData, UIElement container, UIStyling styling, UILayout layout) : base(layout)
+    public UIDropdownSetting(Type valueType, IEnumerable options, UIElement container, UIStyling styling, UILayout layout) : base(layout)
     {
         Dropdown = new(null, styling with { Padding = 5 }, layout.Container()) { Layer = container };
-        foreach (string option in dropdownData.Options)
+        foreach (object option in options)
         {
-            object value = option;
-            if (valueType == typeof(int)) { value = int.Parse(option); }
-            else if (valueType == typeof(long)) { value = long.Parse(option); }
-            else if (valueType == typeof(float)) { value = float.Parse(option); }
-            else if (valueType == typeof(double)) { value = double.Parse(option); }
-            Dropdown.AddLabelChoice(option, styling, value);
+            Dropdown.AddLabelChoice(option.ToString(), styling, option);
         }
         Dropdown.OnChoiceSelect += (choice) => OnValueEmitted?.Invoke(choice.Tag);
         AddChild(Dropdown);
@@ -121,7 +127,7 @@ public class UIDropdownSetting : UISetting
     {
         // TODO: make this more intuitive in fge
         // blud what even is this
-        UIElement selection = Dropdown.Entries.Items.Find(element => $"{element.Tag}" == $"{value}");
+        UIElement selection = Dropdown.Entries.Items.Find(element => element.Tag == value);
         if (selection is not null)
         {
             Dropdown.SelectChoice(selection);

@@ -63,27 +63,37 @@ public class SettingDeveloperMode : Attribute
 public class SettingDropdown : Attribute
 {
     /// <summary>Abstract base impl of a class that gives the options list.</summary>
-    public abstract class AbstractImpl
+    public interface IImpl
     {
         /// <summary>Implement this with a method that gives the relevant options.</summary>
-        public abstract string[] GetOptions { get; }
+        public abstract object[] GetOptions { get; }
     }
 
     /// <summary>Type the implements a getter for the option list.</summary>
     public Type Impl;
 
     /// <summary>The options to display in the dropdown.</summary>
-    public virtual string[] Options => (Activator.CreateInstance(Impl) as AbstractImpl).GetOptions;
+    public virtual object[] Options => (Activator.CreateInstance(Impl) as IImpl).GetOptions;
 }
 
 
 /// <summary>Implements <see cref="SettingDropdown"/> with a manual list of options..</summary>
 [AttributeUsage(AttributeTargets.Field)]
-public class ManualSettingsDropdown(params string[] options) : SettingDropdown
+public class ManualSettingsDropdown(params object[] options) : SettingDropdown
 {
     /// <summary>The actual underlying options.</summary>
-    public string[] ActualOptions = options;
+    public object[] ActualOptions = options;
 
     /// <inheritdoc/>
-    public override string[] Options => ActualOptions;
+    public override object[] Options => ActualOptions;
+}
+
+public interface IStaticEnumerable<TSelf> where TSelf : IStaticEnumerable<TSelf>
+{
+    public static abstract IEnumerable<TSelf> Options { get; }
+}
+
+public static class StaticEnumerable
+{
+    public static IEnumerable<T> GetOptions<T>() where T : IStaticEnumerable<T> => T.Options;
 }

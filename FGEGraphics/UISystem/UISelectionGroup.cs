@@ -29,10 +29,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     [UIDebug]
     public int MaxSelections
     {
-        get => Internal.MaxSelections;
+        get;
         set
         {
-            Internal.MaxSelections = value;
+            field = value;
             FlushSelections();
             UpdateLocks();
         }
@@ -61,9 +61,6 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <summary>Data internal to a <see cref="UISelectionGroup"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The maximum allowed number of selected elements.</summary>
-        public int MaxSelections = -1;
-
         /// <summary>Maps elements to their selection logic.</summary>
         public Dictionary<UIElement, Action> Updaters = [];
     }
