@@ -39,6 +39,9 @@ public class UIElement
     /// <summary>The UI view this element is attached to.</summary>
     public ViewUI2D View;
 
+    /// <summary>This element's children.</summary>
+    public List<UIElement> Children = [];
+
     /// <summary>Styling logic for this element.</summary>
     public UIStyling Styling
     {
@@ -154,9 +157,6 @@ public class UIElement
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
     {
-        /// <summary>This element's children.</summary>
-        public List<UIElement> Children = [];
-
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
 
@@ -239,7 +239,7 @@ public class UIElement
         {
             throw new Exception("Tried to add a child that is invalid (null, self, or already has a parent)!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children, child];
+        Children.Add(child);
         AddChildInternal(child);
     }
 
@@ -251,7 +251,7 @@ public class UIElement
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children, .. children];
+        Children.AddRange(children);
         foreach (UIElement child in children)
         {
             AddChildInternal(child);
@@ -282,22 +282,22 @@ public class UIElement
         {
             return;
         }
-        if (!ElementInternal.Children.Contains(child))
+        if (!Children.Contains(child))
         {
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children.Where(c => c != child)];
+        Children.Remove(child);
         RemoveChildInternal(child);
     }
 
     /// <summary>Removes all children from this element.</summary>
     public void RemoveAllChildren()
     {
-        foreach (UIElement child in ElementInternal.Children)
+        foreach (UIElement child in Children)
         {
             RemoveChildInternal(child);
         }
-        ElementInternal.Children.Clear();
+        Children.Clear();
     }
 
     /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
@@ -313,7 +313,7 @@ public class UIElement
         {
             yield return this;
         }
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid)
             {
@@ -334,7 +334,7 @@ public class UIElement
     /// <returns>A list of child elements containing the position.</returns>
     public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
     {
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid && element.Contains(x, y))
             {
@@ -349,7 +349,7 @@ public class UIElement
     /// <returns>A list of child elements not containing the position.</returns>
     public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
     {
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid && !element.Contains(x, y))
             {
@@ -548,7 +548,7 @@ public class UIElement
     {
         TickInput();
         Tick(delta);
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid)
             {
@@ -557,13 +557,13 @@ public class UIElement
         }
     }
 
-    public void UpdateScale()
+    public virtual void UpdateScale(double delta, Vector3 rotation)
     {
         ElementInternal.LastScale = Scale;
         Scale = Layout.Scale;
     }
 
-    public void UpdateSize()
+    public virtual void UpdateSize(double delta, Vector3 rotation)
     {
         ElementInternal.LastSize = Size;
         if (ScaleSize)
@@ -576,7 +576,7 @@ public class UIElement
         }
     }
 
-    public void UpdatePosition(Vector3 rotation)
+    public virtual void UpdatePosition(double delta, Vector3 rotation)
     {
         ElementInternal.LastPosition = Position;
         ElementInternal.LastRotation = Rotation;
@@ -614,6 +614,9 @@ public class UIElement
         Rotation = rotation.Z;
     }
 
+    public virtual void UpdateChildTransforms(double delta, Vector3 rotation)
+    { }
+
     [Flags]
     public enum TransformFlags
     {
@@ -640,15 +643,19 @@ public class UIElement
     {
         if (flags.HasFlag(TransformFlags.SCALE))
         {
-            UpdateScale();
+            UpdateScale(delta, rotation);
         }
         if (flags.HasFlag(TransformFlags.SIZE))
         {
-            UpdateSize();
+            UpdateSize(delta, rotation);
         }
         if (flags.HasFlag(TransformFlags.POSITION))
         {
-            UpdatePosition(rotation);
+            UpdatePosition(delta, rotation);
+        }
+        if (flags.HasFlag(TransformFlags.CHILDREN))
+        {
+            UpdateChildTransforms(delta, rotation);
         }
     }
 
@@ -748,7 +755,7 @@ public class UIElement
         GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
         if (RenderMode != UIRenderMode.NONE)
         {
-            foreach (UIElement child in ElementInternal.Children)
+            foreach (UIElement child in Children)
             {
                 if (child.IsValid)
                 {
