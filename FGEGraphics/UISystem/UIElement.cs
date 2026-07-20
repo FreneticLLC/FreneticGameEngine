@@ -614,6 +614,16 @@ public class UIElement
         Rotation = rotation.Z;
     }
 
+    [Flags]
+    public enum TransformFlags
+    {
+        SCALE = 0,
+        SIZE = 1 << 0,
+        POSITION = 1 << 1,
+        CHILDREN = 1 << 2,
+        ALL = SCALE | SIZE | POSITION | CHILDREN
+    }
+
     // TODO: Support rotations
     /// <summary>
     /// Updates the absolute layout values for this element in the following order:
@@ -626,11 +636,20 @@ public class UIElement
     /// </summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
-    public virtual void UpdateTransforms(double delta, Vector3 rotation)
+    public virtual void UpdateTransforms(double delta, Vector3 rotation, TransformFlags flags = TransformFlags.ALL)
     {
-        UpdateScale();
-        UpdateSize();
-        UpdatePosition(rotation);
+        if (flags.HasFlag(TransformFlags.SCALE))
+        {
+            UpdateScale();
+        }
+        if (flags.HasFlag(TransformFlags.SIZE))
+        {
+            UpdateSize();
+        }
+        if (flags.HasFlag(TransformFlags.POSITION))
+        {
+            UpdatePosition(rotation);
+        }
     }
 
     /// <summary>Fires relevant events if this element's transforms have changed.</summary>

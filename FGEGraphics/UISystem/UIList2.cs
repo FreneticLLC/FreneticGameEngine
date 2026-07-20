@@ -73,37 +73,39 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         Anchor = styling.Anchor.Get(this) ?? Layout.Anchor;
     }
 
-    public override void UpdateTransforms(double delta, OpenTK.Mathematics.Vector3 rotation)
+    public override void UpdateTransforms(double delta, OpenTK.Mathematics.Vector3 rotation, TransformFlags flags)
     {
-        UpdateScale();
-        UpdatePosition(rotation);
-        ElementInternal.LastSize = Size;
-        int maxDepth = 0;
-        foreach (UIElement child in ElementInternal.Children)
+        if (flags.HasFlag(TransformFlags.SCALE))
         {
-            child.UpdateTransforms(delta, rotation);
-            int childDepth = Vertical ? child.Width : child.Height;
-            if (childDepth > maxDepth)
+            UpdateScale();
+        }
+        if (flags.HasFlag(TransformFlags.POSITION))
+        {
+            UpdatePosition(rotation);
+        }
+        if (flags.HasFlag(TransformFlags.SIZE))
+        {
+            foreach (UIElement child in ElementInternal.Children)
             {
-                maxDepth = childDepth;
+                child.UpdateTransforms(delta, rotation, TransformFlags.SCALE | TransformFlags.SIZE);
+            }
+            int length = ElementInternal.Children.Sum(child => Vertical ? child.Height : child.Width) + Spacing * (ElementInternal.Children.Count - 1) + Style.Padding * 2;
+            int maxDepth = ElementInternal.Children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding * 2;
+            ElementInternal.LastSize = Size;
+            Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
+        }
+        if (flags.HasFlag(TransformFlags.CHILDREN))
+        {
+            int offset = 0;
+            for (int i = 0; i < ElementInternal.Children.Count; i++)
+            {
+                UIElement child = IsReversed ? ElementInternal.Children[^(i + 1)] : ElementInternal.Children[i];
+                int inset = Style.Padding + (Vertical ? Anchor.AlignmentX : Anchor.AlignmentY).GetPosition((Vertical ? Width : Height) - Style.Padding * 2, Vertical ? child.Width : child.Height);
+                Vector2i pos = Vertical ? new(X + inset, Y + Style.Padding + offset) : new(X + Style.Padding + offset, Y + inset);
+                child.ElementInternal.LastPosition = child.Position = pos;
+                child.UpdateTransforms(delta, rotation, TransformFlags.CHILDREN);
+                offset += (Vertical ? child.Height : child.Width) + Spacing;
             }
         }
-        int length = 0;
-        for (int i = 0; i < ElementInternal.Children.Count; i++)
-        {
-            UIElement child = IsReversed ? ElementInternal.Children[^(i + 1)] : ElementInternal.Children[i];
-            child.UpdateTransforms(delta, rotation);
-            int inset = Style.Padding + (Vertical ? Anchor.AlignmentX : Anchor.AlignmentY).GetPosition(maxDepth, Vertical ? child.Width : child.Height);
-            Vector2i pos = Vertical ? new(X + inset, Y + Style.Padding + length) : new(X + Style.Padding + length, Y + inset);
-            child.ElementInternal.LastPosition = child.Position = pos;
-            length += Vertical ? child.Height : child.Width;
-            if (i < ElementInternal.Children.Count - 1)
-            {
-                length += Spacing;
-            }
-        }
-        maxDepth += Style.Padding * 2;
-        length += Style.Padding * 2;
-        Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
     }
 }
