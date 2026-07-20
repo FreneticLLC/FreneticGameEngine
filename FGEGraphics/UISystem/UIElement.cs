@@ -900,6 +900,7 @@ public class UIElement
     {
     }
 
+    // TODO: DESTROY!!!
     /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>).</summary>
     /// <param name="baseColor">The base text styling.</param>
     /// <param name="detailed">Whether to include extra base information.</param>
@@ -929,30 +930,17 @@ public class UIElement
     {
         List<string> info = GetBaseDebugInfo(baseColor, detailed: true);
         info.AddRange(GetDebugInfo());
-        // TODO: This should absolutely not be written this way. Raw reflection at runtime is a no-no!
-        foreach (MemberInfo memberInfo in GetType().GetMembers())
-        {
-            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
-            {
-                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this) : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this) : null;
-                if (value is not null)
-                {
-                    string color = value is bool boolValue ? (boolValue ? "2" : "1") : "3";
-                    info.Add($"^7{memberInfo.Name}: ^{color}{value}");
-                }
-            }
-        }
         return info.Select(line => baseColor + line).JoinString("\n");
     }
 
     /// <summary>Returns the current value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
     /// <param name="memberName">The unqualified name of the member.</param>
-    public object GetDebug(string memberName) => ElementInternal.DebugMembers[memberName]?.Getter(this);
+    public object GetDebugValue(string memberName) => ElementInternal.DebugMembers[memberName]?.Getter(this);
 
     /// <summary>Sets the value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
     /// <param name="memberName">The unqualified name of the member.</param>
     /// <param name="value">The new value.</param>
-    public bool SetDebug(string memberName, object value)
+    public bool SetDebugValue(string memberName, object value)
     {
         if (ElementInternal.DebugMembers[memberName].Setter is Action<object, object> setter)
         {

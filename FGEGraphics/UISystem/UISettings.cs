@@ -157,8 +157,8 @@ public class UIDebugPanel : UIList
             if (UISetting.Create(debugMember.Info, debugMember.Type, this, styling, new UILayout().SetSize(300, 60)) is UISetting setting)
             {
                 entry.AddListItem(setting);
-                setting.AcceptValue(Element.GetDebug(name));
-                setting.OnValueEmitted += value => Element.SetDebug(name, value);
+                setting.AcceptValue(Element.GetDebugValue(name));
+                setting.OnValueEmitted += value => Element.SetDebugValue(name, value);
             }
             AddListItem(entry);
         }
