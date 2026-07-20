@@ -113,9 +113,12 @@ public class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public UIRenderMode RenderMode = UIRenderMode.FULL;
 
+    // TODO: Remove (The whole hierarchy should be shown in a GUI debug display)
     /// <summary>Whether this element displays additional information in debug mode.</summary>
     public bool AllowDebug = true;
 
+    /// <summary>Whether this element update its own transforms in the element tree.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
     public bool TransformSelf = true;
 
     /// <summary>
@@ -182,13 +185,11 @@ public class UIElement
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
 
+        /// <summary>A map of this element's styling component types to their applicator methods.</summary>
         public Dictionary<Type, StylingAcceptors.Applicator> StylingApplicators;
 
-        public record DebugMember(MemberInfo Info, Type Type, Func<object, object> Getter, Action<object, object> Setter);
-
-        public static Dictionary<Type, Dictionary<string, DebugMember>> DebugMembersByElementType = [];
-
-        public Dictionary<string, DebugMember> DebugMembers;
+        /// <summary>A map of this element's members marked with <see cref="UIDebugAttribute"/>, keyed by name.</summary>
+        public Dictionary<string, UIDebugMember> DebugMembers;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -206,7 +207,7 @@ public class UIElement
             Layout.Element = this;
         }
         ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
-        ElementInternal.DebugMembers = GetOrCreateDebugMembers();
+        ElementInternal.DebugMembers = UIDebugMember.GetOrCreateDebugMembers(GetType());
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -304,7 +305,8 @@ public class UIElement
     /// <param name="element">The possible child element.</param>
     public bool HasChild(UIElement element) => element.Parent == this;
 
-    // TODO: 'filter' predicate parameter
+    // TODO: 'filter' predicate parameter?
+    //   - the current implementation is essentially a Where check
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="includeSelf">Whether to include this element.</param>
     public IEnumerable<UIElement> AllChildren(bool includeSelf = true, Func<UIElement, bool> filter = null) 
@@ -557,12 +559,16 @@ public class UIElement
         }
     }
 
+    /// <summary>Updates <see cref="Scale"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
     public virtual void UpdateScale(double delta, Vector3 rotation)
     {
         ElementInternal.LastScale = Scale;
         Scale = Layout.Scale;
     }
 
+    /// <summary>Updates <see cref="Size"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
     public virtual void UpdateSize(double delta, Vector3 rotation)
     {
         ElementInternal.LastSize = Size;
@@ -576,6 +582,8 @@ public class UIElement
         }
     }
 
+    /// <summary>Updates <see cref="Position"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
     public virtual void UpdatePosition(double delta, Vector3 rotation)
     {
         ElementInternal.LastPosition = Position;
@@ -614,18 +622,11 @@ public class UIElement
         Rotation = rotation.Z;
     }
 
+    /// <summary>Updates the transforms of this element's children.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    /// <seealso cref="TransformSelf"/>
     public virtual void UpdateChildTransforms(double delta, Vector3 rotation)
     { }
-
-    [Flags]
-    public enum TransformFlags
-    {
-        SCALE = 0,
-        SIZE = 1 << 0,
-        POSITION = 1 << 1,
-        CHILDREN = 1 << 2,
-        ALL = SCALE | SIZE | POSITION | CHILDREN
-    }
 
     // TODO: Support rotations
     /// <summary>
@@ -635,10 +636,12 @@ public class UIElement
     /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
     /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
     /// <item><see cref="Rotation"/></item>
+    /// <item>The transforms of this element's children, if necessary</item>
     /// </list>
     /// </summary>
     /// <param name="delta">The time since the last render.</param>
     /// <param name="rotation">The last rotation made in the render chain.</param>
+    /// <param name="flags">Flags toggling stages of this method.</param>
     public virtual void UpdateTransforms(double delta, Vector3 rotation, TransformFlags flags = TransformFlags.ALL)
     {
         if (flags.HasFlag(TransformFlags.SCALE))
@@ -697,6 +700,8 @@ public class UIElement
     {
     }
 
+    /// <summary>Renders this element's background box.</summary>
+    /// <param name="style">The rendering style.</param>
     public void RenderBackground(UIStyle style)
     {
         Vector3 rotation = new(-0.5f, -0.5f, Rotation);
@@ -940,62 +945,41 @@ public class UIElement
         return info.Select(line => baseColor + line).JoinString("\n");
     }
 
-    public override string ToString()
-    {
-        return base.ToString();
-    }
+    /// <summary>Returns the current value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
+    /// <param name="memberName">The unqualified name of the member.</param>
+    public object GetDebug(string memberName) => ElementInternal.DebugMembers[memberName]?.Getter(this);
 
-    public object GetDebug(string propertyName)
+    /// <summary>Sets the value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
+    /// <param name="memberName">The unqualified name of the member.</param>
+    /// <param name="value">The new value.</param>
+    public bool SetDebug(string memberName, object value)
     {
-        return ElementInternal.DebugMembers[propertyName].Getter(this);
-    }
-
-    public void SetDebug(string propertyName, object value)
-    {
-        ElementInternal.DebugMembers[propertyName].Setter(this, value);
-    }
-
-    public ElementInternalData.DebugMember CreateDebugMember(MemberInfo member)
-    {
-        var instance = Expression.Parameter(typeof(object), "element");
-        var typedInstance = Expression.Convert(instance, GetType());
-        (var typedProperty, var memberType, bool canWrite) = member switch
+        if (ElementInternal.DebugMembers[memberName].Setter is Action<object, object> setter)
         {
-            PropertyInfo p => (Expression.Property(typedInstance, p), p.PropertyType, p.CanWrite),
-            FieldInfo f => (Expression.Field(typedInstance, f), f.FieldType, true),
-            _ => throw new ArgumentException("TODO")
-        };
-        var property = Expression.Convert(typedProperty, typeof(object));
-        var getter = Expression.Lambda<Func<object, object>>(property, instance).Compile();
-
-        // TODO: bad
-        if (!canWrite)
-        {
-            return new(member, memberType, getter, null);
+            setter(this, value);
+            return true;
         }
-
-        var value = Expression.Parameter(typeof(object), "value");
-        var typedValue = Expression.Convert(value, memberType);
-        var assignment = Expression.Assign(typedProperty, typedValue);
-        var setter = Expression.Lambda<Action<object, object>>(assignment, instance, value).Compile();
-        return new(member, memberType, getter, setter);
+        return false;
     }
 
-    public Dictionary<string, ElementInternalData.DebugMember> GetOrCreateDebugMembers()
+    // TODO
+    /// <inheritdoc/>
+    public override string ToString() => Name;
+
+    // TODO: Add NONE?
+    /// <summary>Flags to toggle stages of <see cref="UpdateTransforms(double, Vector3, TransformFlags)"/>.</summary>
+    [Flags]
+    public enum TransformFlags
     {
-        if (ElementInternalData.DebugMembersByElementType.TryGetValue(GetType(), out Dictionary<string, ElementInternalData.DebugMember> found))
-        {
-            return found;
-        }
-        Dictionary<string, ElementInternalData.DebugMember> members = [];
-        foreach (MemberInfo memberInfo in GetType().GetMembers())
-        {
-            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
-            {
-                members[memberInfo.Name] = CreateDebugMember(memberInfo);
-            }
-        }
-        ElementInternalData.DebugMembersByElementType[GetType()] = members;
-        return members;
+        /// <summary>Updates <see cref="Scale"/>.</summary>
+        SCALE = 0,
+        /// <summary>Updates <see cref="Size"/>.</summary>
+        SIZE = 1 << 0,
+        /// <summary>Updates <see cref="Position"/>.</summary>
+        POSITION = 1 << 1,
+        /// <summary>Updates the transforms of the element's children.</summary>
+        CHILDREN = 1 << 2,
+        /// <summary>Toggle on all features.</summary>
+        ALL = SCALE | SIZE | POSITION | CHILDREN
     }
 }

@@ -18,7 +18,7 @@ public abstract record StylingComponent
     public static implicit operator UIStyling(StylingComponent component) => component.AsStyling();
 }
 
-public class StylingAcceptors
+public static class StylingAcceptors
 {
     public delegate void Applicator(UIElement element, StylingComponent component);
 
@@ -26,7 +26,7 @@ public class StylingAcceptors
 
     public static Dictionary<Type, Dictionary<Type, Applicator>> ApplicatorsByElementType = [];
 
-    public static Applicator CompileApplicator(Type iface, Type componentType)
+    public static Applicator Create(Type iface, Type componentType)
     {
         MethodInfo acceptMethod = iface.GetMethod(nameof(IStylingAcceptor<>.AcceptStyling));
         ParameterExpression elementParam = Expression.Parameter(typeof(UIElement));
@@ -49,11 +49,12 @@ public class StylingAcceptors
                 continue;
             }
             Type componentType = iface.GetGenericArguments()[0];
-            if (!Applicators.ContainsKey(componentType))
+            if (!Applicators.TryGetValue(componentType, out Applicator applicator))
             {
-                Applicators[componentType] = CompileApplicator(iface, componentType);
+                applicator = Create(iface, componentType);
+                Applicators[componentType] = applicator;
             }
-            applicatorsForElement[componentType] = Applicators[componentType];
+            applicatorsForElement[componentType] = applicator;
         }
         ApplicatorsByElementType[elementType] = applicatorsForElement;
         return applicatorsForElement;
