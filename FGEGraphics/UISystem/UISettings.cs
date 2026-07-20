@@ -150,7 +150,7 @@ public class UIDebugPanel : UIList
     public UIDebugPanel(UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Element = element;
-        foreach ((string name, ElementInternalData.DebugMember debugMember) in element.ElementInternal.DebugMembers)
+        foreach ((string name, UIDebugMember debugMember) in element.ElementInternal.DebugMembers)
         {
             UIList entry = new(null, new UILayout()) { Spacing = 10, Vertical = false };
             entry.AddListItem(new UILabel(name, styling with { ShowBackground = false }, new UILayout()));

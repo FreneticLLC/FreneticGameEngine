@@ -16,7 +16,7 @@ public enum SettingNumericDisplayType
 }
 
 /// <summary>Attribute for numeric settings. Define the display type and range limits.</summary>
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class SettingNumeric(SettingNumericDisplayType displayType, double min, double max) : Attribute
 {
     /// <summary>The type of display for this setting (slider vs simple number text box).</summary>
@@ -46,24 +46,12 @@ public class SettingNumeric(SettingNumericDisplayType displayType, double min, d
     public int Digits = -1;
 }
 
-/// <summary>Attribute to mark that a setting is 'advanced', it should not be visible in the UI unless the user requests to view advanced settings.</summary>
-[AttributeUsage(AttributeTargets.Field)]
-public class SettingAdvanced : Attribute
-{
-}
-
-/// <summary>Attribute to mark that a setting is 'developer mode', it should not be visible in the UI unless the user has indicated they are a developer and need developer settings.</summary>
-[AttributeUsage(AttributeTargets.Field)]
-public class SettingDeveloperMode : Attribute
-{
-}
-
 /// <summary>Attribute for a setting that should operate as a dropdown of preset options.</summary>
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class SettingDropdown : Attribute
 {
     /// <summary>Abstract base impl of a class that gives the options list.</summary>
-    public interface IImpl
+    public abstract class AbstractImpl
     {
         /// <summary>Implement this with a method that gives the relevant options.</summary>
         public abstract object[] GetOptions { get; }
@@ -73,12 +61,12 @@ public class SettingDropdown : Attribute
     public Type Impl;
 
     /// <summary>The options to display in the dropdown.</summary>
-    public virtual object[] Options => (Activator.CreateInstance(Impl) as IImpl).GetOptions;
+    public virtual object[] Options => (Activator.CreateInstance(Impl) as AbstractImpl).GetOptions;
 }
 
 
 /// <summary>Implements <see cref="SettingDropdown"/> with a manual list of options..</summary>
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class ManualSettingsDropdown(params object[] options) : SettingDropdown
 {
     /// <summary>The actual underlying options.</summary>
@@ -88,6 +76,7 @@ public class ManualSettingsDropdown(params object[] options) : SettingDropdown
     public override object[] Options => ActualOptions;
 }
 
+// TODO: change this name
 public interface IStaticEnumerable<TSelf> where TSelf : IStaticEnumerable<TSelf>
 {
     public static abstract IEnumerable<TSelf> Options { get; }
