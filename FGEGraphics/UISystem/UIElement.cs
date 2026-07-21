@@ -53,7 +53,15 @@ public class UIElement
     public UIStyle Style => ElementInternal.Style;
 
     /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
-    public UILayout Layout;
+    public UILayout Layout
+    {
+        get;
+        set
+        {
+            field = value;
+            value.Element = this; // uh
+        }
+    }
 
     /// <summary>Whether this element has been added to a parent element, <c>false</c> if not yet added or already removed.</summary>
     public bool IsValid;

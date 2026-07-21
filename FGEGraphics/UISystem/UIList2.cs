@@ -48,6 +48,8 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
     [UIDebug]
     public UIAnchor Anchor;
 
+    public bool FixedSize = false;
+
     public UIAlignment Alignment => Vertical ? Anchor.AlignmentX : Anchor.AlignmentY;
 
     public bool IsReversed => Vertical && Anchor.AlignmentY == UIAlignment.BOTTOM || !Vertical && Anchor.AlignmentX == UIAlignment.RIGHT;
@@ -77,19 +79,29 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
 
     public override void UpdateSize(double delta, OpenTK.Mathematics.Vector3 rotation)
     {
-        ElementInternal.LastSize = Size;
-        if (Children.Count == 0)
-        {
-            Size = new();
-            return;
-        }
+        // this doesn't make any sense
         foreach (UIElement child in Children)
         {
             child.UpdateTransforms(delta, rotation, TransformFlags.SCALE | TransformFlags.SIZE);
         }
+        // TODO: generic default transform flags on UIElement
+        if (FixedSize)
+        {
+            base.UpdateSize(delta, rotation);
+            Layout.SetSize(Size);
+            return;
+        }
+        ElementInternal.LastSize = Size;
+        if (Children.Count == 0)
+        {
+            Size = new();
+            Layout.SetSize(Size);
+            return;
+        }
         int length = Children.Sum(child => Vertical ? child.Height : child.Width) + Spacing * (Children.Count - 1) + Style.Padding * 2;
         int maxDepth = Children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding * 2;
         Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
+        Layout.SetSize(Size);
     }
 
     public override void UpdateChildTransforms(double delta, OpenTK.Mathematics.Vector3 rotation)
