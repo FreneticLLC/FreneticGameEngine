@@ -7,6 +7,7 @@
 //
 
 using FGEGraphics.ClientSystem;
+using FGEGraphics.UISystem.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static FGECore.EntitySystem.EntityPhysicsCharacterProperty;
-using static FGEGraphics.UISystem.UIElement;
+using static FGEGraphics.UISystem.Elements.UIElement;
 
 namespace FGEGraphics.UISystem;
 

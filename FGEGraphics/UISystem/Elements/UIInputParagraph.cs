@@ -16,7 +16,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a <see cref="UIParagraph"/> designed to display the state of text during editing. Primarily used for <see cref="UIInputLabel"/>s</summary>
 /// <remarks>

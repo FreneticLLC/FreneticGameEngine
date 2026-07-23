@@ -19,7 +19,7 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents multiple <see cref="UILabel"/>s chained together.</summary>
 /// <param name="layout">The layout of the element.</param>

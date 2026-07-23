@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Text;
 using Vector2i = FGECore.MathHelpers.Vector2i;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents a single generic item in a UI.
@@ -58,8 +58,8 @@ public class UIElement
         get;
         set
         {
-            field = value;
-            value.Element = this; // uh
+            field = value ?? new UILayout();
+            value.Element = this;
         }
     }
 
@@ -208,14 +208,10 @@ public class UIElement
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIElement(UIStyling styling, UILayout layout)
+    public UIElement(UIStyling styling = null, UILayout layout = null)
     {
         Styling = styling;
-        if (layout is not null)
-        {
-            Layout = layout;
-            Layout.Element = this;
-        }
+        Layout = layout;
         ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
         ElementInternal.DebugMembers = UIDebugMember.GetOrCreateDebugMembers(GetType());
     }

@@ -70,7 +70,7 @@ public class UIDropdown : UIElement
     /// <param name="layout">The layout of the element.</param>
     /// <param name="text">The text to display when no choice is selected.</param>
     /// <param name="layer">An optional layer to place the dropdown on. If <c>null</c>, uses this element's layer.</param>
-    public UIDropdown(string text, UIStyling styling, UILayout layout) : base(null, layout)
+    public UIDropdown(string text, UIStyling styling = null, UILayout layout = null) : base(null, layout)
     {
         PlaceholderInfo = text ?? "null";
         Layer = this;

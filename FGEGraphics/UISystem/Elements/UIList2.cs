@@ -59,7 +59,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
 
     /// <summary>Constructs a new list group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    public UIList2(UIStyling styling, UILayout layout) : base(styling, layout)
+    public UIList2(UIStyling styling = null, UILayout layout = null) : base(styling, layout)
     {
         // ScaleSize = false?
         Vertical = true;

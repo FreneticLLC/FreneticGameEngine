@@ -15,6 +15,7 @@ using FGECore.ConsoleHelpers;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Textures;
+using FGEGraphics.UISystem.Elements;
 
 namespace FGEGraphics.UISystem;
 

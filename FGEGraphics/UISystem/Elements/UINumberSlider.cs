@@ -69,7 +69,7 @@ public class UINumberSlider : UIElement
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling = null, UILayout layout = null) : base(styling, layout)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;

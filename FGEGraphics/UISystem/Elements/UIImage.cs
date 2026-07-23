@@ -23,7 +23,7 @@ namespace FGEGraphics.UISystem;
 /// <remarks>Constructs an image.</remarks>
 /// <param name="image">The image to display.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UIImage(Texture image, UILayout layout) : UIElement(null, layout)
+public class UIImage(Texture image, UILayout layout = null) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => $"Image \"{Image.Name}\"";

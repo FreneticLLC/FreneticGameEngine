@@ -14,9 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
-using FGEGraphics.UISystem;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a toggleable box on the screen.</summary>
 // TODO: generalize beyond an 'X' when toggled
@@ -36,7 +35,7 @@ public class UIToggleBox : UIButton
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="toggled">The initial toggle state.</param>
-    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false) : base(null, styling, layout)
+    public UIToggleBox(UIStyling styling = null, UILayout layout = null, bool toggled = false) : base(null, styling, layout)
     {
         SetToggled(toggled);
     }

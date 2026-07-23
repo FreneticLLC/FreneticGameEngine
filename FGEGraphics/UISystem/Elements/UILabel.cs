@@ -82,7 +82,7 @@ public class UILabel : UIElement
     /// <param name="text">The text to display on the label.</param>
     /// <param name="styling">The style of the label.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UILabel(string text, UIStyling styling = null, UILayout layout = null) : base(styling, layout)
     {
         Internal = new() { Content = text ?? "" };
         UpdateRenderable();

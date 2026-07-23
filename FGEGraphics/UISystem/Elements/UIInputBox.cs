@@ -23,7 +23,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents an interactable text input box on a screen.</summary>
 /// <remarks>Constructs a new text input box.</remarks>
