@@ -50,6 +50,9 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
 
     public bool FixedSize = false;
 
+    // TODO: temporary hack!
+    public int PaddingLeft;
+
     public UIAlignment Alignment => Vertical ? Anchor.AlignmentX : Anchor.AlignmentY;
 
     public bool IsReversed => Vertical && Anchor.AlignmentY == UIAlignment.BOTTOM || !Vertical && Anchor.AlignmentX == UIAlignment.RIGHT;
@@ -77,6 +80,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         Anchor = styling.Anchor.Get(this) ?? Layout.Anchor;
     }
 
+    // TODO: use Style.Inset instead of padding
     public override void UpdateSize(double delta, OpenTK.Mathematics.Vector3 rotation)
     {
         // this doesn't make any sense
@@ -99,7 +103,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
             return;
         }
         int length = Children.Sum(child => Vertical ? child.Height : child.Width) + Spacing * (Children.Count - 1) + Style.Padding * 2;
-        int maxDepth = Children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding * 2;
+        int maxDepth = Children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding + PaddingLeft;
         Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
         Layout.SetSize(Size);
     }
@@ -110,7 +114,7 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         for (int i = 0; i < Children.Count; i++)
         {
             UIElement child = IsReversed ? Children[^(i + 1)] : Children[i];
-            int inset = Style.Padding + Alignment.GetPosition((Vertical ? Width : Height) - Style.Padding * 2, Vertical ? child.Width : child.Height);
+            int inset = PaddingLeft + Alignment.GetPosition((Vertical ? Width : Height) - (PaddingLeft + Style.Padding), Vertical ? child.Width : child.Height);
             Vector2i pos = Vertical ? new(X + inset, Y + Style.Padding + offset) : new(X + Style.Padding + offset, Y + inset);
             child.ElementInternal.LastPosition = child.Position = pos;
             child.UpdateTransforms(delta, rotation, TransformFlags.CHILDREN);

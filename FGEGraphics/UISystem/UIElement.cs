@@ -309,6 +309,18 @@ public class UIElement
         Children.Clear();
     }
 
+    public void ToggleChild(UIElement child)
+    {
+        if (HasChild(child))
+        {
+            RemoveChild(child);
+        }
+        else
+        {
+            AddChild(child);
+        }
+    }
+
     /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
     /// <param name="element">The possible child element.</param>
     public bool HasChild(UIElement element) => element.Parent == this;
