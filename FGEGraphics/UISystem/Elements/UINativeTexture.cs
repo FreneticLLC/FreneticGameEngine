@@ -13,10 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
-using FGEGraphics.UISystem;
 using OpenTK.Graphics.OpenGL4;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents a GL native texture on a screen.
@@ -24,7 +23,7 @@ namespace FGEGraphics.UISystem;
 /// </summary>
 /// <param name="texture">The texture to display.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UINativeTexture(Func<GraphicsUtil.TrackedTexture> texture, UILayout layout) : UIElement(null, layout)
+public class UINativeTexture(Func<GraphicsUtil.TrackedTexture> texture, UILayout layout = null) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => "Native Texture";

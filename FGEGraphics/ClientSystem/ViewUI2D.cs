@@ -19,13 +19,13 @@ using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
-using FGEGraphics.UISystem;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using FGEGraphics.UISystem.Elements;
 
 namespace FGEGraphics.ClientSystem;
 

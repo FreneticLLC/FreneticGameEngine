@@ -15,7 +15,7 @@ using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 using FGECore.CoreSystems;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents an editable number label.</summary>
 public class UINumberInputLabel : UIInputLabel

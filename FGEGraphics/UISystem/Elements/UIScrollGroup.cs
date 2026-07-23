@@ -14,7 +14,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a scrollable box containing other elements.</summary>
 // TODO: option to automatically calculate max scroll based on added elements

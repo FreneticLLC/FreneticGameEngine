@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a container of <see cref="UIElement"/>s that can be configurably selected.</summary>
 /// <param name="layout">The layout of the element.</param>

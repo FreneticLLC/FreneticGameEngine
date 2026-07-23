@@ -15,7 +15,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a slider element that can choose between a range of real number values.</summary>
 public class UINumberSlider : UIElement

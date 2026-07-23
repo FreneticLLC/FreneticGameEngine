@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static BepuPhysics.Collidables.CompoundBuilder;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents an expandable list container of UI elements.

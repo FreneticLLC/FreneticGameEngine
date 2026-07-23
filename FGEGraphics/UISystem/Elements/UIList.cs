@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents an expandable list container of UI elements.

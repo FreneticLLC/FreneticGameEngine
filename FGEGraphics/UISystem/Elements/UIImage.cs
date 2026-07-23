@@ -17,7 +17,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a simple image on a screen.</summary>
 /// <remarks>Constructs an image.</remarks>
