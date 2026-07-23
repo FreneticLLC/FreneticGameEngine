@@ -135,6 +135,8 @@ public class UIElement
     /// </summary>
     public bool ScaleSize = true;
 
+    public bool Scissor = false;
+
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
 
@@ -350,6 +352,7 @@ public class UIElement
         }
     }
 
+    // why do we need this method?
     /// <summary>Gets all children that contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
@@ -358,6 +361,7 @@ public class UIElement
     {
         foreach (UIElement element in Children)
         {
+            // why Contains check?
             if (element.IsValid && element.Contains(x, y))
             {
                 yield return element;
@@ -440,7 +444,7 @@ public class UIElement
     /// </summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
-    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
+    public virtual bool CanInteract(int x, int y) => Scissor ? SelfContains(x, y) : Parent?.CanInteract(x, y) ?? false;
 
     /// <summary>
     /// Ticks this element's interaction state. Should be called in the reverse of the rendering order.
@@ -773,6 +777,11 @@ public class UIElement
     public virtual void RenderAll(double delta)
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
+        // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
+        if (Scissor && Width > 0 && Height > 0)
+        {
+            View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
+        }
         if (RenderMode == UIRenderMode.FULL)
         {
             Render(delta);
@@ -787,6 +796,10 @@ public class UIElement
                     child.RenderAll(delta);
                 }
             }
+        }
+        if (Scissor)
+        {
+            View.Rendering.PopScissor(View.UIContext);
         }
         GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
     }

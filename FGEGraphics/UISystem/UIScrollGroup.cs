@@ -35,8 +35,7 @@ public class UIScrollGroup : UIElement
     /// <summary>The scroll bar layer (above the scissor layer).</summary>
     public UIGroup ScrollBarLayer;
 
-    /// <summary>The scrollable scissor layer for child elements.</summary>
-    public UIScissorGroup ScrollableLayer;
+    public UIElement ScrollableLayer;
 
     /// <summary>Whether either of the scroll bars are pressed.</summary>
     public bool ScrollBarPressed => XAxis.ScrollBar?.IsPressed ?? YAxis.ScrollBar?.IsPressed ?? false;
@@ -45,18 +44,17 @@ public class UIScrollGroup : UIElement
     /// <param name="layout">The layout of the element.</param>
     public UIScrollGroup(UILayout layout) : base(null, layout)
     {
+        Scissor = true;
         // TODO: Fix scroll bar overlap
         XAxis = new(this, false);
         YAxis = new(this, true);
         AddChild(ScrollBarLayer = new UIGroup(layout.Container()));
-        AddChild(ScrollableLayer = new UIScissorGroup(layout.Container()));
+        AddChild(ScrollableLayer = new UIElement(null, layout.Container().SetPosition(() => -XAxis.Value, () => -YAxis.Value)));
     }
 
     /// <inheritdoc/>
     public void AddScrollableChild(UIElement child)
     {
-        UILayout original = new(child.Layout);
-        child.Layout.SetPosition(() => original.Internal.X.Get() - XAxis.Value, () => original.Internal.Y.Get() - YAxis.Value);
         ScrollableLayer.AddChild(child);
     }
 
