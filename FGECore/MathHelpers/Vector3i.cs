@@ -164,6 +164,9 @@ public struct Vector3i : IEquatable<Vector3i>
         return new Vector3i(one.X / two, one.Y / two, one.Z / two);
     }
 
+    /// <summary>Returns the absolute value of each coordinate. Essentially, applies <see cref="Math.Abs(int)"/> to each coordinate.</summary>
+    public readonly Vector3i Abs() => new(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
+
     /// <summary>Returns the bigger valued coordinates for each of X, Y, and Z. Essentially, applies <see cref="Math.Max(int, int)"/> to each coordinate.</summary>
     /// <param name="two">The second Vector3i.</param>
     /// <returns>The bigger valued coordinates.</returns>
@@ -173,6 +176,12 @@ public struct Vector3i : IEquatable<Vector3i>
     /// <param name="two">The second Vector3i.</param>
     /// <returns>The smaller valued coordinates.</returns>
     public readonly Vector3i Min(in Vector3i two) => new(Math.Min(X, two.X), Math.Min(Y, two.Y), Math.Min(Z, two.Z));
+
+    /// <summary>Gets the highest (max) value of the three coordinates in this vector.</summary>
+    public readonly int HighestAxis() => Math.Max(X, Math.Max(Y, Z));
+
+    /// <summary>Gets the lowest (min) value of the three coordinates in this vector.</summary>
+    public readonly int LowestAxis() => Math.Min(X, Math.Min(Y, Z));
 
     /// <summary>Gets or set the XY 2D component of this <see cref="Vector3i"/>.</summary>
     public Vector2i XY
