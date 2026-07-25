@@ -226,6 +226,7 @@ void main()
 		const float depth = 1.0;
 #else // MCM_SIMPLE_LIGHT
 		vec3 fs = vec3(0.0);
+		bool shadow_in_bounds = true;
 		if (is_point == 0)
 		{
 			// Create a variable representing the proper screen/texture coordinate of the shadow view (ranging from 0 to 1 instead of -1 to 1).
@@ -234,7 +235,11 @@ void main()
 				|| fs.y < 0.0 || fs.y > 1.0
 				|| fs.z < 0.0 || fs.z > 1.0) // If any coordinate is outside view range...
 			{
-				continue; // We can't light it! Discard straight away!
+				if (light_type >= 0.5)
+				{
+					continue;
+				}
+				shadow_in_bounds = false;
 			}
 		}
 		// TODO: maybe HD well blurred shadows?
@@ -252,7 +257,7 @@ void main()
 		}
 #if 1 // TODO: MCM_SHADOW_BLURRING?
 		float depth = 1.0;
-		if (is_point == 0)
+		if (is_point == 0 && shadow_in_bounds)
 		{
 			depth = 0.0;
 			// Pretty quality (soft) shadows require a quality graphics card.
@@ -301,7 +306,7 @@ void main()
 		}
 #else // shadow blur (1)
 		float depth = 1.0;
-		if (is_point == 0)
+		if (is_point == 0 && shadow_in_bounds)
 		{
 			float rd = texture(shadowtex, vec3(fs.x * mdX + rdX, fs.y * mdY + rdY, shadowID)).r; // Calculate the depth of the pixel.
 			depth = (rd >= (fs.z - 0.001) ? 1.0 : 0.0); // If we have a bad graphics card, just quickly get a 0 or 1 depth value. This will be pixelated (hard) shadows!
