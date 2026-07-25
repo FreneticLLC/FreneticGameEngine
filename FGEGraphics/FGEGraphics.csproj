@@ -61,7 +61,4 @@
     <PackageReference Include="System.ValueTuple" Version="4.6.2" />
     <PackageReference Include="TextCopy" Version="6.2.1" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UISystem\Elements\" />
-  </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ public class UIElement
         set
         {
             field = value ?? new UILayout();
-            value.Element = this;
+            field.Element = this;
         }
     }
 
@@ -774,7 +774,8 @@ public class UIElement
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
         // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
-        if (Scissor && Width > 0 && Height > 0)
+        // TODO: handle negative width/height
+        if (Scissor)
         {
             View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
         }
