@@ -170,8 +170,8 @@ public class PhysicsSpace
     /// <summary>Event called when entities are colliding.</summary>
     public Action<CollisionEvent> CollisionHandler;
 
-    /// <summary>Optional handler for contact manifolds generated between children of compound collidables.</summary>
-    public ChildContactManifoldHandler ChildContactHandler;
+    /// <summary>Optional handlers for contact manifolds generated between children of compound collidables. Return false to remove the manifold.</summary>
+    public List<ChildContactManifoldHandler> ChildContactHandlers = [];
 
     /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
     public void Recenter(Location newCenter)
