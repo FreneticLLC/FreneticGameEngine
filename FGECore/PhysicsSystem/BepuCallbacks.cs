@@ -223,7 +223,11 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <inheritdoc/>
     public readonly bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold)
     {
-        return true;
+        if (Space.ChildContactHandler is null)
+        {
+            return true;
+        }
+        return Space.ChildContactHandler(workerIndex, pair, childIndexA, childIndexB, ref manifold);
     }
 
     /// <inheritdoc/>

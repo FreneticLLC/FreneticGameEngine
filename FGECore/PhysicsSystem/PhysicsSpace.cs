@@ -170,6 +170,9 @@ public class PhysicsSpace
     /// <summary>Event called when entities are colliding.</summary>
     public Action<CollisionEvent> CollisionHandler;
 
+    /// <summary>Optional handler for contact manifolds generated between children of compound collidables.</summary>
+    public ChildContactManifoldHandler ChildContactHandler;
+
     /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
     public void Recenter(Location newCenter)
     {
@@ -400,3 +403,6 @@ public class PhysicsSpace<T, T2> : PhysicsSpace where T: BasicEntity<T, T2> wher
         Internal.Init(this);
     }
 }
+
+/// <summary>Filters or modifies a contact manifold generated between children of compound collidables.</summary>
+public delegate bool ChildContactManifoldHandler(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold);
