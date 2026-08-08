@@ -161,7 +161,12 @@ public struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     /// <inheritdoc/>
     public readonly bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
     {
+        pairMaterial = default;
         pairMaterial.SpringSettings = ContactSpringiness;
+        if (manifold.Count == 0)
+        {
+            return false;
+        }
         EntityPhysicsProperty aEntity = PhysPropForCollidable(pair.A);
         EntityPhysicsProperty bEntity = PhysPropForCollidable(pair.B);
         Vector3 avgNorm = Vector3.Zero;
