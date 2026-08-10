@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -114,5 +115,17 @@ public static class MathUtilities
             };
             return loc;
         }
+    }
+
+    /// <summary>Integer division that floors (rather than round-towards-zero).</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int FloorDiv(int a, int b)
+    {
+        int result = a / b;
+        if ((a % b != 0) && ((a ^ b) < 0))
+        {
+            result--;
+        }
+        return result;
     }
 }
