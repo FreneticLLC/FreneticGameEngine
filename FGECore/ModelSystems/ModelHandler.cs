@@ -182,8 +182,7 @@ public class ModelHandler
         {
             if (node.Name.StartsWithFast("marker_center"))
             {
-                Matrix4x4 mat = Matrix4x4.Transpose(node.GetMatrix());
-                offset -= mat.Translation.ToLocation();
+                offset -= node.GetPosition().ToLocation();
             }
         }
         if (offset.LengthSquared() > 0.0001)
