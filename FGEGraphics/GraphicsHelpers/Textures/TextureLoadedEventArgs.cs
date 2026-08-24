@@ -8,18 +8,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
-using FGECore.ConsoleHelpers;
-using FGECore.CoreSystems;
-using FGECore.FileSystems;
-using FGECore.MathHelpers;
-using OpenTK.Graphics.OpenGL4;
 
 namespace FGEGraphics.GraphicsHelpers.Textures;
 

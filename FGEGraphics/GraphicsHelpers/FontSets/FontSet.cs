@@ -8,7 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +21,8 @@ using FGECore.UtilitySystems;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+
+using Vector2i = FGECore.MathHelpers.Vector2i;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -108,33 +109,33 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
         Color4F.FromArgb(61, 38, 17),   // 21 // A // DarkBrown
     ];
 
-    private readonly static Point[] ShadowPoints = [
-        new Point(0, 1),
-        new Point(1, 0),
-        new Point(1, 1),
+    private readonly static Vector2i[] ShadowPoints = [
+        new(0, 1),
+        new(1, 0),
+        new(1, 1),
     ];
-    private readonly static Point[] BetterShadowPoints = [
-        new Point(0, 2),
-        new Point(1, 2),
-        new Point(2, 0),
-        new Point(2, 1),
-        new Point(2, 2),
+    private readonly static Vector2i[] BetterShadowPoints = [
+        new(0, 2),
+        new(1, 2),
+        new(2, 0),
+        new(2, 1),
+        new(2, 2),
     ];
-    private readonly static Point[] EmphasisPoints = [
-        new Point(0, -1),
-        new Point(0, 1),
-        new Point(1, 0),
-        new Point(-1, 0),
+    private readonly static Vector2i[] EmphasisPoints = [
+        new(0, -1),
+        new(0, 1),
+        new(1, 0),
+        new(-1, 0),
     ];
-    private readonly static Point[] BetterEmphasisPoints = [
-        new Point(-1, -1),
-        new Point(-1, 1),
-        new Point(1, -1),
-        new Point(1, 1),
-        new Point(0, -2),
-        new Point(0, 2),
-        new Point(2, 0),
-        new Point(-2, 0),
+    private readonly static Vector2i[] BetterEmphasisPoints = [
+        new(-1, -1),
+        new(-1, 1),
+        new(1, -1),
+        new(1, 1),
+        new(0, -2),
+        new(0, 2),
+        new(2, 0),
+        new(-2, 0),
     ];
 
     /// <summary>Correctly forms a Color object for the color number and transparency amount, for use by RenderColoredText.</summary>
@@ -459,29 +460,29 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     GraphicsUtil.CheckError("FontSet - Render - Part - Boxes", line);
                     if (extraShadow)
                     {
-                        foreach (Point point in ShadowPoints)
+                        foreach (Vector2i point in ShadowPoints)
                         {
                             part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
                         }
                     }
                     if (part.Shadow)
                     {
-                        foreach (Point point in ShadowPoints)
+                        foreach (Vector2i point in ShadowPoints)
                         {
                             part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.5f * transmod), ReusableTextVBO, part.Flip);
                         }
-                        foreach (Point point in BetterShadowPoints)
+                        foreach (Vector2i point in BetterShadowPoints)
                         {
                             part.Font.DrawString(part.Text, X + point.X, Y + point.Y, ColorFor(0, part.TextColor.A * 0.25f * transmod), ReusableTextVBO, part.Flip);
                         }
                     }
                     if (part.Emphasis)
                     {
-                        foreach (Point point in EmphasisPoints)
+                        foreach (Vector2i point in EmphasisPoints)
                         {
                             part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
                         }
-                        foreach (Point point in BetterEmphasisPoints)
+                        foreach (Vector2i point in BetterEmphasisPoints)
                         {
                             part.Font.DrawString(part.Text, X + point.X, Y + point.Y, TransModify(part.EmphasisColor, transmod), ReusableTextVBO, part.Flip);
                         }
