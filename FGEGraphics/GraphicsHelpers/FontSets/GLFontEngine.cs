@@ -8,9 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +17,7 @@ using FGECore.FileSystems;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK.Graphics.OpenGL4;
+using SkiaSharp;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -56,11 +54,12 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     public void Expand()
     {
         CurrentHeight *= 2;
-        Bitmap bmp2 = new(DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight);
-        using (Graphics gfx = Graphics.FromImage(bmp2))
+        SKBitmap bmp2 = new(DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, SKColorType.Bgra8888, SKAlphaType.Opaque);
+        using (SKSurface surface = CreateAtlasSurface(bmp2))
         {
-            gfx.Clear(Color.Transparent);
-            gfx.DrawImage(CurrentBMP, new Point(0, 0));
+            SKCanvas canvas = surface.Canvas;
+            canvas.Clear(SKColors.Black);
+            canvas.DrawBitmap(CurrentBMP, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest), null);
         }
         CurrentBMP.Dispose();
         CurrentBMP = bmp2;
@@ -70,7 +69,15 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     public int CurrentHeight = DEFAULT_TEXTURE_SIZE_HEIGHT;
 
     /// <summary>The currently used CPU-Side GLFont mega texture.</summary>
-    public Bitmap CurrentBMP;
+    public SKBitmap CurrentBMP;
+
+    static readonly SKSurfaceProperties AtlasSurfaceProps = new(SKSurfacePropsFlags.None, SKPixelGeometry.RgbHorizontal);
+
+    /// <summary>Creates a canvas surface for the font atlas.</summary>
+    public SKSurface CreateAtlasSurface() => CreateAtlasSurface(CurrentBMP);
+
+    /// <summary>Creates a canvas surface for a font atlas bitmap.</summary>
+    public static SKSurface CreateAtlasSurface(SKBitmap bmp) => SKSurface.Create(bmp.Info, bmp.GetPixels(), bmp.RowBytes, AtlasSurfaceProps);
 
     /// <summary>The GPU-Side mega texture.</summary>
     public GraphicsUtil.TrackedTexture TextureMain;
@@ -89,19 +96,17 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     {
         TextureMain?.Dispose();
         TextureMain = new("GLFontEngine_TextureMain", TextureTarget.Texture2D);
-        BitmapData bmp_data = CurrentBMP.LockBits(new Rectangle(0, 0, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
-        CurrentBMP.UnlockBits(bmp_data);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, CurrentBMP.GetPixels());
         GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
     }
 
-    /// <summary>Keep this public and valid: if it gets released by the GC, the fonts it contains are lost for some reason!</summary>
-    public PrivateFontCollection InternalFontCollection;
+    /// <summary>Main backing font (typeface) for internal prerendering.</summary>
+    public SKTypeface CoreFontFamily;
 
     /// <summary>The backup font that contains emojis, etc.</summary>
-    public FontFamily BackupFontFamily;
+    public SKTypeface BackupFontFamily;
 
     /// <summary>The backing file system.</summary>
     public FileEngine Files;
@@ -123,58 +128,59 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
             }
         }
         // Generate the texture
-        CurrentBMP = new Bitmap(DEFAULT_TEXTURE_SIZE_WIDTH, DEFAULT_TEXTURE_SIZE_HEIGHT);
-        using (Graphics gfx = Graphics.FromImage(CurrentBMP))
+        CurrentBMP = new SKBitmap(DEFAULT_TEXTURE_SIZE_WIDTH, DEFAULT_TEXTURE_SIZE_HEIGHT, SKColorType.Bgra8888, SKAlphaType.Opaque);
+        using (SKSurface surface = CreateAtlasSurface(CurrentBMP))
         {
-            gfx.Clear(Color.Transparent);
-            gfx.FillRectangle(new SolidBrush(Color.White), new Rectangle(0, 0, 20, 20));
+            SKCanvas canvas = surface.Canvas;
+            canvas.Clear(SKColors.Black);
+            canvas.DrawRect(SKRect.Create(0, 0, 20, 20), new SKPaint() { Color = SKColors.White, Style = SKPaintStyle.Fill });
         }
         // Load other stuff
         LoadTextFile();
         Fonts = [];
         // Choose a default font.
-        FontFamily[] families = FontFamily.Families;
-        FontFamily family = FontFamily.GenericMonospace;
+        SKFontManager fontManager = SKFontManager.Default;
+        string[] families = fontManager.GetFontFamilies();
+        SKTypeface family = SKTypeface.Default;
         int family_priority = 0;
         for (int i = 0; i < families.Length; i++)
         {
-            string familyName = families[i].Name.ToLowerFast();
+            string familyName = families[i].ToLowerFast();
             if (family_priority < 20 && familyName == "segoe ui emoji")
             {
-                family = families[i];
+                family = fontManager.MatchFamily(families[i]);
                 family_priority = 20;
             }
             else if (family_priority < 10 && familyName == "segoe ui")
             {
-                family = families[i];
+                family = fontManager.MatchFamily(families[i]);
                 family_priority = 10;
             }
             else if (family_priority < 5 && familyName == "arial")
             {
-                family = families[i];
+                family = fontManager.MatchFamily(families[i]);
                 family_priority = 5;
             }
             else if (family_priority < 2 && familyName == "calibri")
             {
-                family = families[i];
+                family = fontManager.MatchFamily(families[i]);
                 family_priority = 2;
             }
             else if (family_priority < 1 && familyName == "dejavu serif")
             {
-                family = families[i];
+                family = fontManager.MatchFamily(families[i]);
                 family_priority = 1;
             }
         }
         BackupFontFamily = family;
-        Logs.ClientInit($"Select backup font: {BackupFontFamily.Name}");
+        Logs.ClientInit($"Select backup font: {BackupFontFamily.FamilyName}");
         if (!string.IsNullOrWhiteSpace(CoreFontPreference))
         {
             try
             {
-                InternalFontCollection = new PrivateFontCollection();
                 // TODO: Move out of data directory, as we don't use the file handler at all anyway?
-                InternalFontCollection.AddFontFile($"{Environment.CurrentDirectory}/data/fonts/{CoreFontPreference}.ttf");
-                family = InternalFontCollection.Families[0];
+                CoreFontFamily = SKTypeface.FromFile($"{Environment.CurrentDirectory}/data/fonts/{CoreFontPreference}.ttf");
+                family = CoreFontFamily;
                 family_priority = 100;
             }
             catch (Exception ex)
@@ -182,10 +188,9 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
                 Logs.Warning($"Loading {CoreFontPreference}: {ex}");
             }
         }
-        Font def = new(family, 12);
-        Standard = new GLFont(def, this);
+        Standard = new GLFont(family, 12, false, false, this);
         Fonts.Add(Standard);
-        Logs.ClientInit($"Select main font: {family.Name}");
+        Logs.ClientInit($"Select main font: {family.FamilyName}");
         UpdateTexture();
     }
 
@@ -262,8 +267,18 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     /// <returns>A valid font object, or null if there was no match.</returns>
     public GLFont LoadFont(string name, bool bold, bool italic, int size)
     {
-        Font font = new(name, size / DPIScale, (bold ? FontStyle.Bold : 0) | (italic ? FontStyle.Italic : 0));
-        GLFont f = new(font, this);
+        SKFontStyle style = bold && italic ? SKFontStyle.BoldItalic : bold ? SKFontStyle.Bold : italic ? SKFontStyle.Italic : SKFontStyle.Normal;
+        SKTypeface typeface = null;
+        if (CoreFontFamily is not null && CoreFontFamily.FamilyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            typeface = SKFontManager.Default.MatchFamily(CoreFontFamily.FamilyName, style);
+            if (typeface is null || !typeface.FamilyName.Equals(CoreFontFamily.FamilyName, StringComparison.OrdinalIgnoreCase))
+            {
+                typeface = CoreFontFamily;
+            }
+        }
+        typeface ??= SKTypeface.FromFamilyName(name, style);
+        GLFont f = new(typeface, size / DPIScale, bold, italic, this);
         UpdateTexture();
         return f;
     }
@@ -276,7 +291,7 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
         {
             Standard.Dispose();
             CurrentBMP.Dispose();
-            InternalFontCollection?.Dispose();
+            CoreFontFamily?.Dispose();
         }
     }
 
