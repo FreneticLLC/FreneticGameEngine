@@ -24,26 +24,8 @@ using OpenTK.Graphics.OpenGL4;
 namespace FGEGraphics.GraphicsHelpers.Textures;
 
 /// <summary>The primary engine for textures.</summary>
-public class TextureEngine : IDisposable
+public class TextureEngine
 {
-    /// <summary>Dumb MS logic dispose method.</summary>
-    /// <param name="disposing">Whether to dispose managed resources.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            GenericGraphicsObject.Dispose();
-            EmptyBitmap.Dispose();
-        }
-    }
-
-    /// <summary>Disposes the window client.</summary>
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-        Dispose(true);
-    }
-
     /// <summary>A full list of currently loaded textures.</summary>
     public Dictionary<string, Texture> LoadedTextures;
 
@@ -61,12 +43,6 @@ public class TextureEngine : IDisposable
 
     /// <summary>A default normal plane texture.</summary>
     public Texture NormalDef = null;
-
-    /// <summary>An empty bitmap, for regular use.</summary>
-    public Bitmap EmptyBitmap = null;
-
-    /// <summary>A single graphics object for regular use.</summary>
-    public Graphics GenericGraphicsObject = null;
 
     /// <summary>The relevant file helper.</summary>
     public FileEngine Files;
@@ -89,9 +65,6 @@ public class TextureEngine : IDisposable
         Files = files;
         AssetStreaming = assetStreaming;
         Schedule = schedule;
-        // Create a generic graphics object for later use
-        EmptyBitmap = new Bitmap(1, 1);
-        GenericGraphicsObject = Graphics.FromImage(EmptyBitmap);
         // Reset texture list
         LoadedTextures = new Dictionary<string, Texture>(256);
         // Pregenerate a few needed textures
@@ -555,15 +528,7 @@ public class TextureEngine : IDisposable
         texture.InternalTexture = texture.OriginalInternalID;
         texture.OwnsItsTextureId = true;
         texture.Bind();
-        // TODO: Could just feed in binary directly instead of this silly intermediate bitmap
-        using (Bitmap bmp = new(2, 2))
-        {
-            bmp.SetPixel(0, 0, c);
-            bmp.SetPixel(0, 1, c);
-            bmp.SetPixel(1, 0, c);
-            bmp.SetPixel(1, 1, c);
-            LockBitmapToTexture(bmp, false);
-        }
+        LockBitmapToTexture(2, 2, [c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A], false);
         texture.LoadedProperly = true;
         return texture;
     }
