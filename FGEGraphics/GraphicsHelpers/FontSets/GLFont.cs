@@ -186,8 +186,9 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             {
                 Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
                 // TODO: This is incompatible with the texture streaming system and will store nothing. Need to use the streaming support here!
-                using Bitmap bmp = t.SaveToBMP();
-                gfx.DrawImage(bmp, new Rectangle(X, Y, nwidth, nwidth));
+#warning TODO: Reinstate emoji after fonts are converted to skia
+                //using Bitmap bmp = t.SaveToBMP();
+                //gfx.DrawImage(bmp, new Rectangle(X, Y, nwidth, nwidth));
             }
             else
             {

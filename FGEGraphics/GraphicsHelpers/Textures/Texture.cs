@@ -8,18 +8,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FGECore;
-using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
-using FGECore.FileSystems;
-using FGECore.MathHelpers;
 using OpenTK.Graphics.OpenGL4;
+using SkiaSharp;
 
 namespace FGEGraphics.GraphicsHelpers.Textures;
 
@@ -81,16 +76,20 @@ public class Texture : IEquatable<Texture>
 
     /// <summary>Saves the texture to a bitmap.</summary>
     /// <param name="flip">Whether to flip the Y.</param>
-    public Bitmap SaveToBMP(bool flip = false)
+    public SKBitmap SaveToBMP(bool flip = false)
     {
         OriginalInternalID.Bind();
-        Bitmap bmp = new(Width, Height);
-        BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-        bmp.UnlockBits(data);
+        SKBitmap bmp = new(Width, Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+        GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp.GetPixels());
         if (flip)
         {
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            SKBitmap flipped = new(Width, Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+            using SKCanvas canvas = new(flipped);
+            canvas.Translate(0, Height);
+            canvas.Scale(1, -1);
+            canvas.DrawBitmap(bmp, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest));
+            bmp.Dispose();
+            bmp = flipped;
         }
         return bmp;
     }

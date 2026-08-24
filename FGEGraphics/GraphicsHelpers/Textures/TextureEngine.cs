@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -20,6 +19,7 @@ using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
 using OpenTK.Graphics.OpenGL4;
+using SkiaSharp;
 
 namespace FGEGraphics.GraphicsHelpers.Textures;
 
@@ -168,7 +168,7 @@ public class TextureEngine
             {
                 return;
             }
-            Bitmap bmp;
+            SKBitmap bmp;
             try
             {
                 bmp = BitmapForBytes(data);
@@ -197,7 +197,7 @@ public class TextureEngine
         }
         void processLoad(byte[] data)
         {
-            Bitmap bmp;
+            SKBitmap bmp;
             try
             {
                 bmp = BitmapForBytes(data);
@@ -244,6 +244,28 @@ public class TextureEngine
         return texture;
     }
 
+    /// <summary>Copies <see cref="SKBitmap"/> pixels to a tightly packed BGRA byte array.</summary>
+    public static byte[] BitmapBytes(SKBitmap bmp)
+    {
+        int width = bmp.Width, height = bmp.Height;
+        int stride = width * 4;
+        byte[] bytes = new byte[stride * height];
+        IntPtr pixels = bmp.GetPixels();
+        int rowBytes = bmp.RowBytes;
+        if (rowBytes == stride)
+        {
+            Marshal.Copy(pixels, bytes, 0, bytes.Length);
+        }
+        else // unlikely to ever hit outside special cases
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Marshal.Copy(pixels + y * rowBytes, bytes, y * stride, stride);
+            }
+        }
+        return bytes;
+    }
+
     /// <summary>
     /// Produces a copy of the given bitmap, with a new image size.
     /// Akin to "new Bitmap(bmp, width, height)" but forces certain quality options to prevent edge-errors.
@@ -252,54 +274,52 @@ public class TextureEngine
     /// <param name="width">The new output image's width (X) (in pixels).</param>
     /// <param name="height">The new output image's height (Y) (in pixels).</param>
     /// <returns>The resized image.</returns>
-    public static Bitmap RescaleBitmap(Bitmap bmp, int width, int height)
+    public static SKBitmap RescaleBitmap(SKBitmap bmp, int width, int height)
     {
-        Bitmap output = new(width, height);
-        using (Graphics graphics = Graphics.FromImage(output))
-        {
-            using ImageAttributes ia = new();
-            ia.SetWrapMode(WrapMode.TileFlipXY);
-            graphics.SmoothingMode = SmoothingMode.None;
-            graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            graphics.PixelOffsetMode = PixelOffsetMode.None;
-            graphics.CompositingQuality = CompositingQuality.AssumeLinear;
-            graphics.DrawImage(bmp, new Rectangle(0, 0, width, height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia);
-        }
+        SKBitmap output = new(width, height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+        bmp.ScalePixels(output, new SKSamplingOptions(SKFilterMode.Nearest));
         return output;
     }
 
-    /// <summary>Gets a <see cref="Bitmap"/> for some data, with size correction.</summary>
+    /// <summary>Gets a <see cref="SKBitmap"/> for some data, with size correction.</summary>
     /// <param name="data">The raw file data.</param>
     /// <param name="textureWidth">The texture width (or 0 for any-valid).</param>
     /// <returns>The bitmap.</returns>
-    public static Bitmap BitmapForBytes(byte[] data, int textureWidth = 0)
+    public static SKBitmap BitmapForBytes(byte[] data, int textureWidth = 0)
     {
         if (data.Length < 1)
         {
             throw new Exception("Failed to load texture: bitmap loading failed (no data)!");
         }
-        Bitmap bmp;
+        SKBitmap bmp;
         try
         {
-            bmp = new(new MemoryStream(data));
+            bmp = SKBitmap.Decode(data) ?? throw new ArgumentException("Generic failure, SKBitmap.Decode returned null.");
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
             throw new ArgumentException($"{ex.Message} -- for texture data: {data.Length} bytes ({Convert.ToHexString(data[0..Math.Min(32, data.Length)])})", ex);
         }
 #if DEBUG
         if (bmp.Width <= 0 || bmp.Height <= 0)
         {
+            bmp.Dispose();
             throw new Exception("Failed to load texture: bitmap loading failed (bad output size)!");
         }
 #endif
+        if (bmp.ColorType != SKColorType.Bgra8888)
+        {
+            SKBitmap bmp2 = bmp.Copy(SKColorType.Bgra8888);
+            bmp.Dispose();
+            bmp = bmp2 ?? throw new Exception("Failed to load texture: BGRA8888 conversion failed!");
+        }
         if (textureWidth <= 0 || (bmp.Width == textureWidth && bmp.Height == textureWidth))
         {
             return bmp;
         }
         else
         {
-            Bitmap bmp2 = RescaleBitmap(bmp, textureWidth, textureWidth);
+            SKBitmap bmp2 = RescaleBitmap(bmp, textureWidth, textureWidth);
             bmp.Dispose();
             return bmp2;
         }
@@ -310,7 +330,7 @@ public class TextureEngine
     /// <param name="twidth">The texture width, if any.</param>
     /// <param name="docache">If true, use caching. If false, always fetch a fresh copy.</param>
     /// <returns>A valid bitmap object, or null.</returns>
-    public Bitmap GetTextureBitmapWithWidth(string texturename, int twidth, bool docache = false)
+    public SKBitmap GetTextureBitmapWithWidth(string texturename, int twidth, bool docache = false)
     {
         texturename = FileEngine.CleanFileName(texturename);
         if (LoadedTextures.TryGetValue(texturename, out Texture foundTexture) && foundTexture.LoadedProperly)
@@ -333,7 +353,7 @@ public class TextureEngine
     public Dictionary<string, byte[]> TempBitmapBytesCache = [];
 
     /// <summary>Short-lived cached of texture bitmaps, to allow rapid multi calls to not run the entire file loading engine.</summary>
-    public Dictionary<(string, int), Bitmap> TempBitmapCache = [];
+    public Dictionary<(string, int), SKBitmap> TempBitmapCache = [];
 
     /// <summary>If true, the temp-cache will be cleared soon.</summary>
     public bool CacheHasClearScheduled = false;
@@ -351,11 +371,11 @@ public class TextureEngine
             CacheHasClearScheduled = false;
             if (TempBitmapCache.Count != 0)
             {
-                Bitmap[] bmps = [.. TempBitmapCache.Values];
+                SKBitmap[] bmps = [.. TempBitmapCache.Values];
                 TempBitmapCache.Clear();
                 Schedule.StartAsyncTask(() =>
                 {
-                    foreach (Bitmap bmp in bmps)
+                    foreach (SKBitmap bmp in bmps)
                     {
                         bmp.Dispose();
                     }
@@ -371,14 +391,14 @@ public class TextureEngine
     /// <param name="docache">If true, use caching. If false, always create a fresh copy.</param>
     /// <param name="extension">Specific file extension (eg '.png'), if required. Null for automatic search.</param>
     /// <returns>The loaded texture bitmap, or null if it does not exist.</returns>
-    public Bitmap LoadBitmapForTexture(string filename, int twidth, bool docache = false, string extension = null)
+    public SKBitmap LoadBitmapForTexture(string filename, int twidth, bool docache = false, string extension = null)
     {
         filename = FileEngine.CleanFileName(filename);
         if (extension is not null)
         {
             filename += extension;
         }
-        if (docache && TempBitmapCache.TryGetValue((filename, twidth), out Bitmap cachedBitmap))
+        if (docache && TempBitmapCache.TryGetValue((filename, twidth), out SKBitmap cachedBitmap))
         {
             return cachedBitmap;
         }
@@ -415,7 +435,7 @@ public class TextureEngine
             {
                 return null;
             }
-            Bitmap result = BitmapForBytes(textureFile, twidth);
+            SKBitmap result = BitmapForBytes(textureFile, twidth);
             if (docache)
             {
                 TempBitmapCache[(filename, twidth)] = result;
@@ -444,7 +464,7 @@ public class TextureEngine
             Engine = this,
             Name = filename
         };
-        Bitmap bmp = LoadBitmapForTexture(filename, twidth);
+        SKBitmap bmp = LoadBitmapForTexture(filename, twidth);
         if (bmp is null)
         {
             return null;
@@ -455,7 +475,7 @@ public class TextureEngine
     }
 
     /// <summary>Internal helper to make a GL texture from a bitmap.</summary>
-    public void InternalTextureFromBitMap(Texture texture, Bitmap bmp)
+    public void InternalTextureFromBitMap(Texture texture, SKBitmap bmp)
     {
         texture.Width = bmp.Width;
         texture.Height = bmp.Height;
@@ -466,7 +486,7 @@ public class TextureEngine
             texture.OwnsItsTextureId = true;
         }
         texture.Bind();
-        LockBitmapToTexture(bmp, DefaultLinear);
+        LockBitmapToTexture(bmp.Width, bmp.Height, BitmapBytes(bmp), DefaultLinear);
     }
 
     /// <summary>loads a thumbnail texture by name and puts it into a texture array.</summary>
@@ -477,7 +497,7 @@ public class TextureEngine
     {
         try
         {
-            Bitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true, extension: ".thumb.jpg");
+            SKBitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true, extension: ".thumb.jpg");
             if (bmp is not null)
             {
                 LockBitmapToTexture(bmp, depth);
@@ -498,7 +518,7 @@ public class TextureEngine
     {
         try
         {
-            Bitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true);
+            SKBitmap bmp = LoadBitmapForTexture(filename, twidth, docache: true);
             if (bmp is not null)
             {
                 LockBitmapToTexture(bmp, depth);
@@ -576,7 +596,7 @@ public class TextureEngine
     /// <summary>Locks a bitmap file's data to a GL texture array.</summary>
     /// <param name="bmp">The bitmap to use.</param>
     /// <param name="depth">The depth in a 3D texture.</param>
-    public static void LockBitmapToTexture(Bitmap bmp, int depth)
+    public static void LockBitmapToTexture(SKBitmap bmp, int depth)
     {
 #if DEBUG
         if (bmp.Width <= 0 || bmp.Height <= 0 || bmp.Width > 1024 * 256 || bmp.Height > 1024 * 256)
