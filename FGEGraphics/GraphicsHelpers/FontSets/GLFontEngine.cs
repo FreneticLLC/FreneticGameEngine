@@ -91,12 +91,19 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     /// <summary>The current minimum height of the GLFont mega texture.</summary>
     public int CMinHeight = 20;
 
+    /// <summary>If true, the font engine has loaded. If false, it still is in the loading process.</summary>
+    public bool Loaded = false;
+
     /// <summary>Update the CPU-Side mega texture onto the GPU.</summary>
     public void UpdateTexture()
     {
+        if (!Loaded)
+        {
+            return;
+        }
         TextureMain?.Dispose();
         TextureMain = new("GLFontEngine_TextureMain", TextureTarget.Texture2D);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, CurrentBMP.GetPixels());
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, DEFAULT_TEXTURE_SIZE_WIDTH, CurrentHeight, 0, PixelFormat.Bgra, PixelType.UnsignedByte, CurrentBMP.GetPixels());
         GraphicsUtil.TexParamLinearClamp();
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
         GraphicsUtil.BindTexture(TextureTarget.Texture2D, 0);
@@ -191,6 +198,7 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
         Standard = new GLFont(family, 12, false, false, this);
         Fonts.Add(Standard);
         Logs.ClientInit($"Select main font: {family.FamilyName}");
+        Loaded = true;
         UpdateTexture();
     }
 
