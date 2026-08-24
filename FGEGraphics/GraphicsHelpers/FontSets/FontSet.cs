@@ -592,7 +592,7 @@ public class FontSet(string _name, FontSetEngine engine) : IEquatable<FontSet>
                     iY = Engine.RandomHelper.Next(-1, 1);
                 }
                 part.Font.DrawSingleCharacter(chr, X + iX + nX, Y + iY, vbo, color, part.Flip);
-                nX += part.Font.RectForSymbol(txt).Width;
+                nX += part.Font.RectForSymbol(txt).Advance;
             }
             return nX;
         }
