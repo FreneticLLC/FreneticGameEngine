@@ -8,16 +8,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.FileSystems;
+using FGECore.MathHelpers;
 using OpenTK.Graphics.OpenGL4;
 using SkiaSharp;
 
@@ -68,15 +63,15 @@ public class TextureEngine
         // Reset texture list
         LoadedTextures = new Dictionary<string, Texture>(256);
         // Pregenerate a few needed textures
-        White = GenerateForColor(Color.White, "white");
+        White = GenerateForColor(Color4F.White, "white");
         LoadedTextures.Add("white", White);
-        Black = GenerateForColor(Color.Black, "black");
+        Black = GenerateForColor(Color4F.Black, "black");
         LoadedTextures.Add("black", Black);
-        Clear = GenerateForColor(Color.Transparent, "clear");
+        Clear = GenerateForColor(Color4F.Transparent, "clear");
         LoadedTextures.Add("clear", Clear);
-        Gray = GenerateForColor(Color.FromArgb(255, 127, 127, 127), "gray");
+        Gray = GenerateForColor(Color4F.FromArgb(255, 127, 127, 127), "gray");
         LoadedTextures.Add("gray", Gray);
-        NormalDef = GenerateForColor(Color.FromArgb(255, 127, 127, 255), "normal_def");
+        NormalDef = GenerateForColor(Color4F.FromArgb(255, 127, 127, 255), "normal_def");
         LoadedTextures.Add("normal_def", NormalDef);
     }
 
@@ -535,7 +530,7 @@ public class TextureEngine
     /// <param name="c">The color to use.</param>
     /// <param name="name">The name of the texture.</param>
     /// <returns>The generated texture.</returns>
-    public Texture GenerateForColor(Color c, string name)
+    public Texture GenerateForColor(Color4F c, string name)
     {
         Texture texture = new()
         {
@@ -548,39 +543,16 @@ public class TextureEngine
         texture.InternalTexture = texture.OriginalInternalID;
         texture.OwnsItsTextureId = true;
         texture.Bind();
-        LockBitmapToTexture(2, 2, [c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A, c.B, c.G, c.R, c.A], false);
+        byte b = (byte)c.IB, g = (byte)c.IG, r = (byte)c.IR, a = (byte)c.IA;
+        LockBitmapToTexture(2, 2, [b, g, r, a, b, g, r, a, b, g, r, a, b, g, r, a], false);
         texture.LoadedProperly = true;
         return texture;
-    }
-
-    /// <summary>Gets the raw bytes of a bitmap as a binary array.</summary>
-    public static byte[] BitmapBytes(Bitmap bmp)
-    {
-        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        byte[] bytes = new byte[bmp_data.Width * bmp_data.Height * 4];
-        Marshal.Copy(bmp_data.Scan0, bytes, 0, bytes.Length);
-        bmp.UnlockBits(bmp_data);
-        return bytes;
-    }
-
-    /// <summary>Locks a bitmap file's data to a GL texture.</summary>
-    /// <param name="bmp">The bitmap to use.</param>
-    /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
-    public static void LockBitmapToTexture(Bitmap bmp, bool linear)
-    {
-#if DEBUG
-        if (bmp.Width <= 0 || bmp.Height <= 0 || bmp.Width > 1024 * 256 || bmp.Height > 1024 * 256)
-        {
-            throw new InvalidOperationException($"Bitmap contains invalid dimensions: {bmp.Width}x{bmp.Height}");
-        }
-#endif
-        LockBitmapToTexture(bmp.Width, bmp.Height, BitmapBytes(bmp), linear);
     }
 
     /// <summary>Locks a bitmap file's data to a GL texture.</summary>
     /// <param name="width">The width of the bitmap image.</param>
     /// <param name="height">The height of the bitmap image.</param>
-    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(Bitmap)"/>.</param>
+    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(SKBitmap)"/>.</param>
     /// <param name="linear">Whether to use linear filtering for the texture (otherwise, "Nearest" filtering mode).</param>
     public static void LockBitmapToTexture(int width, int height, byte[] rawBitmap, bool linear)
     {
@@ -610,7 +582,7 @@ public class TextureEngine
     /// <summary>Locks a bitmap file's data to a GL texture array.</summary>
     /// <param name="width">The width of the bitmap image.</param>
     /// <param name="height">The height of the bitmap image.</param>
-    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(Bitmap)"/>.</param>
+    /// <param name="rawBitmap">The raw bitmapdata to use, from <see cref="BitmapBytes(SKBitmap)"/>.</param>
     /// <param name="depth">The depth in a 3D texture.</param>
     public static void LockBitmapToTexture(int width, int height, byte[] rawBitmap, int depth)
     {
