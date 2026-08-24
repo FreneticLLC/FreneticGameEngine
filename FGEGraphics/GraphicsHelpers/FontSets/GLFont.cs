@@ -196,9 +196,7 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             }
             if (isEmoji)
             {
-                Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
-                // TODO: This is incompatible with the texture streaming system and will store nothing. Need to use the streaming support here!
-                using SKBitmap bmp = t.SaveToBMP();
+                using SKBitmap bmp = Engine.Textures.LoadBitmapForTexture($"emoji/{inputSymbol[1..^1]}", nwidth);
                 canvas.DrawBitmap(bmp, SKRect.Create(X, Y, nwidth, nwidth), new SKSamplingOptions(SKFilterMode.Linear), null);
             }
             else
