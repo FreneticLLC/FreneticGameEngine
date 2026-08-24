@@ -270,8 +270,8 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
         Rectangle2F rec = RectForSymbol(symbol);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y: (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
-            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y + rec.Height : rec.Y) / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y : rec.Y + rec.Height) / Engine.CurrentHeight, color);
         return rec.Width;
     }
 
@@ -286,8 +286,8 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     public float DrawSingleCharacter(char character, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
         Rectangle2F rec = RectForSymbol(character);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y : (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
-            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y + rec.Height : rec.Y) / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y : rec.Y + rec.Height) / Engine.CurrentHeight, color);
         return rec.Width;
     }
 
