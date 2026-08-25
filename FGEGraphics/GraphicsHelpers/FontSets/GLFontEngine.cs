@@ -277,13 +277,9 @@ public class GLFontEngine(TextureEngine teng, ShaderEngine sengine) : IDisposabl
     {
         SKFontStyle style = bold && italic ? SKFontStyle.BoldItalic : bold ? SKFontStyle.Bold : italic ? SKFontStyle.Italic : SKFontStyle.Normal;
         SKTypeface typeface = null;
-        if (CoreFontFamily is not null && CoreFontFamily.FamilyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+        if (name.ToLowerFast() == "standard")
         {
-            typeface = SKFontManager.Default.MatchFamily(CoreFontFamily.FamilyName, style);
-            if (typeface is null || !typeface.FamilyName.Equals(CoreFontFamily.FamilyName, StringComparison.OrdinalIgnoreCase))
-            {
-                typeface = CoreFontFamily;
-            }
+            typeface = SKFontManager.Default.MatchFamily(CoreFontFamily.FamilyName, style) ?? CoreFontFamily;
         }
         typeface ??= SKTypeface.FromFamilyName(name, style);
         GLFont f = new(typeface, size / DPIScale, bold, italic, this);
