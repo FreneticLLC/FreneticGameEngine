@@ -146,7 +146,7 @@ public abstract class GameInstance
     /// <summary>Inits the game instance.</summary>
     public void InstanceInit()
     {
-        SysConsole.Output(InitOutputType, "GameInstance loading file helpers...");
+        SysConsole.Output(InitOutputType, $"GameInstance loading file helpers, save directory is '{SaveFolderPath}'...");
         Directory.CreateDirectory(SaveFolderPath);
         SaveFolderPath = Path.GetFullPath(SaveFolderPath).Replace('\\', '/');
         string realMods = Path.GetFullPath($"{SaveFolderPath}/{Folder_Mods}").Replace('\\', '/');
