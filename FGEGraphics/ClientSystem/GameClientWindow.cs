@@ -484,7 +484,6 @@ public class GameClientWindow : GameInstance<ClientEntity, GameEngineBase>, IDis
         if (disposing)
         {
             CurrentEngine.Dispose();
-            Textures.Dispose();
             GLFonts.Dispose();
             Window.Dispose();
         }

@@ -76,6 +76,14 @@ public abstract class BasicEngine
     /// <summary>Add and activate a joint into this engine with an existing JointID.</summary>
     public void AddJoint_WithJID(GenericBaseJoint joint)
     {
+        if (joint.EntityOne.EID == 0 || joint.EntityTwo.EID == 0)
+        {
+            throw new InvalidOperationException("Cannot add joint on an entity that has never been spawned.");
+        }
+        if (joint.Added)
+        {
+            throw new InvalidOperationException("Cannot add a joint that is already added to an engine.");
+        }
         Joints.Add(joint.JointID, joint);
         if (joint is NonPhysicalJointBase nonPhysJoint)
         {

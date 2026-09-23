@@ -44,23 +44,23 @@ public class CollisionEvent<TManifold> : CollisionEvent where TManifold : struct
     /// <summary>The internal contact manifold.</summary>
     public TManifold Manifold;
 
-    /// <summary>Implements <see cref="CollisionEvent.ContactCount"/>.</summary>
+    /// <inheritdoc/>
     public override int ContactCount => Manifold.Count;
 
-    /// <summary>Implements <see cref="CollisionEvent.GetNormal"/>.</summary>
+    /// <inheritdoc/>
     public override Location GetNormal(int contact)
     {
         return Manifold.GetNormal(contact).ToLocation();
     }
 
-    /// <summary>Implements <see cref="CollisionEvent.GetOffset"/>.</summary>
+    /// <inheritdoc/>
     public override Location GetOffset(int contact)
     {
         // TODO: What's the correct global location if One is null?
         return Manifold.GetOffset(contact).ToLocation() + (One is not null ? One.Position : Location.Zero);
     }
 
-    /// <summary>Implements <see cref="CollisionEvent.GetDepth"/>.</summary>
+    /// <inheritdoc/>
     public override float GetDepth(int contact)
     {
         return Manifold.GetDepth(contact);

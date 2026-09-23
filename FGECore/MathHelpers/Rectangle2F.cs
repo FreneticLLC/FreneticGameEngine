@@ -15,17 +15,17 @@ using System.Threading.Tasks;
 namespace FGECore.MathHelpers;
 
 /// <summary>Represents a float-based rectangle.</summary>
-public class Rectangle2F
+public class Rectangle2F(float _x, float _y, float _width, float _height)
 {
     /// <summary>X coordinate.</summary>
-    public float X;
+    public float X = _x;
 
     /// <summary>Y coordinate.</summary>
-    public float Y;
+    public float Y = _y;
 
     /// <summary>The width.</summary>
-    public float Width;
+    public float Width = _width;
 
     /// <summary>The height.</summary>
-    public float Height;
+    public float Height = _height;
 }

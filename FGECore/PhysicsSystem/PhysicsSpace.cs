@@ -170,10 +170,13 @@ public class PhysicsSpace
     /// <summary>Event called when entities are colliding.</summary>
     public Action<CollisionEvent> CollisionHandler;
 
+    /// <summary>Optional handlers for contact manifolds generated between children of compound collidables. Return false to remove the manifold.</summary>
+    public List<ChildContactManifoldHandler> ChildContactHandlers = [];
+
     /// <summary>Recenters the <see cref="Offset"/> at a new location, and adjusts all internal position values accordingly.</summary>
     public void Recenter(Location newCenter)
     {
-        Location relative = newCenter - Offset;
+        Location relative = Offset - newCenter;
         ref Buffer<BodySet> sets = ref Internal.CoreSimulation.Bodies.Sets;
         for (int s = 0; s < sets.Length; s++)
         {
@@ -292,7 +295,7 @@ public class PhysicsSpace
     public IEnumerable<EntityPhysicsProperty> GetEntitiesInBox(AABB box)
     {
         EntitiesInBoxHelper helper = new() { Entities = [], Space = this };
-        Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), ref helper);
+        Internal.CoreSimulation.BroadPhase.GetOverlaps(new BoundingBox(box.Min.ToNumerics(), box.Max.ToNumerics()), Internal.Pool, ref helper);
         return helper.Entities;
     }
 
@@ -314,7 +317,7 @@ public class PhysicsSpace
     public CollisionResult RayTraceSingle(Location start, Location direction, double distance, Func<EntityPhysicsProperty, bool> filter = null)
     {
         InternalData.RayTraceHelper helper = new() { Space = this, Filter = filter, Start = start, Direction = direction, Hit = new() { Position = start + direction * distance, Time = distance } };
-        Internal.CoreSimulation.RayCast((start - Offset).ToNumerics(), direction.ToNumerics(), (float)distance, ref helper);
+        Internal.CoreSimulation.RayCast((start - Offset).ToNumerics(), direction.ToNumerics(), (float)distance, Internal.Pool, ref helper);
         if (helper.Hit.Hit)
         {
             helper.Hit.Position += Offset;
@@ -400,3 +403,6 @@ public class PhysicsSpace<T, T2> : PhysicsSpace where T: BasicEntity<T, T2> wher
         Internal.Init(this);
     }
 }
+
+/// <summary>Filters or modifies a contact manifold generated between children of compound collidables.</summary>
+public delegate bool ChildContactManifoldHandler(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold);

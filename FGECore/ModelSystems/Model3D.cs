@@ -215,6 +215,9 @@ public class Model3DNode
 
     /// <summary>Get the full final matrix for this node.</summary>
     public Matrix4x4 GetMatrix() => Parent is null ? MatrixA : Parent.GetMatrix() * MatrixA;
+
+    /// <summary>Get this node's position relative to the model root.</summary>
+    public Vector3 GetPosition() => Matrix4x4.Transpose(GetMatrix()).Translation;
 }
 
 /// <summary>Enumeration of possible collision types found in a 3D model.</summary>

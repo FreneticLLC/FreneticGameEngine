@@ -8,19 +8,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
-using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers.Textures;
-using OpenTK;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
+using SkiaSharp;
 
 namespace FGEGraphics.GraphicsHelpers.FontSets;
 
@@ -34,11 +30,21 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <summary>The texture containing all character images.</summary>
     public Texture BaseTexture;
 
+    /// <summary>Info about a single symbol.</summary>
+    public struct SymbolInfo
+    {
+        /// <summary>Bounding rectangle on the character sheet.</summary>
+        public Rectangle2F Rectangle;
+
+        /// <summary>Amount to advance the cursor by (used for kerning).</summary>
+        public float Advance;
+    }
+
     /// <summary>A list of all symbol locations on the base texture.</summary>
-    public Dictionary<string, RectangleF> SymbolLocations;
+    public Dictionary<string, SymbolInfo> SymbolLocations;
 
     /// <summary>A list of all character locations on the base texture.</summary>
-    public Dictionary<char, RectangleF> CharacterLocations;
+    public Dictionary<char, SymbolInfo> CharacterLocations;
 
     /// <summary>The name of the font.</summary>
     public string Name;
@@ -53,10 +59,13 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     public bool Italic;
 
     /// <summary>The font used to create this GLFont.</summary>
-    public Font Internal_Font;
+    public SKFont Internal_Font;
 
     /// <summary>The backup font to use when the main font lacks a symbol.</summary>
-    public Font BackupFont;
+    public SKFont BackupFont;
+
+    /// <summary>The point size used to create this GLFont.</summary>
+    public float PointSize;
 
     /// <summary>How tall a rendered symbol is.</summary>
     public int Height;
@@ -64,44 +73,57 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <summary>Internal data for <see cref="GLFont"/>.</summary>
     public struct InternalData()
     {
-        /// <summary>The format to render strings under.</summary>
-        public static StringFormat RenderFormat;
-
         /// <summary>The size of <see cref="LowCodepointLocs"/>.</summary>
         public const int LOW_CODEPOINT_RANGE_CAP = 8192;
 
         // TODO: Internal struct
         /// <summary>Low code-point range symbol rectangle locations.</summary>
-        public readonly RectangleF[] LowCodepointLocs = new RectangleF[LOW_CODEPOINT_RANGE_CAP];
+        public readonly SymbolInfo[] LowCodepointLocs = new SymbolInfo[LOW_CODEPOINT_RANGE_CAP];
     }
 
     /// <summary>Internal data for <see cref="GLFont"/>.</summary>
     public InternalData Internal = new();
 
     /// <summary>Constructs a GLFont.</summary>
-    /// <param name="font">The CPU font to use.</param>
+    /// <param name="font">The font family (typeface) to use.</param>
+    /// <param name="pointSize">The font size in points.</param>
+    /// <param name="bold">Whether the font is bold.</param>
+    /// <param name="italic">Whether the font is italic.</param>
     /// <param name="eng">The backing engine.</param>
-    public GLFont(Font font, GLFontEngine eng)
+    public GLFont(SKTypeface font, float pointSize, bool bold, bool italic, GLFontEngine eng)
     {
         Engine = eng;
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-        Name = font.Name;
-        Size = (int)(font.Size * eng.DPIScale);
-        Bold = font.Bold;
-        Italic = font.Italic;
-        Height = font.Height;
-        SymbolLocations = new Dictionary<string, RectangleF>(InternalData.LOW_CODEPOINT_RANGE_CAP);
-        CharacterLocations = new Dictionary<char, RectangleF>(InternalData.LOW_CODEPOINT_RANGE_CAP);
-        Internal_Font = font;
-        BackupFont = new Font(Engine.BackupFontFamily, font.SizeInPoints);
+        Name = font.FamilyName;
+        Size = (int)(pointSize * eng.DPIScale);
+        Bold = bold;
+        Italic = italic;
+        PointSize = pointSize;
+        Internal_Font = MakeSkFont(font, pointSize, bold, italic);
+        BackupFont = MakeSkFont(Engine.BackupFontFamily, pointSize, false, false);
+        Height = (int)Math.Ceiling(Internal_Font.Spacing);
+        SymbolLocations = new Dictionary<string, SymbolInfo>(InternalData.LOW_CODEPOINT_RANGE_CAP);
+        CharacterLocations = new Dictionary<char, SymbolInfo>(InternalData.LOW_CODEPOINT_RANGE_CAP);
         RecognizeCharacters(Engine.CoreTextFileCharacters);
     }
 
-    /// <summary>Prepares static helpers.</summary>
-    static GLFont()
+    static SKFont MakeSkFont(SKTypeface typeface, float pointSize, bool bold, bool italic)
     {
-        InternalData.RenderFormat = new StringFormat(StringFormat.GenericTypographic);
-        InternalData.RenderFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap | StringFormatFlags.NoClip;
+        SKFont font = new(typeface, pointSize * (96f / 72f))
+        {
+            Edging = SKFontEdging.SubpixelAntialias,
+            Hinting = SKFontHinting.Full,
+            Subpixel = true
+        };
+        if (bold && typeface.FontWeight < (int)SKFontStyleWeight.SemiBold)
+        {
+            font.Embolden = true;
+        }
+        if (italic && typeface.FontSlant == SKFontStyleSlant.Upright)
+        {
+            font.SkewX = -0.25f;
+        }
+        return font;
     }
 
     /// <summary>Returns 'true' if a <see cref="RecognizeCharacters(string)"/> call might be needed for the text (characters outside of quick-lookup range, or characters not already recognized). This call exists for opti reasons only.</summary>
@@ -145,31 +167,29 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <returns>The list of symbols not able to added without expanding, if any.</returns>
     private IEnumerable<string> AddAll(IEnumerable<string> input)
     {
-        using Graphics gfx = Graphics.FromImage(Engine.CurrentBMP);
-        gfx.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-        gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-        gfx.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+        using SKSurface surface = Engine.CreateAtlasSurface();
+        SKCanvas canvas = surface.Canvas;
+        using SKPaint paint = new() { Color = SKColors.White, IsAntialias = true, Style = SKPaintStyle.Fill };
         int X = Engine.CX;
         int Y = Engine.CY;
-        Brush brush = new SolidBrush(Color.White);
         Engine.CMinHeight = Math.Max(Height + 8, Engine.CMinHeight); // TODO: 8 -> ???
         int processed = 0;
         foreach (string inputSymbol in input)
         {
             bool isEmoji = inputSymbol.Length > 2 && inputSymbol.StartsWith(':') && inputSymbol.EndsWith(':');
-            Font fnt = inputSymbol.Length == 1 ? Internal_Font : BackupFont;
+            SKFont fnt = inputSymbol.Length == 1 ? Internal_Font : BackupFont;
             string chr = inputSymbol == "\t" ? "    " : inputSymbol;
             int nwidth = Height;
             float rawHeight = Height;
+            SKRect bounds = default;
             if (!isEmoji)
             {
-                SizeF measured = gfx.MeasureString(chr, fnt, new PointF(0, 0), InternalData.RenderFormat);
-                nwidth = (int)Math.Ceiling(measured.Width);
-                // TODO: These added values are hacks to compensate for font sizes not matching character sizes. A better measure method should be used instead.
-                rawHeight = measured.Height + Math.Min(6, fnt.SizeInPoints * 0.3f);
-                if (fnt.Italic)
+                float measured = fnt.MeasureText(chr, out bounds, paint);
+                nwidth = (int)Math.Ceiling(measured);
+                rawHeight = (-fnt.Metrics.Ascent + fnt.Metrics.Descent) + Math.Min(6, PointSize * 0.3f);
+                if (fnt == Internal_Font && Italic)
                 {
-                    nwidth += (int)(fnt.SizeInPoints * 0.17);
+                    //nwidth += (int)(PointSize * 0.17);
                 }
             }
             if (X + nwidth >= GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH)
@@ -187,24 +207,23 @@ public class GLFont : IDisposable, IEquatable<GLFont>
             }
             if (isEmoji)
             {
-                Texture t = Engine.Textures.GetTexture("emoji/" + inputSymbol[1..^1]);
-                // TODO: This is incompatible with the texture streaming system and will store nothing. Need to use the streaming support here!
-                using Bitmap bmp = t.SaveToBMP();
-                gfx.DrawImage(bmp, new Rectangle(X, Y, nwidth, nwidth));
+                using SKBitmap bmp = Engine.Textures.LoadBitmapForTexture($"emoji/{inputSymbol[1..^1]}", nwidth);
+                canvas.DrawBitmap(bmp, SKRect.Create(X, Y, nwidth, nwidth), new SKSamplingOptions(SKFilterMode.Linear), null);
             }
             else
             {
-                gfx.DrawString(chr, fnt, brush, new PointF(X, Y), InternalData.RenderFormat);
+                canvas.DrawText(chr, X, Y - fnt.Metrics.Ascent, SKTextAlign.Left, fnt, paint);
             }
             processed++;
-            RectangleF rect = new(X, Y, nwidth, rawHeight);
-            SymbolLocations[inputSymbol] = rect;
+            Rectangle2F rect = new(X, Y, bounds.Right, rawHeight);
+            SymbolInfo info = new() { Rectangle = rect, Advance = nwidth };
+            SymbolLocations[inputSymbol] = info;
             if (chr.Length == 1)
             {
-                CharacterLocations[inputSymbol[0]] = rect;
+                CharacterLocations[inputSymbol[0]] = info;
                 if (chr[0] < InternalData.LOW_CODEPOINT_RANGE_CAP)
                 {
-                    Internal.LowCodepointLocs[inputSymbol[0]] = rect;
+                    Internal.LowCodepointLocs[inputSymbol[0]] = info;
                 }
             }
             X += nwidth + 8; // TODO: 8 -> ???
@@ -223,13 +242,13 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <summary>Gets the location of a symbol.</summary>
     /// <param name="symbol">The symbol to find.</param>
     /// <returns>A rectangle containing the precise location of a symbol.</returns>
-    public RectangleF RectForSymbol(string symbol)
+    public SymbolInfo RectForSymbol(string symbol)
     {
         if (symbol.Length == 1 && symbol[0] < InternalData.LOW_CODEPOINT_RANGE_CAP)
         {
             return Internal.LowCodepointLocs[symbol[0]];
         }
-        if (SymbolLocations.TryGetValue(symbol, out RectangleF rect))
+        if (SymbolLocations.TryGetValue(symbol, out SymbolInfo rect))
         {
             return rect;
         }
@@ -239,13 +258,13 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <summary>Gets the location of a symbol.</summary>
     /// <param name="symbol">The symbol to find.</param>
     /// <returns>A rectangle containing the precise location of a symbol.</returns>
-    public RectangleF RectForSymbol(char symbol)
+    public SymbolInfo RectForSymbol(char symbol)
     {
         if (symbol < InternalData.LOW_CODEPOINT_RANGE_CAP)
         {
             return Internal.LowCodepointLocs[symbol];
         }
-        if (CharacterLocations.TryGetValue(symbol, out RectangleF rect))
+        if (CharacterLocations.TryGetValue(symbol, out SymbolInfo rect))
         {
             return rect;
         }
@@ -262,10 +281,11 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <returns>The length of the character in pixels.</returns>
     public float DrawSingleCharacter(string symbol, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
-        RectangleF rec = RectForSymbol(symbol);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y: (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
-            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
-        return rec.Width;
+        SymbolInfo info = RectForSymbol(symbol);
+        Rectangle2F rec = info.Rectangle;
+        TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y + rec.Height : rec.Y) / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y : rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        return info.Advance;
     }
 
     /// <summary>Draws a single character at a specified location.</summary>
@@ -278,10 +298,11 @@ public class GLFont : IDisposable, IEquatable<GLFont>
     /// <returns>The length of the character in pixels.</returns>
     public float DrawSingleCharacter(char character, float X, float Y, TextVBOBuilder vbo, Color4F color, bool flip)
     {
-        RectangleF rec = RectForSymbol(character);
-        TextVBOBuilder.AddQuad(X, flip ? (Y + rec.Height) : Y, X + rec.Width, flip ? Y : (Y + rec.Height), rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, rec.Y / Engine.CurrentHeight,
-            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (rec.Y + rec.Height) / Engine.CurrentHeight, color);
-        return rec.Width;
+        SymbolInfo info = RectForSymbol(character);
+        Rectangle2F rec = info.Rectangle;
+        TextVBOBuilder.AddQuad(X, Y, X + rec.Width, Y + rec.Height, rec.X / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y + rec.Height : rec.Y) / Engine.CurrentHeight,
+            (rec.X + rec.Width) / GLFontEngine.DEFAULT_TEXTURE_SIZE_WIDTH, (flip ? rec.Y : rec.Y + rec.Height) / Engine.CurrentHeight, color);
+        return info.Advance;
     }
 
     /// <summary>Draws a string at a specified location.</summary>
@@ -337,14 +358,14 @@ public class GLFont : IDisposable, IEquatable<GLFont>
         {
             foreach (string symbol in SeparateEmojiAndSpecialChars(text))
             {
-                X += RectForSymbol(symbol).Width;
+                X += RectForSymbol(symbol).Advance;
             }
         }
         else
         {
             foreach (char c in text)
             {
-                X += RectForSymbol(c).Width;
+                X += RectForSymbol(c).Advance;
             }
         }
         return X;

@@ -303,7 +303,7 @@ public class KeyHandler
                 if (BuildingState.ControlDown)
                 {
                     string copied;
-                    copied = TextCopy.ClipboardService.GetText().Replace('\r', ' ');
+                    copied = TextCopy.ClipboardService.GetText()?.Replace('\r', ' ') ?? "";
                     if (copied.Length > 0 && copied.EndsWith('\n'))
                     {
                         copied = copied[0..^1];

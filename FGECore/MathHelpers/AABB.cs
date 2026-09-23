@@ -96,6 +96,43 @@ public struct AABB(Location _min, Location _max)
     /// <inheritdoc/>
     public readonly override int GetHashCode() => HashCode.Combine(Min, Max);
     #endregion
+
+    #region tracing
+    /// <summary>Calculates an AABB sweep, determining in the given box will move to intersection another box.</summary>
+    /// <param name="start">The starting location of our main box.</param>
+    /// <param name="move">The relative movement vector of our main box from the start.</param>
+    /// <param name="otherBox">The other box we might intersect.</param>
+    public readonly bool AABBSweepSingle(Location start, Location move, AABB otherBox)
+    {
+        Location min = otherBox.Min - Max;
+        Location max = otherBox.Max - Min;
+        double tMin = 0;
+        double tMax = 1;
+        return AABBSweepSingleAxis(start.X, move.X, min.X, max.X, ref tMin, ref tMax)
+            && AABBSweepSingleAxis(start.Y, move.Y, min.Y, max.Y, ref tMin, ref tMax)
+            && AABBSweepSingleAxis(start.Z, move.Z, min.Z, max.Z, ref tMin, ref tMax);
+    }
+
+    /// <summary>Processes a single axis of an AABB sweep.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool AABBSweepSingleAxis(double start, double sweep, double min, double max, ref double tMin, ref double tMax)
+    {
+        if (Math.Abs(sweep) < 1e-10)
+        {
+            return start >= min && start <= max;
+        }
+        double invSweep = 1.0 / sweep;
+        double axisMin = (min - start) * invSweep;
+        double axisMax = (max - start) * invSweep;
+        if (axisMin > axisMax)
+        {
+            (axisMin, axisMax) = (axisMax, axisMin);
+        }
+        tMin = Math.Max(tMin, axisMin);
+        tMax = Math.Min(tMax, axisMax);
+        return tMin <= tMax;
+    }
+    #endregion
 }
 
 /// <summary>Helper extensions for <see cref="AABB"/>.</summary>

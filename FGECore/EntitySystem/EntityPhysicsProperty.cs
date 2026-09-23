@@ -507,7 +507,7 @@ public class EntityPhysicsProperty : BasicEntityProperty
         float maximumT = (float)distance;
         TypedIndex shape = SpawnedBody.Collidable.Shape;
         RayData ray = new() { Direction = direction.ToNumerics(), Origin = (start - PhysicsWorld.Offset).ToNumerics() };
-        PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, ref helper);
+        PhysicsWorld.Internal.CoreSimulation.Shapes[shape.Type].RayTest(shape.Index, SpawnedBody.Pose, ray, ref maximumT, PhysicsWorld.Internal.Pool, ref helper);
         if (helper.Hit.Hit)
         {
             helper.Hit.Position += PhysicsWorld.Offset;

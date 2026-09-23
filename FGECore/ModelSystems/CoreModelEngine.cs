@@ -139,7 +139,7 @@ public class CoreModelEngine
         void processLoad(byte[] data)
         {
             string fileText = StringConversionHelper.UTF8Encoding.GetString(data);
-            string[] lines = fileText.SplitFast('\n');
+            string[] lines = [.. fileText.SplitFast('\n').Select(l => l.Trim())];
             string fmdName = cleanName;
             Location offset = Location.Zero;
             foreach (string line in lines)

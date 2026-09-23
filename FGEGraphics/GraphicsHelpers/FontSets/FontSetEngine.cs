@@ -73,15 +73,21 @@ public class FontSetEngine(GLFontEngine fontEngine)
         GetLanguageHelper = getlanghelp;
         GetOrtho = orthobase;
         GetGlobalTickTime = ticktime;
-        Standard = new FontSet("standard", this);
-        Standard.Load(GLFonts.Standard.Name, GLFonts.Standard.Size);
-        Fonts.Add((Standard.Name, Standard.FontDefault.Size), Standard);
-        SlightlyBigger = new FontSet("slightlybigger", this);
-        SlightlyBigger.Load(GLFonts.Standard.Name, GLFonts.Standard.Size + 5);
-        Fonts.Add((SlightlyBigger.Name, SlightlyBigger.FontDefault.Size), SlightlyBigger);
-        DoubleSize = new FontSet("doublesize", this);
-        DoubleSize.Load(GLFonts.Standard.Name, GLFonts.Standard.Size * 2);
-        Fonts.Add((DoubleSize.Name, DoubleSize.FontDefault.Size), DoubleSize);
+        GLFonts.Loaded = false;
+        float[] fontScales = [0.25f, 0.5f, 1, 1.5f, 2];
+        int standardSize = GLFonts.Standard.Size;
+        Standard = GetFont("standard", standardSize);
+        SlightlyBigger = GetFont("standard", standardSize + 5);
+        DoubleSize = GetFont("standard", standardSize * 2);
+        // Preload expected common rescalings
+        foreach (float scale in fontScales)
+        {
+            GetFont("standard", (int)(standardSize * scale));
+            GetFont("standard", (int)((standardSize + 5) * scale));
+            GetFont("standard", (int)((standardSize * 2) * scale));
+        }
+        GLFonts.Loaded = true;
+        GLFonts.UpdateTexture();
         TextAdvancedFormatters["color"] = (input, font, currentPart, addedPart) =>
         {
             Color4F? specifiedColor = Color4F.FromString(input);

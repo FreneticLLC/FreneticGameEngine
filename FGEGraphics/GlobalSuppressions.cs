@@ -16,7 +16,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
 [assembly: SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable")]
 [assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly")]
-[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "TODO: System.Drawing invalid on Linux?")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
 [assembly: SuppressMessage("Usage", "CA2213:Disposable fields should be disposed", Justification = "This cannot be applied so generally. Not every class owns what it references.")]
 [assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "wtf")]

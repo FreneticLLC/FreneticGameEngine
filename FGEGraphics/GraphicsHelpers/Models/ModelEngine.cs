@@ -153,7 +153,7 @@ public class ModelEngine
                         continue;
                     }
                     string[] datums = line.SplitFast('=');
-                    if (datums.Length != 2 || datums[0] == "model")
+                    if (datums.Length != 2 || datums[0] == "model" || datums[0] == "offset")
                     {
                         continue;
                     }

@@ -2242,7 +2242,7 @@
             <param name="velocity">Velocity of the compound used to expand child bounds.</param>
             <param name="bodyIndex">Index of the body in the active body set; used to accumulate child bounds results.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuPhysics.Collidables.Shapes,``0@)">
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuPhysics.Collidables.Shapes,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Tests a ray against the shape.
             </summary>
@@ -2250,9 +2250,10 @@
             <param name="ray">Ray to test against the shape.</param>
             <param name="maximumT">Maximum distance along the ray, in units of the ray direction's length, that the ray will test.</param>
             <param name="shapeBatches">Shape batches to look up child shapes in if necessary.</param>
+            <param name="pool">Buffer pool used for any temporary allocations required by the test.</param>
             <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuPhysics.Collidables.Shapes,``0@)">
+        <member name="M:BepuPhysics.Collidables.ICompoundShape.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuPhysics.Collidables.Shapes,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Tests multiple rays against the shape.
             </summary>
@@ -2260,6 +2261,7 @@
             <param name="rays">Rays to test against the shape.</param>
             <param name="shapeBatches">Shape batches to look up child shapes in if necessary.</param>
             <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
+            <param name="pool">Buffer pool used for any temporary allocations required by the test.</param>
         </member>
         <member name="P:BepuPhysics.Collidables.ICompoundShape.ChildCount">
             <summary>
@@ -2288,21 +2290,23 @@
             <param name="min">Minimum of the compound's bounding box.</param>
             <param name="max">Maximum of the compound's bounding box.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,``0@)">
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Tests a ray against the shape.
             </summary>
             <param name="pose">Pose of the shape during the ray test.</param>
             <param name="ray">Ray to test against the shape.</param>
             <param name="maximumT">Maximum distance along the ray, in units of the ray direction's length, that the ray will test.</param>
+            <param name="pool">Buffer pool used for any temporary allocations required by the test.</param>
             <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,``0@)">
+        <member name="M:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Tests multiple rays against the shape.
             </summary>
             <param name="pose">Pose of the shape during the ray test.</param>
             <param name="rays">Rays to test against the shape.</param>
+            <param name="pool">Buffer pool used for any temporary allocations required by the test.</param>
             <param name="hitHandler">Callbacks called when the ray interacts with a test candidate.</param>
         </member>
         <member name="P:BepuPhysics.Collidables.IHomogeneousCompoundShape`2.ChildCount">
@@ -2484,7 +2488,7 @@
             </summary>
             <param name="data">Byte buffer to store the mesh in.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.Mesh.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,``0@)">
+        <member name="M:BepuPhysics.Collidables.Mesh.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Casts a ray against the mesh. Executes a callback for every test candidate and every hit.
             </summary>
@@ -2493,8 +2497,9 @@
             <param name="ray">Ray to test against the mesh.</param>
             <param name="maximumT">Maximum length of the ray in units of the ray direction length.</param>
             <param name="hitHandler">Callback to execute for every hit.</param>
+            <param name="pool">Pool to use for any temporary allocations required during the ray test.</param>
         </member>
-        <member name="M:BepuPhysics.Collidables.Mesh.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,``0@)">
+        <member name="M:BepuPhysics.Collidables.Mesh.RayTest``1(BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Casts a bunch of rays against the mesh at the same time, executing a callback for every test candidate and every hit.
             </summary>
@@ -2502,6 +2507,7 @@
             <param name="pose">Pose of the mesh during the ray test.</param>
             <param name="rays">Set of rays to cast against the mesh.</param>
             <param name="hitHandler">Callbacks to execute.</param>
+            <param name="pool">Pool to use for any temporary allocations required during the ray test.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.Mesh.Recenter(System.Numerics.Vector3)">
             <summary>
@@ -2729,6 +2735,29 @@
             <summary>
             Gets the size of the shape type stored in this batch in bytes.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ShapeBatch.RayTest``1(System.Int32,BepuPhysics.RigidPose@,BepuPhysics.Trees.RayData@,System.Single@,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Tests a ray against a shape in the batch.
+            </summary>
+            <typeparam name="TRayHitHandler">Type of the hit handler that will have results reported to it.</typeparam>
+            <param name="shapeIndex">Index of the shape in the batch to test.</param>
+            <param name="pose">Pose of the shape to use for the test.</param>
+            <param name="ray">Ray to test against the shape.</param>
+            <param name="maximumT">The maximum parametric distance along the line. May be mutated by the hit handler.</param>
+            <param name="hitHandler">Hit handler that will process the reported hits.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
+        </member>
+        <member name="M:BepuPhysics.Collidables.ShapeBatch.RayTest``1(System.Int32,BepuPhysics.RigidPose@,BepuPhysics.Trees.RaySource@,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Tests a bunch of rays against a shape in the batch.
+            </summary>
+            <typeparam name="TRayHitHandler">Type of the hit handler that will have results reported to it.</typeparam>
+            <param name="shapeIndex">Index of the shape in the batch to test.</param>
+            <param name="pose">Pose of the shape to use for the test.</param>
+            <param name="rays">Rays to test against the shape.</param>
+            <param name="hitHandler">Hit handler that will process the reported hits.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
         </member>
         <member name="M:BepuPhysics.Collidables.ShapeBatch.GetShapeData(System.Int32,System.Void*@,System.Int32@)">
             <summary>
@@ -3105,7 +3134,7 @@
             Releases memory used by the broad phase. Leaves the broad phase unusable.
             </summary>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@,System.Int32)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@,System.Int32)">
             <summary>
             Finds any intersections between a ray and leaf bounding boxes.
             </summary>
@@ -3113,10 +3142,11 @@
             <param name="origin">Origin of the ray to cast.</param>
             <param name="direction">Direction of the ray to cast.</param>
             <param name="maximumT">Maximum length of the ray traversal in units of the direction's length.</param>
+            <param name="pool">The buffer pool used for any temporary allocations required during the traversal.</param>
             <param name="rayTester">Callback to execute on ray-leaf bounding box intersections.</param>
             <param name="id">User specified id of the ray.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Finds any intersections between a swept bounding box and leaf bounding boxes.
             </summary>
@@ -3125,9 +3155,10 @@
             <param name="max">Maximum bounds of the box to sweep.</param>
             <param name="direction">Direction along which to sweep the bounding box.</param>
             <param name="maximumT">Maximum length of the sweep in units of the direction's length.</param>
+            <param name="pool">Pool to use for temporary allocations required by the traversal, if any.</param>
             <param name="sweepTester">Callback to execute on sweep-leaf bounding box intersections.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(BepuUtilities.BoundingBox@,System.Numerics.Vector3,System.Single,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.Sweep``1(BepuUtilities.BoundingBox@,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Finds any intersections between a swept bounding box and leaf bounding boxes.
             </summary>
@@ -3135,23 +3166,26 @@
             <param name="boundingBox">Bounding box to sweep.</param>
             <param name="direction">Direction along which to sweep the bounding box.</param>
             <param name="maximumT">Maximum length of the sweep in units of the direction's length.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
             <param name="sweepTester">Callback to execute on sweep-leaf bounding box intersections.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(System.Numerics.Vector3,System.Numerics.Vector3,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(System.Numerics.Vector3,System.Numerics.Vector3,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Finds any overlaps between a bounding box and leaf bounding boxes.
             </summary>
             <typeparam name="TOverlapEnumerator">Type of the enumerator to call for overlaps.</typeparam>
             <param name="min">Minimum bounds of the query box.</param>
             <param name="max">Maximum bounds of the query box.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
             <param name="overlapEnumerator">Enumerator to call for overlaps.</param>
         </member>
-        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(BepuUtilities.BoundingBox@,``0@)">
+        <member name="M:BepuPhysics.CollisionDetection.BroadPhase.GetOverlaps``1(BepuUtilities.BoundingBox@,BepuUtilities.Memory.BufferPool,``0@)">
             <summary>
             Finds any overlaps between a bounding box and leaf bounding boxes.
             </summary>
             <typeparam name="TOverlapEnumerator">Type of the enumerator to call for overlaps.</typeparam>
             <param name="boundingBox">Query box bounds.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
             <param name="overlapEnumerator">Enumerator to call for overlaps.</param>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.IBroadPhaseSweepTester">
@@ -3441,6 +3475,17 @@
             <summary>
             Gets the nubmer of pairs which would ideally be gathered together before executing a wide test.
             </summary>
+        </member>
+        <member name="M:BepuPhysics.CollisionDetection.CollisionTasks.IBoundsQueryableCompound.FindLocalOverlaps``1(System.Numerics.Vector3,System.Numerics.Vector3,BepuUtilities.Memory.BufferPool,BepuPhysics.Collidables.Shapes,``0@)">
+            <summary>
+            Finds the indices of all children whose local-space bounding boxes overlap the given local-space AABB.
+            </summary>
+            <typeparam name="TEnumerator">Type of the enumerator that receives child indices.</typeparam>
+            <param name="min">Minimum corner of the query AABB in the compound's local space.</param>
+            <param name="max">Maximum corner of the query AABB in the compound's local space.</param>
+            <param name="pool">Pool used for any temporary allocations during traversal.</param>
+            <param name="shapes">Shape collection used to look up child bounds for compounds with heterogeneous children. May be null for homogeneous compounds that don't require it.</param>
+            <param name="enumerator">Enumerator that receives the indices of overlapping children.</param>
         </member>
         <member name="T:BepuPhysics.CollisionDetection.CollisionTasks.ICollisionPair`1">
             <summary>
@@ -3894,6 +3939,14 @@
             <summary>
             Normal of a triangle detected as being infringed by the manifold associated with this triangle in mesh space.
             </summary>
+        </member>
+        <member name="T:BepuPhysics.CollisionDetection.MeshReductionThunks`1">
+            <summary>
+            Type-specialized thunks that bridge MeshReduction's type-erased function pointer fields back to a concrete mesh shape type.
+            The static fields here are populated once per closed TMesh by the runtime, and the JIT specializes the bodies so that
+            the calls into <typeparamref name="TMesh"/> are devirtualized.
+            </summary>
+            <typeparam name="TMesh">Concrete homogeneous triangle compound shape type.</typeparam>
         </member>
         <member name="M:BepuPhysics.CollisionDetection.NarrowPhase.TryGetContactConstraintAccessor(System.Int32,BepuPhysics.CollisionDetection.ContactConstraintAccessor@)">
             <summary>
@@ -5403,9 +5456,42 @@
             Spring frequency and damping parameters.
             </summary>
         </member>
+        <member name="T:BepuPhysics.Constraints.ServoSettings">
+            <summary>
+            Describes how a quickly and strongly a servo constraint should move towards a position target.
+            </summary>
+            <remarks>
+            The constraint will attempt to reach a speed between <see cref="F:BepuPhysics.Constraints.ServoSettings.BaseSpeed"/> and <see cref="F:BepuPhysics.Constraints.ServoSettings.MaximumSpeed"/> using a force no greater than <see cref="F:BepuPhysics.Constraints.ServoSettings.MaximumForce"/>.
+            The speed that the constraint will attempt to use before clamping is based on its spring settings.
+            <para>
+            Note that a 'position' target for the purposes of this type could also be an orientation target. For those constraints, speeds/forces are in terms of angular speed and torque.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:BepuPhysics.Constraints.ServoSettings.MaximumSpeed">
+            <summary>
+            Maximum speed that the constraint can try to use to move towards the target.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Constraints.ServoSettings.BaseSpeed">
+            <summary>
+            Minimum speed that the constraint will try to use to move towards the target.
+            If the speed implied by the spring configuration is higher than this, the servo will attempt to use the higher speed.
+            Will be clamped by the MaximumSpeed.
+            </summary>
+        </member>
+        <member name="F:BepuPhysics.Constraints.ServoSettings.MaximumForce">
+            <summary>
+            The maximum force that the constraint can apply to move towards the target.
+            </summary>
+            <remarks>
+            This value is specified in terms of force: a change in momentum over time. It is approximated as a maximum impulse (an instantaneous change in momentum) on a per-substep basis. In other words, for a given velocity iteration, the constraint's impulse can be no larger than <see cref="F:BepuPhysics.Constraints.ServoSettings.MaximumForce"/> * dt where dt is the substep duration.
+            </remarks>
+        </member>
         <member name="P:BepuPhysics.Constraints.ServoSettings.Default">
             <summary>
             Gets settings representing a servo with unlimited force, speed, and no base speed.
+            A servo with these settings will behave like a conventional position-level constraint.
             </summary>
         </member>
         <member name="M:BepuPhysics.Constraints.ServoSettings.Validate(BepuPhysics.Constraints.ServoSettings@)">
@@ -5414,6 +5500,14 @@
             </summary>
             <param name="settings">Settings to check.</param>
             <returns>True if the settings contain valid values, false otherwise.</returns>
+        </member>
+        <member name="M:BepuPhysics.Constraints.ServoSettings.#ctor(System.Single,System.Single,System.Single)">
+            <summary>
+            Creates a new servo settings instance with the specified properties.
+            </summary>
+            <param name="maximumSpeed">Sets the <see cref="F:BepuPhysics.Constraints.ServoSettings.MaximumSpeed"/> property.</param>
+            <param name="baseSpeed">Sets the <see cref="F:BepuPhysics.Constraints.ServoSettings.BaseSpeed"/> property.</param>
+            <param name="maximumForce">Sets the <see cref="F:BepuPhysics.Constraints.ServoSettings.MaximumForce"/> property.</param>
         </member>
         <member name="M:BepuPhysics.Constraints.SpringSettingsWide.ComputeSpringiness(BepuPhysics.Constraints.SpringSettingsWide@,System.Single,System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@,System.Numerics.Vector{System.Single}@)">
             <summary>
@@ -5788,7 +5882,7 @@
         </member>
         <member name="T:BepuPhysics.Constraints.VolumeConstraint">
             <summary>
-            Constrains the volume of a tetrahedron connecting the centers of four bodies to match a goal volume. 
+            Constrains the volume of a tetrahedron connecting the centers of four bodies to match a goal volume.
             Scaled volume computed from (ab x ac) * ad; the volume may be negative depending on the winding of the tetrahedron.
             </summary>
         </member>
@@ -6421,7 +6515,7 @@
             Clears the simulation of every object and returns all pooled memory to the buffer pool. Leaves the simulation in an unusable state.
             </summary>
         </member>
-        <member name="M:BepuPhysics.Simulation.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,``0@,System.Int32)">
+        <member name="M:BepuPhysics.Simulation.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@,System.Int32)">
             <summary>
             Intersects a ray against the simulation.
             </summary>
@@ -6429,6 +6523,7 @@
             <param name="origin">Origin of the ray to cast.</param>
             <param name="direction">Direction of the ray to cast.</param>
             <param name="maximumT">Maximum length of the ray traversal in units of the direction's length.</param>
+            <param name="pool">Pool used for temporary allocations required by the test, if any.</param>
             <param name="hitHandler">callbacks to execute on ray-object intersections.</param>
             <param name="id">User specified id of the ray.</param>
         </member>
@@ -6542,7 +6637,8 @@
             <summary>
             Checks whether the child of a collidable should be tested against a ray. Only called by shape types that can have more than one child.
             </summary>
-            <param name="childIndex">Index of the candidate in the parent collidable.</param>
+            <param name="childIndex">Index of the candidate in the parent collidable.
+            <para>For compounds, this is the index of the child in the child array. For meshes, this is the triangle index. For convex shapes or other types that don't have multiple children, this is always zero.</para></param>
             <returns>True if the child should be tested by the ray, false otherwise.</returns>
         </member>
         <member name="M:BepuPhysics.IShapeRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3,System.Int32)">
@@ -6553,7 +6649,8 @@
             <param name="maximumT">Maximum distance along the ray that the traversal is allowed to go in units of ray direction length. Can be set to limit future tests.</param>
             <param name="t">Distance along the ray to the impact in units of ray direction length. In other words, hitLocation = ray.Origin + ray.Direction * t.</param>
             <param name="normal">Surface normal at the hit location.</param>
-            <param name="childIndex">Index of the hit child. For convex shapes or other types that don't have multiple children, this is always zero.</param>
+            <param name="childIndex">Index of the hit child. 
+            <para>For compounds, this is the index of the child in the child array. For meshes, this is the triangle index. For convex shapes or other types that don't have multiple children, this is always zero.</para></param>
         </member>
         <member name="T:BepuPhysics.IRayHitHandler">
             <summary>
@@ -6572,7 +6669,8 @@
             Checks whether the child of a collidable should be tested against a ray. Only called by shape types that can have more than one child.
             </summary>
             <param name="collidable">Parent of the candidate.</param>
-            <param name="childIndex">Index of the candidate in the parent collidable.</param>
+            <param name="childIndex">Index of the candidate child in its parent collidable.
+            <para>For compounds, this is the index of the child in the child array. For meshes, this is the triangle index. For convex shapes or other types that don't have multiple children, this is always zero.</para></param>
             <returns>True if the child should be tested by the ray, false otherwise.</returns>
         </member>
         <member name="M:BepuPhysics.IRayHitHandler.OnRayHit(BepuPhysics.Trees.RayData@,System.Single@,System.Single,System.Numerics.Vector3,BepuPhysics.Collidables.CollidableReference,System.Int32)">
@@ -6584,7 +6682,8 @@
             <param name="t">Distance along the ray to the impact in units of ray direction length. In other words, hitLocation = ray.Origin + ray.Direction * t.</param>
             <param name="normal">Surface normal at the hit location.</param>
             <param name="collidable">Collidable hit by the ray.</param>
-            <param name="childIndex">Index of the hit child. For convex shapes or other types that don't have multiple children, this is always zero.</param>
+            <param name="childIndex">Index of the hit child in its parent collidable.
+            <para>For compounds, this is the index of the child in the child array. For meshes, this is the triangle index. For convex shapes or other types that don't have multiple children, this is always zero.</para></param>
         </member>
         <member name="T:BepuPhysics.ISweepHitHandler">
             <summary>
@@ -6603,7 +6702,8 @@
             Checks whether to run a detailed sweep test against a target collidable's child.
             </summary>
             <param name="collidable">Collidable to check.</param>
-            <param name="child">Index of the child in the collidable to check.</param>
+            <param name="childIndex">Index of the child in the collidable to check.
+            <para>For compounds, this is the index of the child in the child array. For meshes, this is the triangle index. For convex shapes or other types that don't have multiple children, this is always zero.</para></param>
             <returns>True if the sweep test should be attempted, false otherwise.</returns>
         </member>
         <member name="M:BepuPhysics.ISweepHitHandler.OnHit(System.Single@,System.Single,System.Numerics.Vector3,System.Numerics.Vector3,BepuPhysics.Collidables.CollidableReference)">
@@ -7356,6 +7456,11 @@
             Default awakening filter that only wakes up dynamic bodies. Kinematic bodies do not respond to any kind of dynamic simulation, so they won't respond to the change in statics.
             </summary>
         </member>
+        <member name="T:BepuPhysics.StaticsShouldntAwakenBodies">
+            <summary>
+            Awakening filter that prevents any bodies from being awoken by the static's state change.
+            </summary>
+        </member>
         <member name="T:BepuPhysics.Static">
             <summary>
             Stores data for a static collidable in the simulation. Statics can be posed and collide, but have no velocity and no dynamic behavior.
@@ -7486,6 +7591,25 @@
             </summary>
             <param name="description">Description of the static to add.</param>
             <returns>Handle of the new static.</returns>
+        </member>
+        <member name="M:BepuPhysics.Statics.AddWithoutAwakeningBodies(BepuPhysics.StaticDescription@)">
+            <summary>
+            Adds a new static body to the simulation. No attempt is made to awaken sleeping bodies near the static.
+            </summary>
+            <param name="description">Description of the static to add.</param>
+            <returns>Handle of the new static.</returns>
+            <remarks>
+            For most use cases, defaulting to the <see cref="M:BepuPhysics.Statics.Add(BepuPhysics.StaticDescription@)"/> function is recommended;
+            it can help avoid surprising behavior by waking up sleeping bodies near the new static.
+            The query does, however, carry a nonzero cost.
+            <para>
+            If many statics are being added at once, particularly if the new statics overlap with a lot of existing statics,
+            and there's no need to awaken sleeping bodies, this function can be used to avoid the cost of the query.
+            </para>
+            <para>
+            Other custom filters can be used to control which bodies are awoken; see <see cref="M:BepuPhysics.Statics.Add``1(BepuPhysics.StaticDescription@,``0@)"/> and the <see cref="T:BepuPhysics.IStaticChangeAwakeningFilter"/> interface.
+            </para>
+            </remarks>
         </member>
         <member name="M:BepuPhysics.Statics.SetShape``1(BepuPhysics.StaticHandle,BepuPhysics.Collidables.TypedIndex,``0@)">
             <summary>
@@ -7783,19 +7907,17 @@
             <param name="bounds">Extents of the leaf bounds.</param>
             <param name="pool">Resource pool to use if resizing is required.</param>
             <returns>Index of the leaf allocated in the tree's leaf array.</returns>
-            <remarks>Performs incrementally refining tree rotations down along the insertion path, unlike <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
-            For a given tree, this is slightly slower than <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/> and slightly faster than <see cref="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
-            Trees built with repeated insertions of this kind tend to have decent quality, but slightly worse than <see cref="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.</remarks>
+            <remarks>Performs incrementally refining tree rotations when returning along the insertion path, unlike <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
+            This is about twice the cost of <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/> (outside of pathological cases).<para/>
+            Trees built with repeated insertions of this kind tend to have better quality and fewer pathological cases compared to <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.</remarks>
         </member>
-        <member name="M:BepuPhysics.Trees.Tree.AddWithBottomUpRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)">
+        <member name="M:BepuPhysics.Trees.Tree.EstimateCost(BepuPhysics.Trees.NodeChild)">
             <summary>
-            Adds a leaf to the tree with the given bounding box and returns the index of the added leaf.
+            Computes a local cost estimate for a node child using its bounds and leaf count.
+            Handy for 
             </summary>
-            <param name="bounds">Extents of the leaf bounds.</param>
-            <param name="pool">Resource pool to use if resizing is required.</param>
-            <returns>Index of the leaf allocated in the tree's leaf array.</returns>
-            <remarks>Performs incrementally refining tree rotations up along the insertion path, unlike <see cref="M:BepuPhysics.Trees.Tree.AddWithoutRefinement(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>.<para/>
-            Trees built with repeated insertions of this kind tend to have slightly better quality than <see cref="M:BepuPhysics.Trees.Tree.Add(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool)"/>, but it is also slightly more expensive.</remarks>
+            <param name="child">Child to estimate the cost of.</param>
+            <returns>Estimated cost of the child.</returns>
         </member>
         <member name="T:BepuPhysics.Trees.Tree.BinnedBuildWorkerContext">
             <summary>
@@ -8056,6 +8178,18 @@
             Caches input and output for the multithreaded execution of a tree's refit and refinement operations.
             </summary>
         </member>
+        <member name="M:BepuPhysics.Trees.Tree.RayCast``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Single@,BepuUtilities.Memory.BufferPool,``0@,System.Int32)">
+            <summary>
+            Tests a ray against the tree and invokes the <paramref name="leafTester"/> for each leaf node that the ray intersects.
+            </summary>
+            <typeparam name="TLeafTester">The type of the <see cref="T:BepuPhysics.Trees.IRayLeafTester"/> used to process the intersecting leaves.</typeparam>
+            <param name="origin">The origin point of the ray.</param>
+            <param name="direction">The direction of the ray.</param>
+            <param name="maximumT">The maximum parametric distance along the ray to test. This value may be modified by the leaf tester during traversal.</param>
+            <param name="pool">The buffer pool used for temporary allocations during the operation. Only used if the tree is pathologically deep; stack memory is used preferentially.</param>
+            <param name="leafTester">A reference to the tester that processes the indices of intersecting leaves.</param>
+            <param name="id">An optional identifier for the ray that can be used by the leaf tester.</param>
+        </member>
         <member name="M:BepuPhysics.Trees.Tree.TryPushChildForRootRefinement(System.Int32,BepuUtilities.Memory.Buffer{System.Numerics.Vector{System.Int32}},System.Int32,System.Int32,BepuPhysics.Trees.NodeChild@,BepuUtilities.Collections.QuickList{System.ValueTuple{System.Int32,System.Int32}}@,BepuUtilities.Collections.QuickList{BepuPhysics.Trees.NodeChild}@)">
             <summary>
             Checks if a child should be a subtree in the root refinement. If so, it's added to the list. Otherwise, it's pushed onto the stack.
@@ -8272,6 +8406,61 @@
             Executes a single worker of the multithreaded self test.
             </summary>
             <param name="workerIndex">Index of the worker executing this set of tests.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.ConvertBoxToCentroidWithExtent(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3@,System.Numerics.Vector3@)">
+            <summary>
+            Converts a bounding box defined by minimum and maximum corners into a centroid and half-extent representation.
+            </summary>
+            <param name="min">The minimum corner of the bounding box.</param>
+            <param name="max">The maximum corner of the bounding box.</param>
+            <param name="origin">The computed centroid of the bounding box.</param>
+            <param name="expansion">The computed half-extents of the bounding box.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Sweep``1(System.Numerics.Vector3,System.Numerics.Vector3,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Performs a sweep test of an axis-aligned bounding box against the tree and invokes the <paramref name="sweepTester"/> for each intersecting leaf.
+            </summary>
+            <typeparam name="TLeafTester">The type of the <see cref="T:BepuPhysics.Trees.ISweepLeafTester"/> used to process the intersecting leaves.</typeparam>
+            <param name="min">The minimum corner of the axis-aligned bounding box to sweep.</param>
+            <param name="max">The maximum corner of the axis-aligned bounding box to sweep.</param>
+            <param name="direction">The direction of the sweep.</param>
+            <param name="maximumT">The maximum parametric distance along the sweep direction to test.</param>
+            <param name="sweepTester">A reference to the tester that processes the indices of intersecting leaves.</param>
+            <param name="pool">The buffer pool used for temporary allocations during the operation. Only used if the tree is pathologically deep; stack memory is used preferentially.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.Sweep``1(BepuUtilities.BoundingBox@,System.Numerics.Vector3,System.Single,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Performs a sweep test of a bounding box against the tree and invokes the <paramref name="sweepTester"/> for each intersecting leaf.
+            </summary>
+            <typeparam name="TLeafTester">The type of the <see cref="T:BepuPhysics.Trees.ISweepLeafTester"/> used to process the intersecting leaves.</typeparam>
+            <param name="boundingBox">The bounding box to sweep.</param>
+            <param name="direction">The direction of the sweep.</param>
+            <param name="maximumT">The maximum parametric distance along the sweep direction to test.</param>
+            <param name="sweepTester">A reference to the tester that processes the indices of intersecting leaves.</param>
+            <param name="pool">The buffer pool used for temporary allocations during the operation. Only used if the tree is pathologically deep; stack memory is used preferentially.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetOverlaps``1(BepuUtilities.BoundingBox,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Finds and processes all leaves with bounding boxes that overlap the specified axis-aligned bounding box. The <paramref name="leafEnumerator"/> is invoked
+            for each overlapping element.
+            </summary>
+            <typeparam name="TEnumerator">The type of the <see cref="T:BepuUtilities.IBreakableForEach`1"/> enumerator used to process the overlapping elements.</typeparam>
+            <param name="boundingBox">Query to test against the bounding volume hierarchy.</param>
+            <param name="pool">The buffer pool used for temporary allocations during the operation. Only used if the tree is pathologically deep; stack memory is used preferentially.</param>
+            <param name="leafEnumerator">A reference to the enumerator that processes the indices of overlapping elements. The enumerator can
+            terminate early by returning <see langword="false"/> from its iteration.</param>
+        </member>
+        <member name="M:BepuPhysics.Trees.Tree.GetOverlaps``1(System.Numerics.Vector3,System.Numerics.Vector3,BepuUtilities.Memory.BufferPool,``0@)">
+            <summary>
+            Finds and processes all leaves with bounding boxes that overlap the specified axis-aligned bounding box. The <paramref name="leafEnumerator"/> is invoked
+            for each overlapping element.
+            </summary>
+            <typeparam name="TEnumerator">The type of the <see cref="T:BepuUtilities.IBreakableForEach`1"/> enumerator used to process the overlapping elements.</typeparam>
+            <param name="min">The minimum corner of the axis-aligned bounding box.</param>
+            <param name="max">The maximum corner of the axis-aligned bounding box.</param>
+            <param name="pool">The buffer pool used for temporary allocations during the operation. Only used if the tree is pathologically deep; stack memory is used preferentially.</param>
+            <param name="leafEnumerator">A reference to the enumerator that processes the indices of overlapping elements. The enumerator can
+            terminate early by returning <see langword="false"/> from its iteration.</param>
         </member>
         <member name="T:BepuPhysics.Trees.IOverlapHandler">
             <summary>

@@ -16,6 +16,7 @@ using FGEGraphics.GraphicsHelpers;
 
 namespace FGEGraphics.AudioSystem.AudioInternals;
 
+#pragma warning disable CA1416 // Validate platform compatibility
 /// <summary>Helper for audio playback using WASAPI (Windows Audio Session API). As the name implies, this is Windows-only, however it is a very direct proper native lib, just one thin OS level above the hardware driver.</summary>
 public partial class WasApiAudioProvider : GenericAudioBacker
 {
@@ -645,3 +646,4 @@ public partial class WasApiAudioProvider : GenericAudioBacker
         // Not needed
     }
 }
+#pragma warning restore CA1416 // Validate platform compatibility

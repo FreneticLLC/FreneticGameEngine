@@ -21,5 +21,5 @@ out vec4 color;
 void main()
 {
 	vec4 tcolor = texture(tex, fi.texcoord);
-	color = vec4(fi.color.xyz * tcolor.xyz, ((tcolor.x + tcolor.y + tcolor.z) / 3) * fi.color.w);
+	color = vec4(fi.color.xyz * tcolor.xyz, (tcolor.x + tcolor.y + tcolor.z) / 3) * fi.color.w;
 }
