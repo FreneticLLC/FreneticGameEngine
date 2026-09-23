@@ -16,6 +16,8 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace FGEGraphics.UISystem.Elements;
 
+// FIXME: this is going away ASAP
+
 /// <summary>Represents a scrollable box containing other elements.</summary>
 // TODO: option to automatically calculate max scroll based on added elements
 // TODO: add utility list + scrollgroup class

@@ -773,15 +773,26 @@ public class UIElement
     public virtual void RenderAll(double delta)
     {
         GraphicsUtil.CheckError("UIElement - PreRender");
+        bool canScissor = Scissor && Width >= 0 && Height >= 0;
         // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
         // TODO: handle negative width/height
-        if (Scissor)
+        if (canScissor)
         {
             View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
         }
         if (RenderMode == UIRenderMode.FULL)
         {
-            Render(delta);
+            try
+            {
+                Render(delta);
+            }
+            catch (Exception e)
+            {
+                Logs.Debug(e.Message);
+                Renderer2D.SetColor(Color4F.Red);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height);
+                Renderer2D.SetColor(Color4F.White);
+            }
         }
         GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
         if (RenderMode != UIRenderMode.NONE)
@@ -794,7 +805,7 @@ public class UIElement
                 }
             }
         }
-        if (Scissor)
+        if (canScissor)
         {
             View.Rendering.PopScissor(View.UIContext);
         }
@@ -982,7 +993,7 @@ public class UIElement
 
     // TODO
     /// <inheritdoc/>
-    public override string ToString() => Name;
+    public override string ToString() => $"{Name}, {Position}, {Size}, {Rotation}, {Scale}";
 
     // TODO: Add NONE?
     /// <summary>Flags to toggle stages of <see cref="UpdateTransforms(double, Vector3, TransformFlags)"/>.</summary>

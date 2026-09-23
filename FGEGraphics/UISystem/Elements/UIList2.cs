@@ -83,8 +83,10 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
     // TODO: use Style.Inset instead of padding
     public override void UpdateSize(double delta, OpenTK.Mathematics.Vector3 rotation)
     {
+        // TODO: temporary hack
+        IEnumerable<UIElement> children = Children.Where(child => child.RenderMode == UIRenderMode.FULL);
         // this doesn't make any sense
-        foreach (UIElement child in Children)
+        foreach (UIElement child in children)
         {
             child.UpdateTransforms(delta, rotation, TransformFlags.SCALE | TransformFlags.SIZE);
         }
@@ -96,14 +98,14 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
             return;
         }
         ElementInternal.LastSize = Size;
-        if (Children.Count == 0)
+        if (!children.Any())
         {
             Size = new();
             Layout.SetSize(Size);
             return;
         }
-        int length = Children.Sum(child => Vertical ? child.Height : child.Width) + Spacing * (Children.Count - 1) + Style.Padding * 2;
-        int maxDepth = Children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding + PaddingLeft;
+        int length = children.Sum(child => Vertical ? child.Height : child.Width) + Spacing * (Children.Count - 1) + Style.Padding * 2;
+        int maxDepth = children.Max(child => Vertical ? child.Width : child.Height) + Style.Padding + PaddingLeft;
         Size = Vertical ? new(maxDepth, length) : new(length, maxDepth);
         Layout.SetSize(Size);
     }
@@ -114,6 +116,11 @@ public class UIList2 : UIElement, IStylingAcceptor<UIList2.ListStyling>
         for (int i = 0; i < Children.Count; i++)
         {
             UIElement child = IsReversed ? Children[^(i + 1)] : Children[i];
+            // TODO: temporary hack
+            if (child.RenderMode != UIRenderMode.FULL)
+            {
+                continue;
+            }
             int inset = PaddingLeft + Alignment.GetPosition((Vertical ? Width : Height) - (PaddingLeft + Style.Padding), Vertical ? child.Width : child.Height);
             Vector2i pos = Vertical ? new(X + inset, Y + Style.Padding + offset) : new(X + Style.Padding + offset, Y + inset);
             child.ElementInternal.LastPosition = child.Position = pos;

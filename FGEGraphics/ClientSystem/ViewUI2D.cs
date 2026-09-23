@@ -6,12 +6,6 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FreneticUtilities.FreneticExtensions;
 using FGECore;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
@@ -19,14 +13,22 @@ using FGECore.StackNoteSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
+using FGEGraphics.UISystem;
+using FGEGraphics.UISystem.Elements;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using FGEGraphics.UISystem.Elements;
-using FGEGraphics.UISystem;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static FGEGraphics.UISystem.UILayout.InternalData;
 
 namespace FGEGraphics.ClientSystem;
 
@@ -80,7 +82,15 @@ public class ViewUI2D
     public UIElement HeldElement;
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
-    public bool IsDebug;
+    public bool IsDebug
+    {
+        get;
+        set
+        {
+            field = value;
+            // TODO: jank
+        }
+    }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
@@ -90,6 +100,8 @@ public class ViewUI2D
 
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
+
+        public UIDebugPanel DebugPanel;
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -105,23 +117,32 @@ public class ViewUI2D
         Client.Window.KeyDown += HandleKeyEvent;
     }
 
-    /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
-    public void DrawDebugOutlines()
+    public IEnumerable<UIElement> AllChildren()
     {
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        foreach (UIElement child in CurrentScreen.AllChildren())
         {
-            Engine.Textures.White.Bind();
-            Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
-            Renderer2D.SetColor(outlineColor);
-            Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
-            // TODO: rendering stroke thickness
-            if (element == HeldElement)
-            {
-                Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
-                Rendering.RenderRectangle(UIContext, element.X + 2, element.Y + 2, element.X + element.Width - 2, element.Y + element.Height - 2, new(-0.5f, -0.5f, element.Rotation), true);
-            }
-            Renderer2D.SetColor(Color4F.White);
+            yield return child;
         }
+        if (Internal.DebugPanel is not null)
+        {
+            //yield return Internal.DebugPanel;
+        }
+    }
+
+    /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
+    public void DrawDebugOutline(UIElement element)
+    {
+        Engine.Textures.White.Bind();
+        Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
+        Renderer2D.SetColor(outlineColor);
+        Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+        // TODO: rendering stroke thickness
+        if (element == HeldElement)
+        {
+            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
+            Rendering.RenderRectangle(UIContext, element.X + 2, element.Y + 2, element.X + element.Width - 2, element.Y + element.Height - 2, new(-0.5f, -0.5f, element.Rotation), true);
+        }
+        Renderer2D.SetColor(Color4F.White);
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
@@ -157,18 +178,21 @@ public class ViewUI2D
         Shader s = Client.FontSets.FixToShader;
         Client.FontSets.FixToShader = Client.Shaders.ColorMult2D.UnderlyingShader;
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        foreach (UIElement element in AllChildren())
         {
             element.UpdateStyle();
         }
-        for (int i = 0; i < 16; i++) // TODO: this seems reckless
+        for (int i = 0; i < 8; i++) // TODO: this seems reckless
         {
-            foreach (UIElement element in CurrentScreen.AllChildren(filter: element => element.TransformSelf))
+            foreach (UIElement element in AllChildren())
             {
-                element.UpdateTransforms(Client.Delta, Vector3.Zero);
+                if (element.TransformSelf)
+                {
+                    element.UpdateTransforms(Client.Delta, Vector3.Zero);
+                }
             }
             bool anyUpdated = false;
-            foreach (UIElement element in CurrentScreen.AllChildren())
+            foreach (UIElement element in AllChildren())
             {
                 anyUpdated |= element.HandleTransforms();
             }
@@ -176,12 +200,8 @@ public class ViewUI2D
             {
                 break;
             }
-            if (i == 15)
-            {
-                Logs.Warning("WARNING WARNING PASSED 16 TIMES!!!");
-            }
         }
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        foreach (UIElement element in AllChildren())
         {
             if (!element.ElementInternal.HasDrawn)
             {
@@ -191,18 +211,13 @@ public class ViewUI2D
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
+        Internal.DebugPanel?.RenderAll(Client.Delta);
         if (IsDebug)
         {
-            DrawDebugOutlines();
-            /*if (HeldElement is not null)
+            foreach (UIElement element in AllChildren())
             {
-                UIDebugPanel panel = new(HeldElement, UIDebugPanel.Styling, new UILayout().SetSize(300, 200));
-                foreach (var child in panel.AllChildren())
-                {
-                    child.View = this;
-                }
-                panel.RenderAll(0.0);
-            }*/
+                DrawDebugOutline(element);
+            }
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;
@@ -222,13 +237,27 @@ public class ViewUI2D
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.TickAll(Client.Delta);
         // TODO: crude and probably slow
-        ICollection<UIElement> elements = [.. CurrentScreen.AllChildren()];
+        ICollection<UIElement> elements = [.. AllChildren()];
         foreach (UIElement element in elements.Reverse())
         {
             if (element.IsValid)
             {
                 element.TickInteraction(mouseX, mouseY, scrollDelta);
             }
+        }
+        if (HeldElement is not null && IsDebug && Internal.DebugPanel is null)
+        {
+            Internal.DebugPanel = new(HeldElement, UIDebugPanel.Styling with
+            {
+                TextFont = Client.FontSets.Standard,
+                TextBaseColor = "^0"
+            }, new UILayout().SetSize(300, 200));
+            CurrentScreen.AddChild(Internal.DebugPanel);
+        }
+        if ((HeldElement is null || !IsDebug) && Internal.DebugPanel is not null)
+        {
+            CurrentScreen.RemoveChild(Internal.DebugPanel);
+            Internal.DebugPanel = null;
         }
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
