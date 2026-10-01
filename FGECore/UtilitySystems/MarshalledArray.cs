@@ -40,6 +40,9 @@ public unsafe class MarshalledArray<T>(int size) : IDisposable where T : unmanag
             {
                 throw new ArgumentException($"Index {index} is out of range for array of size {size}.");
             }
+#if DEBUG
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+#endif
             return ref Data[index];
         }
     }
@@ -55,8 +58,9 @@ public unsafe class MarshalledArray<T>(int size) : IDisposable where T : unmanag
             return;
         }
         IsDisposed = true;
-        Marshal.FreeHGlobal((nint)Data);
+        nint dataRef = (nint)Data;
         Data = null;
+        Marshal.FreeHGlobal(dataRef);
     }
 
     /// <summary>Finalizer for the MarshalledArray class.</summary>
