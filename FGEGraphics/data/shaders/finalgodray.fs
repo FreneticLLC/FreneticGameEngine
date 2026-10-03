@@ -61,6 +61,10 @@ vec4 raytrace(in vec3 reflectionVector, in float startDepth) // Trace a ray acro
 {
 	float stepSize = 0.01;
 	reflectionVector = normalize(reflectionVector) * stepSize;
+	if (reflectionVector.z <= 0.0)
+	{
+		return vec4(0.0);
+	}
 	vec2 sampledPosition = f_texcoord;
 	float currentDepth = startDepth;
 	while(sampledPosition.x <= 1.0 && sampledPosition.x >= 0.0 && sampledPosition.y <= 1.0 && sampledPosition.y >= 0.0)
