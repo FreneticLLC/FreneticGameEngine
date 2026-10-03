@@ -543,8 +543,8 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.Zero);
             View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_DynamicExposure);
             View.DrawBuffer(DrawBufferMode.ColorAttachment0);
+            GL.Viewport(0, 0, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD);
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
-            GL.UniformMatrix4(ShaderLocations.Common.WORLD, false, ref View3DInternalData.IdentityMatrix);
             GL.Uniform2(ShaderLocations.Deferred.HDRPass.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
             View3D.StandardBlend();
