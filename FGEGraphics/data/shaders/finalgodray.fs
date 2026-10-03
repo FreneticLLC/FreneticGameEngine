@@ -99,7 +99,8 @@ vec4 regularize(in vec4 input_r) // Limit the brightness of R/G/B values to 1.0 
 
 vec3 desaturate(in vec3 c) // Desaturates color to be closer to the specified desaturationColor uniform.
 {
-	return c * (1.0 - desaturationAmount) + desaturationColor * dot(c, vec3(1.0)) * desaturationAmount; // Roughly equivalent to a mix call. (Mix doesn't work well on all cards for some reason.)
+	// NOTE: in real human eyes, rods (that see in the dark) have a spectrum overlap with green and blue but not red cones
+	return c * (1.0 - desaturationAmount) + vec3((c.g + c.b) * 0.5) * desaturationAmount; // Roughly equivalent to a mix call. (Mix doesn't work well on all cards for some reason.)
 }
 
 vec4 getColorInt(in vec2 pos, in float exposure) // Grab the color of a pixel, after lighting. Regularized.
