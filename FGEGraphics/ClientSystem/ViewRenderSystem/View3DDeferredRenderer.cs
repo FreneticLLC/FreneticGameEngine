@@ -272,6 +272,10 @@ public class View3DDeferredRenderer : View3DCoreDataSet
     /// <summary>Adds decal data to the G-Buffer ("FBO").</summary>
     public void RenderPass_Decals()
     {
+        if (Config.DecalRender is null || !Config.ShouldRenderDecals())
+        {
+            return;
+        }
         Shaders.Deferred.GBuffer_Decals = Shaders.Deferred.GBuffer_Decals.Bind();
         State.DeferredTarget.Unbind(View);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_Decal);
@@ -662,9 +666,6 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         View.DrawBuffer(Internal.CurrentFBO == 0 ? DrawBufferMode.Back : DrawBufferMode.ColorAttachment0);
         State.BufferDontTouch = false;
         GraphicsUtil.CheckError("AFRFBO_1");
-        View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (int)State.DeferredTarget.FBO); // TODO: is view line and line below needed?
-        GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
-        GraphicsUtil.CheckError("AFRFBO_2");
         View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, Internal.FBO_GodRay_Main);
         GraphicsUtil.CheckError("AFRFBO_3");
         GL.BlitFramebuffer(0, 0, Config.Width, Config.Height, 0, 0, Config.Width, Config.Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);

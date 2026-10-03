@@ -34,6 +34,9 @@ public class View3DConfiguration
     /// <summary>Set this to whatever method call renders all 3D decals in this view.</summary>
     public Action<View3D> DecalRender = null;
 
+    /// <summary>Function that returns true if decals should render at all.</summary>
+    public Func<bool> ShouldRenderDecals = () => true;
+
     /// <summary>Set this to whatever method call renders all 3D objects in this view.</summary>
     public Action<View3D> Render3D = null;
 
