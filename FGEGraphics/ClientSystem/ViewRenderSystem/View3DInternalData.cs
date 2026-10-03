@@ -152,4 +152,22 @@ public class View3DInternalData
 
     /// <summary>Helper array to calculate dynamic exposure result data.</summary>
     public float[] DynamicExposureResult = new float[DYNAMIC_EXPOSURE_SPREAD * DYNAMIC_EXPOSURE_SPREAD];
+
+    /// <summary>Buffer for dynamic exposure readback data.</summary>
+    public GraphicsUtil.TrackedBuffer[] DynamicExposureBuffers = [];
+
+    /// <summary>GL Fences for dynamic exposure readback data.</summary>
+    public IntPtr[] DynamicExposureFences = [];
+
+    /// <summary>Index of the next dynamic exposure data calculation to read.</summary>
+    public int DynamicExposureReadIndex;
+    
+    /// <summary>Index of the next dynamic exposure data calculation to write into.</summary>
+    public int DynamicExposureWriteIndex;
+    
+    /// <summary>Number of dynamic exposure calculations that are still pending.</summary>
+    public int DynamicExposurePending;
+
+    /// <summary>True if there's any dynamic exposure data available, not necessarily current. False if dynamic exposure is turned off, or has not yet calculated since being turned on.</summary>
+    public bool DynamicExposureHasResult;
 }

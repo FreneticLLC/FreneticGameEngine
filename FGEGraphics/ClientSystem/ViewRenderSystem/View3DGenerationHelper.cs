@@ -122,9 +122,32 @@ public class View3DGenerationHelper : View3DCoreDataSet
         return temp;
     }
 
+    /// <summary>Destroy <see cref="View3DInternalData.DynamicExposureBuffers"/> and all associated data.</summary>
+    public void DestroyDynamicExposureReadbacks()
+    {
+        foreach (IntPtr fence in Internal.DynamicExposureFences)
+        {
+            if (fence != IntPtr.Zero)
+            {
+                GL.DeleteSync(fence);
+            }
+        }
+        foreach (GraphicsUtil.TrackedBuffer buffer in Internal.DynamicExposureBuffers)
+        {
+            buffer.Dispose();
+        }
+        Internal.DynamicExposureBuffers = [];
+        Internal.DynamicExposureFences = [];
+        Internal.DynamicExposureReadIndex = 0;
+        Internal.DynamicExposureWriteIndex = 0;
+        Internal.DynamicExposurePending = 0;
+        Internal.DynamicExposureHasResult = false;
+    }
+
     /// <summary>Internal call to generate light helpers.</summary>
     public void GenerateLightHelpers()
     {
+        DestroyDynamicExposureReadbacks();
         GraphicsUtil.CheckError("Load - View3D - Pre");
         if (State.DeferredTarget != null)
         {
@@ -195,6 +218,14 @@ public class View3DGenerationHelper : View3DCoreDataSet
         View.BindFramebuffer(FramebufferTarget.Framebuffer, Internal.FBO_DynamicExposure);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Internal.FBO_DynamicExposure_Texture.ID, 0);
         View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        Internal.DynamicExposureBuffers = GraphicsUtil.CreateBuffers("View3DGenHelper_DynamicExposure", 3, BufferTarget.PixelPackBuffer);
+        Internal.DynamicExposureFences = new IntPtr[Internal.DynamicExposureBuffers.Length];
+        foreach (GraphicsUtil.TrackedBuffer buffer in Internal.DynamicExposureBuffers)
+        {
+            buffer.Bind();
+            GL.BufferData(BufferTarget.PixelPackBuffer, Internal.DynamicExposureResult.Length * sizeof(float), IntPtr.Zero, BufferUsageHint.StreamRead);
+        }
+        GL.BindBuffer(BufferTarget.PixelPackBuffer, 0);
         GraphicsUtil.CheckError("Load - View3D - Light - HDR");
         // Shadow FBO
         int sq = Config.ShadowTexSize();
@@ -359,6 +390,7 @@ public class View3DGenerationHelper : View3DCoreDataSet
     /// </summary>
     public void Destroy()
     {
+        DestroyDynamicExposureReadbacks();
         if (Internal.CurrentFBO != 0)
         {
             GL.DeleteFramebuffer(Internal.CurrentFBO);

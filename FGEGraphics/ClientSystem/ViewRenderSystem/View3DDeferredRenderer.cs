@@ -533,7 +533,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
     /// <summary>Calculates the brightness value for High Dynamic Range rendering.</summary>
     public void RenderPass_HDR()
     {
-        if (Engine.Deferred_Lights && Engine.Deferred_DynamicExposure)
+        if (Engine.Deferred_Lights && Engine.Deferred_DynamicExposure && Internal.DynamicExposurePending < Internal.DynamicExposureBuffers.Length)
         {
             Shaders.Deferred.HDRPass.Bind();
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -547,6 +547,14 @@ public class View3DDeferredRenderer : View3DCoreDataSet
             GL.UniformMatrix4(ShaderLocations.Common.PROJECTION, false, ref View3DInternalData.SimpleOrthoMatrix);
             GL.Uniform2(ShaderLocations.Deferred.HDRPass.SCREEN_SIZE, new Vector2(Config.Width, Config.Height));
             Engine.Rendering.RenderRectangle(-1, -1, 1, 1);
+            View.FixVP();
+            Internal.DynamicExposureBuffers[Internal.DynamicExposureWriteIndex].Bind();
+            GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+            GL.ReadPixels(0, 0, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, PixelFormat.Red, PixelType.Float, IntPtr.Zero);
+            Internal.DynamicExposureFences[Internal.DynamicExposureWriteIndex] = GL.FenceSync(SyncCondition.SyncGpuCommandsComplete, WaitSyncFlags.None);
+            GL.BindBuffer(BufferTarget.PixelPackBuffer, 0);
+            Internal.DynamicExposureWriteIndex = (Internal.DynamicExposureWriteIndex + 1) % Internal.DynamicExposureBuffers.Length;
+            Internal.DynamicExposurePending++;
             View3D.StandardBlend();
             GraphicsUtil.CheckError("AfterHDRPass");
         }
@@ -1109,14 +1117,36 @@ public class View3DDeferredRenderer : View3DCoreDataSet
     /// <summary>Reads the DynamicExposure result from the GPU.</summary>
     public void ReadDynamicExposure()
     {
+        while (Internal.DynamicExposurePending > 0)
+        {
+            IntPtr fence = Internal.DynamicExposureFences[Internal.DynamicExposureReadIndex];
+            WaitSyncStatus status = GL.ClientWaitSync(fence, ClientWaitSyncFlags.SyncFlushCommandsBit, 0L);
+            if (status == WaitSyncStatus.TimeoutExpired)
+            {
+                break;
+            }
+            if (status == WaitSyncStatus.WaitFailed)
+            {
+                throw new InvalidOperationException("Failed to poll dynamic exposure readback completion.");
+            }
+            if (Engine.Deferred_DynamicExposure)
+            {
+                Internal.DynamicExposureBuffers[Internal.DynamicExposureReadIndex].Bind();
+                GL.GetBufferSubData(BufferTarget.PixelPackBuffer, IntPtr.Zero, Internal.DynamicExposureResult.Length * sizeof(float), Internal.DynamicExposureResult);
+                GL.BindBuffer(BufferTarget.PixelPackBuffer, 0);
+                Internal.DynamicExposureHasResult = true;
+            }
+            GL.DeleteSync(fence);
+            Internal.DynamicExposureFences[Internal.DynamicExposureReadIndex] = IntPtr.Zero;
+            Internal.DynamicExposureReadIndex = (Internal.DynamicExposureReadIndex + 1) % Internal.DynamicExposureBuffers.Length;
+            Internal.DynamicExposurePending--;
+        }
         if (Engine.Deferred_DynamicExposure)
         {
-            View.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, Internal.FBO_DynamicExposure);
-            GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
-            GL.ReadPixels(0, 0, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, View3DInternalData.DYNAMIC_EXPOSURE_SPREAD, PixelFormat.Red, PixelType.Float, Internal.DynamicExposureResult);
-            View.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
-            GL.ReadBuffer(ReadBufferMode.None);
+            if (!Internal.DynamicExposureHasResult)
+            {
+                return;
+            }
             float exp = FindExp(Internal.DynamicExposureResult) / 5;
             exp = Math.Clamp(exp, 0.4f, 5);
             exp = (float)Math.Sqrt(exp);
@@ -1142,6 +1172,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         }
         else
         {
+            Internal.DynamicExposureHasResult = false;
             State.CurrentExposure = 0.75f;
         }
     }
