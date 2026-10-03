@@ -141,17 +141,17 @@ const float ssao_radius = 0.025; // TODO: Uniform?
 float ssao_color(in vec3 position, in vec3 normal, vec3 difcol)
 {
 	float pos_zm = linearizeDepth(texture(depthtex, f.texcoord).x);
-	vec3 rv = vec3(noise[int(dot(position, position) + dot(difcol, difcol) * 17.32 + pos_zm * 72.8) % 32], 0.0);
-	vec3 tangent = normalize(rv - normal * dot(rv, normal));
-	vec3 bitangent = cross(normal, tangent);
-	mat3 tbn = mat3(tangent, bitangent, normal);
 	float occlusion = 0.0;
 	if (pos_zm < 0.99)
 	{
-		for (int i = 0; i < 64; i++) {
-			vec3 vsample = tbn * kernel[i];
-			vsample = vsample * ssao_radius + position;
-			vec4 offset = ssao_projection * vec4(vsample, 1.0);
+		vec3 rv = vec3(noise[int(dot(position, position) + dot(difcol, difcol) * 17.32 + pos_zm * 72.8) % 32], 0.0);
+		vec3 tangent = normalize(rv - normal * dot(rv, normal));
+		vec3 bitangent = cross(normal, tangent);
+		vec4 clip_position = ssao_projection * vec4(position, 1.0);
+		mat3x4 sample_projection = ssao_projection * mat3x4(vec4(tangent * ssao_radius, 0.0), vec4(bitangent * ssao_radius, 0.0), vec4(normal * ssao_radius, 0.0));
+		for (int i = 0; i < 64; i++)
+		{
+			vec4 offset = clip_position + sample_projection * kernel[i];
 			offset.xyz /= offset.w;
 			offset.xyz = offset.xyz * 0.5 + 0.5;
 			float sampleDepth = linearizeDepth(texture(depthtex, offset.xy).x);
