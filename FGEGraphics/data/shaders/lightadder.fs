@@ -160,9 +160,14 @@ void main() // Let's put all code in main, why not...
 				float oneoverdj = 1.0 / depth_jump;
 				float jump = tex_size * depth_jump;
 				float depth_count = 0;
+				ivec3 shadow_size = textureSize(shadowtex, 0);
+				int shadow_layer = min(i, shadow_size.z - 1);
+				ivec2 previous_texel = ivec2(-1);
+				float cached_depth = 0.0;
 				// Loop over an area quite near the pixel on the shadow map, but still covering multiple pixels of the shadow map.
 				for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
 				{
+					int shadow_x = min(int(clamp(fs.x + x * jump, 0.0, 1.0) * float(shadow_size.x)), shadow_size.x - 1);
 					for (float y = -oneoverdj * 2; y < oneoverdj * 2 + 1; y++)
 					{
 						float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 1000.0; // Use the calculus magic from before to get a safe Z-modifier.
@@ -171,8 +176,14 @@ void main() // Let's put all code in main, why not...
 							offz = -0.000001; // Force it to the threshold value to reduce errors.
 						}
 						offz -= extraZOff; // Set it a bit farther regardless to reduce bad shadows. // TODO: This shouldn't be needed, is the above code wrong? Sqrt logic messes with it maybe?
-						float rd = texture(shadowtex, vec3(fs.x + x * jump, fs.y + y * jump, float(i))).r; // Calculate the depth of the pixel.
-						depth += (rd >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
+						int shadow_y = min(int(clamp(fs.y + y * jump, 0.0, 1.0) * float(shadow_size.y)), shadow_size.y - 1);
+						ivec2 shadow_texel = ivec2(shadow_x, shadow_y);
+						if (any(notEqual(shadow_texel, previous_texel)))
+						{
+							cached_depth = texelFetch(shadowtex, ivec3(shadow_texel, shadow_layer), 0).r;
+							previous_texel = shadow_texel;
+						}
+						depth += (cached_depth >= (fs.z + offz) ? 1.0 : 0.0); // Get a 1 or 0 depth value for the current pixel. 0 means don't light, 1 means light.
 						depth_count++; // Can probably use math to generate this number rather than constantly incrementing a counter.
 					}
 				}

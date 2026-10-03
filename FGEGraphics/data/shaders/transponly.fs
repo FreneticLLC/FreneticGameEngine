@@ -194,9 +194,14 @@ void main()
 	float jump = tex_size * depth_jump;
 	float depth = 0.0;
 	float depth_count = 0.0;
+	ivec3 shadow_size = textureSize(shadowtex, 0);
+	int shadow_layer = min(i, shadow_size.z - 1);
+	ivec2 previous_texel = ivec2(-1);
+	float cached_depth = 0.0;
 	// TODO: Make this more efficient
 	for (float x = -oneoverdj * 2; x < oneoverdj * 2 + 1; x++)
 	{
+		int shadow_x = min(int(clamp(fs.x + x * jump, 0.0, 1.0) * float(shadow_size.x)), shadow_size.x - 1);
 		for (float y = -oneoverdj * 2; y < oneoverdj * 2 + 1; y++)
 		{
 			float offz = dot(dz_duv, vec2(x * jump, y * jump)) * 1000.0;
@@ -205,8 +210,14 @@ void main()
 				offz = -0.000001;
 			}
 			offz -= 0.001;
-			float rd = texture(shadowtex, vec3(fs.x + x * jump, -(fs.y + y * jump), float(i))).r;
-			depth += (rd >= (fs.z + offz) ? 1.0 : 0.0);
+			int shadow_y = min(int(clamp(-(fs.y + y * jump), 0.0, 1.0) * float(shadow_size.y)), shadow_size.y - 1);
+			ivec2 shadow_texel = ivec2(shadow_x, shadow_y);
+			if (any(notEqual(shadow_texel, previous_texel)))
+			{
+				cached_depth = texelFetch(shadowtex, ivec3(shadow_texel, shadow_layer), 0).r;
+				previous_texel = shadow_texel;
+			}
+			depth += (cached_depth >= (fs.z + offz) ? 1.0 : 0.0);
 			depth_count++;
 		}
 	}
