@@ -27,6 +27,8 @@
 layout (binding = 0) uniform sampler2DArray tex;
 #if MCM_FADE_DEPTH
 layout (binding = 1) uniform sampler2D depth_tex;
+layout (binding = 2) uniform sampler2D scene_depth_tex;
+layout (location = 17) uniform vec2 scene_near_far = vec2(0.0);
 #endif
 #else
 layout (binding = 0) uniform sampler2D tex;
@@ -101,6 +103,20 @@ float linearizeDepth(in float rinput) // Convert standard depth (stretched) to a
 
 void main()
 {
+#if MCM_FADE_DEPTH
+	if (scene_near_far.x > 0.0)
+	{
+		float scene_depth = texelFetch(scene_depth_tex, ivec2(gl_FragCoord.xy), 0).r;
+		if (scene_depth < 1.0)
+		{
+			float scene_distance = (scene_near_far.x * scene_near_far.y) / (scene_near_far.y - scene_depth * (scene_near_far.y - scene_near_far.x));
+			if (1.0 / gl_FragCoord.w >= scene_distance)
+			{
+				discard;
+			}
+		}
+	}
+#endif
 #if MCM_LL
 	vec4 fcolor;
 #endif
