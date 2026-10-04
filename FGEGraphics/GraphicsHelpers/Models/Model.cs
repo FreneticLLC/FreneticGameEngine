@@ -62,6 +62,16 @@ public class Model(string _name)
     /// <summary>Any actions to trigger once this model is loaded, if it is not already.</summary>
     public List<Action<Model>> OnLoadActions = [];
 
+    /// <summary>Internal data for <see cref="Model"/>.</summary>
+    public struct InternalData
+    {
+        /// <summary>Reusable buffer of bone matrices.</summary>
+        public static Matrix4[] BoneMatrices = [];
+
+        /// <summary>Reusable buffer of bone matrices as a float array.</summary>
+        public static float[] BoneMatricesFloat = [];
+    }
+
     /// <summary>Adds a mesh to this model.</summary>
     /// <param name="mesh">The mesh to add.</param>
     public void AddMesh(ModelMesh mesh)
@@ -102,21 +112,25 @@ public class Model(string _name)
     }
 
     /// <summary>Sets the bones to an array value.</summary>
-    /// <param name="mats">The relevant array.</param>
-    public static void SetBones(Matrix4[] mats)
+    /// <param name="mats">The relevant array of bone matrices.</param>
+    /// <param name="count">The number of matrices in the array.</param>
+    public static void SetBones(Matrix4[] mats, int count)
     {
-        float[] set = new float[mats.Length * 16];
-        for (int i = 0; i < mats.Length; i++)
+        if (InternalData.BoneMatricesFloat.Length < count * 16)
+        {
+            InternalData.BoneMatricesFloat = new float[count * 16];
+        }
+        for (int i = 0; i < count; i++)
         {
             for (int x = 0; x < 4; x++)
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    set[i * 16 + x * 4 + y] = mats[i][x, y];
+                    InternalData.BoneMatricesFloat[i * 16 + x * 4 + y] = mats[i][x, y];
                 }
             }
         }
-        GL.UniformMatrix4(101, mats.Length, false, set);
+        GL.UniformMatrix4(101, count, false, InternalData.BoneMatricesFloat);
     }
 
     /// <summary>Clears up the bones to identity.</summary>
@@ -124,8 +138,7 @@ public class Model(string _name)
     {
         Matrix4 ident = Matrix4.Identity;
         GL.UniformMatrix4(100, false, ref ident);
-        Matrix4[] mats = [ident];
-        SetBones(mats);
+        GL.UniformMatrix4(101, false, ref ident);
     }
 
     /// <summary>Any custom animation adjustments on this model.</summary>
@@ -326,12 +339,16 @@ public class Model(string _name)
         {
             if (any && Meshes[i].Bones.Count > 0)
             {
-                Matrix4[] mats = new Matrix4[Meshes[i].Bones.Count];
-                for (int x = 0; x < Meshes[i].Bones.Count; x++)
+                int count = Meshes[i].Bones.Count;
+                if (InternalData.BoneMatrices.Length < count)
                 {
-                    mats[x] = Meshes[i].Bones[x].Transform;
+                    InternalData.BoneMatrices = new Matrix4[count];
                 }
-                SetBones(mats);
+                for (int x = 0; x < count; x++)
+                {
+                    InternalData.BoneMatrices[x] = Meshes[i].Bones[x].Transform;
+                }
+                SetBones(InternalData.BoneMatrices, count);
             }
             Meshes[i].Draw(context);
         }
