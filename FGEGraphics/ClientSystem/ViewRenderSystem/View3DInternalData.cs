@@ -170,4 +170,7 @@ public class View3DInternalData
 
     /// <summary>True if there's any dynamic exposure data available, not necessarily current. False if dynamic exposure is turned off, or has not yet calculated since being turned on.</summary>
     public bool DynamicExposureHasResult;
+
+    /// <summary>Graphics timers to analyze GPU performance.</summary>
+    public GraphicsTimer Timer_ExposureRead = new(), Timer_Setup = new(), Timer_Shadows = new(), Timer_Forward = new(), Timer_EndFrame = new(), Timer_GBuffer = new(), Timer_Lights = new();
 }

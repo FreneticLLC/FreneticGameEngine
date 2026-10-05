@@ -104,36 +104,54 @@ public class View3D : View3DCoreDataSet
             }
             if (!Config.ForwardMode)
             {
+                Internal.Timer_ExposureRead.Begin();
                 DeferredRenderer.ReadDynamicExposure();
+                Internal.Timer_ExposureRead.End();
                 GraphicsUtil.CheckError("Render - HDR");
             }
+            Internal.Timer_Setup.Begin();
             RenderPass_Setup();
+            Internal.Timer_Setup.End();
             GraphicsUtil.CheckError("Render - Setup");
             if (Config.ForwardMode)
             {
                 if (Engine.Forward_Shadows)
                 {
+                    Internal.Timer_Shadows.Begin();
                     DeferredRenderer.RenderPass_Shadows();
+                    Internal.Timer_Shadows.End();
                     GraphicsUtil.CheckError("Render - Shadow (Fast)");
                 }
+                Internal.Timer_Forward.Begin();
                 ForwardRenderer.RenderPass_FAST();
+                Internal.Timer_Forward.End();
                 GraphicsUtil.CheckError("Render - Fast");
+                Internal.Timer_EndFrame.Begin();
                 GenerationHelper.EndNF(pfbo);
+                Internal.Timer_EndFrame.End();
                 return;
             }
             Statistics.Total.Start();
             if (Engine.Deferred_Shadows)
             {
+                Internal.Timer_Shadows.Begin();
                 DeferredRenderer.RenderPass_Shadows();
+                Internal.Timer_Shadows.End();
                 GraphicsUtil.CheckError("Render - Shadow");
             }
+            Internal.Timer_GBuffer.Begin();
             DeferredRenderer.RenderPass_GBuffer();
+            Internal.Timer_GBuffer.End();
             GraphicsUtil.CheckError("Render - Buffer");
+            Internal.Timer_Lights.Begin();
             DeferredRenderer.RenderPass_Lights();
+            Internal.Timer_Lights.End();
             GraphicsUtil.CheckError("Render - Lights");
             State.PreviousForward = Config.CameraPos + State.CameraForward;
             Statistics.Total.Stop();
+            Internal.Timer_EndFrame.Begin();
             GenerationHelper.EndNF(pfbo);
+            Internal.Timer_EndFrame.End();
         }
         catch (Exception ex)
         {
