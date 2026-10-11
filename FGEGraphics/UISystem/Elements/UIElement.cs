@@ -152,6 +152,10 @@ public class UIElement
     /// <summary>Fired when the element is removed from its parent.</summary>
     public Action OnRemove;
 
+    public Action<UIElement> OnChildAdd;
+
+    public Action<UIElement> OnChildRemove;
+
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>
     public Action<UIStyle, UIStyle> OnStyleChange;
 
@@ -236,6 +240,7 @@ public class UIElement
         child.UpdateStyle();
         child.Added();
         child.OnAdd?.Invoke();
+        OnChildAdd?.Invoke(child);
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -276,6 +281,7 @@ public class UIElement
         child.IsValid = false;
         child.Removed();
         child.OnRemove?.Invoke();
+        OnChildRemove?.Invoke(child);
         child.Parent = null;
         child.ElementInternal.TreeLevel = 0;
         child.View = null;
@@ -321,7 +327,7 @@ public class UIElement
 
     /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
     /// <param name="element">The possible child element.</param>
-    public bool HasChild(UIElement element) => element.Parent == this;
+    public bool HasChild(UIElement element) => element is not null && element.Parent == this;
 
     // TODO: 'filter' predicate parameter?
     //   - the current implementation is essentially a Where check
@@ -772,44 +778,48 @@ public class UIElement
     /// <param name="delta">The time since the last render.</param>
     public virtual void RenderAll(double delta)
     {
-        GraphicsUtil.CheckError("UIElement - PreRender");
-        bool canScissor = Scissor && Width >= 0 && Height >= 0;
-        // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
-        // TODO: handle negative width/height
-        if (canScissor)
+        if (View is null)
         {
-            View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
+            return;
         }
-        if (RenderMode == UIRenderMode.FULL)
+        try
         {
-            try
+            GraphicsUtil.CheckError("UIElement - PreRender");
+            // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
+            // TODO: handle negative width/height
+            bool canScissor = Scissor && Width >= 0 && Height >= 0;
+            if (canScissor)
+            {
+                View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
+            }
+            if (RenderMode == UIRenderMode.FULL)
             {
                 Render(delta);
             }
-            catch (Exception e)
+            GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
+            if (RenderMode != UIRenderMode.NONE)
             {
-                Logs.Debug(e.Message);
-                Renderer2D.SetColor(Color4F.Red);
-                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height);
-                Renderer2D.SetColor(Color4F.White);
-            }
-        }
-        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
-        if (RenderMode != UIRenderMode.NONE)
-        {
-            foreach (UIElement child in Children)
-            {
-                if (child.IsValid)
+                foreach (UIElement child in Children)
                 {
-                    child.RenderAll(delta);
+                    if (child.IsValid)
+                    {
+                        child.RenderAll(delta);
+                    }
                 }
             }
+            if (canScissor)
+            {
+                View.Rendering.PopScissor(View.UIContext);
+            }
+            GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
         }
-        if (canScissor)
+        catch (Exception e)
         {
-            View.Rendering.PopScissor(View.UIContext);
+            Logs.Debug(e.Message);
+            Renderer2D.SetColor(Color4F.Red);
+            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height);
+            Renderer2D.SetColor(Color4F.White);
         }
-        GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
     }
 
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>

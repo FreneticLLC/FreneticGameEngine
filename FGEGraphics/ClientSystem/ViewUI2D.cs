@@ -35,9 +35,6 @@ namespace FGEGraphics.ClientSystem;
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
-    /// <summary>The base text styling for debug information.</summary>
-    public static readonly string DEBUG_BASE_COLOR = "^r^0^h^o^e";
-
     /// <summary>The backing client window.</summary>
     public GameClientWindow Client;
 
@@ -101,6 +98,8 @@ public class ViewUI2D
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
 
+        public UIScreen DebugScreen;
+
         public UIDebugPanel DebugPanel;
     }
 
@@ -114,6 +113,7 @@ public class ViewUI2D
         Client = client;
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
+        Internal.DebugScreen = new(this);
         Client.Window.KeyDown += HandleKeyEvent;
     }
 
@@ -123,9 +123,12 @@ public class ViewUI2D
         {
             yield return child;
         }
-        if (Internal.DebugPanel is not null)
+        if (IsDebug)
         {
-            //yield return Internal.DebugPanel;
+            foreach (UIElement child in Internal.DebugScreen.AllChildren())
+            {
+                yield return child;
+            }
         }
     }
 
@@ -211,13 +214,13 @@ public class ViewUI2D
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
         CurrentScreen.RenderAll(Client.Delta);
-        Internal.DebugPanel?.RenderAll(Client.Delta);
         if (IsDebug)
         {
             foreach (UIElement element in AllChildren())
             {
                 DrawDebugOutline(element);
             }
+            Internal.DebugScreen.RenderAll(Client.Delta);
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;
@@ -236,6 +239,10 @@ public class ViewUI2D
         Vector2 scrollDelta = Client.CurrentMouse.ScrollDelta;
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.TickAll(Client.Delta);
+        if (IsDebug)
+        {
+            Internal.DebugScreen.TickAll(Client.Delta);
+        }
         // TODO: crude and probably slow
         ICollection<UIElement> elements = [.. AllChildren()];
         foreach (UIElement element in elements.Reverse())
@@ -244,20 +251,6 @@ public class ViewUI2D
             {
                 element.TickInteraction(mouseX, mouseY, scrollDelta);
             }
-        }
-        if (HeldElement is not null && IsDebug && Internal.DebugPanel is null)
-        {
-            Internal.DebugPanel = new(HeldElement, UIDebugPanel.Styling with
-            {
-                TextFont = Client.FontSets.Standard,
-                TextBaseColor = "^0"
-            }, new UILayout().SetSize(300, 200));
-            CurrentScreen.AddChild(Internal.DebugPanel);
-        }
-        if ((HeldElement is null || !IsDebug) && Internal.DebugPanel is not null)
-        {
-            CurrentScreen.RemoveChild(Internal.DebugPanel);
-            Internal.DebugPanel = null;
         }
         MousePreviouslyDown = MouseDown;
         Internal.Scrolled = false;
@@ -269,6 +262,15 @@ public class ViewUI2D
         if (args.Key == Keys.F4)
         {
             IsDebug = !IsDebug;
+            if (IsDebug)
+            {
+                Internal.DebugPanel = new(CurrentScreen, UIElementDebugPanel.Styling with { TextFont = Client.FontSets.Standard, TextBaseColor = "^0" }, new UILayout().SetSize(500, 300));
+                Internal.DebugScreen.AddChild(Internal.DebugPanel);
+            }
+            else
+            {
+                Internal.DebugScreen.RemoveChild(Internal.DebugPanel);
+            }
         }
     }
 }

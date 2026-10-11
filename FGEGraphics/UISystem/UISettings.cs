@@ -1,7 +1,9 @@
+using BepuPhysics.Trees;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.UISystem.Elements;
 using FreneticUtilities.FreneticDataSyntax;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -136,7 +138,7 @@ public class UIDropdownSetting : UISetting
     }
 }
 
-public class UIDebugPanel : UIList
+public class UIElementDebugPanel : UIList
 {
     public static UIStyling Styling = new()
     {
@@ -148,7 +150,7 @@ public class UIDebugPanel : UIList
 
     public UIElement Element;
 
-    public UIDebugPanel(UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UIElementDebugPanel(UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Element = element;
         foreach ((string name, UIDebugMember debugMember) in element.ElementInternal.DebugMembers)
@@ -163,5 +165,78 @@ public class UIDebugPanel : UIList
             }
             AddListItem(entry);
         }
+    }
+}
+
+public class UIElementTree : UIList2
+{
+    public UIDebugPanel Panel;
+    public UIElementTree Parent;
+    public UIElement Element;
+
+    public OrderedDictionary<UIElement, UIElementTree> ChildTrees = [];
+
+    public UIElementTree(UIDebugPanel panel, UIElementTree parent, UIElement element, int level, UIStyling styling, UILayout layout) : base(styling, layout)
+    {
+        Panel = panel;
+        Parent = parent;
+        Element = element;
+        UILabel label = new(element.Name, styling);
+        AddChild(label);
+        if (level < 256)
+        {
+            foreach (UIElement child in Element.Children)
+            {
+                UIElementTree tree = new(panel, this, child, level + 1, styling, new UILayout()) { PaddingLeft = 10 };
+                ChildTrees.Add(child, tree);
+            }
+        }
+        label.OnClick += () =>
+        {
+            if (View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftControl))
+            {
+                Panel.OpenElementView(Element);
+                return;
+            }
+            foreach ((_, UIElementTree tree) in ChildTrees)
+            {
+                ToggleChild(tree);
+            }
+        };
+    }
+}
+
+public class UIDebugPanel : UIList2
+{
+    public UIElement MainArea;
+
+    public UIElementDebugPanel ElementView;
+
+    public UIDebugPanel(UIElement root, UIStyling styling, UILayout layout) : base(null, new UILayout())
+    {
+        Vertical = false;
+        Spacing = 10;
+        AddChild(MainArea = new(styling, layout));
+        UIScrollGroup scrollGroup = new(MainArea.Layout.Container());
+        UIElementTree tree = new(this, null, root, 0, styling, new UILayout());
+        scrollGroup.AddScrollableChild(tree);
+        scrollGroup.XAxis.AddScrollBar(styling, 10);
+        scrollGroup.YAxis.AddScrollBar(styling, 10);
+        tree.OnSizeChange += (_, size) =>
+        {
+            scrollGroup.XAxis.MaxValue = size.X;
+            scrollGroup.YAxis.MaxValue = size.Y;
+        };
+        MainArea.AddChild(scrollGroup);
+    }
+
+    public void OpenElementView(UIElement element)
+    {
+        if (HasChild(ElementView))
+        {
+            RemoveChild(ElementView);
+        }
+        ElementView = new(element, MainArea.Styling, new UILayout().SetSize(500, 300));
+        AddChild(ElementView);
     }
 }
