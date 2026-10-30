@@ -52,6 +52,12 @@ public class StackNoteSet
         MaxDepth = Math.Max(MaxDepth, Depth);
     }
 
+    /// <summary>Returns a ref to the current top note on the stack. Can be an invalid/unused note when <see cref="Depth"/> equals <c>0</c>.</summary>
+    public ref StackNote Peek()
+    {
+        return ref Notes[Math.Max(Depth - 1, 0)];
+    }
+
     /// <summary>Pops the current entry from the note stack.</summary>
     public void Pop()
     {

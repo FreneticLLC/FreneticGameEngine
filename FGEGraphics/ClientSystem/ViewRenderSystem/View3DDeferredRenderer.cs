@@ -233,7 +233,7 @@ public class View3DDeferredRenderer : View3DCoreDataSet
         Engine.Rendering.SetColor(Color4.White, View);
         View3D.StandardBlend();
         GraphicsUtil.CheckError("Render - GBuffer - 1");
-        if (Engine.Render3DView || Engine.Client.VR != null)
+        if (Engine.Render3DView || Engine.Client.VR is not null)
         {
             View.Viewport(Config.Width / 2, 0, Config.Width / 2, Config.Height);
             Config.Render3D(View);

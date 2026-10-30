@@ -23,7 +23,7 @@ public static class StackNoteHelper
     {
         get
         {
-            if (InternalCurrentNotes != null)
+            if (InternalCurrentNotes is not null)
             {
                 return InternalCurrentNotes;
             }

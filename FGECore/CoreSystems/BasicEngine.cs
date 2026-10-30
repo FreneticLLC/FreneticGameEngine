@@ -385,13 +385,14 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
             StackNoteHelper.Push("BasicEngine - Tick all entities", this);
             // Dup list, to ensure ents can despawn themselves in the tick method!
             IReadOnlyList<T> ents = EntityListDuplicate();
+            // Performance sensitive loop, so slightly hack the notes system for perf
+            using var _push = StackNoteHelper.UsePush("BasicEngine - Tick specific entity", null);
+            StackNoteSet stackNotes = StackNoteHelper.InternalCurrentNotes;
             foreach (T ent in ents)
             {
                 if (ent.OnTick is not null)
                 {
-                    // TODO: This using push is a bit heavy to be running on *every* entity, can extra outside the loop possibly?
-                    // (C# does slightly dirty things internally there - try/finally block)
-                    using var _push = StackNoteHelper.UsePush("BasicEngine - Tick specific entity", ent);
+                    stackNotes.Peek().Related = ent;
                     ent.OnTick();
                 }
             }
