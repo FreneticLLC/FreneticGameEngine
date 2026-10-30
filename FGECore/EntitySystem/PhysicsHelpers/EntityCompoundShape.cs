@@ -30,6 +30,9 @@ public class EntityCompoundShape : EntityShapeHelper
     /// <summary>All child-shapes of this entity.</summary>
     public List<EntityCompoundChild> Children = [];
 
+    /// <summary>The inner BEPU buffer holding data for this compound shape.</summary>
+    public Buffer<CompoundChild> CompoundBuffer;
+
     /// <summary>Constructs a new <see cref="EntityCompoundShape"/> from the specified compound object and volume estimate.</summary>
     public EntityCompoundShape(List<EntityCompoundChild> compound, double _volume, PhysicsSpace space) : base(space)
     {
@@ -41,15 +44,16 @@ public class EntityCompoundShape : EntityShapeHelper
     /// <summary>Implements <see cref="EntityShapeHelper.Register"/>.</summary>
     public override EntityCompoundShape Register()
     {
-        EntityCompoundShape dup = MemberwiseClone() as EntityCompoundShape;
-        Space.Internal.Pool.Take(dup.Children.Count, out Buffer<CompoundChild> children);
-        int childIndex = 0;
-        foreach (EntityCompoundChild child in dup.Children)
+        EntityCompoundShape dup = Duplicate(Space) as EntityCompoundShape;
+        Space.Internal.Pool.Take(dup.Children.Count, out dup.CompoundBuffer);
+        for (int childIndex = 0; childIndex < dup.Children.Count; childIndex++)
         {
-            TypedIndex childShapeInd = child.Shape.Register().IndexForCompound;
-            children[childIndex++] = new(child.Pose, childShapeInd);
+            EntityCompoundChild child = dup.Children[childIndex];
+            EntityShapeHelper registered = child.Shape.Duplicate(Space).Register();
+            dup.Children[childIndex] = new(registered, child.Pose);
+            dup.CompoundBuffer[childIndex] = new(child.Pose, registered.IndexForCompound);
         }
-        Compound created = new(children);
+        Compound created = new(dup.CompoundBuffer);
         dup.BepuShape = created;
         dup.ShapeIndex = Space.Internal.CoreSimulation.Shapes.Add(created);
         return dup;
@@ -70,6 +74,11 @@ public class EntityCompoundShape : EntityShapeHelper
         foreach (EntityCompoundChild child in Children)
         {
             child.Shape.Unregister();
+        }
+        if (CompoundBuffer.Allocated)
+        {
+            Space.Internal.Pool.Return(ref CompoundBuffer);
+            CompoundBuffer = default;
         }
     }
 

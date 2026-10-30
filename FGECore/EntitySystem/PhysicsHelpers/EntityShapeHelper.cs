@@ -21,8 +21,29 @@ using BepuUtilities.Memory;
 namespace FGECore.EntitySystem.PhysicsHelpers;
 
 /// <summary>Implementations of this class are helpers for the various possible entity physics shapes.</summary>
-public abstract class EntityShapeHelper(PhysicsSpace _space)
+public abstract class EntityShapeHelper(PhysicsSpace _space) : IDisposable
 {
+    /// <summary>Deconstructor to ensure shapes are properly disposed when discarded.</summary>
+    ~EntityShapeHelper()
+    {
+        Dispose();
+    }
+
+    /// <summary>Disposes this shape, removing its physics space registration.</summary>
+    public void Dispose()
+    {
+        if (Space is not null && ShapeIndex.Exists)
+        {
+            Space.Engine.Schedule.ScheduleSyncTask(() =>
+            {
+                if (ShapeIndex.Exists && !Space.Engine.EngineShutdownToken.IsCancellationRequested && Space.Internal.CoreSimulation is not null)
+                {
+                    Unregister();
+                }
+            });
+        }
+        GC.SuppressFinalize(this);
+    }
 
     /// <summary>Helper value: a quaternion that represents the rotation between UnitY and UnitZ.</summary>
     public static readonly System.Numerics.Quaternion Quaternion_Y2Z = MathHelpers.Quaternion.GetQuaternionBetween(Location.UnitY, Location.UnitZ).ToNumerics();
