@@ -390,7 +390,7 @@ public abstract class BasicEngine<T, T2> : BasicEngine where T : BasicEntity<T, 
             StackNoteSet stackNotes = StackNoteHelper.InternalCurrentNotes;
             foreach (T ent in ents)
             {
-                if (ent.OnTick is not null)
+                if (ent.OnTick is not null && !ent.Removed)
                 {
                     stackNotes.Peek().Related = ent;
                     ent.OnTick();
