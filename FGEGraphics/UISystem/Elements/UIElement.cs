@@ -46,7 +46,13 @@ public class UIElement
     public UIStyling Styling
     {
         get;
-        set => field = value ?? UIStyling.Empty;
+        set
+        {
+            UIStyling from = field;
+            field = value ?? UIStyling.Empty;
+            OnStylingChange?.Invoke(from, value);
+            StylingChanged(from, value);
+        }
     }
 
     /// <summary>Gets the current element style.</summary>
@@ -158,6 +164,8 @@ public class UIElement
 
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>
     public Action<UIStyle, UIStyle> OnStyleChange;
+
+    public Action<UIStyling, UIStyling> OnStylingChange;
 
     /// <summary>Fired when <see cref="Position"/> changes value.</summary>
     public Action<Vector2i, Vector2i> OnPositionChange;
@@ -875,6 +883,10 @@ public class UIElement
     /// <param name="to">The new style.</param>
     public virtual void StyleChanged(UIStyle from, UIStyle to)
     {
+    }
+
+    public virtual void StylingChanged(UIStyling from, UIStyling to)
+    { 
     }
 
     /// <summary>Ran when <see cref="Position"/> changes value.</summary>

@@ -7,6 +7,7 @@
 //
 
 using FGECore;
+using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
@@ -216,7 +217,7 @@ public class ViewUI2D
         CurrentScreen.RenderAll(Client.Delta);
         if (IsDebug)
         {
-            foreach (UIElement element in AllChildren())
+            foreach (UIElement element in CurrentScreen.AllChildren())
             {
                 DrawDebugOutline(element);
             }
@@ -264,7 +265,48 @@ public class ViewUI2D
             IsDebug = !IsDebug;
             if (IsDebug)
             {
-                Internal.DebugPanel = new(CurrentScreen, UIElementDebugPanel.Styling with { TextFont = Client.FontSets.Standard, TextBaseColor = "^0" }, new UILayout().SetSize(500, 300));
+                string labelColor = "^r^0^e^7";
+                UIStyleValue<string> labelColorInteractive = UIStyleValue<string>.Interactive(labelColor, "^r^0^e^b^7", "^r^)^e^5", "^r^0^e^7");
+                UIStyling baseStyling = new()
+                {
+                    //Padding = 2,
+                    ShowBackground = true,
+                    Fill = Color4F.Black,
+                    Stroke = Color4F.White,
+                    StrokeWeight = 1,
+                    TextFont = Client.FontSets.Standard,
+                    TextBaseColor = TextStyle.White,
+                };
+                UIStyling styling = baseStyling with
+                {
+                    Components = [
+                        new UIElementTree.StylingOptions()
+                        {
+                            LabelStyling = new UIStyling()
+                            {
+                                TextFont = Client.FontSets.Standard,
+                                TextBaseColor = labelColorInteractive
+                            }
+                        },
+                        new UIElementDebugPanel.StylingOptions()
+                        {
+                            LabelStyling = new UIStyling()
+                            {
+                                TextFont = Client.FontSets.Standard,
+                                TextBaseColor = labelColor
+                            }
+                        },
+                        new UIBoolSetting.StylingOptions()
+                        {
+                            ButtonStyling = baseStyling with
+                            {
+                                StrokeWeight = UIStyleValue<int>.Interactive(1, 2, 3, 1),
+                                TextBaseColor = labelColorInteractive
+                            }
+                        }
+                    ]
+                };
+                Internal.DebugPanel = new(CurrentScreen, styling, new UILayout().SetSize(500, 300));
                 Internal.DebugScreen.AddChild(Internal.DebugPanel);
             }
             else

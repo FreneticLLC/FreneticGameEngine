@@ -51,7 +51,7 @@ public class UIScrollGroup : UIElement
         XAxis = new(this, false);
         YAxis = new(this, true);
         AddChild(ScrollBarLayer = new UIGroup(layout.Container()));
-        AddChild(ScrollableLayer = new UIElement(null, layout.Container().SetPosition(() => -XAxis.Value, () => -YAxis.Value)));
+        AddChild(ScrollableLayer = new UIElement(null, layout.Container().SetPosition(() => -XAxis.Value, () => -YAxis.Value)) { IsEnabled = false });
     }
 
     /// <inheritdoc/>

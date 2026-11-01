@@ -13,7 +13,7 @@ using System.Text;
 
 namespace FGEGraphics.UISystem;
 
-public abstract class UISetting(UILayout layout) : UIElement(null, layout)
+public abstract class UISetting(UIStyling styling, UILayout layout) : UIElement(styling, layout)
 {
     public abstract void AcceptValue(object value);
 
@@ -40,17 +40,26 @@ public abstract class UISetting(UILayout layout) : UIElement(null, layout)
         {
             return new UIDropdownSetting(memberType, dropdownSetting.Options, container, styling, layout);
         }
+        if (memberType == typeof(Vector2i))
+        {
+            return new UIVector2iSetting(styling, layout);
+        }
         return null;
     }
 }
 
-public class UIBoolSetting : UISetting
+public class UIBoolSetting : UISetting, IStylingAcceptor<UIBoolSetting.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> ButtonStyling;
+    }
+
     public UISelectionGroup Selections;
 
     public UIButton Yes, No;
 
-    public UIBoolSetting(UIStyling styling, UILayout layout) : base(layout)
+    public UIBoolSetting(UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Selections = new(new UILayout()) { MinSelections = 1, MaxSelections = 1, IsCyclic = true };
         Yes = new("Yes", styling, layout.Copy().SetOrigin().SetWidth(() => layout.Width / 2));
@@ -66,6 +75,12 @@ public class UIBoolSetting : UISetting
     {
         Selections.SelectElement((bool)value ? Yes : No);
     }
+
+    public void AcceptStyling(StylingOptions styling)
+    {
+        Yes.Styling = styling.ButtonStyling.Get(this);
+        No.Styling = styling.ButtonStyling.Get(this);
+    }
 }
 
 public class UINumberSetting : UISetting
@@ -79,7 +94,7 @@ public class UINumberSetting : UISetting
 
     public UINumberSlider Slider;
 
-    public UINumberSetting(Type numberType, SettingNumeric numeric, UIStyling styling, UILayout layout) : base(layout)
+    public UINumberSetting(Type numberType, SettingNumeric numeric, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         bool integer = IntegerTypes.Contains(numberType);
         string labelFormat = integer ? "0" : (numeric.Digits >= 1 ? "0." + new string('0', numeric.Digits) : "0.0");
@@ -115,7 +130,7 @@ public class UIDropdownSetting : UISetting
 {
     public UIDropdown Dropdown;
 
-    public UIDropdownSetting(Type valueType, IEnumerable options, UIElement container, UIStyling styling, UILayout layout) : base(layout)
+    public UIDropdownSetting(Type valueType, IEnumerable options, UIElement container, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         Dropdown = new(null, styling with { Padding = 5 }, layout.Container()) { Layer = container };
         foreach (object option in options)
@@ -138,17 +153,43 @@ public class UIDropdownSetting : UISetting
     }
 }
 
-public class UIElementDebugPanel : UIList
+public class UIVector2iSetting : UISetting
 {
-    public static UIStyling Styling = new()
+    public UINumberSetting SettingX;
+
+    public UINumberSetting SettingY;
+
+    public UIVector2iSetting(UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Fill = Color4F.White,
-        Stroke = Color4F.Black,
-        StrokeWeight = 2,
-        ShowBackground = true,
-    };
+        AddChild(SettingX = new(typeof(int), new SettingNumeric(SettingNumericDisplayType.NumberBox, int.MinValue, int.MaxValue), styling, layout.Copy().SetOrigin().SetWidth(() => layout.Width / 2)));
+        AddChild(SettingY = new(typeof(int), new SettingNumeric(SettingNumericDisplayType.NumberBox, int.MinValue, int.MaxValue), styling, SettingX.Layout.Copy().SetX(() => SettingX.Width)));
+        SettingY.OnValueEmitted += SettingX.OnValueEmitted += _ =>
+        {
+            OnValueEmitted?.Invoke(new Vector2i(
+                (int)SettingX.InputLabel.Value,
+                (int)SettingY.InputLabel.Value
+            ));
+        };
+    }
+
+    public override void AcceptValue(object value)
+    {
+        Vector2i vector = (Vector2i)value;
+        SettingX.AcceptValue(vector.X);
+        SettingY.AcceptValue(vector.Y);
+    }
+}
+
+public class UIElementDebugPanel : UIList, IStylingAcceptor<UIElementDebugPanel.StylingOptions>
+{
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> LabelStyling;
+    }
 
     public UIElement Element;
+
+    public List<UILabel> Labels = [];
 
     public UIElementDebugPanel(UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
     {
@@ -156,8 +197,10 @@ public class UIElementDebugPanel : UIList
         foreach ((string name, UIDebugMember debugMember) in element.ElementInternal.DebugMembers)
         {
             UIList entry = new(null, new UILayout()) { Spacing = 10, Vertical = false };
-            entry.AddListItem(new UILabel(name, styling with { ShowBackground = false }, new UILayout()));
-            if (UISetting.Create(debugMember.Info, debugMember.Type, this, styling, new UILayout().SetSize(300, 60)) is UISetting setting)
+            UILabel label = new(name, null, new UILayout());
+            Labels.Add(label);
+            entry.AddListItem(label);
+            if (UISetting.Create(debugMember.Info, debugMember.Type, this, styling, new UILayout().SetSize(100, 30)) is UISetting setting)
             {
                 entry.AddListItem(setting);
                 setting.AcceptValue(Element.GetDebugValue(name));
@@ -166,32 +209,45 @@ public class UIElementDebugPanel : UIList
             AddListItem(entry);
         }
     }
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        foreach (UILabel label in Labels)
+        {
+            label.Styling = options.LabelStyling.Get(this);
+        }
+    }
 }
 
-public class UIElementTree : UIList2
+public class UIElementTree : UIList2, IStylingAcceptor<UIElementTree.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> LabelStyling;
+    }
+
     public UIDebugPanel Panel;
-    public UIElementTree Parent;
+    public UIElementTree ParentTree;
     public UIElement Element;
+    public UILabel Label;
 
     public OrderedDictionary<UIElement, UIElementTree> ChildTrees = [];
 
-    public UIElementTree(UIDebugPanel panel, UIElementTree parent, UIElement element, int level, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UIElementTree(UIDebugPanel panel, UIElementTree parent, UIElement element, UIStyling styling, UILayout layout) : base(null, layout)
     {
+        Styling = styling with { ShowBackground = false };
         Panel = panel;
-        Parent = parent;
+        ParentTree = parent;
         Element = element;
-        UILabel label = new(element.Name, styling);
-        AddChild(label);
-        if (level < 256)
+        Label = new(element.Name, null);
+        AddChild(Label);
+        foreach (UIElement child in Element.Children)
         {
-            foreach (UIElement child in Element.Children)
-            {
-                UIElementTree tree = new(panel, this, child, level + 1, styling, new UILayout()) { PaddingLeft = 10 };
-                ChildTrees.Add(child, tree);
-            }
+            UIElementTree tree = new(panel, this, child, styling, new UILayout()) { PaddingLeft = 10 };
+            ChildTrees.Add(child, tree);
+            AddChild(tree);
         }
-        label.OnClick += () =>
+        Label.OnClick += () =>
         {
             if (View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftControl))
             {
@@ -203,6 +259,11 @@ public class UIElementTree : UIList2
                 ToggleChild(tree);
             }
         };
+    }
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        Label.Styling = options.LabelStyling.Get(this);
     }
 }
 
@@ -218,7 +279,7 @@ public class UIDebugPanel : UIList2
         Spacing = 10;
         AddChild(MainArea = new(styling, layout));
         UIScrollGroup scrollGroup = new(MainArea.Layout.Container());
-        UIElementTree tree = new(this, null, root, 0, styling, new UILayout());
+        UIElementTree tree = new(this, null, root, styling, new UILayout());
         scrollGroup.AddScrollableChild(tree);
         scrollGroup.XAxis.AddScrollBar(styling, 10);
         scrollGroup.YAxis.AddScrollBar(styling, 10);

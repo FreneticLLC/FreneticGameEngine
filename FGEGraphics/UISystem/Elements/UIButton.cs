@@ -38,4 +38,9 @@ public class UIButton : UIElement
     {
         AddChild(Label = new UILabel(text, Styling.Bind(this) with { ShowBackground = false }, new UILayout().SetAnchor(UIAnchor.CENTER)) { IsEnabled = false });
     }
+
+    public override void StylingChanged(UIStyling from, UIStyling to)
+    {
+        Label?.Styling = Styling.Bind(this) with { ShowBackground = false };
+    }
 }
