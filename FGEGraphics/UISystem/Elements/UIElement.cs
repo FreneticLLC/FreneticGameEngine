@@ -823,9 +823,9 @@ public class UIElement
         }
         catch (Exception e)
         {
-            Logs.Debug(e.Message);
+            Logs.Debug(e.ToString());
             Renderer2D.SetColor(Color4F.Red);
-            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height);
+            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, hollow: true);
             Renderer2D.SetColor(Color4F.White);
         }
     }

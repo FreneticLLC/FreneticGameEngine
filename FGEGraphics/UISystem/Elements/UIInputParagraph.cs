@@ -23,16 +23,19 @@ namespace FGEGraphics.UISystem.Elements;
 /// This paragraph contains three <see cref="UILabel"/>s. 
 /// The left and right labels display content on either side of the cursor position, while the center label specifically displays highlighted text.
 /// </remarks>
-public class UIInputParagraph : UIParagraph
+public class UIInputParagraph : UIParagraph, IStylingAcceptor<UIInputParagraph.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        /// <summary>The styling for text outside of a selection.</summary>
+        public UIStyleValue<UIStyling> TextStyling;
+
+        /// <summary>The styling for text inside of a selection.</summary>
+        public UIStyleValue<UIStyling> HighlightStyling;
+    }
+
     /// <inheritdoc/>
     public override string Name => "Input Paragraph";
-
-    /// <summary>The styling for text outside of a selection.</summary>
-    public UIStyling TextStyling;
-
-    /// <summary>The styling for text inside of a selection.</summary>
-    public UIStyling HighlightStyling;
 
     /// <summary>Gets or sets the content of this paragraph.</summary>
     /// <remarks>This operation calls <see cref="UpdateRenderState"/>.</remarks>
@@ -90,17 +93,12 @@ public class UIInputParagraph : UIParagraph
 
     /// <summary>Constructs a new <see cref="UIInputParagraph"/>.</summary>
     /// <param name="styling">The styling of the paragraph, used when drawing the cursor.</param>
-    /// <param name="textStyling">The styling for non-selected text.</param>
-    /// <param name="highlightStyling">The styling for selected, or highlighted, text.</param>
     /// <param name="layout">The layout of this element.</param>
-    public UIInputParagraph(UIStyling styling, UIStyling textStyling, UIStyling highlightStyling, UILayout layout) : base(layout)
+    public UIInputParagraph(UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Styling = styling;
-        TextStyling = textStyling;
-        HighlightStyling = highlightStyling;
-        AddLabel(InputInternal.LabelLeft = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
-        AddLabel(InputInternal.LabelCenter = new UILabel("", highlightStyling, new UILayout()) { IsEnabled = false });
-        AddLabel(InputInternal.LabelRight = new UILabel("", textStyling, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelLeft = new UILabel("", null, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelCenter = new UILabel("", null, new UILayout()) { IsEnabled = false });
+        AddLabel(InputInternal.LabelRight = new UILabel("", null, new UILayout()) { IsEnabled = false });
     }
 
     /// <summary>Ensures the cursor positions lie within the current paragraph <see cref="Content"/>.</summary>
@@ -190,11 +188,17 @@ public class UIInputParagraph : UIParagraph
         View.Engine.Textures.White.Bind();
         Renderer2D.SetColor(style.Stroke);
         int lineWidth = style.StrokeWeight / 2;
-        int lineHeight = style.TextFont.Height;
+        int lineHeight = style.TextFont?.Height ?? 0;
         View.Rendering.RenderRectangle(View.UIContext, X + InputInternal.CursorRenderOffset.XF - lineWidth, Y + InputInternal.CursorRenderOffset.YF, X + InputInternal.CursorRenderOffset.XF + lineWidth, Y + InputInternal.CursorRenderOffset.YF + lineHeight);
         Renderer2D.SetColor(Color4.White);
     }
 
     /// <inheritdoc/>
     public override List<string> GetDebugInfo() => [$"^7Indices: ^3[{CursorLeft} {CursorRight}] ^&| ^7Cursors: ^3[{CursorStart} {CursorEnd}] ^&| ^7Cursor Offset: ^3{InputInternal.CursorRenderOffset}"];
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        InputInternal.LabelLeft.Styling = InputInternal.LabelRight.Styling = options.TextStyling.Get(this);
+        InputInternal.LabelCenter.Styling = options.HighlightStyling.Get(this);
+    }
 }

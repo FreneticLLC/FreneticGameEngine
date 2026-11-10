@@ -83,8 +83,15 @@ public class UIBoolSetting : UISetting, IStylingAcceptor<UIBoolSetting.StylingOp
     }
 }
 
-public class UINumberSetting : UISetting
+public class UINumberSetting : UISetting, IStylingAcceptor<UINumberSetting.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> InputLabelStyling;
+
+        public UIStyleValue<UIStyling> SliderStyling;
+    }
+
     /// <summary>Set of core C# data types for basic integer value types.</summary>
     public static HashSet<Type> IntegerTypes = [typeof(int), typeof(long), typeof(short), typeof(byte), typeof(uint), typeof(ulong), typeof(ushort), typeof(sbyte)];
 
@@ -99,7 +106,7 @@ public class UINumberSetting : UISetting
         bool integer = IntegerTypes.Contains(numberType);
         string labelFormat = integer ? "0" : (numeric.Digits >= 1 ? "0." + new string('0', numeric.Digits) : "0.0");
         // TODO: box with 2 padding
-        InputLabel = new(integer, styling, styling, styling, layout.Container(), format: labelFormat) { Min = numeric.Min, Max = numeric.Max };
+        InputLabel = new(integer, styling, layout.Container(), format: labelFormat) { Min = numeric.Min, Max = numeric.Max };
         if (numeric.DisplayType == SettingNumericDisplayType.NumberBox)
         {
             InputLabel.OnTextSubmit += _ => OnValueEmitted?.Invoke(Convert.ChangeType(InputLabel.Value, numberType));
@@ -123,6 +130,12 @@ public class UINumberSetting : UISetting
         double number = Convert.ToDouble(value);
         InputLabel.Value = number;
         Slider?.Value = number;
+    }
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        InputLabel.Styling = options.InputLabelStyling.Get(this);
+        Slider?.Styling = options.SliderStyling.Get(this);
     }
 }
 
@@ -245,7 +258,6 @@ public class UIElementTree : UIList2, IStylingAcceptor<UIElementTree.StylingOpti
         {
             UIElementTree tree = new(panel, this, child, styling, new UILayout()) { PaddingLeft = 10 };
             ChildTrees.Add(child, tree);
-            AddChild(tree);
         }
         Label.OnClick += () =>
         {

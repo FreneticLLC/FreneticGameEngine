@@ -98,16 +98,22 @@ public class UIInputLabel : UIElement
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
     /// <param name="styling">The styling logic of the element.</param>
-    /// <param name="inputStyling">The style of normal input content.</param>
-    /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         ScrollGroup = new(layout.Container()) { IsEnabled = false };
         ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling?.Bind(this), new UILayout()) { IsEnabled = false });
-        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(null, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
         Paragraph.SetContent(defaultText);
+    }
+
+    /// <inheritdoc/>
+    public override void StylingChanged(UIStyling from, UIStyling to)
+    {
+        base.StylingChanged(from, to);
+        PlaceholderInfo?.Styling = to?.Bind(this);
+        Paragraph?.Styling = to is not null ? to.Bind(this) with { ShowBackground = false } : null;
     }
 
     /// <inheritdoc/>

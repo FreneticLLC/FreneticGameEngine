@@ -91,4 +91,6 @@ public record UIStyling
 
     /// <summary>Returns this styling instance with <see cref="Element"/> set to <paramref name="element"/>.</summary>
     public UIStyling Bind(UIElement element) => this with { Element = element };
+
+    public UIStyling ComponentsOnly() => new() { Element = Element, Components = Components };
 }
