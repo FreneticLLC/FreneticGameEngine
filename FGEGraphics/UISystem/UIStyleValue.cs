@@ -6,6 +6,7 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
+using FGEGraphics.UISystem.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,4 +59,6 @@ public readonly struct UIStyleValue<T>
             : !element.IsEnabled ? disabled
             : idle
     );
+
+    public override string ToString() => $"UIStyleValue<{typeof(T).Name}>({(Dynamic is not null ? "dynamic" : Constant?.ToString() ?? "null")})";
 }

@@ -11,22 +11,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents an expandable list container of UI elements.
 /// List expansion is in the opposite direction of the supplied <see cref="UIAnchor"/>. 
 /// </summary>
-public class UIListGroup : UIGroup
+public class UIList : UIElement, IStylingAcceptor<UIList.ListStyling>
 {
+    public record ListStyling : StylingComponent
+    {
+        public UIStyleValue<bool> Vertical = true;
+
+        public UIStyleValue<int> Spacing;
+
+        public UIStyleValue<UIAnchor> Anchor;
+    }
+
     /// <inheritdoc/>
     public override string Name => "List";
 
     /// <summary>Whether the list should expand vertically.</summary>
     [UIDebug]
-    public bool Vertical;
+    public bool Vertical
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                ConfigureSize();
+            }
+        }
+    }
 
     /// <summary>The spacing between each list item.</summary>
     [UIDebug]
@@ -34,12 +55,20 @@ public class UIListGroup : UIGroup
 
     /// <summary>The anchor that the list will expand from.</summary>
     [UIDebug]
-    public UIAnchor Anchor;
+    public UIAnchor Anchor
+    {
+        get;
+        set
+        {
+            field = value;
+            //CheckAnchor();
+        }
+    }
 
     /// <summary>The list of elements currently contained within the list.</summary>
     public List<UIElement> Items = [];
 
-    /// <summary>Data internal to a <see cref="UIListGroup"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
     public struct InternalData()
     {
         /// <summary>Maps items to their positional offsets relative to this list's origin.</summary>
@@ -49,33 +78,16 @@ public class UIListGroup : UIGroup
         public Dictionary<UIElement, Action<Vector2i, Vector2i>> Updaters = [];
     }
 
-    /// <summary>Data internal to a <see cref="UIListGroup"/> instance.</summary>
+    /// <summary>Data internal to a <see cref="UIList"/> instance.</summary>
     public InternalData Internal = new();
 
     /// <summary>Constructs a new list group.</summary>
-    /// <param name="spacing">The spacing between each child.</param>
     /// <param name="layout">The layout of the element.</param>
-    /// <param name="vertical">Whether the list should expand vertically.</param>
-    /// <param name="anchor">The anchor the list will expand from. If <c>null</c>, defaults to the <paramref name="layout"/> anchor.</param>
-    public UIListGroup(int spacing, UILayout layout, bool vertical = true, UIAnchor anchor = null) : base(layout.SetSize(0, 0))
+    public UIList(UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Anchor = anchor ?? Layout.Anchor;
-        if ((vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!vertical && Anchor.AlignmentX == UIAlignment.CENTER))
-        {
-            throw new Exception("UIListGroup must have a non-central expansion direction");
-        }
-        Vertical = vertical;
-        Spacing = spacing;
-        if (Vertical)
-        {
-            Layout.SetHeight(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Height : 0);
-            Layout.SetWidth(() => Items.Count > 0 ? Items.Max(item => item.Width) : 0);
-        }
-        else
-        {
-            Layout.SetWidth(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Width : 0);
-            Layout.SetHeight(() => Items.Count > 0 ? Items.Max(item => item.Height) : 0);
-        }
+        // ScaleSize = false?
+        Vertical = true;
+        Anchor = Layout.Anchor;
     }
 
     // TODO: rename to AddItem
@@ -184,6 +196,36 @@ public class UIListGroup : UIGroup
         if (removeChildren)
         {
             RemoveAllChildren();
+        }
+    }
+
+    public void AcceptStyling(ListStyling styling)
+    {
+        Vertical = styling.Vertical.Get(this);
+        Spacing = styling.Spacing.Get(this);
+        Anchor = styling.Anchor.Get(this) ?? Layout.Anchor;
+    }
+
+    public void CheckAnchor()
+    {
+        if ((Vertical && Anchor.AlignmentY == UIAlignment.CENTER) || (!Vertical && Anchor.AlignmentX == UIAlignment.CENTER))
+        {
+            throw new Exception("UIList must have a non-central expansion direction");
+        }
+    }
+
+    public void ConfigureSize()
+    {
+        // TODO: consider padding
+        if (Vertical)
+        {
+            Layout.SetHeight(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Height : 0);
+            Layout.SetWidth(() => Items.Count > 0 ? Items.Max(item => item.Width) : 0);
+        }
+        else
+        {
+            Layout.SetWidth(() => Items.Count > 0 ? Internal.Offsets[Items[^1]] + Items[^1].Width : 0);
+            Layout.SetHeight(() => Items.Count > 0 ? Items.Max(item => item.Height) : 0);
         }
     }
 }

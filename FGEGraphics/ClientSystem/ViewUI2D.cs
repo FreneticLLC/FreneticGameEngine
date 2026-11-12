@@ -6,13 +6,8 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FreneticUtilities.FreneticExtensions;
 using FGECore;
+using FGECore.ConsoleHelpers;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.StackNoteSystem;
@@ -20,21 +15,27 @@ using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.GraphicsHelpers.FontSets;
 using FGEGraphics.GraphicsHelpers.Shaders;
 using FGEGraphics.UISystem;
+using FGEGraphics.UISystem.Elements;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static FGEGraphics.UISystem.UILayout.InternalData;
 
 namespace FGEGraphics.ClientSystem;
 
 /// <summary>A 2D UI view.</summary>
 public class ViewUI2D
 {
-    /// <summary>The base text styling for debug information.</summary>
-    public static readonly string DEBUG_BASE_COLOR = "^r^0^h^o^e";
-
     /// <summary>The backing client window.</summary>
     public GameClientWindow Client;
 
@@ -79,7 +80,15 @@ public class ViewUI2D
     public UIElement HeldElement;
 
     /// <summary>Whether this UI view is in 'debug' mode.</summary>
-    public bool IsDebug;
+    public bool IsDebug
+    {
+        get;
+        set
+        {
+            field = value;
+            // TODO: jank
+        }
+    }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
     public struct InternalData()
@@ -90,20 +99,9 @@ public class ViewUI2D
         /// <summary>Whether scroll input is still available to consume for the current step.</summary>
         public bool Scrolled;
 
-        /// <summary>Whether to draw textual debug information about the hovered elements, if any.</summary>
-        public bool ShowDebugInfo = true;
+        public UIScreen DebugScreen;
 
-        /// <summary>Whether to draw the debug information at the cursor position.</summary>
-        public bool ShowDetailedDebugInfo = false;
-
-        /// <summary>The list position of the entry at the top of the debug info tree.</summary>
-        public int DebugInfoStartIndex = 0;
-
-        /// <summary>The number of entries displayed in the debug info tree.</summary>
-        public int DebugInfoEntries = 5;
-
-        /// <summary>The total size of the debug info tree.</summary>
-        public int DebugInfoTreeSize;
+        public UIDebugPanel DebugPanel;
     }
 
     /// <summary>Data internal to a <see cref="ViewUI2D"/> instance.</summary>
@@ -116,71 +114,39 @@ public class ViewUI2D
         Client = client;
         DefaultScreen = new UIScreen(this);
         CurrentScreen = DefaultScreen;
+        Internal.DebugScreen = new(this);
         Client.Window.KeyDown += HandleKeyEvent;
     }
 
+    public IEnumerable<UIElement> AllChildren()
+    {
+        foreach (UIElement child in CurrentScreen.AllChildren())
+        {
+            yield return child;
+        }
+        if (IsDebug)
+        {
+            foreach (UIElement child in Internal.DebugScreen.AllChildren())
+            {
+                yield return child;
+            }
+        }
+    }
+
     /// <summary>Draws wireframe outlines of the elements on-screen for debugging.</summary>
-    public void DrawDebugOutlines()
+    public void DrawDebugOutline(UIElement element)
     {
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        Engine.Textures.White.Bind();
+        Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
+        Renderer2D.SetColor(outlineColor);
+        Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
+        // TODO: rendering stroke thickness
+        if (element == HeldElement)
         {
-            Engine.Textures.White.Bind();
-            Color4F outlineColor = element == HeldElement ? Color4F.Green : element.ElementInternal.IsMouseHovered ? Color4F.Yellow : Color4F.Red;
-            Renderer2D.SetColor(outlineColor);
-            Rendering.RenderRectangle(UIContext, element.X + 1, element.Y + 1, element.X + element.Width - 1, element.Y + element.Height - 1, new(-0.5f, -0.5f, element.Rotation), true);
-            // TODO: rendering stroke thickness
-            if (element == HeldElement)
-            {
-                Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
-                Rendering.RenderRectangle(UIContext, element.X + 2, element.Y + 2, element.X + element.Width - 2, element.Y + element.Height - 2, new(-0.5f, -0.5f, element.Rotation), true);
-            }
-            Renderer2D.SetColor(Color4F.White);
+            Rendering.RenderRectangle(UIContext, element.X, element.Y, element.X + element.Width, element.Y + element.Height, new(-0.5f, -0.5f, element.Rotation), true);
+            Rendering.RenderRectangle(UIContext, element.X + 2, element.Y + 2, element.X + element.Width - 2, element.Y + element.Height - 2, new(-0.5f, -0.5f, element.Rotation), true);
         }
-    }
-
-    /// <summary>Gets debug information about the hovered elements, if any.</summary>
-    public string GetDebugInfo(List<UIElement> hoveredElements)
-    {
-        if (Internal.ShowDetailedDebugInfo)
-        {
-            return hoveredElements[Internal.DebugInfoStartIndex].GetAllDebugInfo(DEBUG_BASE_COLOR);
-        }
-        Range infoRange = new(Internal.DebugInfoStartIndex, Math.Min(Internal.DebugInfoStartIndex + Internal.DebugInfoEntries, hoveredElements.Count));
-        int numberInfoEntries = infoRange.End.Value - infoRange.Start.Value;
-        if (numberInfoEntries <= 0)
-        {
-            return null;
-        }
-        IEnumerable<UIElement> elementsToDisplay = hoveredElements.Take(infoRange);
-        int minimumTreeLevel = elementsToDisplay.Min(element => element.ElementInternal.TreeLevel);
-        string debugInfo = elementsToDisplay.Select(element =>
-        {
-            string spacing = new(' ', (element.ElementInternal.TreeLevel - minimumTreeLevel) * 2);
-            return element.GetBaseDebugInfo(DEBUG_BASE_COLOR, detailed: false).Select(line => $"^r{spacing}{DEBUG_BASE_COLOR}{line}").JoinString("\n");
-        }).JoinString("\n\n");
-        return debugInfo + $"\n\n{DEBUG_BASE_COLOR}^&[{infoRange.Start}] - ^3[{numberInfoEntries}] ^&- [{hoveredElements.Count - infoRange.End.Value}]^r";
-    }
-
-    /// <summary>Draws debug information over the current screen.</summary>
-    public void DrawDebug()
-    {
-        List<UIElement> hoveredElements = [];
-        foreach (UIElement element in CurrentScreen.AllChildren())
-        {
-            if (element.ElementInternal.IsMouseHovered && element.AllowDebug)
-            {
-                hoveredElements.Add(element);
-            }
-        }
-        hoveredElements.Reverse();
-        Internal.DebugInfoTreeSize = hoveredElements.Count;
-        Internal.DebugInfoStartIndex = Math.Max(0, Math.Min(Internal.DebugInfoStartIndex, Internal.DebugInfoTreeSize - 1));
-        DrawDebugOutlines();
-        if (Internal.ShowDebugInfo && hoveredElements.Count > 0 && GetDebugInfo(hoveredElements) is string debugInfo)
-        {
-            RenderableText text = Client.FontSets.Standard.ParseFancyText(debugInfo);
-            Client.FontSets.Standard.DrawFancyText(text, new Location(10, (int)(Client.WindowHeight - text.Height - 10), 0));
-        }
+        Renderer2D.SetColor(Color4F.White);
     }
 
     /// <summary>Draw the menu to the relevant back buffer.</summary>
@@ -216,18 +182,21 @@ public class ViewUI2D
         Shader s = Client.FontSets.FixToShader;
         Client.FontSets.FixToShader = Client.Shaders.ColorMult2D.UnderlyingShader;
         GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        foreach (UIElement element in AllChildren())
         {
             element.UpdateStyle();
         }
-        while (true) // TODO: this seems reckless
+        for (int i = 0; i < 8; i++) // TODO: this seems reckless
         {
-            foreach (UIElement element in CurrentScreen.AllChildren())
+            foreach (UIElement element in AllChildren())
             {
-                element.UpdateTransforms(Client.Delta, Vector3.Zero);
+                if (element.TransformSelf)
+                {
+                    element.UpdateTransforms(Client.Delta, Vector3.Zero);
+                }
             }
             bool anyUpdated = false;
-            foreach (UIElement element in CurrentScreen.AllChildren())
+            foreach (UIElement element in AllChildren())
             {
                 anyUpdated |= element.HandleTransforms();
             }
@@ -236,7 +205,7 @@ public class ViewUI2D
                 break;
             }
         }
-        foreach (UIElement element in CurrentScreen.AllChildren())
+        foreach (UIElement element in AllChildren())
         {
             if (!element.ElementInternal.HasDrawn)
             {
@@ -248,7 +217,11 @@ public class ViewUI2D
         CurrentScreen.RenderAll(Client.Delta);
         if (IsDebug)
         {
-            DrawDebug();
+            foreach (UIElement element in CurrentScreen.AllChildren())
+            {
+                DrawDebugOutline(element);
+            }
+            Internal.DebugScreen.RenderAll(Client.Delta);
         }
         GraphicsUtil.CheckError("ViewUI2D - Draw - PostDraw");
         Client.FontSets.FixToShader = s;
@@ -267,8 +240,12 @@ public class ViewUI2D
         Vector2 scrollDelta = Client.CurrentMouse.ScrollDelta;
         MouseDown = Client.CurrentMouse.IsButtonDown(MouseButton.Left);
         CurrentScreen.TickAll(Client.Delta);
+        if (IsDebug)
+        {
+            Internal.DebugScreen.TickAll(Client.Delta);
+        }
         // TODO: crude and probably slow
-        ICollection<UIElement> elements = [.. CurrentScreen.AllChildren()];
+        ICollection<UIElement> elements = [.. AllChildren()];
         foreach (UIElement element in elements.Reverse())
         {
             if (element.IsValid)
@@ -286,38 +263,55 @@ public class ViewUI2D
         if (args.Key == Keys.F4)
         {
             IsDebug = !IsDebug;
-        }
-        if (args.Alt)
-        {
-            if (args.Shift)
+            if (IsDebug)
             {
-                if (args.Key == Keys.KeyPad5)
+                string labelColor = "^r^0^e^7";
+                UIStyleValue<string> labelColorInteractive = UIStyleValue<string>.Interactive(labelColor, "^r^0^e^b^7", "^r^)^e^5", "^r^0^e^7");
+                UIStyling baseStyling = new()
                 {
-                    Internal.ShowDetailedDebugInfo = !Internal.ShowDetailedDebugInfo;
-                }
-                if (args.Key == Keys.KeyPad2 && Internal.DebugInfoEntries > 1)
+                    //Padding = 2,
+                    ShowBackground = true,
+                    Fill = Color4F.Black,
+                    Stroke = Color4F.White,
+                    StrokeWeight = 1,
+                    TextFont = Client.FontSets.Standard,
+                    TextBaseColor = TextStyle.White,
+                };
+                UIStyling styling = baseStyling with
                 {
-                    Internal.DebugInfoEntries--;
-                }
-                else if (args.Key == Keys.KeyPad8 && Internal.DebugInfoEntries < Internal.DebugInfoTreeSize)
-                {
-                    Internal.DebugInfoEntries++;
-                }
+                    Components = [
+                        new UIElementTree.StylingOptions()
+                        {
+                            LabelStyling = new UIStyling()
+                            {
+                                TextFont = Client.FontSets.Standard,
+                                TextBaseColor = labelColorInteractive
+                            }
+                        },
+                        new UIElementDebugPanel.StylingOptions()
+                        {
+                            LabelStyling = new UIStyling()
+                            {
+                                TextFont = Client.FontSets.Standard,
+                                TextBaseColor = labelColor
+                            }
+                        },
+                        new UIBoolSetting.StylingOptions()
+                        {
+                            ButtonStyling = baseStyling with
+                            {
+                                StrokeWeight = UIStyleValue<int>.Interactive(1, 2, 3, 1),
+                                TextBaseColor = labelColorInteractive
+                            }
+                        }
+                    ]
+                };
+                Internal.DebugPanel = new(CurrentScreen, styling, new UILayout().SetSize(500, 300));
+                Internal.DebugScreen.AddChild(Internal.DebugPanel);
             }
             else
             {
-                if (args.Key == Keys.KeyPad5)
-                {
-                    Internal.ShowDebugInfo = !Internal.ShowDebugInfo;
-                }
-                else if (args.Key == Keys.KeyPad2 && Internal.DebugInfoStartIndex < Internal.DebugInfoTreeSize - 1)
-                {
-                    Internal.DebugInfoStartIndex++;
-                }
-                else if (args.Key == Keys.KeyPad8 && Internal.DebugInfoStartIndex > 0)
-                {
-                    Internal.DebugInfoStartIndex--;
-                }
+                Internal.DebugScreen.RemoveChild(Internal.DebugPanel);
             }
         }
     }

@@ -22,7 +22,7 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a simple piece of text on a screen.</summary>
 public class UILabel : UIElement
@@ -82,7 +82,7 @@ public class UILabel : UIElement
     /// <param name="text">The text to display on the label.</param>
     /// <param name="styling">The style of the label.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UILabel(string text, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UILabel(string text, UIStyling styling = null, UILayout layout = null) : base(styling, layout)
     {
         Internal = new() { Content = text ?? "" };
         UpdateRenderable();
@@ -162,9 +162,9 @@ public class UILabel : UIElement
     /// <param name="layout">The layout of the element.</param>
     /// <param name="listAnchor">The anchor to use when positioning the label and the icon in a list.</param>
     /// <returns>A tuple of the label, icon, and their list container.</returns>
-    public static (UILabel Label, UIImage Icon, UIListGroup List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
+    public static (UILabel Label, UIImage Icon, UIList List) WithIcon(string text, Texture icon, int spacing, UIStyling styling, UILayout layout, UIAnchor listAnchor = null)
     {
-        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(null, layout) { Spacing = spacing, Vertical = false, Anchor = listAnchor ?? UIAnchor.TOP_LEFT };
         UILabel label = new(text, styling, layout.Copy().SetOrigin());
         UIImage image = new(icon, new UILayout().SetSize(() => label.Height, () => label.Height));
         list.AddListItem(label);

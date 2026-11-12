@@ -15,7 +15,7 @@ using FGECore.MathHelpers;
 using FGEGraphics.GraphicsHelpers;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a slider element that can choose between a range of real number values.</summary>
 public class UINumberSlider : UIElement
@@ -56,7 +56,7 @@ public class UINumberSlider : UIElement
     public double Progress => (Value - Min) / (Max - Min);
 
     /// <summary>The box placed at the current slider progress.</summary>
-    public UIBox Button;
+    public UIElement Button;
 
     /// <summary>Fired when the user edits the slider value.</summary>
     public Action<double> OnValueEdit;
@@ -69,7 +69,7 @@ public class UINumberSlider : UIElement
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling, UILayout layout) : base(styling, layout)
+    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling = null, UILayout layout = null) : base(styling, layout)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
@@ -82,8 +82,9 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
-        AddChild(Button = new(null, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { RenderMode = UIRenderMode.NONE, IsEnabled = false });
+        AddChild(Button = new(styling.Copy(), layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
+        Styling = styling is not null ? styling with { ShowBackground = false } : null; 
     }
 
     /// <summary>Corrects a slider value to the closest valid position.</summary>
@@ -153,9 +154,9 @@ public class UINumberSlider : UIElement
     /// <param name="listAnchor">The anchor to use when positioning the slider and the label in a list.</param>
     /// <param name="trackLabelEdits">Whether to update the number slider when the label is momentarily edited.</param>
     /// <returns>A list group containing both elements.</returns>
-    public static UIListGroup WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
+    public static UIList WithLabel(UINumberSlider slider, UINumberInputLabel label, int spacing, UILayout layout, UIAnchor listAnchor = null, bool trackLabelEdits = false)
     {
-        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(null, layout) { Spacing = spacing, Vertical = false, Anchor = listAnchor ?? UIAnchor.TOP_LEFT };
         slider.OnValueEdit += _ => label.Value = slider.Value;
         label.OnTextSubmit += _ =>
         {

@@ -6,44 +6,68 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using FreneticUtilities.FreneticExtensions;
 using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
 using FGEGraphics.UISystem.InputSystems;
+using FreneticUtilities.FreneticExtensions;
 using OpenTK.Mathematics;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 using Vector2i = FGECore.MathHelpers.Vector2i;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>
 /// Represents a single generic item in a UI.
 /// <para>Sub-classes implement rendering and general logic for a specific type of UI element.</para>
 /// </summary>
 // TODO: Hover text
-public abstract class UIElement
+public class UIElement
 {
+    /// <summary>The name of this element.</summary>
+    public virtual string Name { get; set; } = "Element";
+
     /// <summary>The parent element, <c>null</c> if this element is the root or hasn't been added as a child.</summary>
     public UIElement Parent;
 
     /// <summary>The UI view this element is attached to.</summary>
     public ViewUI2D View;
 
+    /// <summary>This element's children.</summary>
+    public List<UIElement> Children = [];
+
     /// <summary>Styling logic for this element.</summary>
-    public UIStyling Styling;
+    public UIStyling Styling
+    {
+        get;
+        set
+        {
+            UIStyling from = field;
+            field = value ?? UIStyling.Empty;
+            OnStylingChange?.Invoke(from, value);
+            StylingChanged(from, value);
+        }
+    }
 
     /// <summary>Gets the current element style.</summary>
     public UIStyle Style => ElementInternal.Style;
 
     /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
-    public UILayout Layout;
+    public UILayout Layout
+    {
+        get;
+        set
+        {
+            field = value ?? new UILayout();
+            field.Element = this;
+        }
+    }
 
     /// <summary>Whether this element has been added to a parent element, <c>false</c> if not yet added or already removed.</summary>
     public bool IsValid;
@@ -66,11 +90,13 @@ public abstract class UIElement
     /// <summary>This absolute position.</summary>
     /// <seealso cref="X"/>
     /// <seealso cref="Y"/>
+    [UIDebug]
     public Vector2i Position;
 
     /// <summary>The absolute size.</summary>
     /// <seealso cref="Width"/>
     /// <seealso cref="Height"/>
+    [UIDebug]
     public Vector2i Size;
 
     /// <summary>The absolute rotation.</summary>
@@ -101,17 +127,21 @@ public abstract class UIElement
     /// <summary>Whether this element should render itself. If <c>false</c>, <see cref="Render(double, UIStyle)"/> may be called manually.</summary>
     public UIRenderMode RenderMode = UIRenderMode.FULL;
 
-    /// <summary>The debug name of this element.</summary>
-    public virtual string Name { get; set; } = null;
-
+    // TODO: Remove (The whole hierarchy should be shown in a GUI debug display)
     /// <summary>Whether this element displays additional information in debug mode.</summary>
     public bool AllowDebug = true;
+
+    /// <summary>Whether this element update its own transforms in the element tree.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    public bool TransformSelf = true;
 
     /// <summary>
     /// Whether this element should scale its width based on <see cref="Scale"/>.
     /// Even if this value is <c>false</c>, this element's scale still applies to its children.
     /// </summary>
     public bool ScaleSize = true;
+
+    public bool Scissor = false;
 
     /// <summary>Fired when the user interacts with this element using a mouse, keyboard, or controller.</summary>
     public Action OnClick;
@@ -128,8 +158,14 @@ public abstract class UIElement
     /// <summary>Fired when the element is removed from its parent.</summary>
     public Action OnRemove;
 
+    public Action<UIElement> OnChildAdd;
+
+    public Action<UIElement> OnChildRemove;
+
     /// <summary>Fired when <see cref="Style"/> changes value.</summary>
     public Action<UIStyle, UIStyle> OnStyleChange;
+
+    public Action<UIStyling, UIStyling> OnStylingChange;
 
     /// <summary>Fired when <see cref="Position"/> changes value.</summary>
     public Action<Vector2i, Vector2i> OnPositionChange;
@@ -146,9 +182,6 @@ public abstract class UIElement
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
     public struct ElementInternalData()
     {
-        /// <summary>This element's children.</summary>
-        public List<UIElement> Children = [];
-
         /// <summary>Whether the mouse is hovering over this element.</summary>
         public bool IsMouseHovered;
 
@@ -173,6 +206,12 @@ public abstract class UIElement
 
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
+
+        /// <summary>A map of this element's styling component types to their applicator methods.</summary>
+        public Dictionary<Type, StylingAcceptors.Applicator> StylingApplicators;
+
+        /// <summary>A map of this element's members marked with <see cref="UIDebugAttribute"/>, keyed by name.</summary>
+        public Dictionary<string, UIDebugMember> DebugMembers;
     }
 
     /// <summary>Data internal to a <see cref="UIElement"/> instance.</summary>
@@ -181,14 +220,12 @@ public abstract class UIElement
     /// <summary>Constructs a new element to be placed on a <see cref="UIScreen"/>.</summary>
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIElement(UIStyling styling, UILayout layout)
+    public UIElement(UIStyling styling = null, UILayout layout = null)
     {
         Styling = styling;
-        if (layout is not null)
-        {
-            Layout = layout;
-            Layout.Element = this;
-        }
+        Layout = layout;
+        ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
+        ElementInternal.DebugMembers = UIDebugMember.GetOrCreateDebugMembers(GetType());
     }
 
     /// <summary>Internal handler, adds a child to this element. Do not call directly.</summary>
@@ -211,6 +248,7 @@ public abstract class UIElement
         child.UpdateStyle();
         child.Added();
         child.OnAdd?.Invoke();
+        OnChildAdd?.Invoke(child);
     }
 
     /// <summary>Adds a child to this element.</summary>
@@ -221,7 +259,7 @@ public abstract class UIElement
         {
             throw new Exception("Tried to add a child that is invalid (null, self, or already has a parent)!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children, child];
+        Children.Add(child);
         AddChildInternal(child);
     }
 
@@ -233,7 +271,7 @@ public abstract class UIElement
         {
             throw new Exception("Tried to add a child that already has a parent!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children, .. children];
+        Children.AddRange(children);
         foreach (UIElement child in children)
         {
             AddChildInternal(child);
@@ -251,6 +289,7 @@ public abstract class UIElement
         child.IsValid = false;
         child.Removed();
         child.OnRemove?.Invoke();
+        OnChildRemove?.Invoke(child);
         child.Parent = null;
         child.ElementInternal.TreeLevel = 0;
         child.View = null;
@@ -264,57 +303,75 @@ public abstract class UIElement
         {
             return;
         }
-        if (!ElementInternal.Children.Contains(child))
+        if (!Children.Contains(child))
         {
             throw new Exception("Tried to remove a child that does not belong to this element!");
         }
-        ElementInternal.Children = [.. ElementInternal.Children.Where(c => c != child)];
+        Children.Remove(child);
         RemoveChildInternal(child);
     }
 
     /// <summary>Removes all children from this element.</summary>
     public void RemoveAllChildren()
     {
-        foreach (UIElement child in ElementInternal.Children)
+        foreach (UIElement child in Children)
         {
             RemoveChildInternal(child);
         }
-        ElementInternal.Children.Clear();
+        Children.Clear();
+    }
+
+    public void ToggleChild(UIElement child)
+    {
+        if (HasChild(child))
+        {
+            RemoveChild(child);
+        }
+        else
+        {
+            AddChild(child);
+        }
     }
 
     /// <summary>Returns whether this element is the direct parent (and not a parent-of-a-parent) of another element.</summary>
     /// <param name="element">The possible child element.</param>
-    public bool HasChild(UIElement element) => element.Parent == this;
+    public bool HasChild(UIElement element) => element is not null && element.Parent == this;
 
-    // TODO: 'filter' predicate parameter
+    // TODO: 'filter' predicate parameter?
+    //   - the current implementation is essentially a Where check
     /// <summary>Yields this element and all child elements recursively.</summary>
     /// <param name="includeSelf">Whether to include this element.</param>
-    public IEnumerable<UIElement> AllChildren(bool includeSelf = true)
+    public IEnumerable<UIElement> AllChildren(bool includeSelf = true, Func<UIElement, bool> filter = null) 
     {
-        if (includeSelf)
+        if (includeSelf && (filter?.Invoke(this) ?? true))
         {
             yield return this;
         }
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid)
             {
-                foreach (UIElement child in element.AllChildren(true))
+                foreach (UIElement child in element.AllChildren(true, filter))
                 {
-                    yield return child;
+                    if (filter?.Invoke(child) ?? true)
+                    {
+                        yield return child;
+                    }
                 }
             }
         }
     }
 
+    // why do we need this method?
     /// <summary>Gets all children that contain the position on the screen.</summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
     /// <returns>A list of child elements containing the position.</returns>
     public virtual IEnumerable<UIElement> GetChildrenAt(int x, int y)
     {
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
+            // why Contains check?
             if (element.IsValid && element.Contains(x, y))
             {
                 yield return element;
@@ -328,7 +385,7 @@ public abstract class UIElement
     /// <returns>A list of child elements not containing the position.</returns>
     public virtual IEnumerable<UIElement> GetChildrenNotAt(int x, int y)
     {
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid && !element.Contains(x, y))
             {
@@ -379,6 +436,16 @@ public abstract class UIElement
     public void UpdateStyle()
     {
         SetStyle(Styling?.Get(this) ?? UIStyle.Empty);
+        if (Styling is not null && Styling.Components is not null)
+        {
+            foreach (StylingComponent component in Styling.Components)
+            {
+                if (ElementInternal.StylingApplicators.TryGetValue(component.GetType(), out StylingAcceptors.Applicator applicator))
+                {
+                    applicator(this, component);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -387,7 +454,7 @@ public abstract class UIElement
     /// </summary>
     /// <param name="x">The X position to check for.</param>
     /// <param name="y">The Y position to check for.</param>
-    public virtual bool CanInteract(int x, int y) => Parent?.CanInteract(x, y) ?? false;
+    public virtual bool CanInteract(int x, int y) => Scissor ? SelfContains(x, y) : Parent?.CanInteract(x, y) ?? false;
 
     /// <summary>
     /// Ticks this element's interaction state. Should be called in the reverse of the rendering order.
@@ -517,7 +584,7 @@ public abstract class UIElement
     {
         TickInput();
         Tick(delta);
-        foreach (UIElement element in ElementInternal.Children)
+        foreach (UIElement element in Children)
         {
             if (element.IsValid)
             {
@@ -526,25 +593,19 @@ public abstract class UIElement
         }
     }
 
-    // TODO: Support rotations
-    /// <summary>
-    /// Updates the absolute layout values for this element in the following order:
-    /// <list type="number">
-    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
-    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
-    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
-    /// <item><see cref="Rotation"/></item>
-    /// </list>
-    /// </summary>
-    /// <param name="delta">The time since the last render.</param>
-    /// <param name="rotation">The last rotation made in the render chain.</param>
-    public virtual void UpdateTransforms(double delta, Vector3 rotation)
+    /// <summary>Updates <see cref="Scale"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    public virtual void UpdateScale(double delta, Vector3 rotation)
     {
-        ElementInternal.LastPosition = Position;
-        ElementInternal.LastSize = Size;
-        ElementInternal.LastRotation = Rotation;
         ElementInternal.LastScale = Scale;
         Scale = Layout.Scale;
+    }
+
+    /// <summary>Updates <see cref="Size"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    public virtual void UpdateSize(double delta, Vector3 rotation)
+    {
+        ElementInternal.LastSize = Size;
         if (ScaleSize)
         {
             Size = new((int)(Layout.Width * Scale), (int)(Layout.Height * Scale));
@@ -553,6 +614,14 @@ public abstract class UIElement
         {
             Size = new(Layout.Width, Layout.Height);
         }
+    }
+
+    /// <summary>Updates <see cref="Position"/>.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    public virtual void UpdatePosition(double delta, Vector3 rotation)
+    {
+        ElementInternal.LastPosition = Position;
+        ElementInternal.LastRotation = Rotation;
         int x = Layout.X;
         int y = Layout.Y;
         if (Math.Abs(rotation.Z) < 0.001f)
@@ -585,6 +654,46 @@ public abstract class UIElement
         }*/
         Position = new(x, y);
         Rotation = rotation.Z;
+    }
+
+    /// <summary>Updates the transforms of this element's children.</summary>
+    /// <seealso cref="UpdateTransforms(double, Vector3, TransformFlags)"/>
+    /// <seealso cref="TransformSelf"/>
+    public virtual void UpdateChildTransforms(double delta, Vector3 rotation)
+    { }
+
+    // TODO: Support rotations
+    /// <summary>
+    /// Updates the absolute layout values for this element in the following order:
+    /// <list type="number">
+    /// <item><see cref="Scale"/>, multiplied with all parent values</item>
+    /// <item><see cref="Size"/>, dependent on scale if <see cref="ScaleSize"/> is <c>true</c></item>
+    /// <item><see cref="Position"/>, computed based on size, rotation, and relative position to the parent, if any</item>
+    /// <item><see cref="Rotation"/></item>
+    /// <item>The transforms of this element's children, if necessary</item>
+    /// </list>
+    /// </summary>
+    /// <param name="delta">The time since the last render.</param>
+    /// <param name="rotation">The last rotation made in the render chain.</param>
+    /// <param name="flags">Flags toggling stages of this method.</param>
+    public virtual void UpdateTransforms(double delta, Vector3 rotation, TransformFlags flags = TransformFlags.ALL)
+    {
+        if (flags.HasFlag(TransformFlags.SCALE))
+        {
+            UpdateScale(delta, rotation);
+        }
+        if (flags.HasFlag(TransformFlags.SIZE))
+        {
+            UpdateSize(delta, rotation);
+        }
+        if (flags.HasFlag(TransformFlags.POSITION))
+        {
+            UpdatePosition(delta, rotation);
+        }
+        if (flags.HasFlag(TransformFlags.CHILDREN))
+        {
+            UpdateChildTransforms(delta, rotation);
+        }
     }
 
     /// <summary>Fires relevant events if this element's transforms have changed.</summary>
@@ -625,31 +734,100 @@ public abstract class UIElement
     {
     }
 
+    /// <summary>Renders this element's background box.</summary>
+    /// <param name="style">The rendering style.</param>
+    public void RenderBackground(UIStyle style)
+    {
+        Vector3 rotation = new(-0.5f, -0.5f, Rotation);
+        bool any = style.ShadowSize > 0 || style.Stroke.A > 0 || style.Fill.A > 0;
+        if (any)
+        {
+            View.Engine.Textures.White.Bind();
+            if (style.ShadowSize > 0)
+            {
+                Renderer2D.SetColor(new Color4F(0, 0, 0, 0.5f));
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width + style.ShadowSize, Y + Height + style.ShadowSize, rotation);
+            }
+            if (style.Stroke.A > 0 && style.StrokeWeight > 0)
+            {
+                Renderer2D.SetColor(style.Stroke);
+                View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, rotation);
+            }
+            if (style.Fill.A > 0)
+            {
+                Renderer2D.SetColor(style.Fill);
+                View.Rendering.RenderRectangle(View.UIContext, X + style.StrokeWeight, Y + style.StrokeWeight, X + Width - style.StrokeWeight, Y + Height - style.StrokeWeight, rotation);
+            }
+            Renderer2D.SetColor(Color4F.White);
+        }
+        if (style.Texture is not null)
+        {
+            style.Texture.Bind();
+            float ymin = Y;
+            float ymax = Y + Height;
+            //float ymin = Flip ? Y + Height : Y;
+            //float ymax = Flip ? Y : Y + Height;
+            View.Rendering.RenderRectangle(View.UIContext, X, ymin, X + Width, ymax, rotation);
+        }
+    }
+
     /// <summary>Renders this element with the current <see cref="Style"/>.</summary>
     /// <param name="delta">The time since the last render.</param>
-    public void Render(double delta) => Render(delta, Style);
+    public void Render(double delta)
+    {
+        if (Style.ShowBackground)
+        {
+            RenderBackground(Style);
+        }
+        Render(delta, Style);
+    }
 
     /// <summary>Renders this element and all of its children recursively.</summary>
     /// <param name="delta">The time since the last render.</param>
     public virtual void RenderAll(double delta)
     {
-        GraphicsUtil.CheckError("UIElement - PreRender");
-        if (RenderMode == UIRenderMode.FULL)
+        if (View is null)
         {
-            Render(delta);
+            return;
         }
-        GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
-        if (RenderMode != UIRenderMode.NONE)
+        try
         {
-            foreach (UIElement child in ElementInternal.Children)
+            GraphicsUtil.CheckError("UIElement - PreRender");
+            // TODO: Should this have an earlier error check / warning? At least the negative case should not be possible.
+            // TODO: handle negative width/height
+            bool canScissor = Scissor && Width >= 0 && Height >= 0;
+            if (canScissor)
             {
-                if (child.IsValid)
+                View.Rendering.PushScissor(View.UIContext, X, Y, X + Width, Y + Height);
+            }
+            if (RenderMode == UIRenderMode.FULL)
+            {
+                Render(delta);
+            }
+            GraphicsUtil.CheckError("UIElement - PostRenderSelf", this);
+            if (RenderMode != UIRenderMode.NONE)
+            {
+                foreach (UIElement child in Children)
                 {
-                    child.RenderAll(delta);
+                    if (child.IsValid)
+                    {
+                        child.RenderAll(delta);
+                    }
                 }
             }
+            if (canScissor)
+            {
+                View.Rendering.PopScissor(View.UIContext);
+            }
+            GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
         }
-        GraphicsUtil.CheckError("UIElement - PostRenderAll", this);
+        catch (Exception e)
+        {
+            Logs.Debug(e.ToString());
+            Renderer2D.SetColor(Color4F.Red);
+            View.Rendering.RenderRectangle(View.UIContext, X, Y, X + Width, Y + Height, hollow: true);
+            Renderer2D.SetColor(Color4F.White);
+        }
     }
 
     /// <summary>Ran when the mouse enters the boundaries of this element.</summary>
@@ -705,6 +883,10 @@ public abstract class UIElement
     /// <param name="to">The new style.</param>
     public virtual void StyleChanged(UIStyle from, UIStyle to)
     {
+    }
+
+    public virtual void StylingChanged(UIStyling from, UIStyling to)
+    { 
     }
 
     /// <summary>Ran when <see cref="Position"/> changes value.</summary>
@@ -781,6 +963,7 @@ public abstract class UIElement
     {
     }
 
+    // TODO: DESTROY!!!
     /// <summary>Returns the base debug text to display when debug mode is enabled (see <see cref="ViewUI2D.IsDebug"/>).</summary>
     /// <param name="baseColor">The base text styling.</param>
     /// <param name="detailed">Whether to include extra base information.</param>
@@ -810,19 +993,44 @@ public abstract class UIElement
     {
         List<string> info = GetBaseDebugInfo(baseColor, detailed: true);
         info.AddRange(GetDebugInfo());
-        // TODO: This should absolutely not be written this way. Raw reflection at runtime is a no-no!
-        foreach (MemberInfo memberInfo in GetType().GetMembers())
-        {
-            if (memberInfo.IsDefined(typeof(UIDebugAttribute), true))
-            {
-                object value = memberInfo is FieldInfo fieldInfo ? fieldInfo.GetValue(this) : memberInfo is PropertyInfo propertyInfo ? propertyInfo.GetValue(this) : null;
-                if (value is not null)
-                {
-                    string color = value is bool boolValue ? (boolValue ? "2" : "1") : "3";
-                    info.Add($"^7{memberInfo.Name}: ^{color}{value}");
-                }
-            }
-        }
         return info.Select(line => baseColor + line).JoinString("\n");
+    }
+
+    /// <summary>Returns the current value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
+    /// <param name="memberName">The unqualified name of the member.</param>
+    public object GetDebugValue(string memberName) => ElementInternal.DebugMembers[memberName]?.Getter(this);
+
+    /// <summary>Sets the value of a member marked with <see cref="UIDebugAttribute"/>.</summary>
+    /// <param name="memberName">The unqualified name of the member.</param>
+    /// <param name="value">The new value.</param>
+    public bool SetDebugValue(string memberName, object value)
+    {
+        if (ElementInternal.DebugMembers[memberName].Setter is Action<object, object> setter)
+        {
+            setter(this, value);
+            return true;
+        }
+        return false;
+    }
+
+    // TODO
+    /// <inheritdoc/>
+    public override string ToString() => $"{Name}, {Position}, {Size}, {Rotation}, {Scale}";
+
+    // TODO: Add NONE?
+    /// <summary>Flags to toggle stages of <see cref="UpdateTransforms(double, Vector3, TransformFlags)"/>.</summary>
+    [Flags]
+    public enum TransformFlags
+    {
+        /// <summary>Updates <see cref="Scale"/>.</summary>
+        SCALE = 0,
+        /// <summary>Updates <see cref="Size"/>.</summary>
+        SIZE = 1 << 0,
+        /// <summary>Updates <see cref="Position"/>.</summary>
+        POSITION = 1 << 1,
+        /// <summary>Updates the transforms of the element's children.</summary>
+        CHILDREN = 1 << 2,
+        /// <summary>Toggle on all features.</summary>
+        ALL = SCALE | SIZE | POSITION | CHILDREN
     }
 }
