@@ -28,7 +28,7 @@ public class PointLight : LightObject
     public float Radius;
 
     /// <summary>Color of the light.</summary>
-    Color3F Color;
+    public Color3F Color;
 
     /// <summary>Gets whether it should cast shadows.</summary>
     public bool CastShadows = true;
