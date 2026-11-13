@@ -44,6 +44,17 @@ public class PointLight : LightObject
         }
     }
 
+    /// <summary>Sets the color of the light.</summary>
+    /// <param name="col">The new color.</param>
+    public void SetColor(Color3F col)
+    {
+        Color = col;
+        for (int i = 0; i < 6; i++)
+        {
+            InternalLights[i].Color = col;
+        }
+    }
+
     /// <summary>Constructs the point light.</summary>
     /// <param name="pos">The position.</param>
     /// <param name="radius">The radius.</param>
