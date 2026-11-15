@@ -12,11 +12,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a toggleable box on the screen.</summary>
 // TODO: generalize beyond an 'X' when toggled
-public class UIToggleBox : UIBox
+public class UIToggleBox : UIButton
 {
     /// <inheritdoc/>
     public override string Name => "Toggle Box";
@@ -32,7 +32,7 @@ public class UIToggleBox : UIBox
     /// <param name="styling">The styling logic of the element.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="toggled">The initial toggle state.</param>
-    public UIToggleBox(UIStyling styling, UILayout layout, bool toggled = false) : base(styling, layout)
+    public UIToggleBox(UIStyling styling = null, UILayout layout = null, bool toggled = false) : base(null, styling, layout)
     {
         SetToggled(toggled);
     }
@@ -63,10 +63,10 @@ public class UIToggleBox : UIBox
     /// <param name="labelStyling">The styling of the label.</param>
     /// <param name="listAnchor">The anchor to use when positioning the box and the icon in a list.</param>
     /// <returns>A tuple of the toggle box, label, and their list container.</returns>
-    public static (UIToggleBox Box, UILabel Label, UIListGroup List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = null, UIAnchor listAnchor = null)
+    public static (UIToggleBox Box, UILabel Label, UIList List) WithLabel(string text, int spacing, UIStyling styling, UILayout layout, bool toggled = false, UIStyling labelStyling = null, UIAnchor listAnchor = null)
     {
         UIToggleBox box = new(styling, layout.Copy().SetOrigin(), toggled);
-        UIListGroup list = new(spacing, layout, vertical: false, anchor: listAnchor ?? UIAnchor.TOP_LEFT);
+        UIList list = new(null, layout) { Spacing = spacing, Vertical = false, Anchor = listAnchor ?? UIAnchor.TOP_LEFT };
         UILabel label = new(text, labelStyling ?? styling?.Bind(box), new UILayout());
         list.AddListItem(box);
         list.AddListItem(label);
