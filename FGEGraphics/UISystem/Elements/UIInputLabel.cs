@@ -106,6 +106,8 @@ public class UIInputLabel : UIElement
         ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(null, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
         Paragraph.SetContent(defaultText);
+        UpdateScrollGroup();
+        Paragraph.OnSizeChange += (_, _) => UpdateScrollGroup();
     }
 
     /// <inheritdoc/>
@@ -149,33 +151,32 @@ public class UIInputLabel : UIElement
         {
             return;
         }
+        int cursorPosition = !Paragraph.InputInternal.CursorRenderOffset.IsNaN() ? (int)Paragraph.InputInternal.CursorRenderOffset.X : 0;
         ScrollGroup.XAxis.MaxValue = Math.Max(Paragraph.Width - ScrollGroup.Width, 0);
-        ScrollGroup.XAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X - ScrollGroup.XAxis.Value);
+        ScrollGroup.XAxis.ScrollToPos(cursorPosition, cursorPosition - ScrollGroup.XAxis.Value);
         ScrollGroup.XAxis.Clamp();
     }
 
     /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
     public void UpdateScrollGroupY()
     {
-        if (Paragraph.Internal.Renderables.Count == 0)
+        if (!Multiline || Paragraph.Internal.Renderables.Count == 0)
         {
             ScrollGroup.YAxis.Reset();
             return;
         }
         int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.TextFont?.Height ?? 0;
+        int cursorPosition = !Paragraph.InputInternal.CursorRenderOffset.IsNaN() ? (int)Paragraph.InputInternal.CursorRenderOffset.Y : 0;
         ScrollGroup.YAxis.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        ScrollGroup.YAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.YAxis.Value);
-        ScrollGroup.XAxis.Clamp();
+        ScrollGroup.YAxis.ScrollToPos(cursorPosition, cursorPosition + lastLineHeight - ScrollGroup.YAxis.Value);
+        ScrollGroup.YAxis.Clamp();
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        if (!Paragraph.InputInternal.CursorRenderOffset.IsNaN())
-        {
-            UpdateScrollGroupX();
-            UpdateScrollGroupY();
-        }    
+        UpdateScrollGroupX();
+        UpdateScrollGroupY();   
     }
 
     /// <summary>Updates the visual state of this label.</summary>

@@ -91,9 +91,10 @@ public class UIScrollGroup : UIElement
         {
             return true;
         }
+        // TODO: should this first condition stay?
         if (YAxis.MaxValue == 0 || View.Client.Window.KeyboardState.IsKeyDown(Keys.LeftShift))
         {
-            horizontal = vertical;
+            horizontal += vertical;
             vertical = 0;
         }
         XAxis.TickMouseScroll(horizontal);
