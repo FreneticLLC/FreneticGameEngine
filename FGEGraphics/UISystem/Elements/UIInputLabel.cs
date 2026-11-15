@@ -113,9 +113,8 @@ public class UIInputLabel : UIElement
     /// <inheritdoc/>
     public override void StylingChanged(UIStyling from, UIStyling to)
     {
-        base.StylingChanged(from, to);
-        PlaceholderInfo?.Styling = to?.Bind(this);
-        Paragraph?.Styling = to is not null ? to.Bind(this) with { ShowBackground = false } : null;
+        PlaceholderInfo?.SetStyling(to.Bind(this));
+        Paragraph?.SetStyling(to.Bind(this) with { ShowBackground = false });
     }
 
     /// <inheritdoc/>

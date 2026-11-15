@@ -198,7 +198,9 @@ public class UIInputParagraph : UIParagraph, IStylingAcceptor<UIInputParagraph.S
 
     public void AcceptStyling(StylingOptions options)
     {
-        InputInternal.LabelLeft.Styling = InputInternal.LabelRight.Styling = options.TextStyling.Get(this);
-        InputInternal.LabelCenter.Styling = options.HighlightStyling.Get(this);
+        UIStyling textStyling = options.TextStyling.Get(this);
+        InputInternal.LabelLeft.SetStyling(textStyling);
+        InputInternal.LabelRight.SetStyling(textStyling);
+        InputInternal.LabelCenter.SetStyling(options.HighlightStyling.Get(this));
     }
 }

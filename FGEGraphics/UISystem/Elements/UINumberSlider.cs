@@ -69,7 +69,7 @@ public class UINumberSlider : UIElement
     /// <param name="integer">Whether to use integers instead of decimals.</param>
     /// <param name="styling">The clickable styles.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling = null, UILayout layout = null) : base(styling, layout)
+    public UINumberSlider(double min, double max, double defaultValue, double interval, bool integer, UIStyling styling = null, UILayout layout = null) : base(null, layout)
     {
         Integer = integer;
         Interval = Integer ? Math.Max((int)interval, 1.0) : interval;
@@ -82,9 +82,9 @@ public class UINumberSlider : UIElement
             Max = Min + Interval * maxStep;
         }
         Value = Math.Clamp(Integer ? (int)Default : Default, Min, Max); // TODO: is this correct?
-        AddChild(Button = new(styling.Copy(), layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { IsEnabled = false });
+        AddChild(Button = new(null, layout.Copy().SetOrigin().SetWidth(layout.Height / 2)) { IsEnabled = false });
         Button.Layout.SetX(() => (int)(Progress * Width) - Button.Width / 2);
-        Styling = styling is not null ? styling with { ShowBackground = false } : null; 
+        SetStyling(styling);
     }
 
     /// <summary>Corrects a slider value to the closest valid position.</summary>
@@ -144,6 +144,13 @@ public class UINumberSlider : UIElement
         }
         Renderer2D.SetColor(Color4F.White);
         Button.Render(delta, style);
+    }
+
+    public override UIStyling AcceptStyling(UIStyling styling) => styling with { ShowBackground = false };
+
+    public override void StylingChanged(UIStyling from, UIStyling to)
+    {
+        Button?.SetStyling(to.Bind(this) with { ShowBackground = true });
     }
 
     /// <summary>Joins a number slider and a number input label into a single unit.</summary>

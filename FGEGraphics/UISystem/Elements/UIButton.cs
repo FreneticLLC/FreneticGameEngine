@@ -41,6 +41,6 @@ public class UIButton : UIElement
 
     public override void StylingChanged(UIStyling from, UIStyling to)
     {
-        Label?.Styling = Styling.Bind(this) with { ShowBackground = false };
+        Label?.SetStyling(Styling.Bind(this) with { ShowBackground = false });
     }
 }

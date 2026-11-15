@@ -78,8 +78,8 @@ public class UIBoolSetting : UISetting, IStylingAcceptor<UIBoolSetting.StylingOp
 
     public void AcceptStyling(StylingOptions styling)
     {
-        Yes.Styling = styling.ButtonStyling.Get(this);
-        No.Styling = styling.ButtonStyling.Get(this);
+        Yes.SetStyling(styling.ButtonStyling.Get(this));
+        No.SetStyling(styling.ButtonStyling.Get(this));
     }
 }
 
@@ -106,7 +106,7 @@ public class UINumberSetting : UISetting, IStylingAcceptor<UINumberSetting.Styli
         bool integer = IntegerTypes.Contains(numberType);
         string labelFormat = integer ? "0" : (numeric.Digits >= 1 ? "0." + new string('0', numeric.Digits) : "0.0");
         // TODO: box with 2 padding
-        InputLabel = new(integer, styling, layout.Container(), format: labelFormat) { Min = numeric.Min, Max = numeric.Max };
+        InputLabel = new(integer, null, layout.Container(), format: labelFormat) { Min = numeric.Min, Max = numeric.Max };
         if (numeric.DisplayType == SettingNumericDisplayType.NumberBox)
         {
             InputLabel.OnTextSubmit += _ => OnValueEmitted?.Invoke(Convert.ChangeType(InputLabel.Value, numberType));
@@ -117,7 +117,7 @@ public class UINumberSetting : UISetting, IStylingAcceptor<UINumberSetting.Styli
             UILayout container = layout.Container();
             // todo: optimize
             InputLabel.Layout.SetWidth(() => (int)(container.Width * 0.3));
-            Slider = new(numeric.ViewMin, numeric.ViewMax, 0.0, numeric.Interval, integer, styling, layout.Container().SetWidth(() => (int)(container.Width * 0.4))) { Digits = numeric.Digits };
+            Slider = new(numeric.ViewMin, numeric.ViewMax, 0.0, numeric.Interval, integer, null, layout.Container().SetWidth(() => (int)(container.Width * 0.7))) { Digits = numeric.Digits };
             Slider.OnValueEdit += value => OnValueEmitted?.Invoke(Convert.ChangeType(value, numberType));
             UIList list = UINumberSlider.WithLabel(Slider, InputLabel, 10, new UILayout(), trackLabelEdits: true);
             AddChild(list);
@@ -134,8 +134,8 @@ public class UINumberSetting : UISetting, IStylingAcceptor<UINumberSetting.Styli
 
     public void AcceptStyling(StylingOptions options)
     {
-        InputLabel.Styling = options.InputLabelStyling.Get(this);
-        Slider?.Styling = options.SliderStyling.Get(this);
+        InputLabel.SetStyling(options.InputLabelStyling.Get(this));
+        Slider?.SetStyling(options.SliderStyling.Get(this));
     }
 }
 
@@ -227,7 +227,7 @@ public class UIElementDebugPanel : UIList, IStylingAcceptor<UIElementDebugPanel.
     {
         foreach (UILabel label in Labels)
         {
-            label.Styling = options.LabelStyling.Get(this);
+            label.SetStyling(options.LabelStyling.Get(this));
         }
     }
 }
@@ -246,9 +246,9 @@ public class UIElementTree : UIList2, IStylingAcceptor<UIElementTree.StylingOpti
 
     public OrderedDictionary<UIElement, UIElementTree> ChildTrees = [];
 
-    public UIElementTree(UIDebugPanel panel, UIElementTree parent, UIElement element, UIStyling styling, UILayout layout) : base(null, layout)
+    public UIElementTree(UIDebugPanel panel, UIElementTree parent, UIElement element, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Styling = styling with { ShowBackground = false };
+        SetStyling(Styling);
         Panel = panel;
         ParentTree = parent;
         Element = element;
@@ -275,7 +275,7 @@ public class UIElementTree : UIList2, IStylingAcceptor<UIElementTree.StylingOpti
 
     public void AcceptStyling(StylingOptions options)
     {
-        Label.Styling = options.LabelStyling.Get(this);
+        Label.SetStyling(options.LabelStyling.Get(this));
     }
 }
 

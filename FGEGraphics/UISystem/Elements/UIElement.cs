@@ -43,19 +43,9 @@ public class UIElement
     public List<UIElement> Children = [];
 
     /// <summary>Styling logic for this element.</summary>
-    public UIStyling Styling
-    {
-        get;
-        set
-        {
-            UIStyling from = field;
-            field = value ?? UIStyling.Empty;
-            OnStylingChange?.Invoke(from, value);
-            StylingChanged(from, value);
-        }
-    }
+    public UIStyling Styling => ElementInternal.Styling;
 
-    /// <summary>Gets the current element style.</summary>
+    /// <summary>This element's current style.</summary>
     public UIStyle Style => ElementInternal.Style;
 
     /// <summary>The positioning, sizing, and rotation logic for this element.</summary>
@@ -204,6 +194,8 @@ public class UIElement
         /// <summary>The last absolute scale.</summary>
         public float LastScale;
 
+        public UIStyling Styling = UIStyling.Empty;
+
         /// <summary>The current style of this element.</summary>
         public UIStyle Style = UIStyle.Empty;
 
@@ -222,7 +214,7 @@ public class UIElement
     /// <param name="layout">The layout of the element.</param>
     public UIElement(UIStyling styling = null, UILayout layout = null)
     {
-        Styling = styling;
+        ElementInternal.Styling = styling ?? UIStyling.Empty;
         Layout = layout;
         ElementInternal.StylingApplicators = StylingAcceptors.GetOrCreateApplicators(GetType());
         ElementInternal.DebugMembers = UIDebugMember.GetOrCreateDebugMembers(GetType());
@@ -414,6 +406,10 @@ public class UIElement
         return false;
     }
 
+    public virtual UIStyle AcceptStyle(UIStyle style) => style;
+
+    public virtual UIStyling AcceptStyling(UIStyling styling) => styling;
+
     /// <summary>
     /// Sets the style of this element.
     /// <para>Fires <see cref="OnStyleChange"/> and <see cref="StyleChanged(UIStyle, UIStyle)"/>.</para>
@@ -423,6 +419,7 @@ public class UIElement
     {
         style ??= UIStyle.Empty;
         UIStyle previousStyle = ElementInternal.Style;
+        style = AcceptStyle(style);
         if (previousStyle == style)
         {
             return;
@@ -430,6 +427,20 @@ public class UIElement
         ElementInternal.Style = style;
         StyleChanged(previousStyle, ElementInternal.Style = style);
         OnStyleChange?.Invoke(previousStyle, style);
+    }
+
+    public void SetStyling(UIStyling styling)
+    {
+        styling ??= UIStyling.Empty;
+        UIStyling previousStyling = ElementInternal.Styling;
+        styling = AcceptStyling(styling);
+        if (previousStyling == styling)
+        {
+            return;
+        }
+        ElementInternal.Styling = styling;
+        StylingChanged(previousStyling, ElementInternal.Styling = styling);
+        OnStylingChange?.Invoke(previousStyling, styling);
     }
 
     /// <summary>If a <see cref="Styling"/> is present, attempts to update the current style.</summary>
@@ -886,7 +897,7 @@ public class UIElement
     }
 
     public virtual void StylingChanged(UIStyling from, UIStyling to)
-    { 
+    {
     }
 
     /// <summary>Ran when <see cref="Position"/> changes value.</summary>
