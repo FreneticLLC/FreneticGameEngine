@@ -25,6 +25,10 @@ public abstract class UISetting(UIStyling styling, UILayout layout) : UIElement(
         {
             return new UIBoolSetting(styling, layout);
         }
+        if (member.GetCustomAttribute<SettingDropdown>() is SettingDropdown dropdownSetting)
+        {
+            return new UIDropdownSetting(memberType, dropdownSetting.Options, container, styling, layout);
+        }
         if (UINumberSetting.NumberTypes.Contains(memberType))
         {
             SettingNumeric settingInfo = member.GetCustomAttribute<SettingNumeric>() ?? new SettingNumeric(SettingNumericDisplayType.NumberBox, double.MinValue, double.MaxValue);
@@ -35,10 +39,6 @@ public abstract class UISetting(UIStyling styling, UILayout layout) : UIElement(
             var helper = typeof(StaticEnumerable).GetMethod(nameof(StaticEnumerable.GetOptions)).MakeGenericMethod(memberType);
             IEnumerable options = (IEnumerable)helper.Invoke(null, null);
             return new UIDropdownSetting(memberType, options, container, styling, layout);
-        }
-        if (member.GetCustomAttribute<SettingDropdown>() is SettingDropdown dropdownSetting)
-        {
-            return new UIDropdownSetting(memberType, dropdownSetting.Options, container, styling, layout);
         }
         if (memberType == typeof(Vector2i))
         {
@@ -139,13 +139,18 @@ public class UINumberSetting : UISetting, IStylingAcceptor<UINumberSetting.Styli
     }
 }
 
-public class UIDropdownSetting : UISetting
+public class UIDropdownSetting : UISetting, IStylingAcceptor<UIDropdownSetting.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> DropdownStyling;
+    }
+
     public UIDropdown Dropdown;
 
     public UIDropdownSetting(Type valueType, IEnumerable options, UIElement container, UIStyling styling, UILayout layout) : base(styling, layout)
     {
-        Dropdown = new(null, styling with { Padding = 5 }, layout.Container()) { Layer = container };
+        Dropdown = new(null, null, layout.Container()) { Layer = container };
         foreach (object option in options)
         {
             Dropdown.AddLabelChoice(option.ToString(), styling, option);
@@ -158,11 +163,16 @@ public class UIDropdownSetting : UISetting
     {
         // TODO: make this more intuitive in fge
         // blud what even is this
-        UIElement selection = Dropdown.Entries.Items.Find(element => element.Tag == value);
+        UIElement selection = Dropdown.Entries.Items.SelectMany(row => row.Children).FirstOrDefault(choice => Equals(choice.Tag, value));
         if (selection is not null)
         {
             Dropdown.SelectChoice(selection);
         }
+    }
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        Dropdown.SetStyling(options.DropdownStyling.Get(this));
     }
 }
 

@@ -26,8 +26,13 @@ namespace FGEGraphics.UISystem;
 // TODO: Dropdown icon next to placeholder info?
 // TODO: Different style for placeholder info
 // TODO: Add choice at index, remove choice
-public class UIDropdown : UIElement
+public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
 {
+    public record StylingOptions : StylingComponent
+    {
+        public UIStyleValue<UIStyling> ChoiceStyling;
+    }
+
     /// <inheritdoc/>
     public override string Name => "Dropdown";
 
@@ -65,6 +70,8 @@ public class UIDropdown : UIElement
     /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
     public InternalData Internal = new();
 
+    public UIStyling ChoiceStyling = UIStyling.Empty; // TODO: sensible default
+
     /// <summary>Constructs a new UI dropdown.</summary>
     /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
     /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
@@ -75,9 +82,10 @@ public class UIDropdown : UIElement
     {
         PlaceholderInfo = text ?? "null";
         Layer = this;
-        AddChild(Button = new UIButton(text, styling, layout.Container()) { OnClick = Open });
-        Entries = new UIList(styling, new UILayout().SetAnchor(UIAnchor.TOP_CENTER));
+        AddChild(Button = new UIButton(text, null, layout.Container()) { OnClick = Open });
+        Entries = new UIList(null, new UILayout().SetAnchor(UIAnchor.TOP_LEFT)) { IsStateLocked = true };
         Entries.Layout.SetPosition(() => X - Layer.X, () => Y - Layer.Y);
+        SetStyling(styling);
     }
 
     /// <summary>Opens the dropdown list.</summary>
@@ -124,7 +132,7 @@ public class UIDropdown : UIElement
     public void AddChoice(UIElement choice, Func<string> label)
     {
         // TODO: configurable appearance
-        UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f) };
+        UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f), ShowBackground = true };
         UIElement container = new(containerStyle, new UILayout().SetSize(() => Width, () => choice.Height));
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
         container.AddChild(choice);
@@ -144,5 +152,23 @@ public class UIDropdown : UIElement
         UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
         AddChoice(label, () => label.Content);
         return label;
+    }
+
+    public override UIStyling AcceptStyling(UIStyling styling) => styling with { ShowBackground = false };
+
+    public override void StylingChanged(UIStyling from, UIStyling to)
+    {
+        to = to with { ShowBackground = true };
+        Button.SetStyling(to);
+        Entries.SetStyling(to);
+    }
+
+    public void AcceptStyling(StylingOptions options)
+    {
+        ChoiceStyling = options.ChoiceStyling.Get(this);
+        foreach (UIElement choice in Entries.Items)
+        {
+            choice.Children[0].SetStyling(ChoiceStyling);
+        }
     }
 }

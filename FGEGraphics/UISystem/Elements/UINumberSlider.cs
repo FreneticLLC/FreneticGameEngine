@@ -150,7 +150,7 @@ public class UINumberSlider : UIElement
 
     public override void StylingChanged(UIStyling from, UIStyling to)
     {
-        Button?.SetStyling(to.Bind(this) with { ShowBackground = true });
+        Button.SetStyling(to.Bind(this) with { ShowBackground = true });
     }
 
     /// <summary>Joins a number slider and a number input label into a single unit.</summary>
