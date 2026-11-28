@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace FGEGraphics.UISystem.Elements;
 
+// todo: this should not be an element, really
 /// <summary>Represents a container of <see cref="UIElement"/>s that can be configurably selected.</summary>
 /// <param name="layout">The layout of the element.</param>
 public class UISelectionGroup(UILayout layout) : UIGroup(layout)
@@ -57,6 +58,11 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <para>The second argument is the new element. The first argument is the dropped selection when <see cref="IsCyclic"/> is <c>true</c> and <see cref="MaxSelections"/> was exceeded, otherwise <c>null</c>.</para>
     /// </summary>
     public Action<UIElement, UIElement> OnSelectElement;
+
+    /// <summary>
+    /// Fired when an element is deselected.
+    /// </summary>
+    public Action<UIElement> OnDeselectElement;
 
     /// <summary>Data internal to a <see cref="UISelectionGroup"/> instance.</summary>
     public struct InternalData()
@@ -168,6 +174,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         {
             SetLocked(element, true);
         }
+        OnDeselectElement?.Invoke(element);
     }
 
     /// <summary>Deselects all elements and updates the group state.</summary>
@@ -228,6 +235,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     public void RemoveElement(UIElement element, bool removeChild = true)
     {
         element.OnClick -= Internal.Updaters[element];
+        Internal.Updaters.Remove(element);
         Elements.Remove(element);
         if (SelectedElements.Contains(element))
         {

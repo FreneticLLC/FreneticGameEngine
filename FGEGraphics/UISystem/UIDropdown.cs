@@ -6,16 +6,10 @@
 // hold any right or permission to use this software until such time as the official license is identified.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FGECore.MathHelpers;
 using FGEGraphics.UISystem.Elements;
-using OpenTK.Mathematics;
+using System;
+using System.Collections.Generic;
 
 namespace FGEGraphics.UISystem;
 
@@ -43,22 +37,12 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
     /// <summary>The button to open the dropdown.</summary>
     public UIButton Button;
 
-    /// <summary>The dropdown list of choice entries.</summary>
-    public UIList Entries;
+    /// <summary>The layer to place the list container on.</summary>
+    public UIElement Layer;
 
     public UISelectionGroup Selections;
 
-    /// <summary>The list of selectable choices in the dropdown.</summary>
-    //public List<UIElement> Choices = [];
-
-    /// <summary>The currently selected entry in the <see cref="Entries"/>.</summary>
-    public UIElement SelectedChoice; // TODO: selection group
-
-    /// <summary>Fired when a choice is selected.</summary>
-    public Action<UIElement> OnChoiceSelect;
-
-    /// <summary>The layer to place the list container on, if any.</summary>
-    public UIElement Layer;
+    public UIList2 Entries;
 
     /// <summary>Data internal to a <see cref="UIDropdown"/> instance.</summary>
     public struct InternalData()
@@ -73,18 +57,25 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
     public UIStyling ChoiceStyling = UIStyling.Empty; // TODO: sensible default
 
     /// <summary>Constructs a new UI dropdown.</summary>
-    /// <param name="buttonStyling">The <see cref="Button"/> element styling.</param>
-    /// <param name="boxStyling">The <see cref="Box"/> element styling.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <param name="text">The text to display when no choice is selected.</param>
-    /// <param name="layer">An optional layer to place the dropdown on. If <c>null</c>, uses this element's layer.</param>
     public UIDropdown(string text, UIStyling styling = null, UILayout layout = null) : base(null, layout)
     {
-        PlaceholderInfo = text ?? "null";
+        PlaceholderInfo = text ?? "...";
         Layer = this;
         AddChild(Button = new UIButton(text, null, layout.Container()) { OnClick = Open });
-        Entries = new UIList(null, new UILayout().SetAnchor(UIAnchor.TOP_LEFT)) { IsStateLocked = true };
+        Entries = new UIList2(null, new UILayout().SetAnchor(UIAnchor.TOP_LEFT)) { IsStateLocked = true, IsEnabled = false };
         Entries.Layout.SetPosition(() => X - Layer.X, () => Y - Layer.Y);
+        Selections = new UISelectionGroup(new UILayout()) { MinSelections = 0, MaxSelections = 1 };
+        Selections.OnSelectElement += (_, element) =>
+        {
+            if (Layer.HasChild(Entries))
+            {
+                Close();
+            }
+            Button.Label.Content = Internal.ToStrings[element]();
+        };
+        Selections.OnDeselectElement += element => Button.Label.Content = PlaceholderInfo;
         SetStyling(styling);
     }
 
@@ -106,7 +97,7 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
 
     /// <summary>Selects a dropdown choice, closing the container if necessary.</summary>
     /// <param name="choice">The choice to select.</param>
-    public void SelectChoice(UIElement choice)
+    /*public void SelectChoice(UIElement choice)
     {
         SelectedChoice = choice;
         if (Layer.HasChild(Entries))
@@ -118,28 +109,28 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
         {
             OnChoiceSelect?.Invoke(choice);
         }
-    }
+    }*/
 
     /// <summary>Reverts the dropdown to its pre-chosen state.</summary>
-    public void DeselectChoice()
+    /*public void DeselectChoice()
     {
         SelectChoice(null);
-    }
+    }*/
 
     /// <summary>Adds a choice to the dropdown.</summary>
     /// <param name="choice">The choice element.</param>
-    /// <param name="label">The string representation of the choice.</param>
-    public void AddChoice(UIElement choice, Func<string> label)
+    /// <param name="toString">The string representation of the choice.</param>
+    public void AddChoice(UIElement choice, Func<string> toString)
     {
         // TODO: configurable appearance
-        UIStyling containerStyle = Entries.Items.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f), ShowBackground = true };
-        UIElement container = new(containerStyle, new UILayout().SetSize(() => Width, () => choice.Height));
+        UIStyling containerStyle = Entries.Children.Count % 2 == 0 ? null : new UIStyling { Fill = new Color4F(0, 0, 0, 0.25f), ShowBackground = true };
+        UIElement container = new(containerStyle, new UILayout().SetSize(() => Width, () => choice.Height)) { IsEnabled = false };
         choice.Layout.SetAnchor(UIAnchor.TOP_CENTER);
+        choice.SetStyling(ChoiceStyling);
         container.AddChild(choice);
-        Entries.AddListItem(container);
-        //Choices.Add(choice);
-        Internal.ToStrings[choice] = label;
-        choice.OnClick += () => SelectChoice(choice);
+        Entries.AddChild(container);
+        Selections.AddElement(choice, addChild: false);
+        Internal.ToStrings[choice] = toString;
     }
 
     /// <summary>Adds a <see cref="UILabel"/> as a choice to the dropdown.</summary>
@@ -147,12 +138,14 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
     /// <param name="styling">The label styles.</param>
     /// <param name="tag">An optional value attached to the resulting label.</param>
     /// <returns>The created label.</returns>
-    public UILabel AddLabelChoice(string choice, UIStyling styling, object tag = null)
+    public UILabel AddChoice(string choice, UIStyling styling, object tag = null)
     {
-        UILabel label = new(choice, styling, new UILayout()) { Tag = tag };
+        UILabel label = new(choice, ChoiceStyling, new UILayout()) { Tag = tag };
         AddChoice(label, () => label.Content);
         return label;
     }
+
+    // TODO: remove choice
 
     public override UIStyling AcceptStyling(UIStyling styling) => styling with { ShowBackground = false };
 
@@ -166,9 +159,9 @@ public class UIDropdown : UIElement, IStylingAcceptor<UIDropdown.StylingOptions>
     public void AcceptStyling(StylingOptions options)
     {
         ChoiceStyling = options.ChoiceStyling.Get(this);
-        foreach (UIElement choice in Entries.Items)
+        foreach (UIElement choice in Selections.Elements)
         {
-            choice.Children[0].SetStyling(ChoiceStyling);
+            choice.SetStyling(ChoiceStyling);
         }
     }
 }

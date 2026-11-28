@@ -153,9 +153,9 @@ public class UIDropdownSetting : UISetting, IStylingAcceptor<UIDropdownSetting.S
         Dropdown = new(null, null, layout.Container()) { Layer = container };
         foreach (object option in options)
         {
-            Dropdown.AddLabelChoice(option.ToString(), styling, option);
+            Dropdown.AddChoice(option.ToString(), styling, option);
         }
-        Dropdown.OnChoiceSelect += (choice) => OnValueEmitted?.Invoke(choice.Tag);
+        Dropdown.Selections.OnSelectElement += (_, choice) => OnValueEmitted?.Invoke(choice.Tag);
         AddChild(Dropdown);
     }
 
@@ -163,10 +163,10 @@ public class UIDropdownSetting : UISetting, IStylingAcceptor<UIDropdownSetting.S
     {
         // TODO: make this more intuitive in fge
         // blud what even is this
-        UIElement selection = Dropdown.Entries.Items.SelectMany(row => row.Children).FirstOrDefault(choice => Equals(choice.Tag, value));
+        UIElement selection = Dropdown.Selections.Elements.FirstOrDefault(choice => Equals(choice.Tag, value));
         if (selection is not null)
         {
-            Dropdown.SelectChoice(selection);
+            Dropdown.Selections.SelectElement(selection);
         }
     }
 
