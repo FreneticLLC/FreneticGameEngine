@@ -18,7 +18,7 @@ using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents an entire screen with any kind of graphics.</summary>
 public class UIScreen : UIElement

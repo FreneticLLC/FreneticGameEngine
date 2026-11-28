@@ -16,6 +16,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGEGraphics.ClientSystem;
 using FGEGraphics.GraphicsHelpers;
+using FGEGraphics.UISystem.Elements;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;

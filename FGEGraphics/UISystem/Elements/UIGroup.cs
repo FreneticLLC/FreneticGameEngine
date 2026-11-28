@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a simple container of several UI elements.</summary>
 public class UIGroup : UIElement
@@ -22,7 +22,7 @@ public class UIGroup : UIElement
 
     /// <summary>Constructs a new group.</summary>
     /// <param name="layout">The layout of the element.</param>
-    public UIGroup(UILayout layout) : base(null, layout)
+    public UIGroup(UILayout layout = null) : base(null, layout)
     {
         IsEnabled = false;
         ScaleSize = false;

@@ -17,13 +17,13 @@ using FGEGraphics.GraphicsHelpers.Textures;
 using OpenTK;
 using OpenTK.Mathematics;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a simple image on a screen.</summary>
 /// <remarks>Constructs an image.</remarks>
 /// <param name="image">The image to display.</param>
 /// <param name="layout">The layout of the element.</param>
-public class UIImage(Texture image, UILayout layout) : UIElement(null, layout)
+public class UIImage(Texture image, UILayout layout = null) : UIElement(null, layout)
 {
     /// <inheritdoc/>
     public override string Name => $"Image \"{Image.Name}\"";

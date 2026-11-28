@@ -22,13 +22,13 @@ using FGEGraphics.UISystem.InputSystems;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents an editable text area.</summary>
 // TODO: Text alignment
 // TODO: Cap text length
 // TODO: HasEdited
-public class UIInputLabel : UIBox
+public class UIInputLabel : UIElement
 {
     /// <summary>An enumeration of <see cref="EditText(EditType, string, string, Action)"/> operations.</summary>
     public enum EditType
@@ -98,16 +98,23 @@ public class UIInputLabel : UIBox
     /// <param name="placeholderInfo">The text to display when the input is empty.</param>
     /// <param name="defaultText">The default input text.</param>
     /// <param name="styling">The styling logic of the element.</param>
-    /// <param name="inputStyling">The style of normal input content.</param>
-    /// <param name="highlightStyling">The style of highlighted input content.</param>
     /// <param name="layout">The layout of the element.</param>
-    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UIStyling inputStyling, UIStyling highlightStyling, UILayout layout) : base(styling, layout)
+    public UIInputLabel(string placeholderInfo, string defaultText, UIStyling styling, UILayout layout) : base(styling, layout)
     {
         ScrollGroup = new(layout.Container()) { IsEnabled = false };
         ScrollGroup.AddScrollableChild(PlaceholderInfo = new UILabel(placeholderInfo, styling?.Bind(this), new UILayout()) { IsEnabled = false });
-        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(highlightStyling, inputStyling, highlightStyling, new UILayout()) { IsEnabled = false });
+        ScrollGroup.AddScrollableChild(Paragraph = new UIInputParagraph(null, new UILayout()) { IsEnabled = false });
         AddChild(ScrollGroup);
         Paragraph.SetContent(defaultText);
+        UpdateScrollGroup();
+        Paragraph.OnSizeChange += (_, _) => UpdateScrollGroup();
+    }
+
+    /// <inheritdoc/>
+    public override void StylingChanged(UIStyling from, UIStyling to)
+    {
+        PlaceholderInfo?.SetStyling(to.Bind(this));
+        Paragraph?.SetStyling(to.Bind(this) with { ShowBackground = false });
     }
 
     /// <inheritdoc/>
@@ -143,33 +150,32 @@ public class UIInputLabel : UIBox
         {
             return;
         }
+        int cursorPosition = !Paragraph.InputInternal.CursorRenderOffset.IsNaN() ? (int)Paragraph.InputInternal.CursorRenderOffset.X : 0;
         ScrollGroup.XAxis.MaxValue = Math.Max(Paragraph.Width - ScrollGroup.Width, 0);
-        ScrollGroup.XAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.X, (int)Paragraph.InputInternal.CursorRenderOffset.X - ScrollGroup.XAxis.Value);
+        ScrollGroup.XAxis.ScrollToPos(cursorPosition, cursorPosition - ScrollGroup.XAxis.Value);
         ScrollGroup.XAxis.Clamp();
     }
 
     /// <summary>Updates the vertical scroll values based on the text height and cursor position.</summary>
     public void UpdateScrollGroupY()
     {
-        if (Paragraph.Internal.Renderables.Count == 0)
+        if (!Multiline || Paragraph.Internal.Renderables.Count == 0)
         {
             ScrollGroup.YAxis.Reset();
             return;
         }
         int lastLineHeight = Paragraph.InputInternal.LabelRight.Style.TextFont?.Height ?? 0;
+        int cursorPosition = !Paragraph.InputInternal.CursorRenderOffset.IsNaN() ? (int)Paragraph.InputInternal.CursorRenderOffset.Y : 0;
         ScrollGroup.YAxis.MaxValue = Math.Max((int)Paragraph.Internal.Renderables[^1].YOffset + lastLineHeight - ScrollGroup.Height, 0);
-        ScrollGroup.YAxis.ScrollToPos((int)Paragraph.InputInternal.CursorRenderOffset.Y, (int)Paragraph.InputInternal.CursorRenderOffset.Y + lastLineHeight - ScrollGroup.YAxis.Value);
-        ScrollGroup.XAxis.Clamp();
+        ScrollGroup.YAxis.ScrollToPos(cursorPosition, cursorPosition + lastLineHeight - ScrollGroup.YAxis.Value);
+        ScrollGroup.YAxis.Clamp();
     }
 
     /// <summary>Updates the <see cref="ScrollGroup"/> values.</summary>
     public void UpdateScrollGroup()
     {
-        if (!Paragraph.InputInternal.CursorRenderOffset.IsNaN())
-        {
-            UpdateScrollGroupX();
-            UpdateScrollGroupY();
-        }    
+        UpdateScrollGroupX();
+        UpdateScrollGroupY();   
     }
 
     /// <summary>Updates the visual state of this label.</summary>
@@ -324,7 +330,7 @@ public class UIInputLabel : UIBox
         {
             return;
         }
-        bool BarPressed(UIBox bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
+        bool BarPressed(UIElement bar) => (bar?.IsPressed | bar?.SelfContains((int)View.Client.MouseX, (int)View.Client.MouseY)) ?? false;
         if (BarPressed(ScrollGroup.XAxis.ScrollBar) || BarPressed(ScrollGroup.YAxis.ScrollBar))
         {
             return;

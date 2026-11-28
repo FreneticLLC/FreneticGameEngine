@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FGEGraphics.ClientSystem;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
 /// <summary>Represents a simple renderer that can be attached to any element.</summary>
 /// <param name="renderer">The renderer method. See <see cref="UIElement.Render(double, UIStyle)"/>.</param>

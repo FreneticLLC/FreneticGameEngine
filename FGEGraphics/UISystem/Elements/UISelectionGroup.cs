@@ -12,8 +12,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGEGraphics.UISystem;
+namespace FGEGraphics.UISystem.Elements;
 
+// todo: this should not be an element, really
 /// <summary>Represents a container of <see cref="UIElement"/>s that can be configurably selected.</summary>
 /// <param name="layout">The layout of the element.</param>
 public class UISelectionGroup(UILayout layout) : UIGroup(layout)
@@ -29,10 +30,10 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     [UIDebug]
     public int MaxSelections
     {
-        get => Internal.MaxSelections;
+        get;
         set
         {
-            Internal.MaxSelections = value;
+            field = value;
             FlushSelections();
             UpdateLocks();
         }
@@ -58,12 +59,14 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// </summary>
     public Action<UIElement, UIElement> OnSelectElement;
 
+    /// <summary>
+    /// Fired when an element is deselected.
+    /// </summary>
+    public Action<UIElement> OnDeselectElement;
+
     /// <summary>Data internal to a <see cref="UISelectionGroup"/> instance.</summary>
     public struct InternalData()
     {
-        /// <summary>The maximum allowed number of selected elements.</summary>
-        public int MaxSelections = -1;
-
         /// <summary>Maps elements to their selection logic.</summary>
         public Dictionary<UIElement, Action> Updaters = [];
     }
@@ -171,6 +174,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
         {
             SetLocked(element, true);
         }
+        OnDeselectElement?.Invoke(element);
     }
 
     /// <summary>Deselects all elements and updates the group state.</summary>
@@ -231,6 +235,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     public void RemoveElement(UIElement element, bool removeChild = true)
     {
         element.OnClick -= Internal.Updaters[element];
+        Internal.Updaters.Remove(element);
         Elements.Remove(element);
         if (SelectedElements.Contains(element))
         {
@@ -249,7 +254,7 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
     /// <param name="tabFactory">A function that takes a screen and returns its tab button.</param>
     /// <param name="layout">The layout of the element.</param>
     /// <returns>A tuple of the constructed selection group and a function to add screens to the tab list.</returns>
-    public static (UISelectionGroup, Action<UIScreen, bool>) WithTabs(UIGroup content, UIListGroup tabs, Func<UIScreen, UIElement> tabFactory, UILayout layout)
+    public static (UISelectionGroup, Action<UIElement, bool>) WithTabs(UIElement content, UIList tabs, Func<UIElement, UIElement> tabFactory, UILayout layout)
     {
         UISelectionGroup result = new(layout)
         {
@@ -260,15 +265,15 @@ public class UISelectionGroup(UILayout layout) : UIGroup(layout)
             {
                 if (from is not null)
                 {
-                    content.RemoveChild((UIScreen)from.Tag);
+                    content.RemoveChild((UIElement)from.Tag);
                 }
-                content.AddChild((UIScreen)to.Tag);
+                content.AddChild((UIElement)to.Tag);
             }
         };
-        return (result, (screen, main) =>
+        return (result, (element, main) =>
         {
-            UIElement tab = tabFactory(screen);
-            tab.Tag = screen;
+            UIElement tab = tabFactory(element);
+            tab.Tag = element;
             tabs.AddListItem(tab);
             result.AddElement(tab, selected: main, addChild: false);
         });
